@@ -27,7 +27,7 @@ combine express with functions - https://firebase.google.com/docs/functions/http
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const express = require("express");
-const { sendWhatsappTextMessage, sendWhatsappImageMessage, sendWhatsappTextListMessage } = require("./common/sendWhatsappMessage");
+const { sendWhatsappTextMessage, sendWhatsappImageMessage, sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { getReponsesObj } = require("./common/utils");
 const { whatsappVerificationHandler } = require("./common/whatsappVerificationHandler");
 
@@ -63,7 +63,8 @@ app.post("/whatsapp", async (req, res) => {
           const button = value.messages[0].button;
           switch (button.text) {
             case "Yes":
-              await sendVotingMessage(db, button.payload, from, responses);
+              await onFactCheckerYes(db, button.payload, from)
+              //await sendVotingMessage(db, button.payload, from, responses);
               break;
             case "No":
               sendWhatsappTextMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, responses.VOTE_NO, message.id);
@@ -74,24 +75,15 @@ app.post("/whatsapp", async (req, res) => {
         case "interactive":
           // handle voting here
           const interactive = value.messages[0].interactive;
-          if (interactive.type == "list_reply") {
-            const [messageId, vote] = interactive.list_reply.id.split("_");
-            const factCheckersSnapshot = await db.collection("factCheckers").where("whatsappNumber", "==", from).where("preferredChannel", "==", "Whatsapp").get();
-            if (factCheckersSnapshot.empty) {
-              functions.logger.log(`No corresponding fact checker with whatsapp number ${from} found`);
+          switch (interactive.type) {
+            case "list_reply":
+              await onVoteReceipt(db, interactive.list_reply.id)
               break;
-            } else {
-              if (factCheckersSnapshot.size > 1) {
-                functions.logger.log(`More than 1 factChecker with whatsAppNumber ${from} found`);
-              }
-              await db.collection("messages").doc(messageId).collection("votes").add({
-                factCheckerDocRef: factCheckersSnapshot.docs[0].ref,
-                whatsAppNumber: factCheckersSnapshot.docs[0].get("whatsappNumber"),
-                vote: vote,
-              });
+            case "button_reply":
+              await onScamAssessmentReply(db, interactive.button_reply.id);
               break;
-            }
           }
+          break;
 
         case "text":
           // handle URL evidence here
@@ -107,6 +99,58 @@ app.post("/whatsapp", async (req, res) => {
     res.sendStatus(404);
   }
 });
+
+async function onFactCheckerYes(db, messageId, from) {
+  const messageRef = db.collection("messages").doc(messageId);
+  const messageSnap = await messageRef.get();
+  const message = messageSnap.data();
+  const voteRequestSnap = await messageRef.collection("voteRequests").where("whatsappNumber", "==", from).where("platform", "==", "Whatsapp").get();
+  if (voteRequestSnap.empty) {
+    functions.logger.log(`No corresponding voteRequest for message ${messageId} with whatsapp number ${from} found`);
+  } else {
+    if (voteRequestSnap.size > 1) {
+      functions.logger.log(`More than 1 voteRequest with whatsAppNumber ${from} found`);
+    }
+
+    switch (message.type) {
+      case "text":
+        res = await sendWhatsappTextMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, message.text);
+        break;
+      case "image":
+        res = await sendWhatsappImageMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, message.mediaId, null, message.text);
+        break;
+    }
+
+    await voteRequestSnap.docs[0].ref.update({
+      hasAgreed: true,
+      sentMessageId: res.data.messages[0].id,
+    })
+
+  }
+}
+
+async function onScamAssessmentReply(db, buttonId) {
+  const [messageId, voteRequestId, type] = buttonId.split("_");
+  const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
+  const updateObj = {}
+  if (type === "scam") {
+    updateObj.isScam = true;
+    updateObj.vote = "scam";
+  } else if (type === "notscam") {
+    updateObj.isScam = false;
+    updateObj.vote = null;
+  }
+  await voteRequestRef.update(updateObj);
+}
+
+async function onVoteReceipt(db, listId) {
+  const [messageId, voteRequestId, vote] = listId.split("_");
+  const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
+  await voteRequestRef.update({
+    vote: vote,
+  })
+}
+
 
 async function sendVotingMessage(db, messageId, from, responses) {
   const messageSnapshot = await db.collection("messages").doc(messageId).get();

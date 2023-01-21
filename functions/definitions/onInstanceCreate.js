@@ -47,23 +47,40 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     const parentInstanceCount = await getCount(parentMessageRef, "instance")
     const thresholds = await getThresholds();
     if (parentInstanceCount >= thresholds.startVote && !parentMessageSnap.get("isPollStarted")) {
-      await despatchPoll(parentMessageRef.id);
+      await despatchPoll(parentMessageRef);
       //return parentMessageRef.update({ isPollStarted: true });
     }
     return Promise.resolve();
   });
 
-async function despatchPoll(messageId) {
+async function despatchPoll(messageRef) {
+  const messageId = messageRef.id
   const db = admin.firestore();
   const factCheckersSnapshot = await db.collection('factCheckers').where('isActive', '==', true).get();
   if (!factCheckersSnapshot.empty) {
-    factCheckersSnapshot.forEach(doc => {
+    factCheckersSnapshot.forEach(async doc => {
       const factChecker = doc.data();
       if (factChecker?.preferredChannel == "Whatsapp") {
-        sendWhatsappTemplateMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
-
+        await sendWhatsappTemplateMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
+        await messageRef.collection("voteRequests").add({
+          factCheckerDocRef: doc.ref,
+          whatsappNumber: factChecker.whatsappNumber,
+          hasAgreed: false,
+          isScam: null,
+          platform: "Whatsapp",
+          sentMessageId: null,
+          vote: null,
+        });
       } else if (factChecker?.preferredChannel == "Telegram") {
-        console.log("telegram");
+        await messageRef.collection("voteRequests").add({
+          factCheckerDocRef: doc.ref,
+          whatsappNumber: factChecker.whatsappNumber,
+          hasAgreed: false,
+          isScam: null,
+          platform: "Telegram",
+          sentMessageId: null,
+          vote: null,
+        });
       }
     })
   }

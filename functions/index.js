@@ -10,6 +10,8 @@ const webhookHandlerUser =
   require("./definitions/webhookHandlerUser");
 const onVoteCreate =
   require("./definitions/onVoteCreate");
+const onVoteRequestUpdate =
+  require("./definitions/onVoteRequestUpdate");
 
 
 // our stuff, uncomment when ready!
@@ -19,3 +21,4 @@ exports.onVoteCreate = onVoteCreate.onVoteCreate;
 exports.onMessageUpdate = onMessageUpdate.onMessageUpdate;
 exports.webhookHandlerFactChecker = webhookHandlerFactChecker.webhookHandlerFactChecker;
 exports.webhookHandlerUser = webhookHandlerUser.webhookHandlerUser;
+exports.onVoteRequestUpdate = onVoteRequestUpdate;

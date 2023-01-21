@@ -5,6 +5,7 @@ exports.USER_BOT_RESPONSES = {
   IRRELEVANT: "CheckMate has assessed the message and found that there are no meaningful claims made within it. Thank you for using CheckMate.😊💪",
   NO_SCORE: "Sorry! CheckMate has yet to assess the message",
   MESSAGE_NOT_YET_ASSESSED: "Sorry, CheckMate doesn't have an answer for you now. We will update you again if the message has been accessed",
+  SCAM: "CheckMate has assessed that this message is likely to be a scam!",
   UNSUPPORTED_TYPE: "Sorry, CheckMate currently doesn't support this type of message.",
 };
 
@@ -15,7 +16,9 @@ exports.FACTCHECKER_BOT_RESPONSES = {
 };
 
 exports.thresholds = {
-  endVote: 0.2,
+  endVote: 0.5,
+  endVoteScam: 0.2,
   startVote: 1,
   isIrrelevant: 0.5,
+  isScam: 0.7,
 };

@@ -39,7 +39,6 @@ const app = express();
 // Accepts POST requests at /webhook endpoint
 app.post("/whatsapp", async (req, res) => {
     if (req.body.object) {
-        // console.log(JSON.stringify(req.body, null, 2));
         if (
             req.body.entry &&
             req.body.entry[0].changes &&
@@ -47,7 +46,6 @@ app.post("/whatsapp", async (req, res) => {
             req.body.entry[0].changes[0].value.messages &&
             req.body.entry[0].changes[0].value.messages[0]
         ) {
-            console.log(process.env.ENVIRONMENT);
             let value = req.body.entry[0].changes[0].value
             let phoneNumberId = value.metadata.phone_number_id;
             let message = value.messages[0];
@@ -55,7 +53,7 @@ app.post("/whatsapp", async (req, res) => {
             let type = message.type;
 
             //remove later!!
-            if (type == "button" || phoneNumberId != process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID) {
+            if (type == "button" || type == "interactive" || phoneNumberId != process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID) {
                 res.sendStatus(200);
                 return;
             }
@@ -150,6 +148,7 @@ async function newTextInstanceHandler(db, {
             isAssessed: false, //boolean, whether or not we have concluded the voting
             truthScore: null, //float, the mean truth score
             isIrrelevant: null, //bool, if majority voted irrelevant then update this
+            isScam: null,
             custom_reply: null, //string
         });
         messageId = writeResult.id;
@@ -200,6 +199,7 @@ async function newImageInstanceHandler(db, {
             isPollStarted: false, //boolean, whether or not polling has started
             isAssessed: false, //boolean, whether or not we have concluded the voting
             truthScore: null, //float, the mean truth score
+            isScam: null,
             isIrrelevant: null, //bool, if majority voted irrelevant then update this
             custom_reply: null, //string
         });
@@ -235,7 +235,6 @@ function handleSpecialCommands(messageObj) {
                 mockDb();
                 return
             case '/getid':
-                console.log(process.env.ENVIRONMENT);
                 sendWhatsappTextMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, messageObj.from, `${messageObj.id}`, messageObj.id)
                 return
 

@@ -43,9 +43,14 @@ exports.getThresholds = async function () {
 exports.getResponseToMessage = function (docSnap, responses) {
     const isAssessed = docSnap.get("isAssessed");
     const isIrrelevant = docSnap.get("isIrrelevant");
+    const isScam = docSnap.get("isScam");
     const truthScore = docSnap.get("truthScore");
+
     if (!isAssessed) {
         return responses.MESSAGE_NOT_YET_ASSESSED
+    }
+    if (isScam) {
+        return responses.SCAM;
     }
     if (isIrrelevant) {
         return responses.IRRELEVANT;

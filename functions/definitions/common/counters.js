@@ -1,6 +1,6 @@
 const { FieldValue } = require('@google-cloud/firestore');
 
-exports.incrementCounter = function (docRef, type, numShards, increment = 1) {
+exports.incrementCounter = async function (docRef, type, numShards, increment = 1) {
     if (!docRef) {
         return
     }
