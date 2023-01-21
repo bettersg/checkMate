@@ -1,16 +1,21 @@
-const demoAddMessage = require('./definitions/demoAddMessage');
-const demoMakeUppercase = require('./definitions/demoMakeUppercase');
-const dbUpdateHanderInstanceCount = require('./definitions/dbUpdateHandlerInstanceCount');
-const dbUpdateHanderVoteCount = require('./definitions/dbUpdateHandlerVoteCount');
-const webhookHandlerFactChecker = require('./definitions/webhookHandlerFactChecker');
-const webhookHandlerUser = require('./definitions/webhookHandlerUser');
+const onInstanceCreate =
+  require("./definitions/onInstanceCreate");
+const onMessageCreate =
+  require("./definitions/onMessageCreate");
+const onMessageUpdate =
+  require("./definitions/onMessageUpdate");
+const webhookHandlerFactChecker =
+  require("./definitions/webhookHandlerFactChecker");
+const webhookHandlerUser =
+  require("./definitions/webhookHandlerUser");
+const onVoteCreate =
+  require("./definitions/onVoteCreate");
 
-//demo only
-exports.addMessage = demoAddMessage.addMessage;
-exports.makeUppercase = demoMakeUppercase.makeUppercase;
 
-//our stuff, uncomment when ready!
-//exports.launchVote = dbUpdateHanderInstanceCount.launchVote;
-//exports.sendResponse = dbUpdateHanderVoteCount.sendResponse;
-//exports.webhookHandlerFactChecker = webhookHandlerFactChecker.webhookHandlerFactChecker;
-//exports.webhookHandlerUser = webhookHandlerUser.webhookHandlerUser;
+// our stuff, uncomment when ready!
+exports.onInstanceCreate = onInstanceCreate.onInstanceCreate;
+exports.onMessageCreate = onMessageCreate.onMessageCreate;
+exports.onVoteCreate = onVoteCreate.onVoteCreate;
+exports.onMessageUpdate = onMessageUpdate.onMessageUpdate;
+exports.webhookHandlerFactChecker = webhookHandlerFactChecker.webhookHandlerFactChecker;
+exports.webhookHandlerUser = webhookHandlerUser.webhookHandlerUser;
