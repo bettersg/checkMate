@@ -38,7 +38,6 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       const isScam = (scamCount > parseInt(thresholds.isScam * voteCount));
       const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * voteCount));
       const isAssessed = (voteCount > parseInt(thresholds.endVote * numFactCheckers)) || (isScam && voteCount > parseInt(thresholds.endVoteScam * numFactCheckers));
-      console.log(`scamCount:${scamCount}, voteCount:${voteCount}, isScam:${isScam}, isIrrelevant:${isIrrelevant}, isAssessed:${isAssessed}`);
       return messageRef.update({
         truthScore: truthScore,
         isScam: isScam,
