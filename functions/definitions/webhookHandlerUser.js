@@ -190,10 +190,10 @@ async function newImageInstanceHandler(db, {
     //get response buffer
     let response = await downloadWhatsappMedia(mediaId, mimeType);
     const hash = await getHash(response.data);
-    console.log(hash)
     let imageMatchSnapshot = await db.collection('messages').where('type', '==', 'image').where('hash', '==', hash).get();
     let messageId;
     if (imageMatchSnapshot.empty) {
+        response = await downloadWhatsappMedia(mediaId, mimeType);
         const storageBucket = admin.storage().bucket();
         filename = `images/${mediaId}.${mimeType.split('/')[1]}`
         const file = storageBucket.file(filename);
