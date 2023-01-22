@@ -123,7 +123,9 @@ async function onFactCheckerYes(db, messageId, from) {
       hasAgreed: true,
       sentMessageId: res.data.messages[0].id,
     })
-    sendScamAssessmentMessage(voteRequestSnap.docs[0], messageRef)
+    setTimeout(() => {
+      sendScamAssessmentMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
+    }, 2000);
   }
 }
 

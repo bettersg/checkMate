@@ -1,7 +1,7 @@
 const { sendWhatsappButtonMessage, sendWhatsappTextListMessage } = require("./sendWhatsappMessage");
 const { getReponsesObj } = require("./utils");
 
-exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef) {
+exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef, replyId) {
   const voteRequestData = voteRequestSnap.data();
   const responses = await getReponsesObj("factCheckers");
   switch (voteRequestData.platform) {
@@ -19,7 +19,7 @@ exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef)
           title: "It's something else",
         }
       }];
-      await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
       break;
     case "Telegram":
       break

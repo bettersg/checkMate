@@ -188,17 +188,24 @@ async function newImageInstanceHandler(db, {
     const token = process.env.WHATSAPP_TOKEN;
     let filename;
     //get response buffer
-    let response = await downloadWhatsappMedia(mediaId, mimeType);
-    const hash = await getHash(response.data);
+    let buffer = await downloadWhatsappMedia(mediaId, mimeType);
+    const hash = getHash(buffer);
     let imageMatchSnapshot = await db.collection('messages').where('type', '==', 'image').where('hash', '==', hash).get();
     let messageId;
     if (imageMatchSnapshot.empty) {
-        response = await downloadWhatsappMedia(mediaId, mimeType);
         const storageBucket = admin.storage().bucket();
         filename = `images/${mediaId}.${mimeType.split('/')[1]}`
         const file = storageBucket.file(filename);
         const stream = file.createWriteStream();
-        response.data.pipe(stream);
+        stream.on('error', (err) => {
+            functions.logger.log(err);
+        });
+
+        stream.on('finish', () => {
+            functions.logger.log(`${filename} has been uploaded`);
+        });
+
+        stream.end(buffer);
         let writeResult = await db.collection('messages').add({
             type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
             category: "fake news",

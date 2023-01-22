@@ -10,7 +10,8 @@ if (!admin.apps.length) {
     admin.initializeApp();
 }
 
-async function downloadWhatsappMedia(mediaId, mimeType,) {
+
+async function downloadWhatsappMedia(mediaId) {
     const token = process.env.WHATSAPP_TOKEN;
     //get download URL
     response = await axios({
@@ -31,7 +32,7 @@ async function downloadWhatsappMedia(mediaId, mimeType,) {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                 },
-                responseType: "stream",
+                responseType: "arraybuffer",
             });
         } catch (err) {
             functions.logger.log(err);
@@ -40,18 +41,15 @@ async function downloadWhatsappMedia(mediaId, mimeType,) {
     } else {
         throw new Error("Error occured while fetching image url from Facebook");
     }
-    return responseBuffer;
+    return Buffer.from(responseBuffer.data);
 }
 
-async function getHash(stream) {
-    const hash = crypto.createHash('sha256');
-    return new Promise((resolve, reject) => {
-        stream.on('data', chunk => hash.update(chunk));
-        stream.on('end', () => {
-            const hashValue = hash.digest('hex');
-            resolve(hashValue);
-        });
-    });
+function getHash(buffer) {
+    const hash = crypto.createHash('sha256')
+        .update(buffer)
+        .digest('hex');
+    return hash;
 }
+
 exports.downloadWhatsappMedia = downloadWhatsappMedia;
 exports.getHash = getHash;
