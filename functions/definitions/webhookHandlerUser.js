@@ -117,9 +117,9 @@ app.post("/whatsapp", async (req, res) => {
                     })
                     break;
             }
+            markWhatsappMessageAsRead("user", message.id);
         }
         res.sendStatus(200);
-        markWhatsappMessageAsRead("user", message.id);
     } else {
         // Return a '404 Not Found' if event is not from a WhatsApp API
         res.sendStatus(404);
