@@ -28,6 +28,9 @@ const { USER_BOT_RESPONSES } = require('./common/constants');
 const { whatsappVerificationHandler } = require('./common/whatsappVerificationHandler');
 const { mockDb } = require('./common/utils');
 
+const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
+
+
 // if (process.env.NODE_ENV !== 'production') {
 //     require('dotenv').config();
 // }
@@ -82,13 +85,10 @@ app.post("/whatsapp", async (req, res) => {
                 case "text":
                     // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
                     if (!message.text || !message.text.body) {
-                        res.sendStatus(200);
-                        markWhatsappMessageAsRead("user", message.id);
                         break;
                     }
                     if (message.text.body.startsWith("/")) {
                         handleSpecialCommands(message);
-                        res.sendStatus(200);
                         break;
                     }
                     await newTextInstanceHandler(db, {
@@ -108,7 +108,6 @@ app.post("/whatsapp", async (req, res) => {
                         timestamp: messageTimestamp,
                         id: message.id || null,
                         mediaId: message?.image?.id || null,
-                        hash: message?.image?.sha256 || null,
                         mimeType: message?.image?.mime_type || null,
                         from: from || null,
                         fromName: value.contacts[0]?.profile?.name || null,
@@ -180,16 +179,26 @@ async function newImageInstanceHandler(db, {
     timestamp: timestamp,
     id: id,
     mediaId: mediaId,
-    hash: hash,
     mimeType: mimeType,
     from: from,
     fromName: fromName,
     isForwarded: isForwarded,
     isFrequentlyForwarded: isFrequentlyForwarded
 }) {
+    const token = process.env.WHATSAPP_TOKEN;
+    let filename;
+    //get response buffer
+    let response = await downloadWhatsappMedia(mediaId, mimeType);
+    const hash = await getHash(response.data);
+    console.log(hash)
     let imageMatchSnapshot = await db.collection('messages').where('type', '==', 'image').where('hash', '==', hash).get();
     let messageId;
     if (imageMatchSnapshot.empty) {
+        const storageBucket = admin.storage().bucket();
+        filename = `images/${mediaId}.${mimeType.split('/')[1]}`
+        const file = storageBucket.file(filename);
+        const stream = file.createWriteStream();
+        response.data.pipe(stream);
         let writeResult = await db.collection('messages').add({
             type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
             category: "fake news",
@@ -197,7 +206,7 @@ async function newImageInstanceHandler(db, {
             hash: hash,
             mediaId: mediaId,
             mimeType: mimeType,
-            storageUrl: null,
+            storageUrl: filename,
             firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
             isPollStarted: false, //boolean, whether or not polling has started
             isAssessed: false, //boolean, whether or not we have concluded the voting
@@ -207,6 +216,7 @@ async function newImageInstanceHandler(db, {
             custom_reply: null, //string
         });
         messageId = writeResult.id;
+
     } else {
         if (imageMatchSnapshot.size > 1) {
             functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);

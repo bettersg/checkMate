@@ -9,7 +9,7 @@ exports.onMessageUpdate = functions.region("asia-southeast1").runWith({ secrets:
         const before = change.before;
         const after = change.after;
         if (!before.data().isAssessed && after.data().isAssessed) {
-            replyPendingInstances(after);
+            await replyPendingInstances(after);
         }
         return Promise.resolve();
     });

@@ -30,6 +30,7 @@ const express = require("express");
 const { sendWhatsappTextMessage, sendWhatsappImageMessage, markWhatsappMessageAsRead } = require("./common/sendWhatsappMessage");
 const { getReponsesObj } = require("./common/utils");
 const { whatsappVerificationHandler } = require("./common/whatsappVerificationHandler");
+const { sendScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -56,7 +57,7 @@ app.post("/whatsapp", async (req, res) => {
         res.sendStatus(403);
         return;
       }
-      const responses = await getReponsesObj("factCheckers");
+      let responses
 
       switch (type) {
         case "button":
@@ -66,6 +67,7 @@ app.post("/whatsapp", async (req, res) => {
               await onFactCheckerYes(db, button.payload, from)
               break;
             case "No":
+              responses = await getReponsesObj("factCheckers");
               sendWhatsappTextMessage("factChecker", from, responses.VOTE_NO, message.id);
               break;
           }
@@ -75,10 +77,10 @@ app.post("/whatsapp", async (req, res) => {
           const interactive = value.messages[0].interactive;
           switch (interactive.type) {
             case "list_reply":
-              await onVoteReceipt(db, interactive.list_reply.id)
+              await onVoteReceipt(db, interactive.list_reply.id, from, message.id)
               break;
             case "button_reply":
-              await onScamAssessmentReply(db, interactive.button_reply.id);
+              await onScamAssessmentReply(db, interactive.button_reply.id, from, message.id);
               break;
           }
           break;
@@ -117,34 +119,39 @@ async function onFactCheckerYes(db, messageId, from) {
         break;
     }
 
-    await voteRequestSnap.docs[0].ref.update({
+    voteRequestSnap.docs[0].ref.update({
       hasAgreed: true,
       sentMessageId: res.data.messages[0].id,
     })
-
+    sendScamAssessmentMessage(voteRequestSnap.docs[0], messageRef)
   }
 }
 
-async function onScamAssessmentReply(db, buttonId) {
+async function onScamAssessmentReply(db, buttonId, from, replyId) {
+  const responses = await getReponsesObj("factCheckers");
   const [messageId, voteRequestId, type] = buttonId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
   const updateObj = {}
   if (type === "scam") {
     updateObj.isScam = true;
     updateObj.vote = "scam";
+    sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
   } else if (type === "notscam") {
     updateObj.isScam = false;
     updateObj.vote = null;
+    sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_NEXT_POLL, replyId);
   }
   await voteRequestRef.update(updateObj);
 }
 
-async function onVoteReceipt(db, listId) {
+async function onVoteReceipt(db, listId, from, replyId) {
+  const responses = await getReponsesObj("factCheckers");
   const [messageId, voteRequestId, vote] = listId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
   await voteRequestRef.update({
     vote: vote,
   })
+  sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
 }
 
 

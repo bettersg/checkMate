@@ -13,6 +13,8 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   VOTE_NO: "Sure, no worries! If you change your mind, you can go back up to the message and click yes. 😊",
   FACTCHECK_PROMPT: "Please vote on the new viral message above. If there is no claim in the message, select 'No Claim Made'. Otherwise, assess the veracity of the claim(s) on a scale from 0 to 5, where 0 means the claims(s) are entirely false, and 5 means the claims(s) are entirely true.",
   SCAM_ASSESSMENT_PROMPT: "Is this message a scam, i.e. an attempt to trick someone into giving away their money or personal information, or is it something else?",
+  RESPONSE_RECORDED: "Your response has been recorded. Thank you! 🙏",
+  HOLD_FOR_NEXT_POLL: "Thank you 🙏! Please hold for another poll to vote on how true the message is.",
 };
 
 exports.thresholds = {

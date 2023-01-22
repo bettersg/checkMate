@@ -182,7 +182,11 @@ async function callWhatsappSendMessageApi(data, bot) {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
         },
-    }).catch((error) => functions.logger.log(error.response));
+    }).catch((error) => {
+        functions.logger.log(error.response);
+        throw (error);
+    }
+    );
     return response;
 }
 
