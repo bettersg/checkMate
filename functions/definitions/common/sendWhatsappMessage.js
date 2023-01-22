@@ -25,6 +25,7 @@ async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null) {
 
 async function sendWhatsappImageMessage(bot, to, id, url = null, caption = null, replyMessageId = null) {
     if (runtimeEnvironment.value() !== "PROD") {
+        caption = caption ?? "<NO CAPTION>";
         caption = `*${bot.toUpperCase()}_BOT:* ${caption}`
     }
     const mediaObj = {};
