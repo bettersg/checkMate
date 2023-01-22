@@ -23,7 +23,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const express = require('express');
-const { sendWhatsappTextMessage } = require('./common/sendWhatsappMessage');
+const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
 const { USER_BOT_RESPONSES } = require('./common/constants');
 const { whatsappVerificationHandler } = require('./common/whatsappVerificationHandler');
 const { mockDb } = require('./common/utils');
@@ -55,6 +55,7 @@ app.post("/whatsapp", async (req, res) => {
             //remove later!!
             if (type == "button" || type == "interactive" || phoneNumberId != process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID) {
                 res.sendStatus(200);
+                markWhatsappMessageAsRead("user", message.id);
                 return;
             }
 
@@ -71,8 +72,9 @@ app.post("/whatsapp", async (req, res) => {
             // check that message type is supported, otherwise respond with appropriate message
             const supportedTypes = supportedTypesSnapshot.get('whatsapp') ?? ["text", "image"];
             if (!supportedTypes.includes(type)) {
-                sendWhatsappTextMessage(phoneNumberId, from, responses?.UNSUPPORTED_TYPE ?? USER_BOT_RESPONSES.UNSUPPORTED_TYPE, message.id)
+                sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE ?? USER_BOT_RESPONSES.UNSUPPORTED_TYPE, message.id)
                 res.sendStatus(200);
+                markWhatsappMessageAsRead("user", message.id);
                 return
             }
             const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0);
@@ -81,14 +83,14 @@ app.post("/whatsapp", async (req, res) => {
                     // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
                     if (!message.text || !message.text.body) {
                         res.sendStatus(200);
-                        return
+                        markWhatsappMessageAsRead("user", message.id);
+                        break;
                     }
                     if (message.text.body.startsWith("/")) {
                         handleSpecialCommands(message);
                         res.sendStatus(200);
-                        return
+                        break;
                     }
-
                     await newTextInstanceHandler(db, {
                         text: message.text.body,
                         timestamp: messageTimestamp,
@@ -117,6 +119,7 @@ app.post("/whatsapp", async (req, res) => {
             }
         }
         res.sendStatus(200);
+        markWhatsappMessageAsRead("user", message.id);
     } else {
         // Return a '404 Not Found' if event is not from a WhatsApp API
         res.sendStatus(404);
@@ -235,7 +238,7 @@ function handleSpecialCommands(messageObj) {
                 mockDb();
                 return
             case '/getid':
-                sendWhatsappTextMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, messageObj.from, `${messageObj.id}`, messageObj.id)
+                sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
                 return
 
         }

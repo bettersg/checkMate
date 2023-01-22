@@ -27,7 +27,7 @@ combine express with functions - https://firebase.google.com/docs/functions/http
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const express = require("express");
-const { sendWhatsappTextMessage, sendWhatsappImageMessage, sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
+const { sendWhatsappTextMessage, sendWhatsappImageMessage, markWhatsappMessageAsRead } = require("./common/sendWhatsappMessage");
 const { getReponsesObj } = require("./common/utils");
 const { whatsappVerificationHandler } = require("./common/whatsappVerificationHandler");
 
@@ -53,7 +53,7 @@ app.post("/whatsapp", async (req, res) => {
       const type = message.type;
 
       if (phoneNumberId != process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID) {
-        res.sendStatus(200);
+        res.sendStatus(403);
         return;
       }
       const responses = await getReponsesObj("factCheckers");
@@ -64,14 +64,12 @@ app.post("/whatsapp", async (req, res) => {
           switch (button.text) {
             case "Yes":
               await onFactCheckerYes(db, button.payload, from)
-              //await sendVotingMessage(db, button.payload, from, responses);
               break;
             case "No":
-              sendWhatsappTextMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, responses.VOTE_NO, message.id);
+              sendWhatsappTextMessage("factChecker", from, responses.VOTE_NO, message.id);
               break;
           }
-          res.sendStatus(200);
-          return;
+          break;
         case "interactive":
           // handle voting here
           const interactive = value.messages[0].interactive;
@@ -88,12 +86,10 @@ app.post("/whatsapp", async (req, res) => {
         case "text":
           // handle URL evidence here
           break;
-        default:
-          res.sendStatus(200);
-          return;
       }
     }
     res.sendStatus(200);
+    markWhatsappMessageAsRead("factChecker", message.id);
   } else {
     // Return a '404 Not Found' if event is not from a WhatsApp API
     res.sendStatus(404);
@@ -114,10 +110,10 @@ async function onFactCheckerYes(db, messageId, from) {
 
     switch (message.type) {
       case "text":
-        res = await sendWhatsappTextMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, message.text);
+        res = await sendWhatsappTextMessage("factChecker", from, message.text);
         break;
       case "image":
-        res = await sendWhatsappImageMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, message.mediaId, null, message.text);
+        res = await sendWhatsappImageMessage("factChecker", from, message.mediaId, null, message.text);
         break;
     }
 
@@ -151,45 +147,6 @@ async function onVoteReceipt(db, listId) {
   })
 }
 
-
-async function sendVotingMessage(db, messageId, from, responses) {
-  const messageSnapshot = await db.collection("messages").doc(messageId).get();
-  const message = messageSnapshot.data();
-
-  const rows = [];
-  const max_score = 5;
-  for (let i = 0; i <= max_score; i++) {
-    rows.push({
-      id: `${messageId}_${i}`,
-      title: `${i}`,
-    });
-  }
-  rows[0].description = "Totally false";
-  rows[max_score].description = "Totally true";
-  rows.push({
-    id: `${messageId}_irrelevant`,
-    title: "No Claim Made",
-    description: "The message contains no claims",
-  });
-  sections = [{
-    rows: rows,
-  }];
-  let res;
-  switch (message.type) {
-    case "text":
-      res = await sendWhatsappTextMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, message.text);
-      setTimeout(async () => {
-        await sendWhatsappTextListMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, responses.FACTCHECK_PROMPT, "Vote here", sections, res.data.messages[0].id);
-      }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
-      break;
-    case "image":
-      res = await sendWhatsappImageMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, message.mediaId, null, message.text);
-      setTimeout(async () => {
-        await sendWhatsappTextListMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, from, responses.FACTCHECK_PROMPT, "Vote here", sections, res.data.messages[0].id);
-      }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
-      break;
-  }
-}
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests

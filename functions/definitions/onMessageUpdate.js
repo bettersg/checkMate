@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 const { getResponseToMessage, getReponsesObj } = require("./common/utils");
 const { sendWhatsappTextMessage } = require("./common/sendWhatsappMessage");
 
-exports.onMessageUpdate = functions.region("asia-southeast1").runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document("/messages/{messageId}")
+exports.onMessageUpdate = functions.region("asia-southeast1").runWith({ secrets: ["WHATSAPP_TOKEN"] }).firestore.document("/messages/{messageId}")
     .onUpdate(async (change, context) => {
         // Grab the current value of what was written to Firestore.
         const before = change.before;
@@ -20,7 +20,7 @@ async function replyPendingInstances(docRef) {
     const response = getResponseToMessage(docRef, responses);
     pendingSnapshot.forEach(async (doc) => {
         const data = doc.data();
-        await sendWhatsappTextMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, data.from, response, data.id);
+        await sendWhatsappTextMessage("user", data.from, response, data.id);
         await doc.ref.update({ isReplied: true });
     });
 }

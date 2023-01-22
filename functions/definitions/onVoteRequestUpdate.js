@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { getResponseToMessage, getReponsesObj, getThresholds } = require("./common/utils");
-const { sendWhatsappTextMessage, sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
+const { getReponsesObj, getThresholds } = require("./common/utils");
+const { sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { incrementCounter, getCount } = require("./common/counters");
 const { defineInt } = require('firebase-functions/params');
 // Define some parameters
@@ -91,7 +91,7 @@ async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
           title: "It's something else",
         }
       }];
-      await sendWhatsappButtonMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
       break;
     case "Telegram":
       break
@@ -126,12 +126,12 @@ async function sendVotingMessage(voteRequestSnap, messageRef) {
       switch (message.type) {
         case "text":
           setTimeout(async () => {
-            await sendWhatsappTextListMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
           break;
         case "image":
           setTimeout(async () => {
-            await sendWhatsappTextListMessage(process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID, voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
           break;
       }

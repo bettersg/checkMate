@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const { downloadWhatsappMedia } = require("./common/downloadWhatsappMedia");
-exports.onMessageCreate = functions.region("asia-southeast1").firestore.document("/messages/{messageId}")
+exports.onMessageCreate = functions.region("asia-southeast1").runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document("/messages/{messageId}")
     .onCreate(async (snap, context) => {
         // Grab the current value of what was written to Firestore.
         const data = snap.data();

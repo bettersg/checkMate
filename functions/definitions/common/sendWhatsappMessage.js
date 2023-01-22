@@ -3,8 +3,12 @@ const functions = require('firebase-functions');
 const { defineString } = require('firebase-functions/params');
 
 const graphApiVersion = defineString("GRAPH_API_VERSION");
+const runtimeEnvironment = defineString("ENVIRONMENT")
 
-async function sendWhatsappTextMessage(phoneNumberId, to, text, replyMessageId = null) {
+async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null) {
+    if (runtimeEnvironment.value() !== "PROD") {
+        text = `*${bot.toUpperCase()}_BOT:* ${text}`
+    }
     const data = {
         text: { body: text },
         to: to,
@@ -15,11 +19,14 @@ async function sendWhatsappTextMessage(phoneNumberId, to, text, replyMessageId =
             message_id: replyMessageId,
         };
     }
-    const response = await callWhatsappSendMessageApi(data, phoneNumberId);
+    const response = await callWhatsappSendMessageApi(data, bot);
     return response;
 }
 
-async function sendWhatsappImageMessage(phoneNumberId, to, id, url = null, caption = null, replyMessageId = null) {
+async function sendWhatsappImageMessage(bot, to, id, url = null, caption = null, replyMessageId = null) {
+    if (runtimeEnvironment.value() !== "PROD") {
+        caption = `*${bot.toUpperCase()}_BOT:* ${caption}`
+    }
     const mediaObj = {};
     if (url) {
         mediaObj.link = url;
@@ -40,18 +47,13 @@ async function sendWhatsappImageMessage(phoneNumberId, to, id, url = null, capti
             message_id: replyMessageId,
         };
     }
-    const response = await callWhatsappSendMessageApi(data, phoneNumberId);
+    const response = await callWhatsappSendMessageApi(data, bot);
     return response;
 }
 
-async function sendWhatsappTemplateMessage(phoneNumberId, to, templateName, languageCode = "en", bodyTextVariables = [], buttonPayloads = [], bot = "user") {
+async function sendWhatsappTemplateMessage(bot, to, templateName, languageCode = "en", bodyTextVariables = [], buttonPayloads = []) {
     let token;
     token = process.env.WHATSAPP_TOKEN;
-    // if (bot === "factChecker") {
-    //     token = process.env.WHATSAPP_TOKEN_FACT_CHECKERS;
-    // } else {
-    //     token = process.env.WHATSAPP_TOKEN;
-    // }
     const buttonComponentArr = buttonPayloads.map((payload, index) => {
         return {
             type: "button",
@@ -91,11 +93,14 @@ async function sendWhatsappTemplateMessage(phoneNumberId, to, templateName, lang
             components: componentsArr,
         },
     };
-    let response = await callWhatsappSendMessageApi(data, phoneNumberId);
+    let response = await callWhatsappSendMessageApi(data, bot);
     return response;
 }
 
-async function sendWhatsappTextListMessage(phoneNumberId, to, text, buttonText, sections, replyMessageId = null) {
+async function sendWhatsappTextListMessage(bot, to, text, buttonText, sections, replyMessageId = null) {
+    if (runtimeEnvironment.value() !== "PROD") {
+        text = `*${bot.toUpperCase()}_BOT:* ${text}`
+    }
     data = {
         messaging_product: "whatsapp",
         recipient_type: "individual",
@@ -117,11 +122,14 @@ async function sendWhatsappTextListMessage(phoneNumberId, to, text, buttonText, 
             message_id: replyMessageId,
         };
     }
-    const response = await callWhatsappSendMessageApi(data, phoneNumberId);
+    const response = await callWhatsappSendMessageApi(data, bot);
     return response;
 }
 
-async function sendWhatsappButtonMessage(phoneNumberId, to, text, buttons, replyMessageId = null) {
+async function sendWhatsappButtonMessage(bot, to, text, buttons, replyMessageId = null) {
+    if (runtimeEnvironment.value() !== "PROD") {
+        text = `*${bot.toUpperCase()}_BOT:* ${text}`
+    }
     data = {
         messaging_product: "whatsapp",
         recipient_type: "individual",
@@ -142,11 +150,26 @@ async function sendWhatsappButtonMessage(phoneNumberId, to, text, buttons, reply
             message_id: replyMessageId,
         };
     }
-    callWhatsappSendMessageApi(data, phoneNumberId);
+    callWhatsappSendMessageApi(data, bot);
 };
 
-async function callWhatsappSendMessageApi(data, phoneNumberId) {
+async function markWhatsappMessageAsRead(bot, messageId) {
+    data = {
+        messaging_product: "whatsapp",
+        status: "read",
+        message_id: messageId,
+    }
+    callWhatsappSendMessageApi(data, bot);
+}
+
+async function callWhatsappSendMessageApi(data, bot) {
     const token = process.env.WHATSAPP_TOKEN;
+    let phoneNumberId;
+    if (bot == "factChecker") {
+        phoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
+    } else {
+        phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+    }
     const response = await axios({
         method: "POST", // Required, HTTP method, a string, e.g. POST, GET
         url:
@@ -167,3 +190,4 @@ exports.sendWhatsappImageMessage = sendWhatsappImageMessage;
 exports.sendWhatsappTemplateMessage = sendWhatsappTemplateMessage;
 exports.sendWhatsappTextListMessage = sendWhatsappTextListMessage;
 exports.sendWhatsappButtonMessage = sendWhatsappButtonMessage;
+exports.markWhatsappMessageAsRead = markWhatsappMessageAsRead;

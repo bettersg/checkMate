@@ -39,7 +39,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
       functions.logger.log("Missing 'from' field in instance data");
     } else {
       const response = getResponseToMessage(parentMessageSnap, responses)
-      await sendWhatsappTextMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, data.from, response, data.id)
+      await sendWhatsappTextMessage("user", data.from, response, data.id)
       if (parentMessageSnap.get("isAssessed")) {
         return snap.ref.update({ isReplied: true });
       }
@@ -48,7 +48,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     const thresholds = await getThresholds();
     if (parentInstanceCount >= thresholds.startVote && !parentMessageSnap.get("isPollStarted")) {
       await despatchPoll(parentMessageRef);
-      //return parentMessageRef.update({ isPollStarted: true });
+      return parentMessageRef.update({ isPollStarted: true });
     }
     return Promise.resolve();
   });
@@ -61,7 +61,7 @@ async function despatchPoll(messageRef) {
     factCheckersSnapshot.forEach(async doc => {
       const factChecker = doc.data();
       if (factChecker?.preferredChannel == "Whatsapp") {
-        await sendWhatsappTemplateMessage(process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID, factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
+        await sendWhatsappTemplateMessage("user", factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
         await messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           whatsappNumber: factChecker.whatsappNumber,
