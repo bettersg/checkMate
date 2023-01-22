@@ -30,10 +30,6 @@ const { mockDb } = require('./common/utils');
 
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 
-
-// if (process.env.NODE_ENV !== 'production') {
-//     require('dotenv').config();
-// }
 if (!admin.apps.length) {
     admin.initializeApp();
 }
@@ -189,7 +185,7 @@ async function newImageInstanceHandler(db, {
     let filename;
     //get response buffer
     let buffer = await downloadWhatsappMedia(mediaId, mimeType);
-    const hash = getHash(buffer);
+    const hash = await getHash(buffer);
     let imageMatchSnapshot = await db.collection('messages').where('type', '==', 'image').where('hash', '==', hash).get();
     let messageId;
     if (imageMatchSnapshot.empty) {

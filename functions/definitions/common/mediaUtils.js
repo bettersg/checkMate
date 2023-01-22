@@ -2,14 +2,15 @@ const axios = require('axios');
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const { defineString } = require('firebase-functions/params');
-const crypto = require('crypto');
+const util = require('util');
+const { imageHash } = require('image-hash');
 
 const graphApiVersion = defineString("GRAPH_API_VERSION")
+const imageHashSync = util.promisify(imageHash);
 
 if (!admin.apps.length) {
     admin.initializeApp();
 }
-
 
 async function downloadWhatsappMedia(mediaId) {
     const token = process.env.WHATSAPP_TOKEN;
@@ -44,12 +45,12 @@ async function downloadWhatsappMedia(mediaId) {
     return Buffer.from(responseBuffer.data);
 }
 
-function getHash(buffer) {
-    const hash = crypto.createHash('sha256')
-        .update(buffer)
-        .digest('hex');
-    return hash;
-}
+async function getHash(buffer) {
+    result = await imageHashSync({
+        data: buffer
+    }, 8, true);
+    return result;
+};
 
 exports.downloadWhatsappMedia = downloadWhatsappMedia;
 exports.getHash = getHash;
