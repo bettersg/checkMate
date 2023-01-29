@@ -12,7 +12,7 @@
 8. you should now be able to hit the url at http://127.0.0.1:5001/checkmate-373101/asia-southeast1/addMessage?text=uppercaseme successfully
 9.  Now can work on your individual functions in the /functions/definitions folder
 10. Uncomment the exports when ready to test with the local emulator!
-11. Rmb to use https://ngrok.com/ (can install vs code extension) to expose localhost as an internet URL, in case you want to run locally but test with actual Whatsapp and Telegram
+11. Rmb to use https://ngrok.com/ (can install vs code extension) to expose localhost as an internet URL, in case you want to run locally but test with actual Whatsapp and Telegram. Note...might need to have premium Ngrok for this to work with whatsapp.
 
 ## Things to note
 1. Put all keys and access tokens in the .env file and make sure its gitignored!
@@ -20,10 +20,7 @@
 3. Test locally first using the emulator and ngrok. Once the functions are ready, we will deploy the whole setup to the production firestore.
 4. Do add comments if needed, and try and write code that's easily understandable
 5. Feel free to do things differently from what I've laid out (for example, you can tweak the schema), so long it makes sense! But do let us know if you are making schema changes.
-6. I suggest using postman to make things like firing the API to update Telegram bot webhook repeatable (you'll have to do this cos the ngrok URL will change each time)
-7. If there's anything you're unsure or stuck on, just ask in the chat :) better to unblock early than to bang the wall!
-8. For telegram we should be using webhooks, not getUpdates https://core.telegram.org/bots/api#getting-updates
-9.  For telegram voting, I was thinking of using the inline keyboard with callback buttons https://core.telegram.org/bots/2-0-intro#new-inline-keyboards
+6. If there's anything you're unsure or stuck on, just ask in the chat :) better to unblock early than to bang the wall!
 
 ## Useful Resources and links:
 - Firebase Console - https://console.firebase.google.com/, login with your bettersg email. Go here to manage the product resources and to change the production DB (later on, for a start we can just use the emulator)
