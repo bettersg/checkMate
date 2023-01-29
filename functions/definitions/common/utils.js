@@ -28,7 +28,7 @@ exports.mockDb = async function () {
         numVoted: 0,
         numCorrectVotes: 0,
         numVerifiedLinks: 0,
-        preferredChannel: "Whatsapp",
+        preferredChannel: "whatsapp",
     })
     functions.logger.log("mocked")
 }

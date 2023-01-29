@@ -52,7 +52,7 @@ async function onFactCheckerYes(db, messageId, from) {
   const messageRef = db.collection("messages").doc(messageId);
   const messageSnap = await messageRef.get();
   const message = messageSnap.data();
-  const voteRequestSnap = await messageRef.collection("voteRequests").where("whatsappNumber", "==", from).where("platform", "==", "Whatsapp").get();
+  const voteRequestSnap = await messageRef.collection("voteRequests").where("whatsappNumber", "==", from).where("platform", "==", "whatsapp").get();
   if (voteRequestSnap.empty) {
     functions.logger.log(`No corresponding voteRequest for message ${messageId} with whatsapp number ${from} found`);
   } else {

@@ -60,24 +60,24 @@ async function despatchPoll(messageRef) {
   if (!factCheckersSnapshot.empty) {
     factCheckersSnapshot.forEach(async doc => {
       const factChecker = doc.data();
-      if (factChecker?.preferredChannel == "Whatsapp") {
+      if (factChecker?.preferredChannel == "whatsapp") {
         await sendWhatsappTemplateMessage("user", factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
         await messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           whatsappNumber: factChecker.whatsappNumber,
           hasAgreed: false,
           isScam: null,
-          platform: "Whatsapp",
+          platform: "whatsapp",
           sentMessageId: null,
           vote: null,
         });
-      } else if (factChecker?.preferredChannel == "Telegram") {
+      } else if (factChecker?.preferredChannel == "telegram") {
         await messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           whatsappNumber: factChecker.whatsappNumber,
           hasAgreed: false,
           isScam: null,
-          platform: "Telegram",
+          platform: "telegram",
           sentMessageId: null,
           vote: null,
         });

@@ -5,7 +5,7 @@ exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef,
   const voteRequestData = voteRequestSnap.data();
   const responses = await getReponsesObj("factCheckers");
   switch (voteRequestData.platform) {
-    case "Whatsapp":
+    case "whatsapp":
       const buttons = [{
         type: "reply",
         reply: {
@@ -21,7 +21,7 @@ exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef,
       }];
       await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
       break;
-    case "Telegram":
+    case "telegram":
       break
   }
 };
@@ -32,7 +32,7 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
   const voteRequestData = voteRequestSnap.data();
   const responses = await getReponsesObj("factCheckers");
   switch (voteRequestData.platform) {
-    case "Whatsapp":
+    case "whatsapp":
       const rows = [];
       const max_score = 5;
       for (let i = 0; i <= max_score; i++) {
@@ -64,7 +64,7 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
           break;
       }
       break;
-    case "Telegram":
+    case "telegram":
       break;
   }
 };
