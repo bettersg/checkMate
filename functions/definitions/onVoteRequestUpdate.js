@@ -19,9 +19,6 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
     const after = docSnap.data();
     const messageRef = docSnap.ref.parent.parent;
 
-    // if (!before.hasAgreed && after.hasAgreed && !!after?.sentMessageId) {
-    //   sendScamAssessmentMessage(change.after, messageRef);
-    // } else 
     if (before.isScam !== false && after.isScam === false) {
       sendVotingMessage(change.after, messageRef);
     } else if (before.vote != after.vote) {
