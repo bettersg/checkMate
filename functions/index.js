@@ -12,4 +12,4 @@ const onVoteRequestUpdate =
 exports.onInstanceCreate = onInstanceCreate.onInstanceCreate;
 exports.onMessageUpdate = onMessageUpdate.onMessageUpdate;
 exports.webhookHandler = webhookHandler.webhookHandler;
-exports.onVoteRequestUpdate = onVoteRequestUpdate;
+exports.onVoteRequestUpdate = onVoteRequestUpdate.onVoteRequestUpdate;
