@@ -122,16 +122,13 @@ async function sendVotingMessage(voteRequestSnap, messageRef) {
       }];
       switch (message.type) {
         case "text":
-          setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
         case "image":
-          setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
       }
+      functions.logger.log("voting message sent");
       break;
     case "telegram":
       break;

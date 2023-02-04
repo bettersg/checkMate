@@ -27,7 +27,7 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document('/messages/{messageId}/instances/{instanceId}')
+exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document('/messages/{messageId}/instances/{instanceId}')
   .onCreate(async (snap, context) => {
     // Grab the current value of what was written to Firestore.
     const data = snap.data();
@@ -61,7 +61,7 @@ async function despatchPoll(messageRef) {
     factCheckersSnapshot.forEach(async doc => {
       const factChecker = doc.data();
       if (factChecker?.preferredChannel == "whatsapp") {
-        await sendWhatsappTemplateMessage("user", factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
+        await sendWhatsappTemplateMessage("factChecker", factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
         await messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           whatsappNumber: factChecker.whatsappNumber,

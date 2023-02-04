@@ -4,6 +4,7 @@ const { defineString } = require('firebase-functions/params');
 
 const graphApiVersion = defineString("GRAPH_API_VERSION");
 const runtimeEnvironment = defineString("ENVIRONMENT")
+const testPhoneNumberId = defineString("WHATSAPP_TEST_BOT_PHONE_NUMBER_ID")
 
 async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null) {
     if (runtimeEnvironment.value() !== "PROD") {
@@ -166,10 +167,14 @@ async function markWhatsappMessageAsRead(bot, messageId) {
 async function callWhatsappSendMessageApi(data, bot) {
     const token = process.env.WHATSAPP_TOKEN;
     let phoneNumberId;
-    if (bot == "factChecker") {
-        phoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
+    if (runtimeEnvironment.value() !== "PROD") {
+        phoneNumberId = testPhoneNumberId.value();
     } else {
-        phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+        if (bot == "factChecker") {
+            phoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
+        } else {
+            phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+        }
     }
     const response = await axios({
         method: "POST", // Required, HTTP method, a string, e.g. POST, GET

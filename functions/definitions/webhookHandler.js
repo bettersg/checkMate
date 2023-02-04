@@ -24,6 +24,10 @@ const admin = require('firebase-admin');
 const express = require('express');
 const { userHandler } = require("./userHandler");
 const { checkerHandler } = require("./checkerHandler");
+const { defineString } = require('firebase-functions/params');
+
+const runtimeEnvironment = defineString("ENVIRONMENT")
+const testPhoneNumberId = defineString("WHATSAPP_TEST_BOT_PHONE_NUMBER_ID")
 
 if (!admin.apps.length) {
     admin.initializeApp();
@@ -46,13 +50,24 @@ app.post("/whatsapp", async (req, res) => {
             let from = message.from; // extract the phone number from the webhook payload
             let type = message.type;
 
+            let checkerPhoneNumberId
+            let userPhoneNumberId
+
+            if (runtimeEnvironment.value() == 'PROD') {
+                checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
+                userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID;
+            } else {
+                checkerPhoneNumberId = testPhoneNumberId.value();
+                userPhoneNumberId = testPhoneNumberId.value();
+            }
+
             if (
-                phoneNumberId === process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID ||
-                phoneNumberId === process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+                phoneNumberId === checkerPhoneNumberId ||
+                phoneNumberId === userPhoneNumberId
             ) {
-                if ((type == "button" || type == "interactive") && phoneNumberId === process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID) { //when live, can check against WABA id instead
+                if ((type == "button" || type == "interactive") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
                     await checkerHandler(message);
-                } else if (phoneNumberId === process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID) {
+                } else if (phoneNumberId === userPhoneNumberId) {
                     await userHandler(message);
                 }
                 else {
