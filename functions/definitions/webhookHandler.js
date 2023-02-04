@@ -53,7 +53,7 @@ app.post("/whatsapp", async (req, res) => {
             let checkerPhoneNumberId
             let userPhoneNumberId
 
-            if (runtimeEnvironment.value() == 'PROD') {
+            if (runtimeEnvironment.value() === "PROD") {
                 checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
                 userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID;
             } else {

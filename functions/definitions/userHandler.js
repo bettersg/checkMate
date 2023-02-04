@@ -5,6 +5,8 @@ const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common
 const { USER_BOT_RESPONSES } = require('./common/constants');
 const { mockDb } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
+const { defineString } = require('firebase-functions/params');
+const runtimeEnvironment = defineString("ENVIRONMENT")
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -35,7 +37,7 @@ exports.userHandler = async function (message) {
       if (!message.text || !message.text.body) {
         break;
       }
-      if (message.text.body.startsWith("/")) {
+      if (message.text.body.startsWith("/") && runtimeEnvironment.value() !== "PROD") {
         handleSpecialCommands(message);
         break;
       }
