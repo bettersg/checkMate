@@ -12,7 +12,7 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.userHandler = async function (message) {
+exports.userHandlerWhatsapp = async function (message) {
   let from = message.from; // extract the phone number from the webhook payload
   let type = message.type;
   const db = admin.firestore()
@@ -120,7 +120,6 @@ async function newImageInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
-  const token = process.env.WHATSAPP_TOKEN;
   let filename;
   //get response buffer
   let buffer = await downloadWhatsappMedia(mediaId, mimeType);

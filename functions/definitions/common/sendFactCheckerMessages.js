@@ -19,7 +19,7 @@ exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef,
           title: "It's something else",
         }
       }];
-      await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
       break;
     case "telegram":
       break
@@ -54,12 +54,12 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
       switch (message.type) {
         case "text":
           setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+            await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
           break;
         case "image":
           setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+            await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
           break;
       }

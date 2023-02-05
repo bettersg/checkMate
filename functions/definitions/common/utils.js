@@ -21,14 +21,13 @@ exports.mockDb = async function () {
     await factCheckersRef.add({
         name: "Bing Wen",
         isActive: true,
-        whatsappNumber: "6591807628",
-        telegramId: "",
+        platformId: "6591807628",
         level: 1,
         experience: 0,
         numVoted: 0,
         numCorrectVotes: 0,
         numVerifiedLinks: 0,
-        preferredChannel: "whatsapp",
+        preferredPlatform: "whatsapp",
     })
     functions.logger.log("mocked")
 }
@@ -38,6 +37,17 @@ exports.getThresholds = async function () {
     const theresholdsRef = db.doc('systemParameters/thresholds');
     const theresholdsSnap = await theresholdsRef.get()
     return theresholdsSnap.data() ?? thresholds;
+}
+
+exports.checkUrl = function (urlString) {
+    let url;
+    try {
+        url = new URL(urlString)
+    }
+    catch (e) {
+        return false;
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
 }
 
 exports.getResponseToMessage = function (docSnap, responses) {

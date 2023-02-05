@@ -52,5 +52,15 @@ async function getHash(buffer) {
     return result;
 };
 
+async function getSignedUrl(storageUrl) {
+    const storage = admin.storage();
+    const [temporaryUrl] = await storage.bucket().file(storageUrl).getSignedUrl({
+        action: "read",
+        expires: Date.now() + 60 * 60 * 1000,
+    })
+    return temporaryUrl
+}
+
 exports.downloadWhatsappMedia = downloadWhatsappMedia;
 exports.getHash = getHash;
+exports.getSignedUrl = getSignedUrl;

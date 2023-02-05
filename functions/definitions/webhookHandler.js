@@ -22,8 +22,8 @@ combine express with functions - https://firebase.google.com/docs/functions/http
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const express = require('express');
-const { userHandler } = require("./userHandler");
-const { checkerHandler } = require("./checkerHandler");
+const { userHandlerWhatsapp } = require("./userHandlers");
+const { checkerHandlerWhatsapp } = require("./checkerHandlers");
 const { defineString } = require('firebase-functions/params');
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
@@ -66,9 +66,9 @@ app.post("/whatsapp", async (req, res) => {
                 phoneNumberId === userPhoneNumberId
             ) {
                 if ((type == "button" || type == "interactive") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
-                    await checkerHandler(message);
+                    await checkerHandlerWhatsapp(message);
                 } else if (phoneNumberId === userPhoneNumberId) {
-                    await userHandler(message);
+                    await userHandlerWhatsapp(message);
                 }
                 else {
                     functions.logger.log("unexpected message type")

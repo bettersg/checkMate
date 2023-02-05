@@ -88,7 +88,7 @@ async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
           title: "It's something else",
         }
       }];
-      await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
       break;
     case "telegram":
       break
@@ -122,10 +122,10 @@ async function sendVotingMessage(voteRequestSnap, messageRef) {
       }];
       switch (message.type) {
         case "text":
-          await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
         case "image":
-          await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
       }
       functions.logger.log("voting message sent");
