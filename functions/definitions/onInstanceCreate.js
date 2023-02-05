@@ -17,6 +17,7 @@ const { incrementCounter, getCount } = require('./common/counters');
 const { getResponseToMessage, getReponsesObj, getThresholds } = require('./common/utils');
 const { sendWhatsappTextMessage, sendWhatsappTemplateMessage } = require('./common/sendWhatsappMessage');
 const admin = require('firebase-admin');
+const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
 
 // Define some parameters
@@ -31,18 +32,21 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
   .onCreate(async (snap, context) => {
     // Grab the current value of what was written to Firestore.
     const data = snap.data();
-    const parentMessageRef = snap.ref.parent.parent;
-    incrementCounter(parentMessageRef, "instance", numInstanceShards.value())
-    const parentMessageSnap = await parentMessageRef.get();
-    const responses = await getReponsesObj();
     if (!data.from) {
       functions.logger.log("Missing 'from' field in instance data");
-    } else {
-      const response = getResponseToMessage(parentMessageSnap, responses)
-      await sendWhatsappTextMessage("user", data.from, response, data.id)
-      if (parentMessageSnap.get("isAssessed")) {
-        return snap.ref.update({ isReplied: true, replyTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
-      }
+      return Promise.resolve()
+    }
+    const parentMessageRef = snap.ref.parent.parent;
+    await incrementCounter(parentMessageRef, "instance", numInstanceShards.value())
+
+    await upsertUser(data.from, data.timestamp, snap.ref);
+
+    const parentMessageSnap = await parentMessageRef.get();
+    const responses = await getReponsesObj();
+    const response = getResponseToMessage(parentMessageSnap, responses)
+    await sendWhatsappTextMessage("user", data.from, response, data.id)
+    if (parentMessageSnap.get("isAssessed")) {
+      return snap.ref.update({ isReplied: true, replyTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
     }
     const parentInstanceCount = await getCount(parentMessageRef, "instance")
     const thresholds = await getThresholds();
@@ -52,6 +56,21 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     }
     return Promise.resolve();
   });
+
+async function upsertUser(from, messageTimestamp, instanceRef) {
+  const db = admin.firestore();
+  const batch = db.batch()
+  const userRef = db.collection("users").doc(from);
+  const userInstanceRef = userRef.collection("instances").doc();
+  batch.set(userRef, {
+    lastSent: messageTimestamp,
+    instanceCount: FieldValue.increment(1),
+  }, { merge: true })
+  batch.set(userInstanceRef, {
+    instanceDocRef: instanceRef
+  })
+  await batch.commit()
+}
 
 async function despatchPoll(messageRef) {
   const messageId = messageRef.id
