@@ -20,7 +20,7 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
     const messageRef = docSnap.ref.parent.parent;
 
     if (before.isScam !== false && after.isScam === false) {
-      sendVotingMessage(change.after, messageRef);
+      await sendVotingMessage(change.after, messageRef);
     } else if (before.vote != after.vote) {
       await updateCounts(messageRef, before.vote, after.vote)
       const db = admin.firestore();
