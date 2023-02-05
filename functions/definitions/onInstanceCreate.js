@@ -41,7 +41,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
       const response = getResponseToMessage(parentMessageSnap, responses)
       await sendWhatsappTextMessage("user", data.from, response, data.id)
       if (parentMessageSnap.get("isAssessed")) {
-        return snap.ref.update({ isReplied: true });
+        return snap.ref.update({ isReplied: true, replyTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
       }
     }
     const parentInstanceCount = await getCount(parentMessageRef, "instance")
