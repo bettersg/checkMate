@@ -20,7 +20,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
     case "button":
       const button = message.button;
       switch (button.text) {
-        case "Yes":
+        case "Yes!":
           await onFactCheckerYes(button.payload, from, "whatsapp")
           break;
         case "No":
