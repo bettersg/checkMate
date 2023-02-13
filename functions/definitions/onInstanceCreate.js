@@ -80,7 +80,7 @@ async function despatchPoll(messageRef) {
     factCheckersSnapshot.forEach(async doc => {
       const factChecker = doc.data();
       if (factChecker?.preferredPlatform == "whatsapp") {
-        await sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
+        await sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
         await messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           platformId: factChecker.platformId,
