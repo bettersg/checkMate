@@ -87,6 +87,12 @@ app.post("/whatsapp", async (req, res) => {
     }
 });
 
+app.post("/telegram", async (req, res) => {
+    const db = admin.firestore();
+    console.log(JSON.stringify(req.body));
+    res.sendStatus(200);
+})
+
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests 
 app.get("/whatsapp", (req, res) => {
