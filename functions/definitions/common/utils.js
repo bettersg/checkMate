@@ -7,6 +7,10 @@ if (!admin.apps.length) {
     admin.initializeApp();
 }
 
+exports.sleep = function (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 exports.mockDb = async function () {
     functions.logger.log("mocking...")
     const db = admin.firestore()

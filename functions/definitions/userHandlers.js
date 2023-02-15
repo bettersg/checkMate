@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
 const { USER_BOT_RESPONSES } = require('./common/constants');
-const { mockDb } = require('./common/utils');
+const { mockDb, sleep } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { defineString } = require('firebase-functions/params');
 const runtimeEnvironment = defineString("ENVIRONMENT")
@@ -41,6 +41,18 @@ exports.userHandlerWhatsapp = async function (message) {
         handleSpecialCommands(message);
         break;
       }
+      if (message.text.body === "Show me how CheckMate works!") {
+        await handleNewUser(message);
+        break;
+      }
+
+      if (message.text.body === "<Demo Scam Message>") {
+        await sendWhatsappTextMessage("user", from, responses?.SCAM ?? USER_BOT_RESPONSES.SCAM, message.id);
+        await sleep(2000);
+        await sendWhatsappTextMessage("user", from, "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! Apart from such messages, please don't send in anything else, because then our CheckMates will have to review it. Now, let's go do our part in the fight against scams and fake news! 💪");
+        break;
+      }
+
       await newTextInstanceHandler(db, {
         text: message.text.body,
         timestamp: messageTimestamp,
@@ -194,4 +206,10 @@ function handleSpecialCommands(messageObj) {
 
     }
   }
+}
+
+async function handleNewUser(messageObj) {
+  let res = await sendWhatsappTextMessage("user", messageObj.from, "<Demo Scam Message>");
+  await sleep(2000);
+  await sendWhatsappTextMessage("user", messageObj.from, "If you receive a scam message like this demo one above, just forward or copy and send it to this number. Go ahead and try it to see how CheckMate works!", res.data.messages[0].id);
 }
