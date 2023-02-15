@@ -65,7 +65,7 @@ app.post("/whatsapp", async (req, res) => {
                 phoneNumberId === checkerPhoneNumberId ||
                 phoneNumberId === userPhoneNumberId
             ) {
-                if ((type == "button" || type == "interactive") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
+                if ((type == "button" || type == "interactive" || type == "text") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
                     await checkerHandlerWhatsapp(message);
                 } else if (phoneNumberId === userPhoneNumberId) {
                     await userHandlerWhatsapp(message);

@@ -43,7 +43,16 @@ exports.checkerHandlerWhatsapp = async function (message) {
       break;
 
     case "text":
-      // handle URL evidence here
+      if (!message.text || !message.text.body) {
+        break;
+      }
+      if (message.text.body === "I'd like to join the CheckMates!") {
+        await onSignUp(from, "whatsapp");
+      } else if (!!message?.context?.id) {
+        await onMsgReplyReceipt(from, message.context.id, message.text.body, "whatsapp");
+      } else {
+        sendWhatsappTextMessage("factChecker", from, "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.")
+      }
       break;
   }
   markWhatsappMessageAsRead("factChecker", message.id);
@@ -54,6 +63,33 @@ exports.checkerHandlerTelegram = async function (message) {
   const db = admin.firestore();
 }
 
+async function onSignUp(from, platform = "whatsapp") {
+  const db = admin.firestore();
+  let res = await sendTextMessage("factChecker", from, "Welcome to the community of CheckMates! To complete signup, please *reply to this message (swipe right on it)* with the name you'd like CheckMate to address you as, e.g. Aaron", null, platform);
+  await db.collection("factCheckers").doc(`${from}`).set({
+    name: "",
+    isActive: true,
+    platformId: from,
+    level: 1,
+    experience: 0,
+    numVoted: 0,
+    numCorrectVotes: 0,
+    numVerifiedLinks: 0,
+    preferredPlatform: "whatsapp",
+    getNameMessageId: res.data.messages[0].id,
+  });
+}
+
+async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
+  const db = admin.firestore();
+  const factCheckerSnap = await db.collection("factCheckers").doc(from).get();
+  if (factCheckerSnap.get("getNameMessageId") === messageId) {
+    await factCheckerSnap.ref.update({
+      name: text.trim()
+    });
+    await sendTextMessage("factChecker", from, `Hi ${text.trim()}, welcome to CheckMate! You're now all set to help check messages that our users send in 💪`, null, platform);
+  }
+}
 
 async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
   const db = admin.firestore();
@@ -73,11 +109,9 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
         break;
       case "image":
         const temporaryUrl = await getSignedUrl(message.storageUrl);
-        functions.logger.log(temporaryUrl);
         res = await sendImageMessage("factChecker", from, temporaryUrl, message.text, null, platform);
         break;
     }
-    functions.logger.log(JSON.stringify(res.data, null, 2));
     voteRequestSnap.docs[0].ref.update({
       hasAgreed: true,
       sentMessageId: res.data.messages[0].id,
