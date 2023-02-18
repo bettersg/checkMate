@@ -22,7 +22,6 @@ const { defineInt } = require('firebase-functions/params');
 
 // Define some parameters
 const numInstanceShards = defineInt('NUM_SHARDS_INSTANCE_COUNT');
-//const whatsappUserBotPhoneNumberId = defineSecret('WHATSAPP_USER_BOT_PHONE_NUMBER_ID');
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -77,7 +76,7 @@ async function despatchPoll(messageRef) {
   const db = admin.firestore();
   const factCheckersSnapshot = await db.collection('factCheckers').where('isActive', '==', true).get();
   if (!factCheckersSnapshot.empty) {
-    factCheckersSnapshot.forEach(async doc => {
+    for (const doc of factCheckersSnapshot.docs) {
       const factChecker = doc.data();
       if (factChecker?.preferredPlatform == "whatsapp") {
         await sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
@@ -101,6 +100,6 @@ async function despatchPoll(messageRef) {
           vote: null,
         });
       }
-    })
+    }
   }
 }
