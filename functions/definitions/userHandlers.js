@@ -182,20 +182,6 @@ async function newImageInstanceHandler(db, {
   });
 }
 
-function handleSpecialCommands(messageObj) {
-  const command = messageObj.text.body.toLowerCase();
-  if (command.startsWith('/')) {
-    switch (command) {
-      case '/mockdb':
-        mockDb();
-        return
-      case '/getid':
-        sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
-        return
-    }
-  }
-}
-
 async function handleNewUser(messageObj) {
   const db = admin.firestore();
   const responses = await getReponsesObj("users");

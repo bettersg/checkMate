@@ -3,6 +3,9 @@ const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES, thresholds } = require('.
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { sendWhatsappTextMessage } = require('./sendWhatsappMessage')
+const { defineString } = require('firebase-functions/params');
+
+const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
 
 if (!admin.apps.length) {
     admin.initializeApp();
@@ -37,10 +40,10 @@ const mockDb = async function () {
     })
     await systemParametersRef.doc('supportedTypes').set(thresholds)
     const factCheckersRef = db.collection('factCheckers');
-    await factCheckersRef.doc("6591807628").set({
+    await factCheckersRef.doc(checker1PhoneNumber.value()).set({
         name: "Bing Wen",
         isActive: true,
-        platformId: "6591807628",
+        platformId: checker1PhoneNumber.value(),
         level: 1,
         experience: 0,
         numVoted: 0,
