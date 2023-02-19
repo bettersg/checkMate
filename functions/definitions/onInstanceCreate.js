@@ -76,11 +76,16 @@ async function despatchPoll(messageRef) {
   const db = admin.firestore();
   const factCheckersSnapshot = await db.collection('factCheckers').where('isActive', '==', true).get();
   if (!factCheckersSnapshot.empty) {
-    for (const doc of factCheckersSnapshot.docs) {
-      const factChecker = doc.data();
-      if (factChecker?.preferredPlatform == "whatsapp") {
-        await sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
-        await messageRef.collection("voteRequests").add({
+    const despatchPromises = factCheckersSnapshot.docs.map(factCheckerDoc => sendTemplateMessageAndCreateVoteRequest(factCheckerDoc.data(), messageId, factCheckerDoc, messageRef));
+    await Promise.all(despatchPromises);
+  }
+}
+
+function sendTemplateMessageAndCreateVoteRequest(factChecker, messageId, doc, messageRef) {
+  if (factChecker?.preferredPlatform === "whatsapp") {
+    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? "CheckMate"], [messageId, messageId], "factChecker")
+      .then(() => {
+        return messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           platformId: factChecker.platformId,
           hasAgreed: false,
@@ -89,17 +94,10 @@ async function despatchPoll(messageRef) {
           sentMessageId: null,
           vote: null,
         });
-      } else if (factChecker?.preferredPlatform == "telegram") {
-        await messageRef.collection("voteRequests").add({
-          factCheckerDocRef: doc.ref,
-          platformId: factChecker.platformId,
-          hasAgreed: false,
-          isScam: null,
-          platform: "telegram",
-          sentMessageId: null,
-          vote: null,
-        });
-      }
-    }
+      });
+  } else if (factChecker?.preferredPlatform === "telegram") {
+    //not yet implemented
+  } else {
+    return Promise.reject(new Error(`Preferred platform not supported for factChecker ${factChecker.id}`));
   }
 }
