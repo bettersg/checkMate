@@ -7,6 +7,9 @@ exports.USER_BOT_RESPONSES = {
   MESSAGE_NOT_YET_ASSESSED: "Sorry, CheckMate doesn't have an answer for you now. We will update you again if the message has been accessed",
   SCAM: "CheckMate has assessed that this message is likely to be a scam!",
   UNSUPPORTED_TYPE: "Sorry, CheckMate currently doesn't support this type of message.",
+  DEMO_SCAM_MESSAGE: "<Demo Scam Message>",
+  DEMO_SCAM_PROMPT: "If you receive a scam message like this demo one above, just forward or copy and send it to this number. Go ahead and try it to see how CheckMate works!",
+  ONBOARDING_END: "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! Apart from such messages, please don't send in anything else, because then our CheckMates will have to review it. Now, let's go do our part in the fight against scams and fake news! 💪"
 };
 
 exports.FACTCHECKER_BOT_RESPONSES = {
@@ -15,6 +18,9 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   SCAM_ASSESSMENT_PROMPT: "Is this message a scam, i.e. an attempt to trick someone into giving away their money or personal information, or is it something else?",
   RESPONSE_RECORDED: "Your response has been recorded. Thank you! 🙏",
   HOLD_FOR_NEXT_POLL: "Thank you 🙏! Please hold for another poll to vote on how true the message is.",
+  ONBOARDING_START: "Welcome to the community of CheckMates! To complete signup, please *reply to this message (swipe right on it)* with the name you'd like CheckMate to address you as, e.g. Aaron",
+  ONBOARDING_SUCCESS: "Hi {{name}}, welcome to CheckMate! You're now all set to help check messages that our users send in 💪",
+  NOT_A_REPLY: "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.",
 };
 
 exports.thresholds = {

@@ -4,12 +4,10 @@ const { defineString } = require('firebase-functions/params');
 
 const graphApiVersion = defineString("GRAPH_API_VERSION");
 const runtimeEnvironment = defineString("ENVIRONMENT")
-const testPhoneNumberId = defineString("WHATSAPP_TEST_BOT_PHONE_NUMBER_ID")
+const testUserPhoneNumberId = defineString("WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID")
+const testCheckerPhoneNumberId = defineString("WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID")
 
 async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null) {
-    if (runtimeEnvironment.value() !== "PROD") {
-        text = `*${bot.toUpperCase()}_BOT:* ${text}`
-    }
     const data = {
         text: { body: text },
         to: to,
@@ -25,10 +23,6 @@ async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null) {
 }
 
 async function sendWhatsappImageMessage(bot, to, id, url = null, caption = null, replyMessageId = null) {
-    if (runtimeEnvironment.value() !== "PROD") {
-        caption = caption ?? "<NO CAPTION>";
-        caption = `*${bot.toUpperCase()}_BOT:* ${caption}`
-    }
     const mediaObj = {};
     if (url) {
         mediaObj.link = url;
@@ -100,9 +94,6 @@ async function sendWhatsappTemplateMessage(bot, to, templateName, languageCode =
 }
 
 async function sendWhatsappTextListMessage(bot, to, text, buttonText, sections, replyMessageId = null) {
-    if (runtimeEnvironment.value() !== "PROD") {
-        text = `*${bot.toUpperCase()}_BOT:* ${text}`
-    }
     data = {
         messaging_product: "whatsapp",
         recipient_type: "individual",
@@ -129,9 +120,6 @@ async function sendWhatsappTextListMessage(bot, to, text, buttonText, sections, 
 }
 
 async function sendWhatsappButtonMessage(bot, to, text, buttons, replyMessageId = null) {
-    if (runtimeEnvironment.value() !== "PROD") {
-        text = `*${bot.toUpperCase()}_BOT:* ${text}`
-    }
     data = {
         messaging_product: "whatsapp",
         recipient_type: "individual",
@@ -168,7 +156,11 @@ async function callWhatsappSendMessageApi(data, bot) {
     const token = process.env.WHATSAPP_TOKEN;
     let phoneNumberId;
     if (runtimeEnvironment.value() !== "PROD") {
-        phoneNumberId = testPhoneNumberId.value();
+        if (bot == "factChecker") {
+            phoneNumberId = testCheckerPhoneNumberId.value();
+        } else {
+            phoneNumberId = testUserPhoneNumberId.value();
+        }
     } else {
         if (bot == "factChecker") {
             phoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;

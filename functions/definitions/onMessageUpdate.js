@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { getResponseToMessage, getReponsesObj } = require("./common/utils");
 const { sendWhatsappTextMessage } = require("./common/sendWhatsappMessage");
+const { Timestamp } = require('firebase-admin/firestore');
 
 exports.onMessageUpdate = functions.region("asia-southeast1").runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document("/messages/{messageId}")
     .onUpdate(async (change, context) => {
@@ -9,7 +10,7 @@ exports.onMessageUpdate = functions.region("asia-southeast1").runWith({ secrets:
         const before = change.before;
         const after = change.after;
         if (!before.data().isAssessed && after.data().isAssessed) {
-            await after.ref.update({ assessedTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
+            await after.ref.update({ assessedTimeStamp: Timestamp.fromDate(new Date()) });
             await replyPendingInstances(after);
         }
         return Promise.resolve();
@@ -22,6 +23,6 @@ async function replyPendingInstances(docRef) {
     pendingSnapshot.forEach(async (doc) => {
         const data = doc.data();
         await sendWhatsappTextMessage("user", data.from, response, data.id);
-        await doc.ref.update({ isReplied: true, replyTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
+        await doc.ref.update({ isReplied: true, replyTimeStamp: Timestamp.fromDate(new Date()) });
     });
 }

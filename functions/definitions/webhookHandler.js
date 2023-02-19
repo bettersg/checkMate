@@ -25,9 +25,11 @@ const express = require('express');
 const { userHandlerWhatsapp } = require("./userHandlers");
 const { checkerHandlerWhatsapp } = require("./checkerHandlers");
 const { defineString } = require('firebase-functions/params');
+const { handleSpecialCommands } = require("./common/utils")
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
-const testPhoneNumberId = defineString("WHATSAPP_TEST_BOT_PHONE_NUMBER_ID")
+const testUserPhoneNumberId = defineString("WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID")
+const testCheckerPhoneNumberId = defineString("WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID")
 
 if (!admin.apps.length) {
     admin.initializeApp();
@@ -57,21 +59,28 @@ app.post("/whatsapp", async (req, res) => {
                 checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
                 userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID;
             } else {
-                checkerPhoneNumberId = testPhoneNumberId.value();
-                userPhoneNumberId = testPhoneNumberId.value();
+                checkerPhoneNumberId = testCheckerPhoneNumberId.value();
+                userPhoneNumberId = testUserPhoneNumberId.value();
             }
 
             if (
                 phoneNumberId === checkerPhoneNumberId ||
                 phoneNumberId === userPhoneNumberId
             ) {
-                if ((type == "button" || type == "interactive" || type == "text") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
-                    await checkerHandlerWhatsapp(message);
-                } else if (phoneNumberId === userPhoneNumberId) {
-                    await userHandlerWhatsapp(message);
+                if (phoneNumberId !== userPhoneNumberId && phoneNumberId !== checkerPhoneNumberId) {
+                    functions.logger.log("unexpected message source");
+                    res.sendStatus(200);
+                    return;
                 }
-                else {
-                    functions.logger.log("unexpected message type")
+                if (type == "text" && message.text.body.startsWith("/") && runtimeEnvironment.value() !== "PROD") { //handle db commands
+                    await handleSpecialCommands(message);
+                } else {
+                    if ((type == "button" || type == "interactive" || type == "text") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
+                        await checkerHandlerWhatsapp(message);
+                    }
+                    if (phoneNumberId === userPhoneNumberId) {
+                        await userHandlerWhatsapp(message);
+                    }
                 }
                 res.sendStatus(200);
             } else {

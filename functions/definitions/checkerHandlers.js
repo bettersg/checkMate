@@ -51,7 +51,8 @@ exports.checkerHandlerWhatsapp = async function (message) {
       } else if (!!message?.context?.id) {
         await onMsgReplyReceipt(from, message.context.id, message.text.body, "whatsapp");
       } else {
-        sendWhatsappTextMessage("factChecker", from, "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.")
+        responses = await getReponsesObj("factCheckers");
+        sendWhatsappTextMessage("factChecker", from, responses.NOT_A_REPLY);
       }
       break;
   }
@@ -64,8 +65,9 @@ exports.checkerHandlerTelegram = async function (message) {
 }
 
 async function onSignUp(from, platform = "whatsapp") {
+  const responses = await getReponsesObj("factCheckers");
   const db = admin.firestore();
-  let res = await sendTextMessage("factChecker", from, "Welcome to the community of CheckMates! To complete signup, please *reply to this message (swipe right on it)* with the name you'd like CheckMate to address you as, e.g. Aaron", null, platform);
+  let res = await sendTextMessage("factChecker", from, responses.ONBOARDING_START, null, platform);
   await db.collection("factCheckers").doc(`${from}`).set({
     name: "",
     isActive: true,
@@ -81,13 +83,14 @@ async function onSignUp(from, platform = "whatsapp") {
 }
 
 async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
+  const responses = await getReponsesObj("factCheckers");
   const db = admin.firestore();
   const factCheckerSnap = await db.collection("factCheckers").doc(from).get();
   if (factCheckerSnap.get("getNameMessageId") === messageId) {
     await factCheckerSnap.ref.update({
       name: text.trim()
     });
-    await sendTextMessage("factChecker", from, `Hi ${text.trim()}, welcome to CheckMate! You're now all set to help check messages that our users send in 💪`, null, platform);
+    await sendTextMessage("factChecker", from, responses.ONBOARDING_SUCCESS.replace("{{name}}", text.trim()), null, platform);
   }
 }
 

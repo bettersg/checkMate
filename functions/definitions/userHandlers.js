@@ -2,8 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
-const { USER_BOT_RESPONSES } = require('./common/constants');
-const { mockDb, sleep } = require('./common/utils');
+const { mockDb, sleep, getReponsesObj } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { defineString } = require('firebase-functions/params');
 const runtimeEnvironment = defineString("ENVIRONMENT")
@@ -17,16 +16,14 @@ exports.userHandlerWhatsapp = async function (message) {
   let type = message.type;
   const db = admin.firestore()
 
-  const responsesRef = db.doc('systemParameters/userBotResponses');
   const supportedTypesRef = db.doc('systemParameters/supportedTypes');
-  const [responsesSnapshot, supportedTypesSnapshot] = await db.getAll(responsesRef, supportedTypesRef);
-
-  const responses = responsesSnapshot.data();
+  const supportedTypesSnap = await supportedTypesRef.get()
+  const supportedTypes = supportedTypesSnap.get("whatsapp") || ["image", "text"]
 
   // check that message type is supported, otherwise respond with appropriate message
-  const supportedTypes = supportedTypesSnapshot.get('whatsapp') ?? ["text", "image"];
   if (!supportedTypes.includes(type)) {
-    sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE ?? USER_BOT_RESPONSES.UNSUPPORTED_TYPE, message.id)
+    const responses = await getReponsesObj("users")
+    sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE, message.id)
     markWhatsappMessageAsRead("user", message.id);
     return
   }
@@ -37,19 +34,12 @@ exports.userHandlerWhatsapp = async function (message) {
       if (!message.text || !message.text.body) {
         break;
       }
-      if (message.text.body.startsWith("/") && runtimeEnvironment.value() !== "PROD") {
-        handleSpecialCommands(message);
-        break;
-      }
       if (message.text.body === "Show me how CheckMate works!") {
         await handleNewUser(message);
         break;
       }
-
       if (message.text.body === "<Demo Scam Message>") {
-        await sendWhatsappTextMessage("user", from, responses?.SCAM ?? USER_BOT_RESPONSES.SCAM, message.id);
-        await sleep(2000);
-        await sendWhatsappTextMessage("user", from, "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! Apart from such messages, please don't send in anything else, because then our CheckMates will have to review it. Now, let's go do our part in the fight against scams and fake news! 💪");
+        await respondToDemoScam(message);
         break;
       }
 
@@ -192,7 +182,6 @@ async function newImageInstanceHandler(db, {
   });
 }
 
-//remove for prod
 function handleSpecialCommands(messageObj) {
   const command = messageObj.text.body.toLowerCase();
   if (command.startsWith('/')) {
@@ -203,13 +192,30 @@ function handleSpecialCommands(messageObj) {
       case '/getid':
         sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
         return
-
     }
   }
 }
 
 async function handleNewUser(messageObj) {
-  let res = await sendWhatsappTextMessage("user", messageObj.from, "<Demo Scam Message>");
+  const db = admin.firestore();
+  const responses = await getReponsesObj("users");
+  const userRef = db.collection('users').doc(messageObj.from);
+  const userSnap = await userRef.get();
+  if (!userSnap.exists) {
+    const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0);
+    await userRef.set({
+      instanceCount: 0,
+      onboardMessageReceiptTime: messageTimestamp,
+    })
+  };
+  let res = await sendWhatsappTextMessage("user", messageObj.from, responses.DEMO_SCAM_MESSAGE);
   await sleep(2000);
-  await sendWhatsappTextMessage("user", messageObj.from, "If you receive a scam message like this demo one above, just forward or copy and send it to this number. Go ahead and try it to see how CheckMate works!", res.data.messages[0].id);
+  await sendWhatsappTextMessage("user", messageObj.from, responses?.DEMO_SCAM_PROMPT, res.data.messages[0].id);
+}
+
+async function respondToDemoScam(messageObj) {
+  const responses = await getReponsesObj("users")
+  await sendWhatsappTextMessage("user", messageObj.from, responses?.SCAM, messageObj.id);
+  await sleep(2000);
+  await sendWhatsappTextMessage("user", messageObj.from, responses?.ONBOARDING_END);
 }
