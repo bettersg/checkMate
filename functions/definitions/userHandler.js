@@ -5,6 +5,7 @@ const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common
 const { USER_BOT_RESPONSES } = require('./common/constants');
 const { mockDb } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
+const calculateSimilarity = require('./calculateSimilarity')
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -73,9 +74,16 @@ async function newTextInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
+  // 1 - check if the exact same message exists in database
   let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('text', '==', text).get();
   let messageId;
   if (textMatchSnapshot.empty) {
+    // 2 - if there is no exact match, then perform a cosine similarity calculation
+    let similarityScore = calculateSimilarity(text)
+    if (similarityScore != {}){
+      const bestMatchingDocument = similarityScore.message
+      const similarityScore = similarityScore.score
+    }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       category: "fake news", //Can be "fake news" or "scam"
