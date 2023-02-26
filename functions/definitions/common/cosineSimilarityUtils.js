@@ -10,6 +10,11 @@ function wordCountMap(str){
 return wordCount;
 }
 
+function addWordsToDictionary(wordCountmap, dict){
+    for(let key in wordCountmap){
+        dict[key] = true;
+    }
+}
 // convert wordMap to vectors
 function wordMapToVector(map,dict){
     let wordCountVector = [];
