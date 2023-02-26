@@ -7,6 +7,8 @@ if (!admin.apps.length) {
 
 exports.calculateSimilarity = async function (messageToCompare) {
     const db = admin.firestore()
+    // strip any url in the message
+    messageToCompare = messageToCompare.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
 
     // stores the results of the comparison between each message in db and the current message to evaluate
     let comparisonScoresTable = [] 
@@ -18,8 +20,15 @@ exports.calculateSimilarity = async function (messageToCompare) {
     spamMessages.forEach(spamMessageDoc =>{
         const spamMessage = spamMessageDoc.data();
         if(spamMessage.text != "") {
-            currentSimilarityScore = getSimilarityScore(textCosineSimilarity(spamMessage.text, messageToCompare))
-            comparisonScoresTable.push( {message: spamMessage.text, score: currentSimilarityScore} )    
+            // strip urls from current message to allow variation comparison
+            const currentMessage = spamMessage.text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+            // if we have a match after stripping we give 100% score as it is a variation, otherwise we compute the cosineSimilarity score
+            if (currentMessage == messageToCompare) {
+                comparisonScoresTable.push( {message: spamMessage.text, score: 100} )    
+            } else {
+                currentSimilarityScore = getSimilarityScore(textCosineSimilarity(spamMessage.text, messageToCompare))
+                comparisonScoresTable.push( {message: spamMessage.text, score: currentSimilarityScore} )  
+            }
         }
     })
 
@@ -30,6 +39,5 @@ exports.calculateSimilarity = async function (messageToCompare) {
     } else {
         return {}
     }
-    
 }
 
