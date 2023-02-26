@@ -27,7 +27,7 @@ exports.calculateSimilarity = async function (messageToCompare) {
                 comparisonScoresTable.push( {message: spamMessage.text, score: 100} )    
             } else {
                 currentSimilarityScore = getSimilarityScore(textCosineSimilarity(spamMessage.text, messageToCompare))
-                comparisonScoresTable.push( {message: spamMessage.text, score: currentSimilarityScore} )  
+                comparisonScoresTable.push( {message: currentMessage, score: currentSimilarityScore} )  
             }
         }
     })
