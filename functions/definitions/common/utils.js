@@ -2,12 +2,34 @@
 const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES, thresholds } = require('./constants');
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { sendWhatsappTextMessage } = require('./sendWhatsappMessage')
+const { defineString } = require('firebase-functions/params');
+
+const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
 
 if (!admin.apps.length) {
     admin.initializeApp();
 }
 
-exports.mockDb = async function () {
+exports.sleep = function (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+exports.handleSpecialCommands = async function (messageObj) {
+    const command = messageObj.text.body.toLowerCase();
+    if (command.startsWith('/')) {
+        switch (command) {
+            case '/mockdb':
+                await mockDb();
+                return
+            case '/getid':
+                await sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
+                return
+        }
+    }
+}
+
+const mockDb = async function () {
     functions.logger.log("mocking...")
     const db = admin.firestore()
     const systemParametersRef = db.collection('systemParameters');
@@ -16,20 +38,19 @@ exports.mockDb = async function () {
     await systemParametersRef.doc('supportedTypes').set({
         whatsapp: ["text", "image"]
     })
-    await systemParametersRef.doc('supportedTypes').set(thresholds)
+    await systemParametersRef.doc('thresholds').set(thresholds)
     const factCheckersRef = db.collection('factCheckers');
-    await factCheckersRef.add({
+    await factCheckersRef.doc(checker1PhoneNumber.value()).set({
         name: "Bing Wen",
         isActive: true,
-        whatsappNumber: "6591807628",
-        telegramId: "",
+        platformId: checker1PhoneNumber.value(),
         level: 1,
         experience: 0,
         numVoted: 0,
         numCorrectVotes: 0,
         numVerifiedLinks: 0,
-        preferredChannel: "whatsapp",
-    })
+        preferredPlatform: "whatsapp",
+    }, { merge: true })
     functions.logger.log("mocked")
 }
 
@@ -38,6 +59,17 @@ exports.getThresholds = async function () {
     const theresholdsRef = db.doc('systemParameters/thresholds');
     const theresholdsSnap = await theresholdsRef.get()
     return theresholdsSnap.data() ?? thresholds;
+}
+
+exports.checkUrl = function (urlString) {
+    let url;
+    try {
+        url = new URL(urlString)
+    }
+    catch (e) {
+        return false;
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
 }
 
 exports.getResponseToMessage = function (docSnap, responses) {

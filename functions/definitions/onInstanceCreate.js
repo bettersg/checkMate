@@ -17,32 +17,35 @@ const { incrementCounter, getCount } = require('./common/counters');
 const { getResponseToMessage, getReponsesObj, getThresholds } = require('./common/utils');
 const { sendWhatsappTextMessage, sendWhatsappTemplateMessage } = require('./common/sendWhatsappMessage');
 const admin = require('firebase-admin');
+const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
 
 // Define some parameters
 const numInstanceShards = defineInt('NUM_SHARDS_INSTANCE_COUNT');
-//const whatsappUserBotPhoneNumberId = defineSecret('WHATSAPP_USER_BOT_PHONE_NUMBER_ID');
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document('/messages/{messageId}/instances/{instanceId}')
+exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] }).firestore.document('/messages/{messageId}/instances/{instanceId}')
   .onCreate(async (snap, context) => {
     // Grab the current value of what was written to Firestore.
     const data = snap.data();
-    const parentMessageRef = snap.ref.parent.parent;
-    incrementCounter(parentMessageRef, "instance", numInstanceShards.value())
-    const parentMessageSnap = await parentMessageRef.get();
-    const responses = await getReponsesObj();
     if (!data.from) {
       functions.logger.log("Missing 'from' field in instance data");
-    } else {
-      const response = getResponseToMessage(parentMessageSnap, responses)
-      await sendWhatsappTextMessage("user", data.from, response, data.id)
-      if (parentMessageSnap.get("isAssessed")) {
-        return snap.ref.update({ isReplied: true });
-      }
+      return Promise.resolve()
+    }
+    const parentMessageRef = snap.ref.parent.parent;
+    await incrementCounter(parentMessageRef, "instance", numInstanceShards.value())
+
+    await upsertUser(data.from, data.timestamp, snap.ref);
+
+    const parentMessageSnap = await parentMessageRef.get();
+    const responses = await getReponsesObj();
+    const response = getResponseToMessage(parentMessageSnap, responses)
+    await sendWhatsappTextMessage("user", data.from, response, data.id)
+    if (parentMessageSnap.get("isAssessed")) {
+      return snap.ref.update({ isReplied: true, replyTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
     }
     const parentInstanceCount = await getCount(parentMessageRef, "instance")
     const thresholds = await getThresholds();
@@ -53,35 +56,48 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     return Promise.resolve();
   });
 
+async function upsertUser(from, messageTimestamp, instanceRef) {
+  const db = admin.firestore();
+  const batch = db.batch()
+  const userRef = db.collection("users").doc(from);
+  const userInstanceRef = userRef.collection("instances").doc();
+  batch.set(userRef, {
+    lastSent: messageTimestamp,
+    instanceCount: FieldValue.increment(1),
+  }, { merge: true })
+  batch.set(userInstanceRef, {
+    instanceDocRef: instanceRef
+  })
+  await batch.commit()
+}
+
 async function despatchPoll(messageRef) {
   const messageId = messageRef.id
   const db = admin.firestore();
   const factCheckersSnapshot = await db.collection('factCheckers').where('isActive', '==', true).get();
   if (!factCheckersSnapshot.empty) {
-    factCheckersSnapshot.forEach(async doc => {
-      const factChecker = doc.data();
-      if (factChecker?.preferredChannel == "whatsapp") {
-        await sendWhatsappTemplateMessage("user", factChecker.whatsappNumber, "sample_issue_resolution", "en_US", [factChecker?.name ?? ""], [messageId, messageId], "factChecker");
-        await messageRef.collection("voteRequests").add({
+    const despatchPromises = factCheckersSnapshot.docs.map(factCheckerDoc => sendTemplateMessageAndCreateVoteRequest(factCheckerDoc.data(), messageId, factCheckerDoc, messageRef));
+    await Promise.all(despatchPromises);
+  }
+}
+
+function sendTemplateMessageAndCreateVoteRequest(factChecker, messageId, doc, messageRef) {
+  if (factChecker?.preferredPlatform === "whatsapp") {
+    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? "CheckMate"], [messageId, messageId], "factChecker")
+      .then(() => {
+        return messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
-          whatsappNumber: factChecker.whatsappNumber,
+          platformId: factChecker.platformId,
           hasAgreed: false,
           isScam: null,
           platform: "whatsapp",
           sentMessageId: null,
           vote: null,
         });
-      } else if (factChecker?.preferredChannel == "telegram") {
-        await messageRef.collection("voteRequests").add({
-          factCheckerDocRef: doc.ref,
-          whatsappNumber: factChecker.whatsappNumber,
-          hasAgreed: false,
-          isScam: null,
-          platform: "telegram",
-          sentMessageId: null,
-          vote: null,
-        });
-      }
-    })
+      });
+  } else if (factChecker?.preferredPlatform === "telegram") {
+    //not yet implemented
+  } else {
+    return Promise.reject(new Error(`Preferred platform not supported for factChecker ${factChecker.id}`));
   }
 }

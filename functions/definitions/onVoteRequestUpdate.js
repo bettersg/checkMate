@@ -20,7 +20,7 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
     const messageRef = docSnap.ref.parent.parent;
 
     if (before.isScam !== false && after.isScam === false) {
-      sendVotingMessage(change.after, messageRef);
+      await sendVotingMessage(change.after, messageRef);
     } else if (before.vote != after.vote) {
       await updateCounts(messageRef, before.vote, after.vote)
       const db = admin.firestore();
@@ -30,7 +30,7 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       const irrelevantCount = await getCount(messageRef, "irrelevant");
       const scamCount = await getCount(messageRef, "scam")
       const voteTotal = await getCount(messageRef, "totalVoteScore");
-      const truthScore = voteTotal / voteCount;
+      const truthScore = voteTotal / (voteCount - irrelevantCount - scamCount);
       const thresholds = await getThresholds();
       const isScam = (scamCount > parseInt(thresholds.isScam * voteCount));
       const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * voteCount));
@@ -88,7 +88,7 @@ async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
           title: "It's something else",
         }
       }];
-      await sendWhatsappButtonMessage("factChecker", voteRequestData.whatsappNumber, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
       break;
     case "telegram":
       break
@@ -122,16 +122,13 @@ async function sendVotingMessage(voteRequestSnap, messageRef) {
       }];
       switch (message.type) {
         case "text":
-          setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
         case "image":
-          setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.whatsappNumber, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
       }
+      functions.logger.log("voting message sent");
       break;
     case "telegram":
       break;
