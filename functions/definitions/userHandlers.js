@@ -83,10 +83,12 @@ async function newTextInstanceHandler(db, {
   let messageId;
   if (textMatchSnapshot.empty) {
     // 2 - if there is no exact match, then perform a cosine similarity calculation
-    let similarityScore = calculateSimilarity(text)
-    if (similarityScore != {}) {
-      const bestMatchingDocument = similarityScore.message
-      const similarityScore = similarityScore.score
+    let similarity = calculateSimilarity(text)
+    if (similarity != {}) {
+      const bestMatchingDocument = similarity.message
+      const similarityScore = similarity.score
+      console.log(bestMatchingDocument)
+      console.log(similarityScore)
     }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
