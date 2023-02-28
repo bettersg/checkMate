@@ -9,7 +9,9 @@ exports.calculateSimilarity = async function (messageToCompare) {
     const db = admin.firestore()
     // strip any url in the message
     messageToCompare = messageToCompare.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
-
+    // strip phone numbers of minimum 7 digits as they can vary as well
+    messageToCompare = messageToCompare.replace(/[0-9]{7,}+/g, '')
+    
     // stores the results of the comparison between each message in db and the current message to evaluate
     let comparisonScoresTable = [] 
     let currentSimilarityScore = 0
@@ -21,7 +23,9 @@ exports.calculateSimilarity = async function (messageToCompare) {
         const spamMessage = spamMessageDoc.data();
         if(spamMessage.text != "") {
             // strip urls from current message to allow variation comparison
-            const currentMessage = spamMessage.text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+            let currentMessage = spamMessage.text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+            // strip phone numbers of minimum 7 digits as they can vary as well
+            currentMessage = currentMessage.replace(/[0-9]{7,}+/g, '')
             // if we have a match after stripping we give 100% score as it is a variation, otherwise we compute the cosineSimilarity score
             if (currentMessage == messageToCompare) {
                 comparisonScoresTable.push( {message: spamMessage.text, score: 100} )    
