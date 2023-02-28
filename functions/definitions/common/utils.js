@@ -38,7 +38,7 @@ const mockDb = async function () {
     await systemParametersRef.doc('supportedTypes').set({
         whatsapp: ["text", "image"]
     })
-    await systemParametersRef.doc('supportedTypes').set(thresholds)
+    await systemParametersRef.doc('thresholds').set(thresholds)
     const factCheckersRef = db.collection('factCheckers');
     await factCheckersRef.doc(checker1PhoneNumber.value()).set({
         name: "Bing Wen",
