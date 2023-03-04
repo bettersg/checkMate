@@ -32,8 +32,8 @@ exports.calculateSimilarity = async function (messageToCompare) {
 
     // sort by similarity score and return only the highest scoring message
     if (comparisonScoresTable.length > 0) {
-        let sortedResults = comparisonScoresTable.sort((r1, r2) => (r1.score > r2.score) ? 1 : (r1.score < r2.score) ? -1 : 0); //I suspect this is yielding
-        return sortedResults[0]
+        let sortedResults = comparisonScoresTable.sort((r1, r2) => (r1.score > r2.score) ? 1 : (r1.score < r2.score) ? -1 : 0); //I suspect this is yielding ascending similarity
+        return sortedResults[sortedResults.length - 1]
     } else {
         return {}
     }
