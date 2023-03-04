@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const { textCosineSimilarity, getSimilarityScore } = require("./common/cosineSimilarityUtils");
+const { stripPhone, stripUrl } = require("./common/utils")
 
 if (!admin.apps.length) {
     admin.initializeApp();
@@ -7,30 +8,24 @@ if (!admin.apps.length) {
 
 exports.calculateSimilarity = async function (messageToCompare) {
     const db = admin.firestore()
-    // strip any url in the message
-    messageToCompare = messageToCompare.replace(/(?:https?|ftp):\/\/[\n\S]/g, '');
-    // strip phone numbers of minimum 7 digits as they can vary as well
-    messageToCompare = messageToCompare.replace(/[0-9]{7,}/g, '')
     // stores the results of the comparison between each message in db and the current message to evaluate
     let comparisonScoresTable = []
     let currentSimilarityScore = 0
-
     // get all the messages of type text from firestore
     const spamMessages = await db.collection('messages').where('type', '==', 'text').get();
     // iterate over the messages and compare with current then add to the table for further sorting
     spamMessages.forEach(spamMessageDoc => {
         const spamMessage = spamMessageDoc.data();
-        if (spamMessage.text != "") {
-            // strip urls from current message to allow variation comparison
-            let currentMessage = spamMessage.text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
-            // strip phone numbers of minimum 7 digits as they can vary as well
-            currentMessage = currentMessage.replace(/[0-9]{7,}/g, '')
+        if (!("strippedText" in spamMessage)) {
+            spamMessage.strippedText = stripPhone(spamMessage.text);
+        }
+        if (spamMessage.strippedText != "") {
             // if we have a match after stripping we give 100% score as it is a variation, otherwise we compute the cosineSimilarity score
-            if (currentMessage == messageToCompare) {
-                comparisonScoresTable.push({ message: spamMessage.text, score: 100 })
+            if (spamMessage.strippedText == messageToCompare) {
+                comparisonScoresTable.push({ ref: spamMessageDoc.ref, message: currentMessage, score: 100 })
             } else {
-                currentSimilarityScore = getSimilarityScore(textCosineSimilarity(spamMessage.text, messageToCompare))
-                comparisonScoresTable.push({ message: currentMessage, score: currentSimilarityScore })
+                currentSimilarityScore = getSimilarityScore(textCosineSimilarity(spamMessage.strippedText, messageToCompare))
+                comparisonScoresTable.push({ ref: spamMessageDoc.ref, message: spamMessage.strippedText, score: currentSimilarityScore })
             }
         }
     })
@@ -38,7 +33,6 @@ exports.calculateSimilarity = async function (messageToCompare) {
     // sort by similarity score and return only the highest scoring message
     if (comparisonScoresTable.length > 0) {
         let sortedResults = comparisonScoresTable.sort((r1, r2) => (r1.score > r2.score) ? 1 : (r1.score < r2.score) ? -1 : 0); //I suspect this is yielding
-        console.log(sortedResults[sortedResults.length - 1]);
         return sortedResults[0]
     } else {
         return {}
