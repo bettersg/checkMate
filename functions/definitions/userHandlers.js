@@ -91,8 +91,7 @@ async function newTextInstanceHandler(db, {
     }
     matchedId = textMatchSnapshot.docs[0].id;
   }
-  console.log(strippedText);
-  if (!hasMatch) {
+  if (!hasMatch && strippedText.length > 0) {
     let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedText', '==', strippedText).where('isScam', '==', true).get();
     if (!strippedTextMatchSnapshot.empty) {
       hasMatch = true;
@@ -102,7 +101,6 @@ async function newTextInstanceHandler(db, {
       matchedId = strippedTextMatchSnapshot.docs[0].id;
     }
   }
-  console.log(hasMatch)
   if (!hasMatch) {
     // 2 - if there is no exact match, then perform a cosine similarity calculation
     let similarity = await calculateSimilarity(text)
