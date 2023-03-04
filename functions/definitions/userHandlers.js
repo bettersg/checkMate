@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
-const { mockDb, sleep, getReponsesObj } = require('./common/utils');
+const { mockDb, sleep, getReponsesObj, stripPhone, stripUrl } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { calculateSimilarity } = require('./calculateSimilarity')
 const { defineString } = require('firebase-functions/params');
@@ -78,23 +78,52 @@ async function newTextInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
+  let hasMatch = false;
+  let matchedId;
+  let strippedText = stripPhone(text);
   // 1 - check if the exact same message exists in database
   let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('text', '==', text).get();
   let messageId;
-  if (textMatchSnapshot.empty) {
+  if (!textMatchSnapshot.empty) {
+    hasMatch = true;
+    if (textMatchSnapshot.size > 1) {
+      functions.logger.log(`strangely, more than 1 device matches the query ${text}`);
+    }
+    matchedId = textMatchSnapshot.docs[0].id;
+  }
+  console.log(strippedText);
+  if (!hasMatch) {
+    let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedText', '==', strippedText).where('isScam', '==', true).get();
+    if (!strippedTextMatchSnapshot.empty) {
+      hasMatch = true;
+      if (strippedTextMatchSnapshot.size > 1) {
+        functions.logger.log(`more than 1 device matches the query ${strippedText}`);
+      }
+      matchedId = strippedTextMatchSnapshot.docs[0].id;
+    }
+  }
+  console.log(hasMatch)
+  if (!hasMatch) {
     // 2 - if there is no exact match, then perform a cosine similarity calculation
     let similarity = await calculateSimilarity(text)
-    console.log(similarity);
+    let bestMatchingDocumentRef
+    let bestMatchingText
+    let similarityScore
     if (similarity != {}) {
-      const bestMatchingDocument = similarity.message
-      const similarityScore = similarity.score
-      // console.log(bestMatchingDocument)
-      // console.log(similarityScore)
+      bestMatchingDocumentRef = similarity.ref
+      bestMatchingText = similarity.message
+      similarityScore = similarity.score
     }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       category: "fake news", //Can be "fake news" or "scam"
       text: text, //text or caption
+      strippedText: strippedText,
+      closestMatch: {
+        documentRef: bestMatchingDocumentRef ?? null,
+        text: bestMatchingText ?? null,
+        score: similarityScore ?? null,
+      },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
@@ -105,10 +134,7 @@ async function newTextInstanceHandler(db, {
     });
     messageId = writeResult.id;
   } else {
-    if (textMatchSnapshot.size > 1) {
-      functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);
-    }
-    messageId = textMatchSnapshot.docs[0].id;
+    messageId = matchedId;
   }
   const _ = await db.collection('messages').doc(messageId).collection('instances').add({
     source: "whatsapp",
@@ -173,7 +199,7 @@ async function newImageInstanceHandler(db, {
 
   } else {
     if (imageMatchSnapshot.size > 1) {
-      functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);
+      functions.logger.log(`strangely, more than 1 device matches the image query ${hash}`);
     }
     messageId = imageMatchSnapshot.docs[0].id;
   }
