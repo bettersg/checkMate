@@ -11,7 +11,6 @@ exports.calculateSimilarity = async function (messageToCompare) {
     messageToCompare = messageToCompare.replace(/(?:https?|ftp):\/\/[\n\S]/g, '');
     // strip phone numbers of minimum 7 digits as they can vary as well
     messageToCompare = messageToCompare.replace(/[0-9]{7,}/g, '')
-
     // stores the results of the comparison between each message in db and the current message to evaluate
     let comparisonScoresTable = []
     let currentSimilarityScore = 0
