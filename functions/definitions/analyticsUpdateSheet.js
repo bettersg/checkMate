@@ -7,25 +7,29 @@ const {google} = require('googleapis');
 const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
 const { getFirestore, Timestamp, FieldValue } = require('firebase-admin/firestore');
 
-const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+// const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+// const CREDENTIALS_PATH = path.join(process.cwd(), 'adminKey.json');
 
 /**
  * Load or request or authorization to call APIs.
  *
  */
 async function authorize() {
-  client = await authenticate({
-    scopes: SCOPES,
-    keyfilePath: CREDENTIALS_PATH,
+  client = new google.auth.GoogleAuth({
+    keyFile: "serviceAccountKey.json",
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
+  // authenticate({
+  //   scopes: SCOPES,
+  //   keyfilePath: CREDENTIALS_PATH,
+  // });
   return client;
 }
 
 async function getFirestoreData() {
   // initialize database
   initializeApp({
-    credential: cert(require('../../adminKey.json'))
+    credential: cert(require('../../serviceAccountKey.json'))
   });
   const db = getFirestore();
 
