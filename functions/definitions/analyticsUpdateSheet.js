@@ -1,15 +1,7 @@
-
-const fs = require('fs').promises;
-const path = require('path');
 const process = require('process');
-const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
-const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
-const { getFirestore, Timestamp, FieldValue } = require('firebase-admin/firestore');
-
-// const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-// const CREDENTIALS_PATH = path.join(process.cwd(), 'adminKey.json');
-
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 /**
  * Load or request or authorization to call APIs.
  *
@@ -19,10 +11,6 @@ async function authorize() {
     keyFile: "serviceAccountKey.json",
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
-  // authenticate({
-  //   scopes: SCOPES,
-  //   keyfilePath: CREDENTIALS_PATH,
-  // });
   return client;
 }
 
@@ -43,23 +31,22 @@ async function getFirestoreData() {
   const ss = time.getSeconds();
   const date = `${DD}/${MM}/${YYYY} ${HH}:${mm}:${ss}`
 
-  // [database] get # total users
-  const registeredUserCountSnapshot = await db.collection('users').count().get();
+  /**
+   * CHECK FOR [USERS]
+   */
+  const dbRefUsers = db.collection('users');
+  const registeredUserCountSnapshot = await dbRefUsers.count().get();
   const registeredUserCount = registeredUserCountSnapshot.data().count;
 
-  // [LOOP COLLECTION TO CHECK]
-  const dbRefUsers = db.collection('users');
   let repeatUsers = 0;
   let activeUsersToday = 0;
   let activeUsersThisWeek = 0;
 
   (await dbRefUsers.get()).forEach((doc) => {
-    // [database] get # users that sent > 1 message
     if (doc.get('instanceCount') >= 1){
       repeatUsers += 1
     }
 
-    // [database] get # users active today
     const midnightToday = new Date().setHours(0,0,0,0);
     if (doc.get('lastSent') >= midnightToday) {
       activeUsersToday += 1
@@ -67,9 +54,23 @@ async function getFirestoreData() {
 
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).setHours(0,0,0,0)
     const lastSentDate = doc.get('lastSent');
-    // [database] get # users active this week
     if (lastSentDate._seconds * 1000 >= sevenDaysAgo) {
       activeUsersThisWeek += 1
+    }
+  })
+
+  /**
+   * CHECK FOR [CHECKERS]
+   */
+  const dbRefCheckers = db.collection('factCheckers');
+  const registeredCheckersSnapshot = await dbRefCheckers.count().get();
+  const registeredCheckersCount = registeredCheckersSnapshot.data().count;
+
+  let repeatCheckers = 0;
+
+  (await dbRefCheckers.get()).forEach((doc) => {
+    if (doc.get('numVoted') >= 1){
+      repeatCheckers += 1
     }
   })
 
@@ -78,6 +79,8 @@ async function getFirestoreData() {
     repeatUsers,
     activeUsersToday,
     activeUsersThisWeek,
+    registeredCheckersCount,
+    repeatCheckers,
   }
 
   return { data, date }
@@ -85,58 +88,27 @@ async function getFirestoreData() {
 
 function updateSheet(data, date, auth) {
   const sheetsAPI = google.sheets({version: 'v4', auth});
-  const {
-    registeredUserCount,
-    repeatUsers,
-    activeUsersToday,
-    activeUsersThisWeek,
-  } = data
 
-  sheetsAPI.spreadsheets.values.update({
-    spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
-    range: 'main!B2',
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [[date]],
-    }
-  });
+  const sheetUpdateDataAndCell = [
+    [date, "B2"],
+    [data?.registeredUserCount, "E4"],
+    [data?.repeatUsers, "E8"],
+    [data?.activeUsersToday, "E12"],
+    [data?.activeUsersThisWeek, "E16"],
+    [data?.registeredCheckersCount, "H4"],  
+    [data?.repeatCheckers, "H8"]
+  ]
 
-  sheetsAPI.spreadsheets.values.update({
-    spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
-    range: 'main!E4',
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [[registeredUserCount]],
-    }
-  });
-
-  sheetsAPI.spreadsheets.values.update({
-    spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
-    range: 'main!E8',
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [[repeatUsers]],
-    }
-  });
-
-  sheetsAPI.spreadsheets.values.update({
-    spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
-    range: 'main!E12',
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [[activeUsersToday]],
-    }
-  });
-
-  sheetsAPI.spreadsheets.values.update({
-    spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
-    range: 'main!E16',
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [[activeUsersThisWeek]],
-    }
-  });
-  return;
+  sheetUpdateDataAndCell.map(([cellData, cellIndex]) => {
+    sheetsAPI.spreadsheets.values.update({
+      spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
+      range: `main!${cellIndex}`,
+      valueInputOption: 'USER_ENTERED',
+      resource: {
+        values: [[cellData]],
+      }
+    });
+  })
 }
 
 exports.analyticsUpdateSheet = authorize()
