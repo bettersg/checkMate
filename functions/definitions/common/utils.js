@@ -4,7 +4,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { sendWhatsappTextMessage } = require('./sendWhatsappMessage')
 const { defineString } = require('firebase-functions/params');
-const { findPhoneNumbersInText } = require('libphonenumber-js')
+const { findPhoneNumbersInText } = require('libphonenumber-js');
+const { createHash } = await import('node:crypto');
 
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
 
@@ -148,8 +149,13 @@ function stripUrl(originalStr, includePlaceholder = false) {
   return replacedString;
 }
 
+function hashMessage(originalStr) {
+  return createHash('md5').update(originalStr).digest('hex');
+}
+
 exports.getReponsesObj = getReponsesObj;
 exports.getResponse = getResponse;
 exports.stripPhone = stripPhone;
 exports.stripUrl = stripUrl;
+exports.hashMessage = hashMessage;
 

@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
-const { mockDb, sleep, getReponsesObj, stripPhone, stripUrl } = require('./common/utils');
+const { mockDb, sleep, getReponsesObj, stripPhone, stripUrl, hashMessage } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { calculateSimilarity } = require('./calculateSimilarity')
 const { defineString } = require('firebase-functions/params');
@@ -78,10 +78,15 @@ async function newTextInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
+
   let hasMatch = false;
   let matchedId;
-  let strippedText = stripPhone(text);
+  let hashedText = hashMessage(text);  // hash of the original text
+  let strippedText = stripPhone(text); // text stripped of phone nr
+  let hashedStrippedText = hashMessage(text);  // hash of the stripped text
+
   // 1 - check if the exact same message exists in database
+  //TODO modify below line once we implement hash comparison
   let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('text', '==', text).get();
   let messageId;
   if (!textMatchSnapshot.empty) {
@@ -92,6 +97,7 @@ async function newTextInstanceHandler(db, {
     matchedId = textMatchSnapshot.docs[0].id;
   }
   if (!hasMatch && strippedText.length > 0) {
+    //TODO modify below line once we implement hash comparison
     let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedText', '==', strippedText).where('isScam', '==', true).get();
     if (!strippedTextMatchSnapshot.empty) {
       hasMatch = true;
@@ -117,6 +123,8 @@ async function newTextInstanceHandler(db, {
       category: "fake news", //Can be "fake news" or "scam"
       text: text, //text or caption
       strippedText: strippedText,
+      hashedText: hashedText,
+      hashedStrippedText: hashedStrippedText,
       closestMatch: {
         documentRef: bestMatchingDocumentRef ?? null,
         text: bestMatchingText ?? null,
