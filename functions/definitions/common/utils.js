@@ -5,7 +5,7 @@ const admin = require('firebase-admin');
 const { sendWhatsappTextMessage } = require('./sendWhatsappMessage')
 const { defineString } = require('firebase-functions/params');
 const { findPhoneNumbersInText } = require('libphonenumber-js');
-const { createHash } = await import('node:crypto');
+const { createHash } = await import('crypto');
 
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
 
