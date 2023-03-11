@@ -7,7 +7,7 @@ var fetch = require('node-fetch');
 
 async function authorize() {
   client = new google.auth.GoogleAuth({
-    keyFile: process.env.SERVICE_ACCOUNT_KEY,
+    keyFile: 'serviceAccountKey.json', // note: this file only exists on GCP Console
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
   return client;
@@ -16,7 +16,7 @@ async function authorize() {
 async function getFirestoreData() {
   // initialize database
   initializeApp({
-    credential: cert(require(process.env.SERVICE_ACCOUNT_KEY))
+    credential: cert(require('./serviceAccountKey.json')) // note: this file only exists on GCP Console
   });
   const db = getFirestore();
   const date = new Date().toLocaleString('en-US', {timeZone: 'Singapore'})
@@ -122,12 +122,12 @@ async function getBitlyMetrics(token){
   return bitlyClickCount;
 }
 
-exports.analyticsUpdateSheet = functions.runWith({ secrets: ['BITLY_TOKEN', "SERVICE_ACCOUNT_KEY"] }).pubsub.topic('analytics-google-sheets-api').onPublish((message, context) => {
+exports.analyticsUpdateSheet = ((message, context) => {
   // message and context are unused, only used to trigger function run
 
   authorize().then(async (auth) => {
     const {data, date} = await getFirestoreData();
-    const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN);
+    const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
     const allData = {...data, ...bitlyData}
     await updateSheet(allData, date, auth);
   })
