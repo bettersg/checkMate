@@ -5,7 +5,7 @@ const admin = require('firebase-admin');
 const { sendWhatsappTextMessage } = require('./sendWhatsappMessage')
 const { defineString } = require('firebase-functions/params');
 const { findPhoneNumbersInText } = require('libphonenumber-js');
-const { createHash } = await import('crypto');
+const { createHash } = require('crypto');
 
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
 
@@ -150,6 +150,7 @@ function stripUrl(originalStr, includePlaceholder = false) {
 }
 
 function hashMessage(originalStr) {
+  console.log(originalStr)
   return createHash('md5').update(originalStr).digest('hex');
 }
 

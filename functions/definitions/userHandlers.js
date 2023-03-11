@@ -83,7 +83,7 @@ async function newTextInstanceHandler(db, {
   let matchedId;
   let hashedText = hashMessage(text);  // hash of the original text
   let strippedText = stripPhone(text); // text stripped of phone nr
-  let hashedStrippedText = hashMessage(text);  // hash of the stripped text
+  let hashedStrippedText = hashMessage(strippedText);  // hash of the stripped text
 
   // 1 - check if the exact same message exists in database
   //TODO modify below line once we implement hash comparison
