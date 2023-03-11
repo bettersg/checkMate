@@ -150,7 +150,6 @@ function stripUrl(originalStr, includePlaceholder = false) {
 }
 
 function hashMessage(originalStr) {
-  console.log(originalStr)
   return createHash('md5').update(originalStr).digest('hex');
 }
 
