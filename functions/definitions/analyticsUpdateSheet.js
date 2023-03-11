@@ -1,14 +1,13 @@
+const functions = require('firebase-functions');
 const process = require('process');
 const {google} = require('googleapis');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
-/**
- * Load or request or authorization to call APIs.
- *
- */
+var fetch = require('node-fetch');
+
 async function authorize() {
   client = new google.auth.GoogleAuth({
-    keyFile: "serviceAccountKey.json",
+    keyFile: process.env.SERVICE_ACCOUNT_KEY,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
   return client;
@@ -17,19 +16,10 @@ async function authorize() {
 async function getFirestoreData() {
   // initialize database
   initializeApp({
-    credential: cert(require('../../serviceAccountKey.json'))
+    credential: cert(require(process.env.SERVICE_ACCOUNT_KEY))
   });
   const db = getFirestore();
-
-  // get current timestamp
-  const time = new Date();
-  const YYYY = time.getFullYear();
-  const MM = time.getMonth()+1;
-  const DD = time.getDate();
-  const HH = time.getHours();
-  const mm = time.getMinutes();
-  const ss = time.getSeconds();
-  const date = `${DD}/${MM}/${YYYY} ${HH}:${mm}:${ss}`
+  const date = new Date().toLocaleString('en-US', {timeZone: 'Singapore'})
 
   /**
    * CHECK FOR [USERS]
@@ -86,9 +76,9 @@ async function getFirestoreData() {
   return { data, date }
 }
 
-function updateSheet(data, date, auth) {
+async function updateSheet(data, date, auth) {
   const sheetsAPI = google.sheets({version: 'v4', auth});
-
+  
   const sheetUpdateDataAndCell = [
     [date, "B2"],
     [data?.registeredUserCount, "E4"],
@@ -96,12 +86,15 @@ function updateSheet(data, date, auth) {
     [data?.activeUsersToday, "E12"],
     [data?.activeUsersThisWeek, "E16"],
     [data?.registeredCheckersCount, "H4"],  
-    [data?.repeatCheckers, "H8"]
+    [data?.repeatCheckers, "H8"],
+    [data?.['bit.ly/add-checkmate'], "E3"],
+    [data?.['bit.ly/join-checkmates'], "H3"],
+    [data?.['bit.ly/checkmate-privacy'], "J3"]
   ]
 
   sheetUpdateDataAndCell.map(([cellData, cellIndex]) => {
     sheetsAPI.spreadsheets.values.update({
-      spreadsheetId: process.env.SPREADSHEET_ID || '1JOWHb2me-gFiPx5idT9ijUXpKCT-MGrLSVSPk4wZsi0',
+      spreadsheetId: process.env.SPREADSHEET_ID,
       range: `main!${cellIndex}`,
       valueInputOption: 'USER_ENTERED',
       resource: {
@@ -111,11 +104,34 @@ function updateSheet(data, date, auth) {
   })
 }
 
-exports.analyticsUpdateSheet = authorize()
-  .then(async (auth) => {
+async function getBitlyMetrics(token){
+  const bitlink = ["bit.ly/join-checkmates", "bit.ly/add-checkmate", "bit.ly/checkmate-privacy"]
+  let bitlyClickCount = {}
+
+  for (const link of bitlink) {
+    await fetch(`https://api-ssl.bitly.com/v4/bitlinks/${link}/clicks/summary?unit=month&units=1`, {
+      headers: {
+          'Authorization': `Bearer ${token}`
+      }
+    }).then(res => res.json())
+      .then(json => {
+      bitlyClickCount[link] = json.total_clicks;
+    })
+  }
+
+  return bitlyClickCount;
+}
+
+exports.analyticsUpdateSheet = functions.runWith({ secrets: ['BITLY_TOKEN', "SERVICE_ACCOUNT_KEY"] }).pubsub.topic('analytics-google-sheets-api').onPublish((message, context) => {
+  // message and context are unused, only used to trigger function run
+
+  authorize().then(async (auth) => {
     const {data, date} = await getFirestoreData();
-    updateSheet(data, date, auth);
+    const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN);
+    const allData = {...data, ...bitlyData}
+    await updateSheet(allData, date, auth);
   })
   .catch(
     console.error
   );
+})
