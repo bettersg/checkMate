@@ -2,8 +2,9 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
-const { mockDb, sleep, getReponsesObj } = require('./common/utils');
+const { mockDb, sleep, getReponsesObj, stripPhone, stripUrl, hashMessage } = require('./common/utils');
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
+const { calculateSimilarity } = require('./calculateSimilarity')
 const { defineString } = require('firebase-functions/params');
 const runtimeEnvironment = defineString("ENVIRONMENT")
 
@@ -77,13 +78,59 @@ async function newTextInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
-  let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('text', '==', text).get();
+
+  let hasMatch = false;
+  let matchedId;
+  let textHash = hashMessage(text);  // hash of the original text
+  let strippedText = stripPhone(text); // text stripped of phone nr
+  let strippedTextHash = hashMessage(strippedText);  // hash of the stripped text
+  let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
+
+  // 1 - check if the exact same message exists in database
+  let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('textHash', '==', textHash).get();
   let messageId;
-  if (textMatchSnapshot.empty) {
+  if (!textMatchSnapshot.empty) {
+    hasMatch = true;
+    matchType = "exact"
+    if (textMatchSnapshot.size > 1) {
+      functions.logger.log(`more than 1 device matches the query hash ${textHash} for text ${text}`);
+    }
+    matchedId = textMatchSnapshot.docs[0].id;
+  }
+  if (!hasMatch && strippedText.length > 0) {
+    let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedTextHash', '==', strippedTextHash).where('isScam', '==', true).get(); //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
+    if (!strippedTextMatchSnapshot.empty) {
+      hasMatch = true;
+      matchType = "stripped"
+      if (strippedTextMatchSnapshot.size > 1) {
+        functions.logger.log(`more than 1 device matches the stripped query hash ${strippedText} for text ${strippedText}`);
+      }
+      matchedId = strippedTextMatchSnapshot.docs[0].id;
+    }
+  }
+  if (!hasMatch) {
+    // 2 - if there is no exact match, then perform a cosine similarity calculation
+    let similarity = await calculateSimilarity(text)
+    let bestMatchingDocumentRef
+    let bestMatchingText
+    let similarityScore
+    if (similarity != {}) {
+      bestMatchingDocumentRef = similarity.ref
+      bestMatchingText = similarity.message
+      similarityScore = similarity.score
+    }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       category: "fake news", //Can be "fake news" or "scam"
       text: text, //text or caption
+      strippedText: strippedText,
+      textHash: textHash,
+      strippedTextHash: strippedTextHash,
+      closestMatch: {
+        documentRef: bestMatchingDocumentRef ?? null,
+        text: bestMatchingText ?? null,
+        score: similarityScore ?? null,
+      },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
@@ -94,10 +141,7 @@ async function newTextInstanceHandler(db, {
     });
     messageId = writeResult.id;
   } else {
-    if (textMatchSnapshot.size > 1) {
-      functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);
-    }
-    messageId = textMatchSnapshot.docs[0].id;
+    messageId = matchedId;
   }
   const _ = await db.collection('messages').doc(messageId).collection('instances').add({
     source: "whatsapp",
@@ -109,6 +153,8 @@ async function newTextInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    matchType: matchType,
+    strippedText: strippedText,
   });
 }
 
@@ -162,7 +208,7 @@ async function newImageInstanceHandler(db, {
 
   } else {
     if (imageMatchSnapshot.size > 1) {
-      functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);
+      functions.logger.log(`strangely, more than 1 device matches the image query ${hash}`);
     }
     messageId = imageMatchSnapshot.docs[0].id;
   }

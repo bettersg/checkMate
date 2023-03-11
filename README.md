@@ -4,12 +4,12 @@
 
 1. Git Clone (use SSH)
 2. Go to develop branch
-3. `cd firebase-functions`
+3. `cd functions`
 4. `npm install -g firebase-tools`
 5. `npm install`
 6. run `firebase login` then login with your betterSG email
 7. run `firebase emulators:start`
-8. you should now be able to hit the url at http://127.0.0.1:5001/checkmate-373101/asia-southeast1/addMessage?text=uppercaseme successfully
+8. you should now be able to hit the url at http://127.0.0.1:5001/checkmate-373101/asia-southeast1/xxxxx successfully
 9.  Now can work on your individual functions in the /functions/definitions folder
 10. Uncomment the exports when ready to test with the local emulator!
 11. Rmb to use https://ngrok.com/ (can install vs code extension) to expose localhost as an internet URL, in case you want to run locally but test with actual Whatsapp and Telegram. Note...might need to have premium Ngrok for this to work with whatsapp.

@@ -6,6 +6,8 @@ erDiagram
         string category "Not used for now"
         string text "Text or caption"
         string hash "Image hash, for image only"
+        string textHash "hash of original text, for text only"
+        string strippedTextHash "hash of stripped text, for text only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
         string storageURL "Cloud storage URL, for image only"
@@ -34,6 +36,8 @@ erDiagram
         boolean isFrequentlyForwarded "Not used for now"
         boolean isReplied "System has replied to the citizen"
 				timestamp replyTimestamp
+        string matchType "either exact, stripped, similarity or none"
+        string strippedText
     }
 
     voteRequests {
