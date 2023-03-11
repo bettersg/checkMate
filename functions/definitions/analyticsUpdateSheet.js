@@ -122,16 +122,15 @@ async function getBitlyMetrics(token){
   return bitlyClickCount;
 }
 
-exports.analyticsUpdateSheet = ((message, context) => {
-  // message and context are unused, only used to trigger function run
-
-  authorize().then(async (auth) => {
-    const {data, date} = await getFirestoreData();
-    const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
-    const allData = {...data, ...bitlyData}
-    await updateSheet(allData, date, auth);
+exports.analyticsUpdateSheet = (async (message, context) => {
+    // message and context are unused, only used to trigger function run
+    await authorize().then(async (auth) => {
+      const {data, date} = await getFirestoreData();
+      const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
+      const allData = {...data, ...bitlyData}
+      await updateSheet(allData, date, auth);
+    })
+    .catch(
+      console.error
+      );
   })
-  .catch(
-    console.error
-  );
-})
