@@ -1,7 +1,7 @@
 const { sendWhatsappButtonMessage, sendWhatsappTextListMessage } = require("./sendWhatsappMessage");
 const { getReponsesObj } = require("./utils");
 
-exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef, replyId) {
+exports.sendL1ScamAssessmentMessage = async function (voteRequestSnap, messageRef, replyId = null) {
   const voteRequestData = voteRequestSnap.data();
   const responses = await getReponsesObj("factCheckers");
   switch (voteRequestData.platform) {
@@ -9,22 +9,48 @@ exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef,
       const buttons = [{
         type: "reply",
         reply: {
-          id: `${messageRef.id}_${voteRequestSnap.id}_scam`,
-          title: "It's a scam",
+          id: `checkers0_${messageRef.id}_${voteRequestSnap.id}_sus`,
+          title: "Scam/Illicit",
         },
       }, {
         type: "reply",
         reply: {
-          id: `${messageRef.id}_${voteRequestSnap.id}_notscam`,
-          title: "It's something else",
+          id: `checkers0_${messageRef.id}_${voteRequestSnap.id}_notsus`,
+          title: "Misinfo/Others",
         }
       }];
-      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.L1_SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
       break;
     case "telegram":
       break
   }
 };
+
+exports.sendL2ScamAssessmentMessage = async function (voteRequestSnap, messageRef, replyId = null) {
+  const voteRequestData = voteRequestSnap.data();
+  const responses = await getReponsesObj("factCheckers");
+  switch (voteRequestData.platform) {
+    case "whatsapp":
+      const buttons = [{
+        type: "reply",
+        reply: {
+          id: `checkers1_${messageRef.id}_${voteRequestSnap.id}_scam`,
+          title: "Scam",
+        },
+      }, {
+        type: "reply",
+        reply: {
+          id: `checkers1_${messageRef.id}_${voteRequestSnap.id}_illicit`,
+          title: "Other Illicit",
+        }
+      }];
+      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.L2_SCAM_ASSESSMENT_PROMPT, buttons, replyId ?? voteRequestData.sentMessageId)
+      break;
+    case "telegram":
+      break
+  }
+};
+
 
 exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, messageRef) {
   const messageSnap = await messageRef.get();
@@ -53,14 +79,10 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
       }];
       switch (message.type) {
         case "text":
-          setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
         case "image":
-          setTimeout(async () => {
-            await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          }, 3000); // seem like we need to wait some time for this because for some reason it will have error 500 otherwise.
+          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
           break;
       }
       break;
@@ -68,3 +90,4 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
       break;
   }
 };
+

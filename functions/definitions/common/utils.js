@@ -78,6 +78,7 @@ exports.getResponseToMessage = function (docSnap, responses) {
   const isAssessed = docSnap.get("isAssessed");
   const isIrrelevant = docSnap.get("isIrrelevant");
   const isScam = docSnap.get("isScam");
+  const isIllicit = docSnap.get("isIllicit");
   const truthScore = docSnap.get("truthScore");
 
   if (!isAssessed) {
@@ -85,6 +86,9 @@ exports.getResponseToMessage = function (docSnap, responses) {
   }
   if (isScam) {
     return responses.SCAM;
+  }
+  if (isIllicit) {
+    return responses.SUSPICIOUS;
   }
   if (isIrrelevant) {
     return responses.IRRELEVANT;

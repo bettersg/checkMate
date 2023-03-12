@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require("./common/sendWhatsappMessage");
 const { getReponsesObj } = require("./common/utils");
-const { sendScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
+const { sendL1ScamAssessmentMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
@@ -37,7 +37,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
           await onVoteReceipt(db, interactive.list_reply.id, from, message.id)
           break;
         case "button_reply":
-          await onScamAssessmentReply(db, interactive.button_reply.id, from, message.id);
+          await onButtonReply(db, interactive.button_reply.id, from, message.id);
           break;
       }
       break;
@@ -120,25 +120,40 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
       sentMessageId: res.data.messages[0].id,
     })
     setTimeout(() => {
-      sendScamAssessmentMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
+      sendL1ScamAssessmentMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
     }, 2000);
   }
 }
 
-async function onScamAssessmentReply(db, buttonId, from, replyId, platform = "whatsapp") {
+async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
   const responses = await getReponsesObj("factCheckers");
-  const [messageId, voteRequestId, type] = buttonId.split("_");
+  const [buttonMessageRef, messageId, voteRequestId, type] = buttonId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
   const updateObj = {}
-  if (type === "scam") {
-    updateObj.isScam = true;
-    updateObj.vote = "scam";
-    sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
-  } else if (type === "notscam") {
-    updateObj.isScam = false;
-    updateObj.vote = null;
-    sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_NEXT_POLL, replyId);
+  switch (buttonMessageRef) {
+    case "checkers0":
+      if (type === "sus") {
+        updateObj.triggerVote = false;
+        updateObj.triggerL2 = true;
+        updateObj.vote = null;
+        sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_L2_SCAM_ASSESSMENT, replyId);
+      } else if (type === "notsus") {
+        updateObj.triggerVote = true;
+        updateObj.triggerL2 = false;
+        updateObj.vote = null;
+        sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_NEXT_POLL, replyId);
+      }
+      break;
+    case "checkers1":
+      if (type === "scam") {
+        updateObj.vote = "scam";
+      } else if (type === "illicit") {
+        updateObj.vote = "illicit";
+      }
+      sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
+      break;
   }
+
   await voteRequestRef.update(updateObj);
 }
 
