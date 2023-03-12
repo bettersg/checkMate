@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const process = require('process');
-const {google} = require('googleapis');
+const { google } = require('googleapis');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 var fetch = require('node-fetch');
@@ -19,7 +19,7 @@ async function getFirestoreData() {
     credential: cert(require('./serviceAccountKey.json')) // note: this file only exists on GCP Console
   });
   const db = getFirestore();
-  const date = new Date().toLocaleString('en-US', {timeZone: 'Singapore'})
+  const date = new Date().toLocaleString('en-US', { timeZone: 'Singapore' })
 
   /**
    * CHECK FOR [USERS]
@@ -33,16 +33,16 @@ async function getFirestoreData() {
   let activeUsersThisWeek = 0;
 
   (await dbRefUsers.get()).forEach((doc) => {
-    if (doc.get('instanceCount') >= 1){
+    if (doc.get('instanceCount') >= 1) {
       repeatUsers += 1
     }
 
-    const midnightToday = new Date().setHours(0,0,0,0);
+    const midnightToday = new Date().setHours(0, 0, 0, 0);
     if (doc.get('lastSent') >= midnightToday) {
       activeUsersToday += 1
     }
 
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).setHours(0,0,0,0)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0)
     const lastSentDate = doc.get('lastSent');
     if (lastSentDate._seconds * 1000 >= sevenDaysAgo) {
       activeUsersThisWeek += 1
@@ -59,7 +59,7 @@ async function getFirestoreData() {
   let repeatCheckers = 0;
 
   (await dbRefCheckers.get()).forEach((doc) => {
-    if (doc.get('numVoted') >= 1){
+    if (doc.get('numVoted') >= 1) {
       repeatCheckers += 1
     }
   })
@@ -77,15 +77,15 @@ async function getFirestoreData() {
 }
 
 async function updateSheet(data, date, auth) {
-  const sheetsAPI = google.sheets({version: 'v4', auth});
-  
+  const sheetsAPI = google.sheets({ version: 'v4', auth });
+
   const sheetUpdateDataAndCell = [
     [date, "B2"],
     [data?.registeredUserCount, "E4"],
     [data?.repeatUsers, "E8"],
     [data?.activeUsersToday, "E12"],
     [data?.activeUsersThisWeek, "E16"],
-    [data?.registeredCheckersCount, "H4"],  
+    [data?.registeredCheckersCount, "H4"],
     [data?.repeatCheckers, "H8"],
     [data?.['bit.ly/add-checkmate'], "E3"],
     [data?.['bit.ly/join-checkmates'], "H3"],
@@ -104,33 +104,50 @@ async function updateSheet(data, date, auth) {
   })
 }
 
-async function getBitlyMetrics(token){
+async function getBitlyMetrics(token) {
   const bitlink = ["bit.ly/join-checkmates", "bit.ly/add-checkmate", "bit.ly/checkmate-privacy"]
   let bitlyClickCount = {}
 
   for (const link of bitlink) {
     await fetch(`https://api-ssl.bitly.com/v4/bitlinks/${link}/clicks/summary?unit=month&units=1`, {
       headers: {
-          'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`
       }
     }).then(res => res.json())
       .then(json => {
-      bitlyClickCount[link] = json.total_clicks;
-    })
+        bitlyClickCount[link] = json.total_clicks;
+      })
   }
 
   return bitlyClickCount;
 }
 
 exports.analyticsUpdateSheet = (async (message, context) => {
-    // message and context are unused, only used to trigger function run
-    await authorize().then(async (auth) => {
-      const {data, date} = await getFirestoreData();
-      const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
-      const allData = {...data, ...bitlyData}
-      await updateSheet(allData, date, auth);
-    })
+  // message and context are unused, only used to trigger function run
+  await authorize().then(async (auth) => {
+    const { data, date } = await getFirestoreData();
+    const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
+    const allData = { ...data, ...bitlyData }
+    await updateSheet(allData, date, auth);
+  })
     .catch(
       console.error
+    );
+})
+
+exports.analyticsUpdateSheet1 = functions //TO ZH: can help me test if this works if you deploy it? If it does, can probably replace your one above. This will remove all dependency on the console I think.
+  .region('asia-southeast1')
+  .runWith({ secrets: ["BITLY_TOKEN"] })
+  .pubsub.topic("analytics-google-sheets-api")
+  .onPublish(async (message) => { //TO ZH: can see if the topic is correct..?
+    // message and context are unused, only used to trigger function run
+    await authorize().then(async (auth) => {
+      const { data, date } = await getFirestoreData();
+      const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
+      const allData = { ...data, ...bitlyData }
+      await updateSheet(allData, date, auth);
+    })
+      .catch(
+        functions.logger.log(error) //console.log doesn't appear in the functions logs i think
       );
   })

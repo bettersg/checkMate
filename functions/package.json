@@ -21,6 +21,7 @@
     "firebase": "^9.15.0",
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.2.1",
+    "googleapis": "^112.0.0",
     "image-hash": "^5.3.1",
     "libphonenumber-js": "^1.10.21"
   },
