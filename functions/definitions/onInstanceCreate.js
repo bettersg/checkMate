@@ -19,6 +19,7 @@ const { sendWhatsappTextMessage, sendWhatsappTemplateMessage } = require('./comm
 const admin = require('firebase-admin');
 const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
+const { Timestamp } = require('firebase-admin/firestore');
 
 // Define some parameters
 const numInstanceShards = defineInt('NUM_SHARDS_INSTANCE_COUNT');
@@ -45,7 +46,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     const response = getResponseToMessage(parentMessageSnap, responses)
     await sendWhatsappTextMessage("user", data.from, response, data.id)
     if (parentMessageSnap.get("isAssessed")) {
-      return snap.ref.update({ isReplied: true, replyTimeStamp: admin.firestore.Timestamp.fromDate(new Date()) });
+      return snap.ref.update({ isReplied: true, replyTimeStamp: Timestamp.fromDate(new Date()) });
     }
     const parentInstanceCount = await getCount(parentMessageRef, "instance")
     const thresholds = await getThresholds();
