@@ -37,7 +37,7 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       const illicitCount = await getCount(messageRef, "illicit");
       const susCount = scamCount + illicitCount;
       const voteTotal = await getCount(messageRef, "totalVoteScore");
-      const truthScore = voteTotal / (voteCount - irrelevantCount - susCount);
+      const truthScore = ((voteCount - irrelevantCount - susCount) > 0) ? voteTotal / (voteCount - irrelevantCount - susCount) : null;
       const thresholds = await getThresholds();
       const isSus = (susCount > parseInt(thresholds.isSus * voteCount));
       const isScam = isSus && (scamCount >= illicitCount);
