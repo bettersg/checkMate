@@ -18,8 +18,7 @@ exports.userHandlerWhatsapp = async function (message) {
   let type = message.type;
   const db = admin.firestore()
 
-  const supportedTypesRef = db.doc('systemParameters/supportedTypes');
-  const supportedTypesSnap = await supportedTypesRef.get()
+  const responses = await getResponsesObj("user")
 
   // check that message type is supported, otherwise respond with appropriate message
 
@@ -30,11 +29,11 @@ exports.userHandlerWhatsapp = async function (message) {
       if (!message.text || !message.text.body) {
         break;
       }
-      if (message.text.body === "Show me how CheckMate works!") {
+      if (message.text.body.toLowerCase() === "Show me how CheckMate works!".toLowerCase()) {
         await handleNewUser(message);
         break;
       }
-      if (message.text.body === "<Demo Scam Message>") {
+      if (message.text.body === responses.DEMO_SCAM_MESSAGE) {
         await respondToDemoScam(message);
         break;
       }
@@ -72,7 +71,6 @@ exports.userHandlerWhatsapp = async function (message) {
       break;
 
     default:
-      const responses = await getResponsesObj("user")
       sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE, message.id)
       break;
   }

@@ -25,10 +25,20 @@ exports.handleSpecialCommands = async function (messageObj) {
         await mockDb();
         return
       case '/getid':
-        await sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
+        await sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id);
+        return
+      case '/getmessages':
+        await getMessages(messageObj.from);
         return
     }
   }
+}
+
+const getMessages = async function (from) {
+  const db = admin.firestore();
+  const messagesRef = db.collection('messages');
+  const messagesSnap = await messagesRef.get()
+  await sendWhatsappTextMessage("user", from, JSON.stringify(messagesSnap.docs, null, 2))
 }
 
 const mockDb = async function () {

@@ -15,7 +15,9 @@ erDiagram
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
 				timestamp assessedTimestamp
+        boolean isSus "Is either scam or illicit"
         boolean isScam
+        boolean isIllicit
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string customReply "Not used for now"

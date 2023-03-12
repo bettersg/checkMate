@@ -8,7 +8,7 @@ exports.USER_BOT_RESPONSES = {
   SCAM: "⛔⛔ Thank you for waiting! Our CheckMates have reviewed the message and think this is likely to be a *scam*!🚫\n\nWe recommend you do not engage further⛔️",
   SUSPICIOUS: "⛔⛔ Thank you for waiting! Our CheckMates have reviewed the message and think this *looks suspicious*!🚨\n\nWe recommend you do not engage further⛔️",
   UNSUPPORTED_TYPE: "Sorry, CheckMate currently doesn't support this type of message.",
-  SCAMSHIELD_PREAMBLE: "This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. CheckMate is partnering with ScamShield to better fight scams in Singapore.",
+  SCAMSHIELD_PREAMBLE: "The above is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. CheckMate is partnering with ScamShield to better fight scams in Singapore.",
   SCAMSHIELD_SEEK_CONSENT: "Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.",
   SCAMSHIELD_ON_CONSENT: "Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!",
   SCAMSHIELD_ON_DECLINE: "No worries! We will not be sending your message to ScamShield. If you change your mind, you can still hit Yes above. Thank you for sharing this message with us, and for keeping Singapore safe!",
@@ -25,8 +25,10 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   RESPONSE_RECORDED: "Got it! Your response has been recorded. Thank you for playing your part in the fight against scams and misinformation, one message at a time! 💪",
   HOLD_FOR_NEXT_POLL: "Got it👍! Please hold for another poll to vote on how true the message is.",
   HOLD_FOR_L2_SCAM_ASSESSMENT: "Got it👍! Please hold for another selection.",
-  ONBOARDING_START: "Welcome to the community of CheckMates! To complete signup, please *reply to this message (swipe right on it)* with the name you'd like CheckMate to address you as, e.g. Aaron",
-  ONBOARDING_SUCCESS: "Hi {{name}}, welcome to CheckMate! You're now all set to help check messages that our users send in 💪",
+  ONBOARDING_1: "Welcome to our community of CheckMates! 👋🏻 We're grateful to have you on board to combat misinformation and scams. 🙇‍♀️🙇🏻 We'd love to get to know you better - could you *reply to this message* and share your name with us? (Reply to this message by swiping right)!",
+  ONBOARDING_2: "Thank you and welcome, {{name}}! We're thrilled to have you on board as we work together to combat misinformation and scams.😊 By using the CheckMate bot, you are accepting our privacy policy which can be found here: [insert a link to your privacy policy].",
+  ONBOARDING_3: `To ensure you're equipped with the necessary skills to identify misinformation and scams, let's start with a quick quiz. 📝 Simply follow the link (https://better-sg.typeform.com/to/yEntWN1g) to take the quiz. Once you've completed it, come back to this chat and click on "I've completed the quiz" to notify me. Let's get started! 🤖`,
+  ONBOARDING_4: "Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! 🙌🏻 Here's the infographic guide that was shown to you earlier on. If you haven't already, do join this WhatsApp group (https://chat.whatsapp.com/D84twkTvQMm9M8RzNWdCJD) that brings together all the other CheckMates and the core product team for updates and feedback. Thanks again for joining our community of CheckMates. Enjoy! 👋🏻🤖",
   NOT_A_REPLY: "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.",
 };
 

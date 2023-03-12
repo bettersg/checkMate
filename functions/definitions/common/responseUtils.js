@@ -33,7 +33,7 @@ async function respondToInstance(instanceSnap) {
     }
     res = await sendTextMessage("user", data.from, responseText, data.id)
     await sleep(2000);
-    await sendTextMessage("user", data.from, responses.SCAMSHIELD_PREAMBLE, res.data.messages[0].id, "whatsapp", true)
+    await sendTextMessage("user", data.from, responses.SCAMSHIELD_PREAMBLE, null, "whatsapp", true)
     const buttons = [{
       type: "reply",
       reply: {

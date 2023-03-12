@@ -180,8 +180,8 @@ async function callWhatsappSendMessageApi(data, bot) {
             "Content-Type": "application/json",
         },
     }).catch((error) => {
-        functions.logger.log(error.response);
-        throw (error);
+        functions.logger.log(error.response.data);
+        throw new Error("An error occured calling the whatsapp API");
     }
     );
     return response;

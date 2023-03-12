@@ -83,7 +83,7 @@ async function despatchPoll(messageRef) {
 
 function sendTemplateMessageAndCreateVoteRequest(factChecker, messageId, doc, messageRef) {
   if (factChecker?.preferredPlatform === "whatsapp") {
-    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? "CheckMate"], [messageId, messageId], "factChecker")
+    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [messageId, messageId], "factChecker")
       .then(() => {
         return messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,

@@ -28,7 +28,7 @@ exports.sendL1ScamAssessmentMessage = async function (voteRequestSnap, messageRe
 
 exports.sendL2ScamAssessmentMessage = async function (voteRequestSnap, messageRef, replyId = null) {
   const voteRequestData = voteRequestSnap.data();
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   switch (voteRequestData.platform) {
     case "whatsapp":
       const buttons = [{
