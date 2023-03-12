@@ -1,8 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
-const { getResponsesObj } = require("./common/responseUtils")
-const { sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { sendVotingMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 const { incrementCounter, getCount } = require("./common/counters");
 const { defineInt } = require('firebase-functions/params');
@@ -80,68 +78,3 @@ async function updateCounts(messageRef, previousVote, currentVote) {
     }
   }
 }
-
-// async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
-//   const voteRequestData = voteRequestSnap.data();
-//   const responses = await getReponsesObj("factCheckers");
-//   switch (voteRequestData.platform) {
-//     case "whatsapp":
-//       const buttons = [{
-//         type: "reply",
-//         reply: {
-//           id: `${messageRef.id}_${voteRequestSnap.id}_scam`,
-//           title: "It's a scam",
-//         },
-//       }, {
-//         type: "reply",
-//         reply: {
-//           id: `${messageRef.id}_${voteRequestSnap.id}_notscam`,
-//           title: "It's something else",
-//         }
-//       }];
-//       await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
-//       break;
-//     case "telegram":
-//       break
-//   }
-// }
-
-// async function sendVotingMessage(voteRequestSnap, messageRef) {
-//   const messageSnap = await messageRef.get();
-//   const message = messageSnap.data();
-//   const voteRequestData = voteRequestSnap.data();
-//   const responses = await getReponsesObj("factCheckers");
-//   switch (voteRequestData.platform) {
-//     case "whatsapp":
-//       const rows = [];
-//       const max_score = 5;
-//       for (let i = 0; i <= max_score; i++) {
-//         rows.push({
-//           id: `${messageRef.id}_${voteRequestSnap.id}_${i}`,
-//           title: `${i}`,
-//         });
-//       }
-//       rows[0].description = "Totally false";
-//       rows[max_score].description = "Totally true";
-//       rows.push({
-//         id: `${messageRef.id}_${voteRequestSnap.id}_irrelevant`,
-//         title: "No Claim Made",
-//         description: "The message contains no claims",
-//       });
-//       sections = [{
-//         rows: rows,
-//       }];
-//       switch (message.type) {
-//         case "text":
-//           await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-//           break;
-//         case "image":
-//           await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-//           break;
-//       }
-//       functions.logger.log("voting message sent");
-//       break;
-//     case "telegram":
-//       break;
-//   }
-// }
