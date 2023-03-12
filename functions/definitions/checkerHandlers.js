@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
-const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require("./common/sendWhatsappMessage");
+const { sendWhatsappTextMessage, markWhatsappMessageAsRead, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { getResponsesObj } = require("./common/responseUtils");
 const { sendL1ScamAssessmentMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
@@ -46,7 +46,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
       if (!message.text || !message.text.body) {
         break;
       }
-      if (message.text.body === "I'd like to join the CheckMates!") {
+      if (message.text.body === "I'd like to join as a CheckMate to help counter misinformation and scams! 💪🏻") {
         await onSignUp(from, "whatsapp");
       } else if (!!message?.context?.id) {
         await onMsgReplyReceipt(from, message.context.id, message.text.body, "whatsapp");
@@ -67,7 +67,7 @@ exports.checkerHandlerTelegram = async function (message) {
 async function onSignUp(from, platform = "whatsapp") {
   const responses = await getResponsesObj("factChecker");
   const db = admin.firestore();
-  let res = await sendTextMessage("factChecker", from, responses.ONBOARDING_START, null, platform);
+  let res = await sendTextMessage("factChecker", from, responses.ONBOARDING_1, platform = platform);
   await db.collection("factCheckers").doc(`${from}`).set({
     name: "",
     isActive: true,
@@ -85,12 +85,19 @@ async function onSignUp(from, platform = "whatsapp") {
 async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
   const responses = await getResponsesObj("factChecker");
   const db = admin.firestore();
-  const factCheckerSnap = await db.collection("factChecker").doc(from).get();
+  const factCheckerSnap = await db.collection("factCheckers").doc(from).get();
   if (factCheckerSnap.get("getNameMessageId") === messageId) {
     await factCheckerSnap.ref.update({
       name: text.trim()
     });
-    await sendTextMessage("factChecker", from, responses.ONBOARDING_SUCCESS.replace("{{name}}", text.trim()), null, platform);
+    const buttons = [{
+      type: "reply",
+      reply: {
+        id: "privacyOk",
+        title: "Got it!",
+      },
+    }];
+    await sendWhatsappButtonMessage("factChecker", from, responses.ONBOARDING_2.replace("{{name}}", text.trim()), buttons);
   }
 }
 
@@ -126,35 +133,56 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
 }
 
 async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
-  const responses = await getResponsesObj("factCheckers");
-  const [buttonMessageRef, messageId, voteRequestId, type] = buttonId.split("_");
-  const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
-  const updateObj = {}
-  switch (buttonMessageRef) {
-    case "checkers0":
-      if (type === "sus") {
-        updateObj.triggerVote = false;
-        updateObj.triggerL2 = true;
-        updateObj.vote = null;
-        sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_L2_SCAM_ASSESSMENT, replyId);
-      } else if (type === "notsus") {
-        updateObj.triggerVote = true;
-        updateObj.triggerL2 = false;
-        updateObj.vote = null;
-        sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_NEXT_POLL, replyId);
-      }
-      break;
-    case "checkers1":
-      if (type === "scam") {
-        updateObj.vote = "scam";
-      } else if (type === "illicit") {
-        updateObj.vote = "illicit";
-      }
-      sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
-      break;
+  let messageId, voteRequestId, type
+  const responses = await getResponsesObj("factChecker");
+  const [buttonMessageRef, ...rest] = buttonId.split("_");
+  if (rest.length === 3) { //this means responses to the actual fact checkers
+    [messageId, voteRequestId, type] = rest
+    const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
+    const updateObj = {}
+    switch (buttonMessageRef) {
+      case "checkers0":
+        if (type === "sus") {
+          updateObj.triggerVote = false;
+          updateObj.triggerL2 = true;
+          updateObj.vote = null;
+          sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_L2_SCAM_ASSESSMENT, replyId);
+        } else if (type === "notsus") {
+          updateObj.triggerVote = true;
+          updateObj.triggerL2 = false;
+          updateObj.vote = null;
+          sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_NEXT_POLL, replyId);
+        }
+        break;
+      case "checkers1":
+        if (type === "scam") {
+          updateObj.vote = "scam";
+        } else if (type === "illicit") {
+          updateObj.vote = "illicit";
+        }
+        sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
+        break;
+    }
+    await voteRequestRef.update(updateObj);
+  }
+  else if (rest.length === 0) { //this means responses to the onboarding messages.
+    switch (buttonMessageRef) {
+      case "privacyOk":
+        const buttons = [{
+          type: "reply",
+          reply: {
+            id: "typeformDone",
+            title: "I've done the quiz!",
+          },
+        }];
+        await sendWhatsappButtonMessage("factChecker", from, responses.ONBOARDING_3, buttons);
+        break;
+      case "typeformDone":
+        await sendTextMessage("factChecker", from, responses.ONBOARDING_4, null, "whatsapp", true);
+        break;
+    }
   }
 
-  await voteRequestRef.update(updateObj);
 }
 
 async function onVoteReceipt(db, listId, from, replyId, platform = "whatsapp") {
