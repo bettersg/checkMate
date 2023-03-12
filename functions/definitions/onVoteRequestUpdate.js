@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
 const { getResponsesObj } = require("./common/responseUtils")
 const { sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
+const { sendVotingMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 const { incrementCounter, getCount } = require("./common/counters");
 const { defineInt } = require('firebase-functions/params');
 // Define some parameters
@@ -20,25 +21,34 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
     const after = docSnap.data();
     const messageRef = docSnap.ref.parent.parent;
 
-    if (before.isScam !== false && after.isScam === false) {
+    if (before.triggerVote !== true && after.triggerVote === true) {
       await sendVotingMessage(change.after, messageRef);
-    } else if (before.vote != after.vote) {
+    } else if (before.triggerL2 !== true && after.triggerL2 === true) {
+      await sendL2ScamAssessmentMessage(change.after, messageRef);
+    }
+    else if (before.vote != after.vote) {
       await updateCounts(messageRef, before.vote, after.vote)
       const db = admin.firestore();
       const factCheckersSnapshot = await db.collection("factCheckers").where("isActive", "==", true).get();
       const numFactCheckers = factCheckersSnapshot.size;
       const voteCount = await getCount(messageRef, "vote");
       const irrelevantCount = await getCount(messageRef, "irrelevant");
-      const scamCount = await getCount(messageRef, "scam")
+      const scamCount = await getCount(messageRef, "scam");
+      const illicitCount = await getCount(messageRef, "illicit");
+      const susCount = scamCount + illicitCount;
       const voteTotal = await getCount(messageRef, "totalVoteScore");
-      const truthScore = voteTotal / (voteCount - irrelevantCount - scamCount);
+      const truthScore = voteTotal / (voteCount - irrelevantCount - susCount);
       const thresholds = await getThresholds();
-      const isScam = (scamCount > parseInt(thresholds.isScam * voteCount));
+      const isSus = (susCount > parseInt(thresholds.isSus * voteCount));
+      const isScam = isSus && (scamCount >= illicitCount);
+      const isIllicit = isSus && !isScam;
       const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * voteCount));
-      const isAssessed = (voteCount > parseInt(thresholds.endVote * numFactCheckers)) || (isScam && voteCount > parseInt(thresholds.endVoteScam * numFactCheckers));
+      const isAssessed = (voteCount > parseInt(thresholds.endVote * numFactCheckers)) || (isSus && voteCount > parseInt(thresholds.endVoteSus * numFactCheckers));
       return messageRef.update({
         truthScore: truthScore,
+        isSus: isSus,
         isScam: isScam,
+        isIllicit: isIllicit,
         isIrrelevant: isIrrelevant,
         isAssessed: isAssessed,
       });
@@ -71,67 +81,67 @@ async function updateCounts(messageRef, previousVote, currentVote) {
   }
 }
 
-async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
-  const voteRequestData = voteRequestSnap.data();
-  const responses = await getResponsesObj("factChecker");
-  switch (voteRequestData.platform) {
-    case "whatsapp":
-      const buttons = [{
-        type: "reply",
-        reply: {
-          id: `${messageRef.id}_${voteRequestSnap.id}_scam`,
-          title: "It's a scam",
-        },
-      }, {
-        type: "reply",
-        reply: {
-          id: `${messageRef.id}_${voteRequestSnap.id}_notscam`,
-          title: "It's something else",
-        }
-      }];
-      await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
-      break;
-    case "telegram":
-      break
-  }
-}
+// async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
+//   const voteRequestData = voteRequestSnap.data();
+//   const responses = await getReponsesObj("factCheckers");
+//   switch (voteRequestData.platform) {
+//     case "whatsapp":
+//       const buttons = [{
+//         type: "reply",
+//         reply: {
+//           id: `${messageRef.id}_${voteRequestSnap.id}_scam`,
+//           title: "It's a scam",
+//         },
+//       }, {
+//         type: "reply",
+//         reply: {
+//           id: `${messageRef.id}_${voteRequestSnap.id}_notscam`,
+//           title: "It's something else",
+//         }
+//       }];
+//       await sendWhatsappButtonMessage("factChecker", voteRequestData.platformId, responses.SCAM_ASSESSMENT_PROMPT, buttons, voteRequestData.sentMessageId)
+//       break;
+//     case "telegram":
+//       break
+//   }
+// }
 
-async function sendVotingMessage(voteRequestSnap, messageRef) {
-  const messageSnap = await messageRef.get();
-  const message = messageSnap.data();
-  const voteRequestData = voteRequestSnap.data();
-  const responses = await getResponsesObj("factChecker");
-  switch (voteRequestData.platform) {
-    case "whatsapp":
-      const rows = [];
-      const max_score = 5;
-      for (let i = 0; i <= max_score; i++) {
-        rows.push({
-          id: `${messageRef.id}_${voteRequestSnap.id}_${i}`,
-          title: `${i}`,
-        });
-      }
-      rows[0].description = "Totally false";
-      rows[max_score].description = "Totally true";
-      rows.push({
-        id: `${messageRef.id}_${voteRequestSnap.id}_irrelevant`,
-        title: "No Claim Made",
-        description: "The message contains no claims",
-      });
-      sections = [{
-        rows: rows,
-      }];
-      switch (message.type) {
-        case "text":
-          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          break;
-        case "image":
-          await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
-          break;
-      }
-      functions.logger.log("voting message sent");
-      break;
-    case "telegram":
-      break;
-  }
-}
+// async function sendVotingMessage(voteRequestSnap, messageRef) {
+//   const messageSnap = await messageRef.get();
+//   const message = messageSnap.data();
+//   const voteRequestData = voteRequestSnap.data();
+//   const responses = await getReponsesObj("factCheckers");
+//   switch (voteRequestData.platform) {
+//     case "whatsapp":
+//       const rows = [];
+//       const max_score = 5;
+//       for (let i = 0; i <= max_score; i++) {
+//         rows.push({
+//           id: `${messageRef.id}_${voteRequestSnap.id}_${i}`,
+//           title: `${i}`,
+//         });
+//       }
+//       rows[0].description = "Totally false";
+//       rows[max_score].description = "Totally true";
+//       rows.push({
+//         id: `${messageRef.id}_${voteRequestSnap.id}_irrelevant`,
+//         title: "No Claim Made",
+//         description: "The message contains no claims",
+//       });
+//       sections = [{
+//         rows: rows,
+//       }];
+//       switch (message.type) {
+//         case "text":
+//           await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+//           break;
+//         case "image":
+//           await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.FACTCHECK_PROMPT, "Vote here", sections, voteRequestData.sentMessageId);
+//           break;
+//       }
+//       functions.logger.log("voting message sent");
+//       break;
+//     case "telegram":
+//       break;
+//   }
+// }

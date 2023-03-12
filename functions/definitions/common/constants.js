@@ -20,9 +20,11 @@ exports.USER_BOT_RESPONSES = {
 exports.FACTCHECKER_BOT_RESPONSES = {
   VOTE_NO: "No problem! If you wish to come back and assess the message, you may do so by clicking the 'yes' button. See you soon!😊",
   FACTCHECK_PROMPT: "Please vote on the new viral message above. If there is no claim in the message, select 'No Claim Made'. Otherwise, assess the veracity of the claim(s) on a scale from 0 to 5, where 0 means the claims(s) are entirely false, and 5 means the claims(s) are entirely true.",
-  SCAM_ASSESSMENT_PROMPT: "Is this message a scam, i.e. an attempt to trick someone into giving away their money or personal information, or is it something else?",
+  L1_SCAM_ASSESSMENT_PROMPT: "Which of these two categories better describes this message?",
+  L2_SCAM_ASSESSMENT_PROMPT: "Is this message a scam, i.e. an attempt to trick someone into giving away their money or personal information, or is it some other kind of suspected illicit activity, e.g. soliciting moneylending/prostitution",
   RESPONSE_RECORDED: "Got it! Your response has been recorded. Thank you for playing your part in the fight against scams and misinformation, one message at a time! 💪",
   HOLD_FOR_NEXT_POLL: "Got it👍! Please hold for another poll to vote on how true the message is.",
+  HOLD_FOR_L2_SCAM_ASSESSMENT: "Got it👍! Please hold for another selection.",
   ONBOARDING_START: "Welcome to the community of CheckMates! To complete signup, please *reply to this message (swipe right on it)* with the name you'd like CheckMate to address you as, e.g. Aaron",
   ONBOARDING_SUCCESS: "Hi {{name}}, welcome to CheckMate! You're now all set to help check messages that our users send in 💪",
   NOT_A_REPLY: "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.",
@@ -30,8 +32,8 @@ exports.FACTCHECKER_BOT_RESPONSES = {
 
 exports.thresholds = {
   endVote: 0.5,
-  endVoteScam: 0.2,
+  endVoteSus: 0.2,
   startVote: 1,
   isIrrelevant: 0.5,
-  isScam: 0.7,
+  isSus: 0.7,
 };
