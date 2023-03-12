@@ -1,9 +1,9 @@
 const { sendWhatsappButtonMessage, sendWhatsappTextListMessage } = require("./sendWhatsappMessage");
-const { getReponsesObj } = require("./utils");
+const { getResponsesObj } = require("./responseUtils");
 
 exports.sendScamAssessmentMessage = async function (voteRequestSnap, messageRef, replyId) {
   const voteRequestData = voteRequestSnap.data();
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   switch (voteRequestData.platform) {
     case "whatsapp":
       const buttons = [{
@@ -30,7 +30,7 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
   const messageSnap = await messageRef.get();
   const message = messageSnap.data();
   const voteRequestData = voteRequestSnap.data();
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   switch (voteRequestData.platform) {
     case "whatsapp":
       const rows = [];

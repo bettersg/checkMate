@@ -2,7 +2,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
-const { mockDb, sleep, getReponsesObj, stripPhone, stripUrl, hashMessage } = require('./common/utils');
+const { mockDb, sleep, stripPhone, stripUrl, hashMessage } = require('./common/utils');
+const { getResponsesObj } = require('./common/responseUtils')
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { calculateSimilarity } = require('./calculateSimilarity')
 const { defineString } = require('firebase-functions/params');
@@ -19,15 +20,9 @@ exports.userHandlerWhatsapp = async function (message) {
 
   const supportedTypesRef = db.doc('systemParameters/supportedTypes');
   const supportedTypesSnap = await supportedTypesRef.get()
-  const supportedTypes = supportedTypesSnap.get("whatsapp") || ["image", "text"]
 
   // check that message type is supported, otherwise respond with appropriate message
-  if (!supportedTypes.includes(type)) {
-    const responses = await getReponsesObj("users")
-    sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE, message.id)
-    markWhatsappMessageAsRead("user", message.id);
-    return
-  }
+
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0);
   switch (type) {
     case "text":
@@ -43,7 +38,6 @@ exports.userHandlerWhatsapp = async function (message) {
         await respondToDemoScam(message);
         break;
       }
-
       await newTextInstanceHandler(db, {
         text: message.text.body,
         timestamp: messageTimestamp,
@@ -65,6 +59,21 @@ exports.userHandlerWhatsapp = async function (message) {
         isForwarded: message?.context?.forwarded || null,
         isFrequentlyForwarded: message?.context?.frequently_forwarded || null
       })
+      break;
+
+    case "interactive":
+      // handle consent here
+      const interactive = message.interactive;
+      switch (interactive.type) {
+        case "button_reply":
+          await onConsentReply(db, interactive.button_reply.id, from, message.id);
+          break;
+      }
+      break;
+
+    default:
+      const responses = await getResponsesObj("user")
+      sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE, message.id)
       break;
   }
   markWhatsappMessageAsRead("user", message.id);
@@ -155,6 +164,7 @@ async function newTextInstanceHandler(db, {
     isReplied: false,
     matchType: matchType,
     strippedText: strippedText,
+    scamShieldConsent: null,
   });
 }
 
@@ -225,12 +235,13 @@ async function newImageInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    scamShieldConsent: null,
   });
 }
 
 async function handleNewUser(messageObj) {
   const db = admin.firestore();
-  const responses = await getReponsesObj("users");
+  const responses = await getResponsesObj("user");
   const userRef = db.collection('users').doc(messageObj.from);
   const userSnap = await userRef.get();
   if (!userSnap.exists) {
@@ -246,8 +257,25 @@ async function handleNewUser(messageObj) {
 }
 
 async function respondToDemoScam(messageObj) {
-  const responses = await getReponsesObj("users")
+  const responses = await getResponsesObj("user")
   await sendWhatsappTextMessage("user", messageObj.from, responses?.SCAM, messageObj.id);
   await sleep(2000);
   await sendWhatsappTextMessage("user", messageObj.from, responses?.ONBOARDING_END);
+}
+
+async function onConsentReply(db, buttonId, from, replyId, platform = "whatsapp") {
+  const responses = await getResponsesObj("user")
+  const [buttonMessageRef, instancePath, selection] = buttonId.split("_");
+  const instanceRef = db.doc(instancePath);
+  const updateObj = {}
+  let replyText
+  if (selection === "consent") {
+    updateObj.scamShieldConsent = true;
+    replyText = responses?.SCAMSHIELD_ON_CONSENT;
+  } else if (selection === "decline") {
+    updateObj.scamShieldConsent = false;
+    replyText = responses?.SCAMSHIELD_ON_DECLINE;
+  }
+  await instanceRef.update(updateObj)
+  await sendWhatsappTextMessage("user", from, replyText)
 }

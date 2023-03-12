@@ -38,6 +38,7 @@ erDiagram
 				timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"
         string strippedText
+        boolean scamShieldConsent
     }
 
     voteRequests {

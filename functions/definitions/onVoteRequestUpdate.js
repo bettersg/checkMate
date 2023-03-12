@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { getReponsesObj, getThresholds } = require("./common/utils");
+const { getThresholds } = require("./common/utils");
+const { getResponsesObj } = require("./common/responseUtils")
 const { sendWhatsappTextListMessage, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { incrementCounter, getCount } = require("./common/counters");
 const { defineInt } = require('firebase-functions/params');
@@ -72,7 +73,7 @@ async function updateCounts(messageRef, previousVote, currentVote) {
 
 async function sendScamAssessmentMessage(voteRequestSnap, messageRef) {
   const voteRequestData = voteRequestSnap.data();
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   switch (voteRequestData.platform) {
     case "whatsapp":
       const buttons = [{
@@ -99,7 +100,7 @@ async function sendVotingMessage(voteRequestSnap, messageRef) {
   const messageSnap = await messageRef.get();
   const message = messageSnap.data();
   const voteRequestData = voteRequestSnap.data();
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   switch (voteRequestData.platform) {
     case "whatsapp":
       const rows = [];

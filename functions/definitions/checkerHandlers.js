@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require("./common/sendWhatsappMessage");
-const { getReponsesObj } = require("./common/utils");
+const { getResponsesObj } = require("./common/responseUtils");
 const { sendScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 
@@ -24,7 +24,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
           await onFactCheckerYes(button.payload, from, "whatsapp")
           break;
         case "No":
-          responses = await getReponsesObj("factCheckers");
+          responses = await getResponsesObj("factChecker");
           sendWhatsappTextMessage("factChecker", from, responses.VOTE_NO, message.id);
           break;
       }
@@ -51,7 +51,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
       } else if (!!message?.context?.id) {
         await onMsgReplyReceipt(from, message.context.id, message.text.body, "whatsapp");
       } else {
-        responses = await getReponsesObj("factCheckers");
+        responses = await getResponsesObj("factChecker");
         sendWhatsappTextMessage("factChecker", from, responses.NOT_A_REPLY);
       }
       break;
@@ -65,7 +65,7 @@ exports.checkerHandlerTelegram = async function (message) {
 }
 
 async function onSignUp(from, platform = "whatsapp") {
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   const db = admin.firestore();
   let res = await sendTextMessage("factChecker", from, responses.ONBOARDING_START, null, platform);
   await db.collection("factCheckers").doc(`${from}`).set({
@@ -83,9 +83,9 @@ async function onSignUp(from, platform = "whatsapp") {
 }
 
 async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   const db = admin.firestore();
-  const factCheckerSnap = await db.collection("factCheckers").doc(from).get();
+  const factCheckerSnap = await db.collection("factChecker").doc(from).get();
   if (factCheckerSnap.get("getNameMessageId") === messageId) {
     await factCheckerSnap.ref.update({
       name: text.trim()
@@ -126,7 +126,7 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
 }
 
 async function onScamAssessmentReply(db, buttonId, from, replyId, platform = "whatsapp") {
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   const [messageId, voteRequestId, type] = buttonId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
   const updateObj = {}
@@ -143,7 +143,7 @@ async function onScamAssessmentReply(db, buttonId, from, replyId, platform = "wh
 }
 
 async function onVoteReceipt(db, listId, from, replyId, platform = "whatsapp") {
-  const responses = await getReponsesObj("factCheckers");
+  const responses = await getResponsesObj("factChecker");
   const [messageId, voteRequestId, vote] = listId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
   await voteRequestRef.update({
