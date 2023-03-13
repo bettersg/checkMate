@@ -8,7 +8,7 @@ exports.USER_BOT_RESPONSES = {
   SCAM: "⛔⛔ Thank you for waiting! Our CheckMates have reviewed the message and think this is likely to be a *scam*!🚫\n\nWe recommend you do not engage further⛔️",
   SUSPICIOUS: "⛔⛔ Thank you for waiting! Our CheckMates have reviewed the message and think this *looks suspicious*!🚨\n\nWe recommend you do not engage further⛔️",
   UNSUPPORTED_TYPE: "Sorry, CheckMate currently doesn't support this type of message.",
-  SCAMSHIELD_PREAMBLE: "The above is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. CheckMate is partnering with ScamShield to better fight scams in Singapore.",
+  SCAMSHIELD_PREAMBLE: "The above represents the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. CheckMate is partnering with ScamShield to better fight scams in Singapore.",
   SCAMSHIELD_SEEK_CONSENT: "Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.",
   SCAMSHIELD_ON_CONSENT: "Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!",
   SCAMSHIELD_ON_DECLINE: "No worries! We will not be sending your message to ScamShield. If you change your mind, you can still hit Yes above. Thank you for sharing this message with us, and for keeping Singapore safe!",
