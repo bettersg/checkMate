@@ -1,17 +1,3 @@
-/*
-Assigned: Yong En
-
-NOTES:
-
-On update to any messages instance count:
-
-1. if instance count above thresholdToStartVote in system_parameters collection
-    1. Loop through fact checkers in the factCheckers collection
-        1. if factCheckers are active
-            1. send them telegram message with inline keyboard with callback buttons for voting
-
-*/
-
 const functions = require('firebase-functions');
 const { incrementCounter, getCount } = require('./common/counters');
 const { getThresholds } = require('./common/utils');
