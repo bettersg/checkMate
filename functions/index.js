@@ -15,4 +15,3 @@ exports.onMessageUpdate = onMessageUpdate.onMessageUpdate;
 exports.webhookHandler = webhookHandler.webhookHandler;
 exports.onVoteRequestUpdate = onVoteRequestUpdate.onVoteRequestUpdate;
 exports.analyticsUpdateSheet = analyticsUpdateSheet.analyticsUpdateSheet;
-exports.analyticsUpdateSheet1 = analyticsUpdateSheet.analyticsUpdateSheet1;
