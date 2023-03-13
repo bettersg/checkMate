@@ -7,9 +7,9 @@ const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString("WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID")
 const testCheckerPhoneNumberId = defineString("WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID")
 
-async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null) {
+async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null, previewUrl = false) {
     const data = {
-        text: { body: text },
+        text: { body: text, preview_url: previewUrl },
         to: to,
         messaging_product: "whatsapp",
     };
@@ -180,8 +180,8 @@ async function callWhatsappSendMessageApi(data, bot) {
             "Content-Type": "application/json",
         },
     }).catch((error) => {
-        functions.logger.log(error.response);
-        throw (error);
+        functions.logger.log(error.response.data);
+        throw new Error("An error occured calling the whatsapp API");
     }
     );
     return response;

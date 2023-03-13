@@ -2,14 +2,14 @@ const { sendWhatsappTextMessage, sendWhatsappImageMessage } = require("./sendWha
 const { sendTelegramTextMessage, sendTelegramImageMessage } = require("./sendTelegramMessage");
 const { checkUrl } = require("./utils")
 
-exports.sendTextMessage = async function (bot, to, text, replyId, platform = "whatsapp") {
+exports.sendTextMessage = async function (bot, to, text, replyId, platform = "whatsapp", previewUrl = false) {
   let res;
   switch (platform) {
     case "telegram":
       res = await sendTelegramTextMessage(bot, to, text, replyId);
       break;
     case "whatsapp":
-      res = await sendWhatsappTextMessage(bot, to, text, replyId);
+      res = await sendWhatsappTextMessage(bot, to, text, replyId, previewUrl);
       break
   }
   return res;

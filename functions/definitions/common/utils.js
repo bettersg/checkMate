@@ -13,7 +13,7 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.sleep = function (ms) {
+function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -25,10 +25,33 @@ exports.handleSpecialCommands = async function (messageObj) {
         await mockDb();
         return
       case '/getid':
-        await sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
+        await sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id);
+        return
+      case '/getmessages':
+        await archiveMessages();
         return
     }
   }
+}
+
+const archiveMessages = async function () {
+  const db = admin.firestore();
+  const messagesRef = db.collection('messages');
+  const messagesSnap = await messagesRef.get()
+  const json = JSON.stringify(messagesSnap.docs, null, 2)
+  var blob = new Blob([json], { type: "application/json" })
+  const arrayBuffer = await blob.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const storageBucket = admin.storage().bucket();
+  const filename = "archive/messages.json"
+  const file = storageBucket.file(filename);
+  const stream = file.createWriteStream();
+  await new Promise((resolve, reject) => {
+    stream.on('error', reject);
+    stream.on('finish', resolve);
+    stream.end(buffer);
+  });
+  functions.logger.log("finished")
 }
 
 const mockDb = async function () {
@@ -74,58 +97,6 @@ exports.checkUrl = function (urlString) {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
-exports.getResponseToMessage = function (docSnap, responses) {
-  const isAssessed = docSnap.get("isAssessed");
-  const isIrrelevant = docSnap.get("isIrrelevant");
-  const isScam = docSnap.get("isScam");
-  const truthScore = docSnap.get("truthScore");
-
-  if (!isAssessed) {
-    return responses.MESSAGE_NOT_YET_ASSESSED
-  }
-  if (isScam) {
-    return responses.SCAM;
-  }
-  if (isIrrelevant) {
-    return responses.IRRELEVANT;
-  }
-  if (truthScore === null) {
-    return responses.NO_SCORE;
-  }
-  return getResponse(truthScore, responses);
-};
-
-async function getReponsesObj(botType = "users") {
-  const db = admin.firestore()
-  let path;
-  let fallbackResponses;
-  if (botType === "users") {
-    path = 'systemParameters/userBotResponses';
-    fallbackResponses = USER_BOT_RESPONSES;
-  } else if (botType === "factCheckers") {
-    path = 'systemParameters/factCheckerBotResponses'
-    fallbackResponses = FACTCHECKER_BOT_RESPONSES;
-  }
-  const defaultResponsesRef = db.doc(path);
-  const defaultResponsesSnap = await defaultResponsesRef.get()
-  return defaultResponsesSnap.data() ?? fallbackResponses
-};
-
-function getResponse(key, responses) {
-  if (isNaN(key)) { //means key is a string
-    return responses.key;
-  } else {
-    const truthScore = key;
-    let numericKeys = Object.keys(responses).filter((e) => !isNaN(e)).sort();
-    for (let numericKey of numericKeys) {
-      if (parseFloat(numericKey) >= truthScore) {
-        return responses[`${numericKey}`];
-      }
-    }
-  }
-  return null;
-};
-
 function stripPhone(originalStr, includePlaceholder = false) {
   const phoneNumbers = findPhoneNumbersInText(originalStr)
   let newStr = originalStr;
@@ -153,9 +124,8 @@ function hashMessage(originalStr) {
   return createHash('md5').update(originalStr).digest('hex');
 }
 
-exports.getReponsesObj = getReponsesObj;
-exports.getResponse = getResponse;
 exports.stripPhone = stripPhone;
 exports.stripUrl = stripUrl;
 exports.hashMessage = hashMessage;
+exports.sleep = sleep;
 

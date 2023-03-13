@@ -15,7 +15,9 @@ erDiagram
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
 				timestamp assessedTimestamp
+        boolean isSus "Is either scam or illicit"
         boolean isScam
+        boolean isIllicit
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string customReply "Not used for now"
@@ -38,6 +40,7 @@ erDiagram
 				timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"
         string strippedText
+        boolean scamShieldConsent
     }
 
     voteRequests {
@@ -46,7 +49,8 @@ erDiagram
         string platformId "whatsapp number or telegram Id"
         string platform "whatsapp/telegram"
         boolean hasAgreed "whether person has agreed to vote"
-        boolean isScam "response to whether it is scam"
+        boolean triggerVote "whether or not a vote should be triggered"
+        boolean triggerL2 "whether or not L2 scam message should be triggered"
         string sentMessageId "message id of the forwarded dubious message to checkers"
         string vote "scam, irrelevant, or number"
     }

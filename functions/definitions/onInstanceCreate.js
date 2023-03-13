@@ -14,7 +14,8 @@ On update to any messages instance count:
 
 const functions = require('firebase-functions');
 const { incrementCounter, getCount } = require('./common/counters');
-const { getResponseToMessage, getReponsesObj, getThresholds } = require('./common/utils');
+const { getThresholds } = require('./common/utils');
+const { respondToInstance } = require('./common/responseUtils')
 const { sendWhatsappTextMessage, sendWhatsappTemplateMessage } = require('./common/sendWhatsappMessage');
 const admin = require('firebase-admin');
 const { FieldValue } = require('@google-cloud/firestore');
@@ -42,9 +43,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     await upsertUser(data.from, data.timestamp, snap.ref);
 
     const parentMessageSnap = await parentMessageRef.get();
-    const responses = await getReponsesObj();
-    const response = getResponseToMessage(parentMessageSnap, responses)
-    await sendWhatsappTextMessage("user", data.from, response, data.id)
+    await respondToInstance(snap);
     if (parentMessageSnap.get("isAssessed")) {
       return snap.ref.update({ isReplied: true, replyTimeStamp: Timestamp.fromDate(new Date()) });
     }
@@ -84,13 +83,14 @@ async function despatchPoll(messageRef) {
 
 function sendTemplateMessageAndCreateVoteRequest(factChecker, messageId, doc, messageRef) {
   if (factChecker?.preferredPlatform === "whatsapp") {
-    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name ?? "CheckMate"], [messageId, messageId], "factChecker")
+    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [messageId, messageId], "factChecker")
       .then(() => {
         return messageRef.collection("voteRequests").add({
           factCheckerDocRef: doc.ref,
           platformId: factChecker.platformId,
           hasAgreed: false,
-          isScam: null,
+          triggerVote: null,
+          triggerL2: null,
           platform: "whatsapp",
           sentMessageId: null,
           vote: null,
