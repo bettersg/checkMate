@@ -2,32 +2,26 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
-const { USER_BOT_RESPONSES } = require('./common/constants');
-const { mockDb } = require('./common/utils');
+const { mockDb, sleep, stripPhone, stripUrl, hashMessage } = require('./common/utils');
+const { getResponsesObj } = require('./common/responseUtils')
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
+const { calculateSimilarity } = require('./calculateSimilarity')
+const { defineString } = require('firebase-functions/params');
+const runtimeEnvironment = defineString("ENVIRONMENT")
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.userHandler = async function (message) {
+exports.userHandlerWhatsapp = async function (message) {
   let from = message.from; // extract the phone number from the webhook payload
   let type = message.type;
   const db = admin.firestore()
 
-  const responsesRef = db.doc('systemParameters/userBotResponses');
-  const supportedTypesRef = db.doc('systemParameters/supportedTypes');
-  const [responsesSnapshot, supportedTypesSnapshot] = await db.getAll(responsesRef, supportedTypesRef);
-
-  const responses = responsesSnapshot.data();
+  const responses = await getResponsesObj("user")
 
   // check that message type is supported, otherwise respond with appropriate message
-  const supportedTypes = supportedTypesSnapshot.get('whatsapp') ?? ["text", "image"];
-  if (!supportedTypes.includes(type)) {
-    sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE ?? USER_BOT_RESPONSES.UNSUPPORTED_TYPE, message.id)
-    markWhatsappMessageAsRead("user", message.id);
-    return
-  }
+
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0);
   switch (type) {
     case "text":
@@ -35,8 +29,12 @@ exports.userHandler = async function (message) {
       if (!message.text || !message.text.body) {
         break;
       }
-      if (message.text.body.startsWith("/")) {
-        handleSpecialCommands(message);
+      if (message.text.body.toLowerCase() === "Show me how CheckMate works!".toLowerCase()) {
+        await handleNewUser(message);
+        break;
+      }
+      if (message.text.body === responses.DEMO_SCAM_MESSAGE) {
+        await respondToDemoScam(message);
         break;
       }
       await newTextInstanceHandler(db, {
@@ -61,6 +59,20 @@ exports.userHandler = async function (message) {
         isFrequentlyForwarded: message?.context?.frequently_forwarded || null
       })
       break;
+
+    case "interactive":
+      // handle consent here
+      const interactive = message.interactive;
+      switch (interactive.type) {
+        case "button_reply":
+          await onConsentReply(db, interactive.button_reply.id, from, message.id);
+          break;
+      }
+      break;
+
+    default:
+      sendWhatsappTextMessage("user", from, responses?.UNSUPPORTED_TYPE, message.id)
+      break;
   }
   markWhatsappMessageAsRead("user", message.id);
 }
@@ -73,13 +85,59 @@ async function newTextInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
-  let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('text', '==', text).get();
+
+  let hasMatch = false;
+  let matchedId;
+  let textHash = hashMessage(text);  // hash of the original text
+  let strippedText = stripPhone(text); // text stripped of phone nr
+  let strippedTextHash = hashMessage(strippedText);  // hash of the stripped text
+  let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
+
+  // 1 - check if the exact same message exists in database
+  let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('textHash', '==', textHash).get();
   let messageId;
-  if (textMatchSnapshot.empty) {
+  if (!textMatchSnapshot.empty) {
+    hasMatch = true;
+    matchType = "exact"
+    if (textMatchSnapshot.size > 1) {
+      functions.logger.log(`more than 1 device matches the query hash ${textHash} for text ${text}`);
+    }
+    matchedId = textMatchSnapshot.docs[0].id;
+  }
+  if (!hasMatch && strippedText.length > 0) {
+    let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedTextHash', '==', strippedTextHash).where('isScam', '==', true).get(); //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
+    if (!strippedTextMatchSnapshot.empty) {
+      hasMatch = true;
+      matchType = "stripped"
+      if (strippedTextMatchSnapshot.size > 1) {
+        functions.logger.log(`more than 1 device matches the stripped query hash ${strippedText} for text ${strippedText}`);
+      }
+      matchedId = strippedTextMatchSnapshot.docs[0].id;
+    }
+  }
+  if (!hasMatch) {
+    // 2 - if there is no exact match, then perform a cosine similarity calculation
+    let similarity = await calculateSimilarity(text)
+    let bestMatchingDocumentRef
+    let bestMatchingText
+    let similarityScore
+    if (similarity != {}) {
+      bestMatchingDocumentRef = similarity.ref
+      bestMatchingText = similarity.message
+      similarityScore = similarity.score
+    }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       category: "fake news", //Can be "fake news" or "scam"
       text: text, //text or caption
+      strippedText: strippedText,
+      textHash: textHash,
+      strippedTextHash: strippedTextHash,
+      closestMatch: {
+        documentRef: bestMatchingDocumentRef ?? null,
+        text: bestMatchingText ?? null,
+        score: similarityScore ?? null,
+      },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
@@ -90,10 +148,7 @@ async function newTextInstanceHandler(db, {
     });
     messageId = writeResult.id;
   } else {
-    if (textMatchSnapshot.size > 1) {
-      functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);
-    }
-    messageId = textMatchSnapshot.docs[0].id;
+    messageId = matchedId;
   }
   const _ = await db.collection('messages').doc(messageId).collection('instances').add({
     source: "whatsapp",
@@ -105,6 +160,9 @@ async function newTextInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    matchType: matchType,
+    strippedText: strippedText,
+    scamShieldConsent: null,
   });
 }
 
@@ -118,7 +176,6 @@ async function newImageInstanceHandler(db, {
   isForwarded: isForwarded,
   isFrequentlyForwarded: isFrequentlyForwarded
 }) {
-  const token = process.env.WHATSAPP_TOKEN;
   let filename;
   //get response buffer
   let buffer = await downloadWhatsappMedia(mediaId, mimeType);
@@ -130,15 +187,11 @@ async function newImageInstanceHandler(db, {
     filename = `images/${mediaId}.${mimeType.split('/')[1]}`
     const file = storageBucket.file(filename);
     const stream = file.createWriteStream();
-    stream.on('error', (err) => {
-      functions.logger.log(err);
+    await new Promise((resolve, reject) => {
+      stream.on('error', reject);
+      stream.on('finish', resolve);
+      stream.end(buffer);
     });
-
-    stream.on('finish', () => {
-      functions.logger.log(`${filename} has been uploaded`);
-    });
-
-    stream.end(buffer);
     let writeResult = await db.collection('messages').add({
       type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       category: "fake news",
@@ -159,7 +212,7 @@ async function newImageInstanceHandler(db, {
 
   } else {
     if (imageMatchSnapshot.size > 1) {
-      functions.logger.log(`strangely, more than 1 device matches the query ${message.text.body}`);
+      functions.logger.log(`strangely, more than 1 device matches the image query ${hash}`);
     }
     messageId = imageMatchSnapshot.docs[0].id;
   }
@@ -176,21 +229,47 @@ async function newImageInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    scamShieldConsent: null,
   });
 }
 
-//remove for prod
-function handleSpecialCommands(messageObj) {
-  const command = messageObj.text.body.toLowerCase();
-  if (command.startsWith('/')) {
-    switch (command) {
-      case '/mockdb':
-        mockDb();
-        return
-      case '/getid':
-        sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id)
-        return
+async function handleNewUser(messageObj) {
+  const db = admin.firestore();
+  const responses = await getResponsesObj("user");
+  const userRef = db.collection('users').doc(messageObj.from);
+  const userSnap = await userRef.get();
+  if (!userSnap.exists) {
+    const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0);
+    await userRef.set({
+      instanceCount: 0,
+      onboardMessageReceiptTime: messageTimestamp,
+    })
+  };
+  let res = await sendWhatsappTextMessage("user", messageObj.from, responses.DEMO_SCAM_MESSAGE);
+  await sleep(2000);
+  await sendWhatsappTextMessage("user", messageObj.from, responses?.DEMO_SCAM_PROMPT, res.data.messages[0].id);
+}
 
-    }
+async function respondToDemoScam(messageObj) {
+  const responses = await getResponsesObj("user")
+  await sendWhatsappTextMessage("user", messageObj.from, responses?.SCAM, messageObj.id);
+  await sleep(2000);
+  await sendWhatsappTextMessage("user", messageObj.from, responses?.ONBOARDING_END);
+}
+
+async function onConsentReply(db, buttonId, from, replyId, platform = "whatsapp") {
+  const responses = await getResponsesObj("user")
+  const [buttonMessageRef, instancePath, selection] = buttonId.split("_");
+  const instanceRef = db.doc(instancePath);
+  const updateObj = {}
+  let replyText
+  if (selection === "consent") {
+    updateObj.scamShieldConsent = true;
+    replyText = responses?.SCAMSHIELD_ON_CONSENT;
+  } else if (selection === "decline") {
+    updateObj.scamShieldConsent = false;
+    replyText = responses?.SCAMSHIELD_ON_DECLINE;
   }
+  await instanceRef.update(updateObj)
+  await sendWhatsappTextMessage("user", from, replyText)
 }

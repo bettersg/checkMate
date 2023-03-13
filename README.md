@@ -4,7 +4,7 @@
 
 1. Git Clone (use SSH)
 2. Go to develop branch
-3. `cd firebase-functions`
+3. `cd functions`
 4. `npm install -g firebase-tools`
 5. `npm install`
 6. run `firebase login` then login with your betterSG email

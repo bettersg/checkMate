@@ -22,8 +22,14 @@ combine express with functions - https://firebase.google.com/docs/functions/http
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const express = require('express');
-const { userHandler } = require("./userHandler");
-const { checkerHandler } = require("./checkerHandler");
+const { userHandlerWhatsapp } = require("./userHandlers");
+const { checkerHandlerWhatsapp } = require("./checkerHandlers");
+const { defineString } = require('firebase-functions/params');
+const { handleSpecialCommands } = require("./common/utils")
+
+const runtimeEnvironment = defineString("ENVIRONMENT")
+const testUserPhoneNumberId = defineString("WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID")
+const testCheckerPhoneNumberId = defineString("WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID")
 
 if (!admin.apps.length) {
     admin.initializeApp();
@@ -46,17 +52,35 @@ app.post("/whatsapp", async (req, res) => {
             let from = message.from; // extract the phone number from the webhook payload
             let type = message.type;
 
+            let checkerPhoneNumberId
+            let userPhoneNumberId
+
+            if (runtimeEnvironment.value() === "PROD") {
+                checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID;
+                userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID;
+            } else {
+                checkerPhoneNumberId = testCheckerPhoneNumberId.value();
+                userPhoneNumberId = testUserPhoneNumberId.value();
+            }
+
             if (
-                phoneNumberId === process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID ||
-                phoneNumberId === process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+                phoneNumberId === checkerPhoneNumberId ||
+                phoneNumberId === userPhoneNumberId
             ) {
-                if ((type == "button" || type == "interactive") && phoneNumberId === process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID) { //when live, can check against WABA id instead
-                    await checkerHandler(message);
-                } else if (phoneNumberId === process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID) {
-                    await userHandler(message);
+                if (phoneNumberId !== userPhoneNumberId && phoneNumberId !== checkerPhoneNumberId) {
+                    functions.logger.log("unexpected message source");
+                    res.sendStatus(200);
+                    return;
                 }
-                else {
-                    functions.logger.log("unexpected message type")
+                if (type == "text" && message.text.body.startsWith("/") && runtimeEnvironment.value() !== "PROD") { //handle db commands
+                    await handleSpecialCommands(message);
+                } else {
+                    if ((type == "button" || type == "interactive" || type == "text") && phoneNumberId === checkerPhoneNumberId) { //when live, can check against WABA id instead
+                        await checkerHandlerWhatsapp(message);
+                    }
+                    if (phoneNumberId === userPhoneNumberId) {
+                        await userHandlerWhatsapp(message);
+                    }
                 }
                 res.sendStatus(200);
             } else {
@@ -71,6 +95,12 @@ app.post("/whatsapp", async (req, res) => {
         res.sendStatus(404);
     }
 });
+
+app.post("/telegram", async (req, res) => {
+    const db = admin.firestore();
+    console.log(JSON.stringify(req.body));
+    res.sendStatus(200);
+})
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests 
