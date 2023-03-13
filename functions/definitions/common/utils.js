@@ -13,7 +13,7 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.sleep = function (ms) {
+function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -28,17 +28,30 @@ exports.handleSpecialCommands = async function (messageObj) {
         await sendWhatsappTextMessage("user", messageObj.from, `${messageObj.id}`, messageObj.id);
         return
       case '/getmessages':
-        await getMessages(messageObj.from);
+        await archiveMessages();
         return
     }
   }
 }
 
-const getMessages = async function (from) {
+const archiveMessages = async function () {
   const db = admin.firestore();
   const messagesRef = db.collection('messages');
   const messagesSnap = await messagesRef.get()
-  await sendWhatsappTextMessage("user", from, JSON.stringify(messagesSnap.docs, null, 2))
+  const json = JSON.stringify(messagesSnap.docs, null, 2)
+  var blob = new Blob([json], { type: "application/json" })
+  const arrayBuffer = await blob.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const storageBucket = admin.storage().bucket();
+  const filename = "archive/messages.json"
+  const file = storageBucket.file(filename);
+  const stream = file.createWriteStream();
+  await new Promise((resolve, reject) => {
+    stream.on('error', reject);
+    stream.on('finish', resolve);
+    stream.end(buffer);
+  });
+  functions.logger.log("finished")
 }
 
 const mockDb = async function () {
@@ -114,4 +127,5 @@ function hashMessage(originalStr) {
 exports.stripPhone = stripPhone;
 exports.stripUrl = stripUrl;
 exports.hashMessage = hashMessage;
+exports.sleep = sleep;
 

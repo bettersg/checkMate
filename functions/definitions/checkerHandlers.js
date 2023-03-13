@@ -71,6 +71,7 @@ async function onSignUp(from, platform = "whatsapp") {
   await db.collection("factCheckers").doc(`${from}`).set({
     name: "",
     isActive: true,
+    isOnboardingComplete: false,
     platformId: from,
     level: 1,
     experience: 0,
@@ -179,6 +180,9 @@ async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp")
         break;
       case "typeformDone":
         await sendTextMessage("factChecker", from, responses.ONBOARDING_4, null, "whatsapp", true);
+        await db.collection("factCheckers").doc(`${from}`).update({
+          isOnboardingComplete: true,
+        })
         break;
     }
   }

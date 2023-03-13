@@ -187,15 +187,11 @@ async function newImageInstanceHandler(db, {
     filename = `images/${mediaId}.${mimeType.split('/')[1]}`
     const file = storageBucket.file(filename);
     const stream = file.createWriteStream();
-    stream.on('error', (err) => {
-      functions.logger.log(err);
+    await new Promise((resolve, reject) => {
+      stream.on('error', reject);
+      stream.on('finish', resolve);
+      stream.end(buffer);
     });
-
-    stream.on('finish', () => {
-      functions.logger.log(`${filename} has been uploaded`);
-    });
-
-    stream.end(buffer);
     let writeResult = await db.collection('messages').add({
       type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       category: "fake news",
