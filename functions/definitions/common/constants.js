@@ -19,7 +19,7 @@ exports.USER_BOT_RESPONSES = {
 
 exports.FACTCHECKER_BOT_RESPONSES = {
   VOTE_NO: "No problem! If you wish to come back and assess the message, you may do so by clicking the 'yes' button. See you soon!😊",
-  FACTCHECK_PROMPT: "Please vote on the new viral message above. If there is no claim in the message, select 'No Claim Made'. Otherwise, assess the veracity of the claim(s) on a scale from 0 to 5, where 0 means the claims(s) are entirely false, and 5 means the claims(s) are entirely true.",
+  FACTCHECK_PROMPT: "Please vote on the new viral message above. If there is no claim in the message, select 'No Claim Made'. Otherwise, assess the veracity of the claim(s) on a scale from 0 to 5, where 0 means the claim(s) are entirely false, and 5 means the claim(s) are entirely true.",
   L1_SCAM_ASSESSMENT_PROMPT: "Which of these two categories better describes this message?",
   L2_SCAM_ASSESSMENT_PROMPT: "Is this message a scam, i.e. an attempt to trick someone into giving away their money or personal information, or is it some other kind of suspected illicit activity, e.g. soliciting moneylending/prostitution",
   RESPONSE_RECORDED: "Got it! Your response has been recorded. Thank you for playing your part in the fight against scams and misinformation, one message at a time! 💪",
@@ -27,7 +27,7 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   HOLD_FOR_L2_SCAM_ASSESSMENT: "Got it👍! Please hold for another selection.",
   ONBOARDING_1: "Welcome to our community of CheckMates! 👋🏻 We're grateful to have you on board to combat misinformation and scams. 🙇‍♀️🙇🏻 We'd love to get to know you better - could you *reply to this message* and share your name with us? (Reply to this message by swiping right)!",
   ONBOARDING_2: "Thank you and welcome, {{name}}! We're thrilled to have you on board as we work together to combat misinformation and scams.😊 By using the CheckMate bot, you are accepting our privacy policy which can be found here: https://bit.ly/checkmate-privacy",
-  ONBOARDING_3: `To ensure you're equipped with the necessary skills to identify misinformation and scams, let's start with a quick quiz. 📝 Simply follow the link (https://bit.ly/checkmates-quiz) to take the quiz. Once you've completed it, come back to this chat and click on "I've completed the quiz" to notify me. Let's get started! 🤖`,
+  ONBOARDING_3: `To ensure you're equipped with the necessary skills to identify misinformation and scams, let's start with a quick quiz. 📝 Simply follow the link (https://bit.ly/checkmates-quiz) to take the quiz. Once you've completed it, come back to this chat and click on "I've done the quiz!" to notify me. Let's get started! 🤖`,
   ONBOARDING_4: "Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! 🙌🏻 Here's the infographic guide that was shown to you earlier on. If you haven't already, do join this WhatsApp group (https://bit.ly/checkmates-groupchat) that brings together all the other CheckMates and the core product team for updates and feedback. Thanks again for joining our community of CheckMates. Enjoy! 👋🏻🤖",
   NOT_A_REPLY: "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.",
 };
