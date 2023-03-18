@@ -124,7 +124,7 @@ async function getBitlyMetrics(token) {
 
 exports.analyticsUpdateSheet = functions
   .region('asia-southeast1')
-  .runWith({ secrets: ["BITLY_TOKEN", "SERVICE_ACCOUNT_KEY"] })
+  .runWith({ secrets: ["BITLY_TOKEN"] })
   .pubsub.topic("analytics-google-sheets-api")
   .onPublish(async (message) => {
     // message and context are unused, only used to trigger function run
