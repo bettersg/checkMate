@@ -1,24 +1,22 @@
 const functions = require('firebase-functions');
 const process = require('process');
 const { google } = require('googleapis');
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
 var fetch = require('node-fetch');
+const admin = require("firebase-admin");
+
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 async function authorize() {
-  client = new google.auth.GoogleAuth({
-    keyFile: process.env.SERVICE_ACCOUNT_KEY,
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
+  const credential = admin.credential.applicationDefault();
+  const client = await credential.getAccessToken();
   return client;
 }
 
 async function getFirestoreData() {
   // initialize database
-  initializeApp({
-    credential: cert(JSON.parse(process.env.SERVICE_ACCOUNT_KEY))
-  });
-  const db = getFirestore();
+  const db = admin.firestore()
   const date = new Date().toLocaleString('en-US', { timeZone: 'Singapore' })
 
   /**
@@ -77,7 +75,8 @@ async function getFirestoreData() {
 }
 
 async function updateSheet(data, date, auth) {
-  const sheetsAPI = google.sheets({ version: 'v4', auth });
+  const sheetsAPI = google.sheets({ version: 'v4', auth: null });
+  const headers = { Authorization: `Bearer ${auth.access_token}` };
 
   const sheetUpdateDataAndCell = [
     [date, "B2"],
@@ -99,7 +98,8 @@ async function updateSheet(data, date, auth) {
       valueInputOption: 'USER_ENTERED',
       resource: {
         values: [[cellData]],
-      }
+      },
+      headers,
     });
   })
 }
@@ -133,8 +133,7 @@ exports.analyticsUpdateSheet = functions
       const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN);
       const allData = { ...data, ...bitlyData }
       await updateSheet(allData, date, auth);
-    })
-      .catch(
-        functions.logger.error
-      );
+    }).catch(
+      functions.logger.error
+    );
   })
