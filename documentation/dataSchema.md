@@ -62,7 +62,7 @@ erDiagram
         string platformId
         number level "Not used for now"
         number experience "Not used for now"
-        number numVoted "Not used for now"
+        number numVoted
         number numCorrectVotes "Not used for now"
         number numVerifiedLinks "Not used for now"
         string preferredPlatform"whatsapp/telegram, only whatsapp used for now"

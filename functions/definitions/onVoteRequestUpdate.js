@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
 const { sendVotingMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
 const { incrementCounter, getCount } = require("./common/counters");
+const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
 // Define some parameters
 const numVoteShards = defineInt('NUM_SHARDS_VOTE_COUNT');
@@ -25,7 +26,8 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       await sendL2ScamAssessmentMessage(change.after, messageRef);
     }
     else if (before.vote != after.vote) {
-      await updateCounts(messageRef, before.vote, after.vote)
+      await updateCounts(messageRef, before.vote, after.vote);
+      await updateCheckerVoteCount(before, after);
       const db = admin.firestore();
       const factCheckersSnapshot = await db.collection("factCheckers").where("isActive", "==", true).get();
       const numFactCheckers = factCheckersSnapshot.size;
@@ -76,5 +78,21 @@ async function updateCounts(messageRef, previousVote, currentVote) {
     } else {
       await incrementCounter(messageRef, "totalVoteScore", numVoteShards.value(), parseInt(currentVote));
     }
+  }
+}
+
+async function updateCheckerVoteCount(before, after) {
+  let factCheckerRef
+  if (before.vote === null && after.vote !== null) {
+    factCheckerRef = after.factCheckerDocRef
+    factCheckerRef.update({
+      numVoted: FieldValue.increment(1),
+    })
+  }
+  else if (before.vote !== null && after.vote === null) {
+    factCheckerRef = after.factCheckerDocRef
+    factCheckerRef.update({
+      numVoted: FieldValue.increment(-1),
+    })
   }
 }
