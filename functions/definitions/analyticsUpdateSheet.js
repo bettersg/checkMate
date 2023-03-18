@@ -7,7 +7,7 @@ var fetch = require('node-fetch');
 
 async function authorize() {
   client = new google.auth.GoogleAuth({
-    keyFile: 'serviceAccountKey.json', // note: this file only exists on GCP Console
+    keyFile: process.env.SERVICE_ACCOUNT_KEY,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
   return client;
@@ -16,7 +16,7 @@ async function authorize() {
 async function getFirestoreData() {
   // initialize database
   initializeApp({
-    credential: cert(require('./serviceAccountKey.json')) // note: this file only exists on GCP Console
+    credential: cert(JSON.parse(process.env.SERVICE_ACCOUNT_KEY))
   });
   const db = getFirestore();
   const date = new Date().toLocaleString('en-US', { timeZone: 'Singapore' })
@@ -122,19 +122,19 @@ async function getBitlyMetrics(token) {
   return bitlyClickCount;
 }
 
-exports.analyticsUpdateSheet = functions //TO ZH: can help me test if this works if you deploy it? If it does, can probably replace your one above. This will remove all dependency on the console I think.
+exports.analyticsUpdateSheet = functions
   .region('asia-southeast1')
-  .runWith({ secrets: ["BITLY_TOKEN"] })
+  .runWith({ secrets: ["BITLY_TOKEN", "SERVICE_ACCOUNT_KEY"] })
   .pubsub.topic("analytics-google-sheets-api")
-  .onPublish(async (message) => { //TO ZH: can see if the topic is correct..?
+  .onPublish(async (message) => {
     // message and context are unused, only used to trigger function run
     await authorize().then(async (auth) => {
       const { data, date } = await getFirestoreData();
-      const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN); // note: this token only exists on GCP Console
+      const bitlyData = await getBitlyMetrics(process.env.BITLY_TOKEN);
       const allData = { ...data, ...bitlyData }
       await updateSheet(allData, date, auth);
     })
       .catch(
-        functions.logger.log(error) //console.log doesn't appear in the functions logs i think
+        functions.logger.error
       );
   })
