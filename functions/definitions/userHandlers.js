@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Timestamp } = require('firebase-admin/firestore');
-const { sendWhatsappTextMessage, markWhatsappMessageAsRead } = require('./common/sendWhatsappMessage');
+const { sendWhatsappTextMessage, markWhatsappMessageAsRead, sendWhatsappContactMessage, sendWhatsappButtonMessage } = require('./common/sendWhatsappMessage');
 const { mockDb, sleep, stripPhone, stripUrl, hashMessage } = require('./common/utils');
 const { getResponsesObj } = require('./common/responseUtils')
 const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
@@ -65,7 +65,7 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive;
       switch (interactive.type) {
         case "button_reply":
-          await onConsentReply(db, interactive.button_reply.id, from, message.id);
+          await onButtonReply(db, interactive.button_reply.id, from, message.id);
           break;
       }
       break;
@@ -254,22 +254,67 @@ async function respondToDemoScam(messageObj) {
   const responses = await getResponsesObj("user")
   await sendWhatsappTextMessage("user", messageObj.from, responses?.SCAM, messageObj.id);
   await sleep(2000);
-  await sendWhatsappTextMessage("user", messageObj.from, responses?.ONBOARDING_END);
+  const buttons = [{
+    type: "reply",
+    reply: {
+      id: "onboarding_quizDone",
+      title: "Got it!",
+    },
+  }];
+  await sendWhatsappButtonMessage("user", messageObj.from, responses?.DEMO_END, buttons);
 }
 
-async function onConsentReply(db, buttonId, from, replyId, platform = "whatsapp") {
+async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
   const responses = await getResponsesObj("user")
-  const [buttonMessageRef, instancePath, selection] = buttonId.split("_");
-  const instanceRef = db.doc(instancePath);
-  const updateObj = {}
-  let replyText
-  if (selection === "consent") {
-    updateObj.scamShieldConsent = true;
-    replyText = responses?.SCAMSHIELD_ON_CONSENT;
-  } else if (selection === "decline") {
-    updateObj.scamShieldConsent = false;
-    replyText = responses?.SCAMSHIELD_ON_DECLINE;
+  const [type, ...rest] = buttonId.split("_");
+  let instancePath, selection;
+  switch (type) {
+    case "scamshieldConsent":
+      [instancePath, selection] = rest;
+      const instanceRef = db.doc(instancePath);
+      const updateObj = {}
+      let replyText
+      if (selection === "consent") {
+        updateObj.scamShieldConsent = true;
+        replyText = responses?.SCAMSHIELD_ON_CONSENT;
+      } else if (selection === "decline") {
+        updateObj.scamShieldConsent = false;
+        replyText = responses?.SCAMSHIELD_ON_DECLINE;
+      }
+      await instanceRef.update(updateObj)
+      await sendWhatsappTextMessage("user", from, replyText)
+      break;
+    case "onboarding":
+      [selection] = rest;
+      switch (selection) {
+        case "quizDone":
+          const buttons = [{
+            type: "reply",
+            reply: {
+              id: "onboarding_sendContactYes",
+              title: "Yes!",
+            },
+          },
+          {
+            type: "reply",
+            reply: {
+              id: "onboarding_sendContactNo",
+              title: "It can wait...",
+            },
+          }];
+          await sendWhatsappButtonMessage("user", from, responses?.CONTACT_SEND, buttons);
+          break;
+        case "sendContactYes":
+          const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
+          await sendWhatsappContactMessage("user", from, runtimeEnvironment.value() === "PROD" ? "+65 80432188" : "+1 555-093-3685", nameObj, "https://checkmate.sg");
+          await sleep(2000);
+          await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END);
+          break;
+        case "sendContactNo":
+          await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END);
+          break;
+      }
+      break;
   }
-  await instanceRef.update(updateObj)
-  await sendWhatsappTextMessage("user", from, replyText)
+
 }

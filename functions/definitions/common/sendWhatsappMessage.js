@@ -89,7 +89,7 @@ async function sendWhatsappTemplateMessage(bot, to, templateName, languageCode =
             components: componentsArr,
         },
     };
-    let response = await callWhatsappSendMessageApi(data, bot);
+    const response = await callWhatsappSendMessageApi(data, bot);
     return response;
 }
 
@@ -140,8 +140,34 @@ async function sendWhatsappButtonMessage(bot, to, text, buttons, replyMessageId 
             message_id: replyMessageId,
         };
     }
-    callWhatsappSendMessageApi(data, bot);
+    const response = await callWhatsappSendMessageApi(data, bot);
+    return response;
 };
+
+async function sendWhatsappContactMessage(bot, to, phoneNumber, name, url, replyMessageId = null) {
+    data = {
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: to,
+        type: "contacts",
+        contacts: [{
+            name,
+            urls: [{
+                url
+            }],
+            phones: [{
+                phone: phoneNumber,
+            }],
+        }]
+    }
+    if (replyMessageId) {
+        data.context = {
+            message_id: replyMessageId,
+        };
+    }
+    const response = await callWhatsappSendMessageApi(data, bot);
+    return response;
+}
 
 async function markWhatsappMessageAsRead(bot, messageId) {
     data = {
@@ -193,3 +219,4 @@ exports.sendWhatsappTemplateMessage = sendWhatsappTemplateMessage;
 exports.sendWhatsappTextListMessage = sendWhatsappTextListMessage;
 exports.sendWhatsappButtonMessage = sendWhatsappButtonMessage;
 exports.markWhatsappMessageAsRead = markWhatsappMessageAsRead;
+exports.sendWhatsappContactMessage = sendWhatsappContactMessage;
