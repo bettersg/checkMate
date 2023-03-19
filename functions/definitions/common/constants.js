@@ -14,7 +14,9 @@ exports.USER_BOT_RESPONSES = {
   SCAMSHIELD_ON_DECLINE: `No worries! We will not be sending your message to ScamShield. If you change your mind, you can still hit "Yes" above. Thank you for sharing this message with us, and for keeping Singapore safe!`,
   DEMO_SCAM_MESSAGE: "Imagine this is a scam message that you receive in another WhatsApp chat. Forward me in to this same chat to try how CheckMate works!",
   DEMO_SCAM_PROMPT: "If you receive a scam message like this demo one above, just forward or copy and send it to this number. Go ahead and try it to see how CheckMate works!",
-  ONBOARDING_END: "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! Apart from such messages, please don't send in anything else, because then our CheckMates will have to review it. Now, let's go do our part in the fight against scams and fake news! 💪"
+  DEMO_END: "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! But apart from messages that you are really unsure about, please don't send in anything else, because then our CheckMates will have to review it.",
+  CONTACT_SEND: "Great! Now that you know how it works, we recommend that you add CheckMate to your contact list so you can easily find it next time. Would you like that?",
+  ONBOARDING_END: "And that's it! If you want to learn more, you can visit https://checkmate.sg. If you have any feedback, do submit it at https://bit.ly/checkmate-feedback. Now, you can start sending in messages, and let's go do our part in the fight against scams and fake news! 💪",
 };
 
 exports.FACTCHECKER_BOT_RESPONSES = {
@@ -28,7 +30,7 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   ONBOARDING_1: "Welcome to our community of CheckMates! 👋🏻 We're grateful to have you on board to combat misinformation and scams. 🙇‍♀️🙇🏻 We'd love to get to know you better - could you *reply to this message* and share your name with us? (Reply to this message by swiping right)!",
   ONBOARDING_2: "Thank you and welcome, {{name}}! We're thrilled to have you on board as we work together to combat misinformation and scams.😊 By using the CheckMate bot, you are accepting our privacy policy which can be found here: https://bit.ly/checkmate-privacy",
   ONBOARDING_3: `To ensure you're equipped with the necessary skills to identify misinformation and scams, let's start with a quick quiz. 📝 Simply follow the link (https://bit.ly/checkmates-quiz) to take the quiz. Once you've completed it, come back to this chat and click on "I've done the quiz!" to notify me. Let's get started! 🤖`,
-  ONBOARDING_4: "Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! 🙌🏻 Here's the infographic guide that was shown to you earlier on. If you haven't already, do join this WhatsApp group (https://bit.ly/checkmates-groupchat) that brings together all the other CheckMates and the core product team for updates and feedback. Thanks again for joining our community of CheckMates. Enjoy! 👋🏻🤖",
+  ONBOARDING_4: `Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! 🙌🏻 If you haven't already, do join this WhatsApp group (https://bit.ly/checkmates-groupchat) that brings together all the other CheckMates and the core product team for updates and feedback. If you're looking for resources, you can visit our wiki page (https://bit.ly/checkmates-wiki). Thanks again for joining our community of CheckMates. Enjoy! 👋🏻🤖`,
   NOT_A_REPLY: "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.",
 };
 
