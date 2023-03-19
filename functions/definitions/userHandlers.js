@@ -257,8 +257,15 @@ async function respondToDemoScam(messageObj) {
   const buttons = [{
     type: "reply",
     reply: {
-      id: "onboarding_quizDone",
-      title: "Got it!",
+      id: "onboarding_sendContactYes",
+      title: "Yes!",
+    },
+  },
+  {
+    type: "reply",
+    reply: {
+      id: "onboarding_sendContactNo",
+      title: "It can wait...",
     },
   }];
   await sendWhatsappButtonMessage("user", messageObj.from, responses?.DEMO_END, buttons);
@@ -287,23 +294,6 @@ async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp")
     case "onboarding":
       [selection] = rest;
       switch (selection) {
-        case "quizDone":
-          const buttons = [{
-            type: "reply",
-            reply: {
-              id: "onboarding_sendContactYes",
-              title: "Yes!",
-            },
-          },
-          {
-            type: "reply",
-            reply: {
-              id: "onboarding_sendContactNo",
-              title: "It can wait...",
-            },
-          }];
-          await sendWhatsappButtonMessage("user", from, responses?.CONTACT_SEND, buttons);
-          break;
         case "sendContactYes":
           const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
           await sendWhatsappContactMessage("user", from, runtimeEnvironment.value() === "PROD" ? "+65 80432188" : "+1 555-093-3685", nameObj, "https://checkmate.sg");
