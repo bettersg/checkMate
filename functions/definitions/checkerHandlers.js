@@ -126,7 +126,13 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
         break;
       case "image":
         const temporaryUrl = await getSignedUrl(message.storageUrl);
-        res = await sendImageMessage("factChecker", from, temporaryUrl, message.text, null, platform);
+        if (temporaryUrl) {
+          res = await sendImageMessage("factChecker", from, temporaryUrl, message.text, null, platform);
+        } else {
+          functions.logger.warn("Problem creating URL")
+          await sendTextMessage("factChecker", from, "Sorry, an error occured", null, platform);
+          return;
+        }
         break;
     }
     await voteRequestSnap.docs[0].ref.update({
