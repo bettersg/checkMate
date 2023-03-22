@@ -3,7 +3,8 @@ const admin = require("firebase-admin");
 const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { getResponsesObj } = require("./common/responseUtils");
-const { sendL1ScamAssessmentMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
+const { sleep } = require("./common/utils")
+const { sendL1CategorisationMessage } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
@@ -34,7 +35,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
       const interactive = message.interactive;
       switch (interactive.type) {
         case "list_reply":
-          await onVoteReceipt(db, interactive.list_reply.id, from, message.id)
+          await onTextListReceipt(db, interactive.list_reply.id, from, message.id);
           break;
         case "button_reply":
           await onButtonReply(db, interactive.button_reply.id, from, message.id);
@@ -106,6 +107,10 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
   const db = admin.firestore();
   const messageRef = db.collection("messages").doc(messageId);
   const messageSnap = await messageRef.get();
+  if (!messageSnap.exists) {
+    functions.logger.log(`No corresponding message ${messageId} found`);
+    return;
+  }
   const message = messageSnap.data();
   const voteRequestSnap = await messageRef.collection("voteRequests").where("platformId", "==", from).where("platform", "==", platform).get();
   if (voteRequestSnap.empty) {
@@ -127,46 +132,16 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
       hasAgreed: true,
       sentMessageId: res.data.messages[0].id,
     })
-    setTimeout(() => {
-      sendL1ScamAssessmentMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
-    }, 2000);
+    await sleep(2000);
+    sendL1CategorisationMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
   }
 }
 
 async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
-  let messageId, voteRequestId, type
+  // let messageId, voteRequestId, type
   const responses = await getResponsesObj("factChecker");
   const [buttonMessageRef, ...rest] = buttonId.split("_");
-  if (rest.length === 3) { //this means responses to the actual fact checkers
-    [messageId, voteRequestId, type] = rest
-    const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
-    const updateObj = {}
-    switch (buttonMessageRef) {
-      case "checkers0":
-        if (type === "sus") {
-          updateObj.triggerVote = false;
-          updateObj.triggerL2 = true;
-          updateObj.vote = null;
-          sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_L2_SCAM_ASSESSMENT, replyId);
-        } else if (type === "notsus") {
-          updateObj.triggerVote = true;
-          updateObj.triggerL2 = false;
-          updateObj.vote = null;
-          sendWhatsappTextMessage("factChecker", from, responses.HOLD_FOR_NEXT_POLL, replyId);
-        }
-        break;
-      case "checkers1":
-        if (type === "scam") {
-          updateObj.vote = "scam";
-        } else if (type === "illicit") {
-          updateObj.vote = "illicit";
-        }
-        sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
-        break;
-    }
-    await voteRequestRef.update(updateObj);
-  }
-  else if (rest.length === 0) { //this means responses to the onboarding messages.
+  if (rest.length === 0) { //this means responses to the onboarding messages.
     switch (buttonMessageRef) {
       case "privacyOk":
         const buttons = [{
@@ -189,12 +164,60 @@ async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp")
 
 }
 
-async function onVoteReceipt(db, listId, from, replyId, platform = "whatsapp") {
+async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp") {
   const responses = await getResponsesObj("factChecker");
-  const [messageId, voteRequestId, vote] = listId.split("_");
+  const [type, messageId, voteRequestId, selection] = listId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
-  await voteRequestRef.update({
-    vote: vote,
-  })
-  sendWhatsappTextMessage("factChecker", from, responses.RESPONSE_RECORDED, replyId);
+  const updateObj = {}
+  let response;
+  switch (type) {
+    case "vote":
+      const vote = selection
+      updateObj.category = "info";
+      updateObj.vote = parseInt(vote);
+      response = responses.RESPONSE_RECORDED;
+      break;
+
+    case "categorize":
+      switch (selection) {
+        case "scam":
+          updateObj.triggerL2Vote = false;
+          updateObj.triggerL2Others = false;
+          updateObj.category = "scam";
+          updateObj.vote = null;
+          response = responses.RESPONSE_RECORDED;
+          break;
+        case "illicit":
+          updateObj.triggerL2Vote = false;
+          updateObj.triggerL2Others = false;
+          updateObj.category = "illicit";
+          updateObj.vote = null;
+          response = responses.RESPONSE_RECORDED;
+          break;
+
+        case "info":
+          updateObj.triggerL2Vote = true;
+          updateObj.triggerL2Others = false;
+          response = responses.HOLD_FOR_NEXT_POLL;
+          break;
+
+        case "others":
+          updateObj.triggerL2Vote = false;
+          updateObj.triggerL2Others = true;
+          response = responses.HOLD_FOR_L2_CATEGORISATION;
+          break;
+      }
+      break;
+
+    case "others":
+      updateObj.category = selection;
+      updateObj.vote = null;
+      response = responses.RESPONSE_RECORDED
+  }
+  try {
+    await voteRequestRef.update(updateObj);
+  } catch (error) {
+    functions.logger.warn(`No corresponding voteRequest with id ${voteRequestId} for message ${messageId} found`);
+  }
+  await sendWhatsappTextMessage("factChecker", from, response, replyId);
 }

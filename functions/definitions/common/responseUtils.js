@@ -1,9 +1,9 @@
-const { response } = require('express');
 const admin = require('firebase-admin');
 const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } = require('./constants');
 const { sleep } = require('./utils');
 const { sendTextMessage } = require('./sendMessage')
 const { sendWhatsappButtonMessage } = require('./sendWhatsappMessage')
+const functions = require('firebase-functions');
 
 async function respondToInstance(instanceSnap) {
   const parentMessageRef = instanceSnap.ref.parent.parent;
@@ -19,6 +19,11 @@ async function respondToInstance(instanceSnap) {
   const isScam = parentMessageSnap.get("isScam");
   const isIllicit = parentMessageSnap.get("isIllicit");
   const truthScore = parentMessageSnap.get("truthScore");
+  const isSpam = parentMessageSnap.get("isSpam");
+  const isUnsure = parentMessageSnap.get("isUnsure");
+  const isInfo = parentMessageSnap.get("isInfo");
+  const isLegitimate = parentMessageSnap.get("isLegitimate");
+  const isMachineCategorised = parentMessageSnap.get("isMachineCategorised");
 
   if (!isAssessed) {
     await sendTextMessage("user", data.from, responses.MESSAGE_NOT_YET_ASSESSED, data.id)
@@ -51,15 +56,36 @@ async function respondToInstance(instanceSnap) {
     await sendWhatsappButtonMessage("user", data.from, responses.SCAMSHIELD_SEEK_CONSENT, buttons, data.id)
     return;
   }
+  if (isSpam) {
+    await sendTextMessage("user", data.from, responses.SPAM, data.id);
+    return
+  }
+  if (isLegitimate) {
+    await sendTextMessage("user", data.from, responses.LEGITIMATE, data.id);
+    return
+  }
   if (isIrrelevant) {
-    await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+    if (isMachineCategorised) {
+      await sendTextMessage("user", data.from, responses.IRRELEVANT_AUTO, data.id)
+    } else {
+      await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+    }
     return;
   }
-  if (truthScore === null) {
-    await sendTextMessage("user", data.from, responses.NO_SCORE, data.id)
+  if (isInfo) {
+    if (truthScore === null) {
+      await sendTextMessage("user", data.from, responses.NO_SCORE, data.id)
+      return;
+    } else {
+      await sendTextMessage("user", data.from, _getResponse(truthScore, responses), data.id)
+    }
+    return
+  }
+  if (isUnsure) {
+    await sendTextMessage("user", data.from, responses.UNSURE, data.id)
     return;
   }
-  sendTextMessage("user", data.from, _getResponse(truthScore, responses), data.id)
+  functions.logger.warn("did not return as expected");
   return;
 }
 

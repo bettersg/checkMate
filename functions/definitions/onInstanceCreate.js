@@ -75,10 +75,11 @@ function sendTemplateMessageAndCreateVoteRequest(factChecker, messageId, doc, me
           factCheckerDocRef: doc.ref,
           platformId: factChecker.platformId,
           hasAgreed: false,
-          triggerVote: null,
-          triggerL2: null,
+          triggerL2Vote: null,
+          triggerL2Others: null,
           platform: "whatsapp",
           sentMessageId: null,
+          category: null,
           vote: null,
         });
       });
