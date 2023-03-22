@@ -11,7 +11,7 @@ exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRe
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_scam`,
           title: "Scam",
-          description: "Intent is to obtain money/personal information via trickery"
+          description: "Intended to obtain money/personal information via deception"
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_illicit`,
