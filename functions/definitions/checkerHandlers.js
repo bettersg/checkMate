@@ -132,7 +132,7 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
       hasAgreed: true,
       sentMessageId: res.data.messages[0].id,
     })
-    await sleep(2000);
+    await sleep(3000);
     sendL1CategorisationMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
   }
 }
@@ -214,10 +214,10 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       updateObj.vote = null;
       response = responses.RESPONSE_RECORDED
   }
+  await sendWhatsappTextMessage("factChecker", from, response, replyId);
   try {
     await voteRequestRef.update(updateObj);
   } catch (error) {
     functions.logger.warn(`No corresponding voteRequest with id ${voteRequestId} for message ${messageId} found`);
   }
-  await sendWhatsappTextMessage("factChecker", from, response, replyId);
 }

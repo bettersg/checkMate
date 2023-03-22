@@ -32,7 +32,7 @@ exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRe
       const sections = [{
         rows: rows,
       }];
-      await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.L1_ASSESSMENT_PROMPT, "Make Selection", sections, voteRequestData.sentMessageId);
+      await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.L1_ASSESSMENT_PROMPT, "Make Selection", sections, replyId ?? voteRequestData.sentMessageId);
       break;
     case "telegram":
       break
@@ -70,7 +70,7 @@ exports.sendL2OthersCategorisationMessage = async function (voteRequestSnap, mes
       const sections = [{
         rows: rows,
       }];
-      await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.L2_OTHERS_ASSESSEMENT_PROMPT, "Make Selection", sections, voteRequestData.sentMessageId);
+      await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.L2_OTHERS_ASSESSEMENT_PROMPT, "Make Selection", sections, replyId ?? voteRequestData.sentMessageId);
       break;
     case "telegram":
       break
