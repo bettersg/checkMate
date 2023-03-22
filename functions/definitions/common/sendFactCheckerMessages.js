@@ -1,4 +1,4 @@
-const { sendWhatsappButtonMessage, sendWhatsappTextListMessage } = require("./sendWhatsappMessage");
+const { sendWhatsappTextListMessage } = require("./sendWhatsappMessage");
 const { getResponsesObj } = require("./responseUtils");
 
 exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRef, replyId = null) {

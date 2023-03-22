@@ -51,9 +51,6 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * responseCount));
       const isUnsure = (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) || unsureCount > parseInt(thresholds.inUnsure * responseCount);
       const isAssessed = (isUnsure && responseCount > parseInt(thresholds.endVoteUnsure * numFactCheckers)) || (!isUnsure && responseCount > parseInt(thresholds.endVote * numFactCheckers)) || (isSus && responseCount > parseInt(thresholds.endVoteSus * numFactCheckers));
-      console.log(parseInt(thresholds.endVoteUnsure * numFactCheckers))
-      console.log(parseInt(thresholds.endVote * numFactCheckers))
-      console.log(parseInt(thresholds.endVoteSus * numFactCheckers))
       return messageRef.update({
         truthScore: truthScore,
         isSus: isSus,

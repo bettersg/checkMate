@@ -171,7 +171,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       const vote = selection
       updateObj.category = "info";
       updateObj.vote = parseInt(vote);
-      response = responses.RESPONSE_RECORDED
+      response = responses.RESPONSE_RECORDED;
       break;
 
     case "categorize":
@@ -181,26 +181,26 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
           updateObj.triggerL2Others = false;
           updateObj.category = "scam";
           updateObj.vote = null;
-          response = responses.RESPONSE_RECORDED
+          response = responses.RESPONSE_RECORDED;
           break;
         case "illicit":
           updateObj.triggerL2Vote = false;
           updateObj.triggerL2Others = false;
           updateObj.category = "illicit";
           updateObj.vote = null;
-          response = responses.RESPONSE_RECORDED
+          response = responses.RESPONSE_RECORDED;
           break;
 
         case "info":
           updateObj.triggerL2Vote = true;
           updateObj.triggerL2Others = false;
-          response = responses.HOLD_FOR_NEXT_POLL
+          response = responses.HOLD_FOR_NEXT_POLL;
           break;
 
         case "others":
           updateObj.triggerL2Vote = false;
           updateObj.triggerL2Others = true;
-          response = responses.HOLD_FOR_L2_CATEGORISATION
+          response = responses.HOLD_FOR_L2_CATEGORISATION;
           break;
       }
       break;
