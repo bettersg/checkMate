@@ -53,12 +53,18 @@ async function getHash(buffer) {
 };
 
 async function getSignedUrl(storageUrl) {
-    const storage = admin.storage();
-    const [temporaryUrl] = await storage.bucket().file(storageUrl).getSignedUrl({
-        action: "read",
-        expires: Date.now() + 60 * 60 * 1000,
-    })
-    return temporaryUrl
+    try {
+        const storage = admin.storage();
+        const [temporaryUrl] = await storage.bucket().file(storageUrl).getSignedUrl({
+            action: "read",
+            expires: Date.now() + 60 * 60 * 1000,
+        });
+        return temporaryUrl;
+    } catch (error) {
+        functions.logger.error(error);
+        // You can also log the error to an external monitoring service or send an alert to the developers
+        return null;
+    }
 }
 
 exports.downloadWhatsappMedia = downloadWhatsappMedia;
