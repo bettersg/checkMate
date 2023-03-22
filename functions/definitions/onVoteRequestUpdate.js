@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
-const { sendVotingMessage, sendL2ScamAssessmentMessage } = require("./common/sendFactCheckerMessages")
+const { sendVotingMessage, sendL2OthersCategorisationMessage } = require("./common/sendFactCheckerMessages")
 const { incrementCounter, getCount } = require("./common/counters");
 const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
@@ -20,36 +20,50 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
     const after = docSnap.data();
     const messageRef = docSnap.ref.parent.parent;
 
-    if (before.triggerVote !== true && after.triggerVote === true) {
+    if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
       await sendVotingMessage(change.after, messageRef);
-    } else if (before.triggerL2 !== true && after.triggerL2 === true) {
-      await sendL2ScamAssessmentMessage(change.after, messageRef);
-    }
-    else if (before.vote != after.vote) {
-      await updateCounts(messageRef, before.vote, after.vote);
+    } else if (before.triggerL2Others !== true && after.triggerL2Others === true) {
+      await sendL2OthersCategorisationMessage(change.after, messageRef);
+    } else if ((before.vote != after.vote) || (before.category != after.category)) {
+      await updateCounts(messageRef, before, after);
       await updateCheckerVoteCount(before, after);
       const db = admin.firestore();
       const factCheckersSnapshot = await db.collection("factCheckers").where("isActive", "==", true).get();
       const numFactCheckers = factCheckersSnapshot.size;
-      const voteCount = await getCount(messageRef, "vote");
+      const responseCount = await getCount(messageRef, "responses");
       const irrelevantCount = await getCount(messageRef, "irrelevant");
       const scamCount = await getCount(messageRef, "scam");
       const illicitCount = await getCount(messageRef, "illicit");
+      const infoCount = await getCount(messageRef, "info");
+      const spamCount = await getCount(messageRef, "spam");
+      const legitimateCount = await getCount(messageRef, "legitimate")
+      const unsureCount = await getCount(messageRef, "unsure");
       const susCount = scamCount + illicitCount;
       const voteTotal = await getCount(messageRef, "totalVoteScore");
-      const truthScore = ((voteCount - irrelevantCount - susCount) > 0) ? voteTotal / (voteCount - irrelevantCount - susCount) : null;
+      const truthScore = (infoCount > 0) ? (voteTotal / infoCount) : null;
       const thresholds = await getThresholds();
-      const isSus = (susCount > parseInt(thresholds.isSus * voteCount));
+      const isSus = (susCount > parseInt(thresholds.isSus * responseCount));
       const isScam = isSus && (scamCount >= illicitCount);
       const isIllicit = isSus && !isScam;
-      const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * voteCount));
-      const isAssessed = (voteCount > parseInt(thresholds.endVote * numFactCheckers)) || (isSus && voteCount > parseInt(thresholds.endVoteSus * numFactCheckers));
+      const isInfo = infoCount > parseInt(thresholds.isInfo * responseCount);
+      const isSpam = spamCount > parseInt(thresholds.isSpam * responseCount);
+      const isLegitimate = legitimateCount > parseInt(thresholds.isLegitimate * responseCount);
+      const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * responseCount));
+      const isUnsure = (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) || unsureCount > parseInt(thresholds.inUnsure * responseCount);
+      const isAssessed = (isUnsure && responseCount > parseInt(thresholds.endVoteUnsure * numFactCheckers)) || (!isUnsure && responseCount > parseInt(thresholds.endVote * numFactCheckers)) || (isSus && responseCount > parseInt(thresholds.endVoteSus * numFactCheckers));
+      console.log(parseInt(thresholds.endVoteUnsure * numFactCheckers))
+      console.log(parseInt(thresholds.endVote * numFactCheckers))
+      console.log(parseInt(thresholds.endVoteSus * numFactCheckers))
       return messageRef.update({
         truthScore: truthScore,
         isSus: isSus,
         isScam: isScam,
         isIllicit: isIllicit,
+        isInfo: isInfo,
+        isSpam: isSpam,
+        isLegitimate: isLegitimate,
         isIrrelevant: isIrrelevant,
+        isUnsure: isUnsure,
         isAssessed: isAssessed,
       });
 
@@ -57,26 +71,28 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
     return Promise.resolve();
   });
 
-async function updateCounts(messageRef, previousVote, currentVote) {
-  if (previousVote === null) {
-    if (currentVote != null) {
-      await incrementCounter(messageRef, "vote", numVoteShards.value());
+async function updateCounts(messageRef, before, after) {
+  const previousCategory = before.category;
+  const currentCategory = after.category;
+  const previousVote = before.vote;
+  const currentVote = after.vote;
+  if (previousCategory === null) {
+    if (currentCategory !== null) {
+      await incrementCounter(messageRef, "responses", numVoteShards.value());
     }
   } else {
-    if (currentVote === null) {
-      await incrementCounter(messageRef, "vote", numVoteShards.value(), -1);
+    if (currentCategory === null) {
+      await incrementCounter(messageRef, "responses", numVoteShards.value(), -1); //if previous category is not null and current category is, reduce the response count
     }
-    if (isNaN(previousVote)) {
-      await incrementCounter(messageRef, previousVote, numVoteShards.value(), -1)
-    } else {
-      await incrementCounter(messageRef, "totalVoteScore", numVoteShards.value(), -parseInt(previousVote));
+    await incrementCounter(messageRef, previousCategory, numVoteShards.value(), -1); //if previous category is not null and current category also not now, reduce the count of the previous category
+    if (previousCategory === "info") {
+      await incrementCounter(messageRef, "totalVoteScore", numVoteShards.value(), -previousVote); //if previous category is info, reduce the total vote score
     }
   }
-  if (currentVote != null) {
-    if (isNaN(currentVote)) {
-      await incrementCounter(messageRef, currentVote, numVoteShards.value());
-    } else {
-      await incrementCounter(messageRef, "totalVoteScore", numVoteShards.value(), parseInt(currentVote));
+  if (currentCategory !== null) {
+    await incrementCounter(messageRef, currentCategory, numVoteShards.value());
+    if (currentCategory === "info") {
+      await incrementCounter(messageRef, "totalVoteScore", numVoteShards.value(), currentVote);
     }
   }
 }

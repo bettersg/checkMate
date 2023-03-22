@@ -88,6 +88,9 @@ async function newTextInstanceHandler(db, {
 
   let hasMatch = false;
   let matchedId;
+  //TODO:classify here
+  //TODO: check if new user and add user if so.
+  //TODO: if new user, trigger onboarding flow with message.
   let textHash = hashMessage(text);  // hash of the original text
   let strippedText = stripPhone(text); // text stripped of phone nr
   let strippedTextHash = hashMessage(strippedText);  // hash of the stripped text
@@ -140,10 +143,14 @@ async function newTextInstanceHandler(db, {
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: false, //boolean, whether or not we have concluded the voting
+      isAssessed: false, //boolean, whether or not we have concluded the voting TODO:SET THIS IF CLASSIFER HAS SET IT
       truthScore: null, //float, the mean truth score
-      isIrrelevant: null, //bool, if majority voted irrelevant then update this
+      isIrrelevant: null, //bool, if majority voted irrelevant then update this  TODO:SET THIS IF CLASSIFER HAS SET IT
       isScam: null,
+      isSpam: null,
+      isLegitimate: null,
+      isUnsure: null,
+      isInfo: null,
       custom_reply: null, //string
     });
     messageId = writeResult.id;
@@ -205,6 +212,10 @@ async function newImageInstanceHandler(db, {
       isAssessed: false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
       isScam: null,
+      isSpam: null,
+      isLegitimate: null,
+      isUnsure: null,
+      isInfo: null,
       isIrrelevant: null, //bool, if majority voted irrelevant then update this
       custom_reply: null, //string
     });
