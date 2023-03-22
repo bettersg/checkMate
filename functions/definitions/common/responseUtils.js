@@ -22,7 +22,8 @@ async function respondToInstance(instanceSnap) {
   const isSpam = parentMessageSnap.get("isSpam");
   const isUnsure = parentMessageSnap.get("isUnsure");
   const isInfo = parentMessageSnap.get("isInfo");
-  const isLegitimate = parentMessageSnap.get("isLegitimate")
+  const isLegitimate = parentMessageSnap.get("isLegitimate");
+  const isMachineCategorised = parentMessageSnap.get("isMachineCategorised");
 
   if (!isAssessed) {
     await sendTextMessage("user", data.from, responses.MESSAGE_NOT_YET_ASSESSED, data.id)
@@ -64,7 +65,11 @@ async function respondToInstance(instanceSnap) {
     return
   }
   if (isIrrelevant) {
-    await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+    if (isMachineCategorised) {
+      await sendTextMessage("user", data.from, responses.IRRELEVANT_AUTO, data.id)
+    } else {
+      await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+    }
     return;
   }
   if (isInfo) {

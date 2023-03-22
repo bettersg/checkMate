@@ -139,6 +139,7 @@ async function newTextInstanceHandler(db, {
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
+      isMachineCategorised: machineCategory === "irrelevant" ? true : false,
       text: text, //text or caption
       strippedText: strippedText,
       textHash: textHash,
@@ -209,6 +210,7 @@ async function newImageInstanceHandler(db, {
     let writeResult = await db.collection('messages').add({
       type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: null,
+      isMachineCategorised: false,
       text: text, //text or caption
       hash: hash,
       mediaId: mediaId,
