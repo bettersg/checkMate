@@ -8,6 +8,7 @@ const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { calculateSimilarity } = require('./calculateSimilarity')
 const { defineString } = require('firebase-functions/params');
 const runtimeEnvironment = defineString("ENVIRONMENT")
+const { classifyText } = require("./common/classifier")
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -65,7 +66,7 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive;
       switch (interactive.type) {
         case "button_reply":
-          await onButtonReply(db, interactive.button_reply.id, from, message.id);
+          await onButtonReply(db, interactive.button_reply.id, message, message.id);
           break;
       }
       break;
@@ -88,6 +89,15 @@ async function newTextInstanceHandler(db, {
 
   let hasMatch = false;
   let matchedId;
+  const machineCategory = classifyText(text);
+  //TODO: check if new user and add user if so.
+  const userRef = db.collection("users").doc(from)
+  const userSnap = await userRef.get();
+  if (!userSnap.exists && machineCategory === "irrelevant") { //start welcome flow
+    await handleUserFirstMessage(from, userRef);
+    return;
+  }
+  //TODO: if new user, trigger onboarding flow with message.
   let textHash = hashMessage(text);  // hash of the original text
   let strippedText = stripPhone(text); // text stripped of phone nr
   let strippedTextHash = hashMessage(strippedText);  // hash of the stripped text
@@ -128,7 +138,8 @@ async function newTextInstanceHandler(db, {
     }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
-      category: "fake news", //Can be "fake news" or "scam"
+      machineCategory: machineCategory, //Can be "fake news" or "scam"
+      isMachineCategorised: machineCategory === "irrelevant" ? true : false,
       text: text, //text or caption
       strippedText: strippedText,
       textHash: textHash,
@@ -140,10 +151,14 @@ async function newTextInstanceHandler(db, {
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: false, //boolean, whether or not we have concluded the voting
+      isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting TODO:SET THIS IF CLASSIFER HAS SET IT
       truthScore: null, //float, the mean truth score
-      isIrrelevant: null, //bool, if majority voted irrelevant then update this
+      isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this  TODO:SET THIS IF CLASSIFER HAS SET IT
       isScam: null,
+      isSpam: null,
+      isLegitimate: null,
+      isUnsure: null,
+      isInfo: null,
       custom_reply: null, //string
     });
     messageId = writeResult.id;
@@ -194,7 +209,8 @@ async function newImageInstanceHandler(db, {
     });
     let writeResult = await db.collection('messages').add({
       type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
-      category: "fake news",
+      machineCategory: null,
+      isMachineCategorised: false,
       text: text, //text or caption
       hash: hash,
       mediaId: mediaId,
@@ -205,6 +221,10 @@ async function newImageInstanceHandler(db, {
       isAssessed: false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
       isScam: null,
+      isSpam: null,
+      isLegitimate: null,
+      isUnsure: null,
+      isInfo: null,
       isIrrelevant: null, //bool, if majority voted irrelevant then update this
       custom_reply: null, //string
     });
@@ -242,18 +262,46 @@ async function handleNewUser(messageObj) {
     const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0);
     await userRef.set({
       instanceCount: 0,
-      onboardMessageReceiptTime: messageTimestamp,
     })
+  } else {
+    if (!userSnap.get("onboardMessageReceiptTime")) {
+      await userRef.update({
+        onboardMessageReceiptTime: messageTimestamp,
+      })
+    }
   };
+
   let res = await sendWhatsappTextMessage("user", messageObj.from, responses.DEMO_SCAM_MESSAGE);
   await sleep(2000);
   await sendWhatsappTextMessage("user", messageObj.from, responses?.DEMO_SCAM_PROMPT, res.data.messages[0].id);
 }
 
+async function handleUserFirstMessage(from, userRef) {
+  const responses = await getResponsesObj("user");
+  const buttons = [{
+    type: "reply",
+    reply: {
+      id: "newUser_onboardingYes",
+      title: "Yes, show me!",
+    },
+  },
+  {
+    type: "reply",
+    reply: {
+      id: "newUser_onboardingNo",
+      title: "No, I'm good",
+    },
+  }];
+  await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons);
+  await userRef.set({
+    instanceCount: 0,
+  })
+}
+
 async function respondToDemoScam(messageObj) {
   const responses = await getResponsesObj("user")
   await sendWhatsappTextMessage("user", messageObj.from, responses?.SCAM, messageObj.id);
-  await sleep(2000);
+  await sleep(5000);
   const buttons = [{
     type: "reply",
     reply: {
@@ -271,7 +319,8 @@ async function respondToDemoScam(messageObj) {
   await sendWhatsappButtonMessage("user", messageObj.from, responses?.DEMO_END, buttons);
 }
 
-async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
+async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
+  const from = messageObj.from;
   const responses = await getResponsesObj("user")
   const [type, ...rest] = buttonId.split("_");
   let instancePath, selection;
@@ -302,6 +351,17 @@ async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp")
           break;
         case "sendContactNo":
           await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END);
+          break;
+      }
+      break;
+    case "newUser":
+      [selection] = rest;
+      switch (selection) {
+        case "onboardingYes":
+          await handleNewUser(messageObj);
+          break;
+        case "onboardingNo":
+          await sendWhatsappTextMessage("user", from, responses?.GET_STARTED);
           break;
       }
       break;
