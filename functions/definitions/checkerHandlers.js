@@ -221,10 +221,10 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       updateObj.vote = null;
       response = responses.RESPONSE_RECORDED
   }
+  await sendWhatsappTextMessage("factChecker", from, response, replyId);
   try {
     await voteRequestRef.update(updateObj);
   } catch (error) {
     functions.logger.warn(`No corresponding voteRequest with id ${voteRequestId} for message ${messageId} found`);
   }
-  await sendWhatsappTextMessage("factChecker", from, response, replyId);
 }
