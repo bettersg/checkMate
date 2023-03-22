@@ -91,9 +91,10 @@ async function newTextInstanceHandler(db, {
   let matchedId;
   const machineCategory = classifyText(text);
   //TODO: check if new user and add user if so.
-  const userSnap = await db.collection("users").doc(from).get();
+  const userRef = db.collection("users").doc(from)
+  const userSnap = await userRef.get();
   if (!userSnap.exists && machineCategory === "irrelevant") { //start welcome flow
-    await handleUserFirstMessage(from);
+    await handleUserFirstMessage(from, userRef);
     return;
   }
   //TODO: if new user, trigger onboarding flow with message.
@@ -137,7 +138,7 @@ async function newTextInstanceHandler(db, {
     }
     let writeResult = await db.collection('messages').add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
-      category: "fake news", //Can be "fake news" or "scam"
+      machineCategory: machineCategory, //Can be "fake news" or "scam"
       text: text, //text or caption
       strippedText: strippedText,
       textHash: textHash,
@@ -207,7 +208,7 @@ async function newImageInstanceHandler(db, {
     });
     let writeResult = await db.collection('messages').add({
       type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
-      category: "fake news",
+      machineCategory: null,
       text: text, //text or caption
       hash: hash,
       mediaId: mediaId,
@@ -259,15 +260,21 @@ async function handleNewUser(messageObj) {
     const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0);
     await userRef.set({
       instanceCount: 0,
-      onboardMessageReceiptTime: messageTimestamp,
     })
+  } else {
+    if (!userSnap.get("onboardMessageReceiptTime")) {
+      await userRef.update({
+        onboardMessageReceiptTime: messageTimestamp,
+      })
+    }
   };
+
   let res = await sendWhatsappTextMessage("user", messageObj.from, responses.DEMO_SCAM_MESSAGE);
   await sleep(2000);
   await sendWhatsappTextMessage("user", messageObj.from, responses?.DEMO_SCAM_PROMPT, res.data.messages[0].id);
 }
 
-async function handleUserFirstMessage(from) {
+async function handleUserFirstMessage(from, userRef) {
   const responses = await getResponsesObj("user");
   const buttons = [{
     type: "reply",
@@ -284,6 +291,9 @@ async function handleUserFirstMessage(from) {
     },
   }];
   await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons);
+  await userRef.set({
+    instanceCount: 0,
+  })
 }
 
 async function respondToDemoScam(messageObj) {
