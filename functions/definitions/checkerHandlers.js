@@ -107,6 +107,10 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
   const db = admin.firestore();
   const messageRef = db.collection("messages").doc(messageId);
   const messageSnap = await messageRef.get();
+  if (!messageSnap.exists) {
+    functions.logger.log(`No corresponding message ${messageId} found`);
+    return;
+  }
   const message = messageSnap.data();
   const voteRequestSnap = await messageRef.collection("voteRequests").where("platformId", "==", from).where("platform", "==", platform).get();
   if (voteRequestSnap.empty) {
@@ -210,6 +214,10 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       updateObj.vote = null;
       response = responses.RESPONSE_RECORDED
   }
-  await voteRequestRef.update(updateObj);
+  try {
+    await voteRequestRef.update(updateObj);
+  } catch (error) {
+    functions.logger.warn(`No corresponding voteRequest with id ${voteRequestId} for message ${messageId} found`);
+  }
   await sendWhatsappTextMessage("factChecker", from, response, replyId);
 }
