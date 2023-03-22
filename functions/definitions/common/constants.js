@@ -15,10 +15,12 @@ exports.USER_BOT_RESPONSES = {
   SCAMSHIELD_SEEK_CONSENT: "Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.",
   SCAMSHIELD_ON_CONSENT: "Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!",
   SCAMSHIELD_ON_DECLINE: `No worries! We will not be sending your message to ScamShield. If you change your mind, you can still hit "Yes" above. Thank you for sharing this message with us, and for keeping Singapore safe!`,
-  DEMO_SCAM_MESSAGE: "Imagine this is a scam message that you receive in another WhatsApp chat. Forward me in to this same chat to try how CheckMate works!",
-  DEMO_SCAM_PROMPT: "If you receive a scam message like this demo one above, just forward or copy and send it to this number. Go ahead and try it to see how CheckMate works!",
-  DEMO_END: "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! Please only send in messages that you're unsure of, because our CheckMates have to review these messages.\n\nNow that you know how it works, would you like to add CheckMate to your contact list for easy finding in the future?",
+  DEMO_SCAM_MESSAGE: "Imagine this is a scam message that you receive in another WhatsApp chat. *Forward me in to this same chat* to try how CheckMate works!",
+  DEMO_SCAM_PROMPT: "If you receive a scam message like this simulated one one above, just forward or copy and send it to this number. Go ahead and try it to see how CheckMate works!",
+  DEMO_END: "See how it works now? When you see a message that you're unsure of 🤔, just forward it in and we'll help you check it ✅✅. It works for images/photos too! Please only send in messages that you're unsure of, because our CheckMates have to review these messages 🙏.\n\nNow that you know how it works, would you like to add CheckMate to your contact list for easy finding in the future?",
   ONBOARDING_END: "And that's it! If you want to learn more, you can visit https://checkmate.sg. If you have any feedback, do submit it at https://bit.ly/checkmate-feedback. Now, you can start sending in messages, and let's go do our part in the fight against scams and fake news! 💪",
+  NEW_USER: "Hello and welcome to CheckMate! We're glad you're here 😊. Would you like to go through a quick onboarding to see how CheckMate works? Otherwise, you can go ahead and send in dubious messages right now!",
+  GET_STARTED: "No worries! You can get started immediately by sending in dubious messages you're unsure about. To learn more, you can visit https://checkmate.sg. Please only send in messages that you're unsure of, because our CheckMates will have to review these messages 🙏. Thank you!"
 };
 
 exports.FACTCHECKER_BOT_RESPONSES = {

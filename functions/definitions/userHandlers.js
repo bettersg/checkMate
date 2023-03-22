@@ -66,7 +66,7 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive;
       switch (interactive.type) {
         case "button_reply":
-          await onButtonReply(db, interactive.button_reply.id, from, message.id);
+          await onButtonReply(db, interactive.button_reply.id, message, message.id);
           break;
       }
       break;
@@ -91,6 +91,11 @@ async function newTextInstanceHandler(db, {
   let matchedId;
   const machineCategory = classifyText(text);
   //TODO: check if new user and add user if so.
+  const userSnap = await db.collection("users").doc(from).get();
+  if (!userSnap.exists && machineCategory === "irrelevant") { //start welcome flow
+    await handleUserFirstMessage(from);
+    return;
+  }
   //TODO: if new user, trigger onboarding flow with message.
   let textHash = hashMessage(text);  // hash of the original text
   let strippedText = stripPhone(text); // text stripped of phone nr
@@ -262,10 +267,29 @@ async function handleNewUser(messageObj) {
   await sendWhatsappTextMessage("user", messageObj.from, responses?.DEMO_SCAM_PROMPT, res.data.messages[0].id);
 }
 
+async function handleUserFirstMessage(from) {
+  const responses = await getResponsesObj("user");
+  const buttons = [{
+    type: "reply",
+    reply: {
+      id: "newUser_onboardingYes",
+      title: "Yes, show me!",
+    },
+  },
+  {
+    type: "reply",
+    reply: {
+      id: "newUser_onboardingNo",
+      title: "No, I'm good",
+    },
+  }];
+  await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons);
+}
+
 async function respondToDemoScam(messageObj) {
   const responses = await getResponsesObj("user")
   await sendWhatsappTextMessage("user", messageObj.from, responses?.SCAM, messageObj.id);
-  await sleep(2000);
+  await sleep(5000);
   const buttons = [{
     type: "reply",
     reply: {
@@ -283,7 +307,8 @@ async function respondToDemoScam(messageObj) {
   await sendWhatsappButtonMessage("user", messageObj.from, responses?.DEMO_END, buttons);
 }
 
-async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
+async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
+  const from = messageObj.from;
   const responses = await getResponsesObj("user")
   const [type, ...rest] = buttonId.split("_");
   let instancePath, selection;
@@ -314,6 +339,17 @@ async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp")
           break;
         case "sendContactNo":
           await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END);
+          break;
+      }
+      break;
+    case "newUser":
+      [selection] = rest;
+      switch (selection) {
+        case "onboardingYes":
+          await handleNewUser(messageObj);
+          break;
+        case "onboardingNo":
+          await sendWhatsappTextMessage("user", from, responses?.GET_STARTED);
           break;
       }
       break;
