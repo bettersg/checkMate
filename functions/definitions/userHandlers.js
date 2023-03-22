@@ -8,6 +8,7 @@ const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils');
 const { calculateSimilarity } = require('./calculateSimilarity')
 const { defineString } = require('firebase-functions/params');
 const runtimeEnvironment = defineString("ENVIRONMENT")
+const { classifyText } = require("./common/classifier")
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -88,7 +89,7 @@ async function newTextInstanceHandler(db, {
 
   let hasMatch = false;
   let matchedId;
-  //TODO:classify here
+  const machineCategory = classifyText(text);
   //TODO: check if new user and add user if so.
   //TODO: if new user, trigger onboarding flow with message.
   let textHash = hashMessage(text);  // hash of the original text
@@ -143,9 +144,9 @@ async function newTextInstanceHandler(db, {
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: false, //boolean, whether or not we have concluded the voting TODO:SET THIS IF CLASSIFER HAS SET IT
+      isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting TODO:SET THIS IF CLASSIFER HAS SET IT
       truthScore: null, //float, the mean truth score
-      isIrrelevant: null, //bool, if majority voted irrelevant then update this  TODO:SET THIS IF CLASSIFER HAS SET IT
+      isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this  TODO:SET THIS IF CLASSIFER HAS SET IT
       isScam: null,
       isSpam: null,
       isLegitimate: null,
