@@ -119,6 +119,7 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
     if (voteRequestSnap.size > 1) {
       functions.logger.log(`More than 1 voteRequest with platformId ${from} found`);
     }
+    let res;
     switch (message.type) {
       case "text":
         res = await sendTextMessage("factChecker", from, message.text, null, platform);
@@ -128,12 +129,12 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
         res = await sendImageMessage("factChecker", from, temporaryUrl, message.text, null, platform);
         break;
     }
-    voteRequestSnap.docs[0].ref.update({
+    await voteRequestSnap.docs[0].ref.update({
       hasAgreed: true,
       sentMessageId: res.data.messages[0].id,
     })
-    await sleep(2000);
-    sendL1CategorisationMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
+    await sleep(3000);
+    await sendL1CategorisationMessage(voteRequestSnap.docs[0], messageRef, res.data.messages[0].id)
   }
 }
 
