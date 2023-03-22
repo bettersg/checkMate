@@ -32,7 +32,7 @@ exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRe
       const sections = [{
         rows: rows,
       }];
-      await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.L1_SCAM_ASSESSMENT_PROMPT, "Make Selection", sections, voteRequestData.sentMessageId);
+      await sendWhatsappTextListMessage("factChecker", voteRequestData.platformId, responses.L1_ASSESSMENT_PROMPT, "Make Selection", sections, voteRequestData.sentMessageId);
       break;
     case "telegram":
       break

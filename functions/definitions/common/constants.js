@@ -24,7 +24,7 @@ exports.USER_BOT_RESPONSES = {
 exports.FACTCHECKER_BOT_RESPONSES = {
   VOTE_NO: "No problem! If you wish to come back and assess the message, you may do so by clicking the 'yes' button. See you soon!😊",
   FACTCHECK_PROMPT: "Please vote on the new viral message above. If there is no claim in the message, select 'No Claim Made'. Otherwise, assess the veracity of the claim(s) on a scale from 0 to 5, where 0 means the claim(s) are entirely false, and 5 means the claim(s) are entirely true.",
-  L1_SCAM_ASSESSMENT_PROMPT: "Which of these categories better describes this message?",
+  L1_ASSESSMENT_PROMPT: "Which of these categories better describes this message?",
   L2_OTHERS_ASSESSEMENT_PROMPT: "Which of these subcategories better describes this message?",
   RESPONSE_RECORDED: "Got it! Your response has been recorded. Thank you for playing your part in the fight against scams and misinformation, one message at a time! 💪",
   HOLD_FOR_NEXT_POLL: "Got it👍! Please hold for another poll to vote on how true the message is.",
