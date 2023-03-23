@@ -8,6 +8,9 @@ const testUserPhoneNumberId = defineString("WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_
 const testCheckerPhoneNumberId = defineString("WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID")
 
 async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null, previewUrl = false) {
+    if (text.length > 4096) {
+        text = `${text.slice(0, 4000)}...*[TRUNCATED, MSG TOO LONG FOR WHATSAPP]*`
+    }
     const data = {
         text: { body: text, preview_url: previewUrl },
         to: to,
@@ -23,6 +26,9 @@ async function sendWhatsappTextMessage(bot, to, text, replyMessageId = null, pre
 }
 
 async function sendWhatsappImageMessage(bot, to, id, url = null, caption = null, replyMessageId = null) {
+    if (caption && caption.length > 1024) {
+        caption = `${caption.slice(0, 950)}...*[TRUNCATED, MSG TOO LONG FOR WHATSAPP]*`
+    }
     const mediaObj = {};
     if (url) {
         mediaObj.link = url;
