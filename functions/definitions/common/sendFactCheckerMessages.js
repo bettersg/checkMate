@@ -1,6 +1,5 @@
 const { sendWhatsappTextListMessage, sendWhatsappTextMessage, sendWhatsappButtonMessage } = require("./sendWhatsappMessage");
 const { getResponsesObj } = require("./responseUtils");
-const admin = require("firebase-admin");
 
 exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRef, replyId = null) {
   const voteRequestData = voteRequestSnap.data();
