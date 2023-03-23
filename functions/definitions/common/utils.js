@@ -132,4 +132,3 @@ exports.stripPhone = stripPhone;
 exports.stripUrl = stripUrl;
 exports.hashMessage = hashMessage;
 exports.sleep = sleep;
-
