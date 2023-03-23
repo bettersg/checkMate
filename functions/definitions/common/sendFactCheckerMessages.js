@@ -1,5 +1,6 @@
-const { sendWhatsappTextListMessage } = require("./sendWhatsappMessage");
+const { sendWhatsappTextListMessage, sendWhatsappTextMessage, sendWhatsappButtonMessage } = require("./sendWhatsappMessage");
 const { getResponsesObj } = require("./responseUtils");
+const admin = require("firebase-admin");
 
 exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRef, replyId = null) {
   const voteRequestData = voteRequestSnap.data();
@@ -112,3 +113,14 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
   }
 };
 
+exports.sendReminderMessage = async function (to, numOutstanding, voteRequestPath) {
+  const responses = await getResponsesObj("factChecker");
+  const buttons = [{
+    type: "reply",
+    reply: {
+      id: `continueOutstanding_${voteRequestPath}`,
+      title: "Yes, send the next!",
+    },
+  }];
+  await sendWhatsappButtonMessage("factChecker", to, responses.OUTSTANDING_REMINDER.replace("{{num_outstanding}}", `${numOutstanding}`), buttons);
+}

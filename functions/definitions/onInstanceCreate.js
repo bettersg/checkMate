@@ -58,31 +58,37 @@ async function upsertUser(from, messageTimestamp, instanceRef) {
 }
 
 async function despatchPoll(messageRef) {
-  const messageId = messageRef.id
   const db = admin.firestore();
   const factCheckersSnapshot = await db.collection('factCheckers').where('isActive', '==', true).get();
   if (!factCheckersSnapshot.empty) {
-    const despatchPromises = factCheckersSnapshot.docs.map(factCheckerDoc => sendTemplateMessageAndCreateVoteRequest(factCheckerDoc.data(), messageId, factCheckerDoc, messageRef));
+    const despatchPromises = factCheckersSnapshot.docs.map(factCheckerDocSnap => sendTemplateMessageAndCreateVoteRequest(factCheckerDocSnap, messageRef));
     await Promise.all(despatchPromises);
   }
 }
 
-function sendTemplateMessageAndCreateVoteRequest(factChecker, messageId, doc, messageRef) {
+function sendTemplateMessageAndCreateVoteRequest(factCheckerDocSnap, messageRef) {
+  const factChecker = factCheckerDocSnap.data()
   if (factChecker?.preferredPlatform === "whatsapp") {
-    return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [messageId, messageId], "factChecker")
-      .then(() => {
-        return messageRef.collection("voteRequests").add({
-          factCheckerDocRef: doc.ref,
-          platformId: factChecker.platformId,
-          hasAgreed: false,
-          triggerL2Vote: null,
-          triggerL2Others: null,
-          platform: "whatsapp",
-          sentMessageId: null,
-          category: null,
-          vote: null,
-        });
-      });
+    // First, add the voteRequest object to the "voteRequests" sub-collection
+    return messageRef.collection("voteRequests").add({
+      factCheckerDocRef: factCheckerDocSnap.ref,
+      platformId: factChecker.platformId,
+      hasAgreed: false,
+      triggerL2Vote: null,
+      triggerL2Others: null,
+      platform: "whatsapp",
+      sentMessageId: null,
+      category: null,
+      vote: null,
+    }).then((writeResult) => {
+      // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
+      promiseSendTemplate = sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [`${writeResult.path}`, `${writeResult.path}`], "factChecker");
+      promiseAddOutstanding = factCheckerDocSnap.ref.collection("outstandingVoteRequests").doc(`${messageRef.id}`).set({
+        voteRequestDocRef: writeResult,
+      })
+      promiseArr = [promiseSendTemplate, promiseAddOutstanding]
+      return Promise.all(promiseArr)
+    });
   } else if (factChecker?.preferredPlatform === "telegram") {
     //not yet implemented
   } else {

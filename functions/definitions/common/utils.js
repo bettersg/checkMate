@@ -128,8 +128,13 @@ function hashMessage(originalStr) {
   return createHash('md5').update(originalStr).digest('hex');
 }
 
+function findIntersection(arr1, arr2) {
+  const set2 = new Set(arr2);
+  return arr1.filter(item => set2.has(item));
+}
+
 exports.stripPhone = stripPhone;
 exports.stripUrl = stripUrl;
 exports.hashMessage = hashMessage;
 exports.sleep = sleep;
-
+exports.findIntersection = findIntersection;

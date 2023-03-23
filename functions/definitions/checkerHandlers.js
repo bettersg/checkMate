@@ -4,7 +4,7 @@ const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { getResponsesObj } = require("./common/responseUtils");
 const { sleep } = require("./common/utils")
-const { sendL1CategorisationMessage } = require("./common/sendFactCheckerMessages")
+const { sendL1CategorisationMessage, sendReminderMessage } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
@@ -22,7 +22,12 @@ exports.checkerHandlerWhatsapp = async function (message) {
       const button = message.button;
       switch (button.text) {
         case "Yes!":
-          await onFactCheckerYes(button.payload, from, "whatsapp")
+          try {
+            await onFactCheckerYes(button.payload, from, "whatsapp");
+          } catch {
+            functions.logger.log(`New onFactCheckerYes failed, payload = ${button.payload}`)
+            await onFactCheckerYes_old(button.payload, from, "whatsapp");
+          }
           break;
         case "No":
           responses = await getResponsesObj("factChecker");
@@ -103,7 +108,7 @@ async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
   }
 }
 
-async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
+async function onFactCheckerYes_old(messageId, from, platform = "whatsapp") {
   const db = admin.firestore();
   const messageRef = db.collection("messages").doc(messageId);
   const messageSnap = await messageRef.get();
@@ -144,6 +149,70 @@ async function onFactCheckerYes(messageId, from, platform = "whatsapp") {
   }
 }
 
+async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
+  const db = admin.firestore();
+  if (!voteRequestPath.includes('/')) {
+    throw new Error("The voteRequestPath does not contain a forward slash (/).");
+  }
+  const voteRequestRef = db.doc(voteRequestPath);
+  const voteRequestSnap = await voteRequestRef.get();
+  if (!voteRequestSnap.exists) {
+    functions.logger.log(`No corresponding voteRequest at ${voteRequestPath} found`);
+    return;
+  }
+  if (!!voteRequestSnap.get("category")) {
+    await sendTextMessage("factChecker", from, "Oops! you have already checked this message 👍", null, platform);
+    await sendRemainingReminder(from, "whatsapp");
+    return;
+  }
+  const messageRef = voteRequestRef.parent.parent;
+  const messageSnap = await messageRef.get();
+  const message = messageSnap.data();
+  let res;
+  switch (message.type) {
+    case "text":
+      res = await sendTextMessage("factChecker", from, message.text, null, platform);
+      break;
+    case "image":
+      const temporaryUrl = await getSignedUrl(message.storageUrl);
+      if (temporaryUrl) {
+        res = await sendImageMessage("factChecker", from, temporaryUrl, message.text, null, platform);
+      } else {
+        functions.logger.warn("Problem creating URL")
+        await sendTextMessage("factChecker", from, "Sorry, an error occured", null, platform);
+        return;
+      }
+      break;
+  }
+  await voteRequestSnap.ref.update({
+    hasAgreed: true,
+    sentMessageId: res.data.messages[0].id,
+  })
+  await sleep(3000);
+  await sendL1CategorisationMessage(voteRequestSnap, messageRef, res.data.messages[0].id)
+
+}
+
+async function sendRemainingReminder(factCheckerId, platform) {
+  const db = admin.firestore();
+  const outstandingVoteRequestsQuerySnap = await db.collection("factCheckers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();
+  const remainingCount = outstandingVoteRequestsQuerySnap.size;
+  if (remainingCount == 0) {
+    await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
+    return;
+  }
+  const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
+  const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
+  const urgentVoteRequestsDocSnapList = outstandingVoteRequestsQuerySnap.docs.filter((docSnap) => unassessedMessageIdList.includes(docSnap.ref.id))
+  let nextVoteRequestPath
+  if (urgentVoteRequestsDocSnapList.length > 0) {
+    nextVoteRequestPath = urgentVoteRequestsDocSnapList[0].get("voteRequestDocRef").path
+  } else {
+    nextVoteRequestPath = outstandingVoteRequestsQuerySnap.docs[0].get("voteRequestDocRef").path
+  }
+  await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
+};
+
 async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
   // let messageId, voteRequestId, type
   const responses = await getResponsesObj("factChecker");
@@ -167,8 +236,13 @@ async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp")
         })
         break;
     }
+  } else {
+    switch (buttonMessageRef) {
+      case "continueOutstanding":
+        const [voteRequestPath] = rest;
+        await onFactCheckerYes(voteRequestPath, from, platform);
+    }
   }
-
 }
 
 async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp") {
@@ -176,6 +250,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
   const [type, messageId, voteRequestId, selection] = listId.split("_");
   const voteRequestRef = db.collection("messages").doc(messageId).collection("voteRequests").doc(voteRequestId);
   const updateObj = {}
+  let isEnd = false;
   let response;
   switch (type) {
     case "vote":
@@ -183,6 +258,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       updateObj.category = "info";
       updateObj.vote = parseInt(vote);
       response = responses.RESPONSE_RECORDED;
+      isEnd = true
       break;
 
     case "categorize":
@@ -193,6 +269,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
           updateObj.category = "scam";
           updateObj.vote = null;
           response = responses.RESPONSE_RECORDED;
+          isEnd = true;
           break;
         case "illicit":
           updateObj.triggerL2Vote = false;
@@ -200,6 +277,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
           updateObj.category = "illicit";
           updateObj.vote = null;
           response = responses.RESPONSE_RECORDED;
+          isEnd = true;
           break;
 
         case "info":
@@ -220,8 +298,14 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       updateObj.category = selection;
       updateObj.vote = null;
       response = responses.RESPONSE_RECORDED
+      isEnd = true;
   }
   await sendWhatsappTextMessage("factChecker", from, response, replyId);
+  if (isEnd) {
+    await db.collection("factCheckers").doc(`${from}`).collection("outstandingVoteRequests").doc(`${messageId}`).delete() //deletes message from outstanding list
+    await sleep(4000);
+    await sendRemainingReminder(from, "whatsapp");
+  }
   try {
     await voteRequestRef.update(updateObj);
   } catch (error) {
