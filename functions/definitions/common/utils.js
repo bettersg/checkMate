@@ -7,6 +7,7 @@ const { defineString } = require('firebase-functions/params');
 const { findPhoneNumbersInText } = require('libphonenumber-js');
 const { createHash } = require('crypto');
 
+const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
 
 if (!admin.apps.length) {
@@ -65,18 +66,20 @@ const mockDb = async function () {
   })
   await systemParametersRef.doc('thresholds').set(thresholds)
   const factCheckersRef = db.collection('factCheckers');
-  await factCheckersRef.doc(checker1PhoneNumber.value()).set({
-    name: "Bing Wen",
-    isActive: true,
-    isOnboardingComplete: true,
-    platformId: checker1PhoneNumber.value(),
-    level: 1,
-    experience: 0,
-    numVoted: 0,
-    numCorrectVotes: 0,
-    numVerifiedLinks: 0,
-    preferredPlatform: "whatsapp",
-  }, { merge: true })
+  if (runtimeEnvironment.value() !== "PROD") {
+    await factCheckersRef.doc(checker1PhoneNumber.value()).set({
+      name: "Bing Wen",
+      isActive: true,
+      isOnboardingComplete: true,
+      platformId: checker1PhoneNumber.value(),
+      level: 1,
+      experience: 0,
+      numVoted: 0,
+      numCorrectVotes: 0,
+      numVerifiedLinks: 0,
+      preferredPlatform: "whatsapp",
+    }, { merge: true })
+  }
   functions.logger.log("mocked")
 }
 
