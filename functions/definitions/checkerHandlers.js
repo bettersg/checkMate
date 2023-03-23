@@ -195,7 +195,7 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
 
 async function sendRemainingReminder(factCheckerId, platform) {
   const db = admin.firestore();
-  const outstandingVoteRequestsQuerySnap = await db.collection("factCheckers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();
+  const outstandingVoteRequestsQuerySnap = await db.collection("factChec5kers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();
   const remainingCount = outstandingVoteRequestsQuerySnap.size;
   if (remainingCount == 0) {
     await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
@@ -303,7 +303,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
   await sendWhatsappTextMessage("factChecker", from, response, replyId);
   if (isEnd) {
     await db.collection("factCheckers").doc(`${from}`).collection("outstandingVoteRequests").doc(`${messageId}`).delete() //deletes message from outstanding list
-    await sleep(4000);
+    await sleep(4500);
     await sendRemainingReminder(from, "whatsapp");
   }
   try {
