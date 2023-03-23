@@ -21,7 +21,7 @@ exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRe
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_info`,
           title: "News/Information/Opinion",
-          description: "Messages intended to inform/convince a broad base of people"
+          description: "Messages intended to inform/convince/mislead a broad base of people"
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_others`,
