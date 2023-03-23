@@ -258,14 +258,16 @@ async function handleNewUser(messageObj) {
   const responses = await getResponsesObj("user");
   const userRef = db.collection('users').doc(messageObj.from);
   const userSnap = await userRef.get();
+  const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0)
   if (!userSnap.exists) {
     await userRef.set({
       instanceCount: 0,
+      onboardMessageReceiptTime: messageTimestamp,
     })
   } else {
     if (!userSnap.get("onboardMessageReceiptTime")) {
       await userRef.update({
-        onboardMessageReceiptTime: new Timestamp(parseInt(messageObj.timestamp), 0),
+        onboardMessageReceiptTime: messageTimestamp,
       })
     }
   };
