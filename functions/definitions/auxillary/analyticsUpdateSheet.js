@@ -63,13 +63,21 @@ async function getFirestoreData() {
   const registeredCheckersCount = registeredCheckersSnapshot.data().count;
 
   let repeatCheckers = 0;
-
-  (await dbRefCheckers.get()).forEach((doc) => {
-    if (doc.get('numVoted') >= 1) {
-      repeatCheckers += 1
+  let individualCheckersData = {};
+  const dbSnapCheckers = await dbRefCheckers.get()
+  for (const doc of dbSnapCheckers.docs) {
+    const factCheckerId = doc.id;
+    const outstandingVoteRequestsQuerySnap = await db.collectionGroup('voteRequests').where('platformId', '==', factCheckerId).where("category", "==", null).get();
+    const totalSentVoteRequestsQuerySnap = await db.collectionGroup('voteRequests').where('platformId', '==', factCheckerId).get();
+    const totalSentVoteRequests = totalSentVoteRequestsQuerySnap.size;
+    const outstandingVoteRequests = outstandingVoteRequestsQuerySnap.size;
+    individualCheckersData[factCheckerId] = {
+      A: factCheckerId, //id
+      B: totalSentVoteRequests, //total votes sent
+      C: totalSentVoteRequests - outstandingVoteRequests, //total voted on
+      D: 1 - (outstandingVoteRequests / totalSentVoteRequests), //completion rate
     }
-  })
-
+  }
   const data = {
     registeredUserCount,
     repeatUsers,
@@ -77,6 +85,7 @@ async function getFirestoreData() {
     activeUsersThisWeek,
     registeredCheckersCount,
     repeatCheckers,
+    individualCheckersData,
   }
 
   return { data, date }
@@ -98,18 +107,54 @@ async function updateSheet(data, date, auth) {
     [data?.['bit.ly/join-checkmates'], "H3"],
     [data?.['bit.ly/checkmate-privacy'], "J3"]
   ]
+  // Add the individual checkers data
+  let checkersHeadersRow = 25;
+  for (const [factCheckerId, factCheckerData] of Object.entries(data?.individualCheckersData ?? {})) {
+    checkersHeadersRow += 1;
+    for (const [key, value] of Object.entries(factCheckerData)) {
+      sheetUpdateDataAndCell.push([value, `${key}${checkersHeadersRow}`]);
+    }
+  }
 
-  sheetUpdateDataAndCell.map(([cellData, cellIndex]) => {
-    sheetsAPI.spreadsheets.values.update({
-      spreadsheetId: process.env.SPREADSHEET_ID,
-      range: `main!${cellIndex}`,
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [[cellData]],
+  functions.logger.log(sheetUpdateDataAndCell);
+
+  // Prepare the batch update request
+  const updateRequests = sheetUpdateDataAndCell.map(([cellData, cellIndex]) => {
+    return {
+      updateCells: {
+        range: {
+          sheetId: 0, // Assuming the first sheet
+          startRowIndex: cellIndex.slice(1) - 1,
+          endRowIndex: cellIndex.slice(1),
+          startColumnIndex: cellIndex.charCodeAt(0) - 65,
+          endColumnIndex: cellIndex.charCodeAt(0) - 64,
+        },
+        rows: [
+          {
+            values: [
+              {
+                userEnteredValue: {
+                  stringValue: cellData.toString(),
+                },
+              },
+            ],
+          },
+        ],
+        fields: 'userEnteredValue',
       },
-      headers,
-    });
-  })
+    };
+  });
+
+  const batchUpdateRequest = {
+    spreadsheetId: process.env.SPREADSHEET_ID,
+    resource: {
+      requests: updateRequests,
+    },
+    headers,
+  };
+
+  // Perform the batch update
+  await sheetsAPI.spreadsheets.batchUpdate(batchUpdateRequest);
 }
 
 async function getBitlyMetrics(token) {
