@@ -66,7 +66,7 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
         isAssessed: isAssessed,
       });
       if (after.category !== null) { //vote has ended
-        await db.collection("factCheckers").doc(`${after.factCheckerDocRef.id}`).collection("outstandingVoteRequests").doc(`${messageRef.id}`).delete() //deletes message from outstanding list
+        await db.collection("factCheckers").doc(`${after.factCheckerDocRef.id}`).collection("outstandingVoteRequests").doc(`${messageRef.id}`).delete() //deletes message from outstanding list TODO: Remove this once collectionGroup mechanism proven working
         await sendRemainingReminder(after.factCheckerDocRef.id, after.platform);
       }
     }

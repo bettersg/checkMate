@@ -83,7 +83,7 @@ function sendTemplateMessageAndCreateVoteRequest(factCheckerDocSnap, messageRef)
     }).then((writeResult) => {
       // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
       promiseSendTemplate = sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [`${writeResult.path}`, `${writeResult.path}`], "factChecker");
-      promiseAddOutstanding = factCheckerDocSnap.ref.collection("outstandingVoteRequests").doc(`${messageRef.id}`).set({
+      promiseAddOutstanding = factCheckerDocSnap.ref.collection("outstandingVoteRequests").doc(`${messageRef.id}`).set({ //TODO: Remove this once collectionGroup mechanism proven working
         voteRequestDocRef: writeResult,
       })
       promiseArr = [promiseSendTemplate, promiseAddOutstanding]
