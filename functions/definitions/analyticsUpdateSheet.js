@@ -35,16 +35,24 @@ async function getFirestoreData() {
       repeatUsers += 1
     }
 
-    const midnightToday = new Date().setHours(0, 0, 0, 0);
-    if (doc.get('lastSent') >= midnightToday) {
-      activeUsersToday += 1
+    const today = new Date();
+    const lastSentDate = doc.get('lastSent');
+
+
+    if (lastSentDate) {
+
+      const oneDayAgo = subtractHours(today, 24)
+      if (lastSentDate.toDate() >= oneDayAgo) {
+        activeUsersToday += 1
+      }
+
+      const sevenDaysAgo = subtractHours(today, 24 * 7)
+      if (lastSentDate.toDate() >= sevenDaysAgo) {
+        activeUsersThisWeek += 1
+      }
     }
 
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0)
-    const lastSentDate = doc.get('lastSent');
-    if (lastSentDate._seconds * 1000 >= sevenDaysAgo) {
-      activeUsersThisWeek += 1
-    }
+
   })
 
   /**
@@ -120,6 +128,11 @@ async function getBitlyMetrics(token) {
   }
 
   return bitlyClickCount;
+}
+
+function subtractHours(date, hours) {
+  date.setHours(date.getHours() - hours);
+  return date;
 }
 
 exports.analyticsUpdateSheet = functions
