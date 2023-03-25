@@ -21,6 +21,8 @@ erDiagram
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string customReply "Not used for now"
+        collection instances
+        collection voteRequests
     }
 
     instance {
@@ -43,7 +45,7 @@ erDiagram
         boolean scamShieldConsent
     }
 
-    voteRequests {
+    voteRequest {
         string id PK "Assigned by Firestore"
         reference factCheckerDocRef FK "link to factChecker"
         string platformId "whatsapp number or telegram Id"
@@ -68,6 +70,12 @@ erDiagram
         number numVerifiedLinks "Not used for now"
         string preferredPlatform"whatsapp/telegram, only whatsapp used for now"
 				string getNameMessageId "ID of the message sent to prompt factChecker for their name. Used to track reply."
+        collection outstandingVoteRequests
+    }
+
+    outstandingVoteRequest {
+      string id PK "message id"
+      reference voteRequestDocRef FK "reference to voteRequests"
     }
 
 		user {
@@ -79,5 +87,7 @@ erDiagram
 
     message ||--|{ instance: has
 		user ||--|{ instance: sends
-    message ||--o{ voteRequests: triggers
-    factChecker ||--o{ voteRequests: responds_to
+    message ||--o{ voteRequest: triggers
+    factChecker ||--o{ voteRequest: responds_to
+    factChecker ||--o{ outstandingVoteRequest: has_yet_to_respond_to
+    outstandingVoteRequest ||--|| voteRequest: is
