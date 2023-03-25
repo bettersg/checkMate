@@ -140,7 +140,7 @@ async function sendRemainingReminder(factCheckerId, platform) {
     });
     const nextVoteRequestPath = sortedVoteRequestDocs[0].ref.path;
     await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
-  } catch (error) {
+  } catch (error) { //TODO: remove this catch block once we are sure that the new code works
     functions.logger.error
     functions.logger.log("Error sending reminder message with collectionGroup query");
     const outstandingVoteRequestsQuerySnap = await db.collection("factCheckers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();

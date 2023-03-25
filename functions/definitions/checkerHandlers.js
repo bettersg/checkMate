@@ -24,7 +24,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
         case "Yes!":
           try {
             await onFactCheckerYes(button.payload, from, "whatsapp");
-          } catch {
+          } catch { //TODO: can remove this once we are sure no one will submit button messages sent under the old format.
             functions.logger.log(`New onFactCheckerYes failed, payload = ${button.payload}`)
             await onFactCheckerYes_old(button.payload, from, "whatsapp");
           }
