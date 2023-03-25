@@ -7,7 +7,7 @@ const webhookHandler =
 const onVoteRequestUpdate =
   require("./definitions/onVoteRequestUpdate");
 const analyticsUpdateSheet =
-  require("./definitions/analyticsUpdateSheet");
+  require("./definitions/auxillary/analyticsUpdateSheet");
 
 // our stuff, uncomment when ready!
 exports.onInstanceCreate = onInstanceCreate.onInstanceCreate;
