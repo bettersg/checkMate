@@ -3,7 +3,7 @@ exports.USER_BOT_RESPONSES = {
   3.5: "🚧🚧 Thank you for waiting! Our CheckMates have reviewed the message and think that *while some elements within could be true, it's presented in a misleading way*.⚠️\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧.\n\nThank you for keeping Singapore informed!",
   5: "✅✅ Thank you for waiting! Our CheckMates have reviewed the message and think that it's *accurate*.✅\n\nThank you for keeping Singapore informed!",
   IRRELEVANT: "Thanks for waiting! Our CheckMates have reviewed the message and think it's *harmless*.👌 Still, such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in trivial messages in the future!",
-  IRRELEVANT_AUTO: "Thanks for waiting! This message is likely *harmless*.👌 Still, such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in trivial messages in the future!",
+  IRRELEVANT_AUTO: "Thanks for waiting! This message is likely *harmless*.👌 Still, such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages in the future!",
   NO_SCORE: "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
   MESSAGE_NOT_YET_ASSESSED: "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
   SCAM: "⛔️⛔️ Thanks for waiting! Our CheckMates have reviewed the message and think this is likely a *scam*!🚫\n\nWe recommend you do not engage further⛔️",
