@@ -4,7 +4,7 @@ const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { getResponsesObj } = require("./common/responseUtils");
 const { sleep } = require("./common/utils")
-const { sendL1CategorisationMessage, sendReminderMessage } = require("./common/sendFactCheckerMessages")
+const { sendL1CategorisationMessage } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
@@ -193,26 +193,6 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
 
 }
 
-async function sendRemainingReminder(factCheckerId, platform) {
-  const db = admin.firestore();
-  const outstandingVoteRequestsQuerySnap = await db.collection("factCheckers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();
-  const remainingCount = outstandingVoteRequestsQuerySnap.size;
-  if (remainingCount == 0) {
-    await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
-    return;
-  }
-  const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
-  const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
-  const urgentVoteRequestsDocSnapList = outstandingVoteRequestsQuerySnap.docs.filter((docSnap) => unassessedMessageIdList.includes(docSnap.ref.id))
-  let nextVoteRequestPath
-  if (urgentVoteRequestsDocSnapList.length > 0) {
-    nextVoteRequestPath = urgentVoteRequestsDocSnapList[0].get("voteRequestDocRef").path
-  } else {
-    nextVoteRequestPath = outstandingVoteRequestsQuerySnap.docs[0].get("voteRequestDocRef").path
-  }
-  await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
-};
-
 async function onButtonReply(db, buttonId, from, replyId, platform = "whatsapp") {
   // let messageId, voteRequestId, type
   const responses = await getResponsesObj("factChecker");
@@ -301,11 +281,6 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       isEnd = true;
   }
   await sendWhatsappTextMessage("factChecker", from, response, replyId);
-  if (isEnd) {
-    await db.collection("factCheckers").doc(`${from}`).collection("outstandingVoteRequests").doc(`${messageId}`).delete() //deletes message from outstanding list
-    await sleep(4500);
-    await sendRemainingReminder(from, "whatsapp");
-  }
   try {
     await voteRequestRef.update(updateObj);
   } catch (error) {

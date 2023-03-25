@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
-const { sendVotingMessage, sendL2OthersCategorisationMessage } = require("./common/sendFactCheckerMessages")
+const { sendVotingMessage, sendL2OthersCategorisationMessage, sendReminderMessage } = require("./common/sendFactCheckerMessages")
 const { incrementCounter, getCount } = require("./common/counters");
 const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
@@ -53,7 +53,7 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       const isIrrelevant = (irrelevantCount > parseInt(thresholds.isIrrelevant * responseCount));
       const isUnsure = (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) || unsureCount > parseInt(thresholds.inUnsure * responseCount);
       const isAssessed = (isUnsure && responseCount > parseInt(thresholds.endVoteUnsure * numFactCheckers)) || (!isUnsure && responseCount > parseInt(thresholds.endVote * numFactCheckers)) || (isSus && responseCount > parseInt(thresholds.endVoteSus * numFactCheckers));
-      return messageRef.update({
+      await messageRef.update({
         truthScore: truthScore,
         isSus: isSus,
         isScam: isScam,
@@ -65,7 +65,10 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
         isUnsure: isUnsure,
         isAssessed: isAssessed,
       });
-
+      if (after.category !== null) { //vote has ended
+        await db.collection("factCheckers").doc(`${after.factCheckerDocRef.id}`).collection("outstandingVoteRequests").doc(`${messageRef.id}`).delete() //deletes message from outstanding list
+        await sendRemainingReminder(after.factCheckerDocRef.id, after.platform);
+      }
     }
     return Promise.resolve();
   });
@@ -111,3 +114,52 @@ async function updateCheckerVoteCount(before, after) {
     })
   }
 }
+
+async function sendRemainingReminder(factCheckerId, platform) {
+  const db = admin.firestore();
+  try {
+    const outstandingVoteRequestsQuerySnap = await db.collectionGroup('voteRequests').where('platformId', '==', factCheckerId).where("category", "==", null).get();
+    const remainingCount = outstandingVoteRequestsQuerySnap.size;
+    console.log(remainingCount)
+    if (remainingCount == 0) {
+      await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
+      return;
+    }
+    const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
+    const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
+    //sort outstandingVoteRequestsQuerySnap by whether the parent message is assessed
+    const sortedVoteRequestDocs = outstandingVoteRequestsQuerySnap.docs.sort((a, b) => {
+      const aIsAssessed = unassessedMessageIdList.includes(a.ref.parent.parent.id);
+      const bIsAssessed = unassessedMessageIdList.includes(b.ref.parent.parent.id);
+      if (aIsAssessed && !bIsAssessed) {
+        return -1;
+      }
+      if (!aIsAssessed && bIsAssessed) {
+        return 1;
+      }
+      return 0;
+    });
+    console.log("we done here");
+    const nextVoteRequestPath = sortedVoteRequestDocs[0].ref.path;
+    await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
+  } catch (error) {
+    functions.logger.error
+    functions.logger.log("Error sending reminder message with collectionGroup query");
+    const outstandingVoteRequestsQuerySnap = await db.collection("factCheckers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();
+    const remainingCount = outstandingVoteRequestsQuerySnap.size;
+    if (remainingCount == 0) {
+      await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
+      return;
+    }
+    const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
+    const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
+    const urgentVoteRequestsDocSnapList = outstandingVoteRequestsQuerySnap.docs.filter((docSnap) => unassessedMessageIdList.includes(docSnap.ref.id))
+    let nextVoteRequestPath
+    if (urgentVoteRequestsDocSnapList.length > 0) {
+      nextVoteRequestPath = urgentVoteRequestsDocSnapList[0].get("voteRequestDocRef").path
+    } else {
+      nextVoteRequestPath = outstandingVoteRequestsQuerySnap.docs[0].get("voteRequestDocRef").path
+    }
+    await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
+  }
+};
