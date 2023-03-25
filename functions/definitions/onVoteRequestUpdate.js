@@ -120,7 +120,6 @@ async function sendRemainingReminder(factCheckerId, platform) {
   try {
     const outstandingVoteRequestsQuerySnap = await db.collectionGroup('voteRequests').where('platformId', '==', factCheckerId).where("category", "==", null).get();
     const remainingCount = outstandingVoteRequestsQuerySnap.size;
-    console.log(remainingCount)
     if (remainingCount == 0) {
       await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
       return;
@@ -139,7 +138,6 @@ async function sendRemainingReminder(factCheckerId, platform) {
       }
       return 0;
     });
-    console.log("we done here");
     const nextVoteRequestPath = sortedVoteRequestDocs[0].ref.path;
     await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
   } catch (error) {
