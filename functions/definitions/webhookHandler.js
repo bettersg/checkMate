@@ -64,7 +64,7 @@ app.post("/whatsapp", async (req, res) => {
                 res.sendStatus(200);
             } else {
                 functions.logger.warn(`Issue with phoneNumberId ${phoneNumberId}`);
-                res.sendStatus(200);
+                res.sendStatus(403);
             }
         }
         else {
@@ -73,7 +73,7 @@ app.post("/whatsapp", async (req, res) => {
     } else {
         // Return a '404 Not Found' if event is not from a WhatsApp API
         functions.logger.warn("issue with req.body.obj");
-        functions.logger.log(JSON.stringify(req.body,null,2));
+        functions.logger.log(JSON.stringify(req.body, null, 2));
         res.sendStatus(404);
     }
 });
