@@ -26,7 +26,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     const parentMessageRef = snap.ref.parent.parent;
     await incrementCounter(parentMessageRef, "instance", numInstanceShards.value())
 
-    await upsertUser(data.from, data.timestamp, snap.ref);
+    await upsertUser(data.from, data.timestamp);
 
     const parentMessageSnap = await parentMessageRef.get();
     await respondToInstance(snap);
@@ -42,19 +42,13 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     return Promise.resolve();
   });
 
-async function upsertUser(from, messageTimestamp, instanceRef) {
+async function upsertUser(from, messageTimestamp) {
   const db = admin.firestore();
-  const batch = db.batch()
   const userRef = db.collection("users").doc(from);
-  const userInstanceRef = userRef.collection("instances").doc();
-  batch.set(userRef, {
+  await userRef.set({
     lastSent: messageTimestamp,
     instanceCount: FieldValue.increment(1),
   }, { merge: true })
-  batch.set(userInstanceRef, {
-    instanceDocRef: instanceRef
-  })
-  await batch.commit()
 }
 
 async function despatchPoll(messageRef) {
@@ -82,12 +76,7 @@ function sendTemplateMessageAndCreateVoteRequest(factCheckerDocSnap, messageRef)
       vote: null,
     }).then((writeResult) => {
       // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
-      promiseSendTemplate = sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [`${writeResult.path}`, `${writeResult.path}`], "factChecker");
-      promiseAddOutstanding = factCheckerDocSnap.ref.collection("outstandingVoteRequests").doc(`${messageRef.id}`).set({ //TODO: Remove this once collectionGroup mechanism proven working
-        voteRequestDocRef: writeResult,
-      })
-      promiseArr = [promiseSendTemplate, promiseAddOutstanding]
-      return Promise.all(promiseArr)
+      return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [`${writeResult.path}`, `${writeResult.path}`], "factChecker");
     });
   } else if (factChecker?.preferredPlatform === "telegram") {
     //not yet implemented

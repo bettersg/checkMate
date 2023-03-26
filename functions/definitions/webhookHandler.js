@@ -68,7 +68,6 @@ app.post("/whatsapp", async (req, res) => {
       }
     }
     else {
-      functions.logger.warn(`Unexpected message type received`);
       res.sendStatus(200); //unexpected message type, could be status update
     }
   } else {
