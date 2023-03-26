@@ -101,13 +101,13 @@ async function updateCounts(messageRef, before, after) {
 
 async function updateCheckerVoteCount(before, after) {
   let factCheckerRef
-  if (before.vote === null && after.vote !== null) {
+  if (before.category === null && after.category !== null) {
     factCheckerRef = after.factCheckerDocRef
     factCheckerRef.update({
       numVoted: FieldValue.increment(1),
     })
   }
-  else if (before.vote !== null && after.vote === null) {
+  else if (before.category !== null && after.category === null) {
     factCheckerRef = after.factCheckerDocRef
     factCheckerRef.update({
       numVoted: FieldValue.increment(-1),
