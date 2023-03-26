@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
 const { sendVotingMessage, sendL2OthersCategorisationMessage, sendReminderMessage } = require("./common/sendFactCheckerMessages")
+const { sendWhatsappTextMessage } = require('./common/sendWhatsappMessage');
 const { incrementCounter, getCount } = require("./common/counters");
 const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
