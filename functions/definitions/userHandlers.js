@@ -90,14 +90,12 @@ async function newTextInstanceHandler(db, {
   let hasMatch = false;
   let matchedId;
   const machineCategory = classifyText(text);
-  //TODO: check if new user and add user if so.
   const userRef = db.collection("users").doc(from)
   const userSnap = await userRef.get();
   if (!userSnap.exists && machineCategory === "irrelevant") { //start welcome flow
     await handleUserFirstMessage(from, userRef);
     return;
   }
-  //TODO: if new user, trigger onboarding flow with message.
   let textHash = hashMessage(text);  // hash of the original text
   let strippedText = stripPhone(text); // text stripped of phone nr
   let strippedTextHash = hashMessage(strippedText);  // hash of the stripped text
@@ -151,9 +149,9 @@ async function newTextInstanceHandler(db, {
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting TODO:SET THIS IF CLASSIFER HAS SET IT
+      isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
-      isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this  TODO:SET THIS IF CLASSIFER HAS SET IT
+      isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this
       isScam: null,
       isSpam: null,
       isLegitimate: null,

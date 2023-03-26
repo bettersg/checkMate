@@ -67,7 +67,6 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
         isAssessed: isAssessed,
       });
       if (after.category !== null) { //vote has ended
-        await db.collection("factCheckers").doc(`${after.factCheckerDocRef.id}`).collection("outstandingVoteRequests").doc(`${messageRef.id}`).delete() //deletes message from outstanding list TODO: Remove this once collectionGroup mechanism proven working
         await sendRemainingReminder(after.factCheckerDocRef.id, after.platform);
       }
     }
@@ -141,24 +140,7 @@ async function sendRemainingReminder(factCheckerId, platform) {
     });
     const nextVoteRequestPath = sortedVoteRequestDocs[0].ref.path;
     await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
-  } catch (error) { //TODO: remove this catch block once we are sure that the new code works
-    functions.logger.error
-    functions.logger.log("Error sending reminder message with collectionGroup query");
-    const outstandingVoteRequestsQuerySnap = await db.collection("factCheckers").doc(`${factCheckerId}`).collection("outstandingVoteRequests").get();
-    const remainingCount = outstandingVoteRequestsQuerySnap.size;
-    if (remainingCount == 0) {
-      await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
-      return;
-    }
-    const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
-    const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
-    const urgentVoteRequestsDocSnapList = outstandingVoteRequestsQuerySnap.docs.filter((docSnap) => unassessedMessageIdList.includes(docSnap.ref.id))
-    let nextVoteRequestPath
-    if (urgentVoteRequestsDocSnapList.length > 0) {
-      nextVoteRequestPath = urgentVoteRequestsDocSnapList[0].get("voteRequestDocRef").path
-    } else {
-      nextVoteRequestPath = outstandingVoteRequestsQuerySnap.docs[0].get("voteRequestDocRef").path
-    }
-    await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
+  } catch (error) {
+    functions.logger.error("Error sending remaining reminder", error);
   }
 };
