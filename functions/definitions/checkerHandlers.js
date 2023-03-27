@@ -4,7 +4,7 @@ const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const { sendWhatsappTextMessage, markWhatsappMessageAsRead, sendWhatsappButtonMessage } = require("./common/sendWhatsappMessage");
 const { getResponsesObj } = require("./common/responseUtils");
 const { sleep } = require("./common/utils")
-const { sendL1CategorisationMessage } = require("./common/sendFactCheckerMessages")
+const { sendL1CategorisationMessage, sendRemainingReminder } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
