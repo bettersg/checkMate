@@ -1,5 +1,4 @@
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
 const { respondToInstance } = require("./common/responseUtils");
 const { Timestamp } = require('firebase-admin/firestore');
 

@@ -1,8 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { getThresholds } = require("./common/utils");
-const { sendVotingMessage, sendL2OthersCategorisationMessage, sendReminderMessage } = require("./common/sendFactCheckerMessages")
-const { sendWhatsappTextMessage } = require('./common/sendWhatsappMessage');
+const { sendVotingMessage, sendL2OthersCategorisationMessage, sendRemainingReminder } = require("./common/sendFactCheckerMessages")
 const { incrementCounter, getCount } = require("./common/counters");
 const { FieldValue } = require('@google-cloud/firestore');
 const { defineInt } = require('firebase-functions/params');
@@ -114,33 +113,3 @@ async function updateCheckerVoteCount(before, after) {
     })
   }
 }
-
-async function sendRemainingReminder(factCheckerId, platform) {
-  const db = admin.firestore();
-  try {
-    const outstandingVoteRequestsQuerySnap = await db.collectionGroup('voteRequests').where('platformId', '==', factCheckerId).where("category", "==", null).get();
-    const remainingCount = outstandingVoteRequestsQuerySnap.size;
-    if (remainingCount == 0) {
-      await sendWhatsappTextMessage("factChecker", factCheckerId, "Great, you have no further messages to assess. Keep it up!💪");
-      return;
-    }
-    const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
-    const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
-    //sort outstandingVoteRequestsQuerySnap by whether the parent message is assessed
-    const sortedVoteRequestDocs = outstandingVoteRequestsQuerySnap.docs.sort((a, b) => {
-      const aIsAssessed = unassessedMessageIdList.includes(a.ref.parent.parent.id);
-      const bIsAssessed = unassessedMessageIdList.includes(b.ref.parent.parent.id);
-      if (aIsAssessed && !bIsAssessed) {
-        return -1;
-      }
-      if (!aIsAssessed && bIsAssessed) {
-        return 1;
-      }
-      return 0;
-    });
-    const nextVoteRequestPath = sortedVoteRequestDocs[0].ref.path;
-    await sendReminderMessage(factCheckerId, remainingCount, nextVoteRequestPath);
-  } catch (error) {
-    functions.logger.error("Error sending remaining reminder", error);
-  }
-};
