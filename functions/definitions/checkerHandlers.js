@@ -6,6 +6,7 @@ const { getResponsesObj } = require("./common/responseUtils");
 const { sleep } = require("./common/utils")
 const { sendL1CategorisationMessage, sendRemainingReminder } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
+const { Timestamp } = require('firebase-admin/firestore');
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -279,6 +280,9 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
       updateObj.vote = null;
       response = responses.RESPONSE_RECORDED
       isEnd = true;
+  }
+  if (isEnd) {
+    updateObj.votedTimestamp = Timestamp.fromDate(new Date());
   }
   await sendWhatsappTextMessage("factChecker", from, response, replyId);
   try {
