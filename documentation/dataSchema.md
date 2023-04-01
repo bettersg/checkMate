@@ -3,8 +3,10 @@ erDiagram
     message {
         string id PK "Assigned by Firestore"
         string type "image/text"
-        string category "Not used for now"
+        string machineCategory
+        boolean isMachineCategorised
         string text "Text or caption"
+        string strippedText
         string hash "Image hash, for image only"
         string textHash "hash of original text, for text only"
         string strippedTextHash "hash of stripped text, for text only"
@@ -18,6 +20,10 @@ erDiagram
         boolean isSus "Is either scam or illicit"
         boolean isScam
         boolean isIllicit
+        boolean isSpam
+        boolean isLegitimate
+        boolean isUnsure
+        boolean isInfo
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string customReply "Not used for now"
@@ -56,21 +62,23 @@ erDiagram
         string sentMessageId "message id of the forwarded dubious message to checkers"
         number vote 
         sting category "scam, irrelevant, or number"
+        timestamp createdTimestamp
+        timestamp firstVotedTimestamp
     }
 
     factChecker {
         string id PK "using their sender ID or phone number"
         string name
         boolean isActive
+        boolean isOnboardingComplete
         string platformId
         number level "Not used for now"
         number experience "Not used for now"
         number numVoted
         number numCorrectVotes "Not used for now"
         number numVerifiedLinks "Not used for now"
-        string preferredPlatform"whatsapp/telegram, only whatsapp used for now"
+        string preferredPlatform "whatsapp/telegram, only whatsapp used for now"
 				string getNameMessageId "ID of the message sent to prompt factChecker for their name. Used to track reply."
-        collection outstandingVoteRequests
     }
 
     outstandingVoteRequest {

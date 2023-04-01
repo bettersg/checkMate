@@ -152,6 +152,7 @@ async function newTextInstanceHandler(db, {
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
       isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this
+      isSus: null,
       isScam: null,
       isSpam: null,
       isLegitimate: null,
@@ -218,6 +219,7 @@ async function newImageInstanceHandler(db, {
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
+      isSus: null,
       isScam: null,
       isSpam: null,
       isLegitimate: null,
