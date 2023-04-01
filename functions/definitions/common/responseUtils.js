@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } = require('./constants');
 const { sleep } = require('./utils');
 const { sendTextMessage } = require('./sendMessage')
-const { sendWhatsappButtonMessage } = require('./sendWhatsappMessage')
+const { sendWhatsappButtonMessage, sendWhatsappTemplateMessage } = require('./sendWhatsappMessage')
 const functions = require('firebase-functions');
 
 async function respondToInstance(instanceSnap) {
@@ -30,85 +30,50 @@ async function respondToInstance(instanceSnap) {
     return;
   }
   if (isScam || isIllicit) {
-    let responseText;
+    const payload = [`scamshieldConsent_${instanceSnap.ref.path}_consent`, `scamshieldConsent_${instanceSnap.ref.path}_decline`, `scamshieldExplain_${instanceSnap.ref.path}_${data.id}`]
     if (isScam) {
-      responseText = responses.SCAM;
+      await sendWhatsappTemplateMessage("user", data.from, "illicit_message_response", "en", [], payload, data.id); //TODO: Change to scams template
     } else {
-      responseText = responses.SUSPICIOUS;
+      await sendWhatsappTemplateMessage("user", data.from, "illicit_message_response", "en", [], payload, data.id);
     }
-    res = await sendTextMessage("user", data.from, responseText, data.id)
-    await sleep(2000);
-    await sendTextMessage("user", data.from, responses.SCAMSHIELD_PREAMBLE, null, "whatsapp", true)
-    const buttons = [{
-      type: "reply",
-      reply: {
-        id: `scamshieldConsent_${instanceSnap.ref.path}_consent`,
-        title: "Yes",
-      },
-    }, {
-      type: "reply",
-      reply: {
-        id: `scamshieldConsent_${instanceSnap.ref.path}_decline`,
-        title: "No",
-      }
-    }];
-    await sleep(2000);
-    await sendWhatsappButtonMessage("user", data.from, responses.SCAMSHIELD_SEEK_CONSENT, buttons, data.id)
     return;
   }
   if (isSpam) {
-    await sendTextMessage("user", data.from, responses.SPAM, data.id);
+    await sendWhatsappTemplateMessage("user", data.from, "spam_message_response", "en", [], [], data.id);
     return
   }
   if (isLegitimate) {
-    await sendTextMessage("user", data.from, responses.LEGITIMATE, data.id);
+    await sendWhatsappTemplateMessage("user", data.from, "legitimate_message_response", "en", [], [], data.id);
     return
   }
   if (isIrrelevant) {
     if (isMachineCategorised) {
-      await sendTextMessage("user", data.from, responses.IRRELEVANT_AUTO, data.id)
+      await sendWhatsappTemplateMessage("user", data.from, "irrelevant_message_auto_response", "en", [], [], data.id);
     } else {
-      await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+      await sendWhatsappTemplateMessage("user", data.from, "irrelevant_message_response", "en", [], [], data.id);
     }
     return;
   }
   if (isInfo) {
     if (truthScore === null) {
-      await sendTextMessage("user", data.from, responses.NO_SCORE, data.id)
+      await sendWhatsappTemplateMessage("user", data.from, "error_response", "en", [], [], data.id);
       return;
+    } else if (truthScore < 1.5) {
+      await sendWhatsappTemplateMessage("user", data.from, "untrue_message_response", "en", [], [], data.id);
+    } else if (truthScore < 3.5) {
+      await sendWhatsappTemplateMessage("user", data.from, "misleading_message_response", "en", [], [], data.id);
     } else {
-      await sendTextMessage("user", data.from, _getResponse(truthScore, responses), data.id)
+      await sendWhatsappTemplateMessage("user", data.from, "accurate_message_response", "en", [], [], data.id);
     }
     return
   }
   if (isUnsure) {
-    await sendTextMessage("user", data.from, responses.UNSURE, data.id)
+    await sendWhatsappTemplateMessage("user", data.from, "unsure_message_response", "en", [], [], data.id);
     return;
   }
   functions.logger.warn("did not return as expected");
   return;
 }
-
-function getResponseToMessage(docSnap, responses) {
-  const isAssessed = docSnap.get("isAssessed");
-  const isIrrelevant = docSnap.get("isIrrelevant");
-  const isScam = docSnap.get("isScam");
-  const truthScore = docSnap.get("truthScore");
-
-  if (!isAssessed) {
-    return responses.MESSAGE_NOT_YET_ASSESSED
-  }
-  if (isScam) {
-    return responses.SCAM;
-  }
-  if (isIrrelevant) {
-    return responses.IRRELEVANT;
-  }
-  if (truthScore === null) {
-    return responses.NO_SCORE;
-  }
-  return _getResponse(truthScore, responses);
-};
 
 async function getResponsesObj(botType = "user") {
   const db = admin.firestore()
@@ -126,21 +91,5 @@ async function getResponsesObj(botType = "user") {
   return defaultResponsesSnap.data() ?? fallbackResponses
 };
 
-function _getResponse(key, responses) {
-  if (isNaN(key)) { //means key is a string
-    return responses.key;
-  } else {
-    const truthScore = key;
-    let numericKeys = Object.keys(responses).filter((e) => !isNaN(e)).sort();
-    for (let numericKey of numericKeys) {
-      if (parseFloat(numericKey) >= truthScore) {
-        return responses[`${numericKey}`];
-      }
-    }
-  }
-  return null;
-};
-
 exports.getResponsesObj = getResponsesObj;
-exports.getResponseToMessage = getResponseToMessage;
 exports.respondToInstance = respondToInstance;

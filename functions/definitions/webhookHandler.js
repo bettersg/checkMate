@@ -63,7 +63,7 @@ app.post("/whatsapp", async (req, res) => {
         }
         res.sendStatus(200);
       } else {
-        functions.logger.warn(`Issue with phoneNumberId ${phoneNumberId}`);
+        //functions.logger.warn(`Issue with phoneNumberId ${phoneNumberId}`);
         res.sendStatus(200);
       }
     }
