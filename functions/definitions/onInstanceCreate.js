@@ -74,6 +74,8 @@ function sendTemplateMessageAndCreateVoteRequest(factCheckerDocSnap, messageRef)
       sentMessageId: null,
       category: null,
       vote: null,
+      createdTimestamp: Timestamp.fromDate(new Date()),
+      votedTimestamp: null,
     }).then((writeResult) => {
       // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
       return sendWhatsappTemplateMessage("factChecker", factChecker.platformId, "new_message_received", "en", [factChecker?.name || "CheckMate"], [`${writeResult.path}`, `${writeResult.path}`], "factChecker");
