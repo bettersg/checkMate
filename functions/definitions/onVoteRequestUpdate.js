@@ -67,6 +67,11 @@ exports.onVoteRequestUpdate = functions.region("asia-southeast1").runWith({ secr
       });
       if (after.category !== null) { //vote has ended
         await sendRemainingReminder(after.factCheckerDocRef.id, after.platform);
+        if (after.votedTimestamp !== before.votedTimestamp) {
+          await after.factCheckerDocRef.set({
+            lastVotedTimestamp: after.votedTimestamp,
+          }, { merge: true });
+        }
       }
     }
     return Promise.resolve();
