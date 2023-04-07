@@ -87,6 +87,7 @@ async function onSignUp(from, platform = "whatsapp") {
     numVerifiedLinks: 0,
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
+    lastVotedTimestamp: null,
   });
 }
 

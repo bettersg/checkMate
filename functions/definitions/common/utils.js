@@ -78,6 +78,8 @@ const mockDb = async function () {
       numCorrectVotes: 0,
       numVerifiedLinks: 0,
       preferredPlatform: "whatsapp",
+      lastVotedTimestamp: null,
+      getNameMessageId: null,
     }, { merge: true })
   }
   functions.logger.log("mocked")
