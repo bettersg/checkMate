@@ -87,6 +87,7 @@ async function onSignUp(from, platform = "whatsapp") {
     numVerifiedLinks: 0,
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
+    lastVotedTimestamp: null,
   });
 }
 
@@ -286,7 +287,7 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
   }
   await sendWhatsappTextMessage("factChecker", from, response, replyId);
   try {
-    await voteRequestRef.update(updateObj);
+    await voteRequestRef.set(updateObj, { merge: true });
   } catch (error) {
     functions.logger.warn(`No corresponding voteRequest with id ${voteRequestId} for message ${messageId} found`);
   }
