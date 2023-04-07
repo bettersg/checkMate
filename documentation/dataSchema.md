@@ -82,11 +82,6 @@ erDiagram
         timestamp lastVotedTimestamp
     }
 
-    outstandingVoteRequest {
-      string id PK "message id"
-      reference voteRequestDocRef FK "reference to voteRequests"
-    }
-
 		user {
 				string id PK "using their sender ID or phone number"
 				number instanceCount
@@ -98,5 +93,3 @@ erDiagram
 		user ||--|{ instance: sends
     message ||--o{ voteRequest: triggers
     factChecker ||--o{ voteRequest: responds_to
-    factChecker ||--o{ outstandingVoteRequest: has_yet_to_respond_to
-    outstandingVoteRequest ||--|| voteRequest: is
