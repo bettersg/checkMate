@@ -148,6 +148,7 @@ async function newTextInstanceHandler(db, {
         score: similarityScore ?? null,
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+      assessedTimestamp: null,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
@@ -174,6 +175,7 @@ async function newTextInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    replyTimestamp: null,
     matchType: matchType,
     strippedText: strippedText,
     scamShieldConsent: null,
@@ -216,6 +218,7 @@ async function newImageInstanceHandler(db, {
       mimeType: mimeType,
       storageUrl: filename,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+      assessedTimestamp: null,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
       truthScore: null, //float, the mean truth score
@@ -249,6 +252,7 @@ async function newImageInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    replyTimestamp: null,
     scamShieldConsent: null,
   });
 }

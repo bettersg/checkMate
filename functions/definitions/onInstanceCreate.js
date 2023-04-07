@@ -31,7 +31,7 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
     const parentMessageSnap = await parentMessageRef.get();
     await respondToInstance(snap);
     if (parentMessageSnap.get("isAssessed")) {
-      return snap.ref.update({ isReplied: true, replyTimeStamp: Timestamp.fromDate(new Date()) });
+      return snap.ref.update({ isReplied: true, replyTimestamp: Timestamp.fromDate(new Date()) });
     }
     const parentInstanceCount = await getCount(parentMessageRef, "instance")
     const thresholds = await getThresholds();

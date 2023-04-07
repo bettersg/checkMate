@@ -8,7 +8,7 @@ exports.onMessageUpdate = functions.region("asia-southeast1").runWith({ secrets:
         const before = change.before;
         const after = change.after;
         if (!before.data().isAssessed && after.data().isAssessed) {
-            await after.ref.update({ assessedTimeStamp: Timestamp.fromDate(new Date()) });
+            await after.ref.update({ assessedTimestamp: Timestamp.fromDate(new Date()) });
             await replyPendingInstances(after);
         }
         return Promise.resolve();
@@ -18,6 +18,6 @@ async function replyPendingInstances(docSnap) {
     const pendingSnapshot = await docSnap.ref.collection("instances").where("isReplied", "==", false).get();
     pendingSnapshot.forEach(async (instanceSnap) => {
         await respondToInstance(instanceSnap);
-        await instanceSnap.ref.update({ isReplied: true, replyTimeStamp: Timestamp.fromDate(new Date()) });
+        await instanceSnap.ref.update({ isReplied: true, replyTimestamp: Timestamp.fromDate(new Date()) });
     });
 }
