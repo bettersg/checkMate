@@ -7,11 +7,8 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-exports.scheduledFunction = functions
-  .region("asia-southeast1")
-  .pubsub.schedule("11 20 * * *")
-  .timeZone('Asia/Singapore')
-  .onRun(async (context) => {
+async function deactivateAndRemind(context) {
+  try {
     const db = admin.firestore();
     const cutoffHours = 72;
     const activeCheckMatesSnap = await db.collection("factCheckers").where("isActive", "==", true).get();
@@ -28,11 +25,20 @@ exports.scheduledFunction = functions
         .where('category', '==', null)
         .get();
       if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
-        console.log(`${factCheckerId}, ${doc.get('name')}`)
-        //await sendWhatsappTemplateMessage("factChecker", factCheckerId, "deactivation_notification", "en", [doc.get("name") || "CheckMate", `${cutoffHours}`], [`${factCheckerId}`])
-        //return doc.ref.update({ isActive: false });
-        return
+        functions.logger.log(`${factCheckerId}, ${doc.get('name')} set to inactive`);
+        await sendWhatsappTemplateMessage("factChecker", factCheckerId, "deactivation_notification", "en", [doc.get("name") || "CheckMate", `${cutoffHours}`], [`${factCheckerId}`])
+        return doc.ref.update({ isActive: false });
       }
     });
     await Promise.all(promisesArr);
-  });
+  }
+  catch (error) {
+    functions.logger.error('Error in deactivateAndRemind:', error);
+  }
+}
+
+exports.scheduledDeactivation = functions
+  .region("asia-southeast1")
+  .pubsub.schedule("11 20 * * *")
+  .timeZone('Asia/Singapore')
+  .onRun(deactivateAndRemind);

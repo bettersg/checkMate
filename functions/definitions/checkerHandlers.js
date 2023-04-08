@@ -34,6 +34,12 @@ exports.checkerHandlerWhatsapp = async function (message) {
           responses = await getResponsesObj("factChecker");
           sendWhatsappTextMessage("factChecker", from, responses.VOTE_NO, message.id);
           break;
+        case "I'm ready to continue!":
+          try {
+            await onContinue(button.payload)
+          } catch {
+            functions.logger.warn(`New onContinue failed, payload = ${button.payload}`)
+          }
       }
       break;
     case "interactive":
@@ -291,4 +297,12 @@ async function onTextListReceipt(db, listId, from, replyId, platform = "whatsapp
   } catch (error) {
     functions.logger.warn(`No corresponding voteRequest with id ${voteRequestId} for message ${messageId} found`);
   }
+}
+
+async function onContinue(factCheckerId) {
+  const db = admin.firestore();
+  await db.collection("factCheckers").doc(factCheckerId).update({
+    isActive: true
+  });
+  await sendRemainingReminder(factCheckerId, "whatsapp");
 }
