@@ -18,6 +18,5 @@ async function replyPendingInstances(docSnap) {
     const pendingSnapshot = await docSnap.ref.collection("instances").where("isReplied", "==", false).get();
     pendingSnapshot.forEach(async (instanceSnap) => {
         await respondToInstance(instanceSnap);
-        await instanceSnap.ref.update({ isReplied: true, replyTimestamp: Timestamp.fromDate(new Date()) });
     });
 }

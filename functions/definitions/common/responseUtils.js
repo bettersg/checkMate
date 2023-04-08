@@ -4,8 +4,9 @@ const { sleep } = require('./utils');
 const { sendTextMessage } = require('./sendMessage')
 const { sendWhatsappButtonMessage } = require('./sendWhatsappMessage')
 const functions = require('firebase-functions');
+const { Timestamp } = require('firebase-admin/firestore');
 
-async function respondToInstance(instanceSnap) {
+async function respondToInstance(instanceSnap, forceReply = false) {
   const parentMessageRef = instanceSnap.ref.parent.parent;
   const parentMessageSnap = await parentMessageRef.get();
   const data = instanceSnap.data();
@@ -25,7 +26,7 @@ async function respondToInstance(instanceSnap) {
   const isLegitimate = parentMessageSnap.get("isLegitimate");
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised");
 
-  if (!isAssessed) {
+  if (!isAssessed && !forceReply) {
     await sendTextMessage("user", data.from, responses.MESSAGE_NOT_YET_ASSESSED, data.id)
     return;
   }
@@ -36,9 +37,6 @@ async function respondToInstance(instanceSnap) {
     } else {
       responseText = responses.SUSPICIOUS;
     }
-    res = await sendTextMessage("user", data.from, responseText, data.id)
-    await sleep(2000);
-    await sendTextMessage("user", data.from, responses.SCAMSHIELD_PREAMBLE, null, "whatsapp", true)
     const buttons = [{
       type: "reply",
       reply: {
@@ -51,41 +49,43 @@ async function respondToInstance(instanceSnap) {
         id: `scamshieldConsent_${instanceSnap.ref.path}_decline`,
         title: "No",
       }
+    }, {
+      type: "reply",
+      reply: {
+        id: `scamshieldExplain_${instanceSnap.ref.path}_${data.id}`,
+        title: "What is ScamShield?",
+      }
     }];
-    await sleep(2000);
-    await sendWhatsappButtonMessage("user", data.from, responses.SCAMSHIELD_SEEK_CONSENT, buttons, data.id)
-    return;
+    await sendWhatsappButtonMessage("user", data.from, responseText, buttons, data.id)
   }
-  if (isSpam) {
+  else if (isSpam) {
     await sendTextMessage("user", data.from, responses.SPAM, data.id);
-    return
   }
-  if (isLegitimate) {
+  else if (isLegitimate) {
     await sendTextMessage("user", data.from, responses.LEGITIMATE, data.id);
-    return
   }
-  if (isIrrelevant) {
+  else if (isIrrelevant) {
     if (isMachineCategorised) {
       await sendTextMessage("user", data.from, responses.IRRELEVANT_AUTO, data.id)
     } else {
       await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
     }
-    return;
   }
-  if (isInfo) {
+  else if (isInfo) {
     if (truthScore === null) {
-      await sendTextMessage("user", data.from, responses.NO_SCORE, data.id)
-      return;
+      await sendTextMessage("user", data.from, responses.ERROR, data.id)
     } else {
       await sendTextMessage("user", data.from, _getResponse(truthScore, responses), data.id)
     }
-    return
   }
-  if (isUnsure) {
+  else if (isUnsure) {
     await sendTextMessage("user", data.from, responses.UNSURE, data.id)
+  }
+  else {
+    functions.logger.warn("did not return as expected");
     return;
   }
-  functions.logger.warn("did not return as expected");
+  await instanceSnap.ref.update({ isReplied: true, replyTimestamp: Timestamp.fromDate(new Date()) });
   return;
 }
 

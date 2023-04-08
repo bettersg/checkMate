@@ -66,7 +66,7 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive;
       switch (interactive.type) {
         case "button_reply":
-          await onButtonReply(db, interactive.button_reply.id, message, message.id);
+          await onButtonReply(interactive.button_reply.id, message);
           break;
       }
       break;
@@ -324,9 +324,10 @@ async function respondToDemoScam(messageObj) {
   await sendWhatsappButtonMessage("user", messageObj.from, responses?.DEMO_END, buttons);
 }
 
-async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
+async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
+  const db = admin.firestore();
   const from = messageObj.from;
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user");
   const [type, ...rest] = buttonId.split("_");
   let instancePath, selection;
   switch (type) {
@@ -344,6 +345,26 @@ async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
       }
       await instanceRef.update(updateObj)
       await sendWhatsappTextMessage("user", from, replyText)
+      break;
+    case "scamshieldExplain":
+      let messageId
+      [instancePath, messageId] = rest;
+      await sendWhatsappTextMessage("user", from, responses?.SCAMSHIELD_EXPLAINER, null, true);
+      const buttons = [{
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_consent`,
+          title: "Yes",
+        },
+      }, {
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_decline`,
+          title: "No",
+        }
+      }];
+      await sleep(2000);
+      await sendWhatsappButtonMessage("user", from, responses.SCAMSHIELD_SEEK_CONSENT, buttons, messageId)
       break;
     case "onboarding":
       [selection] = rest;
@@ -371,5 +392,4 @@ async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
       }
       break;
   }
-
 }

@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage");
+const { respondToInstance } = require("./common/responseUtils");
 const { Timestamp } = require('firebase-admin/firestore');
 
 if (!admin.apps.length) {
@@ -36,6 +37,31 @@ async function deactivateAndRemind(context) {
     functions.logger.error('Error in deactivateAndRemind:', error);
   }
 }
+
+async function checkConversationSessionExpiring(context) {
+  try {
+    const db = admin.firestore();
+    const cutoffHours = 23;
+    const cutoffDate = new Date(Date.now() - cutoffHours * 60 * 60 * 1000)
+    const cutoffTimestamp = Timestamp.fromDate(cutoffDate);
+    const unrepliedInstances = await db.collectionGroup('instances')
+      .where('isReplied', '==', false)
+      .where('timestamp', '<', cutoffTimestamp)
+      .get();
+    const promisesArr = unrepliedInstances.docs.map(async (doc) => {
+      await respondToInstance(doc, true);
+    });
+    await Promise.all(promisesArr);
+  } catch (error) {
+    functions.logger.error('Error in checkConversationSessionExpiring:', error);
+  }
+}
+
+exports.checkSessionExpiring = functions
+  .region("asia-southeast1")
+  .pubsub.schedule("1 * * * *")
+  .timeZone('Asia/Singapore')
+  .onRun(checkConversationSessionExpiring);
 
 exports.scheduledDeactivation = functions
   .region("asia-southeast1")
