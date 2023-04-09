@@ -56,7 +56,7 @@ Would you like us to share this message with ScamShield? Only the contents of th
 It's likely harmless, but you should always make sure 🧐
 
 Thank you for keeping Singapore safe!`,
-  LEGITIMATE: `Thanks for waiting! Our CheckMates have reviewed the message and think that it's *from a legtimate source*.✅
+  LEGITIMATE: `Thanks for waiting! Our CheckMates have reviewed the message and think that it's *from a legitimate source*.✅
 
 Thank you for keeping Singapore safe!`,
   UNSURE: `Thanks for waiting!
