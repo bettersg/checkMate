@@ -60,14 +60,14 @@ async function checkConversationSessionExpiring(context) {
 
 exports.checkSessionExpiring = functions
   .region("asia-southeast1")
+  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("1 * * * *")
   .timeZone('Asia/Singapore')
-  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .onRun(checkConversationSessionExpiring);
 
 exports.scheduledDeactivation = functions
   .region("asia-southeast1")
+  .runWith({ secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("11 20 * * *")
   .timeZone('Asia/Singapore')
-  .runWith({ secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .onRun(deactivateAndRemind);
