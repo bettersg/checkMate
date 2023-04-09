@@ -30,11 +30,14 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     await sendTextMessage("user", data.from, responses.MESSAGE_NOT_YET_ASSESSED, data.id)
     return;
   }
+  const updateObj = { isReplied: true, isReplyForced: forceReply }
   if (isScam || isIllicit) {
     let responseText;
     if (isScam) {
+      updateObj.replyCategory = "scam";
       responseText = responses.SCAM;
     } else {
+      updateObj.replyCategory = "illicit";
       responseText = responses.SUSPICIOUS;
     }
     const buttons = [{
@@ -59,56 +62,49 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     await sendWhatsappButtonMessage("user", data.from, responseText, buttons, data.id)
   }
   else if (isSpam) {
+    updateObj.replyCategory = "spam";
     await sendTextMessage("user", data.from, responses.SPAM, data.id);
   }
   else if (isLegitimate) {
+    updateObj.replyCategory = "legitimate";
     await sendTextMessage("user", data.from, responses.LEGITIMATE, data.id);
   }
   else if (isIrrelevant) {
     if (isMachineCategorised) {
+      updateObj.replyCategory = "irrelevant_auto";
       await sendTextMessage("user", data.from, responses.IRRELEVANT_AUTO, data.id)
     } else {
+      updateObj.replyCategory = "irrelevant";
       await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
     }
   }
   else if (isInfo) {
     if (truthScore === null) {
+      updateObj.replyCategory = "error";
       await sendTextMessage("user", data.from, responses.ERROR, data.id)
+    } else if (truthScore < 1.5) {
+      updateObj.replyCategory = "untrue";
+      await sendTextMessage("user", data.from, responses.UNTRUE, data.id);
+    } else if (truthScore < 3.5) {
+      updateObj.replyCategory = "misleading";
+      await sendTextMessage("user", data.from, responses.MISLEADING, data.id);
     } else {
-      await sendTextMessage("user", data.from, _getResponse(truthScore, responses), data.id)
+      updateObj.replyCategory = "accurate";
+      await sendTextMessage("user", data.from, responses.ACCURATE, data.id);
     }
   }
   else if (isUnsure) {
+    updateObj.replyCategory = "unsure";
     await sendTextMessage("user", data.from, responses.UNSURE, data.id)
   }
   else {
     functions.logger.warn("did not return as expected");
     return;
   }
-  await instanceSnap.ref.update({ isReplied: true, replyTimestamp: Timestamp.fromDate(new Date()) });
+  updateObj.replyTimestamp = Timestamp.fromDate(new Date());
+  await instanceSnap.ref.update(updateObj);
   return;
 }
-
-function getResponseToMessage(docSnap, responses) {
-  const isAssessed = docSnap.get("isAssessed");
-  const isIrrelevant = docSnap.get("isIrrelevant");
-  const isScam = docSnap.get("isScam");
-  const truthScore = docSnap.get("truthScore");
-
-  if (!isAssessed) {
-    return responses.MESSAGE_NOT_YET_ASSESSED
-  }
-  if (isScam) {
-    return responses.SCAM;
-  }
-  if (isIrrelevant) {
-    return responses.IRRELEVANT;
-  }
-  if (truthScore === null) {
-    return responses.NO_SCORE;
-  }
-  return _getResponse(truthScore, responses);
-};
 
 async function getResponsesObj(botType = "user") {
   const db = admin.firestore()
@@ -126,21 +122,20 @@ async function getResponsesObj(botType = "user") {
   return defaultResponsesSnap.data() ?? fallbackResponses
 };
 
-function _getResponse(key, responses) {
-  if (isNaN(key)) { //means key is a string
-    return responses.key;
-  } else {
-    const truthScore = key;
-    let numericKeys = Object.keys(responses).filter((e) => !isNaN(e)).sort();
-    for (let numericKey of numericKeys) {
-      if (parseFloat(numericKey) >= truthScore) {
-        return responses[`${numericKey}`];
-      }
-    }
-  }
-  return null;
-};
+// function _getResponse(key, responses) {
+//   if (isNaN(key)) { //means key is a string
+//     return responses.key;
+//   } else {
+//     const truthScore = key;
+//     let numericKeys = Object.keys(responses).filter((e) => !isNaN(e)).sort();
+//     for (let numericKey of numericKeys) {
+//       if (parseFloat(numericKey) >= truthScore) {
+//         return responses[`${numericKey}`];
+//       }
+//     }
+//   }
+//   return null;
+// };
 
 exports.getResponsesObj = getResponsesObj;
-exports.getResponseToMessage = getResponseToMessage;
 exports.respondToInstance = respondToInstance;

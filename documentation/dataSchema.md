@@ -17,6 +17,8 @@ erDiagram
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
 				timestamp assessedTimestamp
+        timestamp assessmentExpiry "When assessment should expire, if any"
+        boolean assessmentExpired
         boolean isSus "Is either scam or illicit"
         boolean isScam
         boolean isIllicit
@@ -45,6 +47,8 @@ erDiagram
         boolean isForwarded "Not used for now"
         boolean isFrequentlyForwarded "Not used for now"
         boolean isReplied "System has replied to the citizen"
+        boolean isReplyForced "track if reply is forced"
+        string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"
 				timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"
         string strippedText

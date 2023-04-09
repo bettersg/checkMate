@@ -1,15 +1,15 @@
 exports.USER_BOT_RESPONSES = {
-  1.5: `Thank you for waiting! Our CheckMates have reviewed the message and think it's *likely to be untrue*.❌
+  UNTRUE: `Thank you for waiting! Our CheckMates have reviewed the message and think it's *likely to be untrue*.❌
 
 Please do not spread it further⛔️⛔️
   
 Thank you for keeping Singapore informed!`,
-  3.5: `Thank you for waiting! Our CheckMates have reviewed the message and think that *while some elements within could be true, it's presented in a misleading or unbalanced way*.⚠️
+  MISLEADING: `Thank you for waiting! Our CheckMates have reviewed the message and think that *while some elements within could be true, it's presented in a misleading or unbalanced way*.⚠️
 
 Please take it with a pinch of salt and think twice before spreading it further🚧🚧.
   
 Thank you for keeping Singapore informed!`,
-  5: `Thank you for waiting! Our CheckMates have reviewed the message and think that it's *accurate*.✅
+  ACCURATE: `Thank you for waiting! Our CheckMates have reviewed the message and think that it's *accurate*.✅
 
 Thank you for keeping Singapore informed!`,
   IRRELEVANT: `Thanks for waiting!
