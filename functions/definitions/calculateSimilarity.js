@@ -12,7 +12,7 @@ exports.calculateSimilarity = async function (messageToCompare) {
     let comparisonScoresTable = []
     let currentSimilarityScore = 0
     // get all the messages of type text from firestore
-    const spamMessages = await db.collection('messages').where('type', '==', 'text').get();
+    const spamMessages = await db.collection('messages').where('type', '==', 'text').where('assessmentExpired', '==', false).get();
     // iterate over the messages and compare with current then add to the table for further sorting
     spamMessages.forEach(spamMessageDoc => {
         const spamMessage = spamMessageDoc.data();
@@ -22,7 +22,7 @@ exports.calculateSimilarity = async function (messageToCompare) {
         if (spamMessage.strippedText != "") {
             // if we have a match after stripping we give 100% score as it is a variation, otherwise we compute the cosineSimilarity score
             if (spamMessage.strippedText == messageToCompare) {
-                comparisonScoresTable.push({ ref: spamMessageDoc.ref, message: currentMessage, score: 100 })
+                comparisonScoresTable.push({ ref: spamMessageDoc.ref, message: spamMessage.strippedText, score: 100 })
             } else {
                 currentSimilarityScore = getSimilarityScore(textCosineSimilarity(spamMessage.strippedText, messageToCompare))
                 comparisonScoresTable.push({ ref: spamMessageDoc.ref, message: spamMessage.strippedText, score: currentSimilarityScore })

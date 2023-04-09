@@ -136,15 +136,24 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
     }
     const unassessedMessagesQuerySnap = await db.collection("messages").where("isAssessed", "==", false).get();
     const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map((docSnap) => docSnap.id);
-    //sort outstandingVoteRequestsQuerySnap by whether the parent message is assessed
+    /*
+    sort outstandingVoteRequestsQuerySnap for unassessed messages to come before assessed ones. 
+    if both are unassessed, the one created earlier, or the one where the createdTimestamp is not null, 
+    should come first.
+    */
     const sortedVoteRequestDocs = outstandingVoteRequestsQuerySnap.docs.sort((a, b) => {
-      const aIsAssessed = unassessedMessageIdList.includes(a.ref.parent.parent.id);
-      const bIsAssessed = unassessedMessageIdList.includes(b.ref.parent.parent.id);
-      if (aIsAssessed && !bIsAssessed) {
+      const aIsNotAssessed = unassessedMessageIdList.includes(a.ref.parent.parent.id);
+      const bIsNotAssessed = unassessedMessageIdList.includes(b.ref.parent.parent.id);
+      if (aIsNotAssessed && !bIsNotAssessed) {
         return -1;
       }
-      if (!aIsAssessed && bIsAssessed) {
+      if (!aIsNotAssessed && bIsNotAssessed) {
         return 1;
+      }
+      if (aIsNotAssessed && bIsNotAssessed) {
+        const aCreatedTimestamp = a.get("createdTimestamp").toMillis() ?? 0;
+        const bCreatedTimestamp = b.get("createdTimestamp").toMillis() ?? 0;
+        return aCreatedTimestamp - bCreatedTimestamp;
       }
       return 0;
     });

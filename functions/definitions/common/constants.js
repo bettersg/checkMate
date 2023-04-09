@@ -1,19 +1,74 @@
 exports.USER_BOT_RESPONSES = {
-  1.5: "⛔⛔ Thank you for waiting! Our CheckMates have reviewed the message and think it's *likely to be untrue*.❌\n\nPlease do not spread it further⛔️\n\nThank you for keeping Singapore informed!",
-  3.5: "🚧🚧 Thank you for waiting! Our CheckMates have reviewed the message and think that *while some elements within could be true, it's presented in a misleading way*.⚠️\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧.\n\nThank you for keeping Singapore informed!",
-  5: "✅✅ Thank you for waiting! Our CheckMates have reviewed the message and think that it's *accurate*.✅\n\nThank you for keeping Singapore informed!",
-  IRRELEVANT: "Thanks for your interest in CheckMate! Our CheckMates have reviewed the message and think it's *harmless*.👌 Still, such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot the future! If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback instead.",
-  IRRELEVANT_AUTO: "Thanks for your interest in CheckMate! This message is likely *harmless*.👌 Still, such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages in the future! If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback instead.",
+  UNTRUE: `Thank you for waiting! Our CheckMates have reviewed the message and think it's *likely to be untrue*.❌
+
+Please do not spread it further⛔️⛔️
+
+Thank you for keeping Singapore informed!`,
+  MISLEADING: `Thank you for waiting! Our CheckMates have reviewed the message and think that *while some elements within could be true, it's presented in a misleading or unbalanced way*.⚠️
+
+Please take it with a pinch of salt and think twice before spreading it further🚧🚧.
+
+Thank you for keeping Singapore informed!`,
+  ACCURATE: `Thank you for waiting! Our CheckMates have reviewed the message and think that it's *accurate*.✅
+
+Thank you for keeping Singapore informed!`,
+  IRRELEVANT: `Thanks for waiting!
+
+Our CheckMates have reviewed the message and feel there's nothing to assess within it.👌
+
+Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time!
+
+If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
+
+Thanks again for your interest in CheckMate! 🙏🏻`,
+  IRRELEVANT_AUTO: `Thanks for waiting!
+
+It seems like there's nothing to assess within this message.👌
+
+Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time!
+
+If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
+
+Thanks again for your interest in CheckMate! 🙏🏻`,
+  ERROR: `Oops, we encountered an error assessing this message. Sorry about that! 😔
+
+You can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback.
+
+Thank you for waiting!`,
   NO_SCORE: "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
   MESSAGE_NOT_YET_ASSESSED: "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
-  SCAM: "⛔️⛔️ Thanks for waiting! Our CheckMates have reviewed the message and think this is likely a *scam*!🚫\n\nWe recommend you do not engage further⛔️",
-  SUSPICIOUS: "⛔️⛔️ Thanks for waiting! Our CheckMates have reviewed the message and think this *looks suspicious*!🚨\n\nWe recommend you do not engage further⛔️",
-  SPAM: "🚧🚧 Thanks for waiting! Our CheckMates have reviewed this message and think this is likely spam! It's likely harmless, but you should always make sure!\n\nThank you for keeping Singapore safe!",
-  LEGITIMATE: "✅✅Thanks for waiting! Our CheckMates have reviewed the message and think that it's *from a legtimate source*.✅\n\nThank you for keeping Singapore safe!",
-  UNSURE: "🤷🏻‍♂️🤷🏻‍♀️Thanks for waiting! Unfortunately, our CheckMates are *unsure about this message*.😞 Sorry about that, we're human too! If you haven't already done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number instead.\n\nThank you for keeping Singapore safe!",
+  SCAM: `Thanks for waiting! Our CheckMates have reviewed the message and think this *is likely a scam*!🚫
+
+We recommend you do not engage further⛔️⛔️
+
+The above represents the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are partnering ScamShield to fight scams in Singapore.
+
+Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.`,
+  SUSPICIOUS: `Thanks for waiting! Our CheckMates have reviewed the message and think this *looks suspicious*!🚨
+
+We recommend you do not engage further⛔️⛔️
+
+The above represents the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are partnering ScamShield to fight scams in Singapore.
+
+Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.`,
+  SPAM: `Thanks for waiting! Our CheckMates have reviewed this message and think this is likely spam! 🚧 
+
+It's likely harmless, but you should always make sure 🧐
+
+Thank you for keeping Singapore safe!`,
+  LEGITIMATE: `Thanks for waiting! Our CheckMates have reviewed the message and think that it's *from a legitimate source*.✅
+
+Thank you for keeping Singapore safe!`,
+  UNSURE: `Thanks for waiting!
+
+Unfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry about that, we're human too! 😞
+
+If you haven't already done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number instead.
+
+Thank you for keeping Singapore safe!`,
   UNSUPPORTED_TYPE: "Sorry, CheckMate currently doesn't support this type of message.",
-  SCAMSHIELD_PREAMBLE: "The above represents the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. CheckMate is partnering with ScamShield to better fight scams in Singapore.",
-  SCAMSHIELD_SEEK_CONSENT: "Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.",
+  SCAMSHIELD_EXPLAINER: "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more about ScamShield at https://scamshield.org.sg.",
+  SCAMSHIELD_SEEK_CONSENT: "Would you now like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.",
   SCAMSHIELD_ON_CONSENT: "Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!",
   SCAMSHIELD_ON_DECLINE: `No worries! We will not be sending your message to ScamShield. If you change your mind, you can still hit "Yes" above. Thank you for sharing this message with us, and for keeping Singapore safe!`,
   DEMO_SCAM_MESSAGE: "Imagine this is a scam message that you receive in another WhatsApp chat. *Forward this message in to CheckMate (this chat)*⤴️",
