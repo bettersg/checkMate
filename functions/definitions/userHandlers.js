@@ -66,7 +66,7 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive;
       switch (interactive.type) {
         case "button_reply":
-          await onButtonReply(db, interactive.button_reply.id, message, message.id);
+          await onButtonReply(interactive.button_reply.id, message);
           break;
       }
       break;
@@ -102,7 +102,7 @@ async function newTextInstanceHandler(db, {
   let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
 
   // 1 - check if the exact same message exists in database
-  let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('textHash', '==', textHash).get();
+  let textMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('textHash', '==', textHash).where('assessmentExpired', '==', false).get();
   let messageId;
   if (!textMatchSnapshot.empty) {
     hasMatch = true;
@@ -113,7 +113,7 @@ async function newTextInstanceHandler(db, {
     matchedId = textMatchSnapshot.docs[0].id;
   }
   if (!hasMatch && strippedText.length > 0) {
-    let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedTextHash', '==', strippedTextHash).where('isScam', '==', true).get(); //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
+    let strippedTextMatchSnapshot = await db.collection('messages').where('type', '==', 'text').where('strippedTextHash', '==', strippedTextHash).where('isScam', '==', true).where('assessmentExpired', '==', false).get(); //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
     if (!strippedTextMatchSnapshot.empty) {
       hasMatch = true;
       matchType = "stripped"
@@ -148,9 +148,11 @@ async function newTextInstanceHandler(db, {
         score: similarityScore ?? null,
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
-      assessedTimestamp: null,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
+      assessedTimestamp: null,
+      assessmentExpiry: null,
+      assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this
       isSus: null,
@@ -175,6 +177,8 @@ async function newTextInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    isReplyForced: null,
+    replyCategory: null,
     replyTimestamp: null,
     matchType: matchType,
     strippedText: strippedText,
@@ -196,7 +200,7 @@ async function newImageInstanceHandler(db, {
   //get response buffer
   let buffer = await downloadWhatsappMedia(mediaId, mimeType);
   const hash = await getHash(buffer);
-  let imageMatchSnapshot = await db.collection('messages').where('type', '==', 'image').where('hash', '==', hash).get();
+  let imageMatchSnapshot = await db.collection('messages').where('type', '==', 'image').where('hash', '==', hash).where('assessmentExpired', '==', false).get();
   let messageId;
   if (imageMatchSnapshot.empty) {
     const storageBucket = admin.storage().bucket();
@@ -218,9 +222,11 @@ async function newImageInstanceHandler(db, {
       mimeType: mimeType,
       storageUrl: filename,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
-      assessedTimestamp: null,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
+      assessedTimestamp: null,
+      assessmentExpiry: null,
+      assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isSus: null,
       isScam: null,
@@ -252,6 +258,8 @@ async function newImageInstanceHandler(db, {
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    isReplyForced: null,
+    replyCategory: null,
     replyTimestamp: null,
     scamShieldConsent: null,
   });
@@ -324,9 +332,10 @@ async function respondToDemoScam(messageObj) {
   await sendWhatsappButtonMessage("user", messageObj.from, responses?.DEMO_END, buttons);
 }
 
-async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
+async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
+  const db = admin.firestore();
   const from = messageObj.from;
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user");
   const [type, ...rest] = buttonId.split("_");
   let instancePath, selection;
   switch (type) {
@@ -344,6 +353,26 @@ async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
       }
       await instanceRef.update(updateObj)
       await sendWhatsappTextMessage("user", from, replyText)
+      break;
+    case "scamshieldExplain":
+      let messageId
+      [instancePath, messageId] = rest;
+      await sendWhatsappTextMessage("user", from, responses?.SCAMSHIELD_EXPLAINER, null, true);
+      const buttons = [{
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_consent`,
+          title: "Yes",
+        },
+      }, {
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_decline`,
+          title: "No",
+        }
+      }];
+      await sleep(2000);
+      await sendWhatsappButtonMessage("user", from, responses.SCAMSHIELD_SEEK_CONSENT, buttons, messageId)
       break;
     case "onboarding":
       [selection] = rest;
@@ -371,5 +400,4 @@ async function onButtonReply(db, buttonId, messageObj, platform = "whatsapp") {
       }
       break;
   }
-
 }
