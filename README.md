@@ -7,7 +7,7 @@
 3. `cd functions`
 4. `npm install -g firebase-tools`
 5. `npm install`
-6. run `firebase login` then login with your betterSG email
+6. run `firebase login --no-localhost`  (because i was getting redirected to localhost:9005) then login with your betterSG email
 7. run `firebase emulators:start`
 8. you should now be able to hit the url at http://127.0.0.1:5001/checkmate-373101/asia-southeast1/xxxxx successfully
 9.  Now can work on your individual functions in the /functions/definitions folder
