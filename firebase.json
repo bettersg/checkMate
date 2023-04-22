@@ -20,16 +20,22 @@
   ],
   "emulators": {
     "functions": {
+      "host": "0.0.0.0",
       "port": 5001
     },
     "firestore": {
-      "port": 8080
+      "host": "0.0.0.0",
+      "port": "8081",
+      "websocketPort": "54321"
     },
     "storage": {
+      "host": "0.0.0.0",
       "port": 9199
     },
     "ui": {
-      "enabled": true
+      "enabled": true,
+      "host": "0.0.0.0",
+      "port": 4000
     },
     "singleProjectMode": true
   },
