@@ -54,8 +54,6 @@ async function sendWhatsappImageMessage(bot, to, id, url = null, caption = null,
 }
 
 async function sendWhatsappTemplateMessage(bot, to, templateName, languageCode = "en", bodyTextVariables = [], buttonPayloads = [], replyMessageId = null) {
-  let token;
-  token = process.env.WHATSAPP_TOKEN;
   const buttonComponentArr = buttonPayloads.map((payload, index) => {
     return {
       type: "button",
