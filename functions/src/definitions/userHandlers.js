@@ -374,6 +374,8 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
       await sleep(2000);
       await sendWhatsappButtonMessage("user", from, responses.SCAMSHIELD_SEEK_CONSENT, buttons, messageId)
       break;
+    case "irrelevantExplain":
+      await sendWhatsappTextMessage("user", from, responses?.IRRELEVANT_EXPLAINER, null, true);
     case "onboarding":
       [selection] = rest;
       switch (selection) {

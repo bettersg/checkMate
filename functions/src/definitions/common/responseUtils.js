@@ -70,12 +70,19 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     await sendTextMessage("user", data.from, responses.LEGITIMATE, data.id);
   }
   else if (isIrrelevant) {
+    const buttons = [{
+      type: "reply",
+      reply: {
+        id: `irrelevantExplain`,
+        title: "Find out why",
+      },
+    }];
     if (isMachineCategorised) {
       updateObj.replyCategory = "irrelevant_auto";
-      await sendTextMessage("user", data.from, responses.IRRELEVANT_AUTO, data.id)
+      await sendWhatsappButtonMessage("user", data.from, responses.IRRELEVANT_AUTO, buttons, data.id)
     } else {
       updateObj.replyCategory = "irrelevant";
-      await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+      await sendWhatsappButtonMessage("user", data.from, responses.IRRELEVANT, buttons, data.id)
     }
   }
   else if (isInfo) {
@@ -121,21 +128,6 @@ async function getResponsesObj(botType = "user") {
   const defaultResponsesSnap = await defaultResponsesRef.get()
   return defaultResponsesSnap.data() ?? fallbackResponses
 };
-
-// function _getResponse(key, responses) {
-//   if (isNaN(key)) { //means key is a string
-//     return responses.key;
-//   } else {
-//     const truthScore = key;
-//     let numericKeys = Object.keys(responses).filter((e) => !isNaN(e)).sort();
-//     for (let numericKey of numericKeys) {
-//       if (parseFloat(numericKey) >= truthScore) {
-//         return responses[`${numericKey}`];
-//       }
-//     }
-//   }
-//   return null;
-// };
 
 exports.getResponsesObj = getResponsesObj;
 exports.respondToInstance = respondToInstance;

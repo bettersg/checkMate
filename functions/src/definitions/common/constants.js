@@ -14,18 +14,18 @@ Thank you for keeping Singapore informed!`,
 Thank you for keeping Singapore informed!`,
   IRRELEVANT: `Thanks for waiting!
 
-Our CheckMates have reviewed the message and feel there's nothing to assess within it.👌
+Our CheckMates have reviewed the message and feel that it's harmless, and/or that there's nothing noteworthy to assess.👌 To understand why this is so, click the button below.
 
-Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
+Such messages still add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
 
 If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
 
 Thanks again for your interest in CheckMate! 🙏🏻`,
   IRRELEVANT_AUTO: `Thanks for waiting!
 
-It seems like there's nothing to assess within this message.👌
+It seems like this message is harmless, and/or has nothing noteworthy to assess.👌 To understand why this is so, click the button below.
 
-Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
+Such messages still add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
 
 If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
 
@@ -67,6 +67,7 @@ If you haven't already done so, you could send in the message with more context,
 
 Thank you for keeping Singapore safe!`,
   UNSUPPORTED_TYPE: "Sorry, CheckMate currently doesn't support this type of message.",
+  IRRELEVANT_EXPLAINER: "This message doesn't make any verifiable claims...", //TODO: Improve this
   SCAMSHIELD_EXPLAINER: "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more about ScamShield at https://scamshield.org.sg.",
   SCAMSHIELD_SEEK_CONSENT: "Would you now like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.",
   SCAMSHIELD_ON_CONSENT: "Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!",
