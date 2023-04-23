@@ -109,12 +109,9 @@ app.get("/whatsapp", (req, res) => {
       res.sendStatus(403);
     }
   }
-  res.sendStatus(400);
 });
 
 exports.webhookHandler = functions
   .region('asia-southeast1')
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN", "VERIFY_TOKEN"] })
   .https.onRequest(app);
-
-exports.app = app;
