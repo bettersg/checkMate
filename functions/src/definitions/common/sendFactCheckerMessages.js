@@ -96,7 +96,7 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
       }
       rows[0].description = "Totally false";
       rows[max_score].description = "Totally true";
-      sections = [{
+      const sections = [{
         rows: rows,
       }];
       switch (message.type) {
