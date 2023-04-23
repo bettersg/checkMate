@@ -6,8 +6,9 @@
     "serve": "npm run build && firebase emulators:start",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "npm run build && firebase deploy",
-    "logs": "npm run build firebase functions:log",
+    "predeploy": "npm run build",
+    "deploy": "firebase deploy",
+    "logs": "npm run build && firebase functions:log",
     "build": "tsc"
   },
   "engines": {
