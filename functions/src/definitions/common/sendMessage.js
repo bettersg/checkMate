@@ -19,7 +19,9 @@ exports.sendImageMessage = async function (bot, to, urlOrId = null, caption = nu
   let res;
   switch (platform) {
     case "telegram":
-      res = await sendTelegramImageMessage(bot, to, url, caption, replyId);
+      if (checkUrl(urlOrId)) {
+        res = await sendTelegramImageMessage(bot, to, urlOrId, caption, replyId);
+      }
       break;
     case "whatsapp":
       if (checkUrl(urlOrId)) {

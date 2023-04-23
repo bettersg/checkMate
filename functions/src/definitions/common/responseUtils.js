@@ -14,7 +14,7 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     functions.logger.log("Missing 'from' field in instance data");
     return Promise.resolve()
   }
-  const responses = await getResponsesObj(botType = "user");
+  const responses = await getResponsesObj("user");
   const isAssessed = parentMessageSnap.get("isAssessed");
   const isIrrelevant = parentMessageSnap.get("isIrrelevant");
   const isScam = parentMessageSnap.get("isScam");

@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const { sendWhatsappTextListMessage, sendWhatsappTextMessage, sendWhatsappButtonMessage } = require("./sendWhatsappMessage");
 const { getResponsesObj } = require("./responseUtils");
+const functions = require("firebase-functions");
 
 exports.sendL1CategorisationMessage = async function (voteRequestSnap, messageRef, replyId = null) {
   const voteRequestData = voteRequestSnap.data();
@@ -96,7 +97,7 @@ exports.sendVotingMessage = async function sendVotingMessage(voteRequestSnap, me
       }
       rows[0].description = "Totally false";
       rows[max_score].description = "Totally true";
-      sections = [{
+      const sections = [{
         rows: rows,
       }];
       switch (message.type) {

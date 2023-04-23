@@ -77,7 +77,7 @@ async function sendWhatsappTemplateMessage(bot, to, templateName, languageCode =
     }),
   }
   const componentsArr = buttonComponentArr.concat(bodyComponentArr);
-  data = {
+  const data = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -101,7 +101,7 @@ async function sendWhatsappTemplateMessage(bot, to, templateName, languageCode =
 }
 
 async function sendWhatsappTextListMessage(bot, to, text, buttonText, sections, replyMessageId = null) {
-  data = {
+  const data = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -127,7 +127,7 @@ async function sendWhatsappTextListMessage(bot, to, text, buttonText, sections, 
 }
 
 async function sendWhatsappButtonMessage(bot, to, text, buttons, replyMessageId = null) {
-  data = {
+  const data = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -152,7 +152,7 @@ async function sendWhatsappButtonMessage(bot, to, text, buttons, replyMessageId 
 };
 
 async function sendWhatsappContactMessage(bot, to, phoneNumber, name, url, replyMessageId = null) {
-  data = {
+  const data = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -177,7 +177,7 @@ async function sendWhatsappContactMessage(bot, to, phoneNumber, name, url, reply
 }
 
 async function markWhatsappMessageAsRead(bot, messageId) {
-  data = {
+  const data = {
     messaging_product: "whatsapp",
     status: "read",
     message_id: messageId,
