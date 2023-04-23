@@ -16,7 +16,7 @@ Thank you for keeping Singapore informed!`,
 
 Our CheckMates have reviewed the message and feel there's nothing to assess within it.👌
 
-Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time!
+Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
 
 If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
 
@@ -25,7 +25,7 @@ Thanks again for your interest in CheckMate! 🙏🏻`,
 
 It seems like there's nothing to assess within this message.👌
 
-Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time!
+Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
 
 If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
 
