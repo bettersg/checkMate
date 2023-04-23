@@ -7,7 +7,7 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "predeploy": "npm run build",
-    "deploy": "firebase deploy",
+    "deploy": "firebase deploy --only functions",
     "logs": "npm run build && firebase functions:log",
     "build": "tsc"
   },
