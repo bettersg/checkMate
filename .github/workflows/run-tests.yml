@@ -3,6 +3,11 @@ on:
   pull_request:
     paths:
       - 'functions/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
 jobs:
   run_tests:
     runs-on: ubuntu-latest
