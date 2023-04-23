@@ -8,11 +8,12 @@
 4. `npm install -g firebase-tools`
 5. `npm install`
 6. run `firebase login --no-localhost` then login with your betterSG email
-7. run `npm run serve`
-8. you should now be able to hit the url at http://127.0.0.1:5001/checkmate-373101/asia-southeast1/xxxxx successfully
-9.  Now can work on your individual functions in the /functions/definitions folder
-10. Uncomment the exports when ready to test with the local emulator!
-11. Rmb to use https://ngrok.com/ (can install vs code extension) to expose localhost as an internet URL, in case you want to run locally but test with actual Whatsapp and Telegram. Note...might need to have premium Ngrok for this to work with whatsapp.
+7. run `npm run build:watch` for typescript to build and work with emulator's hot reload
+8. run `npm run serve`
+9. you should now be able to hit the url at http://127.0.0.1:5001/checkmate-373101/asia-southeast1/xxxxx successfully
+10.  Now can work on your individual functions in the /functions/definitions folder
+11. Uncomment the exports when ready to test with the local emulator!
+12. Rmb to use https://ngrok.com/ (can install vs code extension) to expose localhost as an internet URL, in case you want to run locally but test with actual Whatsapp and Telegram. Note...might need to have premium Ngrok for this to work with whatsapp.
 
 ## Things to note
 1. Put all keys and access tokens in the .env file and make sure its gitignored!

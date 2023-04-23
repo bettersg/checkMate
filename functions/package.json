@@ -3,13 +3,14 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "lint": "",
-    "serve": "npm run build && firebase emulators:start",
-    "shell": "npm run build && firebase functions:shell",
+    "serve": "firebase emulators:start",
+    "shell": "firebase functions:shell",
     "start": "npm run shell",
     "predeploy": "npm run build",
     "deploy": "firebase deploy --only functions",
-    "logs": "npm run build && firebase functions:log",
-    "build": "tsc"
+    "logs": "firebase functions:log",
+    "build": "tsc",
+    "build:watch": "npm run build -- --watch"
   },
   "engines": {
     "node": "18"
