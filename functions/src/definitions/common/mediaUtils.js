@@ -15,7 +15,7 @@ if (!admin.apps.length) {
 async function downloadWhatsappMedia(mediaId) {
     const token = process.env.WHATSAPP_TOKEN;
     //get download URL
-    response = await axios({
+    const response = await axios({
         method: "GET", // Required, HTTP method, a string, e.g. POST, GET
         url: `https://graph.facebook.com/${graphApiVersion.value()}/${mediaId}`,
         headers: {
@@ -46,7 +46,7 @@ async function downloadWhatsappMedia(mediaId) {
 }
 
 async function getHash(buffer) {
-    result = await imageHashSync({
+    const result = await imageHashSync({
         data: buffer
     }, 8, true);
     return result;

@@ -6,6 +6,7 @@ const { sendWhatsappTextMessage } = require('./sendWhatsappMessage')
 const { defineString } = require('firebase-functions/params');
 const { findPhoneNumbersInText } = require('libphonenumber-js');
 const { createHash } = require('crypto');
+const { Blob } = require('buffer')
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER");
@@ -40,7 +41,7 @@ const archiveMessages = async function () {
   const messagesRef = db.collection('messages');
   const messagesSnap = await messagesRef.get()
   const json = JSON.stringify(messagesSnap.docs, null, 2)
-  var blob = new Blob([json], { type: "application/json" })
+  const blob = new Blob([json], { type: "application/json" })
   const arrayBuffer = await blob.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   const storageBucket = admin.storage().bucket();
