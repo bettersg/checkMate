@@ -30,13 +30,15 @@ exports.onInstanceCreate = functions.region('asia-southeast1').runWith({ secrets
 
     const parentMessageSnap = await parentMessageRef.get();
     await respondToInstance(snap);
-    const parentInstanceCount = await getCount(parentMessageRef, "instance")
-    const thresholds = await getThresholds();
-    if (parentInstanceCount >= thresholds.startVote && !parentMessageSnap.get("isPollStarted")) {
-      await despatchPoll(parentMessageRef);
-      return parentMessageRef.update({ isPollStarted: true });
+    if (!parentMessageSnap.get("isAssessed")) {
+      const parentInstanceCount = await getCount(parentMessageRef, "instance")
+      const thresholds = await getThresholds();
+      if (parentInstanceCount >= thresholds.startVote && !parentMessageSnap.get("isPollStarted")) {
+        await despatchPoll(parentMessageRef);
+        return parentMessageRef.update({ isPollStarted: true });
+      }
+      return Promise.resolve();
     }
-    return Promise.resolve();
   });
 
 async function upsertUser(from, messageTimestamp) {
