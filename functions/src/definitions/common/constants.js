@@ -14,9 +14,9 @@ Thank you for keeping Singapore informed!`,
 Thank you for keeping Singapore informed!`,
   IRRELEVANT: `Thanks for waiting!
 
-Our CheckMates have reviewed the message and feel there's nothing to assess within it.👌
+Our CheckMates have reviewed the message and feel that there's nothing contentious or harmful about it. 👌
 
-Such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
+Still, such messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻
 
 If you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.
 
@@ -43,16 +43,16 @@ Thank you for waiting!`,
 
 We recommend you do not engage further⛔️⛔️
 
-The above represents the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are partnering ScamShield to fight scams in Singapore.
+The above represents the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield to fight scams in Singapore.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.`,
+Would you like us to share this message with ScamShield on your behalf? Only the contents of this message, and no other information, will be sent.`,
   SUSPICIOUS: `Thanks for waiting! Our CheckMates have reviewed the message and think this *looks suspicious*!🚨
 
 We recommend you do not engage further⛔️⛔️
 
-The above represents the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are partnering ScamShield to fight scams in Singapore.
+The above represents the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield to fight scams in Singapore.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.`,
+Would you like us to share this message with ScamShield on your behalf? Only the contents of this message, and no other information, will be sent.`,
   SPAM: `Thanks for waiting! Our CheckMates have reviewed this message and think this is likely spam! 🚧 
 
 It's likely harmless, but you should always make sure 🧐
@@ -73,7 +73,7 @@ Thank you for keeping Singapore safe!`,
   SCAMSHIELD_EXPLAINER:
     'ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more about ScamShield at https://scamshield.org.sg.',
   SCAMSHIELD_SEEK_CONSENT:
-    'Would you now like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.',
+    'Would you now like us to share this message with ScamShield on your behalf? Only the contents of this message, and no other information, will be sent.',
   SCAMSHIELD_ON_CONSENT:
     'Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!',
   SCAMSHIELD_ON_DECLINE: `No worries! We will not be sending your message to ScamShield. If you change your mind, you can still hit "Yes" above. Thank you for sharing this message with us, and for keeping Singapore safe!`,
