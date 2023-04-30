@@ -1,0 +1,14 @@
+{
+  "name": "integration-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run CheckMate.postman_collection.json -g ./env.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "^5.3.2"
+  }
+}
