@@ -20,10 +20,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: checkmate_emulator:latest
+          tags: sarge1989/checkMate:latest
 
       - name: Run unit tests
-        run: docker run checkmate_emulator npm run functions:unittests
+        run: docker run sarge1989/checkMate:latest npm run functions:unittests
       # - name: Build docker image for testing
       #   run: docker-compose build --no-cache
       # - name: Run unit tests in functions folder
