@@ -23,7 +23,7 @@ jobs:
           tags: sarge1989/checkMate:latest
 
       - name: Run unit tests
-        run: docker run sarge1989/checkMate:latest npm run functions:unittests
+        run: docker run sarge1989/checkmate:latest npm run functions:unittests
       # - name: Build docker image for testing
       #   run: docker-compose build --no-cache
       # - name: Run unit tests in functions folder
