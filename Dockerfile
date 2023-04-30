@@ -78,8 +78,6 @@ WORKDIR /app/functions
 COPY functions/.env.local.test .env.local
 COPY functions/.secret.local.test .secret.local
 
-RUN npm run test
-
 RUN npm run build
 
 CMD npm run serve

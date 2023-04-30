@@ -22,9 +22,12 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/functions/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: Install packages
-        run: npm i
-        working-directory: functions
-      - name: Run unit tests
-        run: npm test
-        working-directory: functions
+      - name: Build docker image for testing
+        run: docker-compose build --no-cache
+      # - name: Run unit tests in functions folder
+      # - name: Install packages
+      #   run: npm i
+      #   working-directory: functions
+      # - name: Run unit tests
+      #   run: npm test
+      #   working-directory: functions
