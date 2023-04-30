@@ -13,21 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v4
         with:
-          node-version: 18.x
-      - uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/functions/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Build docker image for testing
-        run: docker-compose build --no-cache
+          context: .
+          push: true
+          tags: checkmate_emulator:latest
+
+      - name: Run unit tests
+        run: docker run checkmate_emulator npm run functions:unittests
+      # - name: Build docker image for testing
+      #   run: docker-compose build --no-cache
       # - name: Run unit tests in functions folder
-      # - name: Install packages
-      #   run: npm i
-      #   working-directory: functions
-      # - name: Run unit tests
-      #   run: npm test
-      #   working-directory: functions
