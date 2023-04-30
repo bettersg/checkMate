@@ -24,8 +24,13 @@ jobs:
 
       - name: Run unit tests
         run: docker run checkmate_emulator:latest npm test
-      # - name: Run unit tests
-      #   run: docker run sarge1989/checkmate:latest npm run functions:unittests
-      # - name: Build docker image for testing
-      #   run: docker-compose build --no-cache
-      # - name: Run unit tests in functions folder
+
+      - name: Start docker compose for testing
+        run: docker-compose start -d
+
+      - name: Install newman
+        run: npm ci
+        working-directory: integration-tests
+      - name: Run postman tests
+        run: npm test
+        working-directory: integration-tests
