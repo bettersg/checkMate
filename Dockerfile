@@ -65,8 +65,9 @@ USER root
 WORKDIR /app/functions
 
 COPY ./functions/package.json ./package.json
+COPY ./functions/package-lock.json ./package-lock.json
 
-RUN npm install
+RUN npm ci
 
 WORKDIR /app
 
