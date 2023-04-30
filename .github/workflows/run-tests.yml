@@ -23,7 +23,7 @@ jobs:
         run: docker-compose build
 
       - name: Run unit tests
-        run: docker run checkmate_emulator:latest npm run functions:unittests
+        run: docker run checkmate_emulator:latest npm test
       # - name: Run unit tests
       #   run: docker run sarge1989/checkmate:latest npm run functions:unittests
       # - name: Build docker image for testing

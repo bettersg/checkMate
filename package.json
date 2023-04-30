@@ -9,7 +9,6 @@
     "googleapis": "^105.0.0"
   },
   "scripts": {
-    "lint": "eslint . --ext js,jsx,ts,tsx --fix",
-    "functions:unittests": "cd functions && npm test"
+    "lint": "eslint . --ext js,jsx,ts,tsx --fix"
   }
 }
