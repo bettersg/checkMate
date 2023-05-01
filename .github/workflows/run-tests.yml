@@ -28,8 +28,7 @@ jobs:
       - name: Start docker compose for testing
         run: docker-compose start -d
       - name: wait for emulator to start
-        run: bash wait-for-it.sh http://127.0.0.1:15001/checkmate-373101/asia-southeast1/healthcheck
-
+        run: chmod +x wait-for-it.sh && ./wait-for-it.sh http://127.0.0.1:15001/checkmate-373101/asia-southeast1/healthcheck
       # Will need a wait here, although currently installing newman should cover
       # the docker compose start up time
       - name: Install newman
