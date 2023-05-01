@@ -10,6 +10,7 @@ const testUserPhoneNumberId = defineString(
 const testCheckerPhoneNumberId = defineString(
   'WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID'
 )
+const graphApiUrl = process.env['GRAPH_API_URL'] || 'https://graph.facebook.com'
 
 async function sendWhatsappTextMessage(
   bot,
@@ -258,7 +259,7 @@ async function callWhatsappSendMessageApi(data, bot) {
   const response = await axios({
     method: 'POST', // Required, HTTP method, a string, e.g. POST, GET
     url:
-      `https://graph.facebook.com/${graphApiVersion.value()}/` +
+      `${graphApiUrl}/${graphApiVersion.value()}/` +
       phoneNumberId +
       '/messages',
     data: data,

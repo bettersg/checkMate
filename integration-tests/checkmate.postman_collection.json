@@ -108,6 +108,142 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Send WhatsApp message",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"F\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+					"host": [
+						"{{FUNCTIONS_URL}}"
+					],
+					"path": [
+						"checkmate-373101",
+						"asia-southeast1",
+						"webhookHandler",
+						"whatsapp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get last message (Read status)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Your test name\", function () {\r",
+							"    const expected = {\r",
+							"    \"hostname\": \"resultserver\",\r",
+							"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+							"    \"body\": {\r",
+							"        \"messaging_product\": \"whatsapp\",\r",
+							"        \"status\": \"read\",\r",
+							"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+							"    },\r",
+							"    \"method\": \"POST\"\r",
+							"}\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.eql(expected);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+					"host": [
+						"{{RESULT_SERVER_URL}}"
+					],
+					"path": [
+						"testresultdata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get last message (Welcome message)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Your test name\", function () {\r",
+							"    const expected = {\r",
+							"    \"hostname\": \"resultserver\",\r",
+							"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+							"    \"body\": {\r",
+							"        \"messaging_product\": \"whatsapp\",\r",
+							"        \"recipient_type\": \"individual\",\r",
+							"        \"to\": \"88888888\",\r",
+							"        \"type\": \"interactive\",\r",
+							"        \"interactive\": {\r",
+							"            \"type\": \"button\",\r",
+							"            \"body\": {\r",
+							"                \"text\": \"Hello and welcome to CheckMate! We're glad you're here 😊. Would you like to go through a quick onboarding to see how CheckMate works? Otherwise, you can go ahead and send in dubious messages right now!\"\r",
+							"            },\r",
+							"            \"action\": {\r",
+							"                \"buttons\": [\r",
+							"                    {\r",
+							"                        \"type\": \"reply\",\r",
+							"                        \"reply\": {\r",
+							"                            \"id\": \"newUser_onboardingYes\",\r",
+							"                            \"title\": \"Yes, show me!\"\r",
+							"                        }\r",
+							"                    },\r",
+							"                    {\r",
+							"                        \"type\": \"reply\",\r",
+							"                        \"reply\": {\r",
+							"                            \"id\": \"newUser_onboardingNo\",\r",
+							"                            \"title\": \"No, I'm good\"\r",
+							"                        }\r",
+							"                    }\r",
+							"                ]\r",
+							"            }\r",
+							"        }\r",
+							"    },\r",
+							"    \"method\": \"POST\"\r",
+							"}\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.eql(expected);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+					"host": [
+						"{{RESULT_SERVER_URL}}"
+					],
+					"path": [
+						"testresultdata"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [

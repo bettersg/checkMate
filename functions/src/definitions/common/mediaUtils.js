@@ -6,6 +6,7 @@ const util = require('util')
 const { imageHash } = require('image-hash')
 
 const graphApiVersion = defineString('GRAPH_API_VERSION')
+const graphApiUrl = process.env['GRAPH_API_URL'] || 'https://graph.facebook.com'
 const imageHashSync = util.promisify(imageHash)
 
 if (!admin.apps.length) {
@@ -17,7 +18,7 @@ async function downloadWhatsappMedia(mediaId) {
   //get download URL
   const response = await axios({
     method: 'GET', // Required, HTTP method, a string, e.g. POST, GET
-    url: `https://graph.facebook.com/${graphApiVersion.value()}/${mediaId}`,
+    url: `${graphApiUrl}/${graphApiVersion.value()}/${mediaId}`,
     headers: {
       Authorization: `Bearer ${token}`,
     },
