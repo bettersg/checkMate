@@ -1,8 +1,6 @@
 name: Run Tests
 on:
   pull_request:
-    paths:
-      - 'functions/**'
   push:
     branches:
       - main
@@ -13,24 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # - name: Build and push
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: sarge1989/checkmate:latest
       - name: Build
         run: docker-compose build --no-cache
-
       - name: Run unit tests
         run: docker run checkmate_emulator:latest npm test
-
       - name: Start docker compose for testing
         run: docker-compose up -d
       - name: Wait for emulator to start
         run: timeout 30 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:15001/checkmate-373101/asia-southeast1/healthcheck)" != "200" ]]; do sleep 1; done' || false
-      # Will need a wait here, although currently installing newman should cover
-      # the docker compose start up time
       - name: Install newman
         run: npm ci
         working-directory: integration-tests
