@@ -124,6 +124,7 @@ app.get('/whatsapp', (req, res) => {
       res.sendStatus(403)
     }
   }
+  res.sendStatus(400)
 })
 
 exports.webhookHandler = functions
@@ -137,3 +138,5 @@ exports.webhookHandler = functions
     ],
   })
   .https.onRequest(app)
+
+exports.app = app
