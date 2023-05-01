@@ -1,12 +1,31 @@
 {
 	"info": {
 		"_postman_id": "d519384a-1f55-41a6-a65f-b8c1e0c49e21",
-		"name": "CheckMate Tests",
+		"name": "checkmate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "mockdb",
+			"name": "Healthcheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/healthcheck",
+					"host": [
+						"{{FUNCTIONS_URL}}"
+					],
+					"path": [
+						"checkmate-373101",
+						"asia-southeast1",
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create mock firestore DB",
 			"event": [
 				{
 					"listen": "test",
@@ -25,7 +44,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"object\": \"whatsapp_business_account\",\r\n    \"entry\": [\r\n        {\r\n            \"id\": \"112914005037866\",\r\n            \"changes\": [\r\n                {\r\n                    \"value\": {\r\n                        \"messaging_product\": \"whatsapp\",\r\n                        \"metadata\": {\r\n                            \"display_phone_number\": \"15550933685\",\r\n                            \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n                        },\r\n                        \"contacts\": [\r\n                            {\r\n                                \"profile\": {\r\n                                    \"name\": \"Jerome\"\r\n                                },\r\n                                \"wa_id\": \"6596880320\"\r\n                            }\r\n                        ],\r\n                        \"messages\": [\r\n                            {\r\n                                \"from\": \"6596880320\",\r\n                                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIDFCMDlDNjhFRDgzMEJCQjA0M0FBM0NEQTc5MEYzRkE4AA==\",\r\n                                \"timestamp\": \"1682861735\",\r\n                                \"text\": {\r\n                                    \"body\": \"/mockdb\"\r\n                                },\r\n                                \"type\": \"text\"\r\n                            }\r\n                        ]\r\n                    },\r\n                    \"field\": \"messages\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"severity\": \"INFO\",\r\n    \"message\": \"\"\r\n}",
+					"raw": "{\r\n    \"object\": \"whatsapp_business_account\",\r\n    \"entry\": [\r\n        {\r\n            \"id\": \"112914005037866\",\r\n            \"changes\": [\r\n                {\r\n                    \"value\": {\r\n                        \"messaging_product\": \"whatsapp\",\r\n                        \"metadata\": {\r\n                            \"display_phone_number\": \"15550933685\",\r\n                            \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n                        },\r\n                        \"contacts\": [\r\n                            {\r\n                                \"profile\": {\r\n                                    \"name\": \"Test User\"\r\n                                },\r\n                                \"wa_id\": \"88888888\"\r\n                            }\r\n                        ],\r\n                        \"messages\": [\r\n                            {\r\n                                \"from\": \"88888888\",\r\n                                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIDFCMDlDNjhFRDgzMEJCQjA0M0FBM0NEQTc5MEYzRkE4AA==\",\r\n                                \"timestamp\": \"1682861735\",\r\n                                \"text\": {\r\n                                    \"body\": \"/mockdb\"\r\n                                },\r\n                                \"type\": \"text\"\r\n                            }\r\n                        ]\r\n                    },\r\n                    \"field\": \"messages\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"severity\": \"INFO\",\r\n    \"message\": \"\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
