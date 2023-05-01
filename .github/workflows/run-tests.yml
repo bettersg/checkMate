@@ -28,9 +28,11 @@ jobs:
       - name: Start docker compose for testing
         run: docker-compose start -d
 
+      # Will need a wait here, although currently installing newman should cover
+      # the docker compose start up time
       - name: Install newman
         run: npm ci
         working-directory: integration-tests
       - name: Run postman tests
-        run: npm test
+        run: npm run test:github
         working-directory: integration-tests
