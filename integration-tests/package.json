@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:github": "newman run CheckMate.postman_collection.json -g ./env-github.json",
-    "test:local": "newman run CheckMate.postman_collection.json -g ./env-local.json"
+    "test": "newman run CheckMate.postman_collection.json -g ./env.json"
   },
   "author": "",
   "license": "ISC",

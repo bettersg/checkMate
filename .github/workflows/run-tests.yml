@@ -23,5 +23,5 @@ jobs:
         run: npm ci
         working-directory: integration-tests
       - name: Run postman tests
-        run: npm run test:github
+        run: npm run test
         working-directory: integration-tests
