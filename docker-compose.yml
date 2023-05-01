@@ -12,3 +12,7 @@ services:
       - '19099:9099'
       - '19199:9199'
       - '19299:9299'
+  resultserver:
+    build: ./integration-tests/server
+    ports:
+      - '12345:12345'
