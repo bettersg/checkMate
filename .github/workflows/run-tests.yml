@@ -11,11 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build
-        run: docker-compose build --no-cache
+        run: docker-compose -f docker-compose-base.yml build --no-cache
       - name: Run unit tests
         run: docker run checkmate_emulator:latest npm test
       - name: Start docker compose for testing
-        run: docker-compose up -d
+        run: docker-compose -f docker-compose-base.yml up -d
       - name: Wait for emulator to start
         run: timeout 30 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:15001/checkmate-373101/asia-southeast1/healthcheck)" != "200" ]]; do sleep 1; done' || false
       - name: Install newman
