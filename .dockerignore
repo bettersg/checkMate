@@ -1,0 +1,7 @@
+node_modules
+lib
+*.log
+*/.env
+*/.env.local
+*/.secret.local
+*/.env.checkmate-373101
