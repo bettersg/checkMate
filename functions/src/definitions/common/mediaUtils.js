@@ -1,12 +1,12 @@
-const axios = require('axios')
-const admin = require('firebase-admin')
-const functions = require('firebase-functions')
-const { defineString } = require('firebase-functions/params')
-const util = require('util')
-const { imageHash } = require('image-hash')
+const axios = require("axios")
+const admin = require("firebase-admin")
+const functions = require("firebase-functions")
+const { defineString } = require("firebase-functions/params")
+const util = require("util")
+const { imageHash } = require("image-hash")
 
-const graphApiVersion = defineString('GRAPH_API_VERSION')
-const graphApiUrl = process.env['GRAPH_API_URL'] || 'https://graph.facebook.com'
+const graphApiVersion = defineString("GRAPH_API_VERSION")
+const graphApiUrl = process.env["GRAPH_API_URL"] || "https://graph.facebook.com"
 const imageHashSync = util.promisify(imageHash)
 
 if (!admin.apps.length) {
@@ -17,7 +17,7 @@ async function downloadWhatsappMedia(mediaId) {
   const token = process.env.WHATSAPP_TOKEN
   //get download URL
   const response = await axios({
-    method: 'GET', // Required, HTTP method, a string, e.g. POST, GET
+    method: "GET", // Required, HTTP method, a string, e.g. POST, GET
     url: `${graphApiUrl}/${graphApiVersion.value()}/${mediaId}`,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -29,21 +29,21 @@ async function downloadWhatsappMedia(mediaId) {
     try {
       //download image and upload to cloud storage
       responseBuffer = await axios({
-        method: 'GET',
+        method: "GET",
         url: url,
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'arraybuffer',
+        responseType: "arraybuffer",
       })
     } catch (err) {
       functions.logger.log(err)
       throw new Error(
-        'Error occured while downloading and calculating hash of image'
+        "Error occured while downloading and calculating hash of image"
       )
     }
   } else {
-    throw new Error('Error occured while fetching image url from Facebook')
+    throw new Error("Error occured while fetching image url from Facebook")
   }
   return Buffer.from(responseBuffer.data)
 }
@@ -66,7 +66,7 @@ async function getSignedUrl(storageUrl) {
       .bucket()
       .file(storageUrl)
       .getSignedUrl({
-        action: 'read',
+        action: "read",
         expires: Date.now() + 60 * 60 * 1000,
       })
     return temporaryUrl

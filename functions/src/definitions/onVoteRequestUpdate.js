@@ -1,27 +1,27 @@
-const functions = require('firebase-functions')
-const admin = require('firebase-admin')
-const { getThresholds } = require('./common/utils')
+const functions = require("firebase-functions")
+const admin = require("firebase-admin")
+const { getThresholds } = require("./common/utils")
 const {
   sendVotingMessage,
   sendL2OthersCategorisationMessage,
   sendRemainingReminder,
-} = require('./common/sendFactCheckerMessages')
-const { incrementCounter, getCount } = require('./common/counters')
-const { FieldValue } = require('@google-cloud/firestore')
-const { defineInt } = require('firebase-functions/params')
+} = require("./common/sendFactCheckerMessages")
+const { incrementCounter, getCount } = require("./common/counters")
+const { FieldValue } = require("@google-cloud/firestore")
+const { defineInt } = require("firebase-functions/params")
 // Define some parameters
-const numVoteShards = defineInt('NUM_SHARDS_VOTE_COUNT')
+const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
 exports.onVoteRequestUpdate = functions
-  .region('asia-southeast1')
+  .region("asia-southeast1")
   .runWith({
-    secrets: ['WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID', 'WHATSAPP_TOKEN'],
+    secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
   })
-  .firestore.document('/messages/{messageId}/voteRequests/{voteRequestId}')
+  .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
   .onUpdate(async (change, context) => {
     // Grab the current value of what was written to Firestore.
     const before = change.before.data()
@@ -43,20 +43,20 @@ exports.onVoteRequestUpdate = functions
       await updateCheckerVoteCount(before, after)
       const db = admin.firestore()
       const factCheckersSnapshot = await db
-        .collection('factCheckers')
-        .where('isActive', '==', true)
+        .collection("factCheckers")
+        .where("isActive", "==", true)
         .get()
       const numFactCheckers = factCheckersSnapshot.size
-      const responseCount = await getCount(messageRef, 'responses')
-      const irrelevantCount = await getCount(messageRef, 'irrelevant')
-      const scamCount = await getCount(messageRef, 'scam')
-      const illicitCount = await getCount(messageRef, 'illicit')
-      const infoCount = await getCount(messageRef, 'info')
-      const spamCount = await getCount(messageRef, 'spam')
-      const legitimateCount = await getCount(messageRef, 'legitimate')
-      const unsureCount = await getCount(messageRef, 'unsure')
+      const responseCount = await getCount(messageRef, "responses")
+      const irrelevantCount = await getCount(messageRef, "irrelevant")
+      const scamCount = await getCount(messageRef, "scam")
+      const illicitCount = await getCount(messageRef, "illicit")
+      const infoCount = await getCount(messageRef, "info")
+      const spamCount = await getCount(messageRef, "spam")
+      const legitimateCount = await getCount(messageRef, "legitimate")
+      const unsureCount = await getCount(messageRef, "unsure")
       const susCount = scamCount + illicitCount
-      const voteTotal = await getCount(messageRef, 'totalVoteScore')
+      const voteTotal = await getCount(messageRef, "totalVoteScore")
       const truthScore = infoCount > 0 ? voteTotal / infoCount : null
       const thresholds = await getThresholds()
       const isSus = susCount > parseInt(thresholds.isSus * responseCount)
@@ -114,11 +114,11 @@ async function updateCounts(messageRef, before, after) {
   const currentVote = after.vote
   if (previousCategory === null) {
     if (currentCategory !== null) {
-      await incrementCounter(messageRef, 'responses', numVoteShards.value())
+      await incrementCounter(messageRef, "responses", numVoteShards.value())
     }
   } else {
     if (currentCategory === null) {
-      await incrementCounter(messageRef, 'responses', numVoteShards.value(), -1) //if previous category is not null and current category is, reduce the response count
+      await incrementCounter(messageRef, "responses", numVoteShards.value(), -1) //if previous category is not null and current category is, reduce the response count
     }
     await incrementCounter(
       messageRef,
@@ -126,10 +126,10 @@ async function updateCounts(messageRef, before, after) {
       numVoteShards.value(),
       -1
     ) //if previous category is not null and current category also not now, reduce the count of the previous category
-    if (previousCategory === 'info') {
+    if (previousCategory === "info") {
       await incrementCounter(
         messageRef,
-        'totalVoteScore',
+        "totalVoteScore",
         numVoteShards.value(),
         -previousVote
       ) //if previous category is info, reduce the total vote score
@@ -137,10 +137,10 @@ async function updateCounts(messageRef, before, after) {
   }
   if (currentCategory !== null) {
     await incrementCounter(messageRef, currentCategory, numVoteShards.value())
-    if (currentCategory === 'info') {
+    if (currentCategory === "info") {
       await incrementCounter(
         messageRef,
-        'totalVoteScore',
+        "totalVoteScore",
         numVoteShards.value(),
         currentVote
       )
