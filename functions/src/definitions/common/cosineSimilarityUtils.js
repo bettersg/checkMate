@@ -1,6 +1,6 @@
 // creates the wordmap
 function wordCountMap(str) {
-  let words = str.split(' ')
+  let words = str.split(" ")
   let wordCount = {}
   words.forEach((w) => {
     wordCount[w] = (wordCount[w] || 0) + 1

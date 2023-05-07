@@ -1,11 +1,11 @@
-const admin = require('firebase-admin')
+const admin = require("firebase-admin")
 const {
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
   sendWhatsappButtonMessage,
-} = require('./sendWhatsappMessage')
-const { getResponsesObj } = require('./responseUtils')
-const functions = require('firebase-functions')
+} = require("./sendWhatsappMessage")
+const { getResponsesObj } = require("./responseUtils")
+const functions = require("firebase-functions")
 
 exports.sendL1CategorisationMessage = async function (
   voteRequestSnap,
@@ -13,28 +13,28 @@ exports.sendL1CategorisationMessage = async function (
   replyId = null
 ) {
   const voteRequestData = voteRequestSnap.data()
-  const responses = await getResponsesObj('factChecker')
-  const type = 'categorize'
+  const responses = await getResponsesObj("factChecker")
+  const type = "categorize"
   switch (voteRequestData.platform) {
-    case 'whatsapp':
+    case "whatsapp":
       const rows = [
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_scam`,
-          title: 'Scam',
+          title: "Scam",
           description:
-            'Intended to obtain money/personal information via deception',
+            "Intended to obtain money/personal information via deception",
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_illicit`,
-          title: 'Illicit',
+          title: "Illicit",
           description:
-            'Other potential illicit activity, e.g. moneylending/prostitution',
+            "Other potential illicit activity, e.g. moneylending/prostitution",
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_info`,
-          title: 'News/Information/Opinion',
+          title: "News/Information/Opinion",
           description:
-            'Messages intended to inform/convince/mislead a broad base of people',
+            "Messages intended to inform/convince/mislead a broad base of people",
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_others`,
@@ -48,15 +48,15 @@ exports.sendL1CategorisationMessage = async function (
         },
       ]
       await sendWhatsappTextListMessage(
-        'factChecker',
+        "factChecker",
         voteRequestData.platformId,
         responses.L1_ASSESSMENT_PROMPT,
-        'Make Selection',
+        "Make Selection",
         sections,
         replyId ?? voteRequestData.sentMessageId
       )
       break
-    case 'telegram':
+    case "telegram":
       break
   }
 }
@@ -67,32 +67,32 @@ exports.sendL2OthersCategorisationMessage = async function (
   replyId = null
 ) {
   const voteRequestData = voteRequestSnap.data()
-  const responses = await getResponsesObj('factChecker')
-  const type = 'others'
+  const responses = await getResponsesObj("factChecker")
+  const type = "others"
   switch (voteRequestData.platform) {
-    case 'whatsapp':
+    case "whatsapp":
       const rows = [
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_spam`,
-          title: 'Spam',
-          description: 'Unsolicited spam, such as marketing messages',
+          title: "Spam",
+          description: "Unsolicited spam, such as marketing messages",
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_legitimate`,
-          title: 'Legitimate',
+          title: "Legitimate",
           description:
             "Legitimate source but can't be assessed, e.g. transactional messages",
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_irrelevant`,
-          title: 'Trivial',
-          description: 'Trivial/banal messages with nothing to assess',
+          title: "Trivial",
+          description: "Trivial/banal messages with nothing to assess",
         },
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_unsure`,
           title: "I'm Unsure",
           description:
-            'Do try your best to categorize! But if really unsure, select this',
+            "Do try your best to categorize! But if really unsure, select this",
         },
       ]
       const sections = [
@@ -101,15 +101,15 @@ exports.sendL2OthersCategorisationMessage = async function (
         },
       ]
       await sendWhatsappTextListMessage(
-        'factChecker',
+        "factChecker",
         voteRequestData.platformId,
         responses.L2_OTHERS_ASSESSEMENT_PROMPT,
-        'Make Selection',
+        "Make Selection",
         sections,
         replyId ?? voteRequestData.sentMessageId
       )
       break
-    case 'telegram':
+    case "telegram":
       break
   }
 }
@@ -121,10 +121,10 @@ exports.sendVotingMessage = async function sendVotingMessage(
   const messageSnap = await messageRef.get()
   const message = messageSnap.data()
   const voteRequestData = voteRequestSnap.data()
-  const responses = await getResponsesObj('factChecker')
-  const type = 'vote'
+  const responses = await getResponsesObj("factChecker")
+  const type = "vote"
   switch (voteRequestData.platform) {
-    case 'whatsapp':
+    case "whatsapp":
       const rows = []
       const max_score = 5
       for (let i = 0; i <= max_score; i++) {
@@ -133,57 +133,57 @@ exports.sendVotingMessage = async function sendVotingMessage(
           title: `${i}`,
         })
       }
-      rows[0].description = 'Totally false'
-      rows[max_score].description = 'Totally true'
+      rows[0].description = "Totally false"
+      rows[max_score].description = "Totally true"
       const sections = [
         {
           rows: rows,
         },
       ]
       switch (message.type) {
-        case 'text':
+        case "text":
           await sendWhatsappTextListMessage(
-            'factChecker',
+            "factChecker",
             voteRequestData.platformId,
             responses.FACTCHECK_PROMPT,
-            'Vote here',
+            "Vote here",
             sections,
             voteRequestData.sentMessageId
           )
           break
-        case 'image':
+        case "image":
           await sendWhatsappTextListMessage(
-            'factChecker',
+            "factChecker",
             voteRequestData.platformId,
             responses.FACTCHECK_PROMPT,
-            'Vote here',
+            "Vote here",
             sections,
             voteRequestData.sentMessageId
           )
           break
       }
       break
-    case 'telegram':
+    case "telegram":
       break
   }
 }
 
 async function _sendReminderMessage(to, numOutstanding, voteRequestPath) {
-  const responses = await getResponsesObj('factChecker')
+  const responses = await getResponsesObj("factChecker")
   const buttons = [
     {
-      type: 'reply',
+      type: "reply",
       reply: {
         id: `continueOutstanding_${voteRequestPath}`,
-        title: 'Yes, send the next!',
+        title: "Yes, send the next!",
       },
     },
   ]
   await sendWhatsappButtonMessage(
-    'factChecker',
+    "factChecker",
     to,
     responses.OUTSTANDING_REMINDER.replace(
-      '{{num_outstanding}}',
+      "{{num_outstanding}}",
       `${numOutstanding}`
     ),
     buttons
@@ -194,22 +194,22 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
   const db = admin.firestore()
   try {
     const outstandingVoteRequestsQuerySnap = await db
-      .collectionGroup('voteRequests')
-      .where('platformId', '==', factCheckerId)
-      .where('category', '==', null)
+      .collectionGroup("voteRequests")
+      .where("platformId", "==", factCheckerId)
+      .where("category", "==", null)
       .get()
     const remainingCount = outstandingVoteRequestsQuerySnap.size
     if (remainingCount == 0) {
       await sendWhatsappTextMessage(
-        'factChecker',
+        "factChecker",
         factCheckerId,
-        'Great, you have no further messages to assess. Keep it up!💪'
+        "Great, you have no further messages to assess. Keep it up!💪"
       )
       return
     }
     const unassessedMessagesQuerySnap = await db
-      .collection('messages')
-      .where('isAssessed', '==', false)
+      .collection("messages")
+      .where("isAssessed", "==", false)
       .get()
     const unassessedMessageIdList = unassessedMessagesQuerySnap.docs.map(
       (docSnap) => docSnap.id
@@ -234,8 +234,8 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
           return 1
         }
         if (aIsNotAssessed && bIsNotAssessed) {
-          const aCreatedTimestamp = a.get('createdTimestamp').toMillis() ?? 0
-          const bCreatedTimestamp = b.get('createdTimestamp').toMillis() ?? 0
+          const aCreatedTimestamp = a.get("createdTimestamp").toMillis() ?? 0
+          const bCreatedTimestamp = b.get("createdTimestamp").toMillis() ?? 0
           return aCreatedTimestamp - bCreatedTimestamp
         }
         return 0
@@ -248,6 +248,6 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
       nextVoteRequestPath
     )
   } catch (error) {
-    functions.logger.error('Error sending remaining reminder', error)
+    functions.logger.error("Error sending remaining reminder", error)
   }
 }

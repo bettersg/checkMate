@@ -1,25 +1,25 @@
-const functions = require('firebase-functions')
-const admin = require('firebase-admin')
-const { Timestamp } = require('firebase-admin/firestore')
+const functions = require("firebase-functions")
+const admin = require("firebase-admin")
+const { Timestamp } = require("firebase-admin/firestore")
 const {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
   sendWhatsappButtonMessage,
-} = require('./common/sendWhatsappMessage')
+} = require("./common/sendWhatsappMessage")
 const {
   mockDb,
   sleep,
   stripPhone,
   stripUrl,
   hashMessage,
-} = require('./common/utils')
-const { getResponsesObj } = require('./common/responseUtils')
-const { downloadWhatsappMedia, getHash } = require('./common/mediaUtils')
-const { calculateSimilarity } = require('./calculateSimilarity')
-const { defineString } = require('firebase-functions/params')
-const runtimeEnvironment = defineString('ENVIRONMENT')
-const { classifyText } = require('./common/classifier')
+} = require("./common/utils")
+const { getResponsesObj } = require("./common/responseUtils")
+const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
+const { calculateSimilarity } = require("./calculateSimilarity")
+const { defineString } = require("firebase-functions/params")
+const runtimeEnvironment = defineString("ENVIRONMENT")
+const { classifyText } = require("./common/classifier")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -30,20 +30,20 @@ exports.userHandlerWhatsapp = async function (message) {
   let type = message.type
   const db = admin.firestore()
 
-  const responses = await getResponsesObj('user')
+  const responses = await getResponsesObj("user")
 
   // check that message type is supported, otherwise respond with appropriate message
 
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0)
   switch (type) {
-    case 'text':
+    case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
       if (!message.text || !message.text.body) {
         break
       }
       if (
         message.text.body.toLowerCase() ===
-        'Show me how CheckMate works!'.toLowerCase()
+        "Show me how CheckMate works!".toLowerCase()
       ) {
         await handleNewUser(message)
         break
@@ -62,7 +62,7 @@ exports.userHandlerWhatsapp = async function (message) {
       })
       break
 
-    case 'image':
+    case "image":
       await newImageInstanceHandler(db, {
         text: message?.image?.caption || null,
         timestamp: messageTimestamp,
@@ -75,11 +75,11 @@ exports.userHandlerWhatsapp = async function (message) {
       })
       break
 
-    case 'interactive':
+    case "interactive":
       // handle consent here
       const interactive = message.interactive
       switch (interactive.type) {
-        case 'button_reply':
+        case "button_reply":
           await onButtonReply(interactive.button_reply.id, message)
           break
       }
@@ -87,14 +87,14 @@ exports.userHandlerWhatsapp = async function (message) {
 
     default:
       sendWhatsappTextMessage(
-        'user',
+        "user",
         from,
         responses?.UNSUPPORTED_TYPE,
         message.id
       )
       break
   }
-  markWhatsappMessageAsRead('user', message.id)
+  markWhatsappMessageAsRead("user", message.id)
 }
 
 async function newTextInstanceHandler(
@@ -111,9 +111,9 @@ async function newTextInstanceHandler(
   let hasMatch = false
   let matchedId
   const machineCategory = classifyText(text)
-  const userRef = db.collection('users').doc(from)
+  const userRef = db.collection("users").doc(from)
   const userSnap = await userRef.get()
-  if (!userSnap.exists && machineCategory === 'irrelevant') {
+  if (!userSnap.exists && machineCategory === "irrelevant") {
     //start welcome flow
     await handleUserFirstMessage(from, userRef)
     return
@@ -121,19 +121,19 @@ async function newTextInstanceHandler(
   let textHash = hashMessage(text) // hash of the original text
   let strippedText = stripPhone(text) // text stripped of phone nr
   let strippedTextHash = hashMessage(strippedText) // hash of the stripped text
-  let matchType = 'none' // will be set to either "exact", "stripped", or "similarity"
+  let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
 
   // 1 - check if the exact same message exists in database
   let textMatchSnapshot = await db
-    .collection('messages')
-    .where('type', '==', 'text')
-    .where('textHash', '==', textHash)
-    .where('assessmentExpired', '==', false)
+    .collection("messages")
+    .where("type", "==", "text")
+    .where("textHash", "==", textHash)
+    .where("assessmentExpired", "==", false)
     .get()
   let messageId
   if (!textMatchSnapshot.empty) {
     hasMatch = true
-    matchType = 'exact'
+    matchType = "exact"
     if (textMatchSnapshot.size > 1) {
       functions.logger.log(
         `more than 1 device matches the query hash ${textHash} for text ${text}`
@@ -143,15 +143,15 @@ async function newTextInstanceHandler(
   }
   if (!hasMatch && strippedText.length > 0) {
     let strippedTextMatchSnapshot = await db
-      .collection('messages')
-      .where('type', '==', 'text')
-      .where('strippedTextHash', '==', strippedTextHash)
-      .where('isScam', '==', true)
-      .where('assessmentExpired', '==', false)
+      .collection("messages")
+      .where("type", "==", "text")
+      .where("strippedTextHash", "==", strippedTextHash)
+      .where("isScam", "==", true)
+      .where("assessmentExpired", "==", false)
       .get() //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
     if (!strippedTextMatchSnapshot.empty) {
       hasMatch = true
-      matchType = 'stripped'
+      matchType = "stripped"
       if (strippedTextMatchSnapshot.size > 1) {
         functions.logger.log(
           `more than 1 device matches the stripped query hash ${strippedText} for text ${strippedText}`
@@ -171,10 +171,10 @@ async function newTextInstanceHandler(
       bestMatchingText = similarity.message
       similarityScore = similarity.score
     }
-    let writeResult = await db.collection('messages').add({
-      type: 'text', //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
+    let writeResult = await db.collection("messages").add({
+      type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: machineCategory === 'irrelevant' ? true : false,
+      isMachineCategorised: machineCategory === "irrelevant" ? true : false,
       text: text, //text or caption
       strippedText: strippedText,
       textHash: textHash,
@@ -186,12 +186,12 @@ async function newTextInstanceHandler(
       },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory === 'irrelevant' ? true : false, //boolean, whether or not we have concluded the voting
+      isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
-      isIrrelevant: machineCategory === 'irrelevant' ? true : null, //bool, if majority voted irrelevant then update this
+      isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this
       isSus: null,
       isScam: null,
       isSpam: null,
@@ -205,14 +205,14 @@ async function newTextInstanceHandler(
     messageId = matchedId
   }
   const _ = await db
-    .collection('messages')
+    .collection("messages")
     .doc(messageId)
-    .collection('instances')
+    .collection("instances")
     .add({
-      source: 'whatsapp',
+      source: "whatsapp",
       id: id || null, //taken from webhook object, needed to reply
       timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
-      type: 'text', //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
+      type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
       text: text, //text or caption, taken from webhook object
       from: from, //sender phone number, taken from webhook object
       isForwarded: isForwarded, //boolean, taken from webhook object
@@ -245,24 +245,24 @@ async function newImageInstanceHandler(
   let buffer = await downloadWhatsappMedia(mediaId, mimeType)
   const hash = await getHash(buffer)
   let imageMatchSnapshot = await db
-    .collection('messages')
-    .where('type', '==', 'image')
-    .where('hash', '==', hash)
-    .where('assessmentExpired', '==', false)
+    .collection("messages")
+    .where("type", "==", "image")
+    .where("hash", "==", hash)
+    .where("assessmentExpired", "==", false)
     .get()
   let messageId
   if (imageMatchSnapshot.empty) {
     const storageBucket = admin.storage().bucket()
-    filename = `images/${mediaId}.${mimeType.split('/')[1]}`
+    filename = `images/${mediaId}.${mimeType.split("/")[1]}`
     const file = storageBucket.file(filename)
     const stream = file.createWriteStream()
     await new Promise((resolve, reject) => {
-      stream.on('error', reject)
-      stream.on('finish', resolve)
+      stream.on("error", reject)
+      stream.on("finish", resolve)
       stream.end(buffer)
     })
-    let writeResult = await db.collection('messages').add({
-      type: 'image', //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
+    let writeResult = await db.collection("messages").add({
+      type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: null,
       isMachineCategorised: false,
       text: text, //text or caption
@@ -296,14 +296,14 @@ async function newImageInstanceHandler(
     messageId = imageMatchSnapshot.docs[0].id
   }
   const _ = await db
-    .collection('messages')
+    .collection("messages")
     .doc(messageId)
-    .collection('instances')
+    .collection("instances")
     .add({
-      source: 'whatsapp',
+      source: "whatsapp",
       id: id || null, //taken from webhook object, needed to reply
       timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
-      type: 'image', //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
+      type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
       text: text, //text or caption, taken from webhook object
       from: from, //sender phone number, taken from webhook object
       hash: hash,
@@ -321,8 +321,8 @@ async function newImageInstanceHandler(
 
 async function handleNewUser(messageObj) {
   const db = admin.firestore()
-  const responses = await getResponsesObj('user')
-  const userRef = db.collection('users').doc(messageObj.from)
+  const responses = await getResponsesObj("user")
+  const userRef = db.collection("users").doc(messageObj.from)
   const userSnap = await userRef.get()
   const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0)
   if (!userSnap.exists) {
@@ -331,7 +331,7 @@ async function handleNewUser(messageObj) {
       onboardMessageReceiptTime: messageTimestamp,
     })
   } else {
-    if (!userSnap.get('onboardMessageReceiptTime')) {
+    if (!userSnap.get("onboardMessageReceiptTime")) {
       await userRef.update({
         onboardMessageReceiptTime: messageTimestamp,
       })
@@ -339,13 +339,13 @@ async function handleNewUser(messageObj) {
   }
 
   let res = await sendWhatsappTextMessage(
-    'user',
+    "user",
     messageObj.from,
     responses.DEMO_SCAM_MESSAGE
   )
   await sleep(2000)
   await sendWhatsappTextMessage(
-    'user',
+    "user",
     messageObj.from,
     responses?.DEMO_SCAM_PROMPT,
     res.data.messages[0].id
@@ -353,33 +353,33 @@ async function handleNewUser(messageObj) {
 }
 
 async function handleUserFirstMessage(from, userRef) {
-  const responses = await getResponsesObj('user')
+  const responses = await getResponsesObj("user")
   const buttons = [
     {
-      type: 'reply',
+      type: "reply",
       reply: {
-        id: 'newUser_onboardingYes',
-        title: 'Yes, show me!',
+        id: "newUser_onboardingYes",
+        title: "Yes, show me!",
       },
     },
     {
-      type: 'reply',
+      type: "reply",
       reply: {
-        id: 'newUser_onboardingNo',
+        id: "newUser_onboardingNo",
         title: "No, I'm good",
       },
     },
   ]
-  await sendWhatsappButtonMessage('user', from, responses?.NEW_USER, buttons)
+  await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons)
   await userRef.set({
     instanceCount: 0,
   })
 }
 
 async function respondToDemoScam(messageObj) {
-  const responses = await getResponsesObj('user')
+  const responses = await getResponsesObj("user")
   await sendWhatsappTextMessage(
-    'user',
+    "user",
     messageObj.from,
     responses?.SCAM,
     messageObj.id
@@ -387,55 +387,55 @@ async function respondToDemoScam(messageObj) {
   await sleep(5000)
   const buttons = [
     {
-      type: 'reply',
+      type: "reply",
       reply: {
-        id: 'onboarding_sendContactYes',
-        title: 'Yes!',
+        id: "onboarding_sendContactYes",
+        title: "Yes!",
       },
     },
     {
-      type: 'reply',
+      type: "reply",
       reply: {
-        id: 'onboarding_sendContactNo',
-        title: 'It can wait...',
+        id: "onboarding_sendContactNo",
+        title: "It can wait...",
       },
     },
   ]
   await sendWhatsappButtonMessage(
-    'user',
+    "user",
     messageObj.from,
     responses?.DEMO_END,
     buttons
   )
 }
 
-async function onButtonReply(buttonId, messageObj, platform = 'whatsapp') {
+async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
   const db = admin.firestore()
   const from = messageObj.from
-  const responses = await getResponsesObj('user')
-  const [type, ...rest] = buttonId.split('_')
+  const responses = await getResponsesObj("user")
+  const [type, ...rest] = buttonId.split("_")
   let instancePath, selection
   switch (type) {
-    case 'scamshieldConsent':
+    case "scamshieldConsent":
       ;[instancePath, selection] = rest
       const instanceRef = db.doc(instancePath)
       const updateObj = {}
       let replyText
-      if (selection === 'consent') {
+      if (selection === "consent") {
         updateObj.scamShieldConsent = true
         replyText = responses?.SCAMSHIELD_ON_CONSENT
-      } else if (selection === 'decline') {
+      } else if (selection === "decline") {
         updateObj.scamShieldConsent = false
         replyText = responses?.SCAMSHIELD_ON_DECLINE
       }
       await instanceRef.update(updateObj)
-      await sendWhatsappTextMessage('user', from, replyText)
+      await sendWhatsappTextMessage("user", from, replyText)
       break
-    case 'scamshieldExplain':
+    case "scamshieldExplain":
       let messageId
       ;[instancePath, messageId] = rest
       await sendWhatsappTextMessage(
-        'user',
+        "user",
         from,
         responses?.SCAMSHIELD_EXPLAINER,
         null,
@@ -443,59 +443,59 @@ async function onButtonReply(buttonId, messageObj, platform = 'whatsapp') {
       )
       const buttons = [
         {
-          type: 'reply',
+          type: "reply",
           reply: {
             id: `scamshieldConsent_${instancePath}_consent`,
-            title: 'Yes',
+            title: "Yes",
           },
         },
         {
-          type: 'reply',
+          type: "reply",
           reply: {
             id: `scamshieldConsent_${instancePath}_decline`,
-            title: 'No',
+            title: "No",
           },
         },
       ]
       await sleep(2000)
       await sendWhatsappButtonMessage(
-        'user',
+        "user",
         from,
         responses.SCAMSHIELD_SEEK_CONSENT,
         buttons,
         messageId
       )
       break
-    case 'onboarding':
+    case "onboarding":
       ;[selection] = rest
       switch (selection) {
-        case 'sendContactYes':
-          const nameObj = { formatted_name: 'CheckMate', suffix: 'CheckMate' }
+        case "sendContactYes":
+          const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
           await sendWhatsappContactMessage(
-            'user',
+            "user",
             from,
-            runtimeEnvironment.value() === 'PROD'
-              ? '+65 80432188'
-              : '+1 555-093-3685',
+            runtimeEnvironment.value() === "PROD"
+              ? "+65 80432188"
+              : "+1 555-093-3685",
             nameObj,
-            'https://checkmate.sg'
+            "https://checkmate.sg"
           )
           await sleep(2000)
-          await sendWhatsappTextMessage('user', from, responses?.ONBOARDING_END)
+          await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
           break
-        case 'sendContactNo':
-          await sendWhatsappTextMessage('user', from, responses?.ONBOARDING_END)
+        case "sendContactNo":
+          await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
           break
       }
       break
-    case 'newUser':
+    case "newUser":
       ;[selection] = rest
       switch (selection) {
-        case 'onboardingYes':
+        case "onboardingYes":
           await handleNewUser(messageObj)
           break
-        case 'onboardingNo':
-          await sendWhatsappTextMessage('user', from, responses?.GET_STARTED)
+        case "onboardingNo":
+          await sendWhatsappTextMessage("user", from, responses?.GET_STARTED)
           break
       }
       break

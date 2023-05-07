@@ -1,11 +1,11 @@
-const functions = require('firebase-functions')
-const { respondToInstance } = require('./common/responseUtils')
-const { Timestamp } = require('firebase-admin/firestore')
+const functions = require("firebase-functions")
+const { respondToInstance } = require("./common/responseUtils")
+const { Timestamp } = require("firebase-admin/firestore")
 
 exports.onMessageUpdate = functions
-  .region('asia-southeast1')
-  .runWith({ secrets: ['WHATSAPP_USER_BOT_PHONE_NUMBER_ID', 'WHATSAPP_TOKEN'] })
-  .firestore.document('/messages/{messageId}')
+  .region("asia-southeast1")
+  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
+  .firestore.document("/messages/{messageId}")
   .onUpdate(async (change, context) => {
     // Grab the current value of what was written to Firestore.
     const before = change.before
@@ -21,8 +21,8 @@ exports.onMessageUpdate = functions
 
 async function replyPendingInstances(docSnap) {
   const pendingSnapshot = await docSnap.ref
-    .collection('instances')
-    .where('isReplied', '==', false)
+    .collection("instances")
+    .where("isReplied", "==", false)
     .get()
   pendingSnapshot.forEach(async (instanceSnap) => {
     await respondToInstance(instanceSnap)

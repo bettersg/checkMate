@@ -1,19 +1,19 @@
-const functions = require('firebase-functions')
-const admin = require('firebase-admin')
-const { sendTextMessage, sendImageMessage } = require('./common/sendMessage')
+const functions = require("firebase-functions")
+const admin = require("firebase-admin")
+const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
 const {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappButtonMessage,
-} = require('./common/sendWhatsappMessage')
-const { getResponsesObj } = require('./common/responseUtils')
-const { sleep } = require('./common/utils')
+} = require("./common/sendWhatsappMessage")
+const { getResponsesObj } = require("./common/responseUtils")
+const { sleep } = require("./common/utils")
 const {
   sendL1CategorisationMessage,
   sendRemainingReminder,
-} = require('./common/sendFactCheckerMessages')
-const { getSignedUrl } = require('./common/mediaUtils')
-const { Timestamp } = require('firebase-admin/firestore')
+} = require("./common/sendFactCheckerMessages")
+const { getSignedUrl } = require("./common/mediaUtils")
+const { Timestamp } = require("firebase-admin/firestore")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -26,24 +26,24 @@ exports.checkerHandlerWhatsapp = async function (message) {
   let responses
 
   switch (type) {
-    case 'button':
+    case "button":
       const button = message.button
       switch (button.text) {
-        case 'Yes!':
+        case "Yes!":
           try {
-            await onFactCheckerYes(button.payload, from, 'whatsapp')
+            await onFactCheckerYes(button.payload, from, "whatsapp")
           } catch {
             //TODO: can remove this once we are sure no one will submit button messages sent under the old format.
             functions.logger.log(
               `New onFactCheckerYes failed, payload = ${button.payload}`
             )
-            await onFactCheckerYes_old(button.payload, from, 'whatsapp')
+            await onFactCheckerYes_old(button.payload, from, "whatsapp")
           }
           break
-        case 'No':
-          responses = await getResponsesObj('factChecker')
+        case "No":
+          responses = await getResponsesObj("factChecker")
           sendWhatsappTextMessage(
-            'factChecker',
+            "factChecker",
             from,
             responses.VOTE_NO,
             message.id
@@ -59,11 +59,11 @@ exports.checkerHandlerWhatsapp = async function (message) {
           }
       }
       break
-    case 'interactive':
+    case "interactive":
       // handle voting here
       const interactive = message.interactive
       switch (interactive.type) {
-        case 'list_reply':
+        case "list_reply":
           await onTextListReceipt(
             db,
             interactive.list_reply.id,
@@ -71,13 +71,13 @@ exports.checkerHandlerWhatsapp = async function (message) {
             message.id
           )
           break
-        case 'button_reply':
+        case "button_reply":
           await onButtonReply(db, interactive.button_reply.id, from, message.id)
           break
       }
       break
 
-    case 'text':
+    case "text":
       if (!message.text || !message.text.body) {
         break
       }
@@ -85,21 +85,21 @@ exports.checkerHandlerWhatsapp = async function (message) {
         message.text.body ===
         "I'd like to join as a CheckMate to help counter misinformation and scams! 💪🏻"
       ) {
-        await onSignUp(from, 'whatsapp')
+        await onSignUp(from, "whatsapp")
       } else if (!!message?.context?.id) {
         await onMsgReplyReceipt(
           from,
           message.context.id,
           message.text.body,
-          'whatsapp'
+          "whatsapp"
         )
       } else {
-        responses = await getResponsesObj('factChecker')
-        sendWhatsappTextMessage('factChecker', from, responses.NOT_A_REPLY)
+        responses = await getResponsesObj("factChecker")
+        sendWhatsappTextMessage("factChecker", from, responses.NOT_A_REPLY)
       }
       break
   }
-  markWhatsappMessageAsRead('factChecker', message.id)
+  markWhatsappMessageAsRead("factChecker", message.id)
 }
 
 exports.checkerHandlerTelegram = async function (message) {
@@ -107,17 +107,17 @@ exports.checkerHandlerTelegram = async function (message) {
   const db = admin.firestore()
 }
 
-async function onSignUp(from, platform = 'whatsapp') {
-  const responses = await getResponsesObj('factChecker')
+async function onSignUp(from, platform = "whatsapp") {
+  const responses = await getResponsesObj("factChecker")
   const db = admin.firestore()
   let res = await sendTextMessage(
-    'factChecker',
+    "factChecker",
     from,
     responses.ONBOARDING_1,
     (platform = platform)
   )
-  await db.collection('factCheckers').doc(`${from}`).set({
-    name: '',
+  await db.collection("factCheckers").doc(`${from}`).set({
+    name: "",
     isActive: true,
     isOnboardingComplete: false,
     platformId: from,
@@ -126,41 +126,41 @@ async function onSignUp(from, platform = 'whatsapp') {
     numVoted: 0,
     numCorrectVotes: 0,
     numVerifiedLinks: 0,
-    preferredPlatform: 'whatsapp',
+    preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
     lastVotedTimestamp: null,
   })
 }
 
-async function onMsgReplyReceipt(from, messageId, text, platform = 'whatsapp') {
-  const responses = await getResponsesObj('factChecker')
+async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
+  const responses = await getResponsesObj("factChecker")
   const db = admin.firestore()
-  const factCheckerSnap = await db.collection('factCheckers').doc(from).get()
-  if (factCheckerSnap.get('getNameMessageId') === messageId) {
+  const factCheckerSnap = await db.collection("factCheckers").doc(from).get()
+  if (factCheckerSnap.get("getNameMessageId") === messageId) {
     await factCheckerSnap.ref.update({
       name: text.trim(),
     })
     const buttons = [
       {
-        type: 'reply',
+        type: "reply",
         reply: {
-          id: 'privacyOk',
-          title: 'Got it!',
+          id: "privacyOk",
+          title: "Got it!",
         },
       },
     ]
     await sendWhatsappButtonMessage(
-      'factChecker',
+      "factChecker",
       from,
-      responses.ONBOARDING_2.replace('{{name}}', text.trim()),
+      responses.ONBOARDING_2.replace("{{name}}", text.trim()),
       buttons
     )
   }
 }
 
-async function onFactCheckerYes_old(messageId, from, platform = 'whatsapp') {
+async function onFactCheckerYes_old(messageId, from, platform = "whatsapp") {
   const db = admin.firestore()
-  const messageRef = db.collection('messages').doc(messageId)
+  const messageRef = db.collection("messages").doc(messageId)
   const messageSnap = await messageRef.get()
   if (!messageSnap.exists) {
     functions.logger.log(`No corresponding message ${messageId} found`)
@@ -168,9 +168,9 @@ async function onFactCheckerYes_old(messageId, from, platform = 'whatsapp') {
   }
   const message = messageSnap.data()
   const voteRequestSnap = await messageRef
-    .collection('voteRequests')
-    .where('platformId', '==', from)
-    .where('platform', '==', platform)
+    .collection("voteRequests")
+    .where("platformId", "==", from)
+    .where("platform", "==", platform)
     .get()
   if (voteRequestSnap.empty) {
     functions.logger.log(
@@ -184,20 +184,20 @@ async function onFactCheckerYes_old(messageId, from, platform = 'whatsapp') {
     }
     let res
     switch (message.type) {
-      case 'text':
+      case "text":
         res = await sendTextMessage(
-          'factChecker',
+          "factChecker",
           from,
           message.text,
           null,
           platform
         )
         break
-      case 'image':
+      case "image":
         const temporaryUrl = await getSignedUrl(message.storageUrl)
         if (temporaryUrl) {
           res = await sendImageMessage(
-            'factChecker',
+            "factChecker",
             from,
             temporaryUrl,
             message.text,
@@ -205,11 +205,11 @@ async function onFactCheckerYes_old(messageId, from, platform = 'whatsapp') {
             platform
           )
         } else {
-          functions.logger.warn('Problem creating URL')
+          functions.logger.warn("Problem creating URL")
           await sendTextMessage(
-            'factChecker',
+            "factChecker",
             from,
-            'Sorry, an error occured',
+            "Sorry, an error occured",
             null,
             platform
           )
@@ -230,10 +230,10 @@ async function onFactCheckerYes_old(messageId, from, platform = 'whatsapp') {
   }
 }
 
-async function onFactCheckerYes(voteRequestPath, from, platform = 'whatsapp') {
+async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   const db = admin.firestore()
-  if (!voteRequestPath.includes('/')) {
-    throw new Error('The voteRequestPath does not contain a forward slash (/).')
+  if (!voteRequestPath.includes("/")) {
+    throw new Error("The voteRequestPath does not contain a forward slash (/).")
   }
   const voteRequestRef = db.doc(voteRequestPath)
   const voteRequestSnap = await voteRequestRef.get()
@@ -243,15 +243,15 @@ async function onFactCheckerYes(voteRequestPath, from, platform = 'whatsapp') {
     )
     return
   }
-  if (!!voteRequestSnap.get('category')) {
+  if (!!voteRequestSnap.get("category")) {
     await sendTextMessage(
-      'factChecker',
+      "factChecker",
       from,
-      'Oops! you have already checked this message 👍',
+      "Oops! you have already checked this message 👍",
       null,
       platform
     )
-    await sendRemainingReminder(from, 'whatsapp')
+    await sendRemainingReminder(from, "whatsapp")
     return
   }
   const messageRef = voteRequestRef.parent.parent
@@ -259,20 +259,20 @@ async function onFactCheckerYes(voteRequestPath, from, platform = 'whatsapp') {
   const message = messageSnap.data()
   let res
   switch (message.type) {
-    case 'text':
+    case "text":
       res = await sendTextMessage(
-        'factChecker',
+        "factChecker",
         from,
         message.text,
         null,
         platform
       )
       break
-    case 'image':
+    case "image":
       const temporaryUrl = await getSignedUrl(message.storageUrl)
       if (temporaryUrl) {
         res = await sendImageMessage(
-          'factChecker',
+          "factChecker",
           from,
           temporaryUrl,
           message.text,
@@ -280,11 +280,11 @@ async function onFactCheckerYes(voteRequestPath, from, platform = 'whatsapp') {
           platform
         )
       } else {
-        functions.logger.warn('Problem creating URL')
+        functions.logger.warn("Problem creating URL")
         await sendTextMessage(
-          'factChecker',
+          "factChecker",
           from,
-          'Sorry, an error occured',
+          "Sorry, an error occured",
           null,
           platform
         )
@@ -309,48 +309,48 @@ async function onButtonReply(
   buttonId,
   from,
   replyId,
-  platform = 'whatsapp'
+  platform = "whatsapp"
 ) {
   // let messageId, voteRequestId, type
-  const responses = await getResponsesObj('factChecker')
-  const [buttonMessageRef, ...rest] = buttonId.split('_')
+  const responses = await getResponsesObj("factChecker")
+  const [buttonMessageRef, ...rest] = buttonId.split("_")
   if (rest.length === 0) {
     //this means responses to the onboarding messages.
     switch (buttonMessageRef) {
-      case 'privacyOk':
+      case "privacyOk":
         const buttons = [
           {
-            type: 'reply',
+            type: "reply",
             reply: {
-              id: 'typeformDone',
+              id: "typeformDone",
               title: "I've done the quiz!",
             },
           },
         ]
         await sendWhatsappButtonMessage(
-          'factChecker',
+          "factChecker",
           from,
           responses.ONBOARDING_3,
           buttons
         )
         break
-      case 'typeformDone':
+      case "typeformDone":
         await sendTextMessage(
-          'factChecker',
+          "factChecker",
           from,
           responses.ONBOARDING_4,
           null,
-          'whatsapp',
+          "whatsapp",
           true
         )
-        await db.collection('factCheckers').doc(`${from}`).update({
+        await db.collection("factCheckers").doc(`${from}`).update({
           isOnboardingComplete: true,
         })
         break
     }
   } else {
     switch (buttonMessageRef) {
-      case 'continueOutstanding':
+      case "continueOutstanding":
         const [voteRequestPath] = rest
         await onFactCheckerYes(voteRequestPath, from, platform)
     }
@@ -362,53 +362,53 @@ async function onTextListReceipt(
   listId,
   from,
   replyId,
-  platform = 'whatsapp'
+  platform = "whatsapp"
 ) {
-  const responses = await getResponsesObj('factChecker')
-  const [type, messageId, voteRequestId, selection] = listId.split('_')
+  const responses = await getResponsesObj("factChecker")
+  const [type, messageId, voteRequestId, selection] = listId.split("_")
   const voteRequestRef = db
-    .collection('messages')
+    .collection("messages")
     .doc(messageId)
-    .collection('voteRequests')
+    .collection("voteRequests")
     .doc(voteRequestId)
   const updateObj = {}
   let isEnd = false
   let response
   switch (type) {
-    case 'vote':
+    case "vote":
       const vote = selection
-      updateObj.category = 'info'
+      updateObj.category = "info"
       updateObj.vote = parseInt(vote)
       response = responses.RESPONSE_RECORDED
       isEnd = true
       break
 
-    case 'categorize':
+    case "categorize":
       switch (selection) {
-        case 'scam':
+        case "scam":
           updateObj.triggerL2Vote = false
           updateObj.triggerL2Others = false
-          updateObj.category = 'scam'
+          updateObj.category = "scam"
           updateObj.vote = null
           response = responses.RESPONSE_RECORDED
           isEnd = true
           break
-        case 'illicit':
+        case "illicit":
           updateObj.triggerL2Vote = false
           updateObj.triggerL2Others = false
-          updateObj.category = 'illicit'
+          updateObj.category = "illicit"
           updateObj.vote = null
           response = responses.RESPONSE_RECORDED
           isEnd = true
           break
 
-        case 'info':
+        case "info":
           updateObj.triggerL2Vote = true
           updateObj.triggerL2Others = false
           response = responses.HOLD_FOR_NEXT_POLL
           break
 
-        case 'others':
+        case "others":
           updateObj.triggerL2Vote = false
           updateObj.triggerL2Others = true
           response = responses.HOLD_FOR_L2_CATEGORISATION
@@ -416,7 +416,7 @@ async function onTextListReceipt(
       }
       break
 
-    case 'others':
+    case "others":
       updateObj.category = selection
       updateObj.vote = null
       response = responses.RESPONSE_RECORDED
@@ -425,7 +425,7 @@ async function onTextListReceipt(
   if (isEnd) {
     updateObj.votedTimestamp = Timestamp.fromDate(new Date())
   }
-  await sendWhatsappTextMessage('factChecker', from, response, replyId)
+  await sendWhatsappTextMessage("factChecker", from, response, replyId)
   try {
     await voteRequestRef.set(updateObj, { merge: true })
   } catch (error) {
@@ -437,8 +437,8 @@ async function onTextListReceipt(
 
 async function onContinue(factCheckerId) {
   const db = admin.firestore()
-  await db.collection('factCheckers').doc(factCheckerId).update({
+  await db.collection("factCheckers").doc(factCheckerId).update({
     isActive: true,
   })
-  await sendRemainingReminder(factCheckerId, 'whatsapp')
+  await sendRemainingReminder(factCheckerId, "whatsapp")
 }

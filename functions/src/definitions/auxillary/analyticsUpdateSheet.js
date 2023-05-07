@@ -1,8 +1,8 @@
-const functions = require('firebase-functions')
-const process = require('process')
-const { google } = require('googleapis')
-var fetch = require('node-fetch')
-const admin = require('firebase-admin')
+const functions = require("firebase-functions")
+const process = require("process")
+const { google } = require("googleapis")
+var fetch = require("node-fetch")
+const admin = require("firebase-admin")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -17,12 +17,12 @@ async function authorize() {
 async function getFirestoreData() {
   // initialize database
   const db = admin.firestore()
-  const date = new Date().toLocaleString('en-US', { timeZone: 'Singapore' })
+  const date = new Date().toLocaleString("en-US", { timeZone: "Singapore" })
 
   /**
    * CHECK FOR [USERS]
    */
-  const dbRefUsers = db.collection('users')
+  const dbRefUsers = db.collection("users")
   const registeredUserCountSnapshot = await dbRefUsers.count().get()
   const registeredUserCount = registeredUserCountSnapshot.data().count
 
@@ -31,12 +31,12 @@ async function getFirestoreData() {
   let activeUsersThisWeek = 0
 
   ;(await dbRefUsers.get()).forEach((doc) => {
-    if (doc.get('instanceCount') >= 1) {
+    if (doc.get("instanceCount") >= 1) {
       repeatUsers += 1
     }
 
     const today = new Date()
-    const lastSentDate = doc.get('lastSent')
+    const lastSentDate = doc.get("lastSent")
 
     if (lastSentDate) {
       const oneDayAgo = subtractHours(today, 24)
@@ -54,7 +54,7 @@ async function getFirestoreData() {
   /**
    * CHECK FOR [CHECKERS]
    */
-  const dbRefCheckers = db.collection('factCheckers')
+  const dbRefCheckers = db.collection("factCheckers")
   const registeredCheckersSnapshot = await dbRefCheckers.count().get()
   const registeredCheckersCount = registeredCheckersSnapshot.data().count
 
@@ -64,13 +64,13 @@ async function getFirestoreData() {
   for (const doc of dbSnapCheckers.docs) {
     const factCheckerId = doc.id
     const outstandingVoteRequestsQuerySnap = await db
-      .collectionGroup('voteRequests')
-      .where('platformId', '==', factCheckerId)
-      .where('category', '==', null)
+      .collectionGroup("voteRequests")
+      .where("platformId", "==", factCheckerId)
+      .where("category", "==", null)
       .get()
     const totalSentVoteRequestsQuerySnap = await db
-      .collectionGroup('voteRequests')
-      .where('platformId', '==', factCheckerId)
+      .collectionGroup("voteRequests")
+      .where("platformId", "==", factCheckerId)
       .get()
     const totalSentVoteRequests = totalSentVoteRequestsQuerySnap.size
     const outstandingVoteRequests = outstandingVoteRequestsQuerySnap.size
@@ -95,20 +95,20 @@ async function getFirestoreData() {
 }
 
 async function updateSheet(data, date, auth) {
-  const sheetsAPI = google.sheets({ version: 'v4', auth: null })
+  const sheetsAPI = google.sheets({ version: "v4", auth: null })
   const headers = { Authorization: `Bearer ${auth.access_token}` }
 
   const sheetUpdateDataAndCell = [
-    [date, 'B2'],
-    [data?.registeredUserCount, 'E4'],
-    [data?.repeatUsers, 'E8'],
-    [data?.activeUsersToday, 'E12'],
-    [data?.activeUsersThisWeek, 'E16'],
-    [data?.registeredCheckersCount, 'H4'],
-    [data?.repeatCheckers, 'H8'],
-    [data?.['bit.ly/add-checkmate'], 'E3'],
-    [data?.['bit.ly/join-checkmates'], 'H3'],
-    [data?.['bit.ly/checkmate-privacy'], 'J3'],
+    [date, "B2"],
+    [data?.registeredUserCount, "E4"],
+    [data?.repeatUsers, "E8"],
+    [data?.activeUsersToday, "E12"],
+    [data?.activeUsersThisWeek, "E16"],
+    [data?.registeredCheckersCount, "H4"],
+    [data?.repeatCheckers, "H8"],
+    [data?.["bit.ly/add-checkmate"], "E3"],
+    [data?.["bit.ly/join-checkmates"], "H3"],
+    [data?.["bit.ly/checkmate-privacy"], "J3"],
   ]
   // Add the individual checkers data
   let checkersHeadersRow = 25
@@ -145,7 +145,7 @@ async function updateSheet(data, date, auth) {
             ],
           },
         ],
-        fields: 'userEnteredValue',
+        fields: "userEnteredValue",
       },
     }
   })
@@ -164,9 +164,9 @@ async function updateSheet(data, date, auth) {
 
 async function getBitlyMetrics(token) {
   const bitlink = [
-    'bit.ly/join-checkmates',
-    'bit.ly/add-checkmate',
-    'bit.ly/checkmate-privacy',
+    "bit.ly/join-checkmates",
+    "bit.ly/add-checkmate",
+    "bit.ly/checkmate-privacy",
   ]
   let bitlyClickCount = {}
 
@@ -194,9 +194,9 @@ function subtractHours(date, hours) {
 }
 
 exports.analyticsUpdateSheet = functions
-  .region('asia-southeast1')
-  .runWith({ secrets: ['BITLY_TOKEN'] })
-  .pubsub.topic('analytics-google-sheets-api')
+  .region("asia-southeast1")
+  .runWith({ secrets: ["BITLY_TOKEN"] })
+  .pubsub.topic("analytics-google-sheets-api")
   .onPublish(async (message) => {
     // message and context are unused, only used to trigger function run
     await authorize()
