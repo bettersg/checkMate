@@ -1,0 +1,12 @@
+services:
+  emulator:
+    extends:
+      file: docker-compose-base.yml
+      service: emulator
+    volumes:
+      - ./functions/src:/app/functions/src
+      - ./functions/lib:/app/functions/lib
+  resultserver:
+    extends:
+      file: docker-compose-base.yml
+      service: resultserver
