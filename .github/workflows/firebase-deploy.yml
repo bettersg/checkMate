@@ -25,6 +25,8 @@ jobs:
         working-directory: functions
       - name: Create SA key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $HOME/gcloud.json
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
       - name: Deploy Cloud Functions
         run: export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json && npm run deploy
         working-directory: functions 
