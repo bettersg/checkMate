@@ -91,6 +91,7 @@ erDiagram
 				number instanceCount
 				timestamp lastSent
 				timestamp firstMessageReceiptTime
+        string firstMessageType "either prepopulated, normal, or irrelevant"
 		}
 
     message ||--|{ instance: has
