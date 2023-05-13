@@ -42,6 +42,7 @@ exports.userHandlerWhatsapp = async function (message) {
       instanceCount: 0,
       firstMessageReceiptTime: messageTimestamp,
       firstMessageType: "normal",
+      lastSent: null,
     })
   }
 
