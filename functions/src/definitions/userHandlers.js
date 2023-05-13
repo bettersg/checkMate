@@ -32,9 +32,19 @@ exports.userHandlerWhatsapp = async function (message) {
 
   const responses = await getResponsesObj("user")
 
-  // check that message type is supported, otherwise respond with appropriate message
-
+  //check whether new user
+  const userRef = db.collection("users").doc(from)
+  const userSnap = await userRef.get()
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0)
+  const isFirstTimeUser = !userSnap.exists;
+  if (isFirstTimeUser) {
+    await userRef.set({
+      instanceCount: 0,
+      firstMessageReceiptTime: messageTimestamp,
+      firstMessageType: "normal",
+    })
+  }
+
   switch (type) {
     case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
@@ -45,25 +55,27 @@ exports.userHandlerWhatsapp = async function (message) {
         message.text.body.toLowerCase() ===
         "Show me how CheckMate works!".toLowerCase()
       ) {
-        await handleNewUser(message)
+        await userRef.update({
+          firstMessageType: "prepopulated",
+        });
         break
       }
-      if (message.text.body === responses.DEMO_SCAM_MESSAGE) {
-        await respondToDemoScam(message)
-        break
-      }
-      await newTextInstanceHandler(db, {
+      // if (message.text.body === responses.DEMO_SCAM_MESSAGE) {
+      //   await respondToDemoScam(message)
+      //   break
+      // }
+      await newTextInstanceHandler({
         text: message.text.body,
         timestamp: messageTimestamp,
         id: message.id || null,
         from: from || null,
         isForwarded: message?.context?.forwarded || null,
         isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
-      })
+      }, isFirstTimeUser)
       break
 
     case "image":
-      await newImageInstanceHandler(db, {
+      await newImageInstanceHandler({
         text: message?.image?.caption || null,
         timestamp: messageTimestamp,
         id: message.id || null,
@@ -72,7 +84,7 @@ exports.userHandlerWhatsapp = async function (message) {
         from: from || null,
         isForwarded: message?.context?.forwarded || null,
         isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
-      })
+      }, isFirstTimeUser)
       break
 
     case "interactive":
@@ -94,11 +106,13 @@ exports.userHandlerWhatsapp = async function (message) {
       )
       break
   }
+  if (isFirstTimeUser) {
+    await newUserHandler(from);
+  }
   markWhatsappMessageAsRead("user", message.id)
 }
 
 async function newTextInstanceHandler(
-  db,
   {
     text: text,
     timestamp: timestamp,
@@ -106,16 +120,17 @@ async function newTextInstanceHandler(
     from: from,
     isForwarded: isForwarded,
     isFrequentlyForwarded: isFrequentlyForwarded,
-  }
+  },
+  isFirstTimeUser,
 ) {
+  const db = admin.firestore()
   let hasMatch = false
   let matchedId
   const machineCategory = classifyText(text)
-  const userRef = db.collection("users").doc(from)
-  const userSnap = await userRef.get()
-  if (!userSnap.exists && machineCategory === "irrelevant") {
-    //start welcome flow
-    await handleUserFirstMessage(from, userRef)
+  if (isFirstTimeUser && machineCategory === "irrelevant") {
+    await db.collection("users").doc(from).update({
+      firstMessageType: "irrelevant",
+    });
     return
   }
   let textHash = hashMessage(text) // hash of the original text
@@ -228,7 +243,6 @@ async function newTextInstanceHandler(
 }
 
 async function newImageInstanceHandler(
-  db,
   {
     text: text,
     timestamp: timestamp,
@@ -238,8 +252,10 @@ async function newImageInstanceHandler(
     from: from,
     isForwarded: isForwarded,
     isFrequentlyForwarded: isFrequentlyForwarded,
+    isFirstTimeUser,
   }
 ) {
+  const db = admin.firestore()
   let filename
   //get response buffer
   let buffer = await downloadWhatsappMedia(mediaId, mimeType)
@@ -319,40 +335,18 @@ async function newImageInstanceHandler(
     })
 }
 
-async function handleNewUser(messageObj) {
-  const db = admin.firestore()
+async function onboardNewUser(from) {
   const responses = await getResponsesObj("user")
-  const userRef = db.collection("users").doc(messageObj.from)
-  const userSnap = await userRef.get()
-  const messageTimestamp = new Timestamp(parseInt(messageObj.timestamp), 0)
-  if (!userSnap.exists) {
-    await userRef.set({
-      instanceCount: 0,
-      onboardMessageReceiptTime: messageTimestamp,
-    })
-  } else {
-    if (!userSnap.get("onboardMessageReceiptTime")) {
-      await userRef.update({
-        onboardMessageReceiptTime: messageTimestamp,
-      })
-    }
-  }
-
-  let res = await sendWhatsappTextMessage(
-    "user",
-    messageObj.from,
-    responses.DEMO_SCAM_MESSAGE
-  )
-  await sleep(2000)
   await sendWhatsappTextMessage(
     "user",
-    messageObj.from,
-    responses?.DEMO_SCAM_PROMPT,
-    res.data.messages[0].id
+    from,
+    responses.ONBOARDING,
+    null,
+    true,
   )
 }
 
-async function handleUserFirstMessage(from, userRef) {
+async function newUserHandler(from) {
   const responses = await getResponsesObj("user")
   const buttons = [
     {
@@ -371,43 +365,40 @@ async function handleUserFirstMessage(from, userRef) {
     },
   ]
   await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons)
-  await userRef.set({
-    instanceCount: 0,
-  })
 }
 
-async function respondToDemoScam(messageObj) {
-  const responses = await getResponsesObj("user")
-  await sendWhatsappTextMessage(
-    "user",
-    messageObj.from,
-    responses?.SCAM,
-    messageObj.id
-  )
-  await sleep(5000)
-  const buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: "onboarding_sendContactYes",
-        title: "Yes!",
-      },
-    },
-    {
-      type: "reply",
-      reply: {
-        id: "onboarding_sendContactNo",
-        title: "It can wait...",
-      },
-    },
-  ]
-  await sendWhatsappButtonMessage(
-    "user",
-    messageObj.from,
-    responses?.DEMO_END,
-    buttons
-  )
-}
+// async function respondToDemoScam(messageObj) {
+//   const responses = await getResponsesObj("user")
+//   await sendWhatsappTextMessage(
+//     "user",
+//     messageObj.from,
+//     responses?.SCAM,
+//     messageObj.id
+//   )
+//   await sleep(5000)
+//   const buttons = [
+//     {
+//       type: "reply",
+//       reply: {
+//         id: "onboarding_sendContactYes",
+//         title: "Yes!",
+//       },
+//     },
+//     {
+//       type: "reply",
+//       reply: {
+//         id: "onboarding_sendContactNo",
+//         title: "It can wait...",
+//       },
+//     },
+//   ]
+//   await sendWhatsappButtonMessage(
+//     "user",
+//     messageObj.from,
+//     responses?.DEMO_END,
+//     buttons
+//   )
+// }
 
 async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
   const db = admin.firestore()
@@ -433,7 +424,7 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
       break
     case "scamshieldExplain":
       let messageId
-      ;[instancePath, messageId] = rest
+        ;[instancePath, messageId] = rest
       await sendWhatsappTextMessage(
         "user",
         from,
@@ -466,33 +457,33 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
         messageId
       )
       break
-    case "onboarding":
-      ;[selection] = rest
-      switch (selection) {
-        case "sendContactYes":
-          const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
-          await sendWhatsappContactMessage(
-            "user",
-            from,
-            runtimeEnvironment.value() === "PROD"
-              ? "+65 80432188"
-              : "+1 555-093-3685",
-            nameObj,
-            "https://checkmate.sg"
-          )
-          await sleep(2000)
-          await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
-          break
-        case "sendContactNo":
-          await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
-          break
-      }
-      break
+    // case "onboarding":
+    //   ;[selection] = rest
+    //   switch (selection) {
+    //     case "sendContactYes":
+    //       const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
+    //       await sendWhatsappContactMessage(
+    //         "user",
+    //         from,
+    //         runtimeEnvironment.value() === "PROD"
+    //           ? "+65 80432188"
+    //           : "+1 555-093-3685",
+    //         nameObj,
+    //         "https://checkmate.sg"
+    //       )
+    //       await sleep(2000)
+    //       await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
+    //       break
+    //     case "sendContactNo":
+    //       await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
+    //       break
+    //   }
+    //   break
     case "newUser":
       ;[selection] = rest
       switch (selection) {
         case "onboardingYes":
-          await handleNewUser(messageObj)
+          await onboardNewUser(from)
           break
         case "onboardingNo":
           await sendWhatsappTextMessage("user", from, responses?.GET_STARTED)
