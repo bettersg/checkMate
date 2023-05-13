@@ -90,7 +90,8 @@ erDiagram
 				string id PK "using their sender ID or phone number"
 				number instanceCount
 				timestamp lastSent
-				timestamp onboardMessageReceiptTime "when they sent in the prepopulated onboard message, optional field that only is included if they do send in before doing anything else"
+				timestamp firstMessageReceiptTime
+        string firstMessageType "either prepopulated, normal, or irrelevant"
 		}
 
     message ||--|{ instance: has
