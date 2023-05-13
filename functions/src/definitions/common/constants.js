@@ -89,9 +89,9 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
   //   "And that's it! If you want to learn more, visit https://checkmate.sg. If you have any feedback, do submit it to https://bit.ly/checkmate-feedback. Now, you can start sending in other messages. Let's do our part in the fight against scams and misinformation! 💪",
   NEW_USER:
     `Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined the effort to battle scams and misinformation😊.
-  
+
 Would you like to know more about how to use CheckMate?
-    
+
 If so, press yes! Otherwise, just go ahead and use it!`,
   GET_STARTED:
     "No worries! You can get started immediately by sending in dubious messages you're unsure about. Let's do our part in the fight against scams and misinformation! 💪",
