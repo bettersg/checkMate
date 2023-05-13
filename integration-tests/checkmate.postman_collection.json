@@ -198,7 +198,7 @@
 							"        \"interactive\": {\r",
 							"            \"type\": \"button\",\r",
 							"            \"body\": {\r",
-							"                \"text\": \"Hello and welcome to CheckMate! We're glad you're here 😊. Would you like to go through a quick onboarding to see how CheckMate works? Otherwise, you can go ahead and send in dubious messages right now!\"\r",
+							"                \"text\": \"Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined the effort to battle scams and misinformation😊.\\n\\nWould you like to know more about how to use CheckMate?\\n\\nIf so, press yes! Otherwise, just go ahead and use it!\"\r",
 							"            },\r",
 							"            \"action\": {\r",
 							"                \"buttons\": [\r",
