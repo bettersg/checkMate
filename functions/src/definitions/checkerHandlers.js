@@ -30,15 +30,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
       const button = message.button
       switch (button.text) {
         case "Yes!":
-          try {
-            await onFactCheckerYes(button.payload, from, "whatsapp")
-          } catch {
-            //TODO: can remove this once we are sure no one will submit button messages sent under the old format.
-            functions.logger.log(
-              `New onFactCheckerYes failed, payload = ${button.payload}`
-            )
-            await onFactCheckerYes_old(button.payload, from, "whatsapp")
-          }
+          await onFactCheckerYes(button.payload, from, "whatsapp")
           break
         case "No":
           responses = await getResponsesObj("factChecker")
@@ -158,78 +150,6 @@ async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
   }
 }
 
-async function onFactCheckerYes_old(messageId, from, platform = "whatsapp") {
-  const db = admin.firestore()
-  const messageRef = db.collection("messages").doc(messageId)
-  const messageSnap = await messageRef.get()
-  if (!messageSnap.exists) {
-    functions.logger.log(`No corresponding message ${messageId} found`)
-    return
-  }
-  const message = messageSnap.data()
-  const voteRequestSnap = await messageRef
-    .collection("voteRequests")
-    .where("platformId", "==", from)
-    .where("platform", "==", platform)
-    .get()
-  if (voteRequestSnap.empty) {
-    functions.logger.log(
-      `No corresponding voteRequest for message ${messageId} with platformId ${from} found`
-    )
-  } else {
-    if (voteRequestSnap.size > 1) {
-      functions.logger.log(
-        `More than 1 voteRequest with platformId ${from} found`
-      )
-    }
-    let res
-    switch (message.type) {
-      case "text":
-        res = await sendTextMessage(
-          "factChecker",
-          from,
-          message.text,
-          null,
-          platform
-        )
-        break
-      case "image":
-        const temporaryUrl = await getSignedUrl(message.storageUrl)
-        if (temporaryUrl) {
-          res = await sendImageMessage(
-            "factChecker",
-            from,
-            temporaryUrl,
-            message.text,
-            null,
-            platform
-          )
-        } else {
-          functions.logger.warn("Problem creating URL")
-          await sendTextMessage(
-            "factChecker",
-            from,
-            "Sorry, an error occured",
-            null,
-            platform
-          )
-          return
-        }
-        break
-    }
-    await voteRequestSnap.docs[0].ref.update({
-      hasAgreed: true,
-      sentMessageId: res.data.messages[0].id,
-    })
-    await sleep(3000)
-    await sendL1CategorisationMessage(
-      voteRequestSnap.docs[0],
-      messageRef,
-      res.data.messages[0].id
-    )
-  }
-}
-
 async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   const db = admin.firestore()
   if (!voteRequestPath.includes("/")) {
@@ -294,6 +214,7 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   }
   await voteRequestSnap.ref.update({
     hasAgreed: true,
+    acceptedTimestamp: Timestamp.fromDate(new Date()),
     sentMessageId: res.data.messages[0].id,
   })
   await sleep(3000)

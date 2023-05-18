@@ -67,6 +67,7 @@ erDiagram
         number vote 
         sting category "scam, irrelevant, or number"
         timestamp createdTimestamp
+        timestamp acceptedTimestamp
         timestamp votedTimestamp
     }
 

@@ -104,6 +104,7 @@ function sendTemplateMessageAndCreateVoteRequest(
         category: null,
         vote: null,
         createdTimestamp: Timestamp.fromDate(new Date()),
+        acceptedTimestamp: null,
         votedTimestamp: null,
       })
       .then((writeResult) => {
