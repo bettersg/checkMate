@@ -37,6 +37,7 @@ exports.userHandlerWhatsapp = async function (message) {
   const userSnap = await userRef.get()
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0)
   const isFirstTimeUser = !userSnap.exists;
+  let triggerOnboarding = isFirstTimeUser;
   if (isFirstTimeUser) {
     await userRef.set({
       instanceCount: 0,
@@ -56,15 +57,16 @@ exports.userHandlerWhatsapp = async function (message) {
         message.text.body.toLowerCase() ===
         "Show me how CheckMate works!".toLowerCase()
       ) {
-        await userRef.update({
-          firstMessageType: "prepopulated",
-        });
+        if (isFirstTimeUser) {
+          await userRef.update({
+            firstMessageType: "prepopulated",
+          });
+        } else {
+          triggerOnboarding = true; //we still want to show him the onboarding message.
+        }
         break
       }
-      // if (message.text.body === responses.DEMO_SCAM_MESSAGE) {
-      //   await respondToDemoScam(message)
-      //   break
-      // }
+
       await newTextInstanceHandler({
         text: message.text.body,
         timestamp: messageTimestamp,
@@ -107,7 +109,7 @@ exports.userHandlerWhatsapp = async function (message) {
       )
       break
   }
-  if (isFirstTimeUser) {
+  if (triggerOnboarding) {
     await newUserHandler(from);
   }
   markWhatsappMessageAsRead("user", message.id)
@@ -368,39 +370,6 @@ async function newUserHandler(from) {
   await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons)
 }
 
-// async function respondToDemoScam(messageObj) {
-//   const responses = await getResponsesObj("user")
-//   await sendWhatsappTextMessage(
-//     "user",
-//     messageObj.from,
-//     responses?.SCAM,
-//     messageObj.id
-//   )
-//   await sleep(5000)
-//   const buttons = [
-//     {
-//       type: "reply",
-//       reply: {
-//         id: "onboarding_sendContactYes",
-//         title: "Yes!",
-//       },
-//     },
-//     {
-//       type: "reply",
-//       reply: {
-//         id: "onboarding_sendContactNo",
-//         title: "It can wait...",
-//       },
-//     },
-//   ]
-//   await sendWhatsappButtonMessage(
-//     "user",
-//     messageObj.from,
-//     responses?.DEMO_END,
-//     buttons
-//   )
-// }
-
 async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
   const db = admin.firestore()
   const from = messageObj.from
@@ -458,28 +427,7 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
         messageId
       )
       break
-    // case "onboarding":
-    //   ;[selection] = rest
-    //   switch (selection) {
-    //     case "sendContactYes":
-    //       const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
-    //       await sendWhatsappContactMessage(
-    //         "user",
-    //         from,
-    //         runtimeEnvironment.value() === "PROD"
-    //           ? "+65 80432188"
-    //           : "+1 555-093-3685",
-    //         nameObj,
-    //         "https://checkmate.sg"
-    //       )
-    //       await sleep(2000)
-    //       await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
-    //       break
-    //     case "sendContactNo":
-    //       await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
-    //       break
-    //   }
-    //   break
+
     case "newUser":
       ;[selection] = rest
       switch (selection) {
