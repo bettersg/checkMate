@@ -19,6 +19,7 @@ const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
 const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
+const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
 const { classifyText } = require("./common/classifier")
 
 if (!admin.apps.length) {
@@ -128,7 +129,7 @@ async function newTextInstanceHandler(
 ) {
   const db = admin.firestore()
   let hasMatch = false
-  let matchedId
+  let messageRef
   const machineCategory = classifyText(text)
   if (isFirstTimeUser && machineCategory === "irrelevant") {
     await db.collection("users").doc(from).update({
@@ -140,55 +141,27 @@ async function newTextInstanceHandler(
   let strippedText = stripPhone(text) // text stripped of phone nr
   let strippedTextHash = hashMessage(strippedText) // hash of the stripped text
   let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
-
+  let similarity
   // 1 - check if the exact same message exists in database
-  let textMatchSnapshot = await db
-    .collection("messages")
-    .where("type", "==", "text")
-    .where("textHash", "==", textHash)
-    .where("assessmentExpired", "==", false)
-    .get()
-  let messageId
-  if (!textMatchSnapshot.empty) {
-    hasMatch = true
-    matchType = "exact"
-    if (textMatchSnapshot.size > 1) {
-      functions.logger.log(
-        `more than 1 device matches the query hash ${textHash} for text ${text}`
-      )
-    }
-    matchedId = textMatchSnapshot.docs[0].id
+  try {
+    similarity = await calculateSimilarity(text)
+  } catch (error) {
+    functions.logger.error("Error in calculateSimilarity:", error)
+    similarity = {};
   }
-  if (!hasMatch && strippedText.length > 0) {
-    let strippedTextMatchSnapshot = await db
-      .collection("messages")
-      .where("type", "==", "text")
-      .where("strippedTextHash", "==", strippedTextHash)
-      .where("isScam", "==", true)
-      .where("assessmentExpired", "==", false)
-      .get() //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
-    if (!strippedTextMatchSnapshot.empty) {
-      hasMatch = true
-      matchType = "stripped"
-      if (strippedTextMatchSnapshot.size > 1) {
-        functions.logger.log(
-          `more than 1 device matches the stripped query hash ${strippedText} for text ${strippedText}`
-        )
-      }
-      matchedId = strippedTextMatchSnapshot.docs[0].id
-    }
+  let bestMatchingDocumentRef
+  let bestMatchingText
+  let similarityScore
+  let matchedParentMessageRef
+  if (similarity != {}) {
+    bestMatchingDocumentRef = similarity.ref
+    bestMatchingText = similarity.message
+    similarityScore = similarity.score
+    matchedParentMessageRef = similarity.parent
   }
+  hasMatch = similarityScore > parseFloat(similarityThreshold.value())
+
   if (!hasMatch) {
-    // 2 - if there is no exact match, then perform a cosine similarity calculation
-    let similarity = await calculateSimilarity(text)
-    let bestMatchingDocumentRef
-    let bestMatchingText
-    let similarityScore
-    if (similarity != {}) {
-      bestMatchingDocumentRef = similarity.ref
-      bestMatchingText = similarity.message
-      similarityScore = similarity.score
-    }
     let writeResult = await db.collection("messages").add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
@@ -197,11 +170,6 @@ async function newTextInstanceHandler(
       strippedText: strippedText,
       textHash: textHash,
       strippedTextHash: strippedTextHash,
-      closestMatch: {
-        documentRef: bestMatchingDocumentRef ?? null,
-        text: bestMatchingText ?? null,
-        score: similarityScore ?? null,
-      },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
@@ -218,13 +186,11 @@ async function newTextInstanceHandler(
       isInfo: null,
       custom_reply: null, //string
     })
-    messageId = writeResult.id
+    messageRef = writeResult
   } else {
-    messageId = matchedId
+    messageRef = matchedParentMessageRef
   }
-  const _ = await db
-    .collection("messages")
-    .doc(messageId)
+  const _ = await messageRef
     .collection("instances")
     .add({
       source: "whatsapp",
@@ -242,6 +208,13 @@ async function newTextInstanceHandler(
       matchType: matchType,
       strippedText: strippedText,
       scamShieldConsent: null,
+      closestMatch: {
+        instanceRef: bestMatchingDocumentRef ?? null,
+        text: bestMatchingText ?? null,
+        score: similarityScore ?? null,
+        parentRef: matchedParentMessageRef ?? null,
+        algorithm: "bag-of-words",
+      },
     })
 }
 
