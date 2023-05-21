@@ -42,7 +42,9 @@ exports.onInstanceCreate = functions
     await upsertUser(data.from, data.timestamp)
 
     const parentMessageSnap = await parentMessageRef.get()
-    await respondToInstance(snap)
+    if (!data.isReplied) {
+      await respondToInstance(snap)
+    }
     if (!parentMessageSnap.get("isAssessed")) {
       const parentInstanceCount = await getCount(parentMessageRef, "instance")
       const thresholds = await getThresholds()
