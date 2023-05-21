@@ -41,6 +41,10 @@ exports.onInstanceCreate = functions
 
     await upsertUser(data.from, data.timestamp)
 
+    if (data?.type === "text") {
+      parentMessageRef.update({ "text": data.text })
+    }
+
     const parentMessageSnap = await parentMessageRef.get()
     if (!data.isReplied) {
       await respondToInstance(snap)
