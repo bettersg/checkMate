@@ -58,7 +58,7 @@ function textCosineSimilarity(txtA, txtB) {
   return cosineSimilarity(vectorA, vectorB)
 }
 
-// convert the result to a rounded percentage
+// round result to 2 decimal places
 function getSimilarityScore(val) {
   return Math.round(val * 100) / 100
 }
