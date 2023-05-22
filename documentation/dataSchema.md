@@ -5,7 +5,7 @@ erDiagram
         string type "image/text"
         string machineCategory
         boolean isMachineCategorised
-        string text "Text or caption"
+        string text "Text or caption. For text, shows the latest iteration"
         string strippedText
         string hash "Image hash, for image only"
         string textHash "hash of original text, for text only"

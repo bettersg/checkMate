@@ -1,6 +1,6 @@
 // creates the wordmap
 function wordCountMap(str) {
-  let words = str.split(" ")
+  let words = str.split(/\s+/);
   let wordCount = {}
   words.forEach((w) => {
     wordCount[w] = (wordCount[w] || 0) + 1
@@ -58,9 +58,9 @@ function textCosineSimilarity(txtA, txtB) {
   return cosineSimilarity(vectorA, vectorB)
 }
 
-// convert the result to a rounded percentage
+// round result to 2 decimal places
 function getSimilarityScore(val) {
-  return Math.round(val * 100)
+  return Math.round(val * 100) / 100
 }
 
 exports.textCosineSimilarity = textCosineSimilarity
