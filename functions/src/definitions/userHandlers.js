@@ -19,6 +19,7 @@ const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
 const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
+const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
 const { classifyText } = require("./common/classifier")
 
 if (!admin.apps.length) {
@@ -37,6 +38,7 @@ exports.userHandlerWhatsapp = async function (message) {
   const userSnap = await userRef.get()
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0)
   const isFirstTimeUser = !userSnap.exists;
+  let triggerOnboarding = isFirstTimeUser;
   if (isFirstTimeUser) {
     await userRef.set({
       instanceCount: 0,
@@ -56,15 +58,16 @@ exports.userHandlerWhatsapp = async function (message) {
         message.text.body.toLowerCase() ===
         "Show me how CheckMate works!".toLowerCase()
       ) {
-        await userRef.update({
-          firstMessageType: "prepopulated",
-        });
+        if (isFirstTimeUser) {
+          await userRef.update({
+            firstMessageType: "prepopulated",
+          });
+        } else {
+          triggerOnboarding = true; //we still want to show him the onboarding message.
+        }
         break
       }
-      // if (message.text.body === responses.DEMO_SCAM_MESSAGE) {
-      //   await respondToDemoScam(message)
-      //   break
-      // }
+
       await newTextInstanceHandler({
         text: message.text.body,
         timestamp: messageTimestamp,
@@ -107,7 +110,7 @@ exports.userHandlerWhatsapp = async function (message) {
       )
       break
   }
-  if (isFirstTimeUser) {
+  if (triggerOnboarding) {
     await newUserHandler(from);
   }
   markWhatsappMessageAsRead("user", message.id)
@@ -126,7 +129,7 @@ async function newTextInstanceHandler(
 ) {
   const db = admin.firestore()
   let hasMatch = false
-  let matchedId
+  let messageRef
   const machineCategory = classifyText(text)
   if (isFirstTimeUser && machineCategory === "irrelevant") {
     await db.collection("users").doc(from).update({
@@ -138,55 +141,27 @@ async function newTextInstanceHandler(
   let strippedText = stripPhone(text) // text stripped of phone nr
   let strippedTextHash = hashMessage(strippedText) // hash of the stripped text
   let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
-
+  let similarity
   // 1 - check if the exact same message exists in database
-  let textMatchSnapshot = await db
-    .collection("messages")
-    .where("type", "==", "text")
-    .where("textHash", "==", textHash)
-    .where("assessmentExpired", "==", false)
-    .get()
-  let messageId
-  if (!textMatchSnapshot.empty) {
-    hasMatch = true
-    matchType = "exact"
-    if (textMatchSnapshot.size > 1) {
-      functions.logger.log(
-        `more than 1 device matches the query hash ${textHash} for text ${text}`
-      )
-    }
-    matchedId = textMatchSnapshot.docs[0].id
+  try {
+    similarity = await calculateSimilarity(text)
+  } catch (error) {
+    functions.logger.error("Error in calculateSimilarity:", error)
+    similarity = {};
   }
-  if (!hasMatch && strippedText.length > 0) {
-    let strippedTextMatchSnapshot = await db
-      .collection("messages")
-      .where("type", "==", "text")
-      .where("strippedTextHash", "==", strippedTextHash)
-      .where("isScam", "==", true)
-      .where("assessmentExpired", "==", false)
-      .get() //consider removing the last condition, which now reduces false positive matches at the cost of more effort to checkMates.
-    if (!strippedTextMatchSnapshot.empty) {
-      hasMatch = true
-      matchType = "stripped"
-      if (strippedTextMatchSnapshot.size > 1) {
-        functions.logger.log(
-          `more than 1 device matches the stripped query hash ${strippedText} for text ${strippedText}`
-        )
-      }
-      matchedId = strippedTextMatchSnapshot.docs[0].id
-    }
+  let bestMatchingDocumentRef
+  let bestMatchingText
+  let similarityScore
+  let matchedParentMessageRef
+  if (similarity != {}) {
+    bestMatchingDocumentRef = similarity.ref
+    bestMatchingText = similarity.message
+    similarityScore = similarity.score
+    matchedParentMessageRef = similarity.parent
   }
+  hasMatch = similarityScore > parseFloat(similarityThreshold.value())
+
   if (!hasMatch) {
-    // 2 - if there is no exact match, then perform a cosine similarity calculation
-    let similarity = await calculateSimilarity(text)
-    let bestMatchingDocumentRef
-    let bestMatchingText
-    let similarityScore
-    if (similarity != {}) {
-      bestMatchingDocumentRef = similarity.ref
-      bestMatchingText = similarity.message
-      similarityScore = similarity.score
-    }
     let writeResult = await db.collection("messages").add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
@@ -195,11 +170,6 @@ async function newTextInstanceHandler(
       strippedText: strippedText,
       textHash: textHash,
       strippedTextHash: strippedTextHash,
-      closestMatch: {
-        documentRef: bestMatchingDocumentRef ?? null,
-        text: bestMatchingText ?? null,
-        score: similarityScore ?? null,
-      },
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
@@ -216,13 +186,11 @@ async function newTextInstanceHandler(
       isInfo: null,
       custom_reply: null, //string
     })
-    messageId = writeResult.id
+    messageRef = writeResult
   } else {
-    messageId = matchedId
+    messageRef = matchedParentMessageRef
   }
-  const _ = await db
-    .collection("messages")
-    .doc(messageId)
+  const _ = await messageRef
     .collection("instances")
     .add({
       source: "whatsapp",
@@ -240,6 +208,13 @@ async function newTextInstanceHandler(
       matchType: matchType,
       strippedText: strippedText,
       scamShieldConsent: null,
+      closestMatch: {
+        instanceRef: bestMatchingDocumentRef ?? null,
+        text: bestMatchingText ?? null,
+        score: similarityScore ?? null,
+        parentRef: matchedParentMessageRef ?? null,
+        algorithm: "bag-of-words",
+      },
     })
 }
 
@@ -368,39 +343,6 @@ async function newUserHandler(from) {
   await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons)
 }
 
-// async function respondToDemoScam(messageObj) {
-//   const responses = await getResponsesObj("user")
-//   await sendWhatsappTextMessage(
-//     "user",
-//     messageObj.from,
-//     responses?.SCAM,
-//     messageObj.id
-//   )
-//   await sleep(5000)
-//   const buttons = [
-//     {
-//       type: "reply",
-//       reply: {
-//         id: "onboarding_sendContactYes",
-//         title: "Yes!",
-//       },
-//     },
-//     {
-//       type: "reply",
-//       reply: {
-//         id: "onboarding_sendContactNo",
-//         title: "It can wait...",
-//       },
-//     },
-//   ]
-//   await sendWhatsappButtonMessage(
-//     "user",
-//     messageObj.from,
-//     responses?.DEMO_END,
-//     buttons
-//   )
-// }
-
 async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
   const db = admin.firestore()
   const from = messageObj.from
@@ -458,28 +400,7 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
         messageId
       )
       break
-    // case "onboarding":
-    //   ;[selection] = rest
-    //   switch (selection) {
-    //     case "sendContactYes":
-    //       const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
-    //       await sendWhatsappContactMessage(
-    //         "user",
-    //         from,
-    //         runtimeEnvironment.value() === "PROD"
-    //           ? "+65 80432188"
-    //           : "+1 555-093-3685",
-    //         nameObj,
-    //         "https://checkmate.sg"
-    //       )
-    //       await sleep(2000)
-    //       await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
-    //       break
-    //     case "sendContactNo":
-    //       await sendWhatsappTextMessage("user", from, responses?.ONBOARDING_END)
-    //       break
-    //   }
-    //   break
+
     case "newUser":
       ;[selection] = rest
       switch (selection) {

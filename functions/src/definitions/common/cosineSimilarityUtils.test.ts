@@ -14,8 +14,8 @@ describe("textCosineSimilarity", () => {
 })
 
 describe("getSimilarityScore", () => {
-  it("should calculate correct percentage", () => {
-    expect(getSimilarityScore(123)).toBe(12300)
-    expect(getSimilarityScore(1.23)).toBe(123)
+  it("should round correctly", () => {
+    expect(getSimilarityScore(0.88204909)).toBe(0.88)
+    expect(getSimilarityScore(0.32509313)).toBe(0.33)
   })
 })
