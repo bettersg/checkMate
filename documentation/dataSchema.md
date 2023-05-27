@@ -6,10 +6,7 @@ erDiagram
         string machineCategory
         boolean isMachineCategorised
         string text "Text or caption. For text, shows the latest iteration"
-        string strippedText
         string hash "Image hash, for image only"
-        string textHash "hash of original text, for text only"
-        string strippedTextHash "hash of stripped text, for text only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
         string storageURL "Cloud storage URL, for image only"

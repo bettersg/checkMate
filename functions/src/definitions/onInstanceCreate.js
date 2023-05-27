@@ -3,6 +3,7 @@ const { incrementCounter, getCount } = require("./common/counters")
 const { getThresholds } = require("./common/utils")
 const { respondToInstance } = require("./common/responseUtils")
 const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
+const { insertOne, CollectionTypes } = require("./common/typesense/collectionOperations")
 const admin = require("firebase-admin")
 const { FieldValue } = require("@google-cloud/firestore")
 const { defineInt } = require("firebase-functions/params")
@@ -22,6 +23,8 @@ exports.onInstanceCreate = functions
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
+      "TYPESENSE_TOKEN",
+      "ML_SERVER_TOKEN",
     ],
   })
   .firestore.document("/messages/{messageId}/instances/{instanceId}")
@@ -43,6 +46,19 @@ exports.onInstanceCreate = functions
 
     if (data?.type === "text") {
       parentMessageRef.update({ "text": data.text })
+
+      //update typesense index
+      const updateObj = {
+        id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
+        message: data.text,
+        embedding: data.embedding,
+      }
+      try {
+        await insertOne(updateObj, CollectionTypes.Instances);
+      }
+      catch (error) {
+        functions.logger.error(`Error inserting instance ${snap.ref.path} into typesense: `, error)
+      }
     }
 
     const parentMessageSnap = await parentMessageRef.get()

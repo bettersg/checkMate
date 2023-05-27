@@ -17,6 +17,7 @@ const {
 const { getResponsesObj } = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
+const { getEmbedding } = require("./common/machineLearningServer/operations")
 const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
@@ -130,29 +131,30 @@ async function newTextInstanceHandler(
   const db = admin.firestore()
   let hasMatch = false
   let messageRef
-  const machineCategory = classifyText(text)
+  const machineCategory = await classifyText(text)
+  console.log(machineCategory)
   if (isFirstTimeUser && machineCategory === "irrelevant") {
     await db.collection("users").doc(from).update({
       firstMessageType: "irrelevant",
     });
     return
   }
-  let textHash = hashMessage(text) // hash of the original text
-  let strippedText = stripPhone(text) // text stripped of phone nr
-  let strippedTextHash = hashMessage(strippedText) // hash of the stripped text
   let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
   let similarity
+  let embedding
   // 1 - check if the exact same message exists in database
   try {
-    similarity = await calculateSimilarity(text)
+    embedding = await getEmbedding(text);
+    similarity = await calculateSimilarity(embedding)
   } catch (error) {
     functions.logger.error("Error in calculateSimilarity:", error)
     similarity = {};
   }
   let bestMatchingDocumentRef
   let bestMatchingText
-  let similarityScore
+  let similarityScore = 0
   let matchedParentMessageRef
+
   if (similarity != {}) {
     bestMatchingDocumentRef = similarity.ref
     bestMatchingText = similarity.message
@@ -167,9 +169,6 @@ async function newTextInstanceHandler(
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: machineCategory === "irrelevant" ? true : false,
       text: text, //text or caption
-      strippedText: strippedText,
-      textHash: textHash,
-      strippedTextHash: strippedTextHash,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
@@ -206,14 +205,14 @@ async function newTextInstanceHandler(
       replyCategory: null,
       replyTimestamp: null,
       matchType: matchType,
-      strippedText: strippedText,
       scamShieldConsent: null,
+      embedding: embedding,
       closestMatch: {
         instanceRef: bestMatchingDocumentRef ?? null,
         text: bestMatchingText ?? null,
         score: similarityScore ?? null,
         parentRef: matchedParentMessageRef ?? null,
-        algorithm: "bag-of-words",
+        algorithm: "all-MiniLM-L6-v2",
       },
     })
 }
