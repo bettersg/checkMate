@@ -36,11 +36,10 @@ exports.onInstanceCreate = functions
       return Promise.resolve()
     }
     const parentMessageRef = snap.ref.parent.parent
-    await incrementCounter(
-      parentMessageRef,
-      "instance",
-      numInstanceShards.value()
-    )
+    const instancesQuerySnap = await parentMessageRef.collection("instances").get()
+    await parentMessageRef.update({
+      instanceCount: instancesQuerySnap.size,
+    })
 
     await upsertUser(data.from, data.timestamp)
 

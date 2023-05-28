@@ -184,6 +184,7 @@ async function newTextInstanceHandler(
       isUnsure: null,
       isInfo: null,
       custom_reply: null, //string
+      instanceCount: 0,
     })
     messageRef = writeResult
   } else {
@@ -276,6 +277,7 @@ async function newImageInstanceHandler(
       isInfo: null,
       isIrrelevant: null, //bool, if majority voted irrelevant then update this
       custom_reply: null, //string
+      instanceCount: 0,
     })
     messageId = writeResult.id
   } else {

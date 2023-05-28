@@ -26,6 +26,7 @@ erDiagram
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string customReply "Not used for now"
+        instanceCount
         collection instances
         collection voteRequests
     }
