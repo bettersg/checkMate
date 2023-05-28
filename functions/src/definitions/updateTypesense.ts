@@ -32,6 +32,7 @@ exports.onMessageWrite = functions
         text: messageData.text || null,
         type: messageData.type,
         category: messageData.primaryCategory,
+        truthScore: messageData.truthScore,
         isAssessed: messageData.isAssessed,
         instanceCount: messageData.instanceCount,
         lastReceivedUnixTimestamp: lastTimestamp.seconds,
