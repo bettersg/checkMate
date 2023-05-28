@@ -19,13 +19,21 @@ exports.onInstanceDelete = functions
       if (!instancesQuerySnap.empty) {
         const lastInstanceDocSnap = instancesQuerySnap.docs[instancesQuerySnap.docs.length - 1]
         const firstInstanceDocSnap = instancesQuerySnap.docs[0]
-        await parentMessageRef.update({
-          instanceCount: FieldValue.increment(-1),
-          lastTimestamp: lastInstanceDocSnap.get("timestamp"),
-          firstTimestamp: firstInstanceDocSnap.get("timestamp"),
-        })
+        try {
+          await parentMessageRef.update({
+            instanceCount: FieldValue.increment(-1),
+            lastTimestamp: lastInstanceDocSnap.get("timestamp"),
+            firstTimestamp: firstInstanceDocSnap.get("timestamp"),
+          })
+        } catch {
+          functions.logger.error(`Failed to update message ${parentMessageRef.path} in Firestore while deleting instance`)
+        }
       } else {
-        await parentMessageRef.update({ instanceCount: 0 })
+        try {
+          await parentMessageRef.update({ instanceCount: 0 })
+        } catch {
+          functions.logger.error(`Failed to update message ${parentMessageRef.path} in Firestore while deleting instance`)
+        }
       }
     }
     const id = snap.ref.path.replace(/\//g, "_") //typesense id can't seem to take /
