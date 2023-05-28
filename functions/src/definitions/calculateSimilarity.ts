@@ -14,7 +14,6 @@ async function calculateSimilarity(embedding: number[]) {
   if (nearestInstance) {
     const doc = nearestInstance.document
     const path = nearestInstance.document.id.replace(/_/g, "/") //typesense id can't seem to take /
-    console.log(path);
     const similarityScore = 1 - nearestInstance.vector_distance
     const db = admin.firestore()
     const instanceRef = db.doc(path)

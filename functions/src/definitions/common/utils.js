@@ -143,6 +143,23 @@ function stripUrl(originalStr, includePlaceholder = false) {
   return replacedString
 }
 
+function firestoreTimestampToYYYYMM(timestamp) {
+  // Convert Firestore timestamp to a JavaScript Date object
+  let date = timestamp.toDate();
+
+  // Get the year and the month
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1; // JavaScript months range from 0 - 11
+
+  // Pad the month with a 0 if it's less than 10
+  if (month < 10) {
+    month = '0' + month;
+  }
+
+  // Return the formatted string
+  return `${year}${month}`;
+}
+
 function hashMessage(originalStr) {
   return createHash("md5").update(originalStr).digest("hex")
 }
@@ -151,3 +168,4 @@ exports.stripPhone = stripPhone
 exports.stripUrl = stripUrl
 exports.hashMessage = hashMessage
 exports.sleep = sleep
+exports.firestoreTimestampToYYYYMM = firestoreTimestampToYYYYMM

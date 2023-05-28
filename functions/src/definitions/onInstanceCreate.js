@@ -1,5 +1,5 @@
 const functions = require("firebase-functions")
-const { incrementCounter, getCount } = require("./common/counters")
+const { getCount } = require("./common/counters")
 const { getThresholds } = require("./common/utils")
 const { respondToInstance } = require("./common/responseUtils")
 const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
@@ -36,9 +36,11 @@ exports.onInstanceCreate = functions
       return Promise.resolve()
     }
     const parentMessageRef = snap.ref.parent.parent
-    const instancesQuerySnap = await parentMessageRef.collection("instances").get()
+    const instancesQuerySnap = await parentMessageRef.collection("instances").orderBy("timestamp", "desc").get()
+    const lastInstanceDocSnap = instancesQuerySnap.docs[0]
     await parentMessageRef.update({
       instanceCount: instancesQuerySnap.size,
+      lastTimestamp: lastInstanceDocSnap.get("timestamp"),
     })
 
     await upsertUser(data.from, data.timestamp)
@@ -65,7 +67,7 @@ exports.onInstanceCreate = functions
       await respondToInstance(snap)
     }
     if (!parentMessageSnap.get("isAssessed")) {
-      const parentInstanceCount = await getCount(parentMessageRef, "instance")
+      const parentInstanceCount = instancesQuerySnap.size
       const thresholds = await getThresholds()
       if (
         parentInstanceCount >= thresholds.startVote &&

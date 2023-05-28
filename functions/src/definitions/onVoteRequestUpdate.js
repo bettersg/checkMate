@@ -74,11 +74,44 @@ exports.onVoteRequestUpdate = functions
       const isAssessed =
         (isUnsure &&
           responseCount >
-            parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
+          parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
         (!isUnsure &&
           responseCount > parseInt(thresholds.endVote * numFactCheckers)) ||
         (isSus &&
           responseCount > parseInt(thresholds.endVoteSus * numFactCheckers))
+
+      //set primaryCategory
+      let primaryCategory
+      if (isScam) {
+        primaryCategory = "scam"
+      } else if (isIllicit) {
+        primaryCategory = "illicit"
+      } else if (isInfo) {
+        if (truthScore === null) {
+          primaryCategory = "error"
+          functions.logger.error("Category is info but truth score is null")
+        }
+        if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+          primaryCategory = "false"
+        }
+        else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+          primaryCategory = "misleading"
+        }
+        else {
+          primaryCategory = "true"
+        }
+      } else if (isSpam) {
+        primaryCategory = "spam"
+      } else if (isLegitimate) {
+        primaryCategory = "legitimate"
+      } else if (isIrrelevant) {
+        primaryCategory = "irrelevant"
+      } else if (isUnsure) {
+        primaryCategory = "unsure"
+      } else {
+        primaryCategory = "error"
+        functions.logger.error("Error in primary category determination")
+      }
       await messageRef.update({
         truthScore: truthScore,
         isSus: isSus,
@@ -90,6 +123,7 @@ exports.onVoteRequestUpdate = functions
         isIrrelevant: isIrrelevant,
         isUnsure: isUnsure,
         isAssessed: isAssessed,
+        primaryCategory: primaryCategory,
       })
       if (after.category !== null) {
         //vote has ended

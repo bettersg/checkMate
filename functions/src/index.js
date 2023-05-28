@@ -6,6 +6,7 @@ const webhookHandler = require("./definitions/webhookHandler")
 const onVoteRequestUpdate = require("./definitions/onVoteRequestUpdate")
 const batchJobs = require("./definitions/batchJobs")
 const healthcheck = require("./definitions/healthcheck")
+const updateTypesense = require("./definitions/updateTypesense")
 
 // our stuff, uncomment when ready!
 exports.onInstanceCreate = onInstanceCreate.onInstanceCreate
@@ -16,3 +17,4 @@ exports.batchJobs = batchJobs
 exports.healthcheck = healthcheck.healthcheck
 exports.onInstanceUpdate = onInstanceUpdate.onInstanceUpdate
 exports.onInstanceDelete = onInstanceDelete.onInstanceDelete
+exports.onMessageWrite = updateTypesense.onMessageWrite

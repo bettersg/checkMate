@@ -13,11 +13,26 @@ exports.onInstanceDelete = functions
   .onDelete(async (snap, context) => {
     // Grab the current value of what was written to Firestore.
     const parentMessageRef = snap.ref.parent.parent;
+
     if (parentMessageRef) {
-      await parentMessageRef.update({
-        instanceCount: FieldValue.increment(-1),
-      })
+      const instancesQuerySnap = await parentMessageRef.collection("instances").orderBy("timestamp").get()
+      if (!instancesQuerySnap.empty) {
+        const lastInstanceDocSnap = instancesQuerySnap.docs[instancesQuerySnap.docs.length - 1]
+        const firstInstanceDocSnap = instancesQuerySnap.docs[0]
+        await parentMessageRef.update({
+          instanceCount: FieldValue.increment(-1),
+          lastTimestamp: lastInstanceDocSnap.get("timestamp"),
+          firstTimestamp: firstInstanceDocSnap.get("timestamp"),
+        })
+      } else {
+        await parentMessageRef.update({ instanceCount: 0 })
+      }
     }
     const id = snap.ref.path.replace(/\//g, "_") //typesense id can't seem to take /
-    await deleteOne(id, CollectionTypes.Instances)
+    try {
+      await deleteOne(id, CollectionTypes.Instances)
+    }
+    catch {
+      functions.logger.error(`Failed to delete instance ${snap.ref.path} from Typesense`)
+    }
   })

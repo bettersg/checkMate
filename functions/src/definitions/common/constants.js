@@ -134,4 +134,6 @@ exports.thresholds = {
   isIrrelevant: 0.5,
   isUnsure: 0.5,
   isSus: 0.5,
+  falseUpperBound: 1.5,
+  misleadingUpperBound: 3.5,
 }

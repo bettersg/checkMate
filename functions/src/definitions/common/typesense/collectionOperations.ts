@@ -65,4 +65,13 @@ async function deleteOne(id: string, collection: CollectionTypes): Promise<void>
   }
 }
 
-export { vectorSearch, insertOne, updateOne, deleteOne, CollectionTypes }
+async function upsertOne(document: Object, collection: CollectionTypes): Promise<void> {
+  try {
+    await getClient().collections(`${collection}${getEnvSuffix()}`).documents().upsert(document)
+  } catch (error) {
+    console.error("Error in upsertOne: ", error)
+    throw error
+  }
+}
+
+export { vectorSearch, insertOne, updateOne, deleteOne, upsertOne, CollectionTypes }

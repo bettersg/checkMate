@@ -132,7 +132,6 @@ async function newTextInstanceHandler(
   let hasMatch = false
   let messageRef
   const machineCategory = await classifyText(text)
-  console.log(machineCategory)
   if (isFirstTimeUser && machineCategory === "irrelevant") {
     await db.collection("users").doc(from).update({
       firstMessageType: "irrelevant",
@@ -170,6 +169,7 @@ async function newTextInstanceHandler(
       isMachineCategorised: machineCategory === "irrelevant" ? true : false,
       text: text, //text or caption
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+      lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
@@ -183,6 +183,7 @@ async function newTextInstanceHandler(
       isLegitimate: null,
       isUnsure: null,
       isInfo: null,
+      primaryCategory: machineCategory === "irrelevant" ? "irrelevant" : null,
       custom_reply: null, //string
       instanceCount: 0,
     })
@@ -263,6 +264,7 @@ async function newImageInstanceHandler(
       mimeType: mimeType,
       storageUrl: filename,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+      lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
@@ -276,6 +278,7 @@ async function newImageInstanceHandler(
       isUnsure: null,
       isInfo: null,
       isIrrelevant: null, //bool, if majority voted irrelevant then update this
+      primaryCategory: null,
       custom_reply: null, //string
       instanceCount: 0,
     })
