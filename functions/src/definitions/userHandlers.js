@@ -38,8 +38,8 @@ exports.userHandlerWhatsapp = async function (message) {
   const userRef = db.collection("users").doc(from)
   const userSnap = await userRef.get()
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0)
-  const isFirstTimeUser = !userSnap.exists;
-  let triggerOnboarding = isFirstTimeUser;
+  const isFirstTimeUser = !userSnap.exists
+  let triggerOnboarding = isFirstTimeUser
   if (isFirstTimeUser) {
     await userRef.set({
       instanceCount: 0,
@@ -62,34 +62,40 @@ exports.userHandlerWhatsapp = async function (message) {
         if (isFirstTimeUser) {
           await userRef.update({
             firstMessageType: "prepopulated",
-          });
+          })
         } else {
-          triggerOnboarding = true; //we still want to show him the onboarding message.
+          triggerOnboarding = true //we still want to show him the onboarding message.
         }
         break
       }
 
-      await newTextInstanceHandler({
-        text: message.text.body,
-        timestamp: messageTimestamp,
-        id: message.id || null,
-        from: from || null,
-        isForwarded: message?.context?.forwarded || null,
-        isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
-      }, isFirstTimeUser)
+      await newTextInstanceHandler(
+        {
+          text: message.text.body,
+          timestamp: messageTimestamp,
+          id: message.id || null,
+          from: from || null,
+          isForwarded: message?.context?.forwarded || null,
+          isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
+        },
+        isFirstTimeUser
+      )
       break
 
     case "image":
-      await newImageInstanceHandler({
-        text: message?.image?.caption || null,
-        timestamp: messageTimestamp,
-        id: message.id || null,
-        mediaId: message?.image?.id || null,
-        mimeType: message?.image?.mime_type || null,
-        from: from || null,
-        isForwarded: message?.context?.forwarded || null,
-        isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
-      }, isFirstTimeUser)
+      await newImageInstanceHandler(
+        {
+          text: message?.image?.caption || null,
+          timestamp: messageTimestamp,
+          id: message.id || null,
+          mediaId: message?.image?.id || null,
+          mimeType: message?.image?.mime_type || null,
+          from: from || null,
+          isForwarded: message?.context?.forwarded || null,
+          isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
+        },
+        isFirstTimeUser
+      )
       break
 
     case "interactive":
@@ -112,7 +118,7 @@ exports.userHandlerWhatsapp = async function (message) {
       break
   }
   if (triggerOnboarding) {
-    await newUserHandler(from);
+    await newUserHandler(from)
   }
   markWhatsappMessageAsRead("user", message.id)
 }
@@ -126,7 +132,7 @@ async function newTextInstanceHandler(
     isForwarded: isForwarded,
     isFrequentlyForwarded: isFrequentlyForwarded,
   },
-  isFirstTimeUser,
+  isFirstTimeUser
 ) {
   const db = admin.firestore()
   let hasMatch = false
@@ -135,7 +141,7 @@ async function newTextInstanceHandler(
   if (isFirstTimeUser && machineCategory === "irrelevant") {
     await db.collection("users").doc(from).update({
       firstMessageType: "irrelevant",
-    });
+    })
     return
   }
   let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
@@ -143,11 +149,11 @@ async function newTextInstanceHandler(
   let embedding
   // 1 - check if the exact same message exists in database
   try {
-    embedding = await getEmbedding(text);
+    embedding = await getEmbedding(text)
     similarity = await calculateSimilarity(embedding)
   } catch (error) {
     functions.logger.error("Error in calculateSimilarity:", error)
-    similarity = {};
+    similarity = {}
   }
   let bestMatchingDocumentRef
   let bestMatchingText
@@ -191,47 +197,43 @@ async function newTextInstanceHandler(
   } else {
     messageRef = matchedParentMessageRef
   }
-  const _ = await messageRef
-    .collection("instances")
-    .add({
-      source: "whatsapp",
-      id: id || null, //taken from webhook object, needed to reply
-      timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
-      type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-      text: text, //text or caption, taken from webhook object
-      from: from, //sender phone number, taken from webhook object
-      isForwarded: isForwarded, //boolean, taken from webhook object
-      isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
-      isReplied: false,
-      isReplyForced: null,
-      replyCategory: null,
-      replyTimestamp: null,
-      matchType: matchType,
-      scamShieldConsent: null,
-      embedding: embedding,
-      closestMatch: {
-        instanceRef: bestMatchingDocumentRef ?? null,
-        text: bestMatchingText ?? null,
-        score: similarityScore ?? null,
-        parentRef: matchedParentMessageRef ?? null,
-        algorithm: "all-MiniLM-L6-v2",
-      },
-    })
+  const _ = await messageRef.collection("instances").add({
+    source: "whatsapp",
+    id: id || null, //taken from webhook object, needed to reply
+    timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
+    type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
+    text: text, //text or caption, taken from webhook object
+    from: from, //sender phone number, taken from webhook object
+    isForwarded: isForwarded, //boolean, taken from webhook object
+    isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
+    isReplied: false,
+    isReplyForced: null,
+    replyCategory: null,
+    replyTimestamp: null,
+    matchType: matchType,
+    scamShieldConsent: null,
+    embedding: embedding,
+    closestMatch: {
+      instanceRef: bestMatchingDocumentRef ?? null,
+      text: bestMatchingText ?? null,
+      score: similarityScore ?? null,
+      parentRef: matchedParentMessageRef ?? null,
+      algorithm: "all-MiniLM-L6-v2",
+    },
+  })
 }
 
-async function newImageInstanceHandler(
-  {
-    text: text,
-    timestamp: timestamp,
-    id: id,
-    mediaId: mediaId,
-    mimeType: mimeType,
-    from: from,
-    isForwarded: isForwarded,
-    isFrequentlyForwarded: isFrequentlyForwarded,
-    isFirstTimeUser,
-  }
-) {
+async function newImageInstanceHandler({
+  text: text,
+  timestamp: timestamp,
+  id: id,
+  mediaId: mediaId,
+  mimeType: mimeType,
+  from: from,
+  isForwarded: isForwarded,
+  isFrequentlyForwarded: isFrequentlyForwarded,
+  isFirstTimeUser,
+}) {
   const db = admin.firestore()
   let filename
   //get response buffer
@@ -317,13 +319,7 @@ async function newImageInstanceHandler(
 
 async function onboardNewUser(from) {
   const responses = await getResponsesObj("user")
-  await sendWhatsappTextMessage(
-    "user",
-    from,
-    responses.ONBOARDING,
-    null,
-    true,
-  )
+  await sendWhatsappTextMessage("user", from, responses.ONBOARDING, null, true)
 }
 
 async function newUserHandler(from) {
@@ -371,7 +367,7 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
       break
     case "scamshieldExplain":
       let messageId
-        ;[instancePath, messageId] = rest
+      ;[instancePath, messageId] = rest
       await sendWhatsappTextMessage(
         "user",
         from,

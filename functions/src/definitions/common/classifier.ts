@@ -5,7 +5,7 @@ async function classifyText(text: string): Promise<string | null> {
   if (text.length < 10) {
     return "irrelevant"
   }
-  const category = await checkTrivial(text);
+  const category = await checkTrivial(text)
   if (category === "trivial") {
     return "irrelevant"
   } else {

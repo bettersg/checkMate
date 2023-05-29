@@ -1,14 +1,14 @@
-import * as functions from 'firebase-functions';
-import { updateOne, CollectionTypes } from "./common/typesense/collectionOperations"
+import * as functions from "firebase-functions"
+import {
+  updateOne,
+  CollectionTypes,
+} from "./common/typesense/collectionOperations"
 import { getEmbedding } from "./common/machineLearningServer/operations"
 
 exports.onInstanceUpdate = functions
   .region("asia-southeast1")
   .runWith({
-    secrets: [
-      "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
-    ],
+    secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN"],
   })
   .firestore.document("/messages/{messageId}/instances/{instanceId}")
   .onUpdate(async (change, context) => {
@@ -25,6 +25,6 @@ exports.onInstanceUpdate = functions
       await updateOne(updateDocument, CollectionTypes.Instances)
       await change.after.ref.update({
         embedding: embedding,
-      });
+      })
     }
   })

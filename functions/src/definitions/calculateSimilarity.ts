@@ -1,7 +1,10 @@
 //calculateSimilarity.ts
-import * as admin from 'firebase-admin';
-import { vectorSearch, CollectionTypes } from "./common/typesense/collectionOperations"
-import * as functions from 'firebase-functions';
+import * as admin from "firebase-admin"
+import {
+  vectorSearch,
+  CollectionTypes,
+} from "./common/typesense/collectionOperations"
+import * as functions from "firebase-functions"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -17,9 +20,9 @@ async function calculateSimilarity(embedding: number[]) {
     const similarityScore = 1 - nearestInstance.vector_distance
     const db = admin.firestore()
     const instanceRef = db.doc(path)
-    const instanceSnap = await instanceRef.get();
+    const instanceSnap = await instanceRef.get()
     if (!instanceSnap.exists) {
-      functions.logger.warn("Path doesn't exist in database");
+      functions.logger.warn("Path doesn't exist in database")
       return {}
     }
     return {
@@ -29,7 +32,7 @@ async function calculateSimilarity(embedding: number[]) {
       parent: instanceRef.parent.parent,
     }
   } else {
-    functions.logger.warn("No similar instance found");
+    functions.logger.warn("No similar instance found")
     return {}
   }
 }

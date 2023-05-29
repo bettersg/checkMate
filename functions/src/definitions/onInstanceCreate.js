@@ -3,7 +3,10 @@ const { getCount } = require("./common/counters")
 const { getThresholds } = require("./common/utils")
 const { respondToInstance } = require("./common/responseUtils")
 const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
-const { insertOne, CollectionTypes } = require("./common/typesense/collectionOperations")
+const {
+  insertOne,
+  CollectionTypes,
+} = require("./common/typesense/collectionOperations")
 const admin = require("firebase-admin")
 const { FieldValue } = require("@google-cloud/firestore")
 const { defineInt } = require("firebase-functions/params")
@@ -36,7 +39,10 @@ exports.onInstanceCreate = functions
       return Promise.resolve()
     }
     const parentMessageRef = snap.ref.parent.parent
-    const instancesQuerySnap = await parentMessageRef.collection("instances").orderBy("timestamp", "desc").get()
+    const instancesQuerySnap = await parentMessageRef
+      .collection("instances")
+      .orderBy("timestamp", "desc")
+      .get()
     const lastInstanceDocSnap = instancesQuerySnap.docs[0]
     await parentMessageRef.update({
       instanceCount: instancesQuerySnap.size,
@@ -46,7 +52,7 @@ exports.onInstanceCreate = functions
     await upsertUser(data.from, data.timestamp)
 
     if (data?.type === "text") {
-      parentMessageRef.update({ "text": data.text })
+      parentMessageRef.update({ text: data.text })
 
       //update typesense index
       const updateObj = {
@@ -55,10 +61,12 @@ exports.onInstanceCreate = functions
         embedding: data.embedding,
       }
       try {
-        await insertOne(updateObj, CollectionTypes.Instances);
-      }
-      catch (error) {
-        functions.logger.error(`Error inserting instance ${snap.ref.path} into typesense: `, error)
+        await insertOne(updateObj, CollectionTypes.Instances)
+      } catch (error) {
+        functions.logger.error(
+          `Error inserting instance ${snap.ref.path} into typesense: `,
+          error
+        )
       }
     }
 
