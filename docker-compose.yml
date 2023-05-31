@@ -10,3 +10,11 @@ services:
     extends:
       file: docker-compose-base.yml
       service: resultserver
+  embedder-server:
+    extends:
+      file: docker-compose-base.yml
+      service: embedder-server
+  typesense-server:
+    extends:
+      file: docker-compose-base.yml
+      service: typesense-server

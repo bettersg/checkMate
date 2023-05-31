@@ -137,6 +137,8 @@ exports.webhookHandler = functions
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
+      "TYPESENSE_TOKEN",
+      "ML_SERVER_TOKEN",
     ],
   })
   .https.onRequest(app)

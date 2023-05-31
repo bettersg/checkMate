@@ -6,14 +6,12 @@ erDiagram
         string machineCategory
         boolean isMachineCategorised
         string text "Text or caption. For text, shows the latest iteration"
-        string strippedText
         string hash "Image hash, for image only"
-        string textHash "hash of original text, for text only"
-        string strippedTextHash "hash of stripped text, for text only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
         string storageURL "Cloud storage URL, for image only"
         timestamp firstTimestamp "Timestamp of first instance"
+        timestamp lastTimestamp "Timestamp of latest instance"
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
 				timestamp assessedTimestamp
@@ -28,7 +26,9 @@ erDiagram
         boolean isInfo
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
+        string primaryCategory either "scam", "illicit", "irrelevant", "spam", "legitimate", "misleading", "false", "true", "unsure", or "error"
         string customReply "Not used for now"
+        number instanceCount
         collection instances
         collection voteRequests
     }

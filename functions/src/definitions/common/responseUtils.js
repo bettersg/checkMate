@@ -1,6 +1,6 @@
 const admin = require("firebase-admin")
 const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } = require("./constants")
-const { sleep } = require("./utils")
+const { sleep, getThresholds } = require("./utils")
 const { sendTextMessage } = require("./sendMessage")
 const { sendWhatsappButtonMessage } = require("./sendWhatsappMessage")
 const functions = require("firebase-functions")
@@ -15,6 +15,7 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     return Promise.resolve()
   }
   const responses = await getResponsesObj("user")
+  const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isIrrelevant = parentMessageSnap.get("isIrrelevant")
   const isScam = parentMessageSnap.get("isScam")
@@ -98,10 +99,10 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     if (truthScore === null) {
       updateObj.replyCategory = "error"
       await sendTextMessage("user", data.from, responses.ERROR, data.id)
-    } else if (truthScore < 1.5) {
+    } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
       updateObj.replyCategory = "untrue"
       await sendTextMessage("user", data.from, responses.UNTRUE, data.id)
-    } else if (truthScore < 3.5) {
+    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
       updateObj.replyCategory = "misleading"
       await sendTextMessage("user", data.from, responses.MISLEADING, data.id)
     } else {
@@ -135,21 +136,6 @@ async function getResponsesObj(botType = "user") {
   const defaultResponsesSnap = await defaultResponsesRef.get()
   return defaultResponsesSnap.data() ?? fallbackResponses
 }
-
-// function _getResponse(key, responses) {
-//   if (isNaN(key)) { //means key is a string
-//     return responses.key;
-//   } else {
-//     const truthScore = key;
-//     let numericKeys = Object.keys(responses).filter((e) => !isNaN(e)).sort();
-//     for (let numericKey of numericKeys) {
-//       if (parseFloat(numericKey) >= truthScore) {
-//         return responses[`${numericKey}`];
-//       }
-//     }
-//   }
-//   return null;
-// };
 
 exports.getResponsesObj = getResponsesObj
 exports.respondToInstance = respondToInstance

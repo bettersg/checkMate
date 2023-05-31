@@ -1,249 +1,932 @@
 {
 	"info": {
-		"_postman_id": "d519384a-1f55-41a6-a65f-b8c1e0c49e21",
+		"_postman_id": "b0082b42-05ff-4cc2-8cb9-062d33c4759f",
 		"name": "checkmate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Healthcheck",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/healthcheck",
-					"host": [
-						"{{FUNCTIONS_URL}}"
-					],
-					"path": [
-						"checkmate-373101",
-						"asia-southeast1",
-						"healthcheck"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create mock firestore DB",
-			"event": [
+			"name": "001_Healthcheck",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"object\": \"whatsapp_business_account\",\r\n    \"entry\": [\r\n        {\r\n            \"id\": \"112914005037866\",\r\n            \"changes\": [\r\n                {\r\n                    \"value\": {\r\n                        \"messaging_product\": \"whatsapp\",\r\n                        \"metadata\": {\r\n                            \"display_phone_number\": \"15550933685\",\r\n                            \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n                        },\r\n                        \"contacts\": [\r\n                            {\r\n                                \"profile\": {\r\n                                    \"name\": \"Test User\"\r\n                                },\r\n                                \"wa_id\": \"88888888\"\r\n                            }\r\n                        ],\r\n                        \"messages\": [\r\n                            {\r\n                                \"from\": \"88888888\",\r\n                                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIDFCMDlDNjhFRDgzMEJCQjA0M0FBM0NEQTc5MEYzRkE4AA==\",\r\n                                \"timestamp\": \"1682861735\",\r\n                                \"text\": {\r\n                                    \"body\": \"/mockdb\"\r\n                                },\r\n                                \"type\": \"text\"\r\n                            }\r\n                        ]\r\n                    },\r\n                    \"field\": \"messages\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"severity\": \"INFO\",\r\n    \"message\": \"\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "Healthcheck",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
 						}
-					}
-				},
-				"url": {
-					"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
-					"host": [
-						"{{FUNCTIONS_URL}}"
 					],
-					"path": [
-						"checkmate-373101",
-						"asia-southeast1",
-						"webhookHandler",
-						"whatsapp"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get mock db collection IDs",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Check number of collections /mockdb command creates in Firestore\", function () {\r",
-							"    const jsonData = pm.response.json();\r",
-							"    \r",
-							"    pm.expect(jsonData?.collectionIds?.length).to.eql(2);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer owner",
-						"type": "default"
-					}
-				],
-				"url": {
-					"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents:listCollectionIds",
-					"host": [
-						"{{FIRESTORE_URL}}"
-					],
-					"path": [
-						"v1",
-						"projects",
-						"checkmate-373101",
-						"databases",
-						"(default)",
-						"documents:listCollectionIds"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Send WhatsApp message",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"F\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/healthcheck",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"healthcheck"
+							]
 						}
-					}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "002_Mock_Db",
+			"item": [
+				{
+					"name": "Create mock firestore DB",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"object\": \"whatsapp_business_account\",\r\n    \"entry\": [\r\n        {\r\n            \"id\": \"112914005037866\",\r\n            \"changes\": [\r\n                {\r\n                    \"value\": {\r\n                        \"messaging_product\": \"whatsapp\",\r\n                        \"metadata\": {\r\n                            \"display_phone_number\": \"15550933685\",\r\n                            \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n                        },\r\n                        \"contacts\": [\r\n                            {\r\n                                \"profile\": {\r\n                                    \"name\": \"Test User\"\r\n                                },\r\n                                \"wa_id\": \"88888888\"\r\n                            }\r\n                        ],\r\n                        \"messages\": [\r\n                            {\r\n                                \"from\": \"88888888\",\r\n                                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIDFCMDlDNjhFRDgzMEJCQjA0M0FBM0NEQTc5MEYzRkE4AA==\",\r\n                                \"timestamp\": \"1682861735\",\r\n                                \"text\": {\r\n                                    \"body\": \"/mockdb\"\r\n                                },\r\n                                \"type\": \"text\"\r\n                            }\r\n                        ]\r\n                    },\r\n                    \"field\": \"messages\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"severity\": \"INFO\",\r\n    \"message\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
-					"host": [
-						"{{FUNCTIONS_URL}}"
+				{
+					"name": "Get mock db collection IDs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Check number of collections /mockdb command creates in Firestore\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(jsonData?.collectionIds?.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
 					],
-					"path": [
-						"checkmate-373101",
-						"asia-southeast1",
-						"webhookHandler",
-						"whatsapp"
-					]
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer owner",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents:listCollectionIds",
+							"host": [
+								"{{FIRESTORE_URL}}"
+							],
+							"path": [
+								"v1",
+								"projects",
+								"checkmate-373101",
+								"databases",
+								"(default)",
+								"documents:listCollectionIds"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "Get last message (Read status)",
-			"event": [
+			"name": "003_New_User",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Your test name\", function () {\r",
-							"    const expected = {\r",
-							"    \"hostname\": \"resultserver\",\r",
-							"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-							"    \"body\": {\r",
-							"        \"messaging_product\": \"whatsapp\",\r",
-							"        \"status\": \"read\",\r",
-							"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
-							"    },\r",
-							"    \"method\": \"POST\"\r",
-							"}\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData).to.eql(expected);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-					"host": [
-						"{{RESULT_SERVER_URL}}"
+					"name": "Send WhatsApp message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
 					],
-					"path": [
-						"testresultdata"
-					]
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"F\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (Read status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"status\": \"read\",\r",
+									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (NEW_USER)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"recipient_type\": \"individual\",\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"type\": \"interactive\",\r",
+									"        \"interactive\": {\r",
+									"            \"type\": \"button\",\r",
+									"            \"body\": {\r",
+									"                \"text\": \"Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined the effort to battle scams and misinformation😊.\\n\\nWould you like to know more about how to use CheckMate?\\n\\nIf so, press yes! Otherwise, just go ahead and use it!\"\r",
+									"            },\r",
+									"            \"action\": {\r",
+									"                \"buttons\": [\r",
+									"                    {\r",
+									"                        \"type\": \"reply\",\r",
+									"                        \"reply\": {\r",
+									"                            \"id\": \"newUser_onboardingYes\",\r",
+									"                            \"title\": \"Yes, show me!\"\r",
+									"                        }\r",
+									"                    },\r",
+									"                    {\r",
+									"                        \"type\": \"reply\",\r",
+									"                        \"reply\": {\r",
+									"                            \"id\": \"newUser_onboardingNo\",\r",
+									"                            \"title\": \"No, I'm good\"\r",
+									"                        }\r",
+									"                    }\r",
+									"                ]\r",
+									"            }\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press Onboarding Yes button Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"newUser_onboardingYes\",\r\n                    \"title\": \"Yes, show me!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (Read status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"status\": \"read\",\r",
+									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (ONBOARDING)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": \"Check out https://youtube.com/shorts/gFeO_qFOchs?feature=share to see how CheckMate works! \\n\\nDone? You're now ready to use CheckMate! Let's do our part in the fight against scams and misinformation! 💪\",\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press Onboarding No button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"newUser_onboardingNo\",\r\n                    \"title\": \"Yes, show me!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (Read status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"status\": \"read\",\r",
+									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (GET_STARTED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": \"No worries! You can get started immediately by sending in dubious messages you're unsure about. Let's do our part in the fight against scams and misinformation! 💪\",\r",
+									"            \"preview_url\": false\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "Get last message (Welcome message)",
-			"event": [
+			"name": "004_Invalid_Message",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Your test name\", function () {\r",
-							"    const expected = {\r",
-							"    \"hostname\": \"resultserver\",\r",
-							"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-							"    \"body\": {\r",
-							"        \"messaging_product\": \"whatsapp\",\r",
-							"        \"recipient_type\": \"individual\",\r",
-							"        \"to\": \"88888888\",\r",
-							"        \"type\": \"interactive\",\r",
-							"        \"interactive\": {\r",
-							"            \"type\": \"button\",\r",
-							"            \"body\": {\r",
-							"                \"text\": \"Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined the effort to battle scams and misinformation😊.\\n\\nWould you like to know more about how to use CheckMate?\\n\\nIf so, press yes! Otherwise, just go ahead and use it!\"\r",
-							"            },\r",
-							"            \"action\": {\r",
-							"                \"buttons\": [\r",
-							"                    {\r",
-							"                        \"type\": \"reply\",\r",
-							"                        \"reply\": {\r",
-							"                            \"id\": \"newUser_onboardingYes\",\r",
-							"                            \"title\": \"Yes, show me!\"\r",
-							"                        }\r",
-							"                    },\r",
-							"                    {\r",
-							"                        \"type\": \"reply\",\r",
-							"                        \"reply\": {\r",
-							"                            \"id\": \"newUser_onboardingNo\",\r",
-							"                            \"title\": \"No, I'm good\"\r",
-							"                        }\r",
-							"                    }\r",
-							"                ]\r",
-							"            }\r",
-							"        }\r",
-							"    },\r",
-							"    \"method\": \"POST\"\r",
-							"}\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData).to.eql(expected);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-					"host": [
-						"{{RESULT_SERVER_URL}}"
+					"name": "Send WhatsApp message (9 Chars)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
 					],
-					"path": [
-						"testresultdata"
-					]
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123456789\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (IRRELEVANT_AUTO)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": \"Thanks for waiting!\\n\\nIt seems like there's nothing to assess within this message.👌\\n\\nSuch messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻\\n\\nIf you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.\\n\\nThanks again for your interest in CheckMate! 🙏🏻\",\r",
+									"            \"preview_url\": false\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"context\": {\r",
+									"            \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 4000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (Read status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"status\": \"read\",\r",
+									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "005_Message_Not_Yet_Accessed",
+			"item": [
+				{
+					"name": "Send WhatsApp message (15 Chars)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123451234512345\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (checker NEW_MESSAGE_RECEIVED template)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const HARD_CODED_ID = \"HARD_CODED_ID\"\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"recipient_type\": \"individual\",\r",
+									"        \"to\": \"CHECKER1_PHONE_NUMBER\",\r",
+									"        \"type\": \"template\",\r",
+									"        \"template\": {\r",
+									"            \"name\": \"new_message_received\",\r",
+									"            \"language\": {\r",
+									"                \"policy\": \"deterministic\",\r",
+									"                \"code\": \"en\"\r",
+									"            },\r",
+									"            \"components\": [\r",
+									"                {\r",
+									"                    \"type\": \"button\",\r",
+									"                    \"sub_type\": \"quick_reply\",\r",
+									"                    \"index\": 0,\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"payload\",\r",
+									"                            \"payload\": HARD_CODED_ID\r",
+									"                        }\r",
+									"                    ]\r",
+									"                },\r",
+									"                {\r",
+									"                    \"type\": \"button\",\r",
+									"                    \"sub_type\": \"quick_reply\",\r",
+									"                    \"index\": 1,\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"payload\",\r",
+									"                            \"payload\": HARD_CODED_ID\r",
+									"                        }\r",
+									"                    ]\r",
+									"                },\r",
+									"                {\r",
+									"                    \"type\": \"body\",\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"text\",\r",
+									"                            \"text\": \"Bing Wen\"\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            ]\r",
+									"        },\r",
+									"        \"context\": {\r",
+									"            \"message_id\": \"factChecker\"\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    // Replace dynamically created IDs\r",
+									"    jsonData.body.template.components[0].parameters[0].payload = HARD_CODED_ID\r",
+									"    jsonData.body.template.components[1].parameters[0].payload = HARD_CODED_ID\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 4000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (MESSAGE_NOT_YET_ASSESSED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": \"Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.\",\r",
+									"            \"preview_url\": false\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"context\": {\r",
+									"            \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (Read status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"status\": \"read\",\r",
+									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
