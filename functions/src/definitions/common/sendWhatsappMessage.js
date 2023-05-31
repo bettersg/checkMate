@@ -256,6 +256,10 @@ async function callWhatsappSendMessageApi(data, bot) {
       phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
     }
   }
+  // to force no replies
+  if (data.context) {
+    delete data.context
+  }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
     url:
