@@ -13,6 +13,20 @@ services:
       - '19199:9199'
       - '19299:9299'
   resultserver:
-    build: ./integration-tests/server
+    build:
+      context: ./integration-tests/server
+      dockerfile: Dockerfile-result-server
     ports:
       - '12345:12345'
+  embedder-server:
+    build:
+      context: ./integration-tests/server
+      dockerfile: Dockerfile-embedder-server
+    ports:
+      - '12344:12344'
+  typesense-server:
+    build:
+      context: ./integration-tests/server
+      dockerfile: Dockerfile-typesense-server
+    ports:
+      - '12343:12343'

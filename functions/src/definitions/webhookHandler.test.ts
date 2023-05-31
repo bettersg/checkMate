@@ -10,7 +10,7 @@ describe("whatsapp webhook verifier", () => {
       "/whatsapp?hub.mode=subscribe&hub.verify_token=testToken"
     )
     expect(response.status).toBe(200)
-    // expect(response.body.message).toBe('pass!');
+    // expect(response.body.message).toBe('pass!')
     return
   })
   it("should reject when token is invalid", async () => {

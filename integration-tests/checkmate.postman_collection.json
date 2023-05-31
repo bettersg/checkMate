@@ -544,7 +544,7 @@
 			"name": "004_Invalid_Message",
 			"item": [
 				{
-					"name": "Send WhatsApp message (14 Chars)",
+					"name": "Send WhatsApp message (9 Chars)",
 					"event": [
 						{
 							"listen": "test",
@@ -563,7 +563,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"12345123451234\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123456789\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -621,7 +621,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 2000);"
+									"setTimeout(() => {}, 4000);"
 								],
 								"type": "text/javascript"
 							}
@@ -808,7 +808,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 2000);"
+									"setTimeout(() => {}, 4000);"
 								],
 								"type": "text/javascript"
 							}
