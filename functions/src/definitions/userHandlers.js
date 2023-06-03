@@ -185,6 +185,7 @@ async function newTextInstanceHandler(
       isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this
       isSus: null,
       isScam: null,
+      isIllicit: null,
       isSpam: null,
       isLegitimate: null,
       isUnsure: null,
@@ -275,6 +276,7 @@ async function newImageInstanceHandler({
       truthScore: null, //float, the mean truth score
       isSus: null,
       isScam: null,
+      isIllicit: null,
       isSpam: null,
       isLegitimate: null,
       isUnsure: null,
