@@ -32,7 +32,7 @@ async function getL1Category(text: string): Promise<string> {
   const data = {
     text: text,
   }
-  const response = await callAPI<TrivialResponse>("checkTrivial", data)
+  const response = await callAPI<TrivialResponse>("getL1Category", data)
   return response.data.prediction
 }
 
