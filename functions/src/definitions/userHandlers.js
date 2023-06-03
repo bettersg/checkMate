@@ -137,7 +137,7 @@ async function newTextInstanceHandler(
   const db = admin.firestore()
   let hasMatch = false
   let messageRef
-  const machineCategory = await classifyText(text)
+  const machineCategory = (await classifyText(text)) ?? "error"
   if (isFirstTimeUser && machineCategory === "irrelevant") {
     await db.collection("users").doc(from).update({
       firstMessageType: "irrelevant",
