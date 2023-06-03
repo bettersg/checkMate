@@ -10,10 +10,28 @@ exports.onMessageUpdate = functions
     // Grab the current value of what was written to Firestore.
     const before = change.before
     const after = change.after
-    if (!before.data().isAssessed && after.data().isAssessed) {
+    const messageData = after.data()
+    if (!before.data().isAssessed && messageData.isAssessed) {
       await after.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
       })
+      const machineCategory = messageData.machineCategory
+      const primaryCategory = messageData.primaryCategory
+      if (
+        machineCategory &&
+        machineCategory !== "unsure" &&
+        primaryCategory !== machineCategory
+      ) {
+        functions.logger.warn(
+          "Voted category does not match machine category",
+          {
+            issue: "classification_mismatch",
+            primaryCategory: messageData.primaryCategory,
+            machineCategory: messageData.machineCategory,
+            text: messageData.text,
+          }
+        )
+      }
       await replyPendingInstances(after)
     }
     return Promise.resolve()
