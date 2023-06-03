@@ -16,7 +16,10 @@ exports.onMessageUpdate = functions
         assessedTimestamp: Timestamp.fromDate(new Date()),
       })
       const machineCategory = messageData.machineCategory
-      const primaryCategory = messageData.primaryCategory
+      let primaryCategory = messageData.primaryCategory
+      if (["misleading", "true", "false"].includes(primaryCategory)) {
+        primaryCategory = "info"
+      }
       if (
         machineCategory &&
         machineCategory !== "unsure" &&
