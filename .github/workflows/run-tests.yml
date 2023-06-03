@@ -24,3 +24,5 @@ jobs:
       - name: Run postman tests
         run: npm run test
         working-directory: integration-tests
+      - name: Print docker compose logs
+        run: docker-compose logs
