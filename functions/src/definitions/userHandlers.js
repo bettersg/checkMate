@@ -7,6 +7,7 @@ const {
   sendWhatsappContactMessage,
   sendWhatsappButtonMessage,
 } = require("./common/sendWhatsappMessage")
+const { sendDisputeNotification } = require("./common/sendMessage")
 const {
   mockDb,
   sleep,
@@ -14,7 +15,7 @@ const {
   stripUrl,
   hashMessage,
 } = require("./common/utils")
-const { getResponsesObj } = require("./common/responseUtils")
+const { getResponsesObj, sendMenuMessage } = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
 const { getEmbedding } = require("./common/machineLearningServer/operations")
@@ -69,6 +70,11 @@ exports.userHandlerWhatsapp = async function (message) {
         break
       }
 
+      if (message.text.body.toLowerCase() === "menu") {
+        await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
+        break
+      }
+
       await newTextInstanceHandler(
         {
           text: message.text.body,
@@ -103,7 +109,10 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive
       switch (interactive.type) {
         case "button_reply":
-          await onButtonReply(interactive.button_reply.id, message)
+          await onButtonReply(message)
+          break
+        case "list_reply":
+          await onTextListReceipt(message)
           break
       }
       break
@@ -323,34 +332,13 @@ async function newImageInstanceHandler({
     })
 }
 
-async function onboardNewUser(from) {
-  const responses = await getResponsesObj("user")
-  await sendWhatsappTextMessage("user", from, responses.ONBOARDING, null, true)
-}
-
 async function newUserHandler(from) {
-  const responses = await getResponsesObj("user")
-  const buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: "newUser_onboardingYes",
-        title: "Yes, show me!",
-      },
-    },
-    {
-      type: "reply",
-      reply: {
-        id: "newUser_onboardingNo",
-        title: "No, I'm good",
-      },
-    },
-  ]
-  await sendWhatsappButtonMessage("user", from, responses?.NEW_USER, buttons)
+  await sendMenuMessage(from, "NEW_USER_MENU_PREFIX", "whatsapp", null, null)
 }
 
-async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
+async function onButtonReply(messageObj, platform = "whatsapp") {
   const db = admin.firestore()
+  const buttonId = messageObj.interactive.button_reply.id
   const from = messageObj.from
   const responses = await getResponsesObj("user")
   const [type, ...rest] = buttonId.split("_")
@@ -419,4 +407,68 @@ async function onButtonReply(buttonId, messageObj, platform = "whatsapp") {
       }
       break
   }
+}
+
+async function onTextListReceipt(messageObj, platform = "whatsapp") {
+  const listId = messageObj.interactive.list_reply.id
+  const from = messageObj.from
+  const db = admin.firestore()
+  const responses = await getResponsesObj("user")
+  const [type, selection, ...rest] = listId.split("_")
+  let response
+  switch (type) {
+    case "menu":
+      switch (selection) {
+        case "check":
+          response = responses.PROCEED_TO_SEND
+          break
+        case "help":
+          response = responses.HOW_TO
+          break
+
+        case "about":
+          response = responses.LEARN_MORE
+          break
+
+        case "feedback":
+          response = responses.FEEDBACK
+          break
+
+        case "contact":
+          const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
+          response = responses.CONTACT
+          await sendWhatsappContactMessage(
+            "user",
+            from,
+            runtimeEnvironment.value() === "PROD"
+              ? "+65 80432188"
+              : "+1 555-093-3685",
+            nameObj,
+            "https://checkmate.sg"
+          )
+          await sleep(3000)
+          break
+        case "dispute":
+          let instancePath
+          ;[instancePath] = rest
+          const instanceRef = db.doc(instancePath)
+          const parentMessageRef = instanceRef.parent.parent
+          const instanceSnap = await instanceRef.get()
+          const parentMessageSnapshot = await parentMessageRef.get()
+          const type = instanceSnap.get("type")
+          const text = instanceSnap.get("text")
+          const category = parentMessageSnapshot.get("primaryCategory")
+          await sendDisputeNotification(
+            from,
+            instancePath,
+            type,
+            text,
+            category
+          )
+          response = responses.DISPUTE
+          break
+      }
+      break
+  }
+  await sendWhatsappTextMessage("user", from, response, null, true)
 }

@@ -9,6 +9,7 @@ const {
 const { checkUrl } = require("./utils")
 const { defineString } = require("firebase-functions/params")
 const reportChannelId = defineString("TELEGRAM_REPORT_CHANNEL_ID")
+const runtimeEnvironment = defineString("ENVIRONMENT")
 
 exports.sendTextMessage = async function (
   bot,
@@ -72,12 +73,14 @@ exports.sendImageMessage = async function (
 
 exports.sendDisputeNotification = async function (
   phoneNumber,
-  messageId,
+  instancePath,
   type,
   text,
   finalCategory
 ) {
-  const messageText = `${phoneNumber} has disputed message ${messageId}
+  const messageText = `<${runtimeEnvironment.value()}>${phoneNumber} has disputed the assessment of a message sent by them.
+  
+message/instance path: ${instancePath}
 
 type: ${type}
 
