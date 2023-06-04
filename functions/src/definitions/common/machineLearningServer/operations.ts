@@ -28,6 +28,14 @@ async function checkTrivial(text: string): Promise<string> {
   return response.data.prediction
 }
 
+async function getL1Category(text: string): Promise<string> {
+  const data = {
+    text: text,
+  }
+  const response = await callAPI<TrivialResponse>("getL1Category", data)
+  return response.data.prediction
+}
+
 async function callAPI<T>(endpoint: string, data: object) {
   try {
     const response = await axios<T>({
@@ -50,4 +58,4 @@ async function callAPI<T>(endpoint: string, data: object) {
   }
 }
 
-export { getEmbedding, checkTrivial }
+export { getEmbedding, checkTrivial, getL1Category }
