@@ -7,6 +7,8 @@ const {
   sendTelegramImageMessage,
 } = require("./sendTelegramMessage")
 const { checkUrl } = require("./utils")
+const { defineString } = require("firebase-functions/params")
+const reportChannelId = defineString("TELEGRAM_REPORT_CHANNEL_ID")
 
 exports.sendTextMessage = async function (
   bot,
@@ -66,4 +68,27 @@ exports.sendImageMessage = async function (
       break
   }
   return res
+}
+
+exports.sendDisputeNotification = async function (
+  phoneNumber,
+  messageId,
+  type,
+  text,
+  finalCategory
+) {
+  const messageText = `${phoneNumber} has disputed message ${messageId}
+
+type: ${type}
+
+text: ${text ?? "<none>"}
+
+category: ${finalCategory}`
+
+  await sendTelegramTextMessage(
+    "report",
+    reportChannelId.value(),
+    messageText,
+    null
+  )
 }
