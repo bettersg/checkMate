@@ -138,7 +138,7 @@ async function newTextInstanceHandler(
   let hasMatch = false
   let messageRef
   const machineCategory = (await classifyText(text)) ?? "error"
-  if (isFirstTimeUser && machineCategory === "irrelevant") {
+  if (isFirstTimeUser && machineCategory.includes("irrelevant")) {
     await db.collection("users").doc(from).update({
       firstMessageType: "irrelevant",
     })
@@ -172,17 +172,19 @@ async function newTextInstanceHandler(
     let writeResult = await db.collection("messages").add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: machineCategory === "irrelevant" ? true : false,
+      isMachineCategorised: machineCategory.includes("irrelevant")
+        ? true
+        : false,
       text: text, //text or caption
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory === "irrelevant" ? true : false, //boolean, whether or not we have concluded the voting
+      isAssessed: machineCategory.includes("irrelevant") ? true : false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
-      isIrrelevant: machineCategory === "irrelevant" ? true : null, //bool, if majority voted irrelevant then update this
+      isIrrelevant: machineCategory.includes("irrelevant") ? true : null, //bool, if majority voted irrelevant then update this
       isSus: null,
       isScam: null,
       isIllicit: null,
@@ -190,7 +192,9 @@ async function newTextInstanceHandler(
       isLegitimate: null,
       isUnsure: null,
       isInfo: null,
-      primaryCategory: machineCategory === "irrelevant" ? "irrelevant" : null,
+      primaryCategory: machineCategory.includes("irrelevant")
+        ? "irrelevant"
+        : null,
       custom_reply: null, //string
       instanceCount: 0,
     })
