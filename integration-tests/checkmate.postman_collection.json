@@ -628,7 +628,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 4000);"
+									"setTimeout(() => {}, 6000);"
 								],
 								"type": "text/javascript"
 							}
