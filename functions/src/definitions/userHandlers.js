@@ -394,18 +394,6 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
         messageId
       )
       break
-
-    case "newUser":
-      ;[selection] = rest
-      switch (selection) {
-        case "onboardingYes":
-          await onboardNewUser(from)
-          break
-        case "onboardingNo":
-          await sendWhatsappTextMessage("user", from, responses?.GET_STARTED)
-          break
-      }
-      break
   }
 }
 
