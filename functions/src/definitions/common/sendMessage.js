@@ -7,6 +7,9 @@ const {
   sendTelegramImageMessage,
 } = require("./sendTelegramMessage")
 const { checkUrl } = require("./utils")
+const { defineString } = require("firebase-functions/params")
+const reportChannelId = defineString("TELEGRAM_REPORT_CHANNEL_ID")
+const runtimeEnvironment = defineString("ENVIRONMENT")
 
 exports.sendTextMessage = async function (
   bot,
@@ -66,4 +69,29 @@ exports.sendImageMessage = async function (
       break
   }
   return res
+}
+
+exports.sendDisputeNotification = async function (
+  phoneNumber,
+  instancePath,
+  type,
+  text,
+  finalCategory
+) {
+  const messageText = `<${runtimeEnvironment.value()}>${phoneNumber} has disputed the assessment of a message sent by them.
+  
+message/instance path: ${instancePath}
+
+type: ${type}
+
+text: ${text ?? "<none>"}
+
+category: ${finalCategory}`
+
+  await sendTelegramTextMessage(
+    "report",
+    reportChannelId.value(),
+    messageText,
+    null
+  )
 }

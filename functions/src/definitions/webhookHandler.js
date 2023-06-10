@@ -123,8 +123,7 @@ app.get("/whatsapp", (req, res) => {
       // Responds with '403 Forbidden' if verify tokens do not match
       res.sendStatus(403)
     }
-  }
-  else {
+  } else {
     res.sendStatus(400)
   }
 })
@@ -139,6 +138,7 @@ exports.webhookHandler = functions
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
       "ML_SERVER_TOKEN",
+      "TELEGRAM_REPORT_BOT_TOKEN",
     ],
   })
   .https.onRequest(app)

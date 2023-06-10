@@ -2,7 +2,10 @@ const admin = require("firebase-admin")
 const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } = require("./constants")
 const { sleep, getThresholds } = require("./utils")
 const { sendTextMessage } = require("./sendMessage")
-const { sendWhatsappButtonMessage } = require("./sendWhatsappMessage")
+const {
+  sendWhatsappButtonMessage,
+  sendWhatsappTextListMessage,
+} = require("./sendWhatsappMessage")
 const functions = require("firebase-functions")
 const { Timestamp } = require("firebase-admin/firestore")
 
@@ -85,15 +88,22 @@ async function respondToInstance(instanceSnap, forceReply = false) {
   } else if (isIrrelevant) {
     if (isMachineCategorised) {
       updateObj.replyCategory = "irrelevant_auto"
-      await sendTextMessage(
-        "user",
+      await sendMenuMessage(
         data.from,
-        responses.IRRELEVANT_AUTO,
-        data.id
+        "IRRELEVANT_AUTO_MENU_PREFIX",
+        "whatsapp",
+        data.id,
+        instanceSnap.ref.path
       )
     } else {
       updateObj.replyCategory = "irrelevant"
-      await sendTextMessage("user", data.from, responses.IRRELEVANT, data.id)
+      await sendMenuMessage(
+        data.from,
+        "IRRELEVANT_MENU_PREFIX",
+        "whatsapp",
+        data.id,
+        instanceSnap.ref.path
+      )
     }
   } else if (isInfo) {
     if (truthScore === null) {
@@ -137,5 +147,93 @@ async function getResponsesObj(botType = "user") {
   return defaultResponsesSnap.data() ?? fallbackResponses
 }
 
+async function sendMenuMessage(
+  to,
+  prefixName,
+  platform = "whatsapp",
+  replyMessageId = null,
+  disputedInstancePath = null
+) {
+  const responses = await getResponsesObj("user")
+  if (!(prefixName in responses)) {
+    functions.logger.error(`prefixName ${prefixName} not found in responses`)
+    return
+  }
+  const text = responses.MENU.replace("{{prefix}}", responses[prefixName])
+  switch (platform) {
+    case "telegram":
+      functions.logger.warn("Telegram menu not implemented yet")
+      break
+    case "whatsapp":
+      const type = "menu"
+      const rows = [
+        {
+          id: `${type}_check`,
+          title: "Check/Report",
+          description: "Send in messages, images, or screenshots for checking!",
+        },
+        {
+          id: `${type}_help`,
+          title: "Get Help",
+          description:
+            "Find out how to use CheckMate to check or report dubious messages",
+        },
+        {
+          id: `${type}_about`,
+          title: "About CheckMate",
+          description: "Learn more about CheckMate and the team behind it",
+        },
+        {
+          id: `${type}_feedback`,
+          title: "Send Feedback",
+          description: "Send us feedback on anything to do with CheckMate",
+        },
+        {
+          id: `${type}_contact`,
+          title: "Get Contact",
+          description: "Get CheckMates contact to add to your contact list",
+        },
+        //TODO: Implement these next time
+        // {
+        //   id: `${type}_newsletter`,
+        //   title: "Get Newsletter",
+        //   description: "Get our newsletter on the latest scams, hoaxes and misinformation",
+        // },
+        // {
+        //   id: `${type}_tips`,
+        //   title: "Get Tips",
+        //   description: "Get tips on how to spot scams, hoaxes and misinformation",
+        // },
+        // {
+        //   id: `${type}_stats`,
+        //   title: "See My Stats",
+        //   description: "View your latest stats and how you've contributed!",
+        // },
+      ]
+      if (disputedInstancePath) {
+        rows.splice(4, 0, {
+          id: `${type}_dispute_${disputedInstancePath}`,
+          title: "Dispute Assessment",
+          description: "Dispute CheckMate's assesment of this message",
+        })
+      }
+      const sections = [
+        {
+          rows: rows,
+        },
+      ]
+      await sendWhatsappTextListMessage(
+        "user",
+        to,
+        text,
+        "View Menu",
+        sections,
+        replyMessageId
+      )
+      break
+  }
+}
+
 exports.getResponsesObj = getResponsesObj
 exports.respondToInstance = respondToInstance
+exports.sendMenuMessage = sendMenuMessage

@@ -342,6 +342,7 @@ async function onTextListReceipt(
       updateObj.vote = null
       response = responses.RESPONSE_RECORDED
       isEnd = true
+      break
   }
   if (isEnd) {
     updateObj.votedTimestamp = Timestamp.fromDate(new Date())

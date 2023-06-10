@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b0082b42-05ff-4cc2-8cb9-062d33c4759f",
+		"_postman_id": "103b9282-6f00-47a0-8170-35734cf20265",
 		"name": "checkmate",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25230076"
 	},
 	"item": [
 		{
@@ -65,7 +66,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"object\": \"whatsapp_business_account\",\r\n    \"entry\": [\r\n        {\r\n            \"id\": \"112914005037866\",\r\n            \"changes\": [\r\n                {\r\n                    \"value\": {\r\n                        \"messaging_product\": \"whatsapp\",\r\n                        \"metadata\": {\r\n                            \"display_phone_number\": \"15550933685\",\r\n                            \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n                        },\r\n                        \"contacts\": [\r\n                            {\r\n                                \"profile\": {\r\n                                    \"name\": \"Test User\"\r\n                                },\r\n                                \"wa_id\": \"88888888\"\r\n                            }\r\n                        ],\r\n                        \"messages\": [\r\n                            {\r\n                                \"from\": \"88888888\",\r\n                                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIDFCMDlDNjhFRDgzMEJCQjA0M0FBM0NEQTc5MEYzRkE4AA==\",\r\n                                \"timestamp\": \"1682861735\",\r\n                                \"text\": {\r\n                                    \"body\": \"/mockdb\"\r\n                                },\r\n                                \"type\": \"text\"\r\n                            }\r\n                        ]\r\n                    },\r\n                    \"field\": \"messages\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"severity\": \"INFO\",\r\n    \"message\": \"\"\r\n}",
+							"raw": "{\r\n    \"object\": \"whatsapp_business_account\",\r\n    \"entry\": [\r\n        {\r\n            \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n            \"changes\": [\r\n                {\r\n                    \"value\": {\r\n                        \"messaging_product\": \"whatsapp\",\r\n                        \"metadata\": {\r\n                            \"display_phone_number\": \"15550933685\",\r\n                            \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n                        },\r\n                        \"contacts\": [\r\n                            {\r\n                                \"profile\": {\r\n                                    \"name\": \"Test User\"\r\n                                },\r\n                                \"wa_id\": \"88888888\"\r\n                            }\r\n                        ],\r\n                        \"messages\": [\r\n                            {\r\n                                \"from\": \"88888888\",\r\n                                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIDFCMDlDNjhFRDgzMEJCQjA0M0FBM0NEQTc5MEYzRkE4AA==\",\r\n                                \"timestamp\": \"1682861735\",\r\n                                \"text\": {\r\n                                    \"body\": \"/mockdb\"\r\n                                },\r\n                                \"type\": \"text\"\r\n                            }\r\n                        ]\r\n                    },\r\n                    \"field\": \"messages\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"severity\": \"INFO\",\r\n    \"message\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -155,7 +156,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"F\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"F\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -178,55 +179,16 @@
 					"response": []
 				},
 				{
-					"name": "Get last message (Read status)",
+					"name": "Get last message (NEW_USER_MENU)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"status\": \"read\",\r",
-									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.eql(expected);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-							"host": [
-								"{{RESULT_SERVER_URL}}"
-							],
-							"path": [
-								"testresultdata"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get last message (NEW_USER)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Your test name\", function () {\r",
-									"    const NEW_USER = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER\");\r",
+									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
+									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_MENU_PREFIX\");\r",
+									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -236,25 +198,41 @@
 									"        \"to\": \"88888888\",\r",
 									"        \"type\": \"interactive\",\r",
 									"        \"interactive\": {\r",
-									"            \"type\": \"button\",\r",
+									"            \"type\": \"list\",\r",
 									"            \"body\": {\r",
-									"                \"text\": NEW_USER\r",
+									"                \"text\": MENU_TEXT\r",
 									"            },\r",
 									"            \"action\": {\r",
-									"                \"buttons\": [\r",
+									"                \"button\": \"View Menu\",\r",
+									"                \"sections\": [\r",
 									"                    {\r",
-									"                        \"type\": \"reply\",\r",
-									"                        \"reply\": {\r",
-									"                            \"id\": \"newUser_onboardingYes\",\r",
-									"                            \"title\": \"Yes, show me!\"\r",
-									"                        }\r",
-									"                    },\r",
-									"                    {\r",
-									"                        \"type\": \"reply\",\r",
-									"                        \"reply\": {\r",
-									"                            \"id\": \"newUser_onboardingNo\",\r",
-									"                            \"title\": \"No, I'm good\"\r",
-									"                        }\r",
+									"                        \"rows\": [\r",
+									"                            {\r",
+									"                                \"id\": \"menu_check\",\r",
+									"                                \"title\": \"Check/Report\",\r",
+									"                                \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_help\",\r",
+									"                                \"title\": \"Get Help\",\r",
+									"                                \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_about\",\r",
+									"                                \"title\": \"About CheckMate\",\r",
+									"                                \"description\": \"Learn more about CheckMate and the team behind it\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_feedback\",\r",
+									"                                \"title\": \"Send Feedback\",\r",
+									"                                \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_contact\",\r",
+									"                                \"title\": \"Get Contact\",\r",
+									"                                \"description\": \"Get CheckMates contact to add to your contact list\"\r",
+									"                            }\r",
+									"                        ]\r",
 									"                    }\r",
 									"                ]\r",
 									"            }\r",
@@ -284,269 +262,11 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Press Onboarding Yes button Copy",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"newUser_onboardingYes\",\r\n                    \"title\": \"Yes, show me!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
-							"host": [
-								"{{FUNCTIONS_URL}}"
-							],
-							"path": [
-								"checkmate-373101",
-								"asia-southeast1",
-								"webhookHandler",
-								"whatsapp"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get last message (Read status)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Your test name\", function () {\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"status\": \"read\",\r",
-									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.eql(expected);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-							"host": [
-								"{{RESULT_SERVER_URL}}"
-							],
-							"path": [
-								"testresultdata"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get last message (ONBOARDING)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Your test name\", function () {\r",
-									"    const ONBOARDING = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.ONBOARDING\");\r",
-									"\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"text\": {\r",
-									"            \"body\": ONBOARDING,\r",
-									"            \"preview_url\": true\r",
-									"        },\r",
-									"        \"to\": \"88888888\",\r",
-									"        \"messaging_product\": \"whatsapp\"\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.eql(expected);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-							"host": [
-								"{{RESULT_SERVER_URL}}"
-							],
-							"path": [
-								"testresultdata"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Press Onboarding No button",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"newUser_onboardingNo\",\r\n                    \"title\": \"Yes, show me!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
-							"host": [
-								"{{FUNCTIONS_URL}}"
-							],
-							"path": [
-								"checkmate-373101",
-								"asia-southeast1",
-								"webhookHandler",
-								"whatsapp"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get last message (Read status)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Your test name\", function () {\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"status\": \"read\",\r",
-									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.eql(expected);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-							"host": [
-								"{{RESULT_SERVER_URL}}"
-							],
-							"path": [
-								"testresultdata"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get last message (GET_STARTED)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Your test name\", function () {\r",
-									"    const GET_STARTED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GET_STARTED\");\r",
-									"\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"text\": {\r",
-									"            \"body\": GET_STARTED,\r",
-									"            \"preview_url\": false\r",
-									"        },\r",
-									"        \"to\": \"88888888\",\r",
-									"        \"messaging_product\": \"whatsapp\"\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.eql(expected);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-							"host": [
-								"{{RESULT_SERVER_URL}}"
-							],
-							"path": [
-								"testresultdata"
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
 		{
-			"name": "004_Invalid_Message",
+			"name": "004_Irrelevant_Message",
 			"item": [
 				{
 					"name": "Send WhatsApp message (9 Chars)",
@@ -568,7 +288,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123456789\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123456789\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -591,32 +311,94 @@
 					"response": []
 				},
 				{
-					"name": "Get last message (IRRELEVANT_AUTO)",
+					"name": "Get last message (IRRELEVANT_MENU)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Your test name\", function () {\r",
-									"    const IRRELEVANT_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IRRELEVANT_AUTO\");\r",
-									"\r",
+									"pm.test(\"Message auto-categorised as irrelevant returns correct menu\", function () {\r",
+									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
+									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IRRELEVANT_AUTO_MENU_PREFIX\");\r",
+									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
-									"        \"text\": {\r",
-									"            \"body\": IRRELEVANT_AUTO,\r",
-									"            \"preview_url\": false\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": \"88888888\",\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": MENU_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": \"View Menu\",\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_check\",\r",
+									"                                    \"title\": \"Check/Report\",\r",
+									"                                    \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_help\",\r",
+									"                                    \"title\": \"Get Help\",\r",
+									"                                    \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_about\",\r",
+									"                                    \"title\": \"About CheckMate\",\r",
+									"                                    \"description\": \"Learn more about CheckMate and the team behind it\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_feedback\",\r",
+									"                                    \"title\": \"Send Feedback\",\r",
+									"                                    \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_dispute_messages/*/instances/*\",\r",
+									"                                    \"title\": \"Dispute Assessment\",\r",
+									"                                    \"description\": \"Dispute CheckMate's assesment of this message\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_contact\",\r",
+									"                                    \"title\": \"Get Contact\",\r",
+									"                                    \"description\": \"Get CheckMates contact to add to your contact list\"\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"            \"context\": {\r",
+									"                \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"            }\r",
 									"        },\r",
-									"        \"to\": \"88888888\",\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"context\": {\r",
-									"            \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
-									"        }\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
 									"    var jsonData = pm.response.json();\r",
+									"    \r",
+									"    // get the id of \"Dispute Assessment\" for validation\r",
+									"    let disputeAssessmentId = jsonData.body.interactive.action.sections[0].rows.find(row => row.title === \"Dispute Assessment\").id;\r",
+									"    let [, , disputedInstancePath] = disputeAssessmentId.split(\"_\")\r",
+									"    \r",
+									"    // check if the id matches the pattern \"menu_dispute_messages/*/instances/*\"\r",
+									"    pm.expect(disputeAssessmentId).to.match(/menu_dispute_messages\\/[^\\/]+\\/instances\\/[^\\/]+/);\r",
+									"    pm.collectionVariables.set(\"disputedInstancePath\", disputedInstancePath);\r",
+									"\r",
+									"    // remove the id of \"Dispute Assessment\" for comparison\r",
+									"    jsonData.body.interactive.action.sections[0].rows = jsonData.body.interactive.action.sections[0].rows.map(row => {\r",
+									"        if (row.title === \"Dispute Assessment\") {\r",
+									"            return {...row, id: \"menu_dispute_messages/*/instances/*\"};\r",
+									"        } else {\r",
+									"            return row;\r",
+									"        }\r",
+									"    });\r",
+									"\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
@@ -628,7 +410,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 6000);"
+									"setTimeout(() => {}, 5000);"
 								],
 								"type": "text/javascript"
 							}
@@ -650,24 +432,113 @@
 					"response": []
 				},
 				{
-					"name": "Get last message (Read status)",
+					"name": "Make Menu Selection (\"Dispute Categorisation\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366736\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_dispute_{{disputedInstancePath}}\",\r\n                    \"title\": \"Dispute Assessment\",\r\n                    \"description\": \"Dispute CheckMate's assesment of this message\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (DISPUTE)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.DISPUTE\");\r",
+									"\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
 									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"status\": \"read\",\r",
-									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
 									"    },\r",
 									"    \"method\": \"POST\"\r",
 									"}\r",
 									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (telegram blast)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"On dispute, message is sent out to Telegram group chat\", function () {\r",
+									"    const DISPUTED_INSTANCE_PATH = pm.collectionVariables.get(\"disputedInstancePath\");\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/botTELEGRAM_REPORT_BOT_TOKEN/sendMessage\",\r",
+									"        \"body\": {\r",
+									"            \"chat_id\": \"111111111\",\r",
+									"            \"text\": `<DEV>88888888 has disputed the assessment of a message sent by them.\\n  \\nmessage/instance path: ${DISPUTED_INSTANCE_PATH}\\n\\ntype: text\\n\\ntext: 123456789\\n\\ncategory: irrelevant`\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
@@ -715,7 +586,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"112914005037866\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123451234512345\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"123451234512345\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -892,9 +763,581 @@
 						}
 					},
 					"response": []
+				}
+			]
+		},
+		{
+			"name": "006_Menu_Message",
+			"item": [
+				{
+					"name": "Send WhatApp message (\"Menu\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366512\",\r\n                \"text\": {\r\n                  \"body\": \"Menu\"\r\n                },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
 				},
 				{
-					"name": "Get last message (Read status)",
+					"name": "Get last message (GENERIC_MENU)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
+									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX\");\r",
+									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"recipient_type\": \"individual\",\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"type\": \"interactive\",\r",
+									"        \"interactive\": {\r",
+									"            \"type\": \"list\",\r",
+									"            \"body\": {\r",
+									"                \"text\": MENU_TEXT\r",
+									"            },\r",
+									"            \"action\": {\r",
+									"                \"button\": \"View Menu\",\r",
+									"                \"sections\": [\r",
+									"                    {\r",
+									"                        \"rows\": [\r",
+									"                            {\r",
+									"                                \"id\": \"menu_check\",\r",
+									"                                \"title\": \"Check/Report\",\r",
+									"                                \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_help\",\r",
+									"                                \"title\": \"Get Help\",\r",
+									"                                \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_about\",\r",
+									"                                \"title\": \"About CheckMate\",\r",
+									"                                \"description\": \"Learn more about CheckMate and the team behind it\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_feedback\",\r",
+									"                                \"title\": \"Send Feedback\",\r",
+									"                                \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
+									"                            },\r",
+									"                            {\r",
+									"                                \"id\": \"menu_contact\",\r",
+									"                                \"title\": \"Get Contact\",\r",
+									"                                \"description\": \"Get CheckMates contact to add to your contact list\"\r",
+									"                            }\r",
+									"                        ]\r",
+									"                    }\r",
+									"                ]\r",
+									"            }\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"Check/Report\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366736\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_check\",\r\n                    \"title\": \"Check/Report\",\r\n                    \"description\": \"Send in messages, images, or screenshots for checking!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (PROCEED_TO_SEND)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PROCEED_TO_SEND\");\r",
+									"\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"Get Help\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366782\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_help\",\r\n                    \"title\": \"Get Help\",\r\n                    \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (HOW_TO)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.HOW_TO\");\r",
+									"\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"About CheckMate\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366804\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_about\",\r\n                    \"title\": \"About CheckMate\",\r\n                    \"description\": \"Learn more about CheckMate and the team behind it\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (LEARN_MORE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LEARN_MORE\");\r",
+									"\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"Send Feedback\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366813\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_feedback\",\r\n                    \"title\": \"Send Feedback\",\r\n                    \"description\": \"Send us feedback on anything to do with CheckMate\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (FEEDBACK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.FEEDBACK\");\r",
+									"\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"Get Contact\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"Jerome\"\r\n                },\r\n                \"wa_id\": \"88888888\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1686366819\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_contact\",\r\n                    \"title\": \"Get Contact\",\r\n                    \"description\": \"Get CheckMates contact to add to your contact list\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (CONTACT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.CONTACT\");\r",
+									"\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": true\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (contact type)",
 					"event": [
 						{
 							"listen": "test",
@@ -902,15 +1345,34 @@
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
 									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"status\": \"read\",\r",
-									"        \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": \"88888888\",\r",
+									"            \"type\": \"contacts\",\r",
+									"            \"contacts\": [\r",
+									"                {\r",
+									"                    \"name\": {\r",
+									"                        \"formatted_name\": \"CheckMate\",\r",
+									"                        \"suffix\": \"CheckMate\"\r",
+									"                    },\r",
+									"                    \"urls\": [\r",
+									"                        {\r",
+									"                            \"url\": \"https://checkmate.sg\"\r",
+									"                        }\r",
+									"                    ],\r",
+									"                    \"phones\": [\r",
+									"                        {\r",
+									"                            \"phone\": \"+1 555-093-3685\"\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            ]\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
@@ -955,6 +1417,20 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "disputedMessagePath",
+			"value": ""
+		},
+		{
+			"key": "disputedMessageTextListId",
+			"value": ""
+		},
+		{
+			"key": "disputedInstancePath",
+			"value": ""
 		}
 	]
 }
