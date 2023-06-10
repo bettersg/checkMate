@@ -226,6 +226,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
+									"    const NEW_USER = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER\");\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -237,7 +238,7 @@
 									"        \"interactive\": {\r",
 									"            \"type\": \"button\",\r",
 									"            \"body\": {\r",
-									"                \"text\": \"Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined the effort to battle scams and misinformation😊.\\n\\nWould you like to know more about how to use CheckMate?\\n\\nIf so, press yes! Otherwise, just go ahead and use it!\"\r",
+									"                \"text\": NEW_USER\r",
 									"            },\r",
 									"            \"action\": {\r",
 									"                \"buttons\": [\r",
@@ -375,12 +376,14 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
+									"    const ONBOARDING = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.ONBOARDING\");\r",
+									"\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
 									"        \"text\": {\r",
-									"            \"body\": \"Check out https://youtube.com/shorts/gFeO_qFOchs?feature=share to see how CheckMate works! \\n\\nDone? You're now ready to use CheckMate! Let's do our part in the fight against scams and misinformation! 💪\",\r",
+									"            \"body\": ONBOARDING,\r",
 									"            \"preview_url\": true\r",
 									"        },\r",
 									"        \"to\": \"88888888\",\r",
@@ -502,12 +505,14 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
+									"    const GET_STARTED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GET_STARTED\");\r",
+									"\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
 									"        \"text\": {\r",
-									"            \"body\": \"No worries! You can get started immediately by sending in dubious messages you're unsure about. Let's do our part in the fight against scams and misinformation! 💪\",\r",
+									"            \"body\": GET_STARTED,\r",
 									"            \"preview_url\": false\r",
 									"        },\r",
 									"        \"to\": \"88888888\",\r",
@@ -593,12 +598,14 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
+									"    const IRRELEVANT_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IRRELEVANT_AUTO\");\r",
+									"\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
 									"        \"text\": {\r",
-									"            \"body\": \"Thanks for waiting!\\n\\nIt seems like there's nothing to assess within this message.👌\\n\\nSuch messages add workload for our CheckMates, so we'd appreciate if you avoid sending in such messages to this bot next time. 🙏🏻\\n\\nIf you wish to send us feedback, you may do so at https://bit.ly/checkmate-feedback. Remember, CheckMate is not a chatbot, and won't be able to reply to individual queries or feedback here.\\n\\nThanks again for your interest in CheckMate! 🙏🏻\",\r",
+									"            \"body\": IRRELEVANT_AUTO,\r",
 									"            \"preview_url\": false\r",
 									"        },\r",
 									"        \"to\": \"88888888\",\r",
@@ -621,7 +628,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 4000);"
+									"setTimeout(() => {}, 6000);"
 								],
 								"type": "text/javascript"
 							}
@@ -808,7 +815,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 4000);"
+									"setTimeout(() => {}, 6000);"
 								],
 								"type": "text/javascript"
 							}
@@ -837,12 +844,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
+									"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED\");\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
 									"        \"text\": {\r",
-									"            \"body\": \"Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.\",\r",
+									"            \"body\": MESSAGE_NOT_YET_ASSESSED,\r",
 									"            \"preview_url\": false\r",
 									"        },\r",
 									"        \"to\": \"88888888\",\r",
