@@ -2,6 +2,9 @@ const axios = require("axios")
 const functions = require("firebase-functions")
 const FormData = require("form-data")
 
+const telegramHost =
+  process.env["TEST_SERVER_URL"] || "https://api.telegram.org" //only exists in integration test environment
+
 exports.sendTelegramTextMessage = async function (
   bot,
   to,
@@ -12,6 +15,8 @@ exports.sendTelegramTextMessage = async function (
   let data
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
+  } else if (bot === "report") {
+    token = process.env.TELEGRAM_REPORT_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -24,7 +29,7 @@ exports.sendTelegramTextMessage = async function (
   }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-    url: `https://api.telegram.org/bot${token}/sendMessage`,
+    url: `${telegramHost}/bot${token}/sendMessage`,
     data: data,
     headers: {
       "Content-Type": "application/json",

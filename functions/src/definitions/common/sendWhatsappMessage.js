@@ -10,7 +10,8 @@ const testUserPhoneNumberId = defineString(
 const testCheckerPhoneNumberId = defineString(
   "WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID"
 )
-const graphApiUrl = process.env["GRAPH_API_URL"] || "https://graph.facebook.com"
+const graphApiUrl =
+  process.env["TEST_SERVER_URL"] || "https://graph.facebook.com" //only exists in integration test environment
 
 async function sendWhatsappTextMessage(
   bot,
