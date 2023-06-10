@@ -76,15 +76,14 @@ Thank you for keeping Singapore safe!`,
   //menu text list
   MENU: `{{prefix}}
 
-Press "View Menu" below to see what you can do with CheckMate! Tap 👈 to select, then hit send. Scroll down to see all the options.
+Select "View Menu" below to see what CheckMate can do! 👈 Scroll down to see all the options, select one, then hit send. 
 
-Do note that CheckMate is *not* a free-for-all chatbot - don't talk to us like you would a human! 😅
+Do note that CheckMate *cannot respond like a human*. Do stick to the existing menu options if not sending in messages for checking! 😅
 
-To pull up this selection anytime, just type "menu", 
-`,
+To pull up this selection anytime, just type "menu"!`,
 
   //menu text list prefix
-  NEW_USER_MENU_PREFIX: `Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined the effort to battle scams and misinformation😊.`,
+  NEW_USER_MENU_PREFIX: `Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined us to battle scams and misinformation😊.`,
 
   //menu text list prefix
   IRRELEVANT_MENU_PREFIX: `Thanks for waiting!🙏🏻 Our CheckMates didn't find anything to assess in this message.😕`,
@@ -95,9 +94,9 @@ To pull up this selection anytime, just type "menu",
   //menu text list prefix
   MENU_PREFIX: `Hi! Thanks for using CheckMate. 🙏🏻`,
 
-  PROCEED_TO_SEND: `Nice! Just go ahead and send/forward us the message. We'll help you check and/or report it! ✅✅
+  PROCEED_TO_SEND: `Nice! Just send/forward us the message. We'll help you check and/or report it! ✅✅
     
-If you like, you can also send in screenshots 📷 or other images 🖼️! This is especially useful to capture the sender's number, or if there is a series of messages. Knowing this will help our CheckMates make a better assessment.
+If you like, you can also send in screenshots 📷 or other images 🖼️! This can help to capture the sender's number, or a full conversation, which could help our CheckMates' assessment.
 
 One last thing: by continuing to use CheckMate, you're agreeing to our privacy policy, which can be found at https://checkmate.sg/privacy-policy. In short, we only collect the messages sent to us and your number to facilitate a response!`,
 
@@ -105,13 +104,13 @@ One last thing: by continuing to use CheckMate, you're agreeing to our privacy p
 
 Done? You're now ready to use CheckMate! Let's do our part in the fight against scams and misinformation! 💪`,
 
-  LEARN_MORE: `To learn more about us or our team, you can visit our website at https://checkmate.sg`,
+  LEARN_MORE: `To learn more about CheckMate, you can visit our website at https://checkmate.sg`,
 
-  FEEDBACK: `You can submit feedback at https://bit.ly/checkmate-feedback. Rest assured, we'll read it!`,
+  FEEDBACK: `You can submit feedback at https://bit.ly/checkmate-feedback. Rest assured, we'll read it ASAP!`,
 
-  DISPUTE: `Thanks for letting us know! Rest assured our CheckMates will review our assessment of this message.`,
+  DISPUTE: `Thanks for letting us know! Our CheckMates will review the assessment of this message.`,
 
-  CONTACT: `Here's our contact! Do add it to your contact list so you can find us more easily in future. 😊`,
+  CONTACT: `Here's our contact! Do add us to your contact list so you can find us in future. 😊`,
 }
 
 exports.FACTCHECKER_BOT_RESPONSES = {
