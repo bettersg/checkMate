@@ -12,6 +12,10 @@ interface TrivialResponse {
   prediction: string
 }
 
+interface L1CategoryResponse {
+  prediction: string
+}
+
 async function getEmbedding(text: string): Promise<number[]> {
   const data = {
     text: text,
@@ -32,7 +36,7 @@ async function getL1Category(text: string): Promise<string> {
   const data = {
     text: text,
   }
-  const response = await callAPI<TrivialResponse>("getL1Category", data)
+  const response = await callAPI<L1CategoryResponse>("getL1Category", data)
   return response.data.prediction
 }
 
