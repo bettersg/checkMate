@@ -188,22 +188,19 @@ async function newTextInstanceHandler(
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory.includes("irrelevant") ? true : false, //boolean, whether or not we have concluded the voting
+      isAssessed: machineCategory !== "unsure", //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isIrrelevant: machineCategory.includes("irrelevant") ? true : null, //bool, if majority voted irrelevant then update this
-      isSus: null,
-      isScam: null,
-      isIllicit: null,
-      isSpam: null,
+      isScam: machineCategory === "scam" ? true : null,
+      isIllicit: machineCategory === "illicit" ? true : null,
+      isSpam: machineCategory === "spam" ? true : null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: null,
-      primaryCategory: machineCategory.includes("irrelevant")
-        ? "irrelevant"
-        : null,
+      isInfo: machineCategory === "info" ? true : null,
+      primaryCategory: machineCategory !== "unsure" ? machineCategory : null,
       custom_reply: null, //string
       instanceCount: 0,
     })
@@ -287,7 +284,6 @@ async function newImageInstanceHandler({
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
-      isSus: null,
       isScam: null,
       isIllicit: null,
       isSpam: null,

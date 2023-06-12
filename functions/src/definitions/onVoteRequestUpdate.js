@@ -74,7 +74,7 @@ exports.onVoteRequestUpdate = functions
       const isAssessed =
         (isUnsure &&
           responseCount >
-          parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
+            parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
         (!isUnsure &&
           responseCount > parseInt(thresholds.endVote * numFactCheckers)) ||
         (isSus &&
@@ -93,11 +93,9 @@ exports.onVoteRequestUpdate = functions
         }
         if (truthScore < (thresholds.falseUpperBound || 1.5)) {
           primaryCategory = "false"
-        }
-        else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+        } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
           primaryCategory = "misleading"
-        }
-        else {
+        } else {
           primaryCategory = "true"
         }
       } else if (isSpam) {
@@ -114,7 +112,6 @@ exports.onVoteRequestUpdate = functions
       }
       await messageRef.update({
         truthScore: truthScore,
-        isSus: isSus,
         isScam: isScam,
         isIllicit: isIllicit,
         isInfo: isInfo,
