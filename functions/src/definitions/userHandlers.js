@@ -188,7 +188,7 @@ async function newTextInstanceHandler(
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory !== "unsure", //boolean, whether or not we have concluded the voting
+      isAssessed: machineCategory !== "unsure" && machineCategory !== "info", //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
@@ -200,7 +200,10 @@ async function newTextInstanceHandler(
       isLegitimate: null,
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
-      primaryCategory: machineCategory !== "unsure" ? machineCategory : null,
+      primaryCategory:
+        machineCategory !== "unsure" && machineCategory !== "info"
+          ? machineCategory
+          : null,
       customReply: null, //string
       instanceCount: 0,
     })

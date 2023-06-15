@@ -30,13 +30,11 @@ exports.onVoteRequestUpdate = functions
     const messageRef = docSnap.ref.parent.parent
 
     if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
-      functions.logger.log(`L2 vote message sent for ${after.platformId}`)
       await sendVotingMessage(change.after, messageRef)
     } else if (
       before.triggerL2Others !== true &&
       after.triggerL2Others === true
     ) {
-      functions.logger.log(`L2 others message sent for ${after.platformId}`)
       await sendL2OthersCategorisationMessage(change.after, messageRef)
     } else if (before.vote != after.vote || before.category != after.category) {
       await updateCounts(messageRef, before, after)
