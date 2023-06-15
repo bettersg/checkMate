@@ -201,7 +201,7 @@ async function newTextInstanceHandler(
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory: machineCategory !== "unsure" ? machineCategory : null,
-      custom_reply: null, //string
+      customReply: null, //string
       instanceCount: 0,
     })
     messageRef = writeResult
@@ -292,7 +292,7 @@ async function newImageInstanceHandler({
       isInfo: null,
       isIrrelevant: null, //bool, if majority voted irrelevant then update this
       primaryCategory: null,
-      custom_reply: null, //string
+      customReply: null, //string
       instanceCount: 0,
     })
     messageId = writeResult.id
