@@ -2279,7 +2279,6 @@
 									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\")\r",
 									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\")\r",
 									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\")\r",
-									"    console.log(BODY_TEXT)\r",
 									"    const expected = {\r",
 									"        \"hostname\": \"resultserver\",\r",
 									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -2332,8 +2331,6 @@
 									"\r",
 									"    jsonData.body.interactive.action.buttons[0].reply.id = \"ID\"\r",
 									"    jsonData.body.interactive.action.buttons[1].reply.id = \"ID\"\r",
-									"\r",
-									"    console.log(JSON.stringify(expected,null,2))\r",
 									"\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
@@ -2405,7 +2402,7 @@
 					"response": []
 				},
 				{
-					"name": "Get last message (SCAM, IMMEDIATE, NOT MATCHED, AUTO)",
+					"name": "Get last message (SPAM, IMMEDIATE, NOT MATCHED, AUTO)",
 					"event": [
 						{
 							"listen": "test",
@@ -2418,7 +2415,6 @@
 									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\")\r",
 									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\")\r",
 									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\")\r",
-									"    console.log(BODY_TEXT)\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -2436,7 +2432,6 @@
 									"    \"method\": \"POST\"\r",
 									"}\r",
 									"    var jsonData = pm.response.json();\r",
-									"    console.log(jsonData.body.text.body == BODY_TEXT)\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
