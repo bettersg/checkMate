@@ -24,7 +24,13 @@ app.all("/*", (req, res) => {
     body: req.body,
     method: req.method,
   });
-  res.send("Hello World!");
+  res.send({
+    messages: [
+      {
+        id: "wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==",
+      },
+    ],
+  });
 });
 
 app.listen(port, () => {

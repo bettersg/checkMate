@@ -1,17 +1,17 @@
 exports.USER_BOT_RESPONSES = {
-  UNTRUE: `Thank you for waiting! Our CheckMates have reviewed the message and think it's *likely to be untrue*.❌
-
+  UNTRUE: `{{thanks}}{{matched}}{{methodology}}*untrue*.❌
+  
 Please do not spread it further⛔️⛔️
 
 Thank you for keeping Singapore informed!`,
 
-  MISLEADING: `Thank you for waiting! Our CheckMates have reviewed the message and think that *while some elements within could be true, it's presented in a misleading or unbalanced way*.⚠️
+  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true! ⚠️
 
 Please take it with a pinch of salt and think twice before spreading it further🚧🚧.
 
 Thank you for keeping Singapore informed!`,
 
-  ACCURATE: `Thank you for waiting! Our CheckMates have reviewed the message and think it's *accurate*.✅
+  ACCURATE: `{{thanks}}{{matched}}{{methodology}}*accurate*.✅
 
 Thank you for keeping Singapore informed!`,
 
@@ -23,46 +23,62 @@ You can try sending the message in again, or report the error via our form at ht
     "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
 
   //button
-  SCAM: `Thanks for waiting! Our CheckMates have reviewed the message and think this *is likely a scam*!🚫
+  SCAM: `{{thanks}}{{matched}}{{methodology}}*a scam*!🚫
 
 We recommend you do not engage further⛔️⛔️
 
-This is the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
+This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.`,
+Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
   //button
-  SUSPICIOUS: `Thanks for waiting! Our CheckMates have reviewed the message and think this *looks suspicious*!🚨
+  ILLICIT: `{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨
 
 We recommend you do not engage further⛔️⛔️
 
-This is the collective opinion of our CheckMates. That said, ScamShield is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
+This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.`,
+Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
-  SPAM: `Thanks for waiting! Our CheckMates have reviewed this message and think this is likely spam! 🚧 
+  SPAM: `{{thanks}}{{matched}}{{methodology}}spam! 🚧 
 
 It's likely harmless, but you should always make sure 🧐
 
 Thank you for keeping Singapore safe!`,
 
-  LEGITIMATE: `Thanks for waiting! Our CheckMates have reviewed the message and think that it's *from a legitimate source*.✅
+  LEGITIMATE: `{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅
 
 Thank you for keeping Singapore safe!`,
 
-  UNSURE: `Thanks for waiting!
+  UNSURE: `{{thanks}}
 
-  Unfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry, we're human too! 😞
+Unfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry, we're human too! 😞
 
-  If you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.
+If you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.
 
 Thank you for keeping Singapore safe!`,
+
+  THANKS_IMMEDIATE: `Thanks for sending this in! `,
+
+  THANKS_DELAYED: `Thanks for waiting! `,
+
+  METHODOLOGY_HUMAN: `Our CheckMates have reviewed this message and think it's `,
+
+  METHODOLOGY_AUTO: `Based on pattern matching, our auto-classifier is confident that this message is `,
+
+  VOTE_RESULTS_SUFFIX: ` You can also see how we voted, before deciding.`,
+
+  //not used
+  MATCHED: `In fact, other users have sent this message in {{numberInstances}} times. `,
 
   UNSUPPORTED_TYPE:
     "Sorry, CheckMate currently doesn't support this type of message.",
 
   SCAMSHIELD_EXPLAINER:
     "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more at https://scamshield.org.sg.",
+
+  //not used
+  STATS_TEMPLATE: `{{top}}% of our CheckMates identified this as {{category1}}{{info_placeholder}}. {{second}}% felt this was {{category2}}.`,
 
   //button
   SCAMSHIELD_SEEK_CONSENT:
@@ -76,7 +92,7 @@ Thank you for keeping Singapore safe!`,
   //menu text list
   MENU: `{{prefix}}
 
-Select "View Menu" below to see what CheckMate can do! 👈 Scroll down to see all the options, select one, then hit send. 
+Select "View Menu" below to see what CheckMate can do! 👈 Scroll down to see all the options, select one, then hit send.
 
 Do note that CheckMate *cannot respond like a human*. Do stick to the existing menu options if not sending in messages for checking! 😅
 
@@ -95,12 +111,12 @@ To pull up this selection anytime, just type "menu"!`,
   MENU_PREFIX: `Hi! Thanks for using CheckMate. 🙏🏻`,
 
   PROCEED_TO_SEND: `Nice! Just send/forward us the message. We'll help you check and/or report it! ✅✅
-    
+
 If you like, you can also send in screenshots 📷 or other images 🖼️! This can help to capture the sender's number, or a full conversation, which could help our CheckMates' assessment.
 
 One last thing: by continuing to use CheckMate, you're agreeing to our privacy policy, which can be found at https://checkmate.sg/privacy-policy. In short, we only collect the messages sent to us and your number to facilitate a response!`,
 
-  HOW_TO: `Check out https://youtube.com/shorts/gFeO_qFOchs?feature=share to see how CheckMate works! 
+  HOW_TO: `Check out https://youtube.com/shorts/gFeO_qFOchs?feature=share to see how CheckMate works!
 
 Done? You're now ready to use CheckMate! Let's do our part in the fight against scams and misinformation! 💪`,
 

@@ -9,7 +9,11 @@ const {
 const functions = require("firebase-functions")
 const { Timestamp } = require("firebase-admin/firestore")
 
-async function respondToInstance(instanceSnap, forceReply = false) {
+async function respondToInstance(
+  instanceSnap,
+  forceReply = false,
+  isImmediate = false
+) {
   const parentMessageRef = instanceSnap.ref.parent.parent
   const parentMessageSnap = await parentMessageRef.get()
   const data = instanceSnap.data()
@@ -29,6 +33,28 @@ async function respondToInstance(instanceSnap, forceReply = false) {
   const isInfo = parentMessageSnap.get("isInfo")
   const isLegitimate = parentMessageSnap.get("isLegitimate")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
+  const instanceCount = parentMessageSnap.get("instanceCount")
+
+  function getFinalResponseText(responseText) {
+    return responseText
+      .replace(
+        "{{thanks}}",
+        isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
+      )
+      .replace(
+        "{{matched}}",
+        instanceCount >= 5
+          ? `In fact, others have already sent this message in ${instanceCount} times. `
+          : ""
+      )
+      .replace(
+        "{{methodology}}",
+        isMachineCategorised
+          ? responses.METHODOLOGY_AUTO
+          : responses.METHODOLOGY_HUMAN
+      )
+      .replace("{{results}}", isImmediate ? "" : responses.VOTE_RESULTS_SUFFIX)
+  }
 
   if (!isAssessed && !forceReply) {
     await sendTextMessage(
@@ -40,54 +66,78 @@ async function respondToInstance(instanceSnap, forceReply = false) {
     return
   }
   const updateObj = { isReplied: true, isReplyForced: forceReply }
-  if (isScam || isIllicit) {
-    let responseText
-    if (isScam) {
-      updateObj.replyCategory = "scam"
-      responseText = responses.SCAM
-    } else {
-      updateObj.replyCategory = "illicit"
-      responseText = responses.SUSPICIOUS
-    }
-    const buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `scamshieldConsent_${instanceSnap.ref.path}_consent`,
-          title: "Yes",
-        },
+  let buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `votingResults_${instanceSnap.ref.path}_${data.id}`,
+        title: "See voting results",
       },
-      {
-        type: "reply",
-        reply: {
-          id: `scamshieldConsent_${instanceSnap.ref.path}_decline`,
-          title: "No",
-        },
+    },
+  ]
+  let scamShieldButtons = [
+    {
+      type: "reply",
+      reply: {
+        id: `scamshieldConsent_${instanceSnap.ref.path}_consent`,
+        title: "Yes",
       },
-      {
-        type: "reply",
-        reply: {
-          id: `scamshieldExplain_${instanceSnap.ref.path}_${data.id}`,
-          title: "What is ScamShield?",
-        },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `scamshieldConsent_${instanceSnap.ref.path}_decline`,
+        title: "No",
       },
-    ]
-    await sendWhatsappButtonMessage(
-      "user",
-      data.from,
-      responseText,
-      buttons,
-      data.id
-    )
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `votingResults_${instanceSnap.ref.path}_${data.id}_scamshield`,
+        title: "See voting results",
+      },
+    },
+  ]
+
+  let category
+  if (isScam) {
+    category = "scam"
+  } else if (isIllicit) {
+    category = "illicit"
   } else if (isSpam) {
-    updateObj.replyCategory = "spam"
-    await sendTextMessage("user", data.from, responses.SPAM, data.id)
+    category = "spam"
   } else if (isLegitimate) {
-    updateObj.replyCategory = "legitimate"
-    await sendTextMessage("user", data.from, responses.LEGITIMATE, data.id)
+    category = "legitimate"
   } else if (isIrrelevant) {
     if (isMachineCategorised) {
-      updateObj.replyCategory = "irrelevant_auto"
+      category = "irrelevant_auto"
+    } else {
+      category = "irrelevant"
+    }
+  } else if (isInfo) {
+    if (truthScore === null) {
+      functions.logger.error(
+        "Null truth score despite category info, error response sent"
+      )
+      category = "error"
+    } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+      category = "untrue"
+    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+      category = "misleading"
+    } else {
+      category = "accurate"
+    }
+  } else if (isUnsure) {
+    category = "unsure"
+  } else {
+    functions.logger.error("No category assigned, error response sent")
+    updateObj.replyCategory = "error"
+    return
+  }
+
+  let responseText
+  switch (category) {
+    case "irrelevant_auto":
       await sendMenuMessage(
         data.from,
         "IRRELEVANT_AUTO_MENU_PREFIX",
@@ -95,8 +145,8 @@ async function respondToInstance(instanceSnap, forceReply = false) {
         data.id,
         instanceSnap.ref.path
       )
-    } else {
-      updateObj.replyCategory = "irrelevant"
+      break
+    case "irrelevant":
       await sendMenuMessage(
         data.from,
         "IRRELEVANT_MENU_PREFIX",
@@ -104,28 +154,32 @@ async function respondToInstance(instanceSnap, forceReply = false) {
         data.id,
         instanceSnap.ref.path
       )
-    }
-  } else if (isInfo) {
-    if (truthScore === null) {
-      updateObj.replyCategory = "error"
-      await sendTextMessage("user", data.from, responses.ERROR, data.id)
-    } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-      updateObj.replyCategory = "untrue"
-      await sendTextMessage("user", data.from, responses.UNTRUE, data.id)
-    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
-      updateObj.replyCategory = "misleading"
-      await sendTextMessage("user", data.from, responses.MISLEADING, data.id)
-    } else {
-      updateObj.replyCategory = "accurate"
-      await sendTextMessage("user", data.from, responses.ACCURATE, data.id)
-    }
-  } else if (isUnsure) {
-    updateObj.replyCategory = "unsure"
-    await sendTextMessage("user", data.from, responses.UNSURE, data.id)
-  } else {
-    functions.logger.warn("did not return as expected")
-    return
+      break
+    case "error":
+      responseText = getFinalResponseText(responses.ERROR)
+      await sendTextMessage("user", data.from, responseText, data.id)
+      break
+    default:
+      responseText = getFinalResponseText(responses[category.toUpperCase()])
+      if (category === "scam" || category === "illicit") {
+        if (isImmediate) {
+          scamShieldButtons.pop()
+        }
+        buttons = scamShieldButtons
+      }
+      if (isImmediate && !(category === "scam" || category === "illicit")) {
+        await sendTextMessage("user", data.from, responseText, data.id)
+      } else {
+        await sendWhatsappButtonMessage(
+          "user",
+          data.from,
+          responseText,
+          buttons,
+          data.id
+        )
+      }
   }
+  updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)
   return

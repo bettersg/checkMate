@@ -14,10 +14,9 @@ erDiagram
         timestamp lastTimestamp "Timestamp of latest instance"
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
-				timestamp assessedTimestamp
+    		timestamp assessedTimestamp
         timestamp assessmentExpiry "When assessment should expire, if any"
         boolean assessmentExpired
-        boolean isSus "Is either scam or illicit"
         boolean isScam
         boolean isIllicit
         boolean isSpam
@@ -49,7 +48,7 @@ erDiagram
         boolean isReplied "System has replied to the citizen"
         boolean isReplyForced "track if reply is forced"
         string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"
-				timestamp replyTimestamp
+    		timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"
         string strippedText
         boolean scamShieldConsent
@@ -64,7 +63,7 @@ erDiagram
         boolean triggerL2Vote "whether or not a vote should be triggered"
         boolean triggerL2Others "whether or not L2 scam message should be triggered"
         string sentMessageId "message id of the forwarded dubious message to checkers"
-        number vote 
+        number vote
         sting category "scam, irrelevant, or number"
         timestamp createdTimestamp
         timestamp acceptedTimestamp
@@ -83,19 +82,19 @@ erDiagram
         number numCorrectVotes "Not used for now"
         number numVerifiedLinks "Not used for now"
         string preferredPlatform "whatsapp/telegram, only whatsapp used for now"
-				string getNameMessageId "ID of the message sent to prompt factChecker for their name. Used to track reply."
+    		string getNameMessageId "ID of the message sent to prompt factChecker for their name. Used to track reply."
         timestamp lastVotedTimestamp
     }
 
-		user {
-				string id PK "using their sender ID or phone number"
-				number instanceCount
-				timestamp lastSent
-				timestamp firstMessageReceiptTime
+    	user {
+    		string id PK "using their sender ID or phone number"
+    		number instanceCount
+    		timestamp lastSent
+    		timestamp firstMessageReceiptTime
         string firstMessageType "either prepopulated, normal, or irrelevant"
-		}
+    	}
 
     message ||--|{ instance: has
-		user ||--|{ instance: sends
+    user ||--|{ instance: sends
     message ||--o{ voteRequest: triggers
     factChecker ||--o{ voteRequest: responds_to

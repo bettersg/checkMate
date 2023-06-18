@@ -108,6 +108,9 @@ exports.sendL2OthersCategorisationMessage = async function (
         sections,
         replyId ?? voteRequestData.sentMessageId
       )
+      functions.logger.log(
+        `L2 others message sent for ${voteRequestData.platformId}`
+      )
       break
     case "telegram":
       break
@@ -162,6 +165,9 @@ exports.sendVotingMessage = async function sendVotingMessage(
           )
           break
       }
+      functions.logger.log(
+        `Vote message sent for ${voteRequestData.platformId}`
+      )
       break
     case "telegram":
       break

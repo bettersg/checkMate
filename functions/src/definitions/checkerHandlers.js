@@ -212,17 +212,25 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
       }
       break
   }
-  await voteRequestSnap.ref.update({
+  const updateObj = {
     hasAgreed: true,
     acceptedTimestamp: Timestamp.fromDate(new Date()),
     sentMessageId: res.data.messages[0].id,
-  })
-  await sleep(3000)
-  await sendL1CategorisationMessage(
-    voteRequestSnap,
-    messageRef,
-    res.data.messages[0].id
-  )
+  }
+  if (message.machineCategory === "info") {
+    // handle case where machine has predicted info, so no need to go into L1 categorisation, but still need to go into L2 voting
+    updateObj.triggerL2Vote = true
+    updateObj.triggerL2Others = false
+    await sleep(1000)
+  } else {
+    await sleep(3000)
+    await sendL1CategorisationMessage(
+      voteRequestSnap,
+      messageRef,
+      res.data.messages[0].id
+    )
+  }
+  await voteRequestSnap.ref.update(updateObj)
 }
 
 async function onButtonReply(
