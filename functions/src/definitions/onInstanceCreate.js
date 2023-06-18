@@ -72,7 +72,7 @@ exports.onInstanceCreate = functions
 
     const parentMessageSnap = await parentMessageRef.get()
     if (!data.isReplied) {
-      await respondToInstance(snap)
+      await respondToInstance(snap, false, true)
     }
     if (!parentMessageSnap.get("isAssessed")) {
       const parentInstanceCount = instancesQuerySnap.size

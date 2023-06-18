@@ -11,10 +11,11 @@ const { sendDisputeNotification } = require("./common/sendMessage")
 const {
   mockDb,
   sleep,
-  stripPhone,
+  getThresholds,
   stripUrl,
   hashMessage,
 } = require("./common/utils")
+const { getCount } = require("./common/counters")
 const { getResponsesObj, sendMenuMessage } = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
@@ -74,7 +75,6 @@ exports.userHandlerWhatsapp = async function (message) {
         await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         break
       }
-
       await newTextInstanceHandler(
         {
           text: message.text.body,
@@ -181,9 +181,8 @@ async function newTextInstanceHandler(
     let writeResult = await db.collection("messages").add({
       type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: machineCategory.includes("irrelevant")
-        ? true
-        : false,
+      isMachineCategorised:
+        machineCategory !== "unsure" && machineCategory !== "info",
       text: text, //text or caption
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
@@ -202,7 +201,7 @@ async function newTextInstanceHandler(
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
         machineCategory !== "unsure" && machineCategory !== "info"
-          ? machineCategory
+          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
           : null,
       customReply: null, //string
       instanceCount: 0,
@@ -358,41 +357,120 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
       await instanceRef.update(updateObj)
       await sendWhatsappTextMessage("user", from, replyText)
       break
-    case "scamshieldExplain":
-      let messageId
-      ;[instancePath, messageId] = rest
-      await sendWhatsappTextMessage(
-        "user",
-        from,
-        responses?.SCAMSHIELD_EXPLAINER,
-        null,
-        true
-      )
-      const buttons = [
-        {
-          type: "reply",
-          reply: {
-            id: `scamshieldConsent_${instancePath}_consent`,
-            title: "Yes",
-          },
-        },
-        {
-          type: "reply",
-          reply: {
-            id: `scamshieldConsent_${instancePath}_decline`,
-            title: "No",
-          },
-        },
-      ]
-      await sleep(2000)
-      await sendWhatsappButtonMessage(
-        "user",
-        from,
-        responses.SCAMSHIELD_SEEK_CONSENT,
-        buttons,
-        messageId
+    case "votingResults":
+      let whatsappMessageId
+      let scamShield
+      ;[instancePath, whatsappMessageId, ...scamShield] = rest
+      const triggerScamShieldConsent =
+        scamShield.length > 0 && scamShield[0] === "scamshield"
+      await handleVotingStatsRequest(
+        instancePath,
+        whatsappMessageId,
+        triggerScamShieldConsent
       )
       break
+  }
+}
+
+async function handleVotingStatsRequest(
+  instancePath,
+  whatsappMessageId,
+  triggerScamShieldConsent
+) {
+  //get statistics
+  const db = admin.firestore()
+  const messageRef = db.doc(instancePath).parent.parent
+  const instanceSnap = await db.doc(instancePath).get()
+  const responseCount = await getCount(messageRef, "responses")
+  const irrelevantCount = await getCount(messageRef, "irrelevant")
+  const scamCount = await getCount(messageRef, "scam")
+  const illicitCount = await getCount(messageRef, "illicit")
+  const infoCount = await getCount(messageRef, "info")
+  const spamCount = await getCount(messageRef, "spam")
+  const legitimateCount = await getCount(messageRef, "legitimate")
+  const unsureCount = await getCount(messageRef, "unsure")
+  const susCount = scamCount + illicitCount
+  const voteTotal = await getCount(messageRef, "totalVoteScore")
+  const truthScore = infoCount > 0 ? voteTotal / infoCount : null
+  const thresholds = await getThresholds()
+  const responses = await getResponsesObj("user")
+  const from = instanceSnap.get("from")
+  let truthCategory
+  if (truthScore !== null) {
+    if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+      truthCategory = "false"
+    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+      truthCategory = "misleading"
+    } else {
+      truthCategory = "true"
+    }
+  } else truthCategory = "NA"
+
+  const categories = [
+    { name: "trivial", count: irrelevantCount, isInfo: false },
+    {
+      name: scamCount >= illicitCount ? "scam" : "illicit",
+      count: susCount,
+      isInfo: false,
+    },
+    { name: "spam", count: spamCount, isInfo: false },
+    { name: truthCategory, count: infoCount, isInfo: true },
+    { name: "legitimate", count: legitimateCount, isInfo: false },
+    { name: "unsure", count: unsureCount, isInfo: false },
+  ]
+
+  categories.sort((a, b) => b.count - a.count) // sort in descending order
+
+  const highestCategory = categories[0].name
+  const secondCategory = categories[1].name
+  const highestPercentage = (
+    (categories[0].count / responseCount) *
+    100
+  ).toFixed(2)
+  const secondPercentage = (
+    (categories[1].count / responseCount) *
+    100
+  ).toFixed(2)
+  const isHighestInfo = categories[0].isInfo
+  const isSecondInfo = categories[1].isInfo
+
+  const infoLiner = `, with an average score of ${truthScore} on a scale of 0-5 (5 = completely true)`
+  let response = `${highestPercentage}% of our CheckMates ${
+    isHighestInfo ? "collectively identified" : "voted"
+  } this *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
+  if (secondPercentage > 0) {
+    response += ` ${secondPercentage}% ${
+      isHighestInfo ? "collectively identified" : "voted"
+    } this *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
+  }
+
+  await sendWhatsappTextMessage("user", from, response, whatsappMessageId)
+
+  if (triggerScamShieldConsent) {
+    await sleep(2000)
+    const buttons = [
+      {
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_consent`,
+          title: "Yes",
+        },
+      },
+      {
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_decline`,
+          title: "No",
+        },
+      },
+    ]
+    await sendWhatsappButtonMessage(
+      "user",
+      from,
+      responses.SCAMSHIELD_SEEK_CONSENT,
+      buttons,
+      whatsappMessageId
+    )
   }
 }
 
