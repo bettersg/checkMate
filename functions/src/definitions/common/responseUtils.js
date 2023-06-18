@@ -53,6 +53,7 @@ async function respondToInstance(
           ? responses.METHODOLOGY_AUTO
           : responses.METHODOLOGY_HUMAN
       )
+      .replace("{{results}}", isImmediate ? "" : responses.VOTE_RESULTS_SUFFIX)
   }
 
   if (!isAssessed && !forceReply) {

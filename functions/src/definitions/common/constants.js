@@ -29,7 +29,7 @@ We recommend you do not engage further⛔️⛔️
 
 This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent. You can also see how we voted, before deciding.`,
+Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
   //button
   ILLICIT: `{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨
@@ -38,7 +38,7 @@ We recommend you do not engage further⛔️⛔️
 
 This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent. You can also see how we voted, before deciding.`,
+Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
   SPAM: `{{thanks}}{{matched}}{{methodology}}spam! 🚧 
 
@@ -65,6 +65,8 @@ Thank you for keeping Singapore safe!`,
   METHODOLOGY_HUMAN: `Our CheckMates have reviewed this message and think it's `,
 
   METHODOLOGY_AUTO: `Based on pattern matching, our auto-classifier is confident that this message is `,
+
+  VOTE_RESULTS_SUFFIX: ` You can also see how we voted, before deciding.`,
 
   //not used
   MATCHED: `In fact, other users have sent this message in {{numberInstances}} times. `,
