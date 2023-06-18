@@ -134,6 +134,596 @@
 			]
 		},
 		{
+			"name": "003_Add_Checkers",
+			"item": [
+				{
+					"name": "Checker 2 Onboarding",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_CHECKER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{CHECKER_2_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{CHECKER_2_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{CHECKER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1687054080\",\r\n                \"text\": {\r\n                  \"body\": \"I'd like to join as a CheckMate to help counter misinformation and scams! 💪🏻\"\r\n                },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Onboarding_1 Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const CHECKER_2_NUMBER = pm.variables.get(\"CHECKER_2_NUMBER\");\r",
+									"    const ONBOARDING_1 = pm.variables.get(\"__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.ONBOARDING_1\");\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"text\": {\r",
+									"                \"body\": ONBOARDING_1,\r",
+									"                \"preview_url\": false\r",
+									"            },\r",
+									"            \"to\": CHECKER_2_NUMBER,\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"context\": {\r",
+									"                \"message_id\": \"whatsapp\"\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Checker 2 input name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_CHECKER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{CHECKER_2_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{CHECKER_2_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{CHECKER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1687055129\",\r\n                \"text\": {\r\n                  \"body\": \"{{CHECKER_2_NAME}}\"\r\n                },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Onboarding_2 Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const CHECKER_2_NUMBER = pm.variables.get(\"CHECKER_2_NUMBER\");\r",
+									"    const CHECKER_2_NAME = pm.variables.get(\"CHECKER_2_NAME\");\r",
+									"    const ONBOARDING_2 = pm.variables.get(\"__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.ONBOARDING_2\").replace(\"{{name}}\", CHECKER_2_NAME);\r",
+									"\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": CHECKER_2_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": ONBOARDING_2\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"privacyOk\",\r",
+									"                                \"title\": \"Got it!\"\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Checker 2 press \"Got it!\" button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_CHECKER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{CHECKER_2_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{CHECKER_2_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{CHECKER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1687057027\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"privacyOk\",\r\n                    \"title\": \"Got it!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Onboarding_3 Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const CHECKER_2_NUMBER = pm.variables.get(\"CHECKER_2_NUMBER\");\r",
+									"    const ONBOARDING_3 = pm.variables.get(\"__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.ONBOARDING_3\")\r",
+									"\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": CHECKER_2_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": ONBOARDING_3\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"typeformDone\",\r",
+									"                                \"title\": \"I've done the quiz!\"\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Checker 2 press \"Ive done the quiz!\" button Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_CHECKER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{CHECKER_2_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{CHECKER_2_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{CHECKER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1687057027\",\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"typeformDone\",\r\n                    \"title\": \"I've done the quiz!\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Onboarding_4 Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const CHECKER_2_NUMBER = pm.variables.get(\"CHECKER_2_NUMBER\");\r",
+									"    const ONBOARDING_4 = pm.variables.get(\"__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.ONBOARDING_4\")\r",
+									"\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"text\": {\r",
+									"                \"body\": ONBOARDING_4,\r",
+									"                \"preview_url\": true\r",
+									"            },\r",
+									"            \"to\": CHECKER_2_NUMBER,\r",
+									"            \"messaging_product\": \"whatsapp\"\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Checker 3 Onboarding",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_CHECKER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{CHECKER_3_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{CHECKER_3_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{CHECKER_3_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1687054080\",\r\n                \"text\": {\r\n                  \"body\": \"I'd like to join as a CheckMate to help counter misinformation and scams! 💪🏻\"\r\n                },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Onboarding_1 Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const CHECKER_3_NUMBER = pm.variables.get(\"CHECKER_3_NUMBER\");\r",
+									"    const ONBOARDING_1 = pm.variables.get(\"__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.ONBOARDING_1\");\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"text\": {\r",
+									"                \"body\": ONBOARDING_1,\r",
+									"                \"preview_url\": false\r",
+									"            },\r",
+									"            \"to\": CHECKER_3_NUMBER,\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"context\": {\r",
+									"                \"message_id\": \"whatsapp\"\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Checker 3 input name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_CHECKER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{CHECKER_3_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{CHECKER_3_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{CHECKER_3_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"1687055129\",\r\n                \"text\": {\r\n                  \"body\": \"{{CHECKER_3_NAME}}\"\r\n                },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Onboarding_2 Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const CHECKER_3_NUMBER = pm.variables.get(\"CHECKER_3_NUMBER\");\r",
+									"    const CHECKER_3_NAME = pm.variables.get(\"CHECKER_3_NAME\");\r",
+									"    const ONBOARDING_2 = pm.variables.get(\"__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.ONBOARDING_2\").replace(\"{{name}}\", CHECKER_3_NAME);\r",
+									"\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": CHECKER_3_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": ONBOARDING_2\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"privacyOk\",\r",
+									"                                \"title\": \"Got it!\"\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "003_New_User",
 			"item": [
 				{
@@ -609,7 +1199,7 @@
 					"response": []
 				},
 				{
-					"name": "Get last message (checker NEW_MESSAGE_RECEIVED template)",
+					"name": "Get first checker message",
 					"event": [
 						{
 							"listen": "test",
@@ -617,13 +1207,17 @@
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
 									"    const HARD_CODED_ID = \"HARD_CODED_ID\"\r",
+									"    const CHECKER_NAME = \"CHECKER_NAME\"\r",
+									"    const CHECKER_PHONE_NUMBER = \"CHECKER_PHONE_NUMBER\"\r",
+									"    const CHECKER_PHONE_NUMBERS = [pm.variables.get(\"CHECKER_1_NUMBER\"), pm.variables.get(\"CHECKER_2_NUMBER\"), pm.variables.get(\"CHECKER_3_NUMBER\")]\r",
+									"    const CHECKER_NAMES = [pm.variables.get(\"CHECKER_1_NAME\"), pm.variables.get(\"CHECKER_2_NAME\"), pm.variables.get(\"CHECKER_3_NAME\")]\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
 									"    \"body\": {\r",
 									"        \"messaging_product\": \"whatsapp\",\r",
 									"        \"recipient_type\": \"individual\",\r",
-									"        \"to\": \"CHECKER1_PHONE_NUMBER\",\r",
+									"        \"to\": CHECKER_PHONE_NUMBER,\r",
 									"        \"type\": \"template\",\r",
 									"        \"template\": {\r",
 									"            \"name\": \"new_message_received\",\r",
@@ -659,7 +1253,7 @@
 									"                    \"parameters\": [\r",
 									"                        {\r",
 									"                            \"type\": \"text\",\r",
-									"                            \"text\": \"Bing Wen\"\r",
+									"                            \"text\": CHECKER_NAME\r",
 									"                        }\r",
 									"                    ]\r",
 									"                }\r",
@@ -672,9 +1266,17 @@
 									"    \"method\": \"POST\"\r",
 									"}\r",
 									"    var jsonData = pm.response.json();\r",
+									"    //check name in list\r",
+									"    const name = jsonData.body.template.components[2].parameters[0].text\r",
+									"    pm.expect(CHECKER_NAMES).to.include(name);\r",
+									"    //check number in list\r",
+									"    const number = jsonData.body.to\r",
+									"    pm.expect(CHECKER_PHONE_NUMBERS).to.include(number);\r",
 									"    // Replace dynamically created IDs\r",
+									"    jsonData.body.to = CHECKER_PHONE_NUMBER\r",
 									"    jsonData.body.template.components[0].parameters[0].payload = HARD_CODED_ID\r",
 									"    jsonData.body.template.components[1].parameters[0].payload = HARD_CODED_ID\r",
+									"    jsonData.body.template.components[2].parameters[0].text = CHECKER_NAME\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
@@ -687,6 +1289,226 @@
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
 									"setTimeout(() => {}, 6000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get second checker message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const HARD_CODED_ID = \"HARD_CODED_ID\"\r",
+									"    const CHECKER_NAME = \"CHECKER_NAME\"\r",
+									"    const CHECKER_PHONE_NUMBER = \"CHECKER_PHONE_NUMBER\"\r",
+									"    const CHECKER_PHONE_NUMBERS = [pm.variables.get(\"CHECKER_1_NUMBER\"), pm.variables.get(\"CHECKER_2_NUMBER\"), pm.variables.get(\"CHECKER_3_NUMBER\")]\r",
+									"    const CHECKER_NAMES = [pm.variables.get(\"CHECKER_1_NAME\"), pm.variables.get(\"CHECKER_2_NAME\"), pm.variables.get(\"CHECKER_3_NAME\")]\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"recipient_type\": \"individual\",\r",
+									"        \"to\": CHECKER_PHONE_NUMBER,\r",
+									"        \"type\": \"template\",\r",
+									"        \"template\": {\r",
+									"            \"name\": \"new_message_received\",\r",
+									"            \"language\": {\r",
+									"                \"policy\": \"deterministic\",\r",
+									"                \"code\": \"en\"\r",
+									"            },\r",
+									"            \"components\": [\r",
+									"                {\r",
+									"                    \"type\": \"button\",\r",
+									"                    \"sub_type\": \"quick_reply\",\r",
+									"                    \"index\": 0,\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"payload\",\r",
+									"                            \"payload\": HARD_CODED_ID\r",
+									"                        }\r",
+									"                    ]\r",
+									"                },\r",
+									"                {\r",
+									"                    \"type\": \"button\",\r",
+									"                    \"sub_type\": \"quick_reply\",\r",
+									"                    \"index\": 1,\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"payload\",\r",
+									"                            \"payload\": HARD_CODED_ID\r",
+									"                        }\r",
+									"                    ]\r",
+									"                },\r",
+									"                {\r",
+									"                    \"type\": \"body\",\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"text\",\r",
+									"                            \"text\": CHECKER_NAME\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            ]\r",
+									"        },\r",
+									"        \"context\": {\r",
+									"            \"message_id\": \"factChecker\"\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    //check name in list\r",
+									"    const name = jsonData.body.template.components[2].parameters[0].text\r",
+									"    pm.expect(CHECKER_NAMES).to.include(name);\r",
+									"    //check number in list\r",
+									"    const number = jsonData.body.to\r",
+									"    pm.expect(CHECKER_PHONE_NUMBERS).to.include(number);\r",
+									"    // Replace dynamically created IDs\r",
+									"    jsonData.body.to = CHECKER_PHONE_NUMBER\r",
+									"    jsonData.body.template.components[0].parameters[0].payload = HARD_CODED_ID\r",
+									"    jsonData.body.template.components[1].parameters[0].payload = HARD_CODED_ID\r",
+									"    jsonData.body.template.components[2].parameters[0].text = CHECKER_NAME\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get third checker message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"    const HARD_CODED_ID = \"HARD_CODED_ID\"\r",
+									"    const CHECKER_NAME = \"CHECKER_NAME\"\r",
+									"    const CHECKER_PHONE_NUMBER = \"CHECKER_PHONE_NUMBER\"\r",
+									"    const CHECKER_PHONE_NUMBERS = [pm.variables.get(\"CHECKER_1_NUMBER\"), pm.variables.get(\"CHECKER_2_NUMBER\"), pm.variables.get(\"CHECKER_3_NUMBER\")]\r",
+									"    const CHECKER_NAMES = [pm.variables.get(\"CHECKER_1_NAME\"), pm.variables.get(\"CHECKER_2_NAME\"), pm.variables.get(\"CHECKER_3_NAME\")]\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"recipient_type\": \"individual\",\r",
+									"        \"to\": CHECKER_PHONE_NUMBER,\r",
+									"        \"type\": \"template\",\r",
+									"        \"template\": {\r",
+									"            \"name\": \"new_message_received\",\r",
+									"            \"language\": {\r",
+									"                \"policy\": \"deterministic\",\r",
+									"                \"code\": \"en\"\r",
+									"            },\r",
+									"            \"components\": [\r",
+									"                {\r",
+									"                    \"type\": \"button\",\r",
+									"                    \"sub_type\": \"quick_reply\",\r",
+									"                    \"index\": 0,\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"payload\",\r",
+									"                            \"payload\": HARD_CODED_ID\r",
+									"                        }\r",
+									"                    ]\r",
+									"                },\r",
+									"                {\r",
+									"                    \"type\": \"button\",\r",
+									"                    \"sub_type\": \"quick_reply\",\r",
+									"                    \"index\": 1,\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"payload\",\r",
+									"                            \"payload\": HARD_CODED_ID\r",
+									"                        }\r",
+									"                    ]\r",
+									"                },\r",
+									"                {\r",
+									"                    \"type\": \"body\",\r",
+									"                    \"parameters\": [\r",
+									"                        {\r",
+									"                            \"type\": \"text\",\r",
+									"                            \"text\": CHECKER_NAME\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            ]\r",
+									"        },\r",
+									"        \"context\": {\r",
+									"            \"message_id\": \"factChecker\"\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    //check name in list\r",
+									"    const name = jsonData.body.template.components[2].parameters[0].text\r",
+									"    pm.expect(CHECKER_NAMES).to.include(name);\r",
+									"    //check number in list\r",
+									"    const number = jsonData.body.to\r",
+									"    pm.expect(CHECKER_PHONE_NUMBERS).to.include(number);\r",
+									"    // Replace dynamically created IDs\r",
+									"    jsonData.body.to = CHECKER_PHONE_NUMBER\r",
+									"    jsonData.body.template.components[0].parameters[0].payload = HARD_CODED_ID\r",
+									"    jsonData.body.template.components[1].parameters[0].payload = HARD_CODED_ID\r",
+									"    jsonData.body.template.components[2].parameters[0].text = CHECKER_NAME\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1397,6 +2219,271 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "007_Scam_Autocategorise",
+			"item": [
+				{
+					"name": "User sends scam message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"This is a scam message\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (SCAM, IMMEDIATE, NOT MATCHED, AUTO)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"scam immediate autocategorised no matched response\", function () {\r",
+									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SCAM\");\r",
+									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\")\r",
+									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED\")\r",
+									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\")\r",
+									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\")\r",
+									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX\")\r",
+									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\").replace(\"{{results}}\",\"\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": \"88888888\",\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"ID\",\r",
+									"                                \"title\": \"Yes\"\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"ID\",\r",
+									"                                \"title\": \"No\"\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"            \"context\": {\r",
+									"                \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    let reply_id_yes = jsonData.body.interactive.action.buttons[0].reply.id;\r",
+									"    let reply_id_no = jsonData.body.interactive.action.buttons[1].reply.id;\r",
+									"    let [, scamInstancePath , ] = reply_id_yes.split(\"_\")\r",
+									"    \r",
+									"    // check if the id matches the pattern \"menu_dispute_messages/*/instances/*\"\r",
+									"    pm.expect(reply_id_yes).to.match(/scamshieldConsent_messages\\/\\w+\\/instances\\/\\w+_consent/);\r",
+									"    pm.expect(reply_id_no).to.match(/scamshieldConsent_messages\\/\\w+\\/instances\\/\\w+_decline/);\r",
+									"    pm.collectionVariables.set(\"scamInstancePath\", scamInstancePath);\r",
+									"\r",
+									"    jsonData.body.interactive.action.buttons[0].reply.id = \"ID\"\r",
+									"    jsonData.body.interactive.action.buttons[1].reply.id = \"ID\"\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "008_Spam_Autocategorise",
+			"item": [
+				{
+					"name": "User sends spam message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"Jerome\" }, \"wa_id\": \"88888888\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"88888888\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": \"16829284575\",\r\n                \"text\": { \"body\": \"This is a spam message\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (SPAM, IMMEDIATE, NOT MATCHED, AUTO)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"spam immediate autocategorised no matched response\", function () {\r",
+									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM\");\r",
+									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\")\r",
+									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED\")\r",
+									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\")\r",
+									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\")\r",
+									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX\")\r",
+									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\")\r",
+									"    const expected = {\r",
+									"    \"hostname\": \"resultserver\",\r",
+									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"    \"body\": {\r",
+									"        \"text\": {\r",
+									"            \"body\": BODY_TEXT,\r",
+									"            \"preview_url\": false\r",
+									"        },\r",
+									"        \"to\": \"88888888\",\r",
+									"        \"messaging_product\": \"whatsapp\",\r",
+									"        \"context\": {\r",
+									"            \"message_id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r",
+									"        }\r",
+									"    },\r",
+									"    \"method\": \"POST\"\r",
+									"}\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
@@ -1430,6 +2517,10 @@
 		},
 		{
 			"key": "disputedInstancePath",
+			"value": ""
+		},
+		{
+			"key": "scamInstancePath",
 			"value": ""
 		}
 	]

@@ -30,13 +30,11 @@ exports.onVoteRequestUpdate = functions
     const messageRef = docSnap.ref.parent.parent
 
     if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
-      functions.logger.log(`L2 vote message sent for ${after.platformId}`)
       await sendVotingMessage(change.after, messageRef)
     } else if (
       before.triggerL2Others !== true &&
       after.triggerL2Others === true
     ) {
-      functions.logger.log(`L2 others message sent for ${after.platformId}`)
       await sendL2OthersCategorisationMessage(change.after, messageRef)
     } else if (before.vote != after.vote || before.category != after.category) {
       await updateCounts(messageRef, before, after)
@@ -74,7 +72,7 @@ exports.onVoteRequestUpdate = functions
       const isAssessed =
         (isUnsure &&
           responseCount >
-          parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
+            parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
         (!isUnsure &&
           responseCount > parseInt(thresholds.endVote * numFactCheckers)) ||
         (isSus &&
@@ -93,11 +91,9 @@ exports.onVoteRequestUpdate = functions
         }
         if (truthScore < (thresholds.falseUpperBound || 1.5)) {
           primaryCategory = "false"
-        }
-        else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+        } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
           primaryCategory = "misleading"
-        }
-        else {
+        } else {
           primaryCategory = "true"
         }
       } else if (isSpam) {
@@ -114,7 +110,6 @@ exports.onVoteRequestUpdate = functions
       }
       await messageRef.update({
         truthScore: truthScore,
-        isSus: isSus,
         isScam: isScam,
         isIllicit: isIllicit,
         isInfo: isInfo,
