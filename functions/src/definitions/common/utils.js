@@ -80,7 +80,7 @@ const mockDb = async function () {
   if (runtimeEnvironment.value() !== "PROD") {
     await factCheckersRef.doc(checker1PhoneNumber.value()).set(
       {
-        name: "Bing Wen",
+        name: "CHECKER1",
         isActive: true,
         isOnboardingComplete: true,
         platformId: checker1PhoneNumber.value(),
