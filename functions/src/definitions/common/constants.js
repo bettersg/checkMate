@@ -169,6 +169,9 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   //button
   OUTSTANDING_REMINDER:
     "You have *{{num_outstanding}} remaining messages* to assess. Would you like to be sent the next one in line?",
+
+  NO_OUTSTANDING:
+    "Great, you have no further messages to assess. Keep it up!💪",
 }
 
 exports.thresholds = {

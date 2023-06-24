@@ -206,10 +206,11 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
       .get()
     const remainingCount = outstandingVoteRequestsQuerySnap.size
     if (remainingCount == 0) {
+      const responses = await getResponsesObj("factChecker")
       await sendWhatsappTextMessage(
         "factChecker",
         factCheckerId,
-        "Great, you have no further messages to assess. Keep it up!💪"
+        responses.NO_OUTSTANDING
       )
       return
     }
