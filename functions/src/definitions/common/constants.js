@@ -78,7 +78,7 @@ Thank you for keeping Singapore safe!`,
     "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more at https://scamshield.org.sg.",
 
   //not used
-  STATS_TEMPLATE: `{{top}}% of our CheckMates identified this as {{category1}}{{info_placeholder}}. {{second}}% felt this was {{category2}}.`,
+  STATS_TEMPLATE: `{{top}}% of our CheckMates identified this as *{{category1}}**{{info_placeholder}}*. *{{second}}*% felt this was *{{category2}}*.`,
 
   //button
   INTERIM_TEMPLATE: `At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think is that this {{prelim_assessment}}{{info_placeholder}}. 

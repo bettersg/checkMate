@@ -104,7 +104,11 @@ async function interimPromptHandler(context) {
     const promisesArr = eligibleInstances.docs.map(async (doc) => {
       const parentMessageRef = doc.ref.parent.parent
       const voteCount = await getCount(parentMessageRef, "responses")
-      if (voteCount >= thresholds.sendInterimMinVotes) {
+      if (
+        voteCount >= runtimeEnvironment.value() === "PROD"
+          ? thresholds.sendInterimMinVotes
+          : 1
+      ) {
         return sendInterimPrompt(doc)
       } else {
         return Promise.resolve()
