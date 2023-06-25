@@ -1,6 +1,7 @@
 const admin = require("firebase-admin")
 const { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } = require("./constants")
 const { sleep, getThresholds } = require("./utils")
+const { getCount } = require("./counters")
 const { sendTextMessage } = require("./sendMessage")
 const {
   sendWhatsappButtonMessage,
@@ -12,7 +13,8 @@ const { Timestamp } = require("firebase-admin/firestore")
 async function respondToInstance(
   instanceSnap,
   forceReply = false,
-  isImmediate = false
+  isImmediate = false,
+  isInterim = false
 ) {
   const parentMessageRef = instanceSnap.ref.parent.parent
   const parentMessageSnap = await parentMessageRef.get()
@@ -288,6 +290,227 @@ async function sendMenuMessage(
   }
 }
 
+async function sendInterimPrompt(instanceSnap) {
+  const data = instanceSnap.data()
+  const responses = await getResponsesObj("user")
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `sendInterim_${instanceSnap.ref.path}`,
+        title: "Get interim update",
+      },
+    },
+  ]
+  await sendWhatsappButtonMessage(
+    "user",
+    data.from,
+    responses.INTERIM_PROMPT,
+    buttons,
+    data.id
+  )
+  await instanceSnap.ref.update({
+    isInterimPromptSent: true,
+  })
+}
+
+async function sendInterimUpdate(instancePath) {
+  //get statistics
+  const db = admin.firestore()
+  const responses = await getResponsesObj("user")
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  if (instanceSnap.get("isReplied")) {
+    await sendTextMessage(
+      "user",
+      instanceSnap.get("from"),
+      responses.ALREADY_REPLIED,
+      data.id
+    )
+    return
+  }
+  const parentMessageRef = db.doc(instancePath).parent.parent
+  const parentMessageSnap = await parentMessageRef.get()
+  const primaryCategory = parentMessageSnap.get("primaryCategory")
+  const truthScore = parentMessageSnap.get("truthScore")
+
+  const voteRequestQuerySnapshot = await parentMessageRef
+    .collection("voteRequests")
+    .get()
+  const numFactCheckers = voteRequestQuerySnapshot.size
+  const voteCount = await getCount(parentMessageRef, "responses")
+  const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
+  let prelimAssessment
+  let infoPlaceholder = ""
+  const infoLiner = `, with an average score of ${truthScore} on a scale of 0-5 (5 = completely true)`
+  switch (primaryCategory) {
+    case "scam":
+      prelimAssessment = "is a scam🚫"
+      break
+    case "illicit":
+      prelimAssessment = "is suspicious🚨"
+      break
+    case "untrue":
+      prelimAssessment = "is untrue❌"
+      infoPlaceholder = infoLiner
+      break
+    case "misleading":
+      prelimAssessment = "is misleading⚠️"
+      infoPlaceholder = infoLiner
+      break
+    case "accurate":
+      prelimAssessment = "is accurate✅"
+      infoPlaceholder = infoLiner
+      break
+    case "spam":
+      prelimAssessment = "is spam🚧"
+      break
+    case "legitimate":
+      prelimAssessment = "is legitimate✅"
+      break
+    case "irrelevant":
+      prelimAssessment =
+        "message doesn't contain a meaningful claim to assess.😕"
+      break
+    case "unsure":
+      prelimAssessment = "unsure"
+      break
+  }
+  let finalResponse
+  if (primaryCategory === "unsure") {
+    finalResponse = responses.INTERIM_TEMPLATE_UNSURE
+  } else {
+    finalResponse = responses.INTERIM_TEMPLATE
+  }
+  finalResponse = finalResponse
+    .replace("{{prelim_assessment}}", prelimAssessment)
+    .replace("{{info_placeholder}}", infoPlaceholder)
+    .replace("{{%voted}}", percentageVoted)
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `sendInterim_${instancePath}`,
+        title: "Get another update",
+      },
+    },
+  ]
+  await sendWhatsappButtonMessage(
+    "user",
+    data.from,
+    finalResponse,
+    buttons,
+    data.id
+  )
+  if (!instanceSnap.get("isInterimReplySent")) {
+    await instanceSnap.ref.update({
+      isInterimReplySent: true,
+    })
+  }
+}
+
+async function sendVotingStats(instancePath, triggerScamShieldConsent) {
+  //get statistics
+  const db = admin.firestore()
+  const messageRef = db.doc(instancePath).parent.parent
+  const instanceSnap = await db.doc(instancePath).get()
+  const responseCount = await getCount(messageRef, "responses")
+  const irrelevantCount = await getCount(messageRef, "irrelevant")
+  const scamCount = await getCount(messageRef, "scam")
+  const illicitCount = await getCount(messageRef, "illicit")
+  const infoCount = await getCount(messageRef, "info")
+  const spamCount = await getCount(messageRef, "spam")
+  const legitimateCount = await getCount(messageRef, "legitimate")
+  const unsureCount = await getCount(messageRef, "unsure")
+  const susCount = scamCount + illicitCount
+  const voteTotal = await getCount(messageRef, "totalVoteScore")
+  const truthScore = infoCount > 0 ? voteTotal / infoCount : null
+  const thresholds = await getThresholds()
+  const responses = await getResponsesObj("user")
+  const from = instanceSnap.get("from")
+  let truthCategory
+  if (truthScore !== null) {
+    if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+      truthCategory = "untrue"
+    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+      truthCategory = "misleading"
+    } else {
+      truthCategory = "accurate"
+    }
+  } else truthCategory = "NA"
+
+  const categories = [
+    { name: "trivial", count: irrelevantCount, isInfo: false },
+    {
+      name: scamCount >= illicitCount ? "scam" : "illicit",
+      count: susCount,
+      isInfo: false,
+    },
+    { name: "spam", count: spamCount, isInfo: false },
+    { name: truthCategory, count: infoCount, isInfo: true },
+    { name: "legitimate", count: legitimateCount, isInfo: false },
+    { name: "unsure", count: unsureCount, isInfo: false },
+  ]
+
+  categories.sort((a, b) => b.count - a.count) // sort in descending order
+
+  const highestCategory = categories[0].name
+  const secondCategory = categories[1].name
+  const highestPercentage = (
+    (categories[0].count / responseCount) *
+    100
+  ).toFixed(2)
+  const secondPercentage = (
+    (categories[1].count / responseCount) *
+    100
+  ).toFixed(2)
+  const isHighestInfo = categories[0].isInfo
+  const isSecondInfo = categories[1].isInfo
+
+  const infoLiner = `, with an average score of ${truthScore} on a scale of 0-5 (5 = completely true)`
+  let response = `${highestPercentage}% of our CheckMates ${
+    isHighestInfo ? "collectively identified" : "voted"
+  } this *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
+  if (secondPercentage > 0) {
+    response += ` ${secondPercentage}% ${
+      isSecondInfo ? "collectively identified" : "voted"
+    } this *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
+  }
+
+  await sendTextMessage("user", from, response, instanceSnap.get("id"))
+
+  if (triggerScamShieldConsent) {
+    await sleep(2000)
+    const buttons = [
+      {
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_consent`,
+          title: "Yes",
+        },
+      },
+      {
+        type: "reply",
+        reply: {
+          id: `scamshieldConsent_${instancePath}_decline`,
+          title: "No",
+        },
+      },
+    ]
+    await sendWhatsappButtonMessage(
+      "user",
+      from,
+      responses.SCAMSHIELD_SEEK_CONSENT,
+      buttons,
+      instanceSnap.get("id")
+    )
+  }
+}
+
 exports.getResponsesObj = getResponsesObj
 exports.respondToInstance = respondToInstance
 exports.sendMenuMessage = sendMenuMessage
+exports.sendInterimPrompt = sendInterimPrompt
+exports.sendInterimUpdate = sendInterimUpdate
+exports.sendVotingStats = sendVotingStats

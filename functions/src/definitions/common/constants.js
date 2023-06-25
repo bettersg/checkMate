@@ -5,7 +5,7 @@ Please do not spread it further⛔️⛔️
 
 Thank you for keeping Singapore informed!`,
 
-  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true! ⚠️
+  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️
 
 Please take it with a pinch of salt and think twice before spreading it further🚧🚧.
 
@@ -40,7 +40,7 @@ This is the collective opinion of our CheckMates. That said, ScamShield (https:/
 
 Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
-  SPAM: `{{thanks}}{{matched}}{{methodology}}spam! 🚧 
+  SPAM: `{{thanks}}{{matched}}{{methodology}}spam!🚧 
 
 It's likely harmless, but you should always make sure 🧐
 
@@ -79,6 +79,24 @@ Thank you for keeping Singapore safe!`,
 
   //not used
   STATS_TEMPLATE: `{{top}}% of our CheckMates identified this as {{category1}}{{info_placeholder}}. {{second}}% felt this was {{category2}}.`,
+
+  //button
+  INTERIM_TEMPLATE: `At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think is that this {{prelim_assessment}}{{info_placeholder}}. 
+
+NOTE: This is a *preliminary assessment*. We will update you with a final assessment once more of our CheckMates have voted, or latest 24 hours since you sent in your message. The final assessment will be more credible, as more CheckMates would have voted. Thank you for using CheckMate!`,
+
+  INTERIM_TEMPLATE_UNSURE: `At this time, {{%voted}} of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.
+  
+If you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.`,
+
+  //button
+  INTERIM_PROMPT: `Thanks for waiting! We're still pending some of our volunteer CheckMates to assess and vote on this message.
+
+CheckMate relies on the wisdom of crowds, thus we will only be able to provide a credible final assessment once enough votes have come in.
+  
+However, if you want an early update of what our CheckMates think this message is, press the button below. Do note that this *is a preliminary assessment, of which we have less confidence in*. Please take it with a pinch of salt.`,
+
+  ALREADY_REPLIED: `CheckMate has already provided a final response to this message.`,
 
   //button
   SCAMSHIELD_SEEK_CONSENT:
@@ -187,4 +205,5 @@ exports.thresholds = {
   isSus: 0.5,
   falseUpperBound: 1.5,
   misleadingUpperBound: 3.5,
+  sendInterimMinVotes: 1,
 }

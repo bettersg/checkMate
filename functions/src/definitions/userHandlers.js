@@ -8,15 +8,14 @@ const {
   sendWhatsappButtonMessage,
 } = require("./common/sendWhatsappMessage")
 const { sendDisputeNotification } = require("./common/sendMessage")
-const {
-  mockDb,
-  sleep,
-  getThresholds,
-  stripUrl,
-  hashMessage,
-} = require("./common/utils")
+const { sleep, getThresholds } = require("./common/utils")
 const { getCount } = require("./common/counters")
-const { getResponsesObj, sendMenuMessage } = require("./common/responseUtils")
+const {
+  getResponsesObj,
+  sendMenuMessage,
+  sendInterimUpdate,
+  sendVotingStats,
+} = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
 const { getEmbedding } = require("./common/machineLearningServer/operations")
@@ -220,6 +219,8 @@ async function newTextInstanceHandler(
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
+    isInterimPromptSent: null,
+    isInterimReplySent: null,
     isReplyForced: null,
     replyCategory: null,
     replyTimestamp: null,
@@ -323,6 +324,8 @@ async function newImageInstanceHandler({
       isForwarded: isForwarded, //boolean, taken from webhook object
       isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
       isReplied: false,
+      isInterimPromptSent: null,
+      isInterimReplySent: null,
       isReplyForced: null,
       replyCategory: null,
       replyTimestamp: null,
@@ -358,23 +361,21 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
       await sendWhatsappTextMessage("user", from, replyText)
       break
     case "votingResults":
-      let whatsappMessageId
       let scamShield
-      ;[instancePath, whatsappMessageId, ...scamShield] = rest
+      ;[instancePath, ...scamShield] = rest
       const triggerScamShieldConsent =
         scamShield.length > 0 && scamShield[0] === "scamshield"
-      await handleVotingStatsRequest(
-        instancePath,
-        whatsappMessageId,
-        triggerScamShieldConsent
-      )
+      await sendVotingStats(instancePath, triggerScamShieldConsent)
+      break
+    case "sendInterim":
+      ;[instancePath] = rest
+      await sendInterimUpdate(instancePath)
       break
   }
 }
 
 async function handleVotingStatsRequest(
   instancePath,
-  whatsappMessageId,
   triggerScamShieldConsent
 ) {
   //get statistics
@@ -398,11 +399,11 @@ async function handleVotingStatsRequest(
   let truthCategory
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-      truthCategory = "false"
+      truthCategory = "untrue"
     } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
       truthCategory = "misleading"
     } else {
-      truthCategory = "true"
+      truthCategory = "accurate"
     }
   } else truthCategory = "NA"
 
@@ -444,7 +445,7 @@ async function handleVotingStatsRequest(
     } this *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
   }
 
-  await sendWhatsappTextMessage("user", from, response, whatsappMessageId)
+  await sendWhatsappTextMessage("user", from, response, instanceSnap.get("id"))
 
   if (triggerScamShieldConsent) {
     await sleep(2000)
@@ -469,7 +470,7 @@ async function handleVotingStatsRequest(
       from,
       responses.SCAMSHIELD_SEEK_CONSENT,
       buttons,
-      whatsappMessageId
+      instanceSnap.get("id")
     )
   }
 }

@@ -25,7 +25,7 @@ erDiagram
         boolean isInfo
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
-        string primaryCategory either "scam", "illicit", "irrelevant", "spam", "legitimate", "misleading", "false", "true", "unsure", or "error"
+        string primaryCategory either "scam", "illicit", "irrelevant", "spam", "legitimate", "misleading", "untrue", "accurate", "unsure", or "error"
         string customReply "Not used for now"
         number instanceCount
         collection instances
@@ -45,8 +45,10 @@ erDiagram
         string mimeType "For image only"
         boolean isForwarded "Not used for now"
         boolean isFrequentlyForwarded "Not used for now"
-        boolean isReplied "System has replied to the citizen"
-        boolean isReplyForced "track if reply is forced"
+        boolean isReplied "System has replied to the citizen with a final assessment"
+        boolean isInterimPromptSent "Have we sent an interim prompt"
+        boolean isInterimReplySent "Have we sent an interim reply"
+        boolean isReplyForced "track if final reply is forced"
         string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"
     		timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"

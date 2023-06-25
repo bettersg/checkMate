@@ -17,7 +17,7 @@ exports.onMessageUpdate = functions
       })
       const machineCategory = messageData.machineCategory
       let primaryCategory = messageData.primaryCategory
-      if (["misleading", "true", "false"].includes(primaryCategory)) {
+      if (["misleading", "untrue", "accurate"].includes(primaryCategory)) {
         primaryCategory = "info"
       }
       if (

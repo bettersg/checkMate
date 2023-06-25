@@ -40,11 +40,10 @@ exports.onVoteRequestUpdate = functions
       await updateCounts(messageRef, before, after)
       await updateCheckerVoteCount(before, after)
       const db = admin.firestore()
-      const factCheckersSnapshot = await db
-        .collection("factCheckers")
-        .where("isActive", "==", true)
+      const voteRequestQuerySnapshot = await messageRef
+        .collection("voteRequests")
         .get()
-      const numFactCheckers = factCheckersSnapshot.size
+      const numFactCheckers = voteRequestQuerySnapshot.size
       const responseCount = await getCount(messageRef, "responses")
       const irrelevantCount = await getCount(messageRef, "irrelevant")
       const scamCount = await getCount(messageRef, "scam")
@@ -90,11 +89,11 @@ exports.onVoteRequestUpdate = functions
           functions.logger.error("Category is info but truth score is null")
         }
         if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-          primaryCategory = "false"
+          primaryCategory = "untrue"
         } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
           primaryCategory = "misleading"
         } else {
-          primaryCategory = "true"
+          primaryCategory = "accurate"
         }
       } else if (isSpam) {
         primaryCategory = "spam"
