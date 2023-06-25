@@ -72,7 +72,7 @@ async function respondToInstance(
     {
       type: "reply",
       reply: {
-        id: `votingResults_${instanceSnap.ref.path}_${data.id}`,
+        id: `votingResults_${instanceSnap.ref.path}`,
         title: "See voting results",
       },
     },
@@ -95,7 +95,7 @@ async function respondToInstance(
     {
       type: "reply",
       reply: {
-        id: `votingResults_${instanceSnap.ref.path}_${data.id}_scamshield`,
+        id: `votingResults_${instanceSnap.ref.path}_scamshield`,
         title: "See voting results",
       },
     },
@@ -454,9 +454,10 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
   ]
 
   categories.sort((a, b) => b.count - a.count) // sort in descending order
-
-  const highestCategory = categories[0].name
-  const secondCategory = categories[1].name
+  const highestCategory =
+    categories[0].name === "scam" ? "a scam" : categories[0].name
+  const secondCategory =
+    categories[1].name === "scam" ? "a scam" : categories[1].name
   const highestPercentage = (
     (categories[0].count / responseCount) *
     100
@@ -470,12 +471,12 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
 
   const infoLiner = `, with an average score of ${truthScore} on a scale of 0-5 (5 = completely true)`
   let response = `${highestPercentage}% of our CheckMates ${
-    isHighestInfo ? "collectively identified" : "voted"
-  } this *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
+    isHighestInfo ? "collectively " : ""
+  }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
   if (secondPercentage > 0) {
     response += ` ${secondPercentage}% ${
-      isSecondInfo ? "collectively identified" : "voted"
-    } this *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
+      isSecondInfo ? "collectively " : ""
+    } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
   }
 
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
