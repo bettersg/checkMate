@@ -47,6 +47,7 @@ erDiagram
         boolean isFrequentlyForwarded "Not used for now"
         boolean isReplied "System has replied to the citizen with a final assessment"
         boolean isInterimPromptSent "Have we sent an interim prompt"
+        boolean isInterimUseful "Whether the interim message is useful"
         boolean isInterimReplySent "Have we sent an interim reply"
         boolean isReplyForced "track if final reply is forced"
         string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"

@@ -83,18 +83,28 @@ Thank you for keeping Singapore safe!`,
   //button
   INTERIM_TEMPLATE: `At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think is that this {{prelim_assessment}}{{info_placeholder}}. 
 
-NOTE: This is a *preliminary assessment*. We will update you with a final assessment once more of our CheckMates have voted, or latest 24 hours since you sent in your message. The final assessment will be more credible, as more CheckMates would have voted. Thank you for using CheckMate!`,
+NOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}`,
 
-  INTERIM_TEMPLATE_UNSURE: `At this time, {{%voted}} of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.
-  
+  INTERIM_TEMPLATE_UNSURE: `At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.
+
 If you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.`,
 
-  //button
-  INTERIM_PROMPT: `Thanks for waiting! We're still pending some of our volunteer CheckMates to assess and vote on this message.
+  INTERIM_FEEDBACK: `
 
-CheckMate relies on the wisdom of crowds, thus we will only be able to provide a credible final assessment once enough votes have come in.
-  
-However, if you want an early update of what our CheckMates think this message is, press the button below. Do note that this *is a preliminary assessment, of which we have less confidence in*. Please take it with a pinch of salt.`,
+Thanks for trusting CheckMate! 👋🏼 If this interim update was useful to you, we'd appreciate it if you'd let us know by tapping on “Yes, it's useful” below. Otherwise, tap on “No, it's not” to continue waiting for the final result. Either way, you can continue to request more updates as more votes come in.`,
+
+  //button
+  INTERIM_PROMPT: `Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. 
+
+You may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼`,
+
+  INTERIM_USEFUL: `Thanks for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.
+
+In the meantime, if you'd like another update after more votes come in, just tap the button below to request one.`,
+
+  INTERIM_NOT_USEFUL: `Sorry to hear that, but thanks anyway for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.
+
+If you'd like still another update after more votes come in, just tap the button below to request one.`,
 
   ALREADY_REPLIED: `CheckMate has already provided a final response to this message.`,
 

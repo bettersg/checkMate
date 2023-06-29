@@ -15,6 +15,7 @@ const {
   sendMenuMessage,
   sendInterimUpdate,
   sendVotingStats,
+  respondToInterimFeedback,
 } = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
@@ -220,6 +221,7 @@ async function newTextInstanceHandler(
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
+    isInterimUseful: null,
     isInterimReplySent: null,
     isReplyForced: null,
     replyCategory: null,
@@ -325,6 +327,7 @@ async function newImageInstanceHandler({
       isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
       isReplied: false,
       isInterimPromptSent: null,
+      isInterimUseful: null,
       isInterimReplySent: null,
       isReplyForced: null,
       replyCategory: null,
@@ -343,12 +346,12 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
   const from = messageObj.from
   const responses = await getResponsesObj("user")
   const [type, ...rest] = buttonId.split("_")
-  let instancePath, selection
+  let instancePath, selection, instanceRef, updateObj
   switch (type) {
     case "scamshieldConsent":
       ;[instancePath, selection] = rest
-      const instanceRef = db.doc(instancePath)
-      const updateObj = {}
+      instanceRef = db.doc(instancePath)
+      updateObj = {}
       let replyText
       if (selection === "consent") {
         updateObj.scamShieldConsent = true
@@ -370,6 +373,10 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
     case "sendInterim":
       ;[instancePath] = rest
       await sendInterimUpdate(instancePath)
+      break
+    case "feedbackInterim":
+      ;[instancePath, selection] = rest
+      await respondToInterimFeedback(instancePath, selection)
       break
   }
 }

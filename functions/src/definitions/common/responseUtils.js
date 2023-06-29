@@ -316,6 +316,7 @@ async function sendInterimPrompt(instanceSnap) {
 
 async function sendInterimUpdate(instancePath) {
   //get statistics
+  const FEEDBACK_FEATURE_FLAG = true
   const db = admin.firestore()
   const responses = await getResponsesObj("user")
   const instanceRef = db.doc(instancePath)
@@ -334,7 +335,6 @@ async function sendInterimUpdate(instancePath) {
   const parentMessageSnap = await parentMessageRef.get()
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const truthScore = parentMessageSnap.get("truthScore")
-
   const voteRequestQuerySnapshot = await parentMessageRef
     .collection("voteRequests")
     .get()
@@ -377,16 +377,77 @@ async function sendInterimUpdate(instancePath) {
       prelimAssessment = "unsure"
       break
   }
+  const updateObj = {}
   let finalResponse
   if (primaryCategory === "unsure") {
     finalResponse = responses.INTERIM_TEMPLATE_UNSURE
+    if (data.isInterimUseful === null) {
+      updateObj.isInterimUseful = false
+    }
   } else {
     finalResponse = responses.INTERIM_TEMPLATE
   }
+  const getFeedback =
+    data.isInterimUseful === null &&
+    primaryCategory !== "unsure" &&
+    FEEDBACK_FEATURE_FLAG
   finalResponse = finalResponse
     .replace("{{prelim_assessment}}", prelimAssessment)
     .replace("{{info_placeholder}}", infoPlaceholder)
     .replace("{{%voted}}", percentageVoted)
+    .replace("{{get_feedback}}", getFeedback ? responses.INTERIM_FEEDBACK : "")
+
+  let buttons
+  if (getFeedback) {
+    buttons = [
+      {
+        type: "reply",
+        reply: {
+          id: `feedbackInterim_${instancePath}_yes`,
+          title: "Yes, it's useful",
+        },
+      },
+      {
+        type: "reply",
+        reply: {
+          id: `feedbackInterim_${instancePath}_no`,
+          title: "No, it's not",
+        },
+      },
+    ]
+  } else {
+    buttons = [
+      {
+        type: "reply",
+        reply: {
+          id: `sendInterim_${instancePath}`,
+          title: "Get another update",
+        },
+      },
+    ]
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    data.from,
+    finalResponse,
+    buttons,
+    data.id
+  )
+  if (!instanceSnap.get("isInterimReplySent")) {
+    updateObj.isInterimReplySent = true
+  }
+  //if updateObj is not empty
+  if (Object.keys(updateObj).length !== 0) {
+    await instanceRef.update(updateObj)
+  }
+}
+
+async function respondToInterimFeedback(instancePath, isUseful) {
+  const db = admin.firestore()
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const responses = await getResponsesObj("user")
+  const data = instanceSnap.data()
   const buttons = [
     {
       type: "reply",
@@ -396,18 +457,19 @@ async function sendInterimUpdate(instancePath) {
       },
     },
   ]
-  await sendWhatsappButtonMessage(
-    "user",
-    data.from,
-    finalResponse,
-    buttons,
-    data.id
-  )
-  if (!instanceSnap.get("isInterimReplySent")) {
-    await instanceSnap.ref.update({
-      isInterimReplySent: true,
-    })
+  let response
+  switch (isUseful) {
+    case "yes":
+      response = responses?.INTERIM_USEFUL
+      await instanceRef.update({ isInterimUseful: true })
+      break
+    case "no":
+      response = responses?.INTERIM_NOT_USEFUL
+      await instanceRef.update({ isInterimUseful: false })
+      break
   }
+
+  await sendWhatsappButtonMessage("user", data.from, response, buttons, data.id)
 }
 
 async function sendVotingStats(instancePath, triggerScamShieldConsent) {
@@ -515,3 +577,4 @@ exports.sendMenuMessage = sendMenuMessage
 exports.sendInterimPrompt = sendInterimPrompt
 exports.sendInterimUpdate = sendInterimUpdate
 exports.sendVotingStats = sendVotingStats
+exports.respondToInterimFeedback = respondToInterimFeedback
