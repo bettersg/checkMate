@@ -6,7 +6,7 @@ import {
 } from "./common/typesense/collectionOperations"
 import { firestoreTimestampToYYYYMM } from "./common/utils"
 
-exports.onMessageWrite = functions
+export const onMessageWrite = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["TYPESENSE_TOKEN"] })
   .firestore.document("/messages/{messageId}")

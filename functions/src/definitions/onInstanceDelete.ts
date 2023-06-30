@@ -5,7 +5,7 @@ import {
 } from "./common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
 
-exports.onInstanceDelete = functions
+export const onInstanceDelete = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["TYPESENSE_TOKEN"],

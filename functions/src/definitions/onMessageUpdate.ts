@@ -1,8 +1,8 @@
-const functions = require("firebase-functions")
-const { respondToInstance } = require("./common/responseUtils")
-const { Timestamp } = require("firebase-admin/firestore")
+import * as functions from "firebase-functions"
+import { respondToInstance } from "./common/responseUtils"
+import { Timestamp } from "firebase-admin/firestore"
 
-exports.onMessageUpdate = functions
+export const onMessageUpdate = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .firestore.document("/messages/{messageId}")
@@ -40,7 +40,9 @@ exports.onMessageUpdate = functions
     return Promise.resolve()
   })
 
-async function replyPendingInstances(docSnap) {
+async function replyPendingInstances(
+  docSnap: functions.firestore.QueryDocumentSnapshot
+) {
   const pendingSnapshot = await docSnap.ref
     .collection("instances")
     .where("isReplied", "==", false)

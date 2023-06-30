@@ -17,9 +17,10 @@ async function sendWhatsappTextMessage(
   bot,
   to,
   text,
-  replyMessageId = null,
+  replyMessageId,
   previewUrl = false
 ) {
+  replyMessageId = replyMessageId ?? null
   if (text.length > 4096) {
     text = `${text.slice(0, 4000)}...*[TRUNCATED, MSG TOO LONG FOR WHATSAPP]*`
   }

@@ -1,14 +1,16 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { getThresholds } = require("./common/utils")
-const {
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
+
+import { getThresholds } from "./common/utils"
+import {
   sendVotingMessage,
   sendL2OthersCategorisationMessage,
   sendRemainingReminder,
-} = require("./common/sendFactCheckerMessages")
-const { incrementCounter, getCount } = require("./common/counters")
-const { FieldValue } = require("@google-cloud/firestore")
-const { defineInt } = require("firebase-functions/params")
+} from "./common/sendFactCheckerMessages"
+import { incrementCounter, getCount } from "./common/counters"
+import { FieldValue } from "@google-cloud/firestore"
+import { defineInt } from "firebase-functions/params"
+
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
 
@@ -16,13 +18,13 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-exports.onVoteRequestUpdate = functions
+export const onVoteRequestUpdate = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
   })
   .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
-  .onUpdate(async (change, context) => {
+  .onUpdate(async (change) => {
     // Grab the current value of what was written to Firestore.
     const before = change.before.data()
     const docSnap = change.after
@@ -55,28 +57,27 @@ exports.onVoteRequestUpdate = functions
       const unsureCount = await getCount(messageRef, "unsure")
       const susCount = scamCount + illicitCount
       const voteTotal = await getCount(messageRef, "totalVoteScore")
-      const truthScore = infoCount > 0 ? voteTotal / infoCount : null
+      const truthScore = voteTotal / infoCount
       const thresholds = await getThresholds()
-      const isSus = susCount > parseInt(thresholds.isSus * responseCount)
+      const isSus = susCount > Number(thresholds.isSus) * responseCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
-      const isInfo = infoCount > parseInt(thresholds.isInfo * responseCount)
-      const isSpam = spamCount > parseInt(thresholds.isSpam * responseCount)
+      const isInfo = infoCount > Number(thresholds.isInfo) * responseCount
+      const isSpam = spamCount > Number(thresholds.isSpam) * responseCount
       const isLegitimate =
-        legitimateCount > parseInt(thresholds.isLegitimate * responseCount)
+        legitimateCount > Number(thresholds.isLegitimate) * responseCount
       const isIrrelevant =
-        irrelevantCount > parseInt(thresholds.isIrrelevant * responseCount)
+        irrelevantCount > Number(thresholds.isIrrelevant) * responseCount
       const isUnsure =
         (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) ||
-        unsureCount > parseInt(thresholds.isUnsure * responseCount)
+        unsureCount > Number(thresholds.isUnsure) * responseCount
       const isAssessed =
         (isUnsure &&
-          responseCount >
-            parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
+          responseCount > Number(thresholds.endVoteUnsure) * numFactCheckers) ||
         (!isUnsure &&
-          responseCount > parseInt(thresholds.endVote * numFactCheckers)) ||
+          responseCount > Number(thresholds.endVote) * numFactCheckers) ||
         (isSus &&
-          responseCount > parseInt(thresholds.endVoteSus * numFactCheckers))
+          responseCount > Number(thresholds.endVoteSus) * numFactCheckers)
 
       //set primaryCategory
       let primaryCategory
@@ -85,13 +86,15 @@ exports.onVoteRequestUpdate = functions
       } else if (isIllicit) {
         primaryCategory = "illicit"
       } else if (isInfo) {
-        if (truthScore === null) {
+        if (!infoCount) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
         }
-        if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+        if (truthScore < (Number(thresholds.falseUpperBound) || 1.5)) {
           primaryCategory = "false"
-        } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+        } else if (
+          truthScore < (Number(thresholds.misleadingUpperBound) || 3.5)
+        ) {
           primaryCategory = "misleading"
         } else {
           primaryCategory = "true"
@@ -107,6 +110,9 @@ exports.onVoteRequestUpdate = functions
       } else {
         primaryCategory = "error"
         functions.logger.error("Error in primary category determination")
+      }
+      if (messageRef === null) {
+        return
       }
       await messageRef.update({
         truthScore: truthScore,
@@ -136,7 +142,11 @@ exports.onVoteRequestUpdate = functions
     return Promise.resolve()
   })
 
-async function updateCounts(messageRef, before, after) {
+async function updateCounts(
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData> | null,
+  before: admin.firestore.DocumentData,
+  after: admin.firestore.DocumentData
+) {
   const previousCategory = before.category
   const currentCategory = after.category
   const previousVote = before.vote
@@ -177,7 +187,10 @@ async function updateCounts(messageRef, before, after) {
   }
 }
 
-async function updateCheckerVoteCount(before, after) {
+async function updateCheckerVoteCount(
+  before: admin.firestore.DocumentData,
+  after: admin.firestore.DocumentData
+) {
   let factCheckerRef
   if (before.category === null && after.category !== null) {
     factCheckerRef = after.factCheckerDocRef

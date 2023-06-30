@@ -1,15 +1,18 @@
-const {
+import {
   USER_BOT_RESPONSES,
   FACTCHECKER_BOT_RESPONSES,
   thresholds,
-} = require("./constants")
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { sendWhatsappTextMessage } = require("./sendWhatsappMessage")
-const { defineString } = require("firebase-functions/params")
-const { findPhoneNumbersInText } = require("libphonenumber-js")
-const { createHash } = require("crypto")
-const { Blob } = require("buffer")
+} from "./constants"
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
+import { Timestamp } from "firebase-admin/firestore"
+import { sendWhatsappTextMessage } from "./sendWhatsappMessage"
+import { defineString } from "firebase-functions/params"
+import { findPhoneNumbersInText } from "libphonenumber-js"
+
+import { createHash } from "crypto"
+import { Blob } from "buffer"
+import { Thresholds, WhatsappMessage } from "../../types"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")
@@ -18,11 +21,13 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-function sleep(ms) {
+export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-exports.handleSpecialCommands = async function (messageObj) {
+export const handleSpecialCommands = async function (
+  messageObj: WhatsappMessage
+) {
   const command = messageObj.text.body.toLowerCase()
   if (command.startsWith("/")) {
     switch (command) {
@@ -99,14 +104,14 @@ const mockDb = async function () {
   functions.logger.log("mocked")
 }
 
-exports.getThresholds = async function () {
+export const getThresholds = async function () {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
-  return theresholdsSnap.data() ?? thresholds
+  return (theresholdsSnap.data() as Thresholds) ?? thresholds
 }
 
-exports.checkUrl = function (urlString) {
+export const checkUrl = function (urlString: string) {
   let url
   try {
     url = new URL(urlString)
@@ -116,7 +121,7 @@ exports.checkUrl = function (urlString) {
   return url.protocol === "http:" || url.protocol === "https:"
 }
 
-function stripPhone(originalStr, includePlaceholder = false) {
+export function stripPhone(originalStr: string, includePlaceholder = false) {
   const phoneNumbers = findPhoneNumbersInText(originalStr)
   let newStr = originalStr
   let offset = 0
@@ -135,7 +140,7 @@ function stripPhone(originalStr, includePlaceholder = false) {
   return newStr
 }
 
-function stripUrl(originalStr, includePlaceholder = false) {
+export function stripUrl(originalStr: string, includePlaceholder = false) {
   const urlRegex =
     /\b((?:https?:\/\/)?(?:(?:www\.)?(?:[\da-z\.-]+)\.(?:[a-z]{2,6})|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:(?:[0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])))(?::[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])?(?:\/[\w\.-]*)*\/?)\b/g
   const placeholder = includePlaceholder ? "<URL>" : ""
@@ -143,13 +148,13 @@ function stripUrl(originalStr, includePlaceholder = false) {
   return replacedString
 }
 
-function firestoreTimestampToYYYYMM(timestamp) {
+export function firestoreTimestampToYYYYMM(timestamp: Timestamp) {
   // Convert Firestore timestamp to a JavaScript Date object
   let date = timestamp.toDate()
 
   // Get the year and the month
   let year = date.getFullYear()
-  let month = date.getMonth() + 1 // JavaScript months range from 0 - 11
+  let month: string | number = date.getMonth() + 1 // JavaScript months range from 0 - 11
 
   // Pad the month with a 0 if it's less than 10
   if (month < 10) {
@@ -160,12 +165,6 @@ function firestoreTimestampToYYYYMM(timestamp) {
   return `${year}${month}`
 }
 
-function hashMessage(originalStr) {
+export function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
-
-exports.stripPhone = stripPhone
-exports.stripUrl = stripUrl
-exports.hashMessage = hashMessage
-exports.sleep = sleep
-exports.firestoreTimestampToYYYYMM = firestoreTimestampToYYYYMM

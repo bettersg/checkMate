@@ -1,14 +1,14 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
-const { respondToInstance } = require("./common/responseUtils")
-const { Timestamp } = require("firebase-admin/firestore")
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
+import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
+import { respondToInstance } from "./common/responseUtils"
+import { Timestamp } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-async function deactivateAndRemind(context) {
+async function deactivateAndRemind() {
   try {
     const db = admin.firestore()
     const cutoffHours = 72
@@ -51,7 +51,7 @@ async function deactivateAndRemind(context) {
   }
 }
 
-async function checkConversationSessionExpiring(context) {
+async function checkConversationSessionExpiring() {
   try {
     const db = admin.firestore()
     const hoursAgo = 23
@@ -76,14 +76,14 @@ async function checkConversationSessionExpiring(context) {
   }
 }
 
-exports.checkSessionExpiring = functions
+export const checkSessionExpiring = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("1 * * * *")
   .timeZone("Asia/Singapore")
   .onRun(checkConversationSessionExpiring)
 
-exports.scheduledDeactivation = functions
+export const scheduledDeactivation = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
