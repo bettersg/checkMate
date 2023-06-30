@@ -9,7 +9,7 @@ const port = 12345;
 const resultdata = [];
 
 app.all("/testresultdata", (req, res) => {
-  const result = resultdata.pop();
+  const result = resultdata.shift();
   res.send(result);
 });
 

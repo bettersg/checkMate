@@ -4,7 +4,7 @@ const express = require("express")
 const { userHandlerWhatsapp } = require("./userHandlers")
 const { checkerHandlerWhatsapp } = require("./checkerHandlers")
 const { defineString } = require("firebase-functions/params")
-const { handleSpecialCommands } = require("./common/utils")
+const { handleSpecialCommands } = require("./specialCommands")
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString(

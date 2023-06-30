@@ -1,8 +1,15 @@
 const functions = require("firebase-functions")
 const admin = require("firebase-admin")
 const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
-const { respondToInstance } = require("./common/responseUtils")
+const {
+  respondToInstance,
+  sendInterimPrompt,
+} = require("./common/responseUtils")
 const { Timestamp } = require("firebase-admin/firestore")
+const { getCount } = require("./common/counters")
+const { getThresholds } = require("./common/utils")
+const { defineString } = require("firebase-functions/params")
+const runtimeEnvironment = defineString("ENVIRONMENT")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -68,11 +75,48 @@ async function checkConversationSessionExpiring(context) {
       .where("timestamp", ">", windowEnd) //and all those later than 24 hours ago
       .get()
     const promisesArr = unrepliedInstances.docs.map(async (doc) => {
-      await respondToInstance(doc, true)
+      return respondToInstance(doc, true)
     })
     await Promise.all(promisesArr)
   } catch (error) {
     functions.logger.error("Error in checkConversationSessionExpiring:", error)
+  }
+}
+
+async function interimPromptHandler(context) {
+  try {
+    const db = admin.firestore()
+    const dayAgo = Timestamp.fromDate(
+      new Date(Date.now() - 24 * 60 * 60 * 1000)
+    )
+    const halfHourAgo =
+      runtimeEnvironment.value() === "PROD"
+        ? Timestamp.fromDate(new Date(Date.now() - 30 * 60 * 1000))
+        : Timestamp.fromDate(new Date())
+    const thresholds = await getThresholds()
+    const eligibleInstances = await db
+      .collectionGroup("instances")
+      .where("isReplied", "==", false) //match all those that haven't been replied to
+      .where("timestamp", ">", dayAgo) //and came in later than 24 hours ago
+      .where("timestamp", "<=", halfHourAgo) //but also at least 30 minutes ago
+      .where("isInterimPromptSent", "==", null) //and for which we haven't sent the interim yet
+      .get()
+    const promisesArr = eligibleInstances.docs.map(async (doc) => {
+      const parentMessageRef = doc.ref.parent.parent
+      const voteCount = await getCount(parentMessageRef, "responses")
+      if (
+        voteCount >= runtimeEnvironment.value() === "PROD"
+          ? thresholds.sendInterimMinVotes
+          : 1
+      ) {
+        return sendInterimPrompt(doc)
+      } else {
+        return Promise.resolve()
+      }
+    })
+    await Promise.all(promisesArr)
+  } catch (error) {
+    functions.logger.error("Error in interimPromptHandler:", error)
   }
 }
 
@@ -91,3 +135,12 @@ exports.scheduledDeactivation = functions
   .pubsub.schedule("11 20 * * *")
   .timeZone("Asia/Singapore")
   .onRun(deactivateAndRemind)
+
+exports.sendInterimPrompt = functions
+  .region("asia-southeast1")
+  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
+  .pubsub.schedule("*/20 * * * *")
+  .timeZone("Asia/Singapore")
+  .onRun(interimPromptHandler)
+
+exports.interimPromptHandler = interimPromptHandler
