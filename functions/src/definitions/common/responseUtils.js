@@ -531,7 +531,7 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
-  const infoLiner = `, with an average score of ${truthScore.toFixed(2)} on a scale of 0-5 (5 = completely true)`
+  const infoLiner = `, with an average score of ${typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"} on a scale of 0-5 (5 = completely true)`
   let response = `${highestPercentage}% of our CheckMates ${
     isHighestInfo ? "collectively " : ""
   }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
