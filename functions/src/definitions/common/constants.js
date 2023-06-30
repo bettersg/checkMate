@@ -5,7 +5,7 @@ Please do not spread it further⛔️⛔️
 
 Thank you for keeping Singapore informed!`,
 
-  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true! ⚠️
+  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️
 
 Please take it with a pinch of salt and think twice before spreading it further🚧🚧.
 
@@ -40,7 +40,7 @@ This is the collective opinion of our CheckMates. That said, ScamShield (https:/
 
 Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
-  SPAM: `{{thanks}}{{matched}}{{methodology}}spam! 🚧 
+  SPAM: `{{thanks}}{{matched}}{{methodology}}spam!🚧 
 
 It's likely harmless, but you should always make sure 🧐
 
@@ -78,7 +78,35 @@ Thank you for keeping Singapore safe!`,
     "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more at https://scamshield.org.sg.",
 
   //not used
-  STATS_TEMPLATE: `{{top}}% of our CheckMates identified this as {{category1}}{{info_placeholder}}. {{second}}% felt this was {{category2}}.`,
+  STATS_TEMPLATE: `{{top}}% of our CheckMates identified this as *{{category1}}**{{info_placeholder}}*. *{{second}}*% felt this was *{{category2}}*.`,
+
+  //button
+  INTERIM_TEMPLATE: `At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think is that this {{prelim_assessment}}{{info_placeholder}}. 
+
+NOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}`,
+
+  INTERIM_TEMPLATE_UNSURE: `At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.
+
+If you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.`,
+
+  INTERIM_FEEDBACK: `
+
+Thanks for trusting CheckMate! 👋🏼 If this interim update was useful to you, we'd appreciate it if you'd let us know by tapping on “Yes, it's useful” below. Otherwise, tap on “No, it's not” to continue waiting for the final result. Either way, you can continue to request more updates as more votes come in.`,
+
+  //button
+  INTERIM_PROMPT: `Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. 
+
+You may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼`,
+
+  INTERIM_USEFUL: `Thanks for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.
+
+In the meantime, if you'd like another update after more votes come in, just tap the button below to request one.`,
+
+  INTERIM_NOT_USEFUL: `Sorry to hear that, but thanks anyway for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.
+
+If you'd like still another update after more votes come in, just tap the button below to request one.`,
+
+  ALREADY_REPLIED: `CheckMate has already provided a final response to this message.`,
 
   //button
   SCAMSHIELD_SEEK_CONSENT:
@@ -169,6 +197,9 @@ exports.FACTCHECKER_BOT_RESPONSES = {
   //button
   OUTSTANDING_REMINDER:
     "You have *{{num_outstanding}} remaining messages* to assess. Would you like to be sent the next one in line?",
+
+  NO_OUTSTANDING:
+    "Great, you have no further messages to assess. Keep it up!💪",
 }
 
 exports.thresholds = {
@@ -184,4 +215,5 @@ exports.thresholds = {
   isSus: 0.5,
   falseUpperBound: 1.5,
   misleadingUpperBound: 3.5,
+  sendInterimMinVotes: 1,
 }
