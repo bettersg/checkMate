@@ -433,16 +433,24 @@ async function sendInterimUpdate(instancePath) {
   }
   const updateObj = {}
   let finalResponse
+  let isFirstMeaningfulReply = false
   if (primaryCategory === "unsure") {
     finalResponse = responses.INTERIM_TEMPLATE_UNSURE
     if (data.isInterimUseful === null) {
       updateObj.isInterimUseful = false
     }
+    if (data.isMeaningfulInterimReplySent === null) {
+      updateObj.isMeaningfulInterimReplySent = false
+    }
   } else {
     finalResponse = responses.INTERIM_TEMPLATE
+    if (!data.isMeaningfulInterimReplySent) {
+      updateObj.isMeaningfulInterimReplySent = true
+      isFirstMeaningfulReply = true
+    }
   }
   const getFeedback =
-    data.isInterimUseful === null &&
+    (data.isInterimUseful === null || isFirstMeaningfulReply) &&
     primaryCategory !== "unsure" &&
     FEEDBACK_FEATURE_FLAG
   finalResponse = finalResponse
