@@ -160,7 +160,7 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
   CONTACT: `Here's our contact! Do add us to your contact list so you can find us in future. 😊`,
 
   SATISFACTION_SURVEY: `Thanks so much for using CheckMate🙏. We're improving the product from time to time, and your feedback is valuable to us.
-  
+
 On a scale from 1-10, how likely are you to recommend us to a friend, colleague or family member?`,
 
   SATISFACTION_SURVEY_THANKS: `Thanks for your feedback!`,
