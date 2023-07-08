@@ -873,6 +873,16 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -1173,6 +1183,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -2352,6 +2372,16 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -2443,6 +2473,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -2470,6 +2509,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -2554,6 +2603,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -2581,6 +2639,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -2665,6 +2733,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -2692,6 +2769,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -2775,6 +2862,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -3368,6 +3464,16 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -3444,10 +3550,18 @@
 									"            },\r",
 									"            \"method\": \"POST\"\r",
 									"        }\r",
-									"    console.log(JSON.stringify(expected,null,2))\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -4133,6 +4247,276 @@
 					"response": []
 				},
 				{
+					"name": "SATISFACTION_SURVEY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SATISFACTION_SURVEY sent to user1\", function () {\r",
+									"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER3\").split(\"/\")\r",
+									"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
+									"    const SATISFACTION_SURVEY = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SATISFACTION_SURVEY\");\r",
+									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": SATISFACTION_SURVEY\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": \"Tap to respond\",\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_10_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"10\",\r",
+									"                                    \"description\": \"Extremely likely 🤩\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_9_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"9\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_8_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"8\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_7_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"7\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_6_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"6\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_5_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"5\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_4_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"4\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_3_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"3\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_2_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"2\"\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": `satisfactionSurvey_1_messages/${messageId}/instances/${instanceId}`,\r",
+									"                                    \"title\": \"1\",\r",
+									"                                    \"description\": \"Not at all likely 😥\"\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Votes 10",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"satisfactionSurvey_10_messages/{{spamMessageId}}/instances/{{spamInstanceId}}\",\r\n                    \"title\": \"10\",\r\n                    \"description\": \"Unsolicited spam, such as marketing messages\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandler/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandler",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SATISFACTION_SURVEY_THANKS",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"ALREADY_REPLIED sent to user 1\", function () {\r",
+									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"    const SATISFACTION_SURVEY_THANKS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SATISFACTION_SURVEY_THANKS\");\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"text\": {\r",
+									"                \"body\": SATISFACTION_SURVEY_THANKS,\r",
+									"                \"preview_url\": true\r",
+									"            },\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[DB CALL] Check instance updated",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Check that instance data updated correctly\", function () {\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    const isSatisfactionSurveySent = jsonData.fields.isSatisfactionSurveySent.booleanValue\r",
+									"    const satisfactionScore = parseInt(jsonData.fields.satisfactionScore.integerValue) //for some reason integerValue returns string\r",
+									"\r",
+									"    pm.expect(isSatisfactionSurveySent).to.be.true;\r",
+									"    pm.expect(satisfactionScore).to.equal(10);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer owner",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{spamMessageId}}/instances/{{spamInstanceId}}",
+							"host": [
+								"{{FIRESTORE_URL}}"
+							],
+							"path": [
+								"v1",
+								"projects",
+								"checkmate-373101",
+								"databases",
+								"(default)",
+								"documents",
+								"messages",
+								"{{spamMessageId}}",
+								"instances",
+								"{{spamInstanceId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Press button to get interim update",
 					"event": [
 						{
@@ -4142,6 +4526,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4241,6 +4635,16 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -4334,6 +4738,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4436,6 +4850,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -4463,6 +4886,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4525,6 +4958,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -4552,6 +4994,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4614,6 +5066,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -4641,6 +5102,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4703,6 +5174,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -4730,6 +5210,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4792,6 +5282,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -4819,6 +5318,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -4893,6 +5402,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -5224,6 +5742,75 @@
 							],
 							"path": [
 								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[DB CALL] Check instance updated Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Check that instance data updated correctly\", function () {\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    const initialJourney = jsonData.fields.initialJourney.mapValue.fields\r",
+									"    const actions = Object.values(initialJourney).map((obj) => obj.stringValue)\r",
+									"    const expected = [\r",
+									"        \"text_machine_irrelevant_length\",\r",
+									"        \"text_machine_irrelevant_length\",\r",
+									"        \"menu_dispute\",\r",
+									"        \"text_machine_unsure\",\r",
+									"        \"sendInterim\",\r",
+									"        \"feedbackInterim_yes\",\r",
+									"        \"feedbackInterim_no\",\r",
+									"        \"sendInterim\",\r",
+									"        \"sendInterim\",\r",
+									"        \"satisfactionSurvey_10\",\r",
+									"        \"sendInterim\",\r",
+									"        \"votingResults\",\r",
+									"        \"text_menu\",\r",
+									"        \"menu_check\",\r",
+									"        \"menu_help\",\r",
+									"        \"menu_about\",\r",
+									"        \"menu_feedback\",\r",
+									"        \"menu_contact\",\r",
+									"        \"text_machine_scam\",\r",
+									"        \"text_machine_spam\",\r",
+									"    ]\r",
+									"    pm.expect(actions).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer owner",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"host": [
+								"{{FIRESTORE_URL}}"
+							],
+							"path": [
+								"v1",
+								"projects",
+								"checkmate-373101",
+								"databases",
+								"(default)",
+								"documents",
+								"users",
+								"{{USER_1_NUMBER}}"
 							]
 						}
 					},

@@ -13,8 +13,7 @@ const { Timestamp } = require("firebase-admin/firestore")
 async function respondToInstance(
   instanceSnap,
   forceReply = false,
-  isImmediate = false,
-  isInterim = false
+  isImmediate = false
 ) {
   const parentMessageRef = instanceSnap.ref.parent.parent
   const parentMessageSnap = await parentMessageRef.get()
@@ -184,6 +183,12 @@ async function respondToInstance(
   updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)
+  if (
+    Math.random() < thresholds.surveyLikelihood &&
+    category != "irrelevant_auto"
+  ) {
+    await sendSatisfactionSurvey(instanceSnap)
+  }
   return
 }
 
@@ -287,6 +292,53 @@ async function sendMenuMessage(
         replyMessageId
       )
       break
+  }
+}
+
+async function sendSatisfactionSurvey(instanceSnap) {
+  const db = admin.firestore()
+  const data = instanceSnap.data()
+  const responses = await getResponsesObj("user")
+  const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
+  const userRef = db.collection("users").doc(data.from)
+  const userSnap = await userRef.get()
+  const lastSent = userSnap.get("satisfactionSurveyLastSent")
+  //check lastSent is more than 1 month ago
+  const oneMonthAgo = new Date()
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+  if (
+    !isSatisfactionSurveySent &&
+    (!lastSent || lastSent.toDate() < oneMonthAgo)
+  ) {
+    const rows = Array.from({ length: 10 }, (_, i) => {
+      const number = 10 - i
+      return {
+        id: `satisfactionSurvey_${number}_${instanceSnap.ref.path}`,
+        title: `${number}`,
+      }
+    })
+    rows[0].description = "Extremely likely 🤩"
+    rows[9].description = "Not at all likely 😥"
+    const sections = [
+      {
+        rows: rows,
+      },
+    ]
+    await sendWhatsappTextListMessage(
+      "user",
+      data.from,
+      responses.SATISFACTION_SURVEY,
+      "Tap to respond",
+      sections
+    )
+    const batch = db.batch()
+    batch.update(instanceSnap.ref, {
+      isSatisfactionSurveySent: true,
+    })
+    batch.update(userRef, {
+      satisfactionSurveyLastSent: Timestamp.fromDate(new Date()),
+    })
+    await batch.commit()
   }
 }
 
@@ -531,7 +583,9 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
-  const infoLiner = `, with an average score of ${typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"} on a scale of 0-5 (5 = completely true)`
+  const infoLiner = `, with an average score of ${
+    typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
+  } on a scale of 0-5 (5 = completely true)`
   let response = `${highestPercentage}% of our CheckMates ${
     isHighestInfo ? "collectively " : ""
   }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`

@@ -42,14 +42,22 @@ exports.userHandlerWhatsapp = async function (message) {
   const messageTimestamp = new Timestamp(parseInt(message.timestamp), 0)
   const isFirstTimeUser = !userSnap.exists
   let triggerOnboarding = isFirstTimeUser
+  let step
   if (isFirstTimeUser) {
     await userRef.set({
       instanceCount: 0,
       firstMessageReceiptTime: messageTimestamp,
       firstMessageType: "normal",
       lastSent: null,
+      satisfactionSurveyLastSent: null,
+      initialJourney: {},
     })
   }
+  const firstMessageReceiptTime = isFirstTimeUser
+    ? messageTimestamp
+    : userSnap.get("firstMessageReceiptTime")
+  const isNewlyJoined =
+    messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
 
   switch (type) {
     case "text":
@@ -61,6 +69,7 @@ exports.userHandlerWhatsapp = async function (message) {
         message.text.body.toLowerCase() ===
         "Show me how CheckMate works!".toLowerCase()
       ) {
+        step = "text_prepopulated"
         if (isFirstTimeUser) {
           await userRef.update({
             firstMessageType: "prepopulated",
@@ -72,10 +81,11 @@ exports.userHandlerWhatsapp = async function (message) {
       }
 
       if (message.text.body.toLowerCase() === "menu") {
+        step = "text_menu"
         await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         break
       }
-      await newTextInstanceHandler(
+      step = await newTextInstanceHandler(
         {
           text: message.text.body,
           timestamp: messageTimestamp,
@@ -89,7 +99,7 @@ exports.userHandlerWhatsapp = async function (message) {
       break
 
     case "image":
-      await newImageInstanceHandler(
+      step = await newImageInstanceHandler(
         {
           text: message?.image?.caption || null,
           timestamp: messageTimestamp,
@@ -109,10 +119,10 @@ exports.userHandlerWhatsapp = async function (message) {
       const interactive = message.interactive
       switch (interactive.type) {
         case "button_reply":
-          await onButtonReply(message)
+          step = await onButtonReply(message)
           break
         case "list_reply":
-          await onTextListReceipt(message)
+          step = await onTextListReceipt(message)
           break
       }
       break
@@ -128,6 +138,13 @@ exports.userHandlerWhatsapp = async function (message) {
   }
   if (triggerOnboarding) {
     await newUserHandler(from)
+  }
+  if (isNewlyJoined && step) {
+    const timestampKey =
+      messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
+    await userRef.update({
+      [`initialJourney.${timestampKey}`]: step,
+    })
   }
   markWhatsappMessageAsRead("user", message.id)
 }
@@ -151,7 +168,7 @@ async function newTextInstanceHandler(
     await db.collection("users").doc(from).update({
       firstMessageType: "irrelevant",
     })
-    return
+    return Promise.resolve(`text_machine_${machineCategory}`)
   }
   let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
   let similarity
@@ -236,7 +253,10 @@ async function newTextInstanceHandler(
       parentRef: matchedParentMessageRef ?? null,
       algorithm: "all-MiniLM-L6-v2",
     },
+    isSatisfactionSurveySent: null,
+    satisfactionScore: null,
   })
+  return Promise.resolve(`text_machine_${machineCategory}`)
 }
 
 async function newImageInstanceHandler({
@@ -333,7 +353,10 @@ async function newImageInstanceHandler({
       replyCategory: null,
       replyTimestamp: null,
       scamShieldConsent: null,
+      isSatisfactionSurveySent: null,
+      satisfactionScore: null,
     })
+  return Promise.resolve("image")
 }
 
 async function newUserHandler(from) {
@@ -379,6 +402,8 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
       await respondToInterimFeedback(instancePath, selection)
       break
   }
+  const step = type + (selection ? `_${selection}` : "")
+  return Promise.resolve(step)
 }
 
 async function onTextListReceipt(messageObj, platform = "whatsapp") {
@@ -387,7 +412,8 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
   const db = admin.firestore()
   const responses = await getResponsesObj("user")
   const [type, selection, ...rest] = listId.split("_")
-  let response
+  let response, instancePath
+  const step = `${type}_${selection}`
   switch (type) {
     case "menu":
       switch (selection) {
@@ -421,19 +447,18 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
           await sleep(3000)
           break
         case "dispute":
-          let instancePath
           ;[instancePath] = rest
           const instanceRef = db.doc(instancePath)
           const parentMessageRef = instanceRef.parent.parent
           const instanceSnap = await instanceRef.get()
           const parentMessageSnapshot = await parentMessageRef.get()
-          const type = instanceSnap.get("type")
+          const instanceType = instanceSnap.get("type")
           const text = instanceSnap.get("text")
           const category = parentMessageSnapshot.get("primaryCategory")
           await sendDisputeNotification(
             from,
             instancePath,
-            type,
+            instanceType,
             text,
             category
           )
@@ -441,6 +466,23 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
           break
       }
       break
+    case "satisfactionSurvey":
+      ;[instancePath] = rest
+      const instanceRef = db.doc(instancePath)
+      //check if selection is number
+      if (!isNaN(selection)) {
+        const selectionNumber = parseInt(selection)
+        await instanceRef.update({
+          satisfactionScore: selectionNumber,
+        })
+      } else {
+        functions.logger.warn(
+          `invalid selection for satisfaction survey: ${selection}`
+        )
+      }
+      response = responses.SATISFACTION_SURVEY_THANKS
+      break
   }
   await sendWhatsappTextMessage("user", from, response, null, true)
+  return Promise.resolve(step)
 }
