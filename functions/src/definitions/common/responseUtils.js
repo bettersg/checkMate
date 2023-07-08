@@ -301,14 +301,16 @@ async function sendSatisfactionSurvey(instanceSnap) {
   const responses = await getResponsesObj("user")
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
   const userRef = db.collection("users").doc(data.from)
+  const thresholds = await getThresholds()
+  const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
   const userSnap = await userRef.get()
   const lastSent = userSnap.get("satisfactionSurveyLastSent")
-  //check lastSent is more than 1 month ago
-  const oneMonthAgo = new Date()
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+  //check lastSent is more than cooldown days ago
+  let cooldownDate = new Date()
+  cooldownDate.setDate(cooldownDate.getDate() - cooldown)
   if (
     !isSatisfactionSurveySent &&
-    (!lastSent || lastSent.toDate() < oneMonthAgo)
+    (!lastSent || lastSent.toDate() < cooldownDate)
   ) {
     const rows = Array.from({ length: 10 }, (_, i) => {
       const number = 10 - i

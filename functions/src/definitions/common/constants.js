@@ -228,4 +228,5 @@ exports.thresholds = {
   misleadingUpperBound: 3.5,
   sendInterimMinVotes: 1,
   surveyLikelihood: env === "DEV" ? 1 : 0.25,
+  satisfactionSurveyCooldownDays: 30,
 }
