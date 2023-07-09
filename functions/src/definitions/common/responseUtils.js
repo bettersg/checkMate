@@ -397,7 +397,7 @@ async function sendInterimUpdate(instancePath) {
   const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
   let prelimAssessment
   let infoPlaceholder = ""
-  const infoLiner = `, with an average score of ${truthScore} on a scale of 0-5 (5 = completely true)`
+  const infoLiner = getInfoLiner(truthScore)
   switch (primaryCategory) {
     case "scam":
       prelimAssessment = "is a scam🚫"
@@ -593,9 +593,7 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
-  const infoLiner = `, with an average score of ${
-    typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
-  } on a scale of 0-5 (5 = completely true)`
+  const infoLiner = getInfoLiner(truthScore)
   let response = `${highestPercentage}% of our CheckMates ${
     isHighestInfo ? "collectively " : ""
   }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
@@ -633,6 +631,12 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
       instanceSnap.get("id")
     )
   }
+}
+
+function getInfoLiner(truthScore) {
+  return `, with an average score of ${
+    typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
+  } on a scale of 0-5 (5 = completely true)`
 }
 
 exports.getResponsesObj = getResponsesObj
