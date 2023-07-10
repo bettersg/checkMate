@@ -13,8 +13,7 @@ const { Timestamp } = require("firebase-admin/firestore")
 async function respondToInstance(
   instanceSnap,
   forceReply = false,
-  isImmediate = false,
-  isInterim = false
+  isImmediate = false
 ) {
   const parentMessageRef = instanceSnap.ref.parent.parent
   const parentMessageSnap = await parentMessageRef.get()
@@ -184,6 +183,12 @@ async function respondToInstance(
   updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)
+  if (
+    Math.random() < thresholds.surveyLikelihood &&
+    category != "irrelevant_auto"
+  ) {
+    await sendSatisfactionSurvey(instanceSnap)
+  }
   return
 }
 
@@ -290,6 +295,55 @@ async function sendMenuMessage(
   }
 }
 
+async function sendSatisfactionSurvey(instanceSnap) {
+  const db = admin.firestore()
+  const data = instanceSnap.data()
+  const responses = await getResponsesObj("user")
+  const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
+  const userRef = db.collection("users").doc(data.from)
+  const thresholds = await getThresholds()
+  const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
+  const userSnap = await userRef.get()
+  const lastSent = userSnap.get("satisfactionSurveyLastSent")
+  //check lastSent is more than cooldown days ago
+  let cooldownDate = new Date()
+  cooldownDate.setDate(cooldownDate.getDate() - cooldown)
+  if (
+    !isSatisfactionSurveySent &&
+    (!lastSent || lastSent.toDate() < cooldownDate)
+  ) {
+    const rows = Array.from({ length: 10 }, (_, i) => {
+      const number = 10 - i
+      return {
+        id: `satisfactionSurvey_${number}_${instanceSnap.ref.path}`,
+        title: `${number}`,
+      }
+    })
+    rows[0].description = "Extremely likely 🤩"
+    rows[9].description = "Not at all likely 😥"
+    const sections = [
+      {
+        rows: rows,
+      },
+    ]
+    await sendWhatsappTextListMessage(
+      "user",
+      data.from,
+      responses.SATISFACTION_SURVEY,
+      "Tap to respond",
+      sections
+    )
+    const batch = db.batch()
+    batch.update(instanceSnap.ref, {
+      isSatisfactionSurveySent: true,
+    })
+    batch.update(userRef, {
+      satisfactionSurveyLastSent: Timestamp.fromDate(new Date()),
+    })
+    await batch.commit()
+  }
+}
+
 async function sendInterimPrompt(instanceSnap) {
   const data = instanceSnap.data()
   const responses = await getResponsesObj("user")
@@ -343,7 +397,7 @@ async function sendInterimUpdate(instancePath) {
   const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
   let prelimAssessment
   let infoPlaceholder = ""
-  const infoLiner = `, with an average score of ${truthScore} on a scale of 0-5 (5 = completely true)`
+  const infoLiner = getInfoLiner(truthScore)
   switch (primaryCategory) {
     case "scam":
       prelimAssessment = "is a scam🚫"
@@ -379,16 +433,24 @@ async function sendInterimUpdate(instancePath) {
   }
   const updateObj = {}
   let finalResponse
+  let isFirstMeaningfulReply = false
   if (primaryCategory === "unsure") {
     finalResponse = responses.INTERIM_TEMPLATE_UNSURE
     if (data.isInterimUseful === null) {
       updateObj.isInterimUseful = false
     }
+    if (data.isMeaningfulInterimReplySent === null) {
+      updateObj.isMeaningfulInterimReplySent = false
+    }
   } else {
     finalResponse = responses.INTERIM_TEMPLATE
+    if (!data.isMeaningfulInterimReplySent) {
+      updateObj.isMeaningfulInterimReplySent = true
+      isFirstMeaningfulReply = true
+    }
   }
   const getFeedback =
-    data.isInterimUseful === null &&
+    (data.isInterimUseful === null || isFirstMeaningfulReply) &&
     primaryCategory !== "unsure" &&
     FEEDBACK_FEATURE_FLAG
   finalResponse = finalResponse
@@ -531,7 +593,7 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
-  const infoLiner = `, with an average score of ${typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"} on a scale of 0-5 (5 = completely true)`
+  const infoLiner = getInfoLiner(truthScore)
   let response = `${highestPercentage}% of our CheckMates ${
     isHighestInfo ? "collectively " : ""
   }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
@@ -569,6 +631,12 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
       instanceSnap.get("id")
     )
   }
+}
+
+function getInfoLiner(truthScore) {
+  return `, with an average score of ${
+    typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
+  } on a scale of 0-5 (5 = completely true)`
 }
 
 exports.getResponsesObj = getResponsesObj

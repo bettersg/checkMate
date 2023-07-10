@@ -53,8 +53,12 @@ erDiagram
         string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"
     		timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"
+        map closestMatch "contains fields algorithm, instanceRef, parentRef, score, text"
+        array embedding
         string strippedText
         boolean scamShieldConsent
+        boolean isSatisfactionSurveySent
+        number satisfactionScore
     }
 
     voteRequest {
@@ -95,6 +99,8 @@ erDiagram
     		timestamp lastSent
     		timestamp firstMessageReceiptTime
         string firstMessageType "either prepopulated, normal, or irrelevant"
+        timestamp satisfactionSurveyLastSent
+        map initialJourney "map mapping out the journey in the first 24 hrs of usage, where key is the timestamp of the step taken"
     	}
 
     message ||--|{ instance: has
