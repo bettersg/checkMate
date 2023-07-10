@@ -1,3 +1,6 @@
+// const { defineString } = require("firebase-functions/params")
+// const runtimeEnvironment = defineString("ENVIRONMENT")
+
 exports.USER_BOT_RESPONSES = {
   UNTRUE: `{{thanks}}{{matched}}{{methodology}}*untrue*.❌
   
@@ -155,6 +158,12 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
   DISPUTE: `Thanks for letting us know! Our CheckMates will review the assessment of this message.`,
 
   CONTACT: `Here's our contact! Do add us to your contact list so you can find us in future. 😊`,
+
+  SATISFACTION_SURVEY: `Thanks so much for using CheckMate🙏. We're improving the product from time to time, and your feedback is valuable to us.
+
+On a scale from 1-10, how likely are you to recommend us to a friend, colleague or family member?`,
+
+  SATISFACTION_SURVEY_THANKS: `Thanks for your feedback!`,
 }
 
 exports.FACTCHECKER_BOT_RESPONSES = {
@@ -202,6 +211,8 @@ exports.FACTCHECKER_BOT_RESPONSES = {
     "Great, you have no further messages to assess. Keep it up!💪",
 }
 
+const env = process.env.ENVIRONMENT
+
 exports.thresholds = {
   endVote: 0.5,
   endVoteSus: 0.2,
@@ -216,4 +227,6 @@ exports.thresholds = {
   falseUpperBound: 1.5,
   misleadingUpperBound: 3.5,
   sendInterimMinVotes: 1,
+  surveyLikelihood: env === "DEV" ? 1 : 0.25,
+  satisfactionSurveyCooldownDays: 30,
 }
