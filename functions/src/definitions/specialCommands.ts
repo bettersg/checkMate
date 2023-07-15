@@ -1,3 +1,5 @@
+import { WhatsappMessage } from "../types"
+
 const { sendWhatsappTextMessage } = require("./common/sendWhatsappMessage")
 const {
   USER_BOT_RESPONSES,
@@ -12,7 +14,9 @@ const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")
 
-exports.handleSpecialCommands = async function (messageObj) {
+export const handleSpecialCommands = async function (
+  messageObj: WhatsappMessage
+) {
   const command = messageObj.text.body.toLowerCase()
   if (command.startsWith("/")) {
     switch (command) {
