@@ -1,7 +1,7 @@
 import { FieldValue } from "@google-cloud/firestore"
 import { DocumentReference } from "firebase-admin/firestore"
 
-export const incrementCounter = async function (
+const incrementCounter = async function (
   docRef: DocumentReference,
   type: string,
   numShards: number,
@@ -18,10 +18,7 @@ export const incrementCounter = async function (
   )
 }
 
-export const getCount = async function (
-  docRef: DocumentReference,
-  type: string
-) {
+const getCount = async function (docRef: DocumentReference, type: string) {
   const querySnapshot = await docRef.collection("shards").get()
   const documents = querySnapshot.docs
   let count = 0
@@ -30,3 +27,5 @@ export const getCount = async function (
   }
   return count
 }
+
+export { getCount, incrementCounter }

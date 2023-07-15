@@ -1,22 +1,19 @@
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
+import { defineString } from "firebase-functions/params"
 import { WhatsappMessage } from "../types"
-
-const { sendWhatsappTextMessage } = require("./common/sendWhatsappMessage")
-const {
+import { sendWhatsappTextMessage } from "./common/sendWhatsappMessage"
+import {
   USER_BOT_RESPONSES,
   FACTCHECKER_BOT_RESPONSES,
   thresholds,
-} = require("./common/constants")
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { interimPromptHandler } = require("./batchJobs")
+} from "./common/constants"
+import { interimPromptHandler } from "./batchJobs"
 
-const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")
 
-export const handleSpecialCommands = async function (
-  messageObj: WhatsappMessage
-) {
+const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
   const command = messageObj.text.body.toLowerCase()
   if (command.startsWith("/")) {
     switch (command) {
@@ -94,3 +91,5 @@ const mockDb = async function () {
   }
   functions.logger.log("mocked")
 }
+
+export { handleSpecialCommands }
