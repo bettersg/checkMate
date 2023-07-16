@@ -66,7 +66,11 @@ async function respondToInstance(
     )
     return
   }
-  const updateObj = { isReplied: true, isReplyForced: forceReply }
+  const updateObj = {
+    isReplied: true,
+    isReplyForced: forceReply,
+    isReplyImmediate: isImmediate,
+  }
   let buttons = [
     {
       type: "reply",
