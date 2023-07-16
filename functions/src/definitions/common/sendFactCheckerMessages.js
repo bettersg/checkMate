@@ -15,6 +15,24 @@ exports.sendL1CategorisationMessage = async function (
   const voteRequestData = voteRequestSnap.data()
   const responses = await getResponsesObj("factChecker")
   const type = "categorize"
+  try {
+    const updateObj = {}
+    if (voteRequestData.triggerL2Vote !== null) {
+      updateObj.triggerL2Vote = null
+    }
+    if (voteRequestData.triggerL2Others !== null) {
+      updateObj.triggerL2Others = null
+    }
+    if (Object.keys(updateObj).length) {
+      // only perform the update if there's something to update
+      await voteRequestSnap.ref.update(updateObj)
+    }
+  } catch (error) {
+    functions.logger.error(
+      "Error resetting triggerL2Vote or triggerL2Others",
+      error
+    )
+  }
   switch (voteRequestData.platform) {
     case "whatsapp":
       const rows = [
