@@ -50,6 +50,8 @@ erDiagram
         boolean isInterimUseful "Whether the interim message is useful"
         boolean isInterimReplySent "Have we sent an interim reply"
         boolean isReplyForced "track if final reply is forced"
+        boolean isMatched "track if message was matched"
+        boolean isReplyImmediate "track if final reply is immediate"
         string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"
     		timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"

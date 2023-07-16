@@ -242,6 +242,8 @@ async function newTextInstanceHandler(
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isReplyForced: null,
+    isMatched: hasMatch,
+    isReplyImmediate: null,
     replyCategory: null,
     replyTimestamp: null,
     matchType: matchType,
@@ -283,7 +285,9 @@ async function newImageInstanceHandler({
     .where("assessmentExpired", "==", false)
     .get()
   let messageId
+  let hasMatch
   if (imageMatchSnapshot.empty) {
+    hasMatch = false
     const storageBucket = admin.storage().bucket()
     filename = `images/${mediaId}.${mimeType.split("/")[1]}`
     const file = storageBucket.file(filename)
@@ -328,6 +332,7 @@ async function newImageInstanceHandler({
         `strangely, more than 1 device matches the image query ${hash}`
       )
     }
+    hasMatch = true
     messageId = imageMatchSnapshot.docs[0].id
   }
   const _ = await db
@@ -352,6 +357,8 @@ async function newImageInstanceHandler({
       isInterimReplySent: null,
       isMeaningfulInterimReplySent: null,
       isReplyForced: null,
+      isMatched: hasMatch,
+      isReplyImmediate: null,
       replyCategory: null,
       replyTimestamp: null,
       scamShieldConsent: null,
