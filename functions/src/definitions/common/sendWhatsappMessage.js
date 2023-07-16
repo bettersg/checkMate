@@ -13,6 +13,15 @@ const testCheckerPhoneNumberId = defineString(
 const graphApiUrl =
   process.env["TEST_SERVER_URL"] || "https://graph.facebook.com" //only exists in integration test environment
 
+/**
+ * Using JSDOC temporarily until converted to ts file
+ * @param {*} bot
+ * @param {*} to
+ * @param {*} text
+ * @param {null|string} replyMessageId
+ * @param {*} previewUrl
+ * @returns
+ */
 async function sendWhatsappTextMessage(
   bot,
   to,

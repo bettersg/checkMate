@@ -1,9 +1,9 @@
-const axios = require("axios")
-const admin = require("firebase-admin")
-const functions = require("firebase-functions")
-const { defineString } = require("firebase-functions/params")
-const util = require("util")
-const { imageHash } = require("image-hash")
+import util from "util"
+import axios from "axios"
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
+import { defineString } from "firebase-functions/params"
+import { imageHash } from "image-hash"
 
 const graphApiVersion = defineString("GRAPH_API_VERSION")
 const graphApiUrl = process.env["GRAPH_API_URL"] || "https://graph.facebook.com"
@@ -13,7 +13,7 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-async function downloadWhatsappMedia(mediaId) {
+async function downloadWhatsappMedia(mediaId: string) {
   const token = process.env.WHATSAPP_TOKEN
   //get download URL
   const response = await axios({
@@ -48,7 +48,7 @@ async function downloadWhatsappMedia(mediaId) {
   return Buffer.from(responseBuffer.data)
 }
 
-async function getHash(buffer) {
+async function getHash(buffer: Buffer) {
   const result = await imageHashSync(
     {
       data: buffer,
@@ -59,7 +59,7 @@ async function getHash(buffer) {
   return result
 }
 
-async function getSignedUrl(storageUrl) {
+async function getSignedUrl(storageUrl: string) {
   try {
     const storage = admin.storage()
     const [temporaryUrl] = await storage
@@ -77,6 +77,4 @@ async function getSignedUrl(storageUrl) {
   }
 }
 
-exports.downloadWhatsappMedia = downloadWhatsappMedia
-exports.getHash = getHash
-exports.getSignedUrl = getSignedUrl
+export { downloadWhatsappMedia, getHash, getSignedUrl }
