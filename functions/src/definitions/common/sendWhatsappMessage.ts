@@ -1,6 +1,7 @@
 import axios from "axios"
 import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
+import { WhatsappButton } from "../../types"
 
 const graphApiVersion = defineString("GRAPH_API_VERSION")
 const runtimeEnvironment = defineString("ENVIRONMENT")
@@ -219,7 +220,7 @@ async function sendWhatsappButtonMessage(
   bot: string,
   to: string,
   text: string,
-  buttons: string,
+  buttons: WhatsappButton[],
   replyMessageId: string | null = null
 ) {
   const data: {
@@ -233,7 +234,7 @@ async function sendWhatsappButtonMessage(
         text: string
       }
       action: {
-        buttons: string
+        buttons: WhatsappButton[]
       }
     }
     context?: {
