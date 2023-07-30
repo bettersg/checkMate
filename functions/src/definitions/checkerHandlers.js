@@ -174,6 +174,24 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
     await sendRemainingReminder(from, "whatsapp")
     return
   }
+  try {
+    const updateObj = {}
+    if (voteRequestSnap.get("triggerL2Vote") !== null) {
+      updateObj.triggerL2Vote = null
+    }
+    if (voteRequestSnap.get("triggerL2Others") !== null) {
+      updateObj.triggerL2Others = null
+    }
+    if (Object.keys(updateObj).length) {
+      // only perform the update if there's something to update
+      await voteRequestRef.update(updateObj)
+    }
+  } catch (error) {
+    functions.logger.error(
+      "Error resetting triggerL2Vote or triggerL2Others",
+      error
+    )
+  }
   const messageRef = voteRequestRef.parent.parent
   const messageSnap = await messageRef.get()
   const message = messageSnap.data()
