@@ -317,7 +317,7 @@ async function sendVotingStats(
   }
 }
 
-async function sendInterimUpdate(instancePath) {
+async function sendInterimUpdate(instancePath: string) {
   //get statistics
   const FEEDBACK_FEATURE_FLAG = true
   const db = admin.firestore()
@@ -325,6 +325,9 @@ async function sendInterimUpdate(instancePath) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
+  if (!data) {
+    return
+  }
   if (instanceSnap.get("isReplied")) {
     await sendTextMessage(
       "user",
@@ -335,6 +338,9 @@ async function sendInterimUpdate(instancePath) {
     return
   }
   const parentMessageRef = db.doc(instancePath).parent.parent
+  if (!parentMessageRef) {
+    return
+  }
   const parentMessageSnap = await parentMessageRef.get()
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const truthScore = parentMessageSnap.get("truthScore")
@@ -379,8 +385,16 @@ async function sendInterimUpdate(instancePath) {
     case "unsure":
       prelimAssessment = "unsure"
       break
+    default:
+      functions.logger.log("primaryCategory did not match available cases")
+      return
   }
-  const updateObj = {}
+  const updateObj: {
+    isInterimUseful?: boolean
+    isMeaningfulInterimReplySent?: boolean
+    prelimAssessment?: string
+    isInterimReplySent?: boolean
+  } = {}
   let finalResponse
   let isFirstMeaningfulReply = false
   if (primaryCategory === "unsure") {
