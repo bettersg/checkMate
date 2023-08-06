@@ -467,8 +467,11 @@ async function sendInterimUpdate(instancePath: string) {
   }
 }
 
-async function sendInterimPrompt(instanceSnap) {
+async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
   const data = instanceSnap.data()
+  if (!data) {
+    return
+  }
   const responses = await getResponsesObj("user")
   const buttons = [
     {
