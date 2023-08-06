@@ -1,5 +1,5 @@
 const admin = require("firebase-admin")
-const { sleep, getThresholds } = require("./utils")
+const { getThresholds } = require("./utils")
 const { getCount } = require("./counters")
 const { sendTextMessage } = require("./sendMessage")
 const { sendWhatsappButtonMessage } = require("./sendWhatsappMessage")
@@ -11,6 +11,7 @@ const {
   getResponsesObj,
   sendMenuMessage,
   sendSatisfactionSurvey,
+  sendVotingStats,
 } = require("./responseUtilsTs")
 
 async function respondToInstance(
@@ -356,105 +357,6 @@ async function sendInterimUpdate(instancePath) {
   //if updateObj is not empty
   if (Object.keys(updateObj).length !== 0) {
     await instanceRef.update(updateObj)
-  }
-}
-
-async function sendVotingStats(instancePath, triggerScamShieldConsent) {
-  //get statistics
-  const db = admin.firestore()
-  const messageRef = db.doc(instancePath).parent.parent
-  const instanceSnap = await db.doc(instancePath).get()
-  const responseCount = await getCount(messageRef, "responses")
-  const irrelevantCount = await getCount(messageRef, "irrelevant")
-  const scamCount = await getCount(messageRef, "scam")
-  const illicitCount = await getCount(messageRef, "illicit")
-  const infoCount = await getCount(messageRef, "info")
-  const spamCount = await getCount(messageRef, "spam")
-  const legitimateCount = await getCount(messageRef, "legitimate")
-  const unsureCount = await getCount(messageRef, "unsure")
-  const susCount = scamCount + illicitCount
-  const voteTotal = await getCount(messageRef, "totalVoteScore")
-  const truthScore = infoCount > 0 ? voteTotal / infoCount : null
-  const thresholds = await getThresholds()
-  const responses = await getResponsesObj("user")
-  const from = instanceSnap.get("from")
-  let truthCategory
-  if (truthScore !== null) {
-    if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-      truthCategory = "untrue"
-    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
-      truthCategory = "misleading"
-    } else {
-      truthCategory = "accurate"
-    }
-  } else truthCategory = "NA"
-
-  const categories = [
-    { name: "trivial", count: irrelevantCount, isInfo: false },
-    {
-      name: scamCount >= illicitCount ? "scam" : "illicit",
-      count: susCount,
-      isInfo: false,
-    },
-    { name: "spam", count: spamCount, isInfo: false },
-    { name: truthCategory, count: infoCount, isInfo: true },
-    { name: "legitimate", count: legitimateCount, isInfo: false },
-    { name: "unsure", count: unsureCount, isInfo: false },
-  ]
-
-  categories.sort((a, b) => b.count - a.count) // sort in descending order
-  const highestCategory =
-    categories[0].name === "scam" ? "a scam" : categories[0].name
-  const secondCategory =
-    categories[1].name === "scam" ? "a scam" : categories[1].name
-  const highestPercentage = (
-    (categories[0].count / responseCount) *
-    100
-  ).toFixed(2)
-  const secondPercentage = (
-    (categories[1].count / responseCount) *
-    100
-  ).toFixed(2)
-  const isHighestInfo = categories[0].isInfo
-  const isSecondInfo = categories[1].isInfo
-
-  const infoLiner = getInfoLiner(truthScore)
-  let response = `${highestPercentage}% of our CheckMates ${
-    isHighestInfo ? "collectively " : ""
-  }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
-  if (secondPercentage > 0) {
-    response += ` ${secondPercentage}% ${
-      isSecondInfo ? "collectively " : ""
-    } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
-  }
-
-  await sendTextMessage("user", from, response, instanceSnap.get("id"))
-
-  if (triggerScamShieldConsent) {
-    await sleep(2000)
-    const buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `scamshieldConsent_${instancePath}_consent`,
-          title: "Yes",
-        },
-      },
-      {
-        type: "reply",
-        reply: {
-          id: `scamshieldConsent_${instancePath}_decline`,
-          title: "No",
-        },
-      },
-    ]
-    await sendWhatsappButtonMessage(
-      "user",
-      from,
-      responses.SCAMSHIELD_SEEK_CONSENT,
-      buttons,
-      instanceSnap.get("id")
-    )
   }
 }
 
