@@ -79,8 +79,8 @@ async function sendMenuMessage(
   to: string,
   prefixName: string,
   platform = "whatsapp",
-  replyMessageId = null,
-  disputedInstancePath = null
+  replyMessageId: string | null = null,
+  disputedInstancePath: string | null = null
 ) {
   const responses = await getResponsesObj("user")
   if (!(prefixName in responses)) {
@@ -494,14 +494,17 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
   })
 }
 async function respondToInstance(
-  instanceSnap,
+  instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false
 ) {
   const parentMessageRef = instanceSnap.ref.parent.parent
+  if (!parentMessageRef) {
+    return
+  }
   const parentMessageSnap = await parentMessageRef.get()
   const data = instanceSnap.data()
-  if (!data.from) {
+  if (!data?.from) {
     functions.logger.log("Missing 'from' field in instance data")
     return Promise.resolve()
   }
@@ -519,7 +522,7 @@ async function respondToInstance(
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
 
-  function getFinalResponseText(responseText) {
+  function getFinalResponseText(responseText: string) {
     return responseText
       .replace(
         "{{thanks}}",
@@ -549,7 +552,13 @@ async function respondToInstance(
     )
     return
   }
-  const updateObj = {
+  const updateObj: {
+    isReplied: boolean
+    isReplyForced: boolean
+    isReplyImmediate: boolean
+    replyCategory?: string
+    replyTimestamp?: Timestamp
+  } = {
     isReplied: true,
     isReplyForced: forceReply,
     isReplyImmediate: isImmediate,
@@ -648,7 +657,13 @@ async function respondToInstance(
       await sendTextMessage("user", data.from, responseText, data.id)
       break
     default:
-      responseText = getFinalResponseText(responses[category.toUpperCase()])
+      if (!(category in responses)) {
+        functions.logger.error(`category ${category} not found in responses`)
+        return
+      }
+      responseText = getFinalResponseText(
+        responses[category.toUpperCase() as keyof typeof responses]
+      )
       if (category === "scam" || category === "illicit") {
         if (isImmediate) {
           scamShieldButtons.pop()

@@ -171,7 +171,7 @@ async function sendWhatsappTextListMessage(
   text: string,
   buttonText: string,
   sections: any,
-  replyMessageId = null
+  replyMessageId: string | null = null
 ) {
   const data: {
     messaging_product: string
