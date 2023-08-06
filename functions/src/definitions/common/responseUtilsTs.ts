@@ -160,9 +160,59 @@ async function sendMenuMessage(
   }
 }
 
+async function sendSatisfactionSurvey(instanceSnap) {
+  const db = admin.firestore()
+  const data = instanceSnap.data()
+  const responses = await getResponsesObj("user")
+  const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
+  const userRef = db.collection("users").doc(data.from)
+  const thresholds = await getThresholds()
+  const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
+  const userSnap = await userRef.get()
+  const lastSent = userSnap.get("satisfactionSurveyLastSent")
+  //check lastSent is more than cooldown days ago
+  let cooldownDate = new Date()
+  cooldownDate.setDate(cooldownDate.getDate() - cooldown)
+  if (
+    !isSatisfactionSurveySent &&
+    (!lastSent || lastSent.toDate() < cooldownDate)
+  ) {
+    const rows = Array.from({ length: 10 }, (_, i) => {
+      const number = 10 - i
+      return {
+        id: `satisfactionSurvey_${number}_${instanceSnap.ref.path}`,
+        title: `${number}`,
+      }
+    })
+    rows[0].description = "Extremely likely 🤩"
+    rows[9].description = "Not at all likely 😥"
+    const sections = [
+      {
+        rows: rows,
+      },
+    ]
+    await sendWhatsappTextListMessage(
+      "user",
+      data.from,
+      responses.SATISFACTION_SURVEY,
+      "Tap to respond",
+      sections
+    )
+    const batch = db.batch()
+    batch.update(instanceSnap.ref, {
+      isSatisfactionSurveySent: true,
+    })
+    batch.update(userRef, {
+      satisfactionSurveyLastSent: Timestamp.fromDate(new Date()),
+    })
+    await batch.commit()
+  }
+}
+
 export {
   getInfoLiner,
   respondToInterimFeedback,
   getResponsesObj,
   sendMenuMessage,
+  sendSatisfactionSurvey,
 }
