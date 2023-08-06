@@ -71,8 +71,8 @@ async function getResponsesObj(botType: "user" | "factChecker" = "user") {
 }
 
 async function sendMenuMessage(
-  to,
-  prefixName,
+  to: string,
+  prefixName: string,
   platform = "whatsapp",
   replyMessageId = null,
   disputedInstancePath = null
@@ -82,7 +82,10 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const text = responses.MENU.replace("{{prefix}}", responses[prefixName])
+  const text = responses.MENU.replace(
+    "{{prefix}}",
+    responses[prefixName as keyof typeof responses]
+  )
   switch (platform) {
     case "telegram":
       functions.logger.warn("Telegram menu not implemented yet")
