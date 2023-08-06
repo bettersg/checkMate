@@ -467,6 +467,30 @@ async function sendInterimUpdate(instancePath: string) {
   }
 }
 
+async function sendInterimPrompt(instanceSnap) {
+  const data = instanceSnap.data()
+  const responses = await getResponsesObj("user")
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `sendInterim_${instanceSnap.ref.path}`,
+        title: "Get interim update",
+      },
+    },
+  ]
+  await sendWhatsappButtonMessage(
+    "user",
+    data.from,
+    responses.INTERIM_PROMPT,
+    buttons,
+    data.id
+  )
+  await instanceSnap.ref.update({
+    isInterimPromptSent: true,
+  })
+}
+
 export {
   getInfoLiner,
   respondToInterimFeedback,
@@ -475,4 +499,5 @@ export {
   sendSatisfactionSurvey,
   sendVotingStats,
   sendInterimUpdate,
+  sendInterimPrompt,
 }
