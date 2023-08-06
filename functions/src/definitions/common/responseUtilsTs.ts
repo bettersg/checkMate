@@ -218,10 +218,16 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(instancePath, triggerScamShieldConsent) {
+async function sendVotingStats(
+  instancePath: string,
+  triggerScamShieldConsent: boolean
+) {
   //get statistics
   const db = admin.firestore()
   const messageRef = db.doc(instancePath).parent.parent
+  if (!messageRef) {
+    return
+  }
   const instanceSnap = await db.doc(instancePath).get()
   const responseCount = await getCount(messageRef, "responses")
   const irrelevantCount = await getCount(messageRef, "irrelevant")
@@ -266,23 +272,17 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
     categories[0].name === "scam" ? "a scam" : categories[0].name
   const secondCategory =
     categories[1].name === "scam" ? "a scam" : categories[1].name
-  const highestPercentage = (
-    (categories[0].count / responseCount) *
-    100
-  ).toFixed(2)
-  const secondPercentage = (
-    (categories[1].count / responseCount) *
-    100
-  ).toFixed(2)
+  const highestPercentage = (categories[0].count / responseCount) * 100
+  const secondPercentage = (categories[1].count / responseCount) * 100
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
   const infoLiner = getInfoLiner(truthScore)
-  let response = `${highestPercentage}% of our CheckMates ${
+  let response = `${highestPercentage.toFixed(2)}% of our CheckMates ${
     isHighestInfo ? "collectively " : ""
   }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
   if (secondPercentage > 0) {
-    response += ` ${secondPercentage}% ${
+    response += ` ${secondPercentage.toFixed(2)}% ${
       isSecondInfo ? "collectively " : ""
     } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
   }
