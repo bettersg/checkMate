@@ -2,10 +2,7 @@ const admin = require("firebase-admin")
 const { sleep, getThresholds } = require("./utils")
 const { getCount } = require("./counters")
 const { sendTextMessage } = require("./sendMessage")
-const {
-  sendWhatsappButtonMessage,
-  sendWhatsappTextListMessage,
-} = require("./sendWhatsappMessage")
+const { sendWhatsappButtonMessage } = require("./sendWhatsappMessage")
 const functions = require("firebase-functions")
 const { Timestamp } = require("firebase-admin/firestore")
 const {

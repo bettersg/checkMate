@@ -5,6 +5,9 @@ import {
   sendWhatsappButtonMessage,
   sendWhatsappTextListMessage,
 } from "./sendWhatsappMessage"
+import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
+import { getThresholds } from "./utils"
+
 function getInfoLiner(truthScore: null | number) {
   return `, with an average score of ${
     typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
@@ -160,9 +163,12 @@ async function sendMenuMessage(
   }
 }
 
-async function sendSatisfactionSurvey(instanceSnap) {
+async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   const db = admin.firestore()
   const data = instanceSnap.data()
+  if (!data) {
+    return
+  }
   const responses = await getResponsesObj("user")
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
   const userRef = db.collection("users").doc(data.from)
@@ -177,13 +183,14 @@ async function sendSatisfactionSurvey(instanceSnap) {
     !isSatisfactionSurveySent &&
     (!lastSent || lastSent.toDate() < cooldownDate)
   ) {
-    const rows = Array.from({ length: 10 }, (_, i) => {
-      const number = 10 - i
-      return {
-        id: `satisfactionSurvey_${number}_${instanceSnap.ref.path}`,
-        title: `${number}`,
-      }
-    })
+    const rows: { id: string; title: string; description?: string }[] =
+      Array.from({ length: 10 }, (_, i) => {
+        const number = 10 - i
+        return {
+          id: `satisfactionSurvey_${number}_${instanceSnap.ref.path}`,
+          title: `${number}`,
+        }
+      })
     rows[0].description = "Extremely likely 🤩"
     rows[9].description = "Not at all likely 😥"
     const sections = [
