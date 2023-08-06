@@ -695,13 +695,11 @@ async function respondToInstance(
 }
 
 export {
-  getInfoLiner,
-  respondToInterimFeedback,
   getResponsesObj,
-  sendMenuMessage,
-  sendSatisfactionSurvey,
-  sendVotingStats,
-  sendInterimUpdate,
-  sendInterimPrompt,
   respondToInstance,
+  sendMenuMessage,
+  sendInterimPrompt,
+  sendInterimUpdate,
+  sendVotingStats,
+  respondToInterimFeedback,
 }
