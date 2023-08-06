@@ -657,7 +657,7 @@ async function respondToInstance(
       await sendTextMessage("user", data.from, responseText, data.id)
       break
     default:
-      if (!(category in responses)) {
+      if (!(category.toUpperCase() in responses)) {
         functions.logger.error(`category ${category} not found in responses`)
         return
       }
