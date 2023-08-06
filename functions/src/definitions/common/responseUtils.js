@@ -4,13 +4,13 @@ const { sendWhatsappButtonMessage } = require("./sendWhatsappMessage")
 const functions = require("firebase-functions")
 const { Timestamp } = require("firebase-admin/firestore")
 const {
-  getInfoLiner,
   respondToInterimFeedback,
   getResponsesObj,
   sendMenuMessage,
   sendSatisfactionSurvey,
   sendVotingStats,
   sendInterimUpdate,
+  sendInterimPrompt,
 } = require("./responseUtilsTs")
 
 async function respondToInstance(
@@ -197,30 +197,6 @@ async function respondToInstance(
     await sendSatisfactionSurvey(instanceSnap)
   }
   return
-}
-
-async function sendInterimPrompt(instanceSnap) {
-  const data = instanceSnap.data()
-  const responses = await getResponsesObj("user")
-  const buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: `sendInterim_${instanceSnap.ref.path}`,
-        title: "Get interim update",
-      },
-    },
-  ]
-  await sendWhatsappButtonMessage(
-    "user",
-    data.from,
-    responses.INTERIM_PROMPT,
-    buttons,
-    data.id
-  )
-  await instanceSnap.ref.update({
-    isInterimPromptSent: true,
-  })
 }
 
 exports.getResponsesObj = getResponsesObj
