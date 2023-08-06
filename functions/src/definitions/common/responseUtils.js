@@ -1,6 +1,4 @@
-const admin = require("firebase-admin")
 const { getThresholds } = require("./utils")
-const { getCount } = require("./counters")
 const { sendTextMessage } = require("./sendMessage")
 const { sendWhatsappButtonMessage } = require("./sendWhatsappMessage")
 const functions = require("firebase-functions")
@@ -12,6 +10,7 @@ const {
   sendMenuMessage,
   sendSatisfactionSurvey,
   sendVotingStats,
+  sendInterimUpdate,
 } = require("./responseUtilsTs")
 
 async function respondToInstance(
@@ -222,142 +221,6 @@ async function sendInterimPrompt(instanceSnap) {
   await instanceSnap.ref.update({
     isInterimPromptSent: true,
   })
-}
-
-async function sendInterimUpdate(instancePath) {
-  //get statistics
-  const FEEDBACK_FEATURE_FLAG = true
-  const db = admin.firestore()
-  const responses = await getResponsesObj("user")
-  const instanceRef = db.doc(instancePath)
-  const instanceSnap = await instanceRef.get()
-  const data = instanceSnap.data()
-  if (instanceSnap.get("isReplied")) {
-    await sendTextMessage(
-      "user",
-      instanceSnap.get("from"),
-      responses.ALREADY_REPLIED,
-      data.id
-    )
-    return
-  }
-  const parentMessageRef = db.doc(instancePath).parent.parent
-  const parentMessageSnap = await parentMessageRef.get()
-  const primaryCategory = parentMessageSnap.get("primaryCategory")
-  const truthScore = parentMessageSnap.get("truthScore")
-  const voteRequestQuerySnapshot = await parentMessageRef
-    .collection("voteRequests")
-    .get()
-  const numFactCheckers = voteRequestQuerySnapshot.size
-  const voteCount = await getCount(parentMessageRef, "responses")
-  const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
-  let prelimAssessment
-  let infoPlaceholder = ""
-  const infoLiner = getInfoLiner(truthScore)
-  switch (primaryCategory) {
-    case "scam":
-      prelimAssessment = "is a scam🚫"
-      break
-    case "illicit":
-      prelimAssessment = "is suspicious🚨"
-      break
-    case "untrue":
-      prelimAssessment = "is untrue❌"
-      infoPlaceholder = infoLiner
-      break
-    case "misleading":
-      prelimAssessment = "is misleading⚠️"
-      infoPlaceholder = infoLiner
-      break
-    case "accurate":
-      prelimAssessment = "is accurate✅"
-      infoPlaceholder = infoLiner
-      break
-    case "spam":
-      prelimAssessment = "is spam🚧"
-      break
-    case "legitimate":
-      prelimAssessment = "is legitimate✅"
-      break
-    case "irrelevant":
-      prelimAssessment =
-        "message doesn't contain a meaningful claim to assess.😕"
-      break
-    case "unsure":
-      prelimAssessment = "unsure"
-      break
-  }
-  const updateObj = {}
-  let finalResponse
-  let isFirstMeaningfulReply = false
-  if (primaryCategory === "unsure") {
-    finalResponse = responses.INTERIM_TEMPLATE_UNSURE
-    if (data.isInterimUseful === null) {
-      updateObj.isInterimUseful = false
-    }
-    if (data.isMeaningfulInterimReplySent === null) {
-      updateObj.isMeaningfulInterimReplySent = false
-    }
-  } else {
-    finalResponse = responses.INTERIM_TEMPLATE
-    if (!data.isMeaningfulInterimReplySent) {
-      updateObj.isMeaningfulInterimReplySent = true
-      isFirstMeaningfulReply = true
-    }
-  }
-  const getFeedback =
-    (data.isInterimUseful === null || isFirstMeaningfulReply) &&
-    primaryCategory !== "unsure" &&
-    FEEDBACK_FEATURE_FLAG
-  finalResponse = finalResponse
-    .replace("{{prelim_assessment}}", prelimAssessment)
-    .replace("{{info_placeholder}}", infoPlaceholder)
-    .replace("{{%voted}}", percentageVoted)
-    .replace("{{get_feedback}}", getFeedback ? responses.INTERIM_FEEDBACK : "")
-
-  let buttons
-  if (getFeedback) {
-    buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackInterim_${instancePath}_yes`,
-          title: "Yes, it's useful",
-        },
-      },
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackInterim_${instancePath}_no`,
-          title: "No, it's not",
-        },
-      },
-    ]
-  } else {
-    buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `sendInterim_${instancePath}`,
-          title: "Get another update",
-        },
-      },
-    ]
-  }
-  await sendWhatsappButtonMessage(
-    "user",
-    data.from,
-    finalResponse,
-    buttons,
-    data.id
-  )
-  if (!instanceSnap.get("isInterimReplySent")) {
-    updateObj.isInterimReplySent = true
-  }
-  //if updateObj is not empty
-  if (Object.keys(updateObj).length !== 0) {
-    await instanceRef.update(updateObj)
-  }
 }
 
 exports.getResponsesObj = getResponsesObj
