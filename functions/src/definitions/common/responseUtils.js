@@ -9,6 +9,11 @@ const {
 } = require("./sendWhatsappMessage")
 const functions = require("firebase-functions")
 const { Timestamp } = require("firebase-admin/firestore")
+const {
+  getInfoLiner,
+  respondToInterimFeedback,
+  getResponsesObj,
+} = require("./responseUtilsTs")
 
 async function respondToInstance(
   instanceSnap,
@@ -66,7 +71,11 @@ async function respondToInstance(
     )
     return
   }
-  const updateObj = { isReplied: true, isReplyForced: forceReply }
+  const updateObj = {
+    isReplied: true,
+    isReplyForced: forceReply,
+    isReplyImmediate: isImmediate,
+  }
   let buttons = [
     {
       type: "reply",
@@ -190,22 +199,6 @@ async function respondToInstance(
     await sendSatisfactionSurvey(instanceSnap)
   }
   return
-}
-
-async function getResponsesObj(botType = "user") {
-  const db = admin.firestore()
-  let path
-  let fallbackResponses
-  if (botType === "user") {
-    path = "systemParameters/userBotResponses"
-    fallbackResponses = USER_BOT_RESPONSES
-  } else if (botType === "factChecker") {
-    path = "systemParameters/factCheckerBotResponses"
-    fallbackResponses = FACTCHECKER_BOT_RESPONSES
-  }
-  const defaultResponsesRef = db.doc(path)
-  const defaultResponsesSnap = await defaultResponsesRef.get()
-  return defaultResponsesSnap.data() ?? fallbackResponses
 }
 
 async function sendMenuMessage(
@@ -504,36 +497,6 @@ async function sendInterimUpdate(instancePath) {
   }
 }
 
-async function respondToInterimFeedback(instancePath, isUseful) {
-  const db = admin.firestore()
-  const instanceRef = db.doc(instancePath)
-  const instanceSnap = await instanceRef.get()
-  const responses = await getResponsesObj("user")
-  const data = instanceSnap.data()
-  const buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: `sendInterim_${instancePath}`,
-        title: "Get another update",
-      },
-    },
-  ]
-  let response
-  switch (isUseful) {
-    case "yes":
-      response = responses?.INTERIM_USEFUL
-      await instanceRef.update({ isInterimUseful: true })
-      break
-    case "no":
-      response = responses?.INTERIM_NOT_USEFUL
-      await instanceRef.update({ isInterimUseful: false })
-      break
-  }
-
-  await sendWhatsappButtonMessage("user", data.from, response, buttons, data.id)
-}
-
 async function sendVotingStats(instancePath, triggerScamShieldConsent) {
   //get statistics
   const db = admin.firestore()
@@ -631,12 +594,6 @@ async function sendVotingStats(instancePath, triggerScamShieldConsent) {
       instanceSnap.get("id")
     )
   }
-}
-
-function getInfoLiner(truthScore) {
-  return `, with an average score of ${
-    typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
-  } on a scale of 0-5 (5 = completely true)`
 }
 
 exports.getResponsesObj = getResponsesObj

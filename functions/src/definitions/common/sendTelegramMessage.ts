@@ -1,18 +1,18 @@
-const axios = require("axios")
-const functions = require("firebase-functions")
-const FormData = require("form-data")
+import axios from "axios"
+import * as functions from "firebase-functions"
+import FormData from "form-data"
 
 const telegramHost =
   process.env["TEST_SERVER_URL"] || "https://api.telegram.org" //only exists in integration test environment
 
-exports.sendTelegramTextMessage = async function (
-  bot,
-  to,
-  text,
+const sendTelegramTextMessage = async function (
+  bot: string,
+  to: string,
+  text: string,
   replyId = null
 ) {
   let token
-  let data
+  let data: { chat_id: string; text: string; reply_to_message_id?: string }
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else if (bot === "report") {
@@ -41,15 +41,20 @@ exports.sendTelegramTextMessage = async function (
   return response
 }
 
-exports.sendTelegramImageMessage = async function (
-  bot,
-  to,
-  url,
-  caption,
+const sendTelegramImageMessage = async function (
+  bot: string,
+  to: string,
+  url: string,
+  caption: string,
   replyId = null
 ) {
   let token
-  let data
+  let data: {
+    chat_id: string
+    photo: string
+    caption?: string
+    reply_to_message_id?: string
+  }
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else {
@@ -79,11 +84,11 @@ exports.sendTelegramImageMessage = async function (
   return response
 }
 
-exports.sendTelegramImageMessageImageStream = async function (
-  bot,
-  to,
-  imageStream,
-  caption,
+const sendTelegramImageMessageImageStream = async function (
+  bot: string,
+  to: string,
+  imageStream: string,
+  caption: string,
   replyId = null
 ) {
   let token
@@ -111,4 +116,10 @@ exports.sendTelegramImageMessageImageStream = async function (
     throw "error with sending telegram photo"
   })
   return response
+}
+
+export {
+  sendTelegramImageMessageImageStream,
+  sendTelegramTextMessage,
+  sendTelegramImageMessage,
 }

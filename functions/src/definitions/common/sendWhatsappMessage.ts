@@ -1,6 +1,7 @@
-const axios = require("axios")
-const functions = require("firebase-functions")
-const { defineString } = require("firebase-functions/params")
+import axios from "axios"
+import * as functions from "firebase-functions"
+import { defineString } from "firebase-functions/params"
+import { WhatsappButton } from "../../types"
 
 const graphApiVersion = defineString("GRAPH_API_VERSION")
 const runtimeEnvironment = defineString("ENVIRONMENT")
@@ -13,26 +14,22 @@ const testCheckerPhoneNumberId = defineString(
 const graphApiUrl =
   process.env["TEST_SERVER_URL"] || "https://graph.facebook.com" //only exists in integration test environment
 
-/**
- * Using JSDOC temporarily until converted to ts file
- * @param {*} bot
- * @param {*} to
- * @param {*} text
- * @param {null|string} replyMessageId
- * @param {*} previewUrl
- * @returns
- */
 async function sendWhatsappTextMessage(
-  bot,
-  to,
-  text,
-  replyMessageId = null,
-  previewUrl = false
+  bot: string,
+  to: string,
+  text: string,
+  replyMessageId: string | null = null,
+  previewUrl: string | boolean = false
 ) {
   if (text.length > 4096) {
     text = `${text.slice(0, 4000)}...*[TRUNCATED, MSG TOO LONG FOR WHATSAPP]*`
   }
-  const data = {
+  const data: {
+    text: { body: string; preview_url: string | boolean }
+    to: string
+    messaging_product: string
+    context?: { message_id: string }
+  } = {
     text: { body: text, preview_url: previewUrl },
     to: to,
     messaging_product: "whatsapp",
@@ -47,12 +44,12 @@ async function sendWhatsappTextMessage(
 }
 
 async function sendWhatsappImageMessage(
-  bot,
-  to,
-  id,
-  url = null,
-  caption = null,
-  replyMessageId = null
+  bot: string,
+  to: string,
+  id: string,
+  url: string | null = null,
+  caption: string | null = null,
+  replyMessageId: string | null = null
 ) {
   if (caption && caption.length > 1024) {
     caption = `${caption.slice(
@@ -60,7 +57,11 @@ async function sendWhatsappImageMessage(
       950
     )}...*[TRUNCATED, MSG TOO LONG FOR WHATSAPP]*`
   }
-  const mediaObj = {}
+  const mediaObj: {
+    link?: string
+    id?: string
+    caption?: string
+  } = {}
   if (url) {
     mediaObj.link = url
   } else {
@@ -69,7 +70,15 @@ async function sendWhatsappImageMessage(
   if (caption) {
     mediaObj.caption = caption
   }
-  const data = {
+  const data: {
+    image: typeof mediaObj
+    to: string
+    type: string
+    messaging_product: string
+    context?: {
+      message_id: string
+    }
+  } = {
     image: mediaObj,
     to: to,
     type: "image",
@@ -85,9 +94,9 @@ async function sendWhatsappImageMessage(
 }
 
 async function sendWhatsappTemplateMessage(
-  bot,
-  to,
-  templateName,
+  bot: string,
+  to: string,
+  templateName: string,
   languageCode = "en",
   bodyTextVariables = [],
   buttonPayloads = [],
@@ -115,8 +124,25 @@ async function sendWhatsappTemplateMessage(
       }
     }),
   }
+  //@ts-ignore TODO: buttonComponentArr and bodyComponentArr have different properties
   const componentsArr = buttonComponentArr.concat(bodyComponentArr)
-  const data = {
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    template: {
+      name: string
+      language: {
+        policy: string
+        code: string
+      }
+      components: typeof componentsArr
+    }
+    context?: {
+      message_id: string
+    }
+  } = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -140,14 +166,32 @@ async function sendWhatsappTemplateMessage(
 }
 
 async function sendWhatsappTextListMessage(
-  bot,
-  to,
-  text,
-  buttonText,
-  sections,
+  bot: string,
+  to: string,
+  text: string,
+  buttonText: string,
+  sections: any,
   replyMessageId = null
 ) {
-  const data = {
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    interactive: {
+      type: string
+      body: {
+        text: string
+      }
+      action: {
+        button: string
+        sections: typeof sections
+      }
+    }
+    context?: {
+      message_id: string
+    }
+  } = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -173,13 +217,30 @@ async function sendWhatsappTextListMessage(
 }
 
 async function sendWhatsappButtonMessage(
-  bot,
-  to,
-  text,
-  buttons,
-  replyMessageId = null
+  bot: string,
+  to: string,
+  text: string,
+  buttons: WhatsappButton[],
+  replyMessageId: string | null = null
 ) {
-  const data = {
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    interactive: {
+      type: string
+      body: {
+        text: string
+      }
+      action: {
+        buttons: WhatsappButton[]
+      }
+    }
+    context?: {
+      message_id: string
+    }
+  } = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -204,14 +265,27 @@ async function sendWhatsappButtonMessage(
 }
 
 async function sendWhatsappContactMessage(
-  bot,
-  to,
-  phoneNumber,
-  name,
-  url,
-  replyMessageId = null
+  bot: string,
+  to: string,
+  phoneNumber: string,
+  name: string,
+  url: string,
+  replyMessageId: string | null = null
 ) {
-  const data = {
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    contacts: {
+      name: string
+      urls: { url: string }[]
+      phones: { phone: string }[]
+    }[]
+    context?: {
+      message_id: string
+    }
+  } = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: to,
@@ -241,7 +315,7 @@ async function sendWhatsappContactMessage(
   return response
 }
 
-async function markWhatsappMessageAsRead(bot, messageId) {
+async function markWhatsappMessageAsRead(bot: string, messageId: string) {
   const data = {
     messaging_product: "whatsapp",
     status: "read",
@@ -250,7 +324,7 @@ async function markWhatsappMessageAsRead(bot, messageId) {
   callWhatsappSendMessageApi(data, bot)
 }
 
-async function callWhatsappSendMessageApi(data, bot) {
+async function callWhatsappSendMessageApi(data: any, bot: string) {
   const token = process.env.WHATSAPP_TOKEN
   let phoneNumberId
   if (runtimeEnvironment.value() !== "PROD") {
@@ -284,10 +358,12 @@ async function callWhatsappSendMessageApi(data, bot) {
   return response
 }
 
-exports.sendWhatsappTextMessage = sendWhatsappTextMessage
-exports.sendWhatsappImageMessage = sendWhatsappImageMessage
-exports.sendWhatsappTemplateMessage = sendWhatsappTemplateMessage
-exports.sendWhatsappTextListMessage = sendWhatsappTextListMessage
-exports.sendWhatsappButtonMessage = sendWhatsappButtonMessage
-exports.markWhatsappMessageAsRead = markWhatsappMessageAsRead
-exports.sendWhatsappContactMessage = sendWhatsappContactMessage
+export {
+  sendWhatsappTextMessage,
+  sendWhatsappImageMessage,
+  sendWhatsappTemplateMessage,
+  sendWhatsappTextListMessage,
+  sendWhatsappButtonMessage,
+  markWhatsappMessageAsRead,
+  sendWhatsappContactMessage,
+}

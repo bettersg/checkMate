@@ -7,8 +7,8 @@ COPY package-lock.json package-lock.json
 
 RUN npm ci
 
-COPY embedder-server.js server.js
+COPY src src
 
 EXPOSE 12344
 
-CMD node server.js
+CMD npm run start-embedder-server
