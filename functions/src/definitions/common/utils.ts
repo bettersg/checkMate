@@ -12,14 +12,14 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-exports.getThresholds = async function () {
+const getThresholds = async function () {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
   return theresholdsSnap.data() ?? thresholds
 }
 
-exports.checkUrl = function (urlString: string) {
+const checkUrl = function (urlString: string) {
   let url
   try {
     url = new URL(urlString)
@@ -78,4 +78,12 @@ function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
 
-export { stripPhone, stripUrl, hashMessage, sleep, firestoreTimestampToYYYYMM }
+export {
+  stripPhone,
+  stripUrl,
+  hashMessage,
+  sleep,
+  firestoreTimestampToYYYYMM,
+  getThresholds,
+  checkUrl,
+}

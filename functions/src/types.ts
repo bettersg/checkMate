@@ -7,3 +7,11 @@ export type WhatsappMessage = {
   }
   type: string
 }
+
+export type WhatsappButton = {
+  type: string
+  reply: {
+    id: string
+    title: string
+  }
+}
