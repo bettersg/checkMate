@@ -6,10 +6,6 @@ erDiagram
         boolean isMachineCategorised
         string text "Text. For text, shows the latest iteration"
         string caption "Latest caption for image, if applicable"
-        string hash "Latest image hash, if applicable"
-        string mediaId "Latest Media ID from whatsApp, if applicable"
-        string mimeType "Minetype of latest image if applicable"
-        string storageURL "Cloud storage URL of latest image, if applicable"
         timestamp firstTimestamp "Timestamp of first instance"
         timestamp lastTimestamp "Timestamp of latest instance"
         boolean isPollStarted
