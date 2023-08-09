@@ -197,10 +197,7 @@ async function newTextInstanceHandler(
     matchedParentMessageRef = similarity.parent
   }
 
-  if (
-    similarityScore > parseFloat(similarityThreshold.value()) &&
-    similarity?.caption == null //prevent matching to images with caption
-  ) {
+  if (similarityScore > parseFloat(similarityThreshold.value())) {
     hasMatch = true
     matchType = "similarity"
   }
@@ -248,8 +245,6 @@ async function newTextInstanceHandler(
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: text, //text or caption, taken from webhook object
-    caption: null,
-    captionHash: null,
     from: from, //sender phone number, taken from webhook object
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
