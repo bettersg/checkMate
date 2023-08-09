@@ -58,7 +58,6 @@ exports.onInstanceCreate = functions
       const updateObj = {
         id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
         message: data.text,
-        caption: null,
         captionHash: "__NULL__",
         embedding: data.embedding,
       }
@@ -80,7 +79,6 @@ exports.onInstanceCreate = functions
         const updateObj = {
           id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
           message: data.text,
-          caption: data.caption,
           captionHash: data.captionHash ? data.captionHash : "__NULL__",
           embedding: data.embedding,
         }

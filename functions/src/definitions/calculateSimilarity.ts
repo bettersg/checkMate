@@ -37,10 +37,6 @@ async function calculateSimilarity(
       functions.logger.warn("Text doesn't match")
       return {}
     }
-    if (instanceSnap.get("caption") != (doc.caption ?? null)) {
-      functions.logger.warn("Caption doesn't match")
-      return {}
-    }
     return {
       ref: instanceRef,
       message: doc.message,
