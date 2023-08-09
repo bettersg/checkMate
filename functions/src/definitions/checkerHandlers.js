@@ -195,8 +195,11 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   const messageRef = voteRequestRef.parent.parent
   const messageSnap = await messageRef.get()
   const message = messageSnap.data()
+  const latestInstanceRef = messageSnap.get("latestInstance")
+  const latestInstanceSnap = await latestInstanceRef.get()
+  const latestType = latestInstanceSnap.get("type") ?? "text"
   let res
-  switch (message.type) {
+  switch (latestType) {
     case "text":
       res = await sendTextMessage(
         "factChecker",
@@ -213,7 +216,7 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
           "factChecker",
           from,
           temporaryUrl,
-          message.text,
+          message.caption,
           null,
           platform
         )

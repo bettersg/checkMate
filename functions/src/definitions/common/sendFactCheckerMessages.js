@@ -143,28 +143,14 @@ exports.sendVotingMessage = async function sendVotingMessage(
           rows: rows,
         },
       ]
-      switch (message.type) {
-        case "text":
-          await sendWhatsappTextListMessage(
-            "factChecker",
-            voteRequestData.platformId,
-            responses.FACTCHECK_PROMPT,
-            "Vote here",
-            sections,
-            voteRequestData.sentMessageId
-          )
-          break
-        case "image":
-          await sendWhatsappTextListMessage(
-            "factChecker",
-            voteRequestData.platformId,
-            responses.FACTCHECK_PROMPT,
-            "Vote here",
-            sections,
-            voteRequestData.sentMessageId
-          )
-          break
-      }
+      await sendWhatsappTextListMessage(
+        "factChecker",
+        voteRequestData.platformId,
+        responses.FACTCHECK_PROMPT,
+        "Vote here",
+        sections,
+        voteRequestData.sentMessageId
+      )
       functions.logger.log(
         `Vote message sent for ${voteRequestData.platformId}`
       )

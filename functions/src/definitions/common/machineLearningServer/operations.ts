@@ -16,6 +16,20 @@ interface L1CategoryResponse {
   prediction: string
 }
 
+interface OCRResponse {
+  output: {
+    sender_name_or_phone_number: string
+    text_messages: {
+      is_left: boolean
+      text: string
+    }[]
+  }
+  is_convo: boolean
+  extracted_message: string
+  sender: string
+  prediction: string
+}
+
 async function getEmbedding(text: string): Promise<number[]> {
   const data = {
     text: text,
@@ -40,6 +54,14 @@ async function getL1Category(text: string): Promise<string> {
   return response.data.prediction
 }
 
+async function performOCR(url: string): Promise<OCRResponse> {
+  const data = {
+    url: url,
+  }
+  const response = await callAPI<OCRResponse>("ocr", data)
+  return response.data
+}
+
 async function callAPI<T>(endpoint: string, data: object) {
   try {
     const response = await axios<T>({
@@ -62,4 +84,4 @@ async function callAPI<T>(endpoint: string, data: object) {
   }
 }
 
-export { getEmbedding, checkTrivial, getL1Category }
+export { getEmbedding, checkTrivial, getL1Category, performOCR }

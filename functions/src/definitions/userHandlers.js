@@ -8,7 +8,7 @@ const {
   sendWhatsappButtonMessage,
 } = require("./common/sendWhatsappMessage")
 const { sendDisputeNotification } = require("./common/sendMessage")
-const { sleep, getThresholds } = require("./common/utils")
+const { sleep, hashMessage } = require("./common/utils")
 const { getCount } = require("./common/counters")
 const {
   getResponsesObj,
@@ -19,11 +19,15 @@ const {
 } = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
-const { getEmbedding } = require("./common/machineLearningServer/operations")
+const {
+  getEmbedding,
+  performOCR,
+} = require("./common/machineLearningServer/operations")
 const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
 const { classifyText } = require("./common/classifier")
+const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -101,7 +105,7 @@ exports.userHandlerWhatsapp = async function (message) {
     case "image":
       step = await newImageInstanceHandler(
         {
-          text: message?.image?.caption || null,
+          caption: message?.image?.caption || null,
           timestamp: messageTimestamp,
           id: message.id || null,
           mediaId: message?.image?.id || null,
@@ -170,13 +174,13 @@ async function newTextInstanceHandler(
     })
     return Promise.resolve(`text_machine_${machineCategory}`)
   }
-  let matchType = "none" // will be set to either "exact", "stripped", or "similarity"
+  let matchType = "none" // will be set to either "similarity" or "none"
   let similarity
   let embedding
   // 1 - check if the exact same message exists in database
   try {
     embedding = await getEmbedding(text)
-    similarity = await calculateSimilarity(embedding)
+    similarity = await calculateSimilarity(embedding, null)
   } catch (error) {
     functions.logger.error("Error in calculateSimilarity:", error)
     similarity = {}
@@ -192,15 +196,23 @@ async function newTextInstanceHandler(
     similarityScore = similarity.score
     matchedParentMessageRef = similarity.parent
   }
-  hasMatch = similarityScore > parseFloat(similarityThreshold.value())
+
+  if (
+    similarityScore > parseFloat(similarityThreshold.value()) &&
+    similarity?.caption == null //prevent matching to images with caption
+  ) {
+    hasMatch = true
+    matchType = "similarity"
+  }
 
   if (!hasMatch) {
     let writeResult = await db.collection("messages").add({
-      type: "text", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised:
         machineCategory !== "unsure" && machineCategory !== "info",
-      text: text, //text or caption
+      text: text, //text
+      caption: null,
+      latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
@@ -209,7 +221,10 @@ async function newTextInstanceHandler(
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
-      isIrrelevant: machineCategory.includes("irrelevant") ? true : null, //bool, if majority voted irrelevant then update this
+      isIrrelevant:
+        !!machineCategory && machineCategory.includes("irrelevant")
+          ? true
+          : null, //bool, if majority voted irrelevant then update this
       isScam: machineCategory === "scam" ? true : null,
       isIllicit: machineCategory === "illicit" ? true : null,
       isSpam: machineCategory === "spam" ? true : null,
@@ -233,6 +248,8 @@ async function newTextInstanceHandler(
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: text, //text or caption, taken from webhook object
+    caption: null,
+    captionHash: null,
     from: from, //sender phone number, taken from webhook object
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
@@ -263,7 +280,7 @@ async function newTextInstanceHandler(
 }
 
 async function newImageInstanceHandler({
-  text: text,
+  caption: caption,
   timestamp: timestamp,
   id: id,
   mediaId: mediaId,
@@ -275,96 +292,194 @@ async function newImageInstanceHandler({
 }) {
   const db = admin.firestore()
   let filename
+  let messageRef
+  let hasMatch = false
+  let captionHash = caption ? hashMessage(caption) : null
+
   //get response buffer
   let buffer = await downloadWhatsappMedia(mediaId, mimeType)
   const hash = await getHash(buffer)
+
+  //upload to storage
+  const storageBucket = admin.storage().bucket()
+  filename = `images/${mediaId}.${mimeType.split("/")[1]}`
+  const file = storageBucket.file(filename)
+  const stream = file.createWriteStream()
+  await new Promise((resolve, reject) => {
+    stream.on("error", reject)
+    stream.on("finish", resolve)
+    stream.end(buffer)
+  })
+  let matchType = "none" // will be set to either "similarity" or "image" or "none"
+  //check if identical image exists among instances
   let imageMatchSnapshot = await db
-    .collection("messages")
-    .where("type", "==", "image")
+    .collectionGroup("instances")
     .where("hash", "==", hash)
-    .where("assessmentExpired", "==", false)
+    .where("captionHash", "==", captionHash)
     .get()
-  let messageId
-  let hasMatch
-  if (imageMatchSnapshot.empty) {
-    hasMatch = false
-    const storageBucket = admin.storage().bucket()
-    filename = `images/${mediaId}.${mimeType.split("/")[1]}`
-    const file = storageBucket.file(filename)
-    const stream = file.createWriteStream()
-    await new Promise((resolve, reject) => {
-      stream.on("error", reject)
-      stream.on("finish", resolve)
-      stream.end(buffer)
-    })
+  if (!imageMatchSnapshot.empty) {
+    hasMatch = true
+    matchType = "image"
+  }
+  //do OCR
+
+  let ocrSuccess
+  let sender
+  let isConvo
+  let extractedMessage
+  let machineCategory
+  if (!hasMatch) {
+    const temporaryUrl = await getSignedUrl(filename)
+    if (temporaryUrl) {
+      try {
+        const ocrOutput = await performOCR(temporaryUrl)
+        sender = ocrOutput?.sender ?? null
+        isConvo = ocrOutput?.is_convo ?? null
+
+        //extractedMessage = ocrOutput?.extracted_message ?? null
+        const textMessages = ocrOutput?.output?.text_messages ?? []
+        const longestLHSMessage = textMessages
+          .filter((message) => message.is_left)
+          .reduce(
+            (longest, current) => {
+              return current.text.length > longest.text.length
+                ? current
+                : longest
+            },
+            { text: "" }
+          ) // Initial value with an empty text property
+        extractedMessage = longestLHSMessage.text || null
+        machineCategory = ocrOutput?.prediction ?? null
+        ocrSuccess = true
+      } catch (error) {
+        functions.logger.error("Error in performOCR:", error)
+      }
+    } else {
+      functions.logger.warn("Problem creating URL")
+    }
+  } else {
+    //this is so that we don't do an unnecessary OCR which is more compute intensive.
+    const matchedInstanceSnap = imageMatchSnapshot.docs[0]
+    sender = matchedInstanceSnap.get("sender") ?? null
+    isConvo = matchedInstanceSnap.get("isConvo") ?? null
+    extractedMessage = matchedInstanceSnap.get("text") ?? null
+    machineCategory = matchedInstanceSnap.get("machineCategory") ?? null
+  }
+
+  let similarity
+  let embedding
+  let bestMatchingDocumentRef
+  let bestMatchingText
+  let similarityScore = 0
+  let matchedParentMessageRef
+
+  if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
+    try {
+      embedding = await getEmbedding(extractedMessage)
+      similarity = await calculateSimilarity(embedding, captionHash)
+    } catch (error) {
+      functions.logger.error("Error in calculateSimilarity:", error)
+      embedding = null
+      similarity = {}
+    }
+    if (similarity != {}) {
+      bestMatchingDocumentRef = similarity.ref
+      bestMatchingText = similarity.message
+      similarityScore = similarity.score
+      matchedParentMessageRef = similarity.parent
+    }
+    if (similarityScore > parseFloat(similarityThreshold.value())) {
+      hasMatch = true
+      matchType = "similarity"
+    }
+  }
+
+  if (!hasMatch) {
     let writeResult = await db.collection("messages").add({
-      type: "image", //Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'. But as a start only support text and image
-      machineCategory: null,
-      isMachineCategorised: false,
-      text: text, //text or caption
-      hash: hash,
-      mediaId: mediaId,
-      mimeType: mimeType,
-      storageUrl: filename,
+      machineCategory: machineCategory, //Can be "fake news" or "scam"
+      isMachineCategorised:
+        machineCategory !== "unsure" && machineCategory !== "info",
+      text: extractedMessage ?? null, //text
+      caption: caption ?? null,
+      latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: false, //boolean, whether or not we have concluded the voting
+      isAssessed: machineCategory !== "unsure" && machineCategory !== "info", //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
-      isScam: null,
-      isIllicit: null,
-      isSpam: null,
+      isIrrelevant:
+        !!machineCategory && machineCategory.includes("irrelevant")
+          ? true
+          : null, //bool, if majority voted irrelevant then update this
+      isScam: machineCategory === "scam" ? true : null,
+      isIllicit: machineCategory === "illicit" ? true : null,
+      isSpam: machineCategory === "spam" ? true : null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: null,
-      isIrrelevant: null, //bool, if majority voted irrelevant then update this
-      primaryCategory: null,
+      isInfo: machineCategory === "info" ? true : null,
+      primaryCategory:
+        machineCategory !== "unsure" && machineCategory !== "info"
+          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+          : null,
       customReply: null, //string
       instanceCount: 0,
     })
-    messageId = writeResult.id
+    messageRef = writeResult
   } else {
-    if (imageMatchSnapshot.size > 1) {
-      functions.logger.log(
-        `strangely, more than 1 device matches the image query ${hash}`
-      )
+    if (matchType === "image") {
+      if (imageMatchSnapshot.size > 1) {
+        functions.logger.log(
+          `strangely, more than 1 device matches the image query ${hash}`
+        )
+      }
+      messageRef = imageMatchSnapshot.docs[0].ref.parent.parent
+    } else if (matchType === "similarity") {
+      messageRef = matchedParentMessageRef
     }
-    hasMatch = true
-    messageId = imageMatchSnapshot.docs[0].id
   }
-  const _ = await db
-    .collection("messages")
-    .doc(messageId)
-    .collection("instances")
-    .add({
-      source: "whatsapp",
-      id: id || null, //taken from webhook object, needed to reply
-      timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
-      type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-      text: text, //text or caption, taken from webhook object
-      from: from, //sender phone number, taken from webhook object
-      hash: hash,
-      mediaId: mediaId,
-      mimeType: mimeType,
-      isForwarded: isForwarded, //boolean, taken from webhook object
-      isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
-      isReplied: false,
-      isInterimPromptSent: null,
-      isInterimUseful: null,
-      isInterimReplySent: null,
-      isMeaningfulInterimReplySent: null,
-      isReplyForced: null,
-      isMatched: hasMatch,
-      isReplyImmediate: null,
-      replyCategory: null,
-      replyTimestamp: null,
-      scamShieldConsent: null,
-      isSatisfactionSurveySent: null,
-      satisfactionScore: null,
-    })
+  const _ = await messageRef.collection("instances").add({
+    source: "whatsapp",
+    id: id || null, //taken from webhook object, needed to reply
+    timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
+    type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
+    text: extractedMessage ?? null, //text extracted from OCR if relevant
+    caption: caption ?? null,
+    captionHash: captionHash,
+    sender: sender, //sender name or number extracted from OCR
+    isConvo: isConvo, //boolean, whether or not the image is that of a conversation
+    from: from, //sender phone number, taken from webhook object
+    hash: hash,
+    mediaId: mediaId,
+    mimeType: mimeType,
+    storageUrl: filename,
+    isForwarded: isForwarded, //boolean, taken from webhook object
+    isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
+    isReplied: false,
+    isInterimPromptSent: null,
+    isInterimUseful: null,
+    isInterimReplySent: null,
+    isMeaningfulInterimReplySent: null,
+    isReplyForced: null,
+    isMatched: hasMatch,
+    isReplyImmediate: null,
+    replyCategory: null,
+    replyTimestamp: null,
+    matchType: matchType,
+    scamShieldConsent: null,
+    embedding: embedding ?? null,
+    closestMatch: {
+      instanceRef: bestMatchingDocumentRef ?? null,
+      text: bestMatchingText ?? null,
+      score: similarityScore ?? null,
+      parentRef: matchedParentMessageRef ?? null,
+      algorithm: "all-MiniLM-L6-v2",
+    },
+    isSatisfactionSurveySent: null,
+    satisfactionScore: null,
+  })
   return Promise.resolve("image")
 }
 
