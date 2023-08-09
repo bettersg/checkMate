@@ -9,7 +9,7 @@ const sendTelegramTextMessage = async function (
   bot: string,
   to: string,
   text: string,
-  replyId = null
+  replyId: string | null = null
 ) {
   let token
   let data: { chat_id: string; text: string; reply_to_message_id?: string }
@@ -45,14 +45,14 @@ const sendTelegramImageMessage = async function (
   bot: string,
   to: string,
   url: string,
-  caption: string,
-  replyId = null
+  caption: string | null,
+  replyId: string | null = null
 ) {
   let token
   let data: {
     chat_id: string
     photo: string
-    caption?: string
+    caption?: string | null
     reply_to_message_id?: string
   }
   if (bot == "factChecker") {
