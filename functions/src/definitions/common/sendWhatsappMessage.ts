@@ -46,7 +46,7 @@ async function sendWhatsappTextMessage(
 async function sendWhatsappImageMessage(
   bot: string,
   to: string,
-  id: string,
+  id: string | null,
   url: string | null = null,
   caption: string | null = null,
   replyMessageId: string | null = null
@@ -59,7 +59,7 @@ async function sendWhatsappImageMessage(
   }
   const mediaObj: {
     link?: string
-    id?: string
+    id?: string | null
     caption?: string
   } = {}
   if (url) {

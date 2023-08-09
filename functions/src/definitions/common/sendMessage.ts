@@ -1,21 +1,23 @@
-const {
+import functions from "firebase-functions"
+import {
   sendWhatsappTextMessage,
   sendWhatsappImageMessage,
-} = require("./sendWhatsappMessage")
-const {
+} from "./sendWhatsappMessage"
+import {
   sendTelegramTextMessage,
   sendTelegramImageMessage,
-} = require("./sendTelegramMessage")
-const { checkUrl } = require("./utils")
-const { defineString } = require("firebase-functions/params")
+} from "./sendTelegramMessage"
+import { checkUrl } from "./utils"
+import { defineString } from "firebase-functions/params"
+
 const reportChannelId = defineString("TELEGRAM_REPORT_CHANNEL_ID")
 const runtimeEnvironment = defineString("ENVIRONMENT")
 
-exports.sendTextMessage = async function (
-  bot,
-  to,
-  text,
-  replyId,
+const sendTextMessage = async function (
+  bot: string,
+  to: string,
+  text: string,
+  replyId: string,
   platform = "whatsapp",
   previewUrl = false
 ) {
@@ -31,14 +33,18 @@ exports.sendTextMessage = async function (
   return res
 }
 
-exports.sendImageMessage = async function (
-  bot,
-  to,
-  urlOrId = null,
+const sendImageMessage = async function (
+  bot: string,
+  to: string,
+  urlOrId: string | null = null,
   caption = null,
   replyId = null,
   platform = "whatsapp"
 ) {
+  if (urlOrId === null) {
+    functions.logger.warn("urlOrId was null in sendImageMessage")
+    return
+  }
   let res
   switch (platform) {
     case "telegram":
@@ -71,12 +77,12 @@ exports.sendImageMessage = async function (
   return res
 }
 
-exports.sendDisputeNotification = async function (
-  phoneNumber,
-  instancePath,
-  type,
-  text,
-  finalCategory
+const sendDisputeNotification = async function (
+  phoneNumber: string,
+  instancePath: string,
+  type: string,
+  text: string,
+  finalCategory: string
 ) {
   const messageText = `<${runtimeEnvironment.value()}>${phoneNumber} has disputed the assessment of a message sent by them.
   
@@ -95,3 +101,5 @@ category: ${finalCategory}`
     null
   )
 }
+
+export { sendTextMessage, sendImageMessage, sendDisputeNotification }
