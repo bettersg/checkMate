@@ -63,24 +63,22 @@ async function getHash(buffer: Buffer) {
 }
 
 async function getSignedUrl(storageUrl: string) {
-  if (runtimeEnvironment.value() === "PROD") {
-    try {
-      const storage = admin.storage()
-      const [temporaryUrl] = await storage
-        .bucket()
-        .file(storageUrl)
-        .getSignedUrl({
-          action: "read",
-          expires: Date.now() + 60 * 60 * 1000,
-        })
-      return temporaryUrl
-    } catch (error) {
-      functions.logger.error(error)
-      // You can also log the error to an external monitoring service or send an alert to the developers
-      return null
-    }
-  } else {
+  if (runtimeEnvironment.value() !== "PROD") {
     return testImageUrl.value()
+  }
+  try {
+    const storage = admin.storage()
+    const [temporaryUrl] = await storage
+      .bucket()
+      .file(storageUrl)
+      .getSignedUrl({
+        action: "read",
+        expires: Date.now() + 60 * 60 * 1000,
+      })
+    return temporaryUrl
+  } catch (error) {
+    functions.logger.error(error)
+    return null
   }
 }
 

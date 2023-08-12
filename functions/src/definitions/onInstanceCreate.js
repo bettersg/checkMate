@@ -53,12 +53,18 @@ exports.onInstanceCreate = functions
 
     if (data?.type === "text") {
       parentMessageRef.update({ text: data.text, latestInstance: snap.ref })
+    } else if (data?.type === "image") {
+      parentMessageRef.update({
+        latestInstance: snap.ref,
+        caption: data.caption,
+      })
+    }
 
-      //update typesense index
+    if (data?.embedding && data?.text) {
       const updateObj = {
         id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
         message: data.text,
-        captionHash: "__NULL__",
+        captionHash: data.captionHash ? data.captionHash : "__NULL__",
         embedding: data.embedding,
       }
       try {
@@ -68,28 +74,6 @@ exports.onInstanceCreate = functions
           `Error inserting instance ${snap.ref.path} into typesense: `,
           error
         )
-      }
-    } else if (data?.type === "image") {
-      //TODO: IF IMAGE, UPDATE storageURL, minetype, text etc. Also update typesense db
-      parentMessageRef.update({
-        latestInstance: snap.ref,
-        caption: data.caption,
-      })
-      if (data?.embedding && data?.text) {
-        const updateObj = {
-          id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
-          message: data.text,
-          captionHash: data.captionHash ? data.captionHash : "__NULL__",
-          embedding: data.embedding,
-        }
-        try {
-          await insertOne(updateObj, CollectionTypes.Instances)
-        } catch (error) {
-          functions.logger.error(
-            `Error inserting instance ${snap.ref.path} into typesense: `,
-            error
-          )
-        }
       }
     }
 

@@ -245,6 +245,7 @@ async function newTextInstanceHandler(
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: text, //text or caption, taken from webhook object
+    sender: null, //sender name or number (for now not collected)
     from: from, //sender phone number, taken from webhook object
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
@@ -289,35 +290,44 @@ async function newImageInstanceHandler({
   let filename
   let messageRef
   let hasMatch = false
+  let matchType = "none" // will be set to either "similarity" or "image" or "none"
+  let matchedInstanceSnap
   let captionHash = caption ? hashMessage(caption) : null
 
   //get response buffer
   let buffer = await downloadWhatsappMedia(mediaId, mimeType)
   const hash = await getHash(buffer)
-
-  //upload to storage
-  const storageBucket = admin.storage().bucket()
-  filename = `images/${mediaId}.${mimeType.split("/")[1]}`
-  const file = storageBucket.file(filename)
-  const stream = file.createWriteStream()
-  await new Promise((resolve, reject) => {
-    stream.on("error", reject)
-    stream.on("finish", resolve)
-    stream.end(buffer)
-  })
-  let matchType = "none" // will be set to either "similarity" or "image" or "none"
-  //check if identical image exists among instances
+  //check if same image already exists
   let imageMatchSnapshot = await db
     .collectionGroup("instances")
     .where("hash", "==", hash)
-    .where("captionHash", "==", captionHash)
     .get()
   if (!imageMatchSnapshot.empty) {
-    hasMatch = true
-    matchType = "image"
+    filename = imageMatchSnapshot.docs[0].data().storageUrl
+    //loop through instances till we find the one with the same captionHash
+    for (let instance of imageMatchSnapshot.docs) {
+      let instanceCaptionHash = instance.get("captionHash")
+      if (instanceCaptionHash === captionHash) {
+        hasMatch = true
+        matchType = "image"
+        matchedInstanceSnap = instance
+        break
+      }
+    }
+  } else {
+    //upload to storage
+    const storageBucket = admin.storage().bucket()
+    filename = `images/${mediaId}.${mimeType.split("/")[1]}`
+    const file = storageBucket.file(filename)
+    const stream = file.createWriteStream()
+    await new Promise((resolve, reject) => {
+      stream.on("error", reject)
+      stream.on("finish", resolve)
+      stream.end(buffer)
+    })
   }
-  //do OCR
 
+  //do OCR
   let ocrSuccess
   let sender
   let isConvo
@@ -329,12 +339,11 @@ async function newImageInstanceHandler({
       try {
         const ocrOutput = await performOCR(temporaryUrl)
         sender = ocrOutput?.sender ?? null
-        isConvo = ocrOutput?.is_convo ?? null
+        isConvo = ocrOutput?.isConvo ?? null
 
-        //extractedMessage = ocrOutput?.extracted_message ?? null
-        const textMessages = ocrOutput?.output?.text_messages ?? []
+        const textMessages = ocrOutput?.output?.textMessages ?? []
         const longestLHSMessage = textMessages
-          .filter((message) => message.is_left)
+          .filter((message) => message.isLeft)
           .reduce(
             (longest, current) => {
               return current.text.length > longest.text.length
@@ -354,7 +363,6 @@ async function newImageInstanceHandler({
     }
   } else {
     //this is so that we don't do an unnecessary OCR which is more compute intensive.
-    const matchedInstanceSnap = imageMatchSnapshot.docs[0]
     sender = matchedInstanceSnap.get("sender") ?? null
     isConvo = matchedInstanceSnap.get("isConvo") ?? null
     extractedMessage = matchedInstanceSnap.get("text") ?? null
@@ -425,12 +433,7 @@ async function newImageInstanceHandler({
     messageRef = writeResult
   } else {
     if (matchType === "image") {
-      if (imageMatchSnapshot.size > 1) {
-        functions.logger.log(
-          `strangely, more than 1 device matches the image query ${hash}`
-        )
-      }
-      messageRef = imageMatchSnapshot.docs[0].ref.parent.parent
+      messageRef = matchedInstanceSnap.ref.parent.parent
     } else if (matchType === "similarity") {
       messageRef = matchedParentMessageRef
     }
