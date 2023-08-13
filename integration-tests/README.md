@@ -5,7 +5,7 @@
 To run tests locally:
 
 - Import the collection `checkmate.postman_collection.json` to Postman
-- Update `env.json` with `node update-env.js`
+- Update `env.json` with `npm run update-env`
 - Import the environment `env.json` to Postman
 - If there were packages added, run `docker-compose build`
 - Run `docker-compose up`
@@ -14,4 +14,4 @@ To run tests locally:
 
 Note:
 
-- In Github Actions, `node update-env.js` is always run when testing.
+- In Github Actions, `npm run update-env` is always run when testing.
