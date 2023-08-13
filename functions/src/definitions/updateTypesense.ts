@@ -33,7 +33,7 @@ exports.onMessageWrite = functions
       const upsertDoc = {
         id,
         text: messageData.text || null,
-        type: messageData.type,
+        caption: messageData.caption || null,
         category: messageData.primaryCategory,
         truthScore: messageData.truthScore,
         isAssessed: messageData.isAssessed,

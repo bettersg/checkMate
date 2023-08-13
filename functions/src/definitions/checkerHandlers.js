@@ -195,8 +195,15 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   const messageRef = voteRequestRef.parent.parent
   const messageSnap = await messageRef.get()
   const message = messageSnap.data()
+  const latestInstanceRef = messageSnap.get("latestInstance")
+  const latestInstanceSnap = await latestInstanceRef.get()
+  const latestType = latestInstanceSnap.get("type") ?? "text"
   let res
-  switch (message.type) {
+  const updateObj = {
+    hasAgreed: true,
+    acceptedTimestamp: Timestamp.fromDate(new Date()),
+  }
+  switch (latestType) {
     case "text":
       res = await sendTextMessage(
         "factChecker",
@@ -205,6 +212,7 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
         null,
         platform
       )
+      updateObj.sentMessageId = res.data.messages[0].id
       break
     case "image":
       const temporaryUrl = await getSignedUrl(message.storageUrl)
@@ -213,12 +221,15 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
           "factChecker",
           from,
           temporaryUrl,
-          message.text,
+          message.caption,
           null,
           platform
         )
+        updateObj.sentMessageId = res.data.messages[0].id
       } else {
-        functions.logger.warn("Problem creating URL")
+        functions.logger.error(
+          `Problem creating URL while sending message ${messageRef.id} to ${from}}`
+        )
         await sendTextMessage(
           "factChecker",
           from,
@@ -229,11 +240,18 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
         return
       }
       break
-  }
-  const updateObj = {
-    hasAgreed: true,
-    acceptedTimestamp: Timestamp.fromDate(new Date()),
-    sentMessageId: res.data.messages[0].id,
+    default:
+      functions.logger.error(
+        `Unknown message type while sending message ${messageRef.id} to ${from}`
+      )
+      await sendTextMessage(
+        "factChecker",
+        from,
+        "Sorry, an error occured",
+        null,
+        platform
+      )
+      return
   }
   if (message.machineCategory === "info") {
     // handle case where machine has predicted info, so no need to go into L1 categorisation, but still need to go into L2 voting

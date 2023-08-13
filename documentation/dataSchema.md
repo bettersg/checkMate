@@ -2,14 +2,10 @@ erDiagram
 
     message {
         string id PK "Assigned by Firestore"
-        string type "image/text"
         string machineCategory
         boolean isMachineCategorised
-        string text "Text or caption. For text, shows the latest iteration"
-        string hash "Image hash, for image only"
-        string mediaId "Media ID from whatsApp, for image only"
-        string mimeType "For image only"
-        string storageURL "Cloud storage URL, for image only"
+        string text "Text. For text, shows the latest iteration"
+        string caption "Latest caption for image, if applicable"
         timestamp firstTimestamp "Timestamp of first instance"
         timestamp lastTimestamp "Timestamp of latest instance"
         boolean isPollStarted
@@ -38,11 +34,16 @@ erDiagram
         string id "whatsapp message id (needed to reply)"
         timestamp timestamp
         string type "text/image"
-        string text "Text or caption"
+        string text "text (if text message) or ocr-extracted text (if image message)"
+        string caption "caption of image, if applicable"
+        string captionHash "md5 hash of caption"
+        string sender "sender name or number, extracted by OCR, if applicable"
+        string isConvo "whether the image is of a convo, if applicable"
         string from "Sender ID or phone number"
         string hash "Image hash, for image only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
+        string storageURL "Cloud storage URL of image, if applicable"
         boolean isForwarded "Not used for now"
         boolean isFrequentlyForwarded "Not used for now"
         boolean isReplied "System has replied to the citizen with a final assessment"
@@ -52,6 +53,7 @@ erDiagram
         boolean isReplyForced "track if final reply is forced"
         boolean isMatched "track if message was matched"
         boolean isReplyImmediate "track if final reply is immediate"
+        boolean isMeaningfulInterimReplySent "track is a non-unsure meaningful interim reply was sent"
         string replyCategory "scam, illicit, untrue, misleading, accurate, spam, legitimate, irrelevant, irrelevant_auto, unsure"
     		timestamp replyTimestamp
         string matchType "either exact, stripped, similarity or none"

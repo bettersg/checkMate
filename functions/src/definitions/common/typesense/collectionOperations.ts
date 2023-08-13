@@ -20,19 +20,36 @@ function getEnvSuffix(): string {
 async function vectorSearch(
   embedding: Array<number>,
   collection: CollectionTypes,
-  numResults: number = 1
+  numResults: number = 1,
+  filterBy: string | null = null
 ): Promise<any> {
   try {
-    let searchRequests = {
-      searches: [
-        {
-          collection: `${collection}${getEnvSuffix()}`,
-          q: "*",
-          query_by: "message",
-          per_page: numResults,
-          vector_query: `embedding:([${embedding}], k:${numResults})`,
-        },
-      ],
+    let searchRequests
+    if (filterBy === null) {
+      searchRequests = {
+        searches: [
+          {
+            collection: `${collection}${getEnvSuffix()}`,
+            q: "*",
+            query_by: "message",
+            per_page: numResults,
+            vector_query: `embedding:([${embedding}], k:${numResults})`,
+          },
+        ],
+      }
+    } else {
+      searchRequests = {
+        searches: [
+          {
+            collection: `${collection}${getEnvSuffix()}`,
+            q: "*",
+            query_by: "message",
+            filter_by: filterBy,
+            per_page: numResults,
+            vector_query: `embedding:([${embedding}], k:${numResults})`,
+          },
+        ],
+      }
     }
     let commonSearchParams = {}
     const response = await getClient().multiSearch.perform(

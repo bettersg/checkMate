@@ -52,12 +52,19 @@ exports.onInstanceCreate = functions
     await upsertUser(data.from, data.timestamp)
 
     if (data?.type === "text") {
-      parentMessageRef.update({ text: data.text })
+      parentMessageRef.update({ text: data.text, latestInstance: snap.ref })
+    } else if (data?.type === "image") {
+      parentMessageRef.update({
+        latestInstance: snap.ref,
+        caption: data.caption,
+      })
+    }
 
-      //update typesense index
+    if (data?.embedding && data?.text) {
       const updateObj = {
         id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
         message: data.text,
+        captionHash: data.captionHash ? data.captionHash : "__NULL__",
         embedding: data.embedding,
       }
       try {
