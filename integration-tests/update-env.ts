@@ -1,7 +1,7 @@
-const _ = require("lodash");
-const fs = require("fs");
-const env = require("./env.json");
-const constants = require("../functions/src/definitions/common/constants");
+import _ from 'lodash';
+import fs from 'fs';
+import env from './env.json';
+import * as constants from '../functions/src/definitions/common/constants';
 
 const factCheckerKeys = Object.keys(constants.FACTCHECKER_BOT_RESPONSES).map(
   (key) => {
@@ -23,7 +23,7 @@ allKeys.forEach((key) => {
   if (!found) {
     env.values.push({
       key,
-      value: "",
+      value: '',
       enabled: true,
     });
   }
@@ -31,7 +31,7 @@ allKeys.forEach((key) => {
 
 //loop through each key in env.values, if it starts with "__CONSTANTS___" but is not in allKeys, remove it
 const envWithRemovedValues = env.values.filter((value) => {
-  if (value.key.startsWith("__CONSTANTS__.")) {
+  if (value.key.startsWith('__CONSTANTS__.')) {
     const key = value.key;
     const found = allKeys.find((allKey) => {
       return allKey === key;
@@ -47,8 +47,8 @@ const envWithRemovedValues = env.values.filter((value) => {
 });
 
 const envWithReplacedValues = envWithRemovedValues.map((value) => {
-  if (value.key.startsWith("__CONSTANTS__.")) {
-    const key = value.key.replace("__CONSTANTS__.", "");
+  if (value.key.startsWith('__CONSTANTS__.')) {
+    const key = value.key.replace('__CONSTANTS__.', '');
     const newValue = _.get(constants, key);
     value.value = newValue;
     return value;
@@ -59,4 +59,4 @@ const envWithReplacedValues = envWithRemovedValues.map((value) => {
 
 env.values = envWithReplacedValues;
 
-fs.writeFileSync("env.json", JSON.stringify(env, null, 2));
+fs.writeFileSync('env.json', JSON.stringify(env, null, 2));
