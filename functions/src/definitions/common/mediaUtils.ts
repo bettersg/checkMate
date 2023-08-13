@@ -6,6 +6,9 @@ import { defineString } from "firebase-functions/params"
 import { imageHash } from "image-hash"
 
 const graphApiVersion = defineString("GRAPH_API_VERSION")
+const runtimeEnvironment = defineString("ENVIRONMENT")
+const testImageUrl = defineString("TEST_IMAGE_URL")
+
 const graphApiUrl = process.env["GRAPH_API_URL"] || "https://graph.facebook.com"
 const imageHashSync = util.promisify(imageHash)
 
@@ -60,6 +63,9 @@ async function getHash(buffer: Buffer) {
 }
 
 async function getSignedUrl(storageUrl: string) {
+  if (runtimeEnvironment.value() !== "PROD") {
+    return testImageUrl.value()
+  }
   try {
     const storage = admin.storage()
     const [temporaryUrl] = await storage
@@ -72,7 +78,6 @@ async function getSignedUrl(storageUrl: string) {
     return temporaryUrl
   } catch (error) {
     functions.logger.error(error)
-    // You can also log the error to an external monitoring service or send an alert to the developers
     return null
   }
 }

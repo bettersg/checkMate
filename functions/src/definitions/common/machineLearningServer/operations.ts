@@ -16,6 +16,34 @@ interface L1CategoryResponse {
   prediction: string
 }
 
+interface OCRResponse {
+  output: {
+    sender_name_or_phone_number: string
+    text_messages: {
+      is_left: boolean
+      text: string
+    }[]
+  }
+  is_convo: boolean
+  extracted_message: string
+  sender: string
+  prediction: string
+}
+
+interface camelCasedOCRResponse {
+  output: {
+    sender: string
+    textMessages: {
+      isLeft: boolean
+      text: string
+    }[]
+  }
+  isConvo: boolean
+  extractedMessage: string
+  sender: string
+  prediction: string
+}
+
 async function getEmbedding(text: string): Promise<number[]> {
   const data = {
     text: text,
@@ -40,6 +68,31 @@ async function getL1Category(text: string): Promise<string> {
   return response.data.prediction
 }
 
+async function performOCR(url: string): Promise<camelCasedOCRResponse> {
+  const data = {
+    url: url,
+  }
+  const response = await callAPI<OCRResponse>("ocr", data)
+  const camelCaseResponse = {
+    output: {
+      sender: response.data.output.sender_name_or_phone_number ?? null,
+      textMessages: (response.data.output.text_messages ?? []).map(
+        (message) => {
+          return {
+            isLeft: message.is_left,
+            text: message.text,
+          }
+        }
+      ),
+    },
+    isConvo: response.data.is_convo ?? null,
+    extractedMessage: response.data.extracted_message ?? null,
+    sender: response.data.sender ?? null,
+    prediction: response.data.prediction ?? null,
+  }
+  return camelCaseResponse
+}
+
 async function callAPI<T>(endpoint: string, data: object) {
   try {
     const response = await axios<T>({
@@ -62,4 +115,4 @@ async function callAPI<T>(endpoint: string, data: object) {
   }
 }
 
-export { getEmbedding, checkTrivial, getL1Category }
+export { getEmbedding, checkTrivial, getL1Category, performOCR }

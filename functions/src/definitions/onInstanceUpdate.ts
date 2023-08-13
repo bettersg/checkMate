@@ -20,6 +20,7 @@ exports.onInstanceUpdate = functions
       const updateDocument = {
         id: change.after.ref.path,
         message: after.text,
+        captionHash: after.captionHash ? after.captionHash : "__NULL__",
         embedding: embedding,
       }
       await updateOne(updateDocument, CollectionTypes.Instances)
