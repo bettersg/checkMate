@@ -43,7 +43,7 @@ erDiagram
         string hash "Image hash, for image only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
-        string storageURL "Cloud storage URL of image, if applicable"
+        string storageUrl "Cloud storage URL of image, if applicable"
         boolean isForwarded "Not used for now"
         boolean isFrequentlyForwarded "Not used for now"
         boolean isReplied "System has replied to the citizen with a final assessment"
