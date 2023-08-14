@@ -194,7 +194,6 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   }
   const messageRef = voteRequestRef.parent.parent
   const messageSnap = await messageRef.get()
-  const message = messageSnap.data()
   const latestInstanceRef = messageSnap.get("latestInstance")
   const latestInstanceSnap = await latestInstanceRef.get()
   const latestType = latestInstanceSnap.get("type") ?? "text"
@@ -208,20 +207,20 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
       res = await sendTextMessage(
         "factChecker",
         from,
-        message.text,
+        latestInstanceSnap.get("text"),
         null,
         platform
       )
       updateObj.sentMessageId = res.data.messages[0].id
       break
     case "image":
-      const temporaryUrl = await getSignedUrl(message.storageUrl)
+      const temporaryUrl = await getSignedUrl(latestInstanceSnap.get("storageUrl"))
       if (temporaryUrl) {
         res = await sendImageMessage(
           "factChecker",
           from,
           temporaryUrl,
-          message.caption,
+          latestInstanceSnap.get("caption"),
           null,
           platform
         )
@@ -253,7 +252,7 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
       )
       return
   }
-  if (message.machineCategory === "info") {
+  if (messageSnap.get("machineCategory") === "info") {
     // handle case where machine has predicted info, so no need to go into L1 categorisation, but still need to go into L2 voting
     updateObj.triggerL2Vote = true
     updateObj.triggerL2Others = false
