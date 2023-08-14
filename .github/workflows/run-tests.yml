@@ -22,7 +22,7 @@ jobs:
         run: npm ci
         working-directory: integration-tests
       - name: Update environment file with latest wordings
-        run: node update-env.js
+        run: npm run update-env
         working-directory: integration-tests
       - name: Run postman tests
         run: npm run test

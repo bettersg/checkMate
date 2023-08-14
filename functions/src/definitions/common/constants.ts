@@ -1,7 +1,4 @@
-// const { defineString } = require("firebase-functions/params")
-// const runtimeEnvironment = defineString("ENVIRONMENT")
-
-exports.USER_BOT_RESPONSES = {
+const USER_BOT_RESPONSES = {
   UNTRUE: `{{thanks}}{{matched}}{{methodology}}*untrue*.❌
   
 Please do not spread it further⛔️⛔️
@@ -166,7 +163,7 @@ On a scale from 1-10, how likely are you to recommend us to a friend, colleague 
   SATISFACTION_SURVEY_THANKS: `Thanks for your feedback!`,
 }
 
-exports.FACTCHECKER_BOT_RESPONSES = {
+const FACTCHECKER_BOT_RESPONSES = {
   VOTE_NO:
     "No problem! If you wish to come back and assess the message, you may do so by clicking the 'yes' button. See you soon!😊",
 
@@ -213,7 +210,7 @@ exports.FACTCHECKER_BOT_RESPONSES = {
 
 const env = process.env.ENVIRONMENT
 
-exports.thresholds = {
+const thresholds = {
   endVote: 0.5,
   endVoteSus: 0.2,
   endVoteUnsure: 0.8,
@@ -230,3 +227,5 @@ exports.thresholds = {
   surveyLikelihood: env === "DEV" ? 1 : 0.25,
   satisfactionSurveyCooldownDays: 30,
 }
+
+export { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES, thresholds }
