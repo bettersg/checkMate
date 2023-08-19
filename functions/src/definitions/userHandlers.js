@@ -179,8 +179,7 @@ async function newTextInstanceHandler(
   let embedding
   // 1 - check if the exact same message exists in database
   try {
-    embedding = await getEmbedding(text)
-    similarity = await calculateSimilarity(embedding, null)
+    ;({ embedding, similarity } = await calculateSimilarity(text, null))
   } catch (error) {
     functions.logger.error("Error in calculateSimilarity:", error)
     similarity = {}
@@ -378,8 +377,10 @@ async function newImageInstanceHandler({
 
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
     try {
-      embedding = await getEmbedding(extractedMessage)
-      similarity = await calculateSimilarity(embedding, captionHash)
+      ;({ embedding, similarity } = await calculateSimilarity(
+        extractedMessage,
+        captionHash
+      ))
     } catch (error) {
       functions.logger.error("Error in calculateSimilarity:", error)
       embedding = null

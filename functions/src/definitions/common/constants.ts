@@ -27,7 +27,7 @@ You can try sending the message in again, or report the error via our form at ht
 
 We recommend you do not engage further⛔️⛔️
 
-This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
+While this is our assessment, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
 
 Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
@@ -36,7 +36,7 @@ Would you like us to share this message with ScamShield? Only the contents of th
 
 We recommend you do not engage further⛔️⛔️
 
-This is the collective opinion of our CheckMates. That said, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
+While this is our assessment, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
 
 Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
 
