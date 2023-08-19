@@ -6,7 +6,7 @@
   "functions": [
     {
       "source": "functions",
-      "codebase": "default",
+      "codebase": "whatsapp-bot",
       "ignore": [
         "node_modules",
         ".git",
