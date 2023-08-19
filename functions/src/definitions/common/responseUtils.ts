@@ -680,18 +680,10 @@ async function respondToInstance(
         responses[category.toUpperCase() as keyof typeof responses]
       )
       if (category === "scam" || category === "illicit") {
-        if (isMachineCategorised && responseCount > 0) {
+        if (isMachineCategorised || responseCount <= 0) {
           scamShieldButtons.pop()
         }
         buttons = scamShieldButtons
-      }
-      if (
-        isMachineCategorised &&
-        responseCount > 0 &&
-        !(category === "scam" || category === "illicit")
-      ) {
-        await sendTextMessage("user", data.from, responseText, data.id)
-      } else {
         await sendWhatsappButtonMessage(
           "user",
           data.from,
@@ -699,6 +691,18 @@ async function respondToInstance(
           buttons,
           data.id
         )
+      } else {
+        if (isMachineCategorised || responseCount <= 0) {
+          await sendTextMessage("user", data.from, responseText, data.id)
+        } else {
+          await sendWhatsappButtonMessage(
+            "user",
+            data.from,
+            responseText,
+            buttons,
+            data.id
+          )
+        }
       }
   }
   updateObj.replyCategory = category
