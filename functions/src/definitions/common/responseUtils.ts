@@ -244,6 +244,20 @@ async function sendVotingStats(
   const responses = await getResponsesObj("user")
   const from = instanceSnap.get("from")
   let truthCategory
+
+  if (responseCount <= 0) {
+    functions.logger.error(
+      `Stats requested for instance ${instancePath} with 0 votes`
+    )
+    await sendTextMessage(
+      "user",
+      from,
+      "Sorry, an error occured!",
+      instanceSnap.get("id")
+    )
+    return
+  }
+
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 1.5)) {
       truthCategory = "untrue"
@@ -521,6 +535,7 @@ async function respondToInstance(
   const isLegitimate = parentMessageSnap.get("isLegitimate")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
+  const responseCount = await getCount(parentMessageRef, "responses")
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -665,12 +680,16 @@ async function respondToInstance(
         responses[category.toUpperCase() as keyof typeof responses]
       )
       if (category === "scam" || category === "illicit") {
-        if (isImmediate) {
+        if (isMachineCategorised && responseCount > 0) {
           scamShieldButtons.pop()
         }
         buttons = scamShieldButtons
       }
-      if (isImmediate && !(category === "scam" || category === "illicit")) {
+      if (
+        isMachineCategorised &&
+        responseCount > 0 &&
+        !(category === "scam" || category === "illicit")
+      ) {
         await sendTextMessage("user", data.from, responseText, data.id)
       } else {
         await sendWhatsappButtonMessage(
