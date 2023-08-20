@@ -5,11 +5,9 @@ const {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
-  sendWhatsappButtonMessage,
 } = require("./common/sendWhatsappMessage")
 const { sendDisputeNotification } = require("./common/sendMessage")
 const { sleep, hashMessage } = require("./common/utils")
-const { getCount } = require("./common/counters")
 const {
   getResponsesObj,
   sendMenuMessage,
@@ -19,15 +17,13 @@ const {
 } = require("./common/responseUtils")
 const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
 const { calculateSimilarity } = require("./calculateSimilarity")
-const {
-  getEmbedding,
-  performOCR,
-} = require("./common/machineLearningServer/operations")
+const { performOCR } = require("./common/machineLearningServer/operations")
 const { defineString } = require("firebase-functions/params")
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
 const { classifyText } = require("./common/classifier")
 const { getSignedUrl } = require("./common/mediaUtils")
+const { nanoid } = require("nanoid")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -48,14 +44,7 @@ exports.userHandlerWhatsapp = async function (message) {
   let triggerOnboarding = isFirstTimeUser
   let step
   if (isFirstTimeUser) {
-    await userRef.set({
-      instanceCount: 0,
-      firstMessageReceiptTime: messageTimestamp,
-      firstMessageType: "normal",
-      lastSent: null,
-      satisfactionSurveyLastSent: null,
-      initialJourney: {},
-    })
+    await createNewUser(userRef, messageTimestamp)
   }
   const firstMessageReceiptTime = isFirstTimeUser
     ? messageTimestamp
@@ -80,6 +69,32 @@ exports.userHandlerWhatsapp = async function (message) {
           })
         } else {
           triggerOnboarding = true //we still want to show him the onboarding message.
+        }
+        break
+      }
+
+      if (
+        message.text.body
+          .toLowerCase()
+          .startsWith(
+            "Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code:".toLowerCase()
+          )
+      ) {
+        const code = message.text.body.split(":")[1].trim()
+        const referralSourceQuerySnap = db
+          .collection("users")
+          .where("referralId", "==", code)
+          .get()
+          .limit(1)
+        if (referralSourceQuerySnap.empty) {
+          functions.logger.warn(
+            `Referral code ${code}, sent by ${from} not found`
+          )
+        } else {
+          const referralSourceSnap = referralSourceQuerySnap.docs[0]
+          await referralSourceSnap.ref.update({
+            referralCount: admin.firestore.FieldValue.increment(1),
+          })
         }
         break
       }
@@ -608,4 +623,43 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
   }
   await sendWhatsappTextMessage("user", from, response, null, true)
   return Promise.resolve(step)
+}
+
+async function createNewUser(userRef, messageTimestamp) {
+  const db = admin.firestore()
+
+  let success = false
+  let retries = 0
+
+  while (retries < MAX_RETRIES && !success) {
+    const referralId = nanoid(8)
+
+    success = await db.runTransaction(async (transaction) => {
+      const existingUserSnap = await transaction.get(
+        db.collection("users").where("referralId", "==", referralId).limit(1)
+      )
+
+      if (existingUserSnap.empty) {
+        // No user with this referralId exists, so add one
+        transaction.set(userRef, {
+          instanceCount: 0,
+          firstMessageReceiptTime: messageTimestamp,
+          firstMessageType: "normal",
+          lastSent: null,
+          satisfactionSurveyLastSent: null,
+          initialJourney: {},
+          referralId: referralId,
+        })
+        return true // Indicate success
+      }
+      return false // Indicate failure due to collision
+    })
+    if (success) {
+      return
+    }
+    retries++
+  }
+  throw new Error(
+    "Failed to generate a unique referral ID after maximum attempts."
+  )
 }
