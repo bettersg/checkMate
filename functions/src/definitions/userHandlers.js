@@ -1,29 +1,30 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { Timestamp } = require("firebase-admin/firestore")
-const {
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
+import { Timestamp } from "firebase-admin/firestore"
+import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
-} = require("./common/sendWhatsappMessage")
-const { sendDisputeNotification } = require("./common/sendMessage")
-const { sleep, hashMessage } = require("./common/utils")
-const {
+} from "./common/sendWhatsappMessage"
+import { sendDisputeNotification } from "./common/sendMessage"
+import { sleep, hashMessage } from "./common/utils"
+import {
   getResponsesObj,
   sendMenuMessage,
   sendInterimUpdate,
   sendVotingStats,
   respondToInterimFeedback,
-} = require("./common/responseUtils")
-const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
-const { calculateSimilarity } = require("./calculateSimilarity")
-const { performOCR } = require("./common/machineLearningServer/operations")
-const { defineString } = require("firebase-functions/params")
+} from "./common/responseUtils"
+import { downloadWhatsappMedia, getHash } from "./common/mediaUtils"
+import { calculateSimilarity } from "./calculateSimilarity"
+import { performOCR } from "./common/machineLearningServer/operations"
+import { defineString } from "firebase-functions/params"
+import { classifyText } from "./common/classifier"
+import { FieldValue } from "@google-cloud/firestore"
+import { nanoid } from "nanoid"
+
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
-const { classifyText } = require("./common/classifier")
-const { getSignedUrl } = require("./common/mediaUtils")
-const { nanoid } = require("nanoid")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -72,20 +73,14 @@ exports.userHandlerWhatsapp = async function (message) {
         }
         break
       }
-
-      if (
-        message.text.body
-          .toLowerCase()
-          .startsWith(
-            "Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code:".toLowerCase()
-          )
-      ) {
+      if (isFirstTimeUser && message.text.body.includes("Code:")) {
         const code = message.text.body.split(":")[1].trim()
-        const referralSourceQuerySnap = db
+        const referralSourceQuerySnap = await db
           .collection("users")
           .where("referralId", "==", code)
-          .get()
           .limit(1)
+          .get()
+
         if (referralSourceQuerySnap.empty) {
           functions.logger.warn(
             `Referral code ${code}, sent by ${from} not found`
@@ -93,7 +88,7 @@ exports.userHandlerWhatsapp = async function (message) {
         } else {
           const referralSourceSnap = referralSourceQuerySnap.docs[0]
           await referralSourceSnap.ref.update({
-            referralCount: admin.firestore.FieldValue.increment(1),
+            referralCount: FieldValue.increment(1),
           })
         }
         break
@@ -584,6 +579,21 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
           )
           await sleep(3000)
           break
+
+        case "referral":
+          const code = (await db.collection("users").doc(from).get()).get(
+            "referralId"
+          )
+          if (code) {
+            response = responses.REFERRAL.replace(
+              "{{link}}",
+              `https://ref.checkmate.sg/${code}`
+            )
+          } else {
+            functions.logger.error(`Referral code not found for ${from}`)
+          }
+          break
+
         case "dispute":
           ;[instancePath] = rest
           const instanceRef = db.doc(instancePath)
@@ -631,7 +641,7 @@ async function createNewUser(userRef, messageTimestamp) {
   let success = false
   let retries = 0
 
-  while (retries < MAX_RETRIES && !success) {
+  while (retries < 10 && !success) {
     const referralId = nanoid(8)
 
     success = await db.runTransaction(async (transaction) => {
@@ -649,6 +659,7 @@ async function createNewUser(userRef, messageTimestamp) {
           satisfactionSurveyLastSent: null,
           initialJourney: {},
           referralId: referralId,
+          referralCount: 0,
         })
         return true // Indicate success
       }

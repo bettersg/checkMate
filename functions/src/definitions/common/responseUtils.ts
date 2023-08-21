@@ -104,6 +104,11 @@ async function sendMenuMessage(
           description: "Send in messages, images, or screenshots for checking!",
         },
         {
+          id: `${type}_referral`,
+          title: "Get Referral Link",
+          description: "Get referral link to forward to others",
+        },
+        {
           id: `${type}_help`,
           title: "Get Help",
           description:
@@ -122,8 +127,9 @@ async function sendMenuMessage(
         {
           id: `${type}_contact`,
           title: "Get Contact",
-          description: "Get CheckMates contact to add to your contact list",
+          description: "Get CheckMate's contact to add to your contact list",
         },
+
         //TODO: Implement these next time
         // {
         //   id: `${type}_newsletter`,
@@ -142,7 +148,7 @@ async function sendMenuMessage(
         // },
       ]
       if (disputedInstancePath) {
-        rows.splice(4, 0, {
+        rows.splice(5, 0, {
           id: `${type}_dispute_${disputedInstancePath}`,
           title: "Dispute Assessment",
           description: "Dispute CheckMate's assesment of this message",

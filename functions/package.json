@@ -28,7 +28,7 @@
     "googleapis": "^112.0.0",
     "image-hash": "^5.3.1",
     "libphonenumber-js": "^1.10.21",
-    "nanoid": "^4.0.2",
+    "nanoid": "^3.3.6",
     "typesense": "^1.5.3"
   },
   "devDependencies": {
