@@ -7,7 +7,7 @@ import {
   sendWhatsappContactMessage,
 } from "./common/sendWhatsappMessage"
 import { sendDisputeNotification } from "./common/sendMessage"
-import { sleep, hashMessage } from "./common/utils"
+import { sleep, hashMessage, normalizeSpaces } from "./common/utils"
 import {
   getResponsesObj,
   sendMenuMessage,
@@ -73,23 +73,38 @@ exports.userHandlerWhatsapp = async function (message) {
         }
         break
       }
-      if (isFirstTimeUser && message.text.body.includes("Code:")) {
-        const code = message.text.body.split(":")[1].trim()
-        const referralSourceQuerySnap = await db
-          .collection("users")
-          .where("referralId", "==", code)
-          .limit(1)
-          .get()
-
-        if (referralSourceQuerySnap.empty) {
-          functions.logger.warn(
-            `Referral code ${code}, sent by ${from} not found`
+      if (
+        normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
+          .toLowerCase()
+          .startsWith(
+            "welcome to checkmate! send in this message to get started, and credit your friend with your referral. code:"
           )
+      ) {
+        if (isFirstTimeUser) {
+          const code = message.text.body.split(":")[1].trim()
+          const referralSourceQuerySnap = await db
+            .collection("users")
+            .where("referralId", "==", code)
+            .limit(1)
+            .get()
+
+          if (referralSourceQuerySnap.empty) {
+            functions.logger.warn(
+              `Referral code ${code}, sent by ${from} not found`
+            )
+          } else {
+            const referralSourceSnap = referralSourceQuerySnap.docs[0]
+            await referralSourceSnap.ref.update({
+              referralCount: FieldValue.increment(1),
+            })
+          }
         } else {
-          const referralSourceSnap = referralSourceQuerySnap.docs[0]
-          await referralSourceSnap.ref.update({
-            referralCount: FieldValue.increment(1),
-          })
+          await sendWhatsappTextMessage(
+            "user",
+            from,
+            responses?.REFERRAL_INVALID,
+            message.id
+          )
         }
         break
       }
