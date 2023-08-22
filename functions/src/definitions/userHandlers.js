@@ -76,9 +76,7 @@ exports.userHandlerWhatsapp = async function (message) {
       if (
         normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
           .toLowerCase()
-          .startsWith(
-            "welcome to checkmate! send in this message to get started, and credit your friend with your referral. code:"
-          )
+          .startsWith(responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase())
       ) {
         if (isFirstTimeUser) {
           const code = message.text.body.split(":")[1].trim()
@@ -605,6 +603,7 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
               `https://ref.checkmate.sg/${code}`
             )
           } else {
+            response = responses.GENERIC_ERROR
             functions.logger.error(`Referral code not found for ${from}`)
           }
           break

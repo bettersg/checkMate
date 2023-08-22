@@ -158,7 +158,11 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
 
   REFERRAL: `Have you started checking and reporting sus messages using CheckMate yet? Sign up by clicking this link! {{link}}`,
 
+  REFERRAL_PREPOPULATED_PREFIX: `Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code:`,
+
   REFERRAL_INVALID: `Sorry, referrals are only credited upon your first interaction with CheckMate.`,
+
+  GENERIC_ERROR: `Sorry, an error occured. 😔 We'll be looking into this! Meanwhile, you can try out other functions of the bot. Apologies!`,
 
   SATISFACTION_SURVEY: `Thanks so much for using CheckMate🙏. We're improving the product from time to time, and your feedback is valuable to us.
 
