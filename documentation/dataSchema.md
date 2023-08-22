@@ -105,6 +105,8 @@ erDiagram
         string firstMessageType "either prepopulated, normal, or irrelevant"
         timestamp satisfactionSurveyLastSent
         map initialJourney "map mapping out the journey in the first 24 hrs of usage, where key is the timestamp of the step taken"
+        string referralId "referral code"
+        number referralCount
     	}
 
     message ||--|{ instance: has
