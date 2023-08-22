@@ -11036,7 +11036,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 3000);"
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11141,6 +11141,16 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 1000);"
 								],
 								"type": "text/javascript"
 							}
