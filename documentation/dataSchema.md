@@ -35,6 +35,7 @@ erDiagram
         timestamp timestamp
         string type "text/image"
         string text "text (if text message) or ocr-extracted text (if image message)"
+        string textHash "md5 hash of text or ocr-extracted text"
         string caption "caption of image, if applicable"
         string captionHash "md5 hash of caption"
         string sender "sender name or number, extracted by OCR, if applicable"

@@ -276,7 +276,7 @@ async function newTextInstanceHandler(
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: text, //text or caption, taken from webhook object
-    textHash: textHash,
+    textHash: textHash ?? null,
     caption: null,
     captionHash: null,
     sender: null, //sender name or number (for now not collected)
@@ -483,6 +483,7 @@ async function newImageInstanceHandler({
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: extractedMessage ?? null, //text extracted from OCR if relevant
+    textHash: textHash ?? null,
     caption: caption ?? null,
     captionHash: captionHash,
     sender: sender, //sender name or number extracted from OCR
