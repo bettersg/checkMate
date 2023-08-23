@@ -15,7 +15,11 @@ import {
   sendVotingStats,
   respondToInterimFeedback,
 } from "./common/responseUtils"
-import { downloadWhatsappMedia, getHash } from "./common/mediaUtils"
+import {
+  downloadWhatsappMedia,
+  getHash,
+  getSignedUrl,
+} from "./common/mediaUtils"
 import { calculateSimilarity } from "./calculateSimilarity"
 import { performOCR } from "./common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
@@ -200,9 +204,14 @@ async function newTextInstanceHandler(
   let matchType = "none" // will be set to either "similarity" or "none"
   let similarity
   let embedding
+  let textHash = hashMessage(text)
   // 1 - check if the exact same message exists in database
   try {
-    ;({ embedding, similarity } = await calculateSimilarity(text, null))
+    ;({ embedding, similarity } = await calculateSimilarity(
+      text,
+      textHash,
+      null
+    ))
   } catch (error) {
     functions.logger.error("Error in calculateSimilarity:", error)
     similarity = {}
@@ -221,7 +230,7 @@ async function newTextInstanceHandler(
 
   if (similarityScore > parseFloat(similarityThreshold.value())) {
     hasMatch = true
-    matchType = "similarity"
+    matchType = similarityScore == 1 ? "exact" : "similarity"
   }
 
   if (!hasMatch) {
@@ -267,6 +276,9 @@ async function newTextInstanceHandler(
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: text, //text or caption, taken from webhook object
+    textHash: textHash,
+    caption: null,
+    captionHash: null,
     sender: null, //sender name or number (for now not collected)
     from: from, //sender phone number, taken from webhook object
     isForwarded: isForwarded, //boolean, taken from webhook object
@@ -397,11 +409,14 @@ async function newImageInstanceHandler({
   let bestMatchingText
   let similarityScore = 0
   let matchedParentMessageRef
+  let textHash = null
 
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
     try {
+      textHash = hashMessage(extractedMessage)
       ;({ embedding, similarity } = await calculateSimilarity(
         extractedMessage,
+        textHash,
         captionHash
       ))
     } catch (error) {
@@ -417,7 +432,7 @@ async function newImageInstanceHandler({
     }
     if (similarityScore > parseFloat(similarityThreshold.value())) {
       hasMatch = true
-      matchType = "similarity"
+      matchType = similarityScore == 1 ? "exact" : "similarity"
     }
   }
 
@@ -458,7 +473,7 @@ async function newImageInstanceHandler({
   } else {
     if (matchType === "image") {
       messageRef = matchedInstanceSnap.ref.parent.parent
-    } else if (matchType === "similarity") {
+    } else if (matchType === "similarity" || matchType === "exact") {
       messageRef = matchedParentMessageRef
     }
   }
