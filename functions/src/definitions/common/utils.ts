@@ -19,6 +19,10 @@ const getThresholds = async function () {
   return theresholdsSnap.data() ?? thresholds
 }
 
+function normalizeSpaces(str: string) {
+  return str.replace(/\u00A0/g, " ")
+}
+
 const checkUrl = function (urlString: string) {
   let url
   try {
@@ -86,4 +90,5 @@ export {
   firestoreTimestampToYYYYMM,
   getThresholds,
   checkUrl,
+  normalizeSpaces,
 }
