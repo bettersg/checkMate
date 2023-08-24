@@ -1,33 +1,34 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { Timestamp } = require("firebase-admin/firestore")
-const {
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
+import { Timestamp } from "firebase-admin/firestore"
+import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
-  sendWhatsappButtonMessage,
-} = require("./common/sendWhatsappMessage")
-const { sendDisputeNotification } = require("./common/sendMessage")
-const { sleep, hashMessage } = require("./common/utils")
-const { getCount } = require("./common/counters")
-const {
+} from "./common/sendWhatsappMessage"
+import { sendDisputeNotification } from "./common/sendMessage"
+import { sleep, hashMessage, normalizeSpaces } from "./common/utils"
+import {
   getResponsesObj,
   sendMenuMessage,
   sendInterimUpdate,
   sendVotingStats,
   respondToInterimFeedback,
-} = require("./common/responseUtils")
-const { downloadWhatsappMedia, getHash } = require("./common/mediaUtils")
-const { calculateSimilarity } = require("./calculateSimilarity")
-const {
-  getEmbedding,
-  performOCR,
-} = require("./common/machineLearningServer/operations")
-const { defineString } = require("firebase-functions/params")
+} from "./common/responseUtils"
+import {
+  downloadWhatsappMedia,
+  getHash,
+  getSignedUrl,
+} from "./common/mediaUtils"
+import { calculateSimilarity } from "./calculateSimilarity"
+import { performOCR } from "./common/machineLearningServer/operations"
+import { defineString } from "firebase-functions/params"
+import { classifyText } from "./common/classifier"
+import { FieldValue } from "@google-cloud/firestore"
+import { nanoid } from "nanoid"
+
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
-const { classifyText } = require("./common/classifier")
-const { getSignedUrl } = require("./common/mediaUtils")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -48,14 +49,7 @@ exports.userHandlerWhatsapp = async function (message) {
   let triggerOnboarding = isFirstTimeUser
   let step
   if (isFirstTimeUser) {
-    await userRef.set({
-      instanceCount: 0,
-      firstMessageReceiptTime: messageTimestamp,
-      firstMessageType: "normal",
-      lastSent: null,
-      satisfactionSurveyLastSent: null,
-      initialJourney: {},
-    })
+    await createNewUser(userRef, messageTimestamp)
   }
   const firstMessageReceiptTime = isFirstTimeUser
     ? messageTimestamp
@@ -80,6 +74,39 @@ exports.userHandlerWhatsapp = async function (message) {
           })
         } else {
           triggerOnboarding = true //we still want to show him the onboarding message.
+        }
+        break
+      }
+      if (
+        normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
+          .toLowerCase()
+          .startsWith(responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase())
+      ) {
+        if (isFirstTimeUser) {
+          const code = message.text.body.split(":")[1].trim()
+          const referralSourceQuerySnap = await db
+            .collection("users")
+            .where("referralId", "==", code)
+            .limit(1)
+            .get()
+
+          if (referralSourceQuerySnap.empty) {
+            functions.logger.warn(
+              `Referral code ${code}, sent by ${from} not found`
+            )
+          } else {
+            const referralSourceSnap = referralSourceQuerySnap.docs[0]
+            await referralSourceSnap.ref.update({
+              referralCount: FieldValue.increment(1),
+            })
+          }
+        } else {
+          await sendWhatsappTextMessage(
+            "user",
+            from,
+            responses?.REFERRAL_INVALID,
+            message.id
+          )
         }
         break
       }
@@ -177,9 +204,14 @@ async function newTextInstanceHandler(
   let matchType = "none" // will be set to either "similarity" or "none"
   let similarity
   let embedding
+  let textHash = hashMessage(text)
   // 1 - check if the exact same message exists in database
   try {
-    ;({ embedding, similarity } = await calculateSimilarity(text, null))
+    ;({ embedding, similarity } = await calculateSimilarity(
+      text,
+      textHash,
+      null
+    ))
   } catch (error) {
     functions.logger.error("Error in calculateSimilarity:", error)
     similarity = {}
@@ -198,7 +230,7 @@ async function newTextInstanceHandler(
 
   if (similarityScore > parseFloat(similarityThreshold.value())) {
     hasMatch = true
-    matchType = "similarity"
+    matchType = similarityScore == 1 ? "exact" : "similarity"
   }
 
   if (!hasMatch) {
@@ -244,6 +276,9 @@ async function newTextInstanceHandler(
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: text, //text or caption, taken from webhook object
+    textHash: textHash ?? null,
+    caption: null,
+    captionHash: null,
     sender: null, //sender name or number (for now not collected)
     from: from, //sender phone number, taken from webhook object
     isForwarded: isForwarded, //boolean, taken from webhook object
@@ -374,11 +409,14 @@ async function newImageInstanceHandler({
   let bestMatchingText
   let similarityScore = 0
   let matchedParentMessageRef
+  let textHash = null
 
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
     try {
+      textHash = hashMessage(extractedMessage)
       ;({ embedding, similarity } = await calculateSimilarity(
         extractedMessage,
+        textHash,
         captionHash
       ))
     } catch (error) {
@@ -394,7 +432,7 @@ async function newImageInstanceHandler({
     }
     if (similarityScore > parseFloat(similarityThreshold.value())) {
       hasMatch = true
-      matchType = "similarity"
+      matchType = similarityScore == 1 ? "exact" : "similarity"
     }
   }
 
@@ -435,7 +473,7 @@ async function newImageInstanceHandler({
   } else {
     if (matchType === "image") {
       messageRef = matchedInstanceSnap.ref.parent.parent
-    } else if (matchType === "similarity") {
+    } else if (matchType === "similarity" || matchType === "exact") {
       messageRef = matchedParentMessageRef
     }
   }
@@ -445,6 +483,7 @@ async function newImageInstanceHandler({
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
     text: extractedMessage ?? null, //text extracted from OCR if relevant
+    textHash: textHash ?? null,
     caption: caption ?? null,
     captionHash: captionHash,
     sender: sender, //sender name or number extracted from OCR
@@ -569,6 +608,22 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
           )
           await sleep(3000)
           break
+
+        case "referral":
+          const code = (await db.collection("users").doc(from).get()).get(
+            "referralId"
+          )
+          if (code) {
+            response = responses.REFERRAL.replace(
+              "{{link}}",
+              `https://ref.checkmate.sg/${code}`
+            )
+          } else {
+            response = responses.GENERIC_ERROR
+            functions.logger.error(`Referral code not found for ${from}`)
+          }
+          break
+
         case "dispute":
           ;[instancePath] = rest
           const instanceRef = db.doc(instancePath)
@@ -608,4 +663,44 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
   }
   await sendWhatsappTextMessage("user", from, response, null, true)
   return Promise.resolve(step)
+}
+
+async function createNewUser(userRef, messageTimestamp) {
+  const db = admin.firestore()
+
+  let success = false
+  let retries = 0
+
+  while (retries < 10 && !success) {
+    const referralId = nanoid(8)
+
+    success = await db.runTransaction(async (transaction) => {
+      const existingUserSnap = await transaction.get(
+        db.collection("users").where("referralId", "==", referralId).limit(1)
+      )
+
+      if (existingUserSnap.empty) {
+        // No user with this referralId exists, so add one
+        transaction.set(userRef, {
+          instanceCount: 0,
+          firstMessageReceiptTime: messageTimestamp,
+          firstMessageType: "normal",
+          lastSent: null,
+          satisfactionSurveyLastSent: null,
+          initialJourney: {},
+          referralId: referralId,
+          referralCount: 0,
+        })
+        return true // Indicate success
+      }
+      return false // Indicate failure due to collision
+    })
+    if (success) {
+      return
+    }
+    retries++
+  }
+  throw new Error(
+    "Failed to generate a unique referral ID after maximum attempts."
+  )
 }
