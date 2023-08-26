@@ -64,40 +64,70 @@ exports.userHandlerWhatsapp = async function (message) {
         break
       }
       if (
-        message.text.body.toLowerCase() ===
-        "Show me how CheckMate works!".toLowerCase()
+        //case where user clicks generic acquisition links
+        normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
+          .toLowerCase()
+          .startsWith(responses?.GENERIC_PREPOPULATED_PREFIX.toLowerCase())
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
-          await userRef.update({
-            firstMessageType: "prepopulated",
-          })
-        } else {
-          triggerOnboarding = true //we still want to show him the onboarding message.
+          const code = message.text.body.split(":")[1].trim()
+          if (code.length > 0) {
+            const referralClickSnap = await db
+              .collection("referralClicks")
+              .doc(code)
+              .get()
+            await userRef.update({
+              firstMessageType: "prepopulated",
+              utm: {
+                source: referralClickSnap.get("utmSource") ?? "none",
+                medium: referralClickSnap.get("utmMedium") ?? "none",
+                content: referralClickSnap.get("utmContent") ?? "none",
+                campaign: referralClickSnap.get("utmCampaign") ?? "none",
+                term: referralClickSnap.get("utmTerm") ?? "none",
+              },
+            })
+          }
         }
         break
       }
       if (
+        //case where user clicks unique referral links
         normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
           .toLowerCase()
           .startsWith(responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase())
       ) {
+        step = "text_prepopulated"
+        let referrer = "none"
         if (isFirstTimeUser) {
           const code = message.text.body.split(":")[1].trim()
-          const referralSourceQuerySnap = await db
-            .collection("users")
-            .where("referralId", "==", code)
-            .limit(1)
-            .get()
+          if (code.length > 0) {
+            const referralSourceQuerySnap = await db
+              .collection("users")
+              .where("referralId", "==", code)
+              .limit(1)
+              .get()
 
-          if (referralSourceQuerySnap.empty) {
-            functions.logger.warn(
-              `Referral code ${code}, sent by ${from} not found`
-            )
-          } else {
-            const referralSourceSnap = referralSourceQuerySnap.docs[0]
-            await referralSourceSnap.ref.update({
-              referralCount: FieldValue.increment(1),
+            if (referralSourceQuerySnap.empty) {
+              functions.logger.warn(
+                `Referral code ${code}, sent by ${from} not found`
+              )
+            } else {
+              const referralSourceSnap = referralSourceQuerySnap.docs[0]
+              referrer = referralSourceSnap.id
+              await referralSourceSnap.ref.update({
+                referralCount: FieldValue.increment(1),
+              })
+            }
+            await userRef.update({
+              firstMessageType: "prepopulated",
+              utm: {
+                source: referrer,
+                medium: "uniqueLink",
+                content: "none",
+                campaign: "none",
+                term: "none",
+              },
             })
           }
         } else {

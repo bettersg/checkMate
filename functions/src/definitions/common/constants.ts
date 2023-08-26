@@ -160,6 +160,8 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
 
   REFERRAL_PREPOPULATED_PREFIX: `Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code:`,
 
+  GENERIC_PREPOPULATED_PREFIX: `Welcome to Checkmate! Send in this message to get started. Code:`,
+
   REFERRAL_INVALID: `Sorry, referrals are only credited upon your first interaction with CheckMate.`,
 
   GENERIC_ERROR: `Sorry, an error occured. 😔 We'll be looking into this! Meanwhile, you can try out other functions of the bot. Apologies!`,
