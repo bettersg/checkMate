@@ -108,6 +108,7 @@ erDiagram
         map initialJourney "map mapping out the journey in the first 24 hrs of usage, where key is the timestamp of the step taken"
         string referralId "referral code"
         number referralCount
+        map utm "map containing utm parameters, source, medium, content, campaign, term"
     	}
 
     message ||--|{ instance: has
