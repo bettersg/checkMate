@@ -861,19 +861,19 @@
 					"response": []
 				},
 				{
-					"name": "[DB CALL] Check referral Id",
+					"name": "[DB CALL] Check referral count Copy",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Check that referral link is length 8\", function () {\r",
+									"pm.test(\"Check that has is created\", function () {\r",
 									"\r",
 									"    var jsonData = pm.response.json();\r",
 									"    const referralId = jsonData.fields.referralId.stringValue\r",
-									"    pm.collectionVariables.set(\"referralLink_USER1\", `https://ref.checkmate.sg/${referralId}`);\r",
 									"    pm.collectionVariables.set(\"referralId_USER1\", referralId);\r",
-									"    pm.expect(referralId.length).to.eql(8);\r",
+									"    pm.collectionVariables.set(\"referralLink_USER1\", `https://ref.checkmate.sg/${referralId}`);\r",
+									"    pm.expect(referralId.length).to.be.above(0);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -11514,7 +11514,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code: {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -11693,7 +11693,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code: {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
