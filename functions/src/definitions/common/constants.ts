@@ -156,11 +156,11 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
 
   CONTACT: `Here's our contact! Do add us to your contact list so you can find us in future. 😊`,
 
-  REFERRAL: `Have you started checking and reporting sus messages using CheckMate yet? Sign up by clicking this link! {{link}}`,
+  REFERRAL: `Have you started checking and reporting suspicious messages using CheckMate yet? Sign up by clicking this link and sending in the pre-loaded message!! {{link}}`,
 
-  REFERRAL_PREPOPULATED_PREFIX: `Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral. Code:`,
+  REFERRAL_PREPOPULATED_PREFIX: `Welcome to CheckMate! Send in this entire message (including the code) to get started, and credit your friend with your referral. Code:`,
 
-  GENERIC_PREPOPULATED_PREFIX: `Welcome to Checkmate! Send in this message to get started. Code:`,
+  GENERIC_PREPOPULATED_PREFIX: `Welcome to Checkmate! Send in this entire message (including the code) to get started. Code:`,
 
   REFERRAL_INVALID: `Sorry, referrals are only credited upon your first interaction with CheckMate.`,
 

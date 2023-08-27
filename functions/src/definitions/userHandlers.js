@@ -25,7 +25,7 @@ import { performOCR } from "./common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
 import { classifyText } from "./common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
-import { nanoid } from "nanoid"
+import Hashids from "hashids"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
@@ -34,11 +34,14 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+const salt = process.env.HASHIDS_SALT
+const hashids = new Hashids(salt)
+
+const db = admin.firestore()
+
 exports.userHandlerWhatsapp = async function (message) {
   let from = message.from // extract the phone number from the webhook payload
   let type = message.type
-  const db = admin.firestore()
-
   const responses = await getResponsesObj("user")
 
   //check whether new user
@@ -102,33 +105,37 @@ exports.userHandlerWhatsapp = async function (message) {
         if (isFirstTimeUser) {
           const code = message.text.body.split(":")[1].trim()
           if (code.length > 0) {
-            const referralSourceQuerySnap = await db
-              .collection("users")
-              .where("referralId", "==", code)
-              .limit(1)
-              .get()
-
-            if (referralSourceQuerySnap.empty) {
-              functions.logger.warn(
-                `Referral code ${code}, sent by ${from} not found`
+            try {
+              referrer = hashids.decode(code)[0]
+              console.log(referrer)
+              const referralSourceSnap = await db
+                .collection("users")
+                .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
+                .get()
+              if (!referralSourceSnap.exists) {
+                functions.logger.warn(
+                  `Referral code ${code}, sent by ${from} does not decode to any user id`
+                )
+              } else {
+                await referralSourceSnap.ref.update({
+                  referralCount: FieldValue.increment(1),
+                })
+                await userRef.update({
+                  firstMessageType: "prepopulated",
+                  utm: {
+                    source: referrer,
+                    medium: "uniqueLink",
+                    content: "none",
+                    campaign: "none",
+                    term: "none",
+                  },
+                })
+              }
+            } catch (error) {
+              functions.logger.error(
+                `Error processing referral code ${code}, sent by ${from}: ${error}`
               )
-            } else {
-              const referralSourceSnap = referralSourceQuerySnap.docs[0]
-              referrer = referralSourceSnap.id
-              await referralSourceSnap.ref.update({
-                referralCount: FieldValue.increment(1),
-              })
             }
-            await userRef.update({
-              firstMessageType: "prepopulated",
-              utm: {
-                source: referrer,
-                medium: "uniqueLink",
-                content: "none",
-                campaign: "none",
-                term: "none",
-              },
-            })
           }
         } else {
           await sendWhatsappTextMessage(
@@ -221,7 +228,6 @@ async function newTextInstanceHandler(
   },
   isFirstTimeUser
 ) {
-  const db = admin.firestore()
   let hasMatch = false
   let messageRef
   const machineCategory = (await classifyText(text)) ?? "error"
@@ -350,7 +356,6 @@ async function newImageInstanceHandler({
   isFrequentlyForwarded: isFrequentlyForwarded,
   isFirstTimeUser,
 }) {
-  const db = admin.firestore()
   let filename
   let messageRef
   let hasMatch = false
@@ -556,7 +561,6 @@ async function newUserHandler(from) {
 }
 
 async function onButtonReply(messageObj, platform = "whatsapp") {
-  const db = admin.firestore()
   const buttonId = messageObj.interactive.button_reply.id
   const from = messageObj.from
   const responses = await getResponsesObj("user")
@@ -601,7 +605,6 @@ async function onButtonReply(messageObj, platform = "whatsapp") {
 async function onTextListReceipt(messageObj, platform = "whatsapp") {
   const listId = messageObj.interactive.list_reply.id
   const from = messageObj.from
-  const db = admin.firestore()
   const responses = await getResponsesObj("user")
   const [type, selection, ...rest] = listId.split("_")
   let response, instancePath
@@ -696,41 +699,16 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
 }
 
 async function createNewUser(userRef, messageTimestamp) {
-  const db = admin.firestore()
-
-  let success = false
-  let retries = 0
-
-  while (retries < 10 && !success) {
-    const referralId = nanoid(8)
-
-    success = await db.runTransaction(async (transaction) => {
-      const existingUserSnap = await transaction.get(
-        db.collection("users").where("referralId", "==", referralId).limit(1)
-      )
-
-      if (existingUserSnap.empty) {
-        // No user with this referralId exists, so add one
-        transaction.set(userRef, {
-          instanceCount: 0,
-          firstMessageReceiptTime: messageTimestamp,
-          firstMessageType: "normal",
-          lastSent: null,
-          satisfactionSurveyLastSent: null,
-          initialJourney: {},
-          referralId: referralId,
-          referralCount: 0,
-        })
-        return true // Indicate success
-      }
-      return false // Indicate failure due to collision
-    })
-    if (success) {
-      return
-    }
-    retries++
-  }
-  throw new Error(
-    "Failed to generate a unique referral ID after maximum attempts."
-  )
+  const id = userRef.id
+  const referralId = hashids.encode(id)
+  await userRef.set({
+    instanceCount: 0,
+    firstMessageReceiptTime: messageTimestamp,
+    firstMessageType: "normal",
+    lastSent: null,
+    satisfactionSurveyLastSent: null,
+    initialJourney: {},
+    referralId: referralId,
+    referralCount: 0,
+  })
 }
