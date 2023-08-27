@@ -91,6 +91,8 @@ exports.userHandlerWhatsapp = async function (message) {
               },
             })
           }
+        } else {
+          await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         }
         break
       }
