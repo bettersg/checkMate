@@ -107,7 +107,6 @@ exports.userHandlerWhatsapp = async function (message) {
           if (code.length > 0) {
             try {
               referrer = hashids.decode(code)[0]
-              console.log(referrer)
               const referralSourceSnap = await db
                 .collection("users")
                 .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
