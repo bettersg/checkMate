@@ -297,7 +297,7 @@ async function newTextInstanceHandler(
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
-        machineCategory !== "unsure" && machineCategory !== "info"
+        machineCategory && machineCategory !== "unsure" && machineCategory !== "info"
           ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
           : null,
       customReply: null, //string
@@ -402,7 +402,7 @@ async function newImageInstanceHandler({
   let sender
   let isConvo
   let extractedMessage
-  let machineCategory
+  let machineCategory = null
   if (!hasMatch) {
     const temporaryUrl = await getSignedUrl(filename)
     if (temporaryUrl) {
@@ -499,7 +499,7 @@ async function newImageInstanceHandler({
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
-        machineCategory !== "unsure" && machineCategory !== "info"
+        machineCategory && machineCategory !== "unsure" && machineCategory !== "info"
           ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
           : null,
       customReply: null, //string
