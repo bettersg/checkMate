@@ -914,7 +914,7 @@
 			"name": "004_Irrelevant_Message",
 			"item": [
 				{
-					"name": "Send WhatsApp message (9 Chars)",
+					"name": "Send WhatsApp message (7 Chars)",
 					"event": [
 						{
 							"listen": "test",
@@ -943,7 +943,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_1_NAME}}\" }, \"wa_id\": \"{{USER_1_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"123456789\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_1_NAME}}\" }, \"wa_id\": \"{{USER_1_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"1234567\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1151,7 +1151,7 @@
 									"        \"path\": \"/botTELEGRAM_REPORT_BOT_TOKEN/sendMessage\",\r",
 									"        \"body\": {\r",
 									"            \"chat_id\": \"111111111\",\r",
-									"            \"text\": `<DEV>${USER_1_NUMBER} has disputed the assessment of a message sent by them.\\n  \\nmessage/instance path: ${DISPUTED_INSTANCE_PATH}\\n\\ntype: text\\n\\ntext: 123456789\\n\\ncategory: irrelevant`\r",
+									"            \"text\": `<DEV>${USER_1_NUMBER} has disputed the assessment of a message sent by them.\\n  \\nmessage/instance path: ${DISPUTED_INSTANCE_PATH}\\n\\ntype: text\\n\\ntext: 1234567\\n\\ncategory: irrelevant`\r",
 									"        },\r",
 									"        \"method\": \"POST\"\r",
 									"    }\r",

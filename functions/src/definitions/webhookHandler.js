@@ -140,6 +140,7 @@ exports.webhookHandler = functions
       "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
     ],
+    timeoutSeconds: 120,
   })
   .https.onRequest(app)
 

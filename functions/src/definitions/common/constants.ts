@@ -120,11 +120,11 @@ If you'd like still another update after more votes come in, just tap the button
   //menu text list
   MENU: `{{prefix}}
 
-Select "View Menu" below to see what CheckMate can do! 👈 Scroll down to see all the options, select one, then hit send.
+If you know what to do, please go ahead! Else, select "View Menu" below to see what CheckMate can do! 👈
 
-Do note that CheckMate *cannot respond like a human*. Do stick to the existing menu options if not sending in messages for checking! 😅
+Do note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.
 
-To pull up this selection anytime, just type "menu"!`,
+Anytime you need a refresher on what CheckMate can do, type "menu" to get here again! 😊`,
 
   //menu text list prefix
   NEW_USER_MENU_PREFIX: `Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined us to battle scams and misinformation😊.`,
