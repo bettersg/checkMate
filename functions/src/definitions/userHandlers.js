@@ -421,10 +421,10 @@ async function newImageInstanceHandler({
   }
 
   //do OCR
-  let ocrSuccess
-  let sender
-  let isConvo
-  let extractedMessage
+  let ocrSuccess = false
+  let sender = null
+  let isConvo = null
+  let extractedMessage = null
   let machineCategory = null
   if (!hasMatch) {
     const temporaryUrl = await getSignedUrl(filename)
@@ -547,7 +547,7 @@ async function newImageInstanceHandler({
     textHash: textHash ?? null,
     caption: caption ?? null,
     captionHash: captionHash,
-    sender: sender, //sender name or number extracted from OCR
+    sender: sender ?? null, //sender name or number extracted from OCR
     isConvo: isConvo, //boolean, whether or not the image is that of a conversation
     from: from, //sender phone number, taken from webhook object
     hash: hash,
