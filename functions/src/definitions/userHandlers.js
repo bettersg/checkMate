@@ -196,6 +196,27 @@ exports.userHandlerWhatsapp = async function (message) {
       }
       break
 
+    case "button":
+      const button = message.button
+      switch (button.text) {
+        case "Get Latest Update":
+          //TODO
+          break
+        case "Unsubscribe":
+          //TODO
+          break
+        default:
+          functions.logger.error("Unsupported button type:", button.text)
+          await sendWhatsappTextMessage(
+            "user",
+            from,
+            responses.GENERIC_ERROR,
+            null,
+            true
+          )
+      }
+      break
+
     default:
       sendWhatsappTextMessage(
         "user",
@@ -297,7 +318,9 @@ async function newTextInstanceHandler(
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
-        machineCategory && machineCategory !== "unsure" && machineCategory !== "info"
+        machineCategory &&
+        machineCategory !== "unsure" &&
+        machineCategory !== "info"
           ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
           : null,
       customReply: null, //string
@@ -423,7 +446,7 @@ async function newImageInstanceHandler({
             { text: "" }
           ) // Initial value with an empty text property
         extractedMessage = longestLHSMessage.text || null
-        machineCategory = ocrOutput?.prediction ?? null
+        machineCategory = isConvo ? ocrOutput?.prediction ?? null : null //only assign machineCategory if it's a screenshot of a conversation, otherwise we dont even know what's being OCRed.
         ocrSuccess = true
       } catch (error) {
         functions.logger.error("Error in performOCR:", error)
@@ -499,7 +522,9 @@ async function newImageInstanceHandler({
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
-        machineCategory && machineCategory !== "unsure" && machineCategory !== "info"
+        machineCategory &&
+        machineCategory !== "unsure" &&
+        machineCategory !== "info"
           ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
           : null,
       customReply: null, //string
