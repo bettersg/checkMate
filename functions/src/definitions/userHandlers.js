@@ -295,14 +295,21 @@ async function newTextInstanceHandler(
     let writeResult = await db.collection("messages").add({
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised:
-        machineCategory !== "unsure" && machineCategory !== "info",
+        machineCategory &&
+        machineCategory !== "error" &&
+        machineCategory !== "unsure" &&
+        machineCategory !== "info",
       text: text, //text
       caption: null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory !== "unsure" && machineCategory !== "info", //boolean, whether or not we have concluded the voting
+      isAssessed: 
+        machineCategory &&
+        machineCategory !== "error" &&
+        machineCategory !== "unsure" && 
+        machineCategory !== "info", //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
@@ -319,6 +326,7 @@ async function newTextInstanceHandler(
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
         machineCategory &&
+        machineCategory != "error" &&
         machineCategory !== "unsure" &&
         machineCategory !== "info"
           ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
@@ -499,14 +507,19 @@ async function newImageInstanceHandler({
     let writeResult = await db.collection("messages").add({
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised:
-        machineCategory !== "unsure" && machineCategory !== "info",
+        machineCategory && 
+        machineCategory !== "unsure" && 
+        machineCategory !== "info",
       text: extractedMessage ?? null, //text
       caption: caption ?? null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: machineCategory !== "unsure" && machineCategory !== "info", //boolean, whether or not we have concluded the voting
+      isAssessed: 
+        machineCategory && 
+        machineCategory !== "unsure" && 
+        machineCategory !== "info", //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
