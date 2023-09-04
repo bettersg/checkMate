@@ -1,5 +1,5 @@
-import admin from "firebase-admin"
-import functions from "firebase-functions"
+import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
 import { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } from "./constants"
 import {
   sendWhatsappButtonMessage,

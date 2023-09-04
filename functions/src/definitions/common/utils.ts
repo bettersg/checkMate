@@ -1,5 +1,5 @@
 import { thresholds } from "./constants"
-import admin from "firebase-admin"
+import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
 import { Timestamp } from "firebase-admin/firestore"
