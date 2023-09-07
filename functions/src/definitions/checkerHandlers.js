@@ -14,6 +14,7 @@ const {
 } = require("./common/sendFactCheckerMessages")
 const { getSignedUrl } = require("./common/mediaUtils")
 const { Timestamp } = require("firebase-admin/firestore")
+const { resetL2Status } = require("./common/voteUtils")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -174,24 +175,7 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
     await sendRemainingReminder(from, "whatsapp")
     return
   }
-  try {
-    const updateObj = {}
-    if (voteRequestSnap.get("triggerL2Vote") !== null) {
-      updateObj.triggerL2Vote = null
-    }
-    if (voteRequestSnap.get("triggerL2Others") !== null) {
-      updateObj.triggerL2Others = null
-    }
-    if (Object.keys(updateObj).length) {
-      // only perform the update if there's something to update
-      await voteRequestRef.update(updateObj)
-    }
-  } catch (error) {
-    functions.logger.error(
-      "Error resetting triggerL2Vote or triggerL2Others",
-      error
-    )
-  }
+  await resetL2Status(voteRequestSnap)
   const messageRef = voteRequestRef.parent.parent
   const messageSnap = await messageRef.get()
   const latestInstanceRef = messageSnap.get("latestInstance")
@@ -214,7 +198,9 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
       updateObj.sentMessageId = res.data.messages[0].id
       break
     case "image":
-      const temporaryUrl = await getSignedUrl(latestInstanceSnap.get("storageUrl"))
+      const temporaryUrl = await getSignedUrl(
+        latestInstanceSnap.get("storageUrl")
+      )
       if (temporaryUrl) {
         res = await sendImageMessage(
           "factChecker",
@@ -335,6 +321,7 @@ async function onTextListReceipt(
     .doc(messageId)
     .collection("voteRequests")
     .doc(voteRequestId)
+  const voteRequestSnap = await voteRequestRef.get()
   const updateObj = {}
   let isEnd = false
   let response
@@ -367,12 +354,14 @@ async function onTextListReceipt(
           break
 
         case "info":
+          await resetL2Status(voteRequestSnap)
           updateObj.triggerL2Vote = true
           updateObj.triggerL2Others = false
           response = responses.HOLD_FOR_NEXT_POLL
           break
 
         case "others":
+          await resetL2Status(voteRequestSnap)
           updateObj.triggerL2Vote = false
           updateObj.triggerL2Others = true
           response = responses.HOLD_FOR_L2_CATEGORISATION
