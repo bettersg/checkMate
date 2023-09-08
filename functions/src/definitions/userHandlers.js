@@ -294,22 +294,24 @@ async function newTextInstanceHandler(
   if (!hasMatch) {
     let writeResult = await db.collection("messages").add({
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised:
+      isMachineCategorised: !!(
         machineCategory &&
         machineCategory !== "error" &&
         machineCategory !== "unsure" &&
-        machineCategory !== "info",
+        machineCategory !== "info"
+      ),
       text: text, //text
       caption: null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: 
+      isAssessed: !!(
         machineCategory &&
         machineCategory !== "error" &&
-        machineCategory !== "unsure" && 
-        machineCategory !== "info", //boolean, whether or not we have concluded the voting
+        machineCategory !== "unsure" &&
+        machineCategory !== "info"
+      ), //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
@@ -325,7 +327,7 @@ async function newTextInstanceHandler(
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
-        machineCategory &&
+        !!machineCategory &&
         machineCategory != "error" &&
         machineCategory !== "unsure" &&
         machineCategory !== "info"
@@ -506,20 +508,22 @@ async function newImageInstanceHandler({
   if (!hasMatch) {
     let writeResult = await db.collection("messages").add({
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised:
-        machineCategory && 
-        machineCategory !== "unsure" && 
-        machineCategory !== "info",
+      isMachineCategorised: !!(
+        machineCategory &&
+        machineCategory !== "unsure" &&
+        machineCategory !== "info"
+      ),
       text: extractedMessage ?? null, //text
       caption: caption ?? null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: 
-        machineCategory && 
-        machineCategory !== "unsure" && 
-        machineCategory !== "info", //boolean, whether or not we have concluded the voting
+      isAssessed: !!(
+        machineCategory &&
+        machineCategory !== "unsure" &&
+        machineCategory !== "info"
+      ), //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
@@ -535,7 +539,7 @@ async function newImageInstanceHandler({
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
       primaryCategory:
-        machineCategory &&
+        !!machineCategory &&
         machineCategory !== "unsure" &&
         machineCategory !== "info"
           ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
