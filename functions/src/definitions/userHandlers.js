@@ -13,6 +13,7 @@ import {
   sendMenuMessage,
   sendInterimUpdate,
   sendVotingStats,
+  sendReferralMessage,
   respondToInterimFeedback,
 } from "./common/responseUtils"
 import {
@@ -204,6 +205,9 @@ exports.userHandlerWhatsapp = async function (message) {
           break
         case "Unsubscribe":
           //TODO
+          break
+        case "Get Referral Message":
+          await sendReferralMessage(from)
           break
         default:
           functions.logger.error("Unsupported button type:", button.text)
@@ -652,6 +656,7 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
   const [type, selection, ...rest] = listId.split("_")
   let response, instancePath
   const step = `${type}_${selection}`
+  let hasReplied = false
   switch (type) {
     case "menu":
       switch (selection) {
@@ -686,18 +691,8 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
           break
 
         case "referral":
-          const code = (await db.collection("users").doc(from).get()).get(
-            "referralId"
-          )
-          if (code) {
-            response = responses.REFERRAL.replace(
-              "{{link}}",
-              `https://ref.checkmate.sg/${code}`
-            )
-          } else {
-            response = responses.GENERIC_ERROR
-            functions.logger.error(`Referral code not found for ${from}`)
-          }
+          await sendReferralMessage(from)
+          hasReplied = true
           break
 
         case "dispute":
@@ -737,7 +732,9 @@ async function onTextListReceipt(messageObj, platform = "whatsapp") {
       response = responses.SATISFACTION_SURVEY_THANKS
       break
   }
-  await sendWhatsappTextMessage("user", from, response, null, true)
+  if (!hasReplied) {
+    await sendWhatsappTextMessage("user", from, response, null, true)
+  }
   return Promise.resolve(step)
 }
 
