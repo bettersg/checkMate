@@ -32,16 +32,16 @@ interface OCRResponse {
 
 interface camelCasedOCRResponse {
   output: {
-    sender: string
+    sender: string | null
     textMessages: {
       isLeft: boolean
       text: string
     }[]
   }
-  isConvo: boolean
-  extractedMessage: string
-  sender: string
-  prediction: string
+  isConvo: boolean | null
+  extractedMessage: string | null
+  sender: string | null
+  prediction: string | null
 }
 
 async function getEmbedding(text: string): Promise<number[]> {
@@ -69,6 +69,16 @@ async function getL1Category(text: string): Promise<string> {
 }
 
 async function performOCR(url: string): Promise<camelCasedOCRResponse> {
+  return {
+    output: {
+      sender: null,
+      textMessages: [],
+    },
+    isConvo: null,
+    extractedMessage: null,
+    sender: null,
+    prediction: null,
+  }
   const data = {
     url: url,
   }
