@@ -17,7 +17,7 @@ const sendTextMessage = async function (
   bot: string,
   to: string,
   text: string,
-  replyId: string,
+  replyId: string | null = null,
   platform = "whatsapp",
   previewUrl = false
 ) {

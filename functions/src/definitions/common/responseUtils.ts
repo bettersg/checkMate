@@ -10,6 +10,8 @@ import { getThresholds, sleep } from "./utils"
 import { sendTextMessage } from "./sendMessage"
 import { getCount } from "./counters"
 
+const db = admin.firestore()
+
 function getInfoLiner(truthScore: null | number) {
   return `, with an average score of ${
     typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
@@ -20,7 +22,6 @@ async function respondToInterimFeedback(
   instancePath: string,
   isUseful: string
 ) {
-  const db = admin.firestore()
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const responses = await getResponsesObj("user")
@@ -60,7 +61,6 @@ async function getResponsesObj(
   botType: "user"
 ): Promise<typeof USER_BOT_RESPONSES>
 async function getResponsesObj(botType: "user" | "factChecker" = "user") {
-  const db = admin.firestore()
   let path
   let fallbackResponses
   if (botType === "factChecker") {
@@ -172,7 +172,6 @@ async function sendMenuMessage(
 }
 
 async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
-  const db = admin.firestore()
   const data = instanceSnap.data()
   if (!data) {
     return
@@ -229,7 +228,6 @@ async function sendVotingStats(
   triggerScamShieldConsent: boolean
 ) {
   //get statistics
-  const db = admin.firestore()
   const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
     return
@@ -340,7 +338,6 @@ async function sendVotingStats(
 async function sendInterimUpdate(instancePath: string) {
   //get statistics
   const FEEDBACK_FEATURE_FLAG = true
-  const db = admin.firestore()
   const responses = await getResponsesObj("user")
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
@@ -723,6 +720,22 @@ async function respondToInstance(
   return
 }
 
+async function sendReferralMessage(user: string) {
+  let referralResponse
+  const code = (await db.collection("users").doc(user).get()).get("referralId")
+  const responses = await getResponsesObj("user")
+  if (code) {
+    referralResponse = responses.REFERRAL.replace(
+      "{{link}}",
+      `https://ref.checkmate.sg/${code}`
+    )
+  } else {
+    referralResponse = responses.GENERIC_ERROR
+    functions.logger.error(`Referral code not found for ${user}`)
+  }
+  await sendTextMessage("user", user, referralResponse, null, "whatsapp", true)
+}
+
 export {
   getResponsesObj,
   respondToInstance,
@@ -730,5 +743,6 @@ export {
   sendInterimPrompt,
   sendInterimUpdate,
   sendVotingStats,
+  sendReferralMessage,
   respondToInterimFeedback,
 }
