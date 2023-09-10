@@ -15,27 +15,12 @@ import {
 import { getSignedUrl } from "./common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { resetL2Status } from "./common/voteUtils"
+import { Message } from "../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-type Message = {
-  from: string
-  type: string
-  button: {
-    text: string
-    payload: string
-  }
-  id: string
-  interactive: {
-    type: string
-    list_reply: { id: string }
-    button_reply: { id: string }
-  }
-  text: { body: string }
-  context: { id: string }
-}
 const checkerHandlerWhatsapp = async function (message: Message) {
   const from = message.from // extract the phone number from the webhook payload
   const type = message.type

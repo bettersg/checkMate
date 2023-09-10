@@ -7,6 +7,7 @@ import {
 import * as functions from "firebase-functions"
 import { getEmbedding } from "./common/machineLearningServer/operations"
 import { stripUrl, stripPhone } from "./common/utils"
+import { Message } from "../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -20,7 +21,13 @@ async function calculateSimilarity(
   captionHash: string | null = null
 ) {
   //embed message to compare
-  let similarity = {}
+  let similarity: {
+    ref?: admin.firestore.DocumentReference<admin.firestore.DocumentData>
+    message?: Message
+    captionHash?: string | null
+    score?: number
+    parent?: admin.firestore.DocumentReference<admin.firestore.DocumentData> | null
+  } = {}
   const embedding = await getEmbedding(text)
 
   //try to match db first
