@@ -355,7 +355,7 @@ async function newTextInstanceHandler({
   }
   if (!messageRef) {
     throw new Error(
-      `No messageRef in newTextInstanceHandler for instance with id ${id}`
+      `No messageRef created or matched for whatsapp message with id ${id}`
     )
   }
   const _ = await messageRef.collection("instances").add({
@@ -426,10 +426,10 @@ async function newImageInstanceHandler({
   let captionHash = caption ? hashMessage(caption) : null
 
   if (!mediaId) {
-    throw new Error(`No mediaId for message instance id ${id}`)
+    throw new Error(`No mediaId for whatsapp message with id ${id}`)
   }
   if (!mimeType) {
-    throw new Error(`No mimeType for message instance id ${id}`)
+    throw new Error(`No mimeType for whatsapp message with id ${id}`)
   }
   //get response buffer
   const buffer = await downloadWhatsappMedia(mediaId)
@@ -545,7 +545,7 @@ async function newImageInstanceHandler({
     }
   }
 
-  if (!hasMatch || !matchedInstanceSnap) {
+  if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
     let writeResult = await db.collection("messages").add({
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: !!(
@@ -589,14 +589,19 @@ async function newImageInstanceHandler({
     })
     messageRef = writeResult
   } else {
-    if (matchType === "image") {
+    if (matchType === "image" && matchedInstanceSnap) {
       messageRef = matchedInstanceSnap.ref.parent.parent
-    } else if (matchType === "similarity" || matchType === "exact") {
+    } else if (
+      (matchType === "similarity" || matchType === "exact") &&
+      matchedParentMessageRef
+    ) {
       messageRef = matchedParentMessageRef
     }
   }
   if (!messageRef) {
-    throw new Error(`No messageRef for message instance id ${id}`)
+    throw new Error(
+      `No messageRef created or matched for whatsapp message with id ${id}`
+    )
   }
   const _ = await messageRef.collection("instances").add({
     source: "whatsapp",
@@ -662,10 +667,14 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       updateObj = {}
       const replyText =
         selection === "consent"
-          ? responses.SCAMSHIELD_ON_CONSENT
-          : responses.SCAMSHIELD_ON_DECLINE
+          ? responses?.SCAMSHIELD_ON_CONSENT
+          : responses?.SCAMSHIELD_ON_DECLINE
       updateObj.scamShieldConsent = selection === "consent"
       await instanceRef.update(updateObj)
+      if (!replyText) {
+        functions.logger.error("No replyText for scamshieldConsent")
+        break
+      }
       await sendWhatsappTextMessage("user", from, replyText)
       break
     case "votingResults":
@@ -739,7 +748,9 @@ async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
           const instanceRef = db.doc(instancePath)
           const parentMessageRef = instanceRef.parent.parent
           if (!parentMessageRef) {
-            throw new Error(`parentMessageRef is null`)
+            throw new Error(
+              `parentMessageRef is null for instance ${instancePath}`
+            )
           }
           const instanceSnap = await instanceRef.get()
           const parentMessageSnapshot = await parentMessageRef.get()

@@ -16,6 +16,9 @@ const sendL1CategorisationMessage = async function (
   const responses = await getResponsesObj("factChecker")
   const type = "categorize"
   if (!voteRequestData) {
+    functions.logger.error(
+      `No vote request data for ${voteRequestSnap.ref.path}`
+    )
     return
   }
   switch (voteRequestData.platform) {
@@ -73,6 +76,9 @@ const sendL2OthersCategorisationMessage = async function (
   const responses = await getResponsesObj("factChecker")
   const type = "others"
   if (!voteRequestData) {
+    functions.logger.error(
+      `No vote request data for ${voteRequestSnap.ref.path}`
+    )
     return
   }
   switch (voteRequestData.platform) {
@@ -133,6 +139,9 @@ const sendVotingMessage = async function sendVotingMessage(
   const responses = await getResponsesObj("factChecker")
   const type = "vote"
   if (!voteRequestData) {
+    functions.logger.error(
+      `No vote request data for ${voteRequestSnap.ref.path}`
+    )
     return
   }
   switch (voteRequestData.platform) {
@@ -235,6 +244,9 @@ const sendRemainingReminder = async function (
     const sortedVoteRequestDocs = outstandingVoteRequestsQuerySnap.docs.sort(
       (a, b) => {
         if (!a.ref.parent.parent || !b.ref.parent.parent) {
+          functions.logger.error(
+            `No parent found for either vote request ${a.ref.path} or ${b.ref.path}`
+          )
           return 0
         }
         const aIsNotAssessed = unassessedMessageIdList.includes(

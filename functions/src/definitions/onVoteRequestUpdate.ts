@@ -30,6 +30,7 @@ const onVoteRequestUpdate = functions
     const after = docSnap.data()
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
+      functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
     if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {

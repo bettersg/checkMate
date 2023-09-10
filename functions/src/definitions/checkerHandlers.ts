@@ -111,6 +111,9 @@ async function onSignUp(from: string, platform = "whatsapp") {
     (platform = platform)
   )
   if (!res) {
+    functions.logger.error(
+      `Error sending message upon signup for factChecker ${from}`
+    )
     return
   }
   await db.collection("factCheckers").doc(`${from}`).set({
@@ -413,7 +416,7 @@ async function onTextListReceipt(
   }
   if (!response) {
     functions.logger.warn(
-      `No response for id ${voteRequestId} for message ${messageId} found`
+      `Response not set for id ${voteRequestId} for message ${messageId}. Unexpected text list selection likely the cause.`
     )
     return
   }

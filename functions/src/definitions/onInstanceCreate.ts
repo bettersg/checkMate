@@ -40,6 +40,7 @@ const onInstanceCreate = functions
     }
     const parentMessageRef = snap.ref.parent.parent
     if (!parentMessageRef) {
+      functions.logger.error(`Instance ${snap.ref.path} has no parent message`)
       return
     }
     const instancesQuerySnap = await parentMessageRef
