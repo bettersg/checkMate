@@ -1,20 +1,23 @@
-const admin = require("firebase-admin")
-const {
+import {
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
   sendWhatsappButtonMessage,
-} = require("./sendWhatsappMessage")
-const { getResponsesObj } = require("./responseUtils")
-const functions = require("firebase-functions")
+} from "./sendWhatsappMessage"
+import { getResponsesObj } from "./responseUtils"
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
 
-exports.sendL1CategorisationMessage = async function (
-  voteRequestSnap,
-  messageRef,
-  replyId = null
+const sendL1CategorisationMessage = async function (
+  voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
+  replyId: string | null = null
 ) {
   const voteRequestData = voteRequestSnap.data()
   const responses = await getResponsesObj("factChecker")
   const type = "categorize"
+  if (!voteRequestData) {
+    return
+  }
   switch (voteRequestData.platform) {
     case "whatsapp":
       const rows = [
@@ -61,14 +64,17 @@ exports.sendL1CategorisationMessage = async function (
   }
 }
 
-exports.sendL2OthersCategorisationMessage = async function (
-  voteRequestSnap,
-  messageRef,
-  replyId = null
+const sendL2OthersCategorisationMessage = async function (
+  voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
+  replyId: string | null = null
 ) {
   const voteRequestData = voteRequestSnap.data()
   const responses = await getResponsesObj("factChecker")
   const type = "others"
+  if (!voteRequestData) {
+    return
+  }
   switch (voteRequestData.platform) {
     case "whatsapp":
       const rows = [
@@ -117,18 +123,25 @@ exports.sendL2OthersCategorisationMessage = async function (
   }
 }
 
-exports.sendVotingMessage = async function sendVotingMessage(
-  voteRequestSnap,
-  messageRef
+const sendVotingMessage = async function sendVotingMessage(
+  voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const messageSnap = await messageRef.get()
   const message = messageSnap.data()
   const voteRequestData = voteRequestSnap.data()
   const responses = await getResponsesObj("factChecker")
   const type = "vote"
+  if (!voteRequestData) {
+    return
+  }
   switch (voteRequestData.platform) {
     case "whatsapp":
-      const rows = []
+      const rows: {
+        id: string
+        title: string
+        description?: string
+      }[] = []
       const max_score = 5
       for (let i = 0; i <= max_score; i++) {
         rows.push({
@@ -160,7 +173,11 @@ exports.sendVotingMessage = async function sendVotingMessage(
   }
 }
 
-async function _sendReminderMessage(to, numOutstanding, voteRequestPath) {
+async function _sendReminderMessage(
+  to: string,
+  numOutstanding: number,
+  voteRequestPath: string
+) {
   const responses = await getResponsesObj("factChecker")
   const buttons = [
     {
@@ -182,7 +199,10 @@ async function _sendReminderMessage(to, numOutstanding, voteRequestPath) {
   )
 }
 
-exports.sendRemainingReminder = async function (factCheckerId, platform) {
+const sendRemainingReminder = async function (
+  factCheckerId: string,
+  platform: string
+) {
   const db = admin.firestore()
   try {
     const outstandingVoteRequestsQuerySnap = await db
@@ -214,6 +234,9 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
     */
     const sortedVoteRequestDocs = outstandingVoteRequestsQuerySnap.docs.sort(
       (a, b) => {
+        if (!a.ref.parent.parent || !b.ref.parent.parent) {
+          return 0
+        }
         const aIsNotAssessed = unassessedMessageIdList.includes(
           a.ref.parent.parent.id
         )
@@ -243,4 +266,10 @@ exports.sendRemainingReminder = async function (factCheckerId, platform) {
   } catch (error) {
     functions.logger.error("Error sending remaining reminder", error)
   }
+}
+export {
+  sendL1CategorisationMessage,
+  sendL2OthersCategorisationMessage,
+  sendVotingMessage,
+  sendRemainingReminder,
 }
