@@ -17,7 +17,7 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-exports.onVoteRequestUpdate = functions
+const onVoteRequestUpdate = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
@@ -196,3 +196,5 @@ async function updateCheckerVoteCount(
     })
   }
 }
+
+export { onVoteRequestUpdate }

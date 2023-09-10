@@ -1,7 +1,10 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
-import { respondToInstance, sendInterimPrompt } from "./common/responseUtils"
+import {
+  respondToInstance,
+  sendInterimPrompt as sendInterimPromptImported,
+} from "./common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { getCount } from "./common/counters"
 import { getThresholds } from "./common/utils"
@@ -111,7 +114,7 @@ async function interimPromptHandler() {
           ? thresholds.sendInterimMinVotes
           : 1)
       ) {
-        return sendInterimPrompt(doc)
+        return sendInterimPromptImported(doc)
       } else {
         return Promise.resolve()
       }
@@ -122,14 +125,14 @@ async function interimPromptHandler() {
   }
 }
 
-exports.checkSessionExpiring = functions
+const checkSessionExpiring = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("1 * * * *")
   .timeZone("Asia/Singapore")
   .onRun(checkConversationSessionExpiring)
 
-exports.scheduledDeactivation = functions
+const scheduledDeactivation = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
@@ -138,11 +141,16 @@ exports.scheduledDeactivation = functions
   .timeZone("Asia/Singapore")
   .onRun(deactivateAndRemind)
 
-exports.sendInterimPrompt = functions
+const sendInterimPrompt = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("*/20 * * * *")
   .timeZone("Asia/Singapore")
   .onRun(interimPromptHandler)
 
-exports.interimPromptHandler = interimPromptHandler
+export {
+  checkSessionExpiring,
+  scheduledDeactivation,
+  sendInterimPrompt,
+  interimPromptHandler,
+}
