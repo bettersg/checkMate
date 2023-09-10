@@ -1,14 +1,15 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { getThresholds } = require("./common/utils")
-const {
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
+import { getThresholds } from "./common/utils"
+import {
   sendVotingMessage,
   sendL2OthersCategorisationMessage,
   sendRemainingReminder,
-} = require("./common/sendFactCheckerMessages")
-const { incrementCounter, getCount } = require("./common/counters")
-const { FieldValue } = require("@google-cloud/firestore")
-const { defineInt } = require("firebase-functions/params")
+} from "./common/sendFactCheckerMessages"
+import { incrementCounter, getCount } from "./common/counters"
+import { FieldValue } from "@google-cloud/firestore"
+import { defineInt } from "firebase-functions/params"
+
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
 
@@ -28,7 +29,9 @@ exports.onVoteRequestUpdate = functions
     const docSnap = change.after
     const after = docSnap.data()
     const messageRef = docSnap.ref.parent.parent
-
+    if (!messageRef) {
+      return
+    }
     if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
       await sendVotingMessage(change.after, messageRef)
     } else if (
@@ -56,26 +59,23 @@ exports.onVoteRequestUpdate = functions
       const voteTotal = await getCount(messageRef, "totalVoteScore")
       const truthScore = infoCount > 0 ? voteTotal / infoCount : null
       const thresholds = await getThresholds()
-      const isSus = susCount > parseInt(thresholds.isSus * responseCount)
+      const isSus = susCount > thresholds.isSus * responseCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
-      const isInfo = infoCount > parseInt(thresholds.isInfo * responseCount)
-      const isSpam = spamCount > parseInt(thresholds.isSpam * responseCount)
+      const isInfo = infoCount > thresholds.isInfo * responseCount
+      const isSpam = spamCount > thresholds.isSpam * responseCount
       const isLegitimate =
-        legitimateCount > parseInt(thresholds.isLegitimate * responseCount)
+        legitimateCount > thresholds.isLegitimate * responseCount
       const isIrrelevant =
-        irrelevantCount > parseInt(thresholds.isIrrelevant * responseCount)
+        irrelevantCount > thresholds.isIrrelevant * responseCount
       const isUnsure =
         (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) ||
-        unsureCount > parseInt(thresholds.isUnsure * responseCount)
+        unsureCount > thresholds.isUnsure * responseCount
       const isAssessed =
         (isUnsure &&
-          responseCount >
-            parseInt(thresholds.endVoteUnsure * numFactCheckers)) ||
-        (!isUnsure &&
-          responseCount > parseInt(thresholds.endVote * numFactCheckers)) ||
-        (isSus &&
-          responseCount > parseInt(thresholds.endVoteSus * numFactCheckers))
+          responseCount > thresholds.endVoteUnsure * numFactCheckers) ||
+        (!isUnsure && responseCount > thresholds.endVote * numFactCheckers) ||
+        (isSus && responseCount > thresholds.endVoteSus * numFactCheckers)
 
       //set primaryCategory
       let primaryCategory
@@ -87,8 +87,7 @@ exports.onVoteRequestUpdate = functions
         if (truthScore === null) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
-        }
-        if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+        } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
           primaryCategory = "untrue"
         } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
           primaryCategory = "misleading"
@@ -135,7 +134,11 @@ exports.onVoteRequestUpdate = functions
     return Promise.resolve()
   })
 
-async function updateCounts(messageRef, before, after) {
+async function updateCounts(
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
+  before: admin.firestore.DocumentData,
+  after: admin.firestore.DocumentData
+) {
   const previousCategory = before.category
   const currentCategory = after.category
   const previousVote = before.vote
@@ -176,7 +179,10 @@ async function updateCounts(messageRef, before, after) {
   }
 }
 
-async function updateCheckerVoteCount(before, after) {
+async function updateCheckerVoteCount(
+  before: admin.firestore.DocumentData,
+  after: admin.firestore.DocumentData
+) {
   let factCheckerRef
   if (before.category === null && after.category !== null) {
     factCheckerRef = after.factCheckerDocRef
