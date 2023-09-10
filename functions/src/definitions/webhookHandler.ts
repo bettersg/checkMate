@@ -1,10 +1,10 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const express = require("express")
-const { userHandlerWhatsapp } = require("./userHandlers")
-const { checkerHandlerWhatsapp } = require("./checkerHandlers")
-const { defineString } = require("firebase-functions/params")
-const { handleSpecialCommands } = require("./specialCommands")
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
+import express from "express"
+import { userHandlerWhatsapp } from "./userHandlers"
+import { checkerHandlerWhatsapp } from "./checkerHandlers"
+import { defineString } from "firebase-functions/params"
+import { handleSpecialCommands } from "./specialCommands"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString(
@@ -128,7 +128,7 @@ app.get("/whatsapp", (req, res) => {
   }
 })
 
-exports.webhookHandler = functions
+const webhookHandler = functions
   .region("asia-southeast1")
   .runWith({
     secrets: [
@@ -144,4 +144,4 @@ exports.webhookHandler = functions
   })
   .https.onRequest(app)
 
-exports.app = app
+export { app, webhookHandler }
