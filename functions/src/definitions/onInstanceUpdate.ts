@@ -5,7 +5,7 @@ import {
 } from "./common/typesense/collectionOperations"
 import { getEmbedding } from "./common/machineLearningServer/operations"
 
-exports.onInstanceUpdate = functions
+const onInstanceUpdate = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN"],
@@ -29,3 +29,5 @@ exports.onInstanceUpdate = functions
       })
     }
   })
+
+export { onInstanceUpdate }

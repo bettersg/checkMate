@@ -1,21 +1,22 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
-const {
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
+import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
+import {
   respondToInstance,
-  sendInterimPrompt,
-} = require("./common/responseUtils")
-const { Timestamp } = require("firebase-admin/firestore")
-const { getCount } = require("./common/counters")
-const { getThresholds } = require("./common/utils")
-const { defineString } = require("firebase-functions/params")
+  sendInterimPrompt as sendInterimPromptImported,
+} from "./common/responseUtils"
+import { Timestamp } from "firebase-admin/firestore"
+import { getCount } from "./common/counters"
+import { getThresholds } from "./common/utils"
+import { defineString } from "firebase-functions/params"
+
 const runtimeEnvironment = defineString("ENVIRONMENT")
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-async function deactivateAndRemind(context) {
+async function deactivateAndRemind() {
   try {
     const db = admin.firestore()
     const cutoffHours = 72
@@ -58,7 +59,7 @@ async function deactivateAndRemind(context) {
   }
 }
 
-async function checkConversationSessionExpiring(context) {
+async function checkConversationSessionExpiring() {
   try {
     const db = admin.firestore()
     const hoursAgo = 23
@@ -83,7 +84,7 @@ async function checkConversationSessionExpiring(context) {
   }
 }
 
-async function interimPromptHandler(context) {
+async function interimPromptHandler() {
   try {
     const db = admin.firestore()
     const dayAgo = Timestamp.fromDate(
@@ -103,13 +104,17 @@ async function interimPromptHandler(context) {
       .get()
     const promisesArr = eligibleInstances.docs.map(async (doc) => {
       const parentMessageRef = doc.ref.parent.parent
+      if (!parentMessageRef) {
+        throw new Error("parentMessageRef was null in interimPromptHandler ")
+      }
       const voteCount = await getCount(parentMessageRef, "responses")
       if (
-        voteCount >= runtimeEnvironment.value() === "PROD"
+        voteCount >=
+        (runtimeEnvironment.value() === "PROD"
           ? thresholds.sendInterimMinVotes
-          : 1
+          : 1)
       ) {
-        return sendInterimPrompt(doc)
+        return sendInterimPromptImported(doc)
       } else {
         return Promise.resolve()
       }
@@ -120,14 +125,14 @@ async function interimPromptHandler(context) {
   }
 }
 
-exports.checkSessionExpiring = functions
+const checkSessionExpiring = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("1 * * * *")
   .timeZone("Asia/Singapore")
   .onRun(checkConversationSessionExpiring)
 
-exports.scheduledDeactivation = functions
+const scheduledDeactivation = functions
   .region("asia-southeast1")
   .runWith({
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
@@ -136,11 +141,16 @@ exports.scheduledDeactivation = functions
   .timeZone("Asia/Singapore")
   .onRun(deactivateAndRemind)
 
-exports.sendInterimPrompt = functions
+const sendInterimPrompt = functions
   .region("asia-southeast1")
   .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
   .pubsub.schedule("*/20 * * * *")
   .timeZone("Asia/Singapore")
   .onRun(interimPromptHandler)
 
-exports.interimPromptHandler = interimPromptHandler
+export {
+  checkSessionExpiring,
+  scheduledDeactivation,
+  sendInterimPrompt,
+  interimPromptHandler,
+}

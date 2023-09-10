@@ -98,9 +98,9 @@ async function sendWhatsappTemplateMessage(
   to: string,
   templateName: string,
   languageCode = "en",
-  bodyTextVariables = [],
-  buttonPayloads = [],
-  replyMessageId = null
+  bodyTextVariables: string[] = [],
+  buttonPayloads: string[] = [],
+  replyMessageId: string | null = null
 ) {
   const buttonComponentArr = buttonPayloads.map((payload, index) => {
     return {
@@ -268,7 +268,7 @@ async function sendWhatsappContactMessage(
   bot: string,
   to: string,
   phoneNumber: string,
-  name: string,
+  name: { formatted_name: string; suffix: string },
   url: string,
   replyMessageId: string | null = null
 ) {
@@ -278,7 +278,7 @@ async function sendWhatsappContactMessage(
     to: string
     type: string
     contacts: {
-      name: string
+      name: { formatted_name: string; suffix: string }
       urls: { url: string }[]
       phones: { phone: string }[]
     }[]
