@@ -98,8 +98,8 @@ async function sendWhatsappTemplateMessage(
   to: string,
   templateName: string,
   languageCode = "en",
-  bodyTextVariables = [],
-  buttonPayloads = [],
+  bodyTextVariables: string[] = [],
+  buttonPayloads: string[] = [],
   replyMessageId = null
 ) {
   const buttonComponentArr = buttonPayloads.map((payload, index) => {
