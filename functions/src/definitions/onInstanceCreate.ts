@@ -1,16 +1,16 @@
-const functions = require("firebase-functions")
-const { getCount } = require("./common/counters")
-const { getThresholds } = require("./common/utils")
-const { respondToInstance } = require("./common/responseUtils")
-const { sendWhatsappTemplateMessage } = require("./common/sendWhatsappMessage")
-const {
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
+import { getCount } from "./common/counters"
+import { getThresholds } from "./common/utils"
+import { respondToInstance } from "./common/responseUtils"
+import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
+import {
   insertOne,
   CollectionTypes,
-} = require("./common/typesense/collectionOperations")
-const admin = require("firebase-admin")
-const { FieldValue } = require("@google-cloud/firestore")
-const { defineInt } = require("firebase-functions/params")
-const { Timestamp } = require("firebase-admin/firestore")
+} from "./common/typesense/collectionOperations"
+import { FieldValue } from "@google-cloud/firestore"
+import { defineInt } from "firebase-functions/params"
+import { Timestamp } from "firebase-admin/firestore"
 
 // Define some parameters
 const numInstanceShards = defineInt("NUM_SHARDS_INSTANCE_COUNT")
@@ -19,7 +19,7 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-exports.onInstanceCreate = functions
+const onInstanceCreate = functions
   .region("asia-southeast1")
   .runWith({
     secrets: [
@@ -39,6 +39,9 @@ exports.onInstanceCreate = functions
       return Promise.resolve()
     }
     const parentMessageRef = snap.ref.parent.parent
+    if (!parentMessageRef) {
+      return
+    }
     const instancesQuerySnap = await parentMessageRef
       .collection("instances")
       .orderBy("timestamp", "desc")
@@ -95,7 +98,7 @@ exports.onInstanceCreate = functions
     }
   })
 
-async function upsertUser(from, messageTimestamp) {
+async function upsertUser(from: string, messageTimestamp: Timestamp) {
   const db = admin.firestore()
   const userRef = db.collection("users").doc(from)
   await userRef.set(
@@ -107,7 +110,9 @@ async function upsertUser(from, messageTimestamp) {
   )
 }
 
-async function despatchPoll(messageRef) {
+async function despatchPoll(
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
+) {
   const db = admin.firestore()
   const factCheckersSnapshot = await db
     .collection("factCheckers")
@@ -123,8 +128,8 @@ async function despatchPoll(messageRef) {
 }
 
 function sendTemplateMessageAndCreateVoteRequest(
-  factCheckerDocSnap,
-  messageRef
+  factCheckerDocSnap: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const factChecker = factCheckerDocSnap.data()
   if (factChecker?.preferredPlatform === "whatsapp") {
@@ -167,3 +172,5 @@ function sendTemplateMessageAndCreateVoteRequest(
     )
   }
 }
+
+export { onInstanceCreate }

@@ -100,7 +100,7 @@ async function sendWhatsappTemplateMessage(
   languageCode = "en",
   bodyTextVariables: string[] = [],
   buttonPayloads: string[] = [],
-  replyMessageId = null
+  replyMessageId: string | null = null
 ) {
   const buttonComponentArr = buttonPayloads.map((payload, index) => {
     return {
