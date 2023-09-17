@@ -18,6 +18,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@google-cloud/pubsub": "^4.0.6",
     "axios": "^1.2.2",
     "dotenv": "^16.0.3",
     "eslint": "^8.32.0",

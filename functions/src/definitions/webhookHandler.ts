@@ -1,10 +1,10 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import express from "express"
-import { userHandlerWhatsapp } from "./userHandlers"
-import { checkerHandlerWhatsapp } from "./checkerHandlers"
 import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
+import { publishToTopic } from "./common/pubsub"
+import { onRequest } from "firebase-functions/v2/https"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString(
@@ -32,7 +32,6 @@ app.post("/whatsapp", async (req, res) => {
       let value = req.body.entry[0].changes[0].value
       let phoneNumberId = value.metadata.phone_number_id
       let message = value.messages[0]
-      let from = message.from // extract the phone number from the webhook payload
       let type = message.type
 
       let checkerPhoneNumberId
@@ -51,14 +50,6 @@ app.post("/whatsapp", async (req, res) => {
         phoneNumberId === userPhoneNumberId
       ) {
         if (
-          phoneNumberId !== userPhoneNumberId &&
-          phoneNumberId !== checkerPhoneNumberId
-        ) {
-          functions.logger.log("unexpected message source")
-          res.sendStatus(200)
-          return
-        }
-        if (
           type == "text" &&
           message.text.body.startsWith("/") &&
           runtimeEnvironment.value() !== "PROD"
@@ -70,16 +61,19 @@ app.post("/whatsapp", async (req, res) => {
             (type == "button" || type == "interactive" || type == "text") &&
             phoneNumberId === checkerPhoneNumberId
           ) {
-            //when live, can check against WABA id instead
-            await checkerHandlerWhatsapp(message)
+            //put into checker queue
+            await publishToTopic("checkerEvents", message)
           }
           if (phoneNumberId === userPhoneNumberId) {
-            await userHandlerWhatsapp(message)
+            //put into user queue
+            await publishToTopic("userEvents", message)
           }
         }
         res.sendStatus(200)
       } else {
-        functions.logger.warn(`Issue with phoneNumberId ${phoneNumberId}`)
+        functions.logger.warn(
+          `Unexpected message source from phoneNumberId ${phoneNumberId}`
+        )
         res.sendStatus(200)
       }
     } else {
@@ -140,8 +134,18 @@ const webhookHandler = functions
       "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
     ],
-    timeoutSeconds: 120,
   })
   .https.onRequest(app)
 
-export { app, webhookHandler }
+const webhookHandlerV2 = onRequest(
+  {
+    secrets: [
+      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+      "VERIFY_TOKEN",
+    ],
+  },
+  app
+)
+
+export { app, webhookHandlerV2, webhookHandler }

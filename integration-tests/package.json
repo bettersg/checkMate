@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "newman run checkmate.postman_collection.json -g ./env.json",
+    "test": "newman run checkmate.postman_collection.json -g ./env.json --delay-request 2000",
     "update-env": "ts-node ./update-env.ts"
   },
   "author": "",
