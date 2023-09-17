@@ -69,16 +69,6 @@ async function getL1Category(text: string): Promise<string> {
 }
 
 async function performOCR(url: string): Promise<camelCasedOCRResponse> {
-  return {
-    output: {
-      sender: null,
-      textMessages: [],
-    },
-    isConvo: null,
-    extractedMessage: null,
-    sender: null,
-    prediction: null,
-  }
   const data = {
     url: url,
   }

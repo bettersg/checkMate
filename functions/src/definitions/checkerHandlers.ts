@@ -1,26 +1,28 @@
-const functions = require("firebase-functions")
-const admin = require("firebase-admin")
-const { sendTextMessage, sendImageMessage } = require("./common/sendMessage")
-const {
+import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
+import { onMessagePublished } from "firebase-functions/v2/pubsub"
+import { sendTextMessage, sendImageMessage } from "./common/sendMessage"
+import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappButtonMessage,
-} = require("./common/sendWhatsappMessage")
-const { getResponsesObj } = require("./common/responseUtils")
-const { sleep } = require("./common/utils")
-const {
+} from "./common/sendWhatsappMessage"
+import { getResponsesObj } from "./common/responseUtils"
+import { sleep } from "./common/utils"
+import {
   sendL1CategorisationMessage,
   sendRemainingReminder,
-} = require("./common/sendFactCheckerMessages")
-const { getSignedUrl } = require("./common/mediaUtils")
-const { Timestamp } = require("firebase-admin/firestore")
-const { resetL2Status } = require("./common/voteUtils")
+} from "./common/sendFactCheckerMessages"
+import { getSignedUrl } from "./common/mediaUtils"
+import { Timestamp } from "firebase-admin/firestore"
+import { resetL2Status } from "./common/voteUtils"
+import { Message } from "../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-exports.checkerHandlerWhatsapp = async function (message) {
+const checkerHandlerWhatsapp = async function (message: Message) {
   const from = message.from // extract the phone number from the webhook payload
   const type = message.type
   const db = admin.firestore()
@@ -95,12 +97,7 @@ exports.checkerHandlerWhatsapp = async function (message) {
   markWhatsappMessageAsRead("factChecker", message.id)
 }
 
-exports.checkerHandlerTelegram = async function (message) {
-  const from = message.from.id
-  const db = admin.firestore()
-}
-
-async function onSignUp(from, platform = "whatsapp") {
+async function onSignUp(from: string, platform = "whatsapp") {
   const responses = await getResponsesObj("factChecker")
   const db = admin.firestore()
   let res = await sendTextMessage(
@@ -109,6 +106,12 @@ async function onSignUp(from, platform = "whatsapp") {
     responses.ONBOARDING_1,
     (platform = platform)
   )
+  if (!res) {
+    functions.logger.error(
+      `Error sending message upon signup for factChecker ${from}`
+    )
+    return
+  }
   await db.collection("factCheckers").doc(`${from}`).set({
     name: "",
     isActive: true,
@@ -125,7 +128,12 @@ async function onSignUp(from, platform = "whatsapp") {
   })
 }
 
-async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
+async function onMsgReplyReceipt(
+  from: string,
+  messageId: string,
+  text: string,
+  platform = "whatsapp"
+) {
   const responses = await getResponsesObj("factChecker")
   const db = admin.firestore()
   const factCheckerSnap = await db.collection("factCheckers").doc(from).get()
@@ -151,7 +159,11 @@ async function onMsgReplyReceipt(from, messageId, text, platform = "whatsapp") {
   }
 }
 
-async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
+async function onFactCheckerYes(
+  voteRequestPath: string,
+  from: string,
+  platform = "whatsapp"
+) {
   const db = admin.firestore()
   if (!voteRequestPath.includes("/")) {
     throw new Error("The voteRequestPath does not contain a forward slash (/).")
@@ -177,12 +189,22 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
   }
   await resetL2Status(voteRequestSnap)
   const messageRef = voteRequestRef.parent.parent
+  if (!messageRef) {
+    functions.logger.error(`null messageRef in resetL2Status`)
+    return
+  }
   const messageSnap = await messageRef.get()
   const latestInstanceRef = messageSnap.get("latestInstance")
   const latestInstanceSnap = await latestInstanceRef.get()
   const latestType = latestInstanceSnap.get("type") ?? "text"
   let res
-  const updateObj = {
+  const updateObj: {
+    hasAgreed: boolean
+    acceptedTimestamp: admin.firestore.Timestamp
+    sentMessageId?: string
+    triggerL2Vote?: boolean
+    triggerL2Others?: boolean
+  } = {
     hasAgreed: true,
     acceptedTimestamp: Timestamp.fromDate(new Date()),
   }
@@ -195,6 +217,9 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
         null,
         platform
       )
+      if (!res) {
+        return
+      }
       updateObj.sentMessageId = res.data.messages[0].id
       break
     case "image":
@@ -210,6 +235,9 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
           null,
           platform
         )
+        if (!res) {
+          return
+        }
         updateObj.sentMessageId = res.data.messages[0].id
       } else {
         functions.logger.error(
@@ -255,10 +283,10 @@ async function onFactCheckerYes(voteRequestPath, from, platform = "whatsapp") {
 }
 
 async function onButtonReply(
-  db,
-  buttonId,
-  from,
-  replyId,
+  db: admin.firestore.Firestore,
+  buttonId: string,
+  from: string,
+  replyId: string,
   platform = "whatsapp"
 ) {
   // let messageId, voteRequestId, type
@@ -308,10 +336,10 @@ async function onButtonReply(
 }
 
 async function onTextListReceipt(
-  db,
-  listId,
-  from,
-  replyId,
+  db: admin.firestore.Firestore,
+  listId: string,
+  from: string,
+  replyId: string,
   platform = "whatsapp"
 ) {
   const responses = await getResponsesObj("factChecker")
@@ -322,7 +350,13 @@ async function onTextListReceipt(
     .collection("voteRequests")
     .doc(voteRequestId)
   const voteRequestSnap = await voteRequestRef.get()
-  const updateObj = {}
+  const updateObj: {
+    category?: string
+    vote?: number | null
+    triggerL2Vote?: boolean
+    triggerL2Others?: boolean
+    votedTimestamp?: Timestamp
+  } = {}
   let isEnd = false
   let response
   switch (type) {
@@ -376,6 +410,12 @@ async function onTextListReceipt(
       isEnd = true
       break
   }
+  if (!response) {
+    functions.logger.warn(
+      `Response not set for id ${voteRequestId} for message ${messageId}. Unexpected text list selection likely the cause.`
+    )
+    return
+  }
   if (isEnd) {
     updateObj.votedTimestamp = Timestamp.fromDate(new Date())
   }
@@ -389,10 +429,36 @@ async function onTextListReceipt(
   }
 }
 
-async function onContinue(factCheckerId) {
+async function onContinue(factCheckerId: string) {
   const db = admin.firestore()
   await db.collection("factCheckers").doc(factCheckerId).update({
     isActive: true,
   })
   await sendRemainingReminder(factCheckerId, "whatsapp")
 }
+
+const onCheckerPublish = onMessagePublished(
+  {
+    topic: "checkerEvents",
+    secrets: [
+      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_TOKEN",
+      "VERIFY_TOKEN",
+      "TYPESENSE_TOKEN",
+      "ML_SERVER_TOKEN",
+      "TELEGRAM_REPORT_BOT_TOKEN",
+    ],
+  },
+  async (event) => {
+    if (event.data.message.json) {
+      functions.logger.log(`Processing ${event.data.message.messageId}`)
+      await checkerHandlerWhatsapp(event.data.message.json)
+    } else {
+      functions.logger.warn(
+        `Unknown message type for messageId ${event.data.message.messageId})`
+      )
+    }
+  }
+)
+export { onCheckerPublish }

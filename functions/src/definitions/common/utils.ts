@@ -16,7 +16,7 @@ const getThresholds = async function () {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
-  return theresholdsSnap.data() ?? thresholds
+  return (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
 }
 
 function normalizeSpaces(str: string) {
