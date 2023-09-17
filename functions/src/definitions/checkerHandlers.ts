@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
+import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { sendTextMessage, sendImageMessage } from "./common/sendMessage"
 import {
   sendWhatsappTextMessage,
@@ -94,11 +95,6 @@ const checkerHandlerWhatsapp = async function (message: Message) {
       break
   }
   markWhatsappMessageAsRead("factChecker", message.id)
-}
-
-const checkerHandlerTelegram = async function (message: Message) {
-  const from = message.from
-  const db = admin.firestore()
 }
 
 async function onSignUp(from: string, platform = "whatsapp") {
@@ -441,4 +437,28 @@ async function onContinue(factCheckerId: string) {
   await sendRemainingReminder(factCheckerId, "whatsapp")
 }
 
-export { checkerHandlerWhatsapp, checkerHandlerTelegram }
+const onCheckerPublish = onMessagePublished(
+  {
+    topic: "checkerEvents",
+    secrets: [
+      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_TOKEN",
+      "VERIFY_TOKEN",
+      "TYPESENSE_TOKEN",
+      "ML_SERVER_TOKEN",
+      "TELEGRAM_REPORT_BOT_TOKEN",
+    ],
+  },
+  async (event) => {
+    if (event.data.message.json) {
+      functions.logger.log(`Processing ${event.data.message.messageId}`)
+      await checkerHandlerWhatsapp(event.data.message.json)
+    } else {
+      functions.logger.warn(
+        `Unknown message type for messageId ${event.data.message.messageId})`
+      )
+    }
+  }
+)
+export { onCheckerPublish }

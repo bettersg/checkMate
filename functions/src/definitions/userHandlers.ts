@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
+import { onMessagePublished } from "firebase-functions/v2/pubsub"
 
 import { Timestamp } from "firebase-admin/firestore"
 import {
@@ -50,7 +51,7 @@ const userHandlerWhatsapp = async function (message: Message) {
   //check whether new user
   const userRef = db.collection("users").doc(from)
   const userSnap = await userRef.get()
-  const messageTimestamp = new Timestamp(message.timestamp, 0)
+  const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
   const isFirstTimeUser = !userSnap.exists
   let triggerOnboarding = isFirstTimeUser
   let step
@@ -809,4 +810,29 @@ async function createNewUser(
   })
 }
 
-export { userHandlerWhatsapp }
+const onUserPublish = onMessagePublished(
+  {
+    topic: "userEvents",
+    secrets: [
+      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_TOKEN",
+      "VERIFY_TOKEN",
+      "TYPESENSE_TOKEN",
+      "ML_SERVER_TOKEN",
+      "TELEGRAM_REPORT_BOT_TOKEN",
+    ],
+    timeoutSeconds: 120,
+  },
+  async (event) => {
+    if (event.data.message.json) {
+      functions.logger.log(`Processing ${event.data.message.messageId}`)
+      await userHandlerWhatsapp(event.data.message.json)
+    } else {
+      functions.logger.warn(
+        `Unknown message type for messageId ${event.data.message.messageId})`
+      )
+    }
+  }
+)
+export { onUserPublish }
