@@ -412,28 +412,14 @@ async function newTextInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
   }
-  const messageIdRef = db.collection("messageIds").doc(id)
-  try {
-    await db.runTransaction(async (t) => {
-      const doc = await t.get(messageIdRef)
-      if (doc.exists) {
-        return
-      }
-      if (!hasMatch && !!messageRef && !!messageUpdateObj) {
-        t.set(messageRef, messageUpdateObj)
-      }
-      t.set(instanceRef, instanceUpdateObj)
-      t.set(messageIdRef, { instanceRef: instanceRef })
-    })
-    functions.logger.log(
-      `Transaction success for messageId ${id} from ${from}!`
-    )
-  } catch (e) {
-    functions.logger.error(
-      `Transaction failure for messageId ${id} from ${from}!`,
-      e
-    )
-  }
+  await addInstanceToDb(
+    id,
+    hasMatch,
+    messageRef,
+    messageUpdateObj,
+    instanceRef,
+    instanceUpdateObj
+  )
   return Promise.resolve(`text_machine_${machineCategory}`)
 }
 
@@ -687,28 +673,14 @@ async function newImageInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
   }
-  const messageIdRef = db.collection("messageIds").doc(id)
-  try {
-    await db.runTransaction(async (t) => {
-      const doc = await t.get(messageIdRef)
-      if (doc.exists) {
-        return
-      }
-      if (!hasMatch && !!messageRef && !!messageUpdateObj) {
-        t.set(messageRef, messageUpdateObj)
-      }
-      t.set(instanceRef, instanceUpdateObj)
-      t.set(messageIdRef, { instanceRef: instanceRef })
-    })
-    functions.logger.log(
-      `Transaction success for messageId ${id} from ${from}!`
-    )
-  } catch (e) {
-    functions.logger.error(
-      `Transaction failure for messageId ${id} from ${from}!`,
-      e
-    )
-  }
+  await addInstanceToDb(
+    id,
+    hasMatch,
+    messageRef,
+    messageUpdateObj,
+    instanceRef,
+    instanceUpdateObj
+  )
   return Promise.resolve("image")
 }
 
@@ -854,6 +826,33 @@ async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
     await sendWhatsappTextMessage("user", from, response, null, true)
   }
   return Promise.resolve(step)
+}
+
+async function addInstanceToDb(
+  id: string,
+  hasMatch: boolean,
+  messageRef: FirebaseFirestore.DocumentReference | null,
+  messageUpdateObj: Object | null = null,
+  instanceRef: FirebaseFirestore.DocumentReference,
+  instanceUpdateObj: Object
+) {
+  const messageIdRef = db.collection("messageIds").doc(id)
+  try {
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(messageIdRef)
+      if (doc.exists) {
+        return
+      }
+      if (!hasMatch && !!messageRef && !!messageUpdateObj) {
+        t.set(messageRef, messageUpdateObj)
+      }
+      t.set(instanceRef, instanceUpdateObj)
+      t.set(messageIdRef, { instanceRef: instanceRef })
+    })
+    functions.logger.log(`Transaction success for messageId ${id}!`)
+  } catch (e) {
+    functions.logger.error(`Transaction failure for messageId ${id}!`, e)
+  }
 }
 
 async function createNewUser(
