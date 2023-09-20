@@ -135,21 +135,6 @@ app.get("/whatsapp", (req, res) => {
   }
 })
 
-const webhookHandler = functions
-  .region("asia-southeast1")
-  .runWith({
-    secrets: [
-      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
-      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
-      "WHATSAPP_TOKEN",
-      "VERIFY_TOKEN",
-      "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
-    ],
-  })
-  .https.onRequest(app)
-
 const webhookHandlerV2 = onRequest(
   {
     secrets: [
@@ -161,4 +146,4 @@ const webhookHandlerV2 = onRequest(
   app
 )
 
-export { app, webhookHandlerV2, webhookHandler }
+export { app, webhookHandlerV2 }
