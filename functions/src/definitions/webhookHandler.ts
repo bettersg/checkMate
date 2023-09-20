@@ -5,6 +5,7 @@ import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "./common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
+import { checkMessageId } from "./common/utils"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString(
@@ -57,6 +58,18 @@ app.post("/whatsapp", async (req, res) => {
           //handle db commands
           await handleSpecialCommands(message)
         } else {
+          if (message?.id) {
+            //if message has been processed before, don't even put it in queue.
+            if (await checkMessageId(message.id)) {
+              functions.logger.warn(`message ${message.id} already processed`)
+              res.sendStatus(200)
+              return
+            }
+          } else {
+            functions.logger.error(`message ${message.id} has no id`)
+            res.sendStatus(200)
+            return
+          }
           if (
             (type == "button" || type == "interactive" || type == "text") &&
             phoneNumberId === checkerPhoneNumberId

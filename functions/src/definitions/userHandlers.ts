@@ -9,7 +9,12 @@ import {
   sendWhatsappContactMessage,
 } from "./common/sendWhatsappMessage"
 import { sendDisputeNotification } from "./common/sendMessage"
-import { sleep, hashMessage, normalizeSpaces } from "./common/utils"
+import {
+  sleep,
+  hashMessage,
+  normalizeSpaces,
+  checkMessageId,
+} from "./common/utils"
 import {
   getResponsesObj,
   sendMenuMessage,
@@ -44,6 +49,15 @@ const hashids = new Hashids(salt)
 const db = admin.firestore()
 
 const userHandlerWhatsapp = async function (message: Message) {
+  if (!message?.id) {
+    functions.logger.error("No message id")
+    return
+  }
+  if (await checkMessageId(message.id)) {
+    functions.logger.warn(`Message ${message.id} already exists`)
+    return
+  }
+
   let from = message.from // extract the phone number from the webhook payload
   let type = message.type
   const responses = await getResponsesObj("user")
@@ -161,7 +175,7 @@ const userHandlerWhatsapp = async function (message: Message) {
       step = await newTextInstanceHandler({
         text: message.text.body,
         timestamp: messageTimestamp,
-        id: message.id || null,
+        id: message.id,
         from: from || null,
         isForwarded: message?.context?.forwarded || null,
         isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
@@ -173,7 +187,7 @@ const userHandlerWhatsapp = async function (message: Message) {
       step = await newImageInstanceHandler({
         caption: message?.image?.caption || null,
         timestamp: messageTimestamp,
-        id: message.id || null,
+        id: message.id,
         mediaId: message?.image?.id || null,
         mimeType: message?.image?.mime_type || null,
         from: from || null,
@@ -253,14 +267,15 @@ async function newTextInstanceHandler({
 }: {
   text: string
   timestamp: Timestamp
-  id: string | null
+  id: string
   from: string | null
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
 }) {
   let hasMatch = false
-  let messageRef
+  let messageRef: FirebaseFirestore.DocumentReference | null = null
+  let messageUpdateObj: Object | null = null
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
     await db.collection("users").doc(from).update({
@@ -286,7 +301,7 @@ async function newTextInstanceHandler({
   let bestMatchingDocumentRef
   let bestMatchingText
   let similarityScore = 0
-  let matchedParentMessageRef
+  let matchedParentMessageRef = null
 
   if (
     similarity.ref &&
@@ -306,7 +321,8 @@ async function newTextInstanceHandler({
   }
 
   if (!hasMatch) {
-    let writeResult = await db.collection("messages").add({
+    messageRef = db.collection("messages").doc()
+    messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: !!(
         machineCategory &&
@@ -349,17 +365,18 @@ async function newTextInstanceHandler({
           : null,
       customReply: null, //string
       instanceCount: 0,
-    })
-    messageRef = writeResult
+    }
   } else {
     messageRef = matchedParentMessageRef
   }
   if (!messageRef) {
-    throw new Error(
+    functions.logger.error(
       `No messageRef created or matched for whatsapp message with id ${id}`
     )
+    return
   }
-  const _ = await messageRef.collection("instances").add({
+  const instanceRef = messageRef.collection("instances").doc()
+  const instanceUpdateObj = {
     source: "whatsapp",
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
@@ -394,7 +411,29 @@ async function newTextInstanceHandler({
     },
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
-  })
+  }
+  const messageIdRef = db.collection("messageIds").doc(id)
+  try {
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(messageIdRef)
+      if (doc.exists) {
+        return
+      }
+      if (!hasMatch && !!messageRef && !!messageUpdateObj) {
+        t.set(messageRef, messageUpdateObj)
+      }
+      t.set(instanceRef, instanceUpdateObj)
+      t.set(messageIdRef, { instanceRef: instanceRef })
+    })
+    functions.logger.log(
+      `Transaction success for messageId ${id} from ${from}!`
+    )
+  } catch (e) {
+    functions.logger.error(
+      `Transaction failure for messageId ${id} from ${from}!`,
+      e
+    )
+  }
   return Promise.resolve(`text_machine_${machineCategory}`)
 }
 
@@ -413,14 +452,15 @@ async function newImageInstanceHandler({
   mediaId: string | null
   mimeType: string | null
   timestamp: Timestamp
-  id: string | null
+  id: string
   from: string | null
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
 }) {
   let filename
-  let messageRef
+  let messageRef: FirebaseFirestore.DocumentReference | null = null
+  let messageUpdateObj: Object | null = null
   let hasMatch = false
   let matchType = "none" // will be set to either "similarity" or "image" or "none"
   let matchedInstanceSnap
@@ -512,7 +552,7 @@ async function newImageInstanceHandler({
   let bestMatchingDocumentRef
   let bestMatchingText
   let similarityScore = 0
-  let matchedParentMessageRef
+  let matchedParentMessageRef = null
   let textHash = null
 
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
@@ -547,7 +587,8 @@ async function newImageInstanceHandler({
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
-    let writeResult = await db.collection("messages").add({
+    messageRef = db.collection("messages").doc()
+    messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: !!(
         machineCategory &&
@@ -587,8 +628,7 @@ async function newImageInstanceHandler({
           : null,
       customReply: null, //string
       instanceCount: 0,
-    })
-    messageRef = writeResult
+    }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
       messageRef = matchedInstanceSnap.ref.parent.parent
@@ -600,11 +640,13 @@ async function newImageInstanceHandler({
     }
   }
   if (!messageRef) {
-    throw new Error(
+    functions.logger.error(
       `No messageRef created or matched for whatsapp message with id ${id}`
     )
+    return
   }
-  const _ = await messageRef.collection("instances").add({
+  const instanceRef = messageRef.collection("instances").doc()
+  const instanceUpdateObj = {
     source: "whatsapp",
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
@@ -644,7 +686,29 @@ async function newImageInstanceHandler({
     },
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
-  })
+  }
+  const messageIdRef = db.collection("messageIds").doc(id)
+  try {
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(messageIdRef)
+      if (doc.exists) {
+        return
+      }
+      if (!hasMatch && !!messageRef && !!messageUpdateObj) {
+        t.set(messageRef, messageUpdateObj)
+      }
+      t.set(instanceRef, instanceUpdateObj)
+      t.set(messageIdRef, { instanceRef: instanceRef })
+    })
+    functions.logger.log(
+      `Transaction success for messageId ${id} from ${from}!`
+    )
+  } catch (e) {
+    functions.logger.error(
+      `Transaction failure for messageId ${id} from ${from}!`,
+      e
+    )
+  }
   return Promise.resolve("image")
 }
 

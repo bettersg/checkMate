@@ -33,6 +33,13 @@ const checkUrl = function (urlString: string) {
   return url.protocol === "http:" || url.protocol === "https:"
 }
 
+async function checkMessageId(messageId: string) {
+  const db = admin.firestore()
+  const messageRef = db.doc(`messagesIds/${messageId}`)
+  const messageSnap = await messageRef.get()
+  return messageSnap.exists
+}
+
 function stripPhone(originalStr: string, includePlaceholder = false) {
   const phoneNumbers = findPhoneNumbersInText(originalStr)
   let newStr = originalStr
@@ -91,4 +98,5 @@ export {
   getThresholds,
   checkUrl,
   normalizeSpaces,
+  checkMessageId,
 }
