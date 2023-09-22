@@ -10015,7 +10015,8 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"// Allow time for firestore onUpdate event to complete\r",
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
