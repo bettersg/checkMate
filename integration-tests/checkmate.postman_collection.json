@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "035f0de1-363b-4ee6-ae39-fa8d662c7e11",
+		"_postman_id": "5218f5ab-c512-43d1-b8a3-0831e12514c1",
 		"name": "checkmate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "25230076"
@@ -123,6 +123,15 @@
 									"    \r",
 									"    pm.expect(jsonData?.collectionIds?.length).to.eql(2);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -252,6 +261,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -373,6 +391,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -499,6 +526,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -604,6 +640,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -714,6 +759,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -838,6 +892,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -996,6 +1059,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -1239,7 +1311,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 2000);"
+									"setTimeout(() => {}, 5000);"
 								],
 								"type": "text/javascript"
 							}
@@ -1346,6 +1418,15 @@
 									"\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -1523,7 +1604,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"// Allow time for firestore onUpdate event to complete\r"
+											"setTimeout(() => {}, 5000);"
 										],
 										"type": "text/javascript"
 									}
@@ -1964,7 +2045,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -2161,7 +2242,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 5000);"
 										],
 										"type": "text/javascript"
 									}
@@ -2366,7 +2447,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -2526,6 +2607,15 @@
 											"    var docId = splitName[splitName.length - 1];\r",
 											"    pm.collectionVariables.set(\"spamInstanceId\", docId);\r",
 											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -2770,7 +2860,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -2912,7 +3002,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3042,7 +3132,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3186,7 +3276,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3287,7 +3377,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3484,7 +3574,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3689,7 +3779,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3889,7 +3979,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -3990,7 +4080,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -4187,7 +4277,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -4392,7 +4482,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -4773,7 +4863,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -4941,6 +5031,15 @@
 										],
 										"type": "text/javascript"
 									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"setTimeout(() => {}, 3000);"
+										],
+										"type": "text/javascript"
+									}
 								}
 							],
 							"request": {
@@ -5056,6 +5155,15 @@
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -5189,7 +5297,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 5000);"
 										],
 										"type": "text/javascript"
 									}
@@ -5628,7 +5736,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -5830,7 +5938,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -6077,7 +6185,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -6228,7 +6336,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -6378,7 +6486,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -6579,7 +6687,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -6841,7 +6949,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -7042,7 +7150,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -7219,6 +7327,15 @@
 										],
 										"type": "text/javascript"
 									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"setTimeout(() => {}, 3000);"
+										],
+										"type": "text/javascript"
+									}
 								}
 							],
 							"request": {
@@ -7348,7 +7465,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 5000);"
 										],
 										"type": "text/javascript"
 									}
@@ -7787,7 +7904,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -7983,7 +8100,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -8187,7 +8304,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -8345,6 +8462,15 @@
 											"    var docId = splitName[splitName.length - 1];\r",
 											"    pm.collectionVariables.set(\"unsureInstanceId\", docId);\r",
 											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -8580,7 +8706,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -8745,7 +8871,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -8952,7 +9078,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -9142,7 +9268,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -9292,7 +9418,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -9489,7 +9615,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -9690,7 +9816,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -9990,7 +10116,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -10186,7 +10312,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -10390,7 +10516,7 @@
 									"script": {
 										"exec": [
 											"// Allow time for firestore onUpdate event to complete\r",
-											"setTimeout(() => {}, 2000);"
+											"setTimeout(() => {}, 3000);"
 										],
 										"type": "text/javascript"
 									}
@@ -10672,6 +10798,15 @@
 										],
 										"type": "text/javascript"
 									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"setTimeout(() => {}, 3000);"
+										],
+										"type": "text/javascript"
+									}
 								}
 							],
 							"request": {
@@ -10838,7 +10973,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -10956,7 +11091,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11074,7 +11209,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11192,7 +11327,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11310,7 +11445,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11443,7 +11578,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 5000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11609,7 +11744,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 2000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11778,7 +11913,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11907,7 +12042,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -12153,6 +12288,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -12308,6 +12452,15 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -12505,7 +12658,7 @@
 							"script": {
 								"exec": [
 									"// Allow time for firestore onUpdate event to complete\r",
-									"setTimeout(() => {}, 2000);"
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
