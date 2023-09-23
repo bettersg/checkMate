@@ -1410,7 +1410,7 @@
 									"        \"path\": \"/botTELEGRAM_REPORT_BOT_TOKEN/sendMessage\",\r",
 									"        \"body\": {\r",
 									"            \"chat_id\": \"111111111\",\r",
-									"            \"text\": `<DEV>${USER_1_NUMBER} has disputed the assessment of a message sent by them.\\n  \\nmessage/instance path: ${DISPUTED_INSTANCE_PATH}\\n\\ntype: text\\n\\ntext: 1234567\\n\\ncategory: irrelevant`\r",
+									"            \"text\": `<SIT>${USER_1_NUMBER} has disputed the assessment of a message sent by them.\\n  \\nmessage/instance path: ${DISPUTED_INSTANCE_PATH}\\n\\ntype: text\\n\\ntext: 1234567\\n\\ncategory: irrelevant`\r",
 									"        },\r",
 									"        \"method\": \"POST\"\r",
 									"    }\r",

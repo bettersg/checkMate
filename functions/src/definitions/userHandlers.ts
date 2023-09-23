@@ -27,7 +27,7 @@ import {
   getHash,
   getSignedUrl,
 } from "./common/mediaUtils"
-import { anonymiseMessage } from "./common/anonymisation"
+import { anonymiseMessage } from "./common/genAI"
 import { calculateSimilarity } from "./calculateSimilarity"
 import { performOCR } from "./common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
@@ -287,7 +287,6 @@ async function newTextInstanceHandler({
   let similarity
   let embedding
   let textHash = hashMessage(text)
-  const strippedMessagePromise = anonymiseMessage(text)
   // 1 - check if the exact same message exists in database
   try {
     ;({ embedding, similarity } = await calculateSimilarity(
@@ -321,9 +320,8 @@ async function newTextInstanceHandler({
     matchType = similarityScore == 1 ? "exact" : "similarity"
   }
 
-  const strippedMessage = await strippedMessagePromise
-
   if (!hasMatch) {
+    const strippedMessage = await anonymiseMessage(text)
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
@@ -339,6 +337,7 @@ async function newTextInstanceHandler({
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+      lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: !!(
         machineCategory &&
@@ -386,8 +385,7 @@ async function newTextInstanceHandler({
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-    originalText: text, //text or caption, taken from webhook object
-    text: strippedMessage,
+    text: text,
     textHash: textHash ?? null,
     caption: null,
     captionHash: null,
@@ -549,7 +547,6 @@ async function newImageInstanceHandler({
   let textHash = null
 
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
-    const strippedMessagePromise = anonymiseMessage(extractedMessage)
     try {
       textHash = hashMessage(extractedMessage)
       ;({ embedding, similarity } = await calculateSimilarity(
@@ -578,10 +575,12 @@ async function newImageInstanceHandler({
       hasMatch = true
       matchType = similarityScore == 1 ? "exact" : "similarity"
     }
-    strippedMessage = await strippedMessagePromise
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
+    if (extractedMessage) {
+      strippedMessage = await anonymiseMessage(extractedMessage)
+    }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
@@ -596,6 +595,7 @@ async function newImageInstanceHandler({
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+      lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: !!(
         machineCategory &&
@@ -648,8 +648,7 @@ async function newImageInstanceHandler({
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-    originalText: extractedMessage ?? null, //text extracted from OCR if relevant
-    text: strippedMessage ?? null,
+    text: extractedMessage ?? null, //text extracted from OCR if relevant
     textHash: textHash ?? null,
     caption: caption ?? null,
     captionHash: captionHash,

@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { getCount } from "./common/counters"
+import { anonymiseMessage } from "./common/genAI"
 import { getThresholds } from "./common/utils"
 import { respondToInstance } from "./common/responseUtils"
 import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
@@ -14,6 +14,10 @@ import { Timestamp } from "firebase-admin/firestore"
 
 // Define some parameters
 const numInstanceShards = defineInt("NUM_SHARDS_INSTANCE_COUNT")
+
+interface MessageUpdate {
+  [x: string]: any
+}
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -48,26 +52,52 @@ const onInstanceCreate = functions
       .orderBy("timestamp", "desc")
       .get()
     const lastInstanceDocSnap = instancesQuerySnap.docs[0]
-    await parentMessageRef.update({
+    const messageUpdateObj: MessageUpdate = {
       instanceCount: instancesQuerySnap.size,
       lastTimestamp: lastInstanceDocSnap.get("timestamp"),
-    })
+      latestInstance: snap.ref,
+    }
+    const parentMessageSnap = await parentMessageRef.get()
+
+    try {
+      const lastRefreshedDate = parentMessageSnap
+        .get("lastRefreshedTimestamp")
+        .toDate()
+      const comparisonDate = new Date()
+      comparisonDate.setDate(comparisonDate.getDate() - 30)
+      //if lastRefreshedDate is more than 30 days ago
+      if (lastRefreshedDate < comparisonDate) {
+        messageUpdateObj.lastRefreshedTimestamp =
+          Timestamp.fromDate(comparisonDate)
+        if (
+          data?.type === "text" &&
+          data?.text != parentMessageSnap.get("originalText")
+        ) {
+          const strippedMessage = await anonymiseMessage(data.text)
+          messageUpdateObj.originalText = data.text
+          messageUpdateObj.text = strippedMessage
+        } else if (data?.type === "image") {
+          messageUpdateObj.caption = data.caption
+          // Don't anonymise image captions for now, since OCR may be inaccurate
+          // if (data?.text != parentMessageSnap.get("originalText")) {
+          //   const strippedMessage = await anonymiseMessage(data.text)
+          //   messageUpdateObj.originalText = data.text
+          //   messageUpdateObj.text = strippedMessage
+          // }
+        }
+      }
+    } catch (e) {
+      functions.logger.error("Error refreshing message: ", e)
+    }
+
+    await parentMessageRef.update(messageUpdateObj)
 
     await upsertUser(data.from, data.timestamp)
-
-    if (data?.type === "text") {
-      parentMessageRef.update({ text: data.text, latestInstance: snap.ref })
-    } else if (data?.type === "image") {
-      parentMessageRef.update({
-        latestInstance: snap.ref,
-        caption: data.caption,
-      })
-    }
 
     if (data?.embedding && data?.text) {
       const updateObj = {
         id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
-        message: data.originalText,
+        message: data.text,
         captionHash: data.captionHash ? data.captionHash : "__NULL__",
         embedding: data.embedding,
       }
@@ -81,7 +111,6 @@ const onInstanceCreate = functions
       }
     }
 
-    const parentMessageSnap = await parentMessageRef.get()
     if (!data.isReplied) {
       await respondToInstance(snap, false, true)
     }

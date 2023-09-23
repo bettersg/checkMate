@@ -19,7 +19,7 @@ const onInstanceUpdate = functions
       const embedding = await getEmbedding(after.text)
       const updateDocument = {
         id: change.after.ref.path,
-        message: after.originalText,
+        message: after.text,
         captionHash: after.captionHash ? after.captionHash : "__NULL__",
         embedding: embedding,
       }

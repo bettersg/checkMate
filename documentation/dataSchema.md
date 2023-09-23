@@ -9,6 +9,7 @@ erDiagram
         string caption "Latest caption for image, if applicable"
         timestamp firstTimestamp "Timestamp of first instance"
         timestamp lastTimestamp "Timestamp of latest instance"
+        timestamp lastRefreshedTimestamp "Timestamp where details were last updated"
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
     		timestamp assessedTimestamp
@@ -35,8 +36,7 @@ erDiagram
         string id "whatsapp message id (needed to reply)"
         timestamp timestamp
         string type "text/image"
-        string originalText "text as sent by user"
-        string text "pii-stripped text (if text message) or ocr-extracted text (if image message)"
+        string text "text (if text message) or ocr-extracted text (if image message)"
         string textHash "md5 hash of text or ocr-extracted text"
         string caption "caption of image, if applicable"
         string captionHash "md5 hash of caption"
