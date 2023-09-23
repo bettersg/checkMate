@@ -12576,7 +12576,7 @@
 					"response": []
 				},
 				{
-					"name": "Send WhatsApp message (15 Chars)",
+					"name": "Duplicate Info Message",
 					"event": [
 						{
 							"listen": "test",
@@ -12593,19 +12593,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"// 1. Retrieve the current messageCounter and increment it.\r",
-									"let messageCounter = 19\r",
-									"\r",
-									"const whatsappId = \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFA1==\";\r",
-									"\r",
-									"// 3. Replace the last n characters (excluding the == at the end) of whatsappId with the new messageCounter\r",
-									"let n = messageCounter.toString().length;\r",
-									"let basePart = whatsappId.substring(0, whatsappId.length - n - 2);\r",
-									"let newId = basePart + messageCounter + \"==\";\r",
-									"\r",
-									"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
-									"\r",
-									"// Allow time for firestore onUpdate event to complete\r"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -12645,7 +12633,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Check that instance interim data values are updated correctly\", function () {\r",
+									"pm.test(\"Check that message count did not increase\", function () {\r",
 									"    var jsonData = pm.response.json();\r",
 									"    const count = pm.variables.get(\"messageCount\")\r",
 									"    pm.expect(jsonData.documents.length).to.eql(count);\r",
@@ -12699,10 +12687,183 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Check that instance interim data values are updated correctly\", function () {\r",
+									"pm.test(\"Check that info instance count did not increase\", function () {\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.collectionVariables.set(\"messageCount\", jsonData.documents.length)\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer owner",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages",
+							"host": [
+								"{{FIRESTORE_URL}}"
+							],
+							"path": [
+								"v1",
+								"projects",
+								"checkmate-373101",
+								"databases",
+								"(default)",
+								"documents",
+								"messages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New unsure message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// 1. Retrieve the current messageCounter and increment it.\r",
+									"let messageCounter = 41\r",
+									"\r",
+									"const whatsappId = \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFA1==\";\r",
+									"\r",
+									"// 3. Replace the last n characters (excluding the == at the end) of whatsappId with the new messageCounter\r",
+									"let n = messageCounter.toString().length;\r",
+									"let basePart = whatsappId.substring(0, whatsappId.length - n - 2);\r",
+									"let newId = basePart + messageCounter + \"==\";\r",
+									"\r",
+									"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
+									"\r",
+									"// Allow time for firestore onUpdate event to complete\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_1_NAME}}\" }, \"wa_id\": \"{{USER_1_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_41}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"This is a whatever message that will be voted on 24601\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mocked immediate retry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_1_NAME}}\" }, \"wa_id\": \"{{USER_1_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_41}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"This is a whatever message that will be voted on 24601\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"checkmate-373101",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"whatsapp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[DB CALL] Get Count of Messages Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Check that only 1 message and 1 instance was created\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    const count = pm.variables.get(\"messageCount\") + 1\r",
+									"    pm.expect(jsonData.documents.length).to.eql(count);\r",
+									"    var filtered = jsonData.documents.filter((doc) => {\r",
+									"        return doc.fields.text.stringValue == \"This is a whatever message that will be voted on 24601\"\r",
+									"    })\r",
+									"    pm.expect(filtered[0].fields.instanceCount.integerValue).to.eql(\"1\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Allow time for firestore onUpdate event to complete\r",
+									"setTimeout(() => {}, 5000);"
 								],
 								"type": "text/javascript"
 							}
@@ -13065,6 +13226,10 @@
 		},
 		{
 			"key": "messageCount",
+			"value": ""
+		},
+		{
+			"key": "whatsapp_id_41",
 			"value": ""
 		}
 	]
