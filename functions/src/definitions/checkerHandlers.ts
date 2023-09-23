@@ -211,7 +211,7 @@ async function onFactCheckerYes(
       res = await sendTextMessage(
         "factChecker",
         from,
-        latestInstanceSnap.get("text"),
+        messageSnap.get("text"),
         null,
         platform
       )

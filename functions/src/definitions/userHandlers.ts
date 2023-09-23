@@ -1,7 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
-
 import { Timestamp } from "firebase-admin/firestore"
 import {
   sendWhatsappTextMessage,
@@ -28,6 +27,7 @@ import {
   getHash,
   getSignedUrl,
 } from "./common/mediaUtils"
+import { anonymiseMessage } from "./common/anonymisation"
 import { calculateSimilarity } from "./calculateSimilarity"
 import { performOCR } from "./common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
@@ -287,6 +287,7 @@ async function newTextInstanceHandler({
   let similarity
   let embedding
   let textHash = hashMessage(text)
+  const strippedMessagePromise = anonymiseMessage(text)
   // 1 - check if the exact same message exists in database
   try {
     ;({ embedding, similarity } = await calculateSimilarity(
@@ -320,6 +321,8 @@ async function newTextInstanceHandler({
     matchType = similarityScore == 1 ? "exact" : "similarity"
   }
 
+  const strippedMessage = await strippedMessagePromise
+
   if (!hasMatch) {
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
@@ -330,7 +333,8 @@ async function newTextInstanceHandler({
         machineCategory !== "unsure" &&
         machineCategory !== "info"
       ),
-      text: text, //text
+      originalText: text,
+      text: strippedMessage, //text
       caption: null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
@@ -365,6 +369,7 @@ async function newTextInstanceHandler({
           : null,
       customReply: null, //string
       instanceCount: 0,
+      rationalisation: null,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -381,7 +386,8 @@ async function newTextInstanceHandler({
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-    text: text, //text or caption, taken from webhook object
+    originalText: text, //text or caption, taken from webhook object
+    text: strippedMessage,
     textHash: textHash ?? null,
     caption: null,
     captionHash: null,
@@ -496,6 +502,7 @@ async function newImageInstanceHandler({
   let sender = null
   let isConvo = null
   let extractedMessage = null
+  let strippedMessage = null
   let machineCategory = null
   if (!hasMatch || !matchedInstanceSnap) {
     const temporaryUrl = await getSignedUrl(filename)
@@ -542,6 +549,7 @@ async function newImageInstanceHandler({
   let textHash = null
 
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
+    const strippedMessagePromise = anonymiseMessage(extractedMessage)
     try {
       textHash = hashMessage(extractedMessage)
       ;({ embedding, similarity } = await calculateSimilarity(
@@ -570,6 +578,7 @@ async function newImageInstanceHandler({
       hasMatch = true
       matchType = similarityScore == 1 ? "exact" : "similarity"
     }
+    strippedMessage = await strippedMessagePromise
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
@@ -581,7 +590,8 @@ async function newImageInstanceHandler({
         machineCategory !== "unsure" &&
         machineCategory !== "info"
       ),
-      text: extractedMessage ?? null, //text
+      originalText: extractedMessage ?? null,
+      text: strippedMessage ?? null, //text
       caption: caption ?? null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
@@ -614,6 +624,7 @@ async function newImageInstanceHandler({
           : null,
       customReply: null, //string
       instanceCount: 0,
+      rationalisation: null,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -637,7 +648,8 @@ async function newImageInstanceHandler({
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-    text: extractedMessage ?? null, //text extracted from OCR if relevant
+    originalText: extractedMessage ?? null, //text extracted from OCR if relevant
+    text: strippedMessage ?? null,
     textHash: textHash ?? null,
     caption: caption ?? null,
     captionHash: captionHash,
@@ -884,6 +896,7 @@ const onUserPublish = onMessagePublished(
       "TYPESENSE_TOKEN",
       "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
+      "OPENAI_API_KEY",
     ],
     timeoutSeconds: 120,
   },

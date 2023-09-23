@@ -67,7 +67,7 @@ const onInstanceCreate = functions
     if (data?.embedding && data?.text) {
       const updateObj = {
         id: snap.ref.path.replace(/\//g, "_"), //typesense id can't seem to take /
-        message: data.text,
+        message: data.originalText,
         captionHash: data.captionHash ? data.captionHash : "__NULL__",
         embedding: data.embedding,
       }

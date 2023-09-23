@@ -4,7 +4,8 @@ erDiagram
         string id PK "Assigned by Firestore"
         string machineCategory
         boolean isMachineCategorised
-        string text "Text. For text, shows the latest iteration"
+        string originalText "text as sent by user"
+        string text "pii-stripped text. For text, shows the latest iteration"
         string caption "Latest caption for image, if applicable"
         timestamp firstTimestamp "Timestamp of first instance"
         timestamp lastTimestamp "Timestamp of latest instance"
@@ -34,7 +35,8 @@ erDiagram
         string id "whatsapp message id (needed to reply)"
         timestamp timestamp
         string type "text/image"
-        string text "text (if text message) or ocr-extracted text (if image message)"
+        string originalText "text as sent by user"
+        string text "pii-stripped text (if text message) or ocr-extracted text (if image message)"
         string textHash "md5 hash of text or ocr-extracted text"
         string caption "caption of image, if applicable"
         string captionHash "md5 hash of caption"
