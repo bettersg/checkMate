@@ -16,21 +16,21 @@ app.get("/helloworld", (req, res) => {
 })
 
 app.get("/voteRequest", (req, res) => {
-  //TODO: To implement
+  //TODO TONGYING: To implement
   res.sendStatus(200)
 })
 
 app.post("/voteRequest", (req, res) => {
-  //TODO: To implement, probably when they vote here
+  //TODO TONGYING: To implement, probably when they vote here
   res.sendStatus(200)
 })
 
 app.get("/checkerData", (req, res) => {
-  //TODO: To implement
+  //TODO TONGYING: To implement
   res.sendStatus(200)
 })
 
-//TODO: decide other routes and implement
+//TODO TONGYING: decide other routes and implement
 
 const apiHandler = onRequest(
   {

@@ -25,7 +25,7 @@ app.post("/", async (req, res) => {
     .update("WebAppData")
     .digest()
 
-  let userId = params.get("user") //TODO: Check this, it should be the telegram bot id!
+  let userId = params.get("user") //TODO TONGYING: Check this, it should be the telegram bot id!
 
   // Generate the data-check-string
   const dataCheckStringParts = []

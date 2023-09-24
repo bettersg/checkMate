@@ -3,7 +3,7 @@ import * as crypto from "crypto"
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 /* 
-TODO: Check this!
+TODO TONGYING: Check this!
 Notes: I haven't checked this yet, got chatGPT to generate this LOL
 But the purpose is to authenticate the calls from the nextJS app
 and ensure they are coming from the Telegram webapp and aren't spoofed.
