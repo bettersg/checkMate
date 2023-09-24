@@ -1,3 +1,5 @@
+import { IncomingHttpHeaders } from "http"
+
 export type WhatsappMessage = {
   from: string
   id: string

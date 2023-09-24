@@ -45,10 +45,17 @@
     "rules": "storage.rules"
   },
   "hosting": {
-    "site": "checkmate-373101-checkers",
-    "public": "checkers-site",
+    "public": "checkers-app/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
+        "source": "/telegramAuth",
+        "function": "telegramAuthHandler"
+      },
       {
         "source": "**",
         "destination": "/index.html"

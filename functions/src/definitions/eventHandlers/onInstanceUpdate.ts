@@ -2,8 +2,8 @@ import * as functions from "firebase-functions"
 import {
   updateOne,
   CollectionTypes,
-} from "./common/typesense/collectionOperations"
-import { getEmbedding } from "./common/machineLearningServer/operations"
+} from "../common/typesense/collectionOperations"
+import { getEmbedding } from "../common/machineLearningServer/operations"
 
 const onInstanceUpdate = functions
   .region("asia-southeast1")

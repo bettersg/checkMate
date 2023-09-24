@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
-import { respondToInstance } from "./common/responseUtils"
+import { respondToInstance } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import {} from "./common/genAI"
+import {} from "../common/genAI"
 
 const onMessageUpdate = functions
   .region("asia-southeast1")

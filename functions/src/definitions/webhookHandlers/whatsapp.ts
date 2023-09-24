@@ -3,9 +3,9 @@ import * as functions from "firebase-functions"
 import express from "express"
 import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
-import { publishToTopic } from "./common/pubsub"
+import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
-import { checkMessageId } from "./common/utils"
+import { checkMessageId } from "../common/utils"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString(

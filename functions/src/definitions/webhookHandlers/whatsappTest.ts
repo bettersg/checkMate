@@ -1,4 +1,4 @@
-import { app } from "./webhookHandler"
+import { app } from "./whatsapp"
 import { agent } from "supertest"
 
 process.env.VERIFY_TOKEN = "testToken"
