@@ -43,5 +43,16 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "hosting": {
+    "site": "checkmate-373101-checkers",
+    "public": "checkers-site",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }
