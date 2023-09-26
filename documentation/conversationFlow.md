@@ -9,7 +9,7 @@ actor checker
 citizen ->> user bot: {fake news}
 alt there is a match
     alt vote not completed
-        user bot ->> citizen: Hello! 👋 Thank you for sending this in! Our *CheckMates🕵🏻 will be reviewing this message* and *providing you with the results soon*. 
+        user bot ->> citizen: Hello! 👋 Thank you for sending this in! Our *CheckMates🕵🏻 will be reviewing this message* and *providing you with the results soon*.
     else is a scam
         user bot ->> citizen: ⛔⛔ Thank you for waiting! Our CheckMates have reviewed the message and think this is likely to be a *scam*!🚫\n\nWe recommend you do not engage further⛔️\n\nThank you for keeping Singapore safe!
     else is suspicious
