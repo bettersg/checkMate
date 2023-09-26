@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     actor Citizen
     participant User Bot
@@ -59,10 +60,10 @@ sequenceDiagram
                         webhookHandler->>Firestore: Update vote request
                         Firestore->> onVoteRequestUpdate: Trigger
                         onVoteRequestUpdate->> Checker Bot: call API with interactive poll
-                        Checker Bot->>Checker: "On a scale of 0-5, how true...?" 
+                        Checker Bot->>Checker: "On a scale of 0-5, how true...?"
                         Checker->>Checker Bot: "<Vote>"
                         Checker Bot->>webhookHandler: Trigger
-                        webhookHandler->>Firestore: Update vote request                        
+                        webhookHandler->>Firestore: Update vote request
                     end
                     Firestore->> onVoteRequestUpdate: Trigger
                     onVoteRequestUpdate->>onVoteRequestUpdate: Determine isScam, isIrrelevant, isAssessed
@@ -80,3 +81,4 @@ sequenceDiagram
             end
         end
     end
+```

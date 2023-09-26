@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
 
     message {
@@ -21,7 +22,7 @@ erDiagram
         boolean isInfo
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
-        string primaryCategory either "scam", "illicit", "irrelevant", "spam", "legitimate", "misleading", "untrue", "accurate", "unsure", or "error"
+        string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or error"
         string customReply "Not used for now"
         number instanceCount
         collection instances
@@ -115,3 +116,4 @@ erDiagram
     user ||--|{ instance: sends
     message ||--o{ voteRequest: triggers
     factChecker ||--o{ voteRequest: responds_to
+```

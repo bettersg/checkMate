@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     autonumber
     participant Outside Chat
@@ -34,3 +35,4 @@ sequenceDiagram
         User Bot->> Citizen: "The message has been assessed to be..."
         end
     end
+```
