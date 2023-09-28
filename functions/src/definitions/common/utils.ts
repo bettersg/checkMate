@@ -35,7 +35,7 @@ const checkUrl = function (urlString: string) {
 
 async function checkMessageId(messageId: string) {
   const db = admin.firestore()
-  const messageRef = db.doc(`messagesIds/${messageId}`)
+  const messageRef = db.collection("messageIds").doc(messageId)
   const messageSnap = await messageRef.get()
   return messageSnap.exists
 }
