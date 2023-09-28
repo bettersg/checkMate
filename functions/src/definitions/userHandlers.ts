@@ -1,7 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
-
 import { Timestamp } from "firebase-admin/firestore"
 import {
   sendWhatsappTextMessage,
@@ -28,6 +27,7 @@ import {
   getHash,
   getSignedUrl,
 } from "./common/mediaUtils"
+import { anonymiseMessage } from "./common/genAI"
 import { calculateSimilarity } from "./calculateSimilarity"
 import { performOCR } from "./common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
@@ -321,6 +321,7 @@ async function newTextInstanceHandler({
   }
 
   if (!hasMatch) {
+    const strippedMessage = await anonymiseMessage(text)
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
@@ -330,11 +331,13 @@ async function newTextInstanceHandler({
         machineCategory !== "unsure" &&
         machineCategory !== "info"
       ),
-      text: text, //text
+      originalText: text,
+      text: strippedMessage, //text
       caption: null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+      lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: !!(
         machineCategory &&
@@ -365,6 +368,7 @@ async function newTextInstanceHandler({
           : null,
       customReply: null, //string
       instanceCount: 0,
+      rationalisation: null,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -381,7 +385,7 @@ async function newTextInstanceHandler({
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
-    text: text, //text or caption, taken from webhook object
+    text: text,
     textHash: textHash ?? null,
     caption: null,
     captionHash: null,
@@ -496,6 +500,7 @@ async function newImageInstanceHandler({
   let sender = null
   let isConvo = null
   let extractedMessage = null
+  let strippedMessage = null
   let machineCategory = null
   if (!hasMatch || !matchedInstanceSnap) {
     const temporaryUrl = await getSignedUrl(filename)
@@ -573,6 +578,9 @@ async function newImageInstanceHandler({
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
+    if (extractedMessage) {
+      strippedMessage = await anonymiseMessage(extractedMessage)
+    }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
@@ -581,11 +589,13 @@ async function newImageInstanceHandler({
         machineCategory !== "unsure" &&
         machineCategory !== "info"
       ),
-      text: extractedMessage ?? null, //text
+      originalText: extractedMessage ?? null,
+      text: strippedMessage ?? null, //text
       caption: caption ?? null,
       latestInstance: null,
       firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+      lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
       isAssessed: !!(
         machineCategory &&
@@ -614,6 +624,7 @@ async function newImageInstanceHandler({
           : null,
       customReply: null, //string
       instanceCount: 0,
+      rationalisation: null,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -884,6 +895,7 @@ const onUserPublish = onMessagePublished(
       "TYPESENSE_TOKEN",
       "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
+      "OPENAI_API_KEY",
     ],
     timeoutSeconds: 120,
   },

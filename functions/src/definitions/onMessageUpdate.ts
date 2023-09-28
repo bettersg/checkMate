@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions"
 import { respondToInstance } from "./common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
+import {} from "./common/genAI"
 
 const onMessageUpdate = functions
   .region("asia-southeast1")
@@ -12,6 +13,7 @@ const onMessageUpdate = functions
     const after = change.after
     const messageData = after.data()
     if (!before.data().isAssessed && messageData.isAssessed) {
+      //TODO: rationalisation here
       await after.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
       })
