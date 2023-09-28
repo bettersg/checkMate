@@ -22,10 +22,11 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+const db = admin.firestore()
+
 const checkerHandlerWhatsapp = async function (message: Message) {
   const from = message.from // extract the phone number from the webhook payload
   const type = message.type
-  const db = admin.firestore()
   let responses
 
   switch (type) {
@@ -99,7 +100,6 @@ const checkerHandlerWhatsapp = async function (message: Message) {
 
 async function onSignUp(from: string, platform = "whatsapp") {
   const responses = await getResponsesObj("factChecker")
-  const db = admin.firestore()
   let res = await sendTextMessage(
     "factChecker",
     from,
@@ -135,7 +135,6 @@ async function onMsgReplyReceipt(
   platform = "whatsapp"
 ) {
   const responses = await getResponsesObj("factChecker")
-  const db = admin.firestore()
   const factCheckerSnap = await db.collection("factCheckers").doc(from).get()
   if (factCheckerSnap.get("getNameMessageId") === messageId) {
     await factCheckerSnap.ref.update({
@@ -164,7 +163,6 @@ async function onFactCheckerYes(
   from: string,
   platform = "whatsapp"
 ) {
-  const db = admin.firestore()
   if (!voteRequestPath.includes("/")) {
     throw new Error("The voteRequestPath does not contain a forward slash (/).")
   }
@@ -430,7 +428,6 @@ async function onTextListReceipt(
 }
 
 async function onContinue(factCheckerId: string) {
-  const db = admin.firestore()
   await db.collection("factCheckers").doc(factCheckerId).update({
     isActive: true,
   })
