@@ -1,13 +1,16 @@
+```mermaid
 erDiagram
 
     message {
         string id PK "Assigned by Firestore"
         string machineCategory
         boolean isMachineCategorised
-        string text "Text. For text, shows the latest iteration"
+        string originalText "text as sent by user"
+        string text "pii-stripped text. For text, shows the latest iteration"
         string caption "Latest caption for image, if applicable"
         timestamp firstTimestamp "Timestamp of first instance"
         timestamp lastTimestamp "Timestamp of latest instance"
+        timestamp lastRefreshedTimestamp "Timestamp where details were last updated"
         boolean isPollStarted
         boolean isAssessed "Should message be considered assessed and ready for reply"
     		timestamp assessedTimestamp
@@ -21,7 +24,7 @@ erDiagram
         boolean isInfo
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
-        string primaryCategory either "scam", "illicit", "irrelevant", "spam", "legitimate", "misleading", "untrue", "accurate", "unsure", or "error"
+        string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or error"
         string customReply "Not used for now"
         number instanceCount
         collection instances
@@ -115,3 +118,4 @@ erDiagram
     user ||--|{ instance: sends
     message ||--o{ voteRequest: triggers
     factChecker ||--o{ voteRequest: responds_to
+```

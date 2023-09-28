@@ -15,7 +15,7 @@ const onInstanceUpdate = functions
     // Grab the current value of what was written to Firestore.
     const before = change.before.data()
     const after = change.after.data()
-    if (after.type === "text" && before.text !== after.text) {
+    if (after.type === "text" && before.originalText !== after.originalText) {
       const embedding = await getEmbedding(after.text)
       const updateDocument = {
         id: change.after.ref.path,

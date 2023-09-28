@@ -30,6 +30,7 @@
     "hashids": "^2.3.0",
     "image-hash": "^5.3.1",
     "libphonenumber-js": "^1.10.21",
+    "openai": "^4.10.0",
     "typesense": "^1.5.3"
   },
   "devDependencies": {
