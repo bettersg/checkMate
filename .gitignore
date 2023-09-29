@@ -65,4 +65,7 @@ node_modules/
 # dotenv environment variables file
 .env
 
+# firebase emulator local data
+local_data
+
 local_batch_jobs
