@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
-import { getAuth, signInWithCustomToken } from "firebase/auth";
+import {
+  getAuth,
+  signInWithCustomToken,
+  connectAuthEmulator,
+} from "firebase/auth";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import app from "./firebase";
 
 const auth = getAuth(app);
+if (import.meta.env.MODE === "dev") {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099"); //TODO: FOR DEV ONLY, need to change env variables later.
+}
 
 function App() {
   const [count, setCount] = useState(0);
@@ -18,16 +25,18 @@ function App() {
     ) {
       setTelegramApp(window.Telegram.WebApp);
       const initData = window.Telegram.WebApp.initData;
-      if (initData) {
+      if (true || initData) {
         // Call your Firebase function to validate the receivedData and get custom token
-        fetch("/telegramAuth", {
+        fetch("/telegramAuth/", {
           method: "POST",
           body: initData,
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.customToken) {
+              alert(data.customToken);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
+                alert("error");
                 console.error(
                   "Error during Firebase signInWithCustomToken",
                   error
@@ -36,11 +45,37 @@ function App() {
             }
           })
           .catch((err) => {
+            alert("error");
             console.error("Error fetching custom token:", err);
           });
       }
     }
   }, []);
+
+  const testAPI = async () => {
+    try {
+      const user = auth.currentUser;
+      let token;
+      if (user) {
+        token = await user.getIdToken();
+      }
+
+      const response = await fetch("/api/helloworld", {
+        method: "GET", // or POST, PUT, etc. depending on your needs
+        headers: {
+          Authorization: `Bearer ${token}`, // Set the ID token here
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+
+      // Do something with the data
+      alert(JSON.stringify(data));
+    } catch (error) {
+      console.error("Error fetching data from API:", error);
+      alert("Error fetching data");
+    }
+  };
 
   return (
     <>
@@ -54,9 +89,7 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+        <button onClick={testAPI}>count is {count}</button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>

@@ -9,10 +9,11 @@ if (!admin.apps.length) {
 }
 
 const app = express()
-app.use(validateFirebaseIdToken) //TODO: uncomment when ready to validate with Telegram App
+app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
 
 app.get("/helloworld", (req, res) => {
-  res.send("Hello World!")
+  console.log("helloworld")
+  res.send({ hello: "hello from /helloworld" })
 })
 
 app.get("/voteRequest", (req, res) => {
@@ -32,11 +33,14 @@ app.get("/checkerData", (req, res) => {
 
 //TODO TONGYING: decide other routes and implement
 
+const main = express()
+main.use("/api", app)
+
 const apiHandler = onRequest(
   {
     secrets: ["TELEGRAM_BOT_TOKEN"],
   },
-  app
+  main
 )
 
 export { apiHandler }

@@ -10,6 +10,7 @@
   },
   "scripts": {
     "lint": "eslint . --ext js,jsx,ts,tsx --fix",
-    "postinstall": "cd functions && npm install && cd ../checkers-app && npm install"
+    "postinstall": "cd functions && npm install && cd ../checkers-app && npm install",
+    "serve": "firebase emulators:start"
   }
 }

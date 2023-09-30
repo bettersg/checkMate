@@ -7,11 +7,16 @@ import { onRequest } from "firebase-functions/v2/https"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
-
 const app = express()
 const db = admin.firestore()
 
+app.get("/", async (req, res) => {
+  console.log("lol")
+  res.send("Hello World!")
+})
+
 app.post("/", async (req, res) => {
+  console.log("started auth handler")
   const initData = req.body // Assuming you send initData in the body of your requests
   const botToken = String(process.env.TELEGRAM_BOT_TOKEN) // Replace with your bot token
 
@@ -21,11 +26,16 @@ app.post("/", async (req, res) => {
 
   // Generate the secret key
   const secretKey = crypto
-    .createHmac("sha256", botToken)
-    .update("WebAppData")
+    .createHmac("sha256", "WebAppData")
+    .update(botToken)
     .digest()
 
-  let userId = params.get("user") //TODO TONGYING: Check this, it should be the telegram bot id!
+  let userId = String(JSON.parse(params.get("user") ?? "").id) //TODO TONGYING: Check this, it should be the telegram bot id!
+
+  if (!userId) {
+    return res.status(403).send("No Access")
+  }
+  console.log(`userid is ${userId}`)
 
   // Generate the data-check-string
   const dataCheckStringParts = []
@@ -35,8 +45,8 @@ app.post("/", async (req, res) => {
       dataCheckStringParts.push(`${key}=${value}`)
     }
   }
-  const dataCheckString = dataCheckStringParts.sort().join("\n")
 
+  const dataCheckString = dataCheckStringParts.sort().join("\n")
   // Compute the hash
   const computedHash = crypto
     .createHmac("sha256", secretKey)
@@ -52,14 +62,14 @@ app.post("/", async (req, res) => {
   // Check the auth_date for data freshness (e.g., within 24 hours)
   const authDate = Number(params.get("auth_date"))
   const timeNow = Math.floor(Date.now() / 1000) // Convert to Unix timestamp
-  if (timeNow - authDate > 300) {
-    // 300 seconds = 5 mins
+  if (timeNow - authDate > 3600) {
+    //1hr
     functions.logger.warn("Telegram data is outdated")
     return res.status(403).send("No Access")
   }
 
   if (userId) {
-    const userSnap = await db.collection("factCheckers").doc(userId).get()
+    const userSnap = await db.collection("factCheckers").doc("6591807628").get()
     if (userSnap.exists) {
       try {
         const customToken = await admin.auth().createCustomToken(userId)
@@ -78,11 +88,14 @@ app.post("/", async (req, res) => {
   }
 })
 
+const main = express()
+main.use("/telegramAuth", app)
+
 const telegramAuthHandler = onRequest(
   {
     secrets: ["TELEGRAM_BOT_TOKEN"],
   },
-  app
+  main
 )
 
 export { telegramAuthHandler }
