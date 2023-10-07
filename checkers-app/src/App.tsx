@@ -31,12 +31,23 @@ function App() {
           method: "POST",
           body: initData,
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              // Check if the status code is 403
+              if (response.status === 403) {
+                throw new Error(
+                  "Forbidden: You don't have permission to access this site."
+                );
+              } else {
+                throw new Error("HTTP Error: " + response.status);
+              }
+            }
+            return response.json();
+          })
           .then((data) => {
             if (data.customToken) {
               alert(data.customToken);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
-                alert("error");
                 console.error(
                   "Error during Firebase signInWithCustomToken",
                   error
@@ -45,7 +56,7 @@ function App() {
             }
           })
           .catch((err) => {
-            alert("error");
+            alert(err);
             console.error("Error fetching custom token:", err);
           });
       }
