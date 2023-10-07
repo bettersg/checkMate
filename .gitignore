@@ -66,3 +66,6 @@ node_modules/
 .env
 
 local_batch_jobs
+
+# local firebase emulator data
+local-data
