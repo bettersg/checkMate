@@ -10,13 +10,7 @@ if (!admin.apps.length) {
 const app = express()
 const db = admin.firestore()
 
-app.get("/", async (req, res) => {
-  console.log("lol")
-  res.send("Hello World!")
-})
-
 app.post("/", async (req, res) => {
-  console.log("started auth handler")
   const initData = req.body // Assuming you send initData in the body of your requests
   const botToken = String(process.env.TELEGRAM_BOT_TOKEN) // Replace with your bot token
 
@@ -30,12 +24,19 @@ app.post("/", async (req, res) => {
     .update(botToken)
     .digest()
 
-  let userId = String(JSON.parse(params.get("user") ?? "").id) //TODO TONGYING: Check this, it should be the telegram bot id!
+  let userId = ""
+
+  try {
+    const userObject = JSON.parse(params.get("user") ?? "{}")
+    userId = String(userObject.id ?? "")
+  } catch (error) {
+    return res.status(403).send("No Access")
+  }
 
   if (!userId) {
     return res.status(403).send("No Access")
   }
-  console.log(`userid is ${userId}`)
+  console.log(`userid is ${userId}`) //TODO: remove once finish dev
 
   // Generate the data-check-string
   const dataCheckStringParts = []
@@ -75,8 +76,8 @@ app.post("/", async (req, res) => {
         const customToken = await admin.auth().createCustomToken(userId)
         return res.json({ customToken: customToken })
       } catch (error) {
-        console.error("Error creating custom token:", error)
-        return res.status(403).send("No Access")
+        functions.logger.error("Error creating custom token:", error)
+        return res.status(500).send("Error creating custom token")
       }
     } else {
       functions.logger.warn("User not a checker")
