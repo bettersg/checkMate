@@ -34,7 +34,11 @@ const onMessageUpdate = functions
     ) {
       let rationalisation: null | string = null
       if (primaryCategory && !messageData.caption && text) {
-        rationalisation = await rationaliseMessage(text, primaryCategory)
+        if (primaryCategory == "irrelevant") {
+          rationalisation = null
+        } else {
+          rationalisation = await rationaliseMessage(text, primaryCategory)
+        }
       }
       await after.ref.update({
         rationalisation: rationalisation,
