@@ -28,7 +28,7 @@ const onMessageUpdate = functions
       await replyPendingInstances(after)
     }
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
-    if (
+    else if (
       before.data().text !== text ||
       before.data().primaryCategory !== primaryCategory
     ) {
