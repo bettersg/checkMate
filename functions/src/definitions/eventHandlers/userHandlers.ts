@@ -27,7 +27,7 @@ import {
   getHash,
   getSignedUrl,
 } from "../common/mediaUtils"
-import { anonymiseMessage } from "../common/genAI"
+import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
 import { performOCR } from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
@@ -321,16 +321,22 @@ async function newTextInstanceHandler({
   }
 
   if (!hasMatch) {
+    const isMachineAssessed = !!(
+      machineCategory &&
+      machineCategory !== "error" &&
+      machineCategory !== "unsure" &&
+      machineCategory !== "info"
+    )
+
     const strippedMessage = await anonymiseMessage(text)
+    let rationalisation: null | string = null
+    if (isMachineAssessed && strippedMessage) {
+      rationalisation = await rationaliseMessage(text, machineCategory)
+    }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: !!(
-        machineCategory &&
-        machineCategory !== "error" &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ),
+      isMachineCategorised: isMachineAssessed,
       originalText: text,
       text: strippedMessage, //text
       caption: null,
@@ -339,36 +345,28 @@ async function newTextInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: !!(
-        machineCategory &&
-        machineCategory !== "error" &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ), //boolean, whether or not we have concluded the voting
+      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isIrrelevant:
-        !!machineCategory && machineCategory.includes("irrelevant")
+        isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
           : null, //bool, if majority voted irrelevant then update this
-      isScam: machineCategory === "scam" ? true : null,
-      isIllicit: machineCategory === "illicit" ? true : null,
-      isSpam: machineCategory === "spam" ? true : null,
+      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+      isIllicit:
+        isMachineAssessed && machineCategory === "illicit" ? true : null,
+      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
       isLegitimate: null,
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
-      primaryCategory:
-        !!machineCategory &&
-        machineCategory != "error" &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-          : null,
+      primaryCategory: isMachineAssessed
+        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+        : null,
       customReply: null, //string
       instanceCount: 0,
-      rationalisation: null,
+      rationalisation: rationalisation,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -578,17 +576,27 @@ async function newImageInstanceHandler({
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
+    let rationalisation: null | string = null
     if (extractedMessage) {
       strippedMessage = await anonymiseMessage(extractedMessage)
     }
-    messageRef = db.collection("messages").doc()
+    const isMachineAssessed = !!(
+      machineCategory &&
+      !caption &&
+      machineCategory !== "error" &&
+      machineCategory !== "unsure" &&
+      machineCategory !== "info"
+    )
+    if (extractedMessage && isMachineAssessed && strippedMessage) {
+      rationalisation = await rationaliseMessage(
+        strippedMessage,
+        machineCategory
+      )
+    }
+    if (extractedMessage) messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: !!(
-        machineCategory &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ),
+      isMachineCategorised: isMachineAssessed,
       originalText: extractedMessage ?? null,
       text: strippedMessage ?? null, //text
       caption: caption ?? null,
@@ -597,34 +605,28 @@ async function newImageInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: !!(
-        machineCategory &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ), //boolean, whether or not we have concluded the voting
+      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isIrrelevant:
-        !!machineCategory && machineCategory.includes("irrelevant")
+        isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
           : null, //bool, if majority voted irrelevant then update this
-      isScam: machineCategory === "scam" ? true : null,
-      isIllicit: machineCategory === "illicit" ? true : null,
-      isSpam: machineCategory === "spam" ? true : null,
+      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+      isIllicit:
+        isMachineAssessed && machineCategory === "illicit" ? true : null,
+      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: machineCategory === "info" ? true : null,
-      primaryCategory:
-        !!machineCategory &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-          : null,
+      isInfo: !caption && machineCategory === "info" ? true : null,
+      primaryCategory: isMachineAssessed
+        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+        : null,
       customReply: null, //string
       instanceCount: 0,
-      rationalisation: null,
+      rationalisation: rationalisation,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {

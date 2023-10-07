@@ -62,9 +62,46 @@ async function anonymiseMessage(message: string) {
       }
     }
   } catch (e) {
-    functions.logger.error("Anonymisation hyperparameters failed: " + e)
+    functions.logger.error("Anonymisation failed: " + e)
     return message
   }
 }
 
-export { anonymiseMessage }
+async function rationaliseMessage(message: string, category: string) {
+  if (env === "SIT" || env === "DEV") {
+    return "This is a rationalisation"
+  }
+  try {
+    const rationalisationHyperparameters = hyperparameters?.rationalisation
+    const model: string = rationalisationHyperparameters.model
+    const systemMessage: string = rationalisationHyperparameters?.prompt?.system
+
+    const examples: examples[] =
+      rationalisationHyperparameters?.prompt?.examples
+    const userMessage: string =
+      rationalisationHyperparameters?.prompt?.user.replace(
+        "{{message}}",
+        message
+      )
+    if (model && systemMessage && examples && userMessage) {
+      const response = await callChatCompletion(
+        model,
+        systemMessage,
+        examples,
+        userMessage
+      )
+      if (response) {
+        return response
+      } else {
+        functions.logger.error("No response returned from openAI api")
+        return null
+      }
+    }
+  } catch (e) {
+    functions.logger.error("Rationalisation failed: " + e)
+    return null
+  }
+  return null
+}
+
+export { anonymiseMessage, rationaliseMessage }
