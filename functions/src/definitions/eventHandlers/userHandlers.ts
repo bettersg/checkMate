@@ -21,6 +21,8 @@ import {
   sendVotingStats,
   sendReferralMessage,
   respondToInterimFeedback,
+  sendRationalisation,
+  respondToRationalisationFeedback,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -396,6 +398,8 @@ async function newTextInstanceHandler({
     isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
+    isRationalisationSent: null,
+    isRationalisationUseful: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
@@ -668,6 +672,8 @@ async function newImageInstanceHandler({
     isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
+    isRationalisationSent: null,
+    isRationalisationUseful: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
@@ -711,16 +717,13 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
     instanceRef,
     updateObj: { scamShieldConsent?: boolean }
   switch (type) {
-    case "scamshieldConsent":
-      ;[instancePath, selection] = rest
+    case "scamshieldDecline":
+      ;[instancePath] = rest
       instanceRef = db.doc(instancePath)
-      updateObj = {}
-      const replyText =
-        selection === "consent"
-          ? responses?.SCAMSHIELD_ON_CONSENT
-          : responses?.SCAMSHIELD_ON_DECLINE
-      updateObj.scamShieldConsent = selection === "consent"
-      await instanceRef.update(updateObj)
+      const replyText = responses?.SCAMSHIELD_ON_DECLINE
+      await instanceRef.update({
+        scamShieldConsent: false,
+      })
       if (!replyText) {
         functions.logger.error("No replyText for scamshieldConsent")
         break
@@ -732,7 +735,8 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       ;[instancePath, ...scamShield] = rest
       const triggerScamShieldConsent =
         scamShield.length > 0 && scamShield[0] === "scamshield"
-      await sendVotingStats(instancePath, triggerScamShieldConsent)
+      //await sendVotingStats(instancePath, triggerScamShieldConsent)
+      await sendVotingStats(instancePath)
       break
     case "sendInterim":
       ;[instancePath] = rest
@@ -741,6 +745,14 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
     case "feedbackInterim":
       ;[instancePath, selection] = rest
       await respondToInterimFeedback(instancePath, selection)
+      break
+    case "rationalisation":
+      ;[instancePath] = rest
+      await sendRationalisation(instancePath)
+      break
+    case "feedbackRationalisation":
+      ;[instancePath, selection] = rest
+      await respondToRationalisationFeedback(instancePath, selection)
       break
   }
   const step = type + (selection ? `_${selection}` : "")

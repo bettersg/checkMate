@@ -108,14 +108,7 @@ If you'd like still another update after more votes come in, just tap the button
 
   ALREADY_REPLIED: `CheckMate has already provided a final response to this message.`,
 
-  //button
-  SCAMSHIELD_SEEK_CONSENT:
-    "Would you now like us to share this message with ScamShield on your behalf? Only the contents of this message, and no other information, will be sent.",
-
-  SCAMSHIELD_ON_CONSENT:
-    "Thank you for sharing this message with us and ScamShield, and for keeping Singapore safe!",
-
-  SCAMSHIELD_ON_DECLINE: `No worries! We will not send your message to ScamShield. If you change your mind, you can still hit "Yes" above. Thank you for sharing this message with us, and for keeping Singapore safe!`,
+  SCAMSHIELD_ON_DECLINE: `No worries! We will not send your message to ScamShield. Thank you for sharing this message with us, and for keeping Singapore safe!`,
 
   //menu text list
   MENU: `{{prefix}}
@@ -171,6 +164,15 @@ Done? You're now ready to use CheckMate! Let's do our part in the fight against 
 On a scale from 1-10, how likely are you to recommend us to a friend, colleague or family member?`,
 
   SATISFACTION_SURVEY_THANKS: `Thanks for your feedback!`,
+
+  HOWD_WE_TELL: `*This is an experimental feature powered by generative AI*.
+
+  Here are some signs that this message is a {{category}}:
+  
+  {{rationalisation}}`,
+  RATIONALISATION_USEFUL: `Thanks for your valuable feedback!`,
+
+  RATIONALISATION_NOT_USEFUL: `Sorry to hear that, but thanks anyway for your valuable feedback!`,
 }
 
 const FACTCHECKER_BOT_RESPONSES = {
