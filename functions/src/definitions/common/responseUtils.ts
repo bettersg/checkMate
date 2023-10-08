@@ -402,9 +402,9 @@ async function sendRationalisation(instancePath: string) {
       },
     ]
     const replyText = responses.HOWD_WE_TELL.replace(
-      "{{category}}",
-      category
-    ).replace("{{rationalisation}}", rationalisation)
+      "{{rationalisation}}",
+      rationalisation
+    )
     await instanceRef.update({
       isRationalisationSent: true,
     })
@@ -646,7 +646,6 @@ async function respondToInstance(
           ? responses.METHODOLOGY_AUTO
           : responses.METHODOLOGY_HUMAN
       )
-      .replace("{{results}}", isImmediate ? "" : responses.VOTE_RESULTS_SUFFIX)
   }
 
   if (!isAssessed && !forceReply) {

@@ -27,18 +27,18 @@ You can try sending the message in again, or report the error via our form at ht
 
 We recommend you do not engage further⛔️⛔️
 
-While this is our assessment, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
+CheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
+To avoid reporting this message, select "Don't report this" below.`,
 
   //button
   ILLICIT: `{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨
 
 We recommend you do not engage further⛔️⛔️
 
-While this is our assessment, ScamShield (https://scamshield.org.sg) is still the authoritative, official source for scams in Singapore. We are currently exploring a collaboration with ScamShield.
+CheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.
 
-Would you like us to share this message with ScamShield? Only the contents of this message, and no other information, will be sent.{{results}}`,
+To avoid reporting this message, select "Don't report this" below.`,
 
   SPAM: `{{thanks}}{{matched}}{{methodology}}spam!🚧 
 
@@ -65,8 +65,6 @@ Thank you for keeping Singapore safe!`,
   METHODOLOGY_HUMAN: `Our CheckMates have reviewed this message and think it's `,
 
   METHODOLOGY_AUTO: `Based on pattern matching, our auto-classifier is confident that this message is `,
-
-  VOTE_RESULTS_SUFFIX: ` You can also see how we voted, before deciding.`,
 
   //not used
   MATCHED: `In fact, other users have sent this message in {{numberInstances}} times. `,
@@ -165,11 +163,9 @@ On a scale from 1-10, how likely are you to recommend us to a friend, colleague 
 
   SATISFACTION_SURVEY_THANKS: `Thanks for your feedback!`,
 
-  HOWD_WE_TELL: `*This is an experimental feature powered by generative AI*.
-
-  Here are some signs that this message is a {{category}}:
-  
-  {{rationalisation}}`,
+  HOWD_WE_TELL: `*This is an experimental feature powered by generative AI*. Do let us know if it was useful below!
+ 
+{{rationalisation}}`,
   RATIONALISATION_USEFUL: `Thanks for your valuable feedback!`,
 
   RATIONALISATION_NOT_USEFUL: `Sorry to hear that, but thanks anyway for your valuable feedback!`,

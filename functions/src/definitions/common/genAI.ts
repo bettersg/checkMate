@@ -1,6 +1,8 @@
 import { callChatCompletion, ChatMessage, examples } from "./openai/openai"
 import hyperparameters from "./openai/hyperparameters.json"
 import * as functions from "firebase-functions"
+import { checkUrlPresence } from "./utils"
+//import RE2 from "re2"
 
 type redaction = {
   text: string
@@ -68,6 +70,9 @@ async function anonymiseMessage(message: string) {
 }
 
 async function rationaliseMessage(message: string, category: string) {
+  if (checkUrlPresence(message) || category === "irrelevant") {
+    return null
+  }
   if (env === "SIT" || env === "DEV") {
     return "This is a rationalisation"
   }
