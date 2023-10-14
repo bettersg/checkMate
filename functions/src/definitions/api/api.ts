@@ -12,7 +12,6 @@ const app = express()
 app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
 
 app.get("/helloworld", (req, res) => {
-  console.log("helloworld")
   res.send({ hello: "hello from /helloworld" })
 })
 
