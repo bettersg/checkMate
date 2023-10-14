@@ -18,7 +18,12 @@ const onMessageUpdate = functions
       //TODO: rationalisation here
       let rationalisation: null | string = null
       let primaryCategory = messageData.primaryCategory
-      if (primaryCategory && !messageData.caption && text) {
+      if (
+        primaryCategory &&
+        primaryCategory !== "irrelevant" &&
+        !messageData.caption &&
+        text
+      ) {
         rationalisation = await rationaliseMessage(text, primaryCategory)
       }
       await after.ref.update({
@@ -33,7 +38,12 @@ const onMessageUpdate = functions
       before.data().primaryCategory !== primaryCategory
     ) {
       let rationalisation: null | string = null
-      if (primaryCategory && !messageData.caption && text) {
+      if (
+        primaryCategory &&
+        primaryCategory !== "irrelevant" &&
+        !messageData.caption &&
+        text
+      ) {
         rationalisation = await rationaliseMessage(text, primaryCategory)
       }
       await after.ref.update({

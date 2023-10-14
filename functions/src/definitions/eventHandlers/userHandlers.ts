@@ -332,7 +332,11 @@ async function newTextInstanceHandler({
 
     const strippedMessage = await anonymiseMessage(text)
     let rationalisation: null | string = null
-    if (isMachineAssessed && strippedMessage) {
+    if (
+      isMachineAssessed &&
+      strippedMessage &&
+      !machineCategory.includes("irrelevant")
+    ) {
       rationalisation = await rationaliseMessage(text, machineCategory)
     }
     messageRef = db.collection("messages").doc()
@@ -591,7 +595,12 @@ async function newImageInstanceHandler({
       machineCategory !== "unsure" &&
       machineCategory !== "info"
     )
-    if (extractedMessage && isMachineAssessed && strippedMessage) {
+    if (
+      extractedMessage &&
+      isMachineAssessed &&
+      strippedMessage &&
+      !machineCategory.includes("irrelevant")
+    ) {
       rationalisation = await rationaliseMessage(
         strippedMessage,
         machineCategory
