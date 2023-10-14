@@ -72,7 +72,9 @@ async function rationaliseMessage(message: string, category: string) {
   if (category.includes("irrelevant") || category === "unsure") {
     return null
   }
-
+  if (env === "SIT") {
+    return "This is a rationalisation"
+  }
   let meaningfulLength: number = 300
   switch (category) {
     case "illicit":
@@ -92,9 +94,6 @@ async function rationaliseMessage(message: string, category: string) {
   if (stripPhone(stripUrl(message, false), false).length < meaningfulLength) {
     //don't bother with rationalisation if remaining message is too short to be meaningful.
     return null
-  }
-  if (env === "SIT") {
-    return "This is a rationalisation"
   }
   try {
     const rationalisationHyperparameters = hyperparameters?.rationalisation
