@@ -32,6 +32,7 @@ const onInstanceCreate = functions
       "WHATSAPP_TOKEN",
       "TYPESENSE_TOKEN",
       "ML_SERVER_TOKEN",
+      "OPENAI_API_KEY",
     ],
   })
   .firestore.document("/messages/{messageId}/instances/{instanceId}")
