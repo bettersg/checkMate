@@ -1,7 +1,7 @@
 import { callChatCompletion, ChatMessage, examples } from "./openai/openai"
 import hyperparameters from "./openai/hyperparameters.json"
 import * as functions from "firebase-functions"
-import { checkUrlPresence } from "./utils"
+import { stripUrl, stripPhone, checkUrlPresence } from "./utils"
 //import RE2 from "re2"
 
 type redaction = {
@@ -70,7 +70,28 @@ async function anonymiseMessage(message: string) {
 }
 
 async function rationaliseMessage(message: string, category: string) {
-  if (checkUrlPresence(message) || category === "irrelevant") {
+  if (category.includes("irrelevant") || category === "unsure") {
+    return null
+  }
+
+  let meaningfulLength: number = 300
+  switch (category) {
+    case "illicit":
+      meaningfulLength = 50
+      break
+    case "scam":
+      meaningfulLength = 50
+      break
+    case "spam":
+      meaningfulLength = 75
+      break
+    default:
+      if (checkUrlPresence(message)) {
+        return null
+      }
+  }
+  if (stripPhone(stripUrl(message, false), false).length < meaningfulLength) {
+    //don't bother with rationalisation if remaining message is too short to be meaningful.
     return null
   }
   if (env === "SIT" || env === "DEV") {

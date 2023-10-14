@@ -21,6 +21,7 @@ const onMessageUpdate = functions
       if (
         primaryCategory &&
         primaryCategory !== "irrelevant" &&
+        primaryCategory !== "unsure" &&
         !messageData.caption &&
         text
       ) {
@@ -41,6 +42,7 @@ const onMessageUpdate = functions
       if (
         primaryCategory &&
         primaryCategory !== "irrelevant" &&
+        primaryCategory !== "unsure" &&
         !messageData.caption &&
         text
       ) {
