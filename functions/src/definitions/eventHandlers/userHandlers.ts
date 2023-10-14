@@ -6,14 +6,14 @@ import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
-} from "./common/sendWhatsappMessage"
-import { sendDisputeNotification } from "./common/sendMessage"
+} from "../common/sendWhatsappMessage"
+import { sendDisputeNotification } from "../common/sendMessage"
 import {
   sleep,
   hashMessage,
   normalizeSpaces,
   checkMessageId,
-} from "./common/utils"
+} from "../common/utils"
 import {
   getResponsesObj,
   sendMenuMessage,
@@ -21,20 +21,20 @@ import {
   sendVotingStats,
   sendReferralMessage,
   respondToInterimFeedback,
-} from "./common/responseUtils"
+} from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
   getHash,
   getSignedUrl,
-} from "./common/mediaUtils"
-import { anonymiseMessage } from "./common/genAI"
-import { calculateSimilarity } from "./calculateSimilarity"
-import { performOCR } from "./common/machineLearningServer/operations"
+} from "../common/mediaUtils"
+import { anonymiseMessage } from "../common/genAI"
+import { calculateSimilarity } from "../common/calculateSimilarity"
+import { performOCR } from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
-import { classifyText } from "./common/classifier"
+import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
-import { Message } from "../types"
+import { Message } from "../../types"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")

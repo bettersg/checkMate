@@ -1,22 +1,22 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
-import { sendTextMessage, sendImageMessage } from "./common/sendMessage"
+import { sendTextMessage, sendImageMessage } from "../common/sendMessage"
 import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappButtonMessage,
-} from "./common/sendWhatsappMessage"
-import { getResponsesObj } from "./common/responseUtils"
-import { sleep } from "./common/utils"
+} from "../common/sendWhatsappMessage"
+import { getResponsesObj } from "../common/responseUtils"
+import { sleep } from "../common/utils"
 import {
   sendL1CategorisationMessage,
   sendRemainingReminder,
-} from "./common/sendFactCheckerMessages"
-import { getSignedUrl } from "./common/mediaUtils"
+} from "../common/sendFactCheckerMessages"
+import { getSignedUrl } from "../common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { resetL2Status } from "./common/voteUtils"
-import { Message } from "../types"
+import { resetL2Status } from "../common/voteUtils"
+import { Message } from "../../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()

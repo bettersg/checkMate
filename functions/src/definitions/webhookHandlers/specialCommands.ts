@@ -1,14 +1,14 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
-import { WhatsappMessage } from "../types"
-import { sendWhatsappTextMessage } from "./common/sendWhatsappMessage"
+import { WhatsappMessage } from "../../types"
+import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import {
   USER_BOT_RESPONSES,
   FACTCHECKER_BOT_RESPONSES,
   thresholds,
-} from "./common/constants"
-import { interimPromptHandler } from "./batchJobs"
+} from "../common/constants"
+import { interimPromptHandler } from "../batchJobs/batchJobs"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")

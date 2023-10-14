@@ -2,7 +2,7 @@ import * as functions from "firebase-functions"
 import {
   deleteOne,
   CollectionTypes,
-} from "./common/typesense/collectionOperations"
+} from "../common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
 
 const onInstanceDelete = functions

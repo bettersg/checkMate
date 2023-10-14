@@ -1,12 +1,12 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { getThresholds } from "./common/utils"
+import { getThresholds } from "../common/utils"
 import {
   sendVotingMessage,
   sendL2OthersCategorisationMessage,
   sendRemainingReminder,
-} from "./common/sendFactCheckerMessages"
-import { incrementCounter, getCount } from "./common/counters"
+} from "../common/sendFactCheckerMessages"
+import { incrementCounter, getCount } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 

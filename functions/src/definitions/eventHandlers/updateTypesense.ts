@@ -3,8 +3,8 @@ import {
   deleteOne,
   upsertOne,
   CollectionTypes,
-} from "./common/typesense/collectionOperations"
-import { firestoreTimestampToYYYYMM } from "./common/utils"
+} from "../common/typesense/collectionOperations"
+import { firestoreTimestampToYYYYMM } from "../common/utils"
 
 const onMessageWrite = functions
   .region("asia-southeast1")
