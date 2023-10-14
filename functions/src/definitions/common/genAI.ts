@@ -40,7 +40,6 @@ async function anonymiseMessage(message: string) {
           try {
             const responseObj = JSON.parse(response)
             const redactions: redaction[] = responseObj.redacted
-            console.log(redactions)
             redactions.forEach((redaction) => {
               let regex = new RegExp(redaction.text, "g")
               returnMessage = returnMessage.replace(
@@ -94,7 +93,7 @@ async function rationaliseMessage(message: string, category: string) {
     //don't bother with rationalisation if remaining message is too short to be meaningful.
     return null
   }
-  if (env === "SIT" || env === "DEV") {
+  if (env === "SIT") {
     return "This is a rationalisation"
   }
   try {
@@ -104,11 +103,9 @@ async function rationaliseMessage(message: string, category: string) {
 
     const examples: examples[] =
       rationalisationHyperparameters?.prompt?.examples
-    const userMessage: string =
-      rationalisationHyperparameters?.prompt?.user.replace(
-        "{{message}}",
-        message
-      )
+    const userMessage: string = rationalisationHyperparameters?.prompt?.user
+      .replace("{{message}}", message)
+      .replace("{{category}}", category)
     if (model && systemMessage && examples && userMessage) {
       const response = await callChatCompletion(
         model,
