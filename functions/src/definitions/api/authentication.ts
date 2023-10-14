@@ -10,6 +10,8 @@ if (!admin.apps.length) {
 const app = express()
 const db = admin.firestore()
 
+const CHECKER1_PHONE_NUMBER: string = String(process.env.CHECKER1_PHONE_NUMBER) //remove later once migrated fully
+
 app.post("/", async (req, res) => {
   const initData = req.body // Assuming you send initData in the body of your requests
   const botToken = String(process.env.TELEGRAM_BOT_TOKEN) // Replace with your bot token
@@ -70,7 +72,10 @@ app.post("/", async (req, res) => {
   }
 
   if (userId) {
-    const userSnap = await db.collection("factCheckers").doc("6591807628").get()
+    const userSnap = await db
+      .collection("factCheckers")
+      .doc(CHECKER1_PHONE_NUMBER)
+      .get() //later change to userId
     if (userSnap.exists) {
       try {
         const customToken = await admin.auth().createCustomToken(userId)
