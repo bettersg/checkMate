@@ -1,13 +1,10 @@
 //calculateSimilarity.ts
 import * as admin from "firebase-admin"
-import {
-  vectorSearch,
-  CollectionTypes,
-} from "./common/typesense/collectionOperations"
+import { vectorSearch, CollectionTypes } from "./typesense/collectionOperations"
 import * as functions from "firebase-functions"
-import { getEmbedding } from "./common/machineLearningServer/operations"
-import { stripUrl, stripPhone } from "./common/utils"
-import { Message } from "../types"
+import { getEmbedding } from "./machineLearningServer/operations"
+import { stripUrl, stripPhone } from "./utils"
+import { Message } from "../../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()

@@ -35,7 +35,8 @@ RUN npm i -g firebase-tools && \
     firebase setup:emulators:firestore && \
     firebase setup:emulators:pubsub && \
     firebase setup:emulators:storage && \
-    firebase setup:emulators:ui
+    firebase setup:emulators:ui && \
+    firebase experiments:enable webframeworks
 
 # Preserve firebase emulators cache
 VOLUME $HOME/.cache

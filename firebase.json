@@ -39,9 +39,39 @@
       "host": "0.0.0.0",
       "port": 8085
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    },
+    "hosting": {
+      "port": 5000
+    }
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "checkers-app/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": {
+          "functionId": "apiHandler",
+          "region": "asia-southeast1"
+        }
+      },
+      {
+        "source": "/telegramAuth",
+        "function": {
+          "functionId": "telegramAuthHandler",
+          "region": "asia-southeast1"
+        }
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

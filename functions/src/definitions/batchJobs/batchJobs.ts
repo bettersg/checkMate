@@ -1,13 +1,13 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
+import { sendWhatsappTemplateMessage } from "../common/sendWhatsappMessage"
 import {
   respondToInstance,
   sendInterimPrompt as sendInterimPromptImported,
-} from "./common/responseUtils"
+} from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { getCount } from "./common/counters"
-import { getThresholds } from "./common/utils"
+import { getCount } from "../common/counters"
+import { getThresholds } from "../common/utils"
 import { defineString } from "firebase-functions/params"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")

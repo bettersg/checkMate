@@ -1,13 +1,13 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { anonymiseMessage } from "./common/genAI"
-import { getThresholds } from "./common/utils"
-import { respondToInstance } from "./common/responseUtils"
-import { sendWhatsappTemplateMessage } from "./common/sendWhatsappMessage"
+import { anonymiseMessage } from "../common/genAI"
+import { getThresholds } from "../common/utils"
+import { respondToInstance } from "../common/responseUtils"
+import { sendWhatsappTemplateMessage } from "../common/sendWhatsappMessage"
 import {
   insertOne,
   CollectionTypes,
-} from "./common/typesense/collectionOperations"
+} from "../common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 import { Timestamp } from "firebase-admin/firestore"
@@ -32,6 +32,7 @@ const onInstanceCreate = functions
       "WHATSAPP_TOKEN",
       "TYPESENSE_TOKEN",
       "ML_SERVER_TOKEN",
+      "OPENAI_API_KEY",
     ],
   })
   .firestore.document("/messages/{messageId}/instances/{instanceId}")

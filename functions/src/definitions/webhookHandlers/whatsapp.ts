@@ -3,9 +3,10 @@ import * as functions from "firebase-functions"
 import express from "express"
 import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
-import { publishToTopic } from "./common/pubsub"
+import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
-import { checkMessageId } from "./common/utils"
+import { checkMessageId } from "../common/utils"
+import { user } from "firebase-functions/v1/auth"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const testUserPhoneNumberId = defineString(
@@ -14,6 +15,8 @@ const testUserPhoneNumberId = defineString(
 const testCheckerPhoneNumberId = defineString(
   "WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID"
 )
+const testUserWABAId = defineString("WHATSAPP_TEST_USERS_WABA_ID")
+const testCheckerWABAId = defineString("WHATSAPP_TEST_CHECKERS_WABA_ID")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -25,6 +28,7 @@ app.post("/whatsapp", async (req, res) => {
   if (req.body.object) {
     if (
       req.body.entry &&
+      req.body.entry[0].id &&
       req.body.entry[0].changes &&
       req.body.entry[0].changes[0] &&
       req.body.entry[0].changes[0].value.messages &&
@@ -34,21 +38,27 @@ app.post("/whatsapp", async (req, res) => {
       let phoneNumberId = value.metadata.phone_number_id
       let message = value.messages[0]
       let type = message.type
-
+      let wabaID = req.body.entry[0].id
       let checkerPhoneNumberId
       let userPhoneNumberId
+      let checkerWabaId
+      let userWabaId
 
       if (runtimeEnvironment.value() === "PROD") {
         checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID
         userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+        checkerWabaId = process.env.WHATSAPP_CHECKERS_WABA_ID
+        userWabaId = process.env.WHATSAPP_USERS_WABA_ID
       } else {
         checkerPhoneNumberId = testCheckerPhoneNumberId.value()
         userPhoneNumberId = testUserPhoneNumberId.value()
+        checkerWabaId = testCheckerWABAId.value()
+        userWabaId = testUserWABAId.value()
       }
 
       if (
-        phoneNumberId === checkerPhoneNumberId ||
-        phoneNumberId === userPhoneNumberId
+        (phoneNumberId === checkerPhoneNumberId && wabaID === checkerWabaId) ||
+        (phoneNumberId === userPhoneNumberId && wabaID === userWabaId)
       ) {
         if (
           type == "text" &&
@@ -141,6 +151,8 @@ const webhookHandlerV2 = onRequest(
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
       "VERIFY_TOKEN",
+      "WHATSAPP_CHECKERS_WABA_ID",
+      "WHATSAPP_USERS_WABA_ID",
     ],
   },
   app
