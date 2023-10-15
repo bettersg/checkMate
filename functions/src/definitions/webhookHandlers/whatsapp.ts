@@ -6,17 +6,8 @@ import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
-import { user } from "firebase-functions/v1/auth"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
-const testUserPhoneNumberId = defineString(
-  "WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID"
-)
-const testCheckerPhoneNumberId = defineString(
-  "WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID"
-)
-const testUserWABAId = defineString("WHATSAPP_TEST_USERS_WABA_ID")
-const testCheckerWABAId = defineString("WHATSAPP_TEST_CHECKERS_WABA_ID")
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -31,68 +22,83 @@ app.post("/whatsapp", async (req, res) => {
       req.body.entry[0].id &&
       req.body.entry[0].changes &&
       req.body.entry[0].changes[0] &&
-      req.body.entry[0].changes[0].value.messages &&
-      req.body.entry[0].changes[0].value.messages[0]
+      req.body.entry[0].changes[0].value
     ) {
       let value = req.body.entry[0].changes[0].value
       let phoneNumberId = value.metadata.phone_number_id
-      let message = value.messages[0]
-      let type = message.type
       let wabaID = req.body.entry[0].id
       let checkerPhoneNumberId
       let userPhoneNumberId
       let checkerWabaId
       let userWabaId
 
-      if (runtimeEnvironment.value() === "PROD") {
-        checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID
-        userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
-        checkerWabaId = process.env.WHATSAPP_CHECKERS_WABA_ID
-        userWabaId = process.env.WHATSAPP_USERS_WABA_ID
-      } else {
-        checkerPhoneNumberId = testCheckerPhoneNumberId.value()
-        userPhoneNumberId = testUserPhoneNumberId.value()
-        checkerWabaId = testCheckerWABAId.value()
-        userWabaId = testUserWABAId.value()
-      }
+      checkerPhoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID
+      userPhoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+      checkerWabaId = process.env.WHATSAPP_CHECKERS_WABA_ID
+      userWabaId = process.env.WHATSAPP_USERS_WABA_ID
 
       if (
         (phoneNumberId === checkerPhoneNumberId && wabaID === checkerWabaId) ||
         (phoneNumberId === userPhoneNumberId && wabaID === userWabaId)
       ) {
-        if (
-          type == "text" &&
-          message.text.body.startsWith("/") &&
-          runtimeEnvironment.value() !== "PROD"
-        ) {
-          //handle db commands
-          await handleSpecialCommands(message)
-        } else {
-          if (message?.id) {
-            //if message has been processed before, don't even put it in queue.
-            if (await checkMessageId(message.id)) {
-              functions.logger.warn(`message ${message.id} already processed`)
+        if (value.messages && value.messages[0]) {
+          let message = value.messages[0]
+          let type = message.type
+          if (
+            type == "text" &&
+            message.text.body.startsWith("/") &&
+            runtimeEnvironment.value() !== "PROD"
+          ) {
+            //handle db commands
+            await handleSpecialCommands(message)
+          } else {
+            if (message?.id) {
+              //if message has been processed before, don't even put it in queue.
+              if (await checkMessageId(message.id)) {
+                functions.logger.warn(`message ${message.id} already processed`)
+                res.sendStatus(200)
+                return
+              }
+            } else {
+              functions.logger.error(`message ${message.id} has no id`)
               res.sendStatus(200)
               return
             }
-          } else {
-            functions.logger.error(`message ${message.id} has no id`)
-            res.sendStatus(200)
-            return
+            if (
+              (type == "button" || type == "interactive" || type == "text") &&
+              phoneNumberId === checkerPhoneNumberId
+            ) {
+              //put into checker queue
+              await publishToTopic("checkerEvents", message)
+            }
+            if (phoneNumberId === userPhoneNumberId) {
+              //put into user queue
+              await publishToTopic("userEvents", message)
+            }
           }
-          if (
-            (type == "button" || type == "interactive" || type == "text") &&
-            phoneNumberId === checkerPhoneNumberId
-          ) {
-            //put into checker queue
-            await publishToTopic("checkerEvents", message)
+          res.sendStatus(200)
+        } else if (value.statuses && value.statuses[0]) {
+          let status = value.statuses[0]
+          let bot = phoneNumberId === checkerPhoneNumberId ? "checker" : "user"
+          if (status.status === "failed") {
+            const errorObj = {
+              messageId: status.id,
+              timestamp: status.timestamp,
+              recipientId: status.recipient_id,
+              errors: status.errors,
+              displayPhoneNumber: value.metadata.displayPhoneNumber,
+              bot: bot,
+            }
+            functions.logger.error(
+              `Error sending message ${status.id} to ${status.recipient_id} from ${bot} bot`,
+              errorObj
+            )
           }
-          if (phoneNumberId === userPhoneNumberId) {
-            //put into user queue
-            await publishToTopic("userEvents", message)
-          }
+          res.sendStatus(200)
+        } else {
+          functions.logger.log(`Not a message or status update`)
+          res.sendStatus(200)
         }
-        res.sendStatus(200)
       } else {
         functions.logger.warn(
           `Unexpected message source from phoneNumberId ${phoneNumberId}`

@@ -4,13 +4,6 @@ import { defineString } from "firebase-functions/params"
 import { WhatsappButton } from "../../types"
 
 const graphApiVersion = defineString("GRAPH_API_VERSION")
-const runtimeEnvironment = defineString("ENVIRONMENT")
-const testUserPhoneNumberId = defineString(
-  "WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID"
-)
-const testCheckerPhoneNumberId = defineString(
-  "WHATSAPP_TEST_CHECKER_BOT_PHONE_NUMBER_ID"
-)
 const graphApiUrl =
   process.env["TEST_SERVER_URL"] || "https://graph.facebook.com" //only exists in integration test environment
 
@@ -327,18 +320,10 @@ async function markWhatsappMessageAsRead(bot: string, messageId: string) {
 async function callWhatsappSendMessageApi(data: any, bot: string) {
   const token = process.env.WHATSAPP_TOKEN
   let phoneNumberId
-  if (runtimeEnvironment.value() !== "PROD") {
-    if (bot == "factChecker") {
-      phoneNumberId = testCheckerPhoneNumberId.value()
-    } else {
-      phoneNumberId = testUserPhoneNumberId.value()
-    }
+  if (bot == "factChecker") {
+    phoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID
   } else {
-    if (bot == "factChecker") {
-      phoneNumberId = process.env.WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID
-    } else {
-      phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
-    }
+    phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
   }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
