@@ -8,6 +8,7 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import app from "./firebase";
+import Dashboard from "./components/Dashboard";
 
 const auth = getAuth(app);
 if (import.meta.env.MODE === "dev") {
@@ -89,26 +90,29 @@ function App() {
   };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={testAPI}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    // <>
+    //   <div>
+    //     <a href="https://vitejs.dev" target="_blank">
+    //       <img src={viteLogo} className="logo" alt="Vite logo" />
+    //     </a>
+    //     <a href="https://react.dev" target="_blank">
+    //       <img src={reactLogo} className="logo react" alt="React logo" />
+    //     </a>
+    //   </div>
+    //   <h1>Vite + React</h1>
+    //   <div className="card">
+    //     <button onClick={testAPI}>count is {count}</button>
+    //     <p>
+    //       Edit <code>src/App.tsx</code> and save to test HMR
+    //     </p>
+    //   </div>
+    //   <p className="read-the-docs">
+    //     Click on the Vite and React logos to learn more
+    //   </p>
+    // </>
+    <div>
+      <Dashboard />
+    </div>
   );
 }
 
