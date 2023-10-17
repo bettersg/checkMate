@@ -8,7 +8,9 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import app from "./firebase";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./components/dashboard/Dashboard";
+import Achievement from "./components/achievements/Achievement";
+import MyVotes from "./components/myvotes/MyVotes";
 
 const auth = getAuth(app);
 if (import.meta.env.MODE === "dev") {
@@ -110,8 +112,10 @@ function App() {
     //     Click on the Vite and React logos to learn more
     //   </p>
     // </>
-    <div>
-      <Dashboard />
+    <div style={{ padding: 1 }}>
+      {/* <Dashboard /> */}
+      {/* <Achievement /> */}
+      <MyVotes />
     </div>
   );
 }

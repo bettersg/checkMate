@@ -5,7 +5,7 @@ export default function Header() {
   return (
     <div className="container items-center justify-between flex-row flex">
       <div
-        className="left-0 mx-0 px-4 mt-4 text-left"
+        className="left-0 mx-0 px-1 mt-4 text-left"
         style={{ alignItems: "start", position: "relative" }}
       >
         <Typography
