@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "checkmate-373101"
-  }
+    "default": "checkmate-373101",
+    "nonprod": "checkmate-nonprod",
+    "prod": "checkmate-373101"
+  },
+  "targets": {},
+  "etags": {}
 }
