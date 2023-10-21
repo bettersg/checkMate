@@ -14,7 +14,7 @@ const CHECKER1_PHONE_NUMBER: string = String(process.env.CHECKER1_PHONE_NUMBER) 
 
 app.post("/", async (req, res) => {
   const initData = req.body // Assuming you send initData in the body of your requests
-  const botToken = String(process.env.TELEGRAM_BOT_TOKEN) // Replace with your bot token
+  const botToken = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN) // Replace with your bot token
 
   // Extract the data from initData (convert from query string format)
   const params = new URLSearchParams(initData)
@@ -99,7 +99,7 @@ main.use("/telegramAuth", app)
 
 const telegramAuthHandler = onRequest(
   {
-    secrets: ["TELEGRAM_BOT_TOKEN"],
+    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
   },
   main
 )
