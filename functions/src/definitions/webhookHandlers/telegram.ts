@@ -5,8 +5,8 @@ import express from "express"
 import TelegramBot from "node-telegram-bot-api"
 import { onRequest } from "firebase-functions/v2/https"
 
-const TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-const bot = new TelegramBot(TOKEN)
+const TOKEN = String(process.env.TELEGRAM_BOT_TOKEN)
+const bot = new TelegramBot(TOKEN, { polling: false });
 
 const app = express()
 
