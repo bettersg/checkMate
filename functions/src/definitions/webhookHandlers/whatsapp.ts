@@ -17,13 +17,7 @@ const app = express()
 // Accepts POST requests at /webhook endpoint
 app.post("/whatsapp", async (req, res) => {
   if (req.body.object) {
-    if (
-      req.body.entry &&
-      req.body.entry[0].id &&
-      req.body.entry[0].changes &&
-      req.body.entry[0].changes[0] &&
-      req.body.entry[0].changes[0].value
-    ) {
+    if (req?.body?.entry?.[0]?.changes?.[0]?.value) {
       let value = req.body.entry[0].changes[0].value
       let phoneNumberId = value.metadata.phone_number_id
       let wabaID = req.body.entry[0].id
@@ -41,7 +35,7 @@ app.post("/whatsapp", async (req, res) => {
         (phoneNumberId === checkerPhoneNumberId && wabaID === checkerWabaId) ||
         (phoneNumberId === userPhoneNumberId && wabaID === userWabaId)
       ) {
-        if (value.messages && value.messages[0]) {
+        if (value?.messages?.[0]) {
           let message = value.messages[0]
           let type = message.type
           if (
@@ -77,7 +71,7 @@ app.post("/whatsapp", async (req, res) => {
             }
           }
           res.sendStatus(200)
-        } else if (value.statuses && value.statuses[0]) {
+        } else if (value?.statuses?.[0]) {
           let status = value.statuses[0]
           let bot = phoneNumberId === checkerPhoneNumberId ? "checker" : "user"
           if (status.status === "failed") {
