@@ -25,8 +25,12 @@ async function calculateSimilarity(
     score?: number
     parent?: admin.firestore.DocumentReference<admin.firestore.DocumentData> | null
   } = {}
-  const embedding = await getEmbedding(text)
-
+  let embedding = null
+  try {
+    embedding = await getEmbedding(text)
+  } catch (e) {
+    functions.logger.error(`Error in getEmbedding: ${e}`)
+  }
   //try to match db first
   const matchedInstancesSnap = await db
     .collectionGroup(CollectionTypes.Instances)
@@ -47,7 +51,7 @@ async function calculateSimilarity(
       // don't bother with vector search if remaining message is too short to be meaningful.
       functions.logger.log("Remaining message text too short to match")
       similarity = {}
-    } else {
+    } else if (embedding) {
       const results = await vectorSearch(
         embedding,
         CollectionTypes.Instances,
