@@ -2,6 +2,7 @@ import { thresholds } from "./constants"
 import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
+//import RE2 from "re2"
 import { Timestamp } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
@@ -59,9 +60,19 @@ function stripPhone(originalStr: string, includePlaceholder = false) {
   return newStr
 }
 
+function checkUrlPresence(originalStr: string): boolean {
+  const urlRegex = new RegExp(
+    "\\b(?:https?:\\/\\/)?(?:www\\.)?[^ \\n\\r]+?\\.[a-z]{2,}(?:[^\\s]*)?",
+    "gi"
+  )
+  return urlRegex.test(originalStr)
+}
+
 function stripUrl(originalStr: string, includePlaceholder = false) {
-  const urlRegex =
-    /\b(?:https?:\/\/)?(?:www\.)?[^ \n\r]+?\.[a-z]{2,}(?:[^\s]*)?/gi
+  const urlRegex = new RegExp(
+    "\\b(?:https?:\\/\\/)?(?:www\\.)?[^ \\n\\r]+?\\.[a-z]{2,}(?:[^\\s]*)?",
+    "gi"
+  )
   const placeholder = includePlaceholder ? "<URL>" : ""
   const replacedString = originalStr.replace(urlRegex, placeholder)
   return replacedString
@@ -99,4 +110,5 @@ export {
   checkUrl,
   normalizeSpaces,
   checkMessageId,
+  checkUrlPresence,
 }

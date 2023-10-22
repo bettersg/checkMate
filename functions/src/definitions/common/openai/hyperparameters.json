@@ -19,5 +19,22 @@
       ],
       "user": "{{message}}"
     }
+  },
+  "rationalisation": {
+    "model": "gpt-3.5-turbo",
+    "prompt": {
+      "system": "You are a scam and misinformation analyst whose job is to explain the category assigned to each message by a group of professional fact-checkers. You will receive text messages delimited in triple backticks, and the accompanying category, also delimited in triple backticks. Provide 3 or fewer reasons to explain briefly and directly to the person in a layman fashion why the message could have been given this category.  Where relevant, you may use Cialdini's principles of persuasion (reciprocity, commitment and consistency, social proof, authority, liking, scarcity) to explain the category assigned to the message.",
+      "examples": [
+        {
+          "user": "Text Message:\n```Hello,Vanessa from Sentosa Marketing Department. Wish you have a nice day.We are doing a survey (about Resort Development), can you assist? Get 15 SGD (Paynow) by answering 3 simple questions.```\n\nAssigned Category:\n```scam```\n",
+          "assistant": "Here are some signs that this message is a scam\n1) It is offering something valuable to the recipient (money), which could be a tactic to persuade the recipient to engage\n2) It is written in poor English, and has bad formatting\n3) The sender is trying to get you to share information with them by appearing friendly and approachable."
+        },
+        {
+          "user": "Text Message:\n```The FASTEST FINANCIAL APPROVAL COMPANY IN TOWN! Apply up to 2 times INCOME**may apply. $10K=900x12 Month\n$20K=1800x12 Month\n$30K=2750x12 Month\nUp to 100k, 36 Month\nCALL US TODAY  HP: 83750447 Sean- 2-3hrs APPROVAL ONLY FOR PINK/BLUE IC```\n\nAssigned Category:\n```illicit```\n",
+          "assistant": "Here are some signs that this message is illicit\n1) It is promoting a potentially illegal or unauthorized moneylending service\n2) It promises to speed up your loan process as much as possible, which may be valuable to people in urgent need of money\n2) It is offering installment plans without providing any information about the terms, conditions, or legality of the service. This lack of transparency raises concerns about the legitimacy and reliability of the financial services offered."
+        }
+      ],
+      "user": "Text Message:\n```{{message}}```\n\nAssigned Category:\n```{{category}}```\n"
+    }
   }
 }

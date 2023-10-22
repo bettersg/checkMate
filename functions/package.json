@@ -32,6 +32,7 @@
     "libphonenumber-js": "^1.10.21",
     "node-telegram-bot-api": "^0.63.0",
     "openai": "^4.10.0",
+    "re2": "^1.20.3",
     "typesense": "^1.5.3"
   },
   "devDependencies": {

@@ -4,6 +4,7 @@ import { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } from "./constants"
 import {
   sendWhatsappButtonMessage,
   sendWhatsappTextListMessage,
+  sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getThresholds, sleep } from "./utils"
@@ -52,6 +53,33 @@ async function respondToInterimFeedback(
   }
 
   await sendWhatsappButtonMessage("user", data.from, response, buttons, data.id)
+}
+
+async function respondToRationalisationFeedback(
+  instancePath: string,
+  isUseful: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const responses = await getResponsesObj("user")
+  const data = instanceSnap.data()
+  if (!data) {
+    functions.logger.log("Missing data in respondToRationalisationFeedback")
+    return
+  }
+  let response
+  switch (isUseful) {
+    case "yes":
+      response = responses?.RATIONALISATION_USEFUL
+      await instanceRef.update({ isRationalisationUseful: true })
+      break
+    default:
+      response = responses?.RATIONALISATION_NOT_USEFUL
+      await instanceRef.update({ isRationalisationUseful: false })
+      break
+  }
+
+  await sendWhatsappTextMessage("user", data.from, response)
 }
 
 async function getResponsesObj(
@@ -223,10 +251,7 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(
-  instancePath: string,
-  triggerScamShieldConsent: boolean
-) {
+async function sendVotingStats(instancePath: string) {
   //get statistics
   const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
@@ -307,31 +332,94 @@ async function sendVotingStats(
 
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
 
-  if (triggerScamShieldConsent) {
-    await sleep(2000)
+  // if (triggerScamShieldConsent) {
+  //   await sleep(2000)
+  //   const buttons = [
+  //     {
+  //       type: "reply",
+  //       reply: {
+  //         id: `scamshieldConsent_${instancePath}_consent`,
+  //         title: "Yes",
+  //       },
+  //     },
+  //     {
+  //       type: "reply",
+  //       reply: {
+  //         id: `scamshieldConsent_${instancePath}_decline`,
+  //         title: "No",
+  //       },
+  //     },
+  //   ]
+  //   await sendWhatsappButtonMessage(
+  //     "user",
+  //     from,
+  //     responses.SCAMSHIELD_SEEK_CONSENT,
+  //     buttons,
+  //     instanceSnap.get("id")
+  //   )
+  // }
+}
+
+async function sendRationalisation(instancePath: string) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const responses = await getResponsesObj("user")
+  try {
+    const messageRef = instanceRef.parent.parent
+    if (!data) {
+      throw new Error("instanceSnap data missing")
+    }
+    if (!messageRef) {
+      throw new Error("messageRef is null")
+    }
+    const messageSnap = await messageRef.get()
+    if (!messageSnap) {
+      throw new Error("messageSnap is null")
+    }
+    const rationalisation = messageSnap.get("rationalisation")
+    const category = messageSnap.get("primaryCategory")
+    if (!rationalisation) {
+      throw new Error("rationalisation is null")
+    }
+    if (!category) {
+      throw new Error("category is null")
+    }
     const buttons = [
       {
         type: "reply",
         reply: {
-          id: `scamshieldConsent_${instancePath}_consent`,
-          title: "Yes",
+          id: `feedbackRationalisation_${instancePath}_yes`,
+          title: "Yes, it's useful",
         },
       },
       {
         type: "reply",
         reply: {
-          id: `scamshieldConsent_${instancePath}_decline`,
-          title: "No",
+          id: `feedbackRationalisation_${instancePath}_no`,
+          title: "No, it's not",
         },
       },
     ]
+    const replyText = responses.HOWD_WE_TELL.replace(
+      "{{rationalisation}}",
+      rationalisation
+    )
+    await instanceRef.update({
+      isRationalisationSent: true,
+    })
     await sendWhatsappButtonMessage(
       "user",
-      from,
-      responses.SCAMSHIELD_SEEK_CONSENT,
+      data.from,
+      replyText,
       buttons,
-      instanceSnap.get("id")
+      data.id
     )
+  } catch (e) {
+    functions.logger.error(`Error sending rationalisation: ${e}`)
+    if (data?.from) {
+      await sendTextMessage("user", data.from, responses.GENERIC_ERROR)
+    }
   }
 }
 
@@ -558,7 +646,6 @@ async function respondToInstance(
           ? responses.METHODOLOGY_AUTO
           : responses.METHODOLOGY_HUMAN
       )
-      .replace("{{results}}", isImmediate ? "" : responses.VOTE_RESULTS_SUFFIX)
   }
 
   if (!isAssessed && !forceReply) {
@@ -576,43 +663,37 @@ async function respondToInstance(
     isReplyImmediate: boolean
     replyCategory?: string
     replyTimestamp?: Timestamp
+    scamShieldConsent?: boolean
   } = {
     isReplied: true,
     isReplyForced: forceReply,
     isReplyImmediate: isImmediate,
   }
-  let buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: `votingResults_${instanceSnap.ref.path}`,
-        title: "See voting results",
-      },
+  let buttons = []
+
+  const votingResultsButton = {
+    type: "reply",
+    reply: {
+      id: `votingResults_${instanceSnap.ref.path}`,
+      title: "See voting results",
     },
-  ]
-  let scamShieldButtons = [
-    {
-      type: "reply",
-      reply: {
-        id: `scamshieldConsent_${instanceSnap.ref.path}_consent`,
-        title: "Yes",
-      },
+  }
+
+  const declineScamShieldButton = {
+    type: "reply",
+    reply: {
+      id: `scamshieldDecline_${instanceSnap.ref.path}`,
+      title: "Don't report this",
     },
-    {
-      type: "reply",
-      reply: {
-        id: `scamshieldConsent_${instanceSnap.ref.path}_decline`,
-        title: "No",
-      },
+  }
+
+  const viewRationalisationButton = {
+    type: "reply",
+    reply: {
+      id: `rationalisation_${instanceSnap.ref.path}`,
+      title: "How'd we tell?",
     },
-    {
-      type: "reply",
-      reply: {
-        id: `votingResults_${instanceSnap.ref.path}_scamshield`,
-        title: "See voting results",
-      },
-    },
-  ]
+  }
 
   let category
   if (isScam) {
@@ -682,11 +763,23 @@ async function respondToInstance(
       responseText = getFinalResponseText(
         responses[category.toUpperCase() as keyof typeof responses]
       )
+
+      if (!(isMachineCategorised || responseCount <= 0)) {
+        buttons.push(votingResultsButton)
+      }
+
+      const rationalisation = parentMessageSnap.get("rationalisation")
+
+      if ((category === "scam" || category === "illicit") && rationalisation) {
+        buttons.push(viewRationalisationButton)
+      }
+
       if (category === "scam" || category === "illicit") {
-        if (isMachineCategorised || responseCount <= 0) {
-          scamShieldButtons.pop()
-        }
-        buttons = scamShieldButtons
+        buttons.push(declineScamShieldButton)
+        updateObj.scamShieldConsent = true
+      }
+
+      if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
           "user",
           data.from,
@@ -695,17 +788,7 @@ async function respondToInstance(
           data.id
         )
       } else {
-        if (isMachineCategorised || responseCount <= 0) {
-          await sendTextMessage("user", data.from, responseText, data.id)
-        } else {
-          await sendWhatsappButtonMessage(
-            "user",
-            data.from,
-            responseText,
-            buttons,
-            data.id
-          )
-        }
+        await sendTextMessage("user", data.from, responseText, data.id)
       }
   }
   updateObj.replyCategory = category
@@ -745,4 +828,6 @@ export {
   sendVotingStats,
   sendReferralMessage,
   respondToInterimFeedback,
+  sendRationalisation,
+  respondToRationalisationFeedback,
 }
