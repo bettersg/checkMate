@@ -11,6 +11,8 @@ import { Request, Response } from "express"
 const runtimeEnvironment = defineString("ENVIRONMENT")
 
 const webhookPath = process.env.WEBHOOK_PATH
+const ingressSetting =
+  process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -159,7 +161,7 @@ app.post("/telegram", async (req, res) => {
 
 const webhookHandlerV2 = onRequest(
   {
-    ingressSettings: "ALLOW_INTERNAL_AND_GCLB",
+    ingressSettings: ingressSetting,
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
