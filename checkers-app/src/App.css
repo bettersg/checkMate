@@ -3,6 +3,12 @@
 @tailwind utilities;  */
 
 /* @layer components{ */
+  p.firebase-emulator-warning {
+    top: 0;
+    height: 30px;
+    width: 200px !important;
+    overflow: hidden;
+  }
 #root {
   max-width: 1280px;
   margin: 0 auto;
