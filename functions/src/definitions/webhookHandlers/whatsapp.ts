@@ -159,6 +159,7 @@ app.post("/telegram", async (req, res) => {
 
 const webhookHandlerV2 = onRequest(
   {
+    ingressSettings: "ALLOW_INTERNAL_AND_GCLB",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
