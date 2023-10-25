@@ -14,8 +14,6 @@ const webhookPath = process.env.WEBHOOK_PATH
 const ingressSetting =
   process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
 
-console.log(ingressSetting)
-
 if (!admin.apps.length) {
   admin.initializeApp()
 }
