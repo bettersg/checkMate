@@ -411,7 +411,7 @@ async function newTextInstanceHandler({
     replyTimestamp: null,
     matchType: matchType,
     scamShieldConsent: null,
-    embedding: embedding,
+    embedding: embedding ?? null,
     closestMatch: {
       instanceRef: bestMatchingDocumentRef ?? null,
       text: bestMatchingText ?? null,

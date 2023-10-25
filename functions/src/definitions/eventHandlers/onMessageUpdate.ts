@@ -5,7 +5,13 @@ import { rationaliseMessage } from "../common/genAI"
 
 const onMessageUpdate = functions
   .region("asia-southeast1")
-  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
+  .runWith({
+    secrets: [
+      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_TOKEN",
+      "OPENAI_API_KEY",
+    ],
+  })
   .firestore.document("/messages/{messageId}")
   .onUpdate(async (change, context) => {
     // Grab the current value of what was written to Firestore.
