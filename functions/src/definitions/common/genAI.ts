@@ -1,6 +1,8 @@
 import { callChatCompletion, ChatMessage, examples } from "./openai/openai"
 import hyperparameters from "./openai/hyperparameters.json"
 import * as functions from "firebase-functions"
+import { stripUrl, stripPhone, checkUrlPresence } from "./utils"
+//import RE2 from "re2"
 
 type redaction = {
   text: string
@@ -61,9 +63,67 @@ async function anonymiseMessage(message: string) {
       }
     }
   } catch (e) {
-    functions.logger.error("Anonymisation hyperparameters failed: " + e)
+    functions.logger.error("Anonymisation failed: " + e)
     return message
   }
 }
 
-export { anonymiseMessage }
+async function rationaliseMessage(message: string, category: string) {
+  if (category.includes("irrelevant") || category === "unsure") {
+    return null
+  }
+  if (env === "SIT") {
+    return "This is a rationalisation"
+  }
+  let meaningfulLength: number = 300
+  switch (category) {
+    case "illicit":
+      meaningfulLength = 50
+      break
+    case "scam":
+      meaningfulLength = 50
+      break
+    case "spam":
+      meaningfulLength = 75
+      break
+    default:
+      if (checkUrlPresence(message)) {
+        return null
+      }
+  }
+  if (stripPhone(stripUrl(message, false), false).length < meaningfulLength) {
+    //don't bother with rationalisation if remaining message is too short to be meaningful.
+    return null
+  }
+  try {
+    const rationalisationHyperparameters = hyperparameters?.rationalisation
+    const model: string = rationalisationHyperparameters.model
+    const systemMessage: string = rationalisationHyperparameters?.prompt?.system
+
+    const examples: examples[] =
+      rationalisationHyperparameters?.prompt?.examples
+    const userMessage: string = rationalisationHyperparameters?.prompt?.user
+      .replace("{{message}}", message)
+      .replace("{{category}}", category)
+    if (model && systemMessage && examples && userMessage) {
+      const response = await callChatCompletion(
+        model,
+        systemMessage,
+        examples,
+        userMessage
+      )
+      if (response) {
+        return response
+      } else {
+        functions.logger.error("No response returned from openAI api")
+        return null
+      }
+    }
+  } catch (e) {
+    functions.logger.error("Rationalisation failed: " + e)
+    return null
+  }
+  return null
+}
+
+export { anonymiseMessage, rationaliseMessage }
