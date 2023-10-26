@@ -1,7 +1,5 @@
-import React from "react";
 import NavbarDefault from "../BotNavBar";
 import Header from "../Header";
-import TabsWithIcon from "../Tabs";
 import PopoverDefault from "../Popover";
 import VoteInstanceButton from "./VoteInstanceButton";
 import FilterVoteButton from "./FilterVotes";
@@ -16,7 +14,8 @@ export default function MyVotes() {
     <div style={{}}>
       <Header />
       {/* <TabsWithIcon /> */}
-      <PopoverDefault props={myVotesLabel} />
+      <PopoverDefault title={myVotesLabel.title}
+        info={myVotesLabel.info} />
       <div className="grid grid-col-3 grid-flow-col gap-4">
         <div className="col-span-2 grid-flow-row">
           <div>

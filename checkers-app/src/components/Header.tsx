@@ -10,7 +10,7 @@ export default function Header() {
       >
         <Typography
           variant="h2"
-          style={{ color: "#f99301", alignContent: "start" }}
+          style={{ color: "#ff4d00", alignContent: "start" }}
         >
           Hello, Sally
         </Typography>

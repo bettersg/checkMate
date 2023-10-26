@@ -5,7 +5,12 @@ import {
   Button,
 } from "@material-tailwind/react";
 
-export default function PopoverDefault({ props }) {
+interface PropType {
+  title: string;
+  info: string;
+}
+
+export default function PopoverDefault(props: PropType) {
   return (
     <div className="left-0 p-2 flex mb-4">
       <Popover placement="right">
