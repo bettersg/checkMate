@@ -5,13 +5,13 @@ Please do not spread it further⛔️⛔️
 
 Thank you for keeping Singapore informed!`,
 
-  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️
+  MISLEADING: `{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}
 
 Please take it with a pinch of salt and think twice before spreading it further🚧🚧.
 
 Thank you for keeping Singapore informed!`,
 
-  ACCURATE: `{{thanks}}{{matched}}{{methodology}}*accurate*.✅
+  ACCURATE: `{{thanks}}{{matched}}{{methodology}}*accurate*.✅{{image_caveat}}
 
 Thank you for keeping Singapore informed!`,
 
@@ -23,7 +23,7 @@ You can try sending the message in again, or report the error via our form at ht
     "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
 
   //button
-  SCAM: `{{thanks}}{{matched}}{{methodology}}*a scam*!🚫
+  SCAM: `{{thanks}}{{matched}}{{methodology}}*a scam*!🚫{{image_caveat}}
 
 We recommend you do not engage further⛔️⛔️
 
@@ -32,7 +32,7 @@ CheckMate will report suspicious messages to ScamShield (https://scamshield.org.
 To avoid reporting this message, select "Don't report this" below.`,
 
   //button
-  ILLICIT: `{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨
+  ILLICIT: `{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨{{image_caveat}}
 
 We recommend you do not engage further⛔️⛔️
 
@@ -40,13 +40,13 @@ CheckMate will report suspicious messages to ScamShield (https://scamshield.org.
 
 To avoid reporting this message, select "Don't report this" below.`,
 
-  SPAM: `{{thanks}}{{matched}}{{methodology}}spam!🚧 
+  SPAM: `{{thanks}}{{matched}}{{methodology}}spam!🚧{{image_caveat}}
 
 It's likely harmless, but you should always make sure 🧐
 
 Thank you for keeping Singapore safe!`,
 
-  LEGITIMATE: `{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅
+  LEGITIMATE: `{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}
 
 Thank you for keeping Singapore safe!`,
 
@@ -61,6 +61,10 @@ Thank you for keeping Singapore safe!`,
   THANKS_IMMEDIATE: `Thanks for sending this in! `,
 
   THANKS_DELAYED: `Thanks for waiting! `,
+
+  IMAGE_CAVEAT: `
+
+This assessment refers to any claims made within the captions. If there are no claims/captions, it refers to the image itself.`,
 
   METHODOLOGY_HUMAN: `Our CheckMates have reviewed this message and think it's `,
 
