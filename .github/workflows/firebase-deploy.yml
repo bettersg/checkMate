@@ -25,7 +25,11 @@ jobs:
             ${{ runner.os }}-node-
       - name: Create env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          else
+            echo "${{ secrets.ENV_FILE_NONPROD }}" > .env
+          fi
         working-directory: functions
       - name: Build Cloud Functions
         run: npm ci
@@ -39,6 +43,14 @@ jobs:
           fi
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
+      - name: Set Firebase project
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            firebase use prod
+          else
+            firebase use uat
+          fi
+        working-directory: functions
       - name: Deploy Cloud Functions
         run: export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json && npm run deploy
         working-directory: functions
