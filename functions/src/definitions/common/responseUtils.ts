@@ -630,7 +630,6 @@ async function respondToInstance(
   const isImage = data?.type === "image"
 
   function getFinalResponseText(responseText: string) {
-    console.log(isImage)
     return responseText
       .replace(
         "{{thanks}}",
