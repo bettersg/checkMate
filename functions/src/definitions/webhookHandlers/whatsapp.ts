@@ -141,11 +141,6 @@ const postHandler = async (req: Request, res: Response) => {
   }
 }
 
-// Accepts POST requests at /webhook endpoint
-// Note: TODO: Will delete after webhook is pointed to new endpoint and everything is stable
-app.post("/whatsapp", postHandler)
-app.get("/whatsapp", getHandler)
-
 // Accepts POST requests at /{webhookPath} endpoint
 app.post(`/${webhookPath}`, postHandler)
 app.get(`/${webhookPath}`, getHandler)
