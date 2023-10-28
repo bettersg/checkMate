@@ -225,18 +225,32 @@ async function onFactCheckerYes(
         latestInstanceSnap.get("storageUrl")
       )
       if (temporaryUrl) {
-        res = await sendImageMessage(
-          "factChecker",
-          from,
-          temporaryUrl,
-          latestInstanceSnap.get("caption"),
-          null,
-          platform
-        )
-        if (!res) {
+        try {
+          res = await sendImageMessage(
+            "factChecker",
+            from,
+            temporaryUrl,
+            latestInstanceSnap.get("caption"),
+            null,
+            platform
+          )
+          if (!res) {
+            return
+          }
+          updateObj.sentMessageId = res.data.messages[0].id
+        } catch {
+          functions.logger.error(
+            `Problem sending message ${messageRef.id} to ${from}}`
+          )
+          await sendTextMessage(
+            "factChecker",
+            from,
+            "Sorry, an error occured",
+            null,
+            platform
+          )
           return
         }
-        updateObj.sentMessageId = res.data.messages[0].id
       } else {
         functions.logger.error(
           `Problem creating URL while sending message ${messageRef.id} to ${from}}`
