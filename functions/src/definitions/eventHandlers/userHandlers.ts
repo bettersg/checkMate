@@ -606,7 +606,7 @@ async function newImageInstanceHandler({
         machineCategory
       )
     }
-    if (extractedMessage) messageRef = db.collection("messages").doc()
+    messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: isMachineAssessed,
