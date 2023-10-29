@@ -3,11 +3,9 @@ import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
 import { WhatsappMessage } from "../../types"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
-import {
-  USER_BOT_RESPONSES,
-  FACTCHECKER_BOT_RESPONSES,
-  thresholds,
-} from "../common/constants"
+import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
+import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
+import thresholds from "../common/parameters/thresholds.json"
 import { interimPromptHandler } from "../batchJobs/batchJobs"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
@@ -64,7 +62,7 @@ const mockDb = async function () {
   await systemParametersRef.doc("userBotResponses").set(USER_BOT_RESPONSES)
   await systemParametersRef
     .doc("factCheckerBotResponses")
-    .set(FACTCHECKER_BOT_RESPONSES)
+    .set(CHECKER_BOT_RESPONSES)
   await systemParametersRef.doc("supportedTypes").set({
     whatsapp: ["text", "image"],
   })

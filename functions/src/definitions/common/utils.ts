@@ -1,4 +1,4 @@
-import { thresholds } from "./constants"
+import thresholds from "./parameters/thresholds.json"
 import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"

@@ -1,0 +1,190 @@
+{
+  "UNTRUE": {
+    "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
+    "cn": "占位符"
+  },
+  "MISLEADING": {
+    "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
+    "cn": "占位符"
+  },
+  "ACCURATE": {
+    "en": "{{thanks}}{{matched}}{{methodology}}*accurate*.✅\n\nThank you for keeping Singapore informed!",
+    "cn": "占位符"
+  },
+  "ERROR": {
+    "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
+    "cn": "占位符"
+  },
+  "MESSAGE_NOT_YET_ASSESSED": {
+    "en": "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
+    "cn": "占位符"
+  },
+  "SCAM": {
+    "en": "{{thanks}}{{matched}}{{methodology}}*a scam*!🚫\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
+    "cn": "占位符"
+  },
+  "ILLICIT": {
+    "en": "{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
+    "cn": "占位符"
+  },
+  "SPAM": {
+    "en": "{{thanks}}{{matched}}{{methodology}}spam!🚧\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
+    "cn": "占位符"
+  },
+  "LEGITIMATE": {
+    "en": "{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅\n\nThank you for keeping Singapore safe!",
+    "cn": "占位符"
+  },
+  "UNSURE": {
+    "en": "{{thanks}}\n\nUnfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry, we're human too!😞\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.\n\nThank you for keeping Singapore safe!",
+    "cn": "占位符"
+  },
+  "THANKS_IMMEDIATE": {
+    "en": "Thanks for sending this in! ",
+    "cn": "占位符"
+  },
+  "THANKS_DELAYED": {
+    "en": "Thanks for waiting! ",
+    "cn": "占位符"
+  },
+  "METHODOLOGY_HUMAN": {
+    "en": "Our CheckMates have reviewed this message and think it's ",
+    "cn": "占位符"
+  },
+  "METHODOLOGY_AUTO": {
+    "en": "Based on pattern matching, our auto-classifier is confident that this message is ",
+    "cn": "占位符"
+  },
+  "MATCHED": {
+    "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
+    "cn": "占位符"
+  },
+  "UNSUPPORTED_TYPE": {
+    "en": "Sorry, CheckMate currently doesn't support this type of message.",
+    "cn": "占位符"
+  },
+  "SCAMSHIELD_EXPLAINER": {
+    "en": "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more at https://scamshield.org.sg.",
+    "cn": "占位符"
+  },
+  "STATS_TEMPLATE": {
+    "en": "{{top}}% of our CheckMates identified this as *{{category1}}**{{info_placeholder}}*. *{{second}}*% felt this was *{{category2}}*.",
+    "cn": "占位符"
+  },
+  "INTERIM_TEMPLATE": {
+    "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think is that this {{prelim_assessment}}{{info_placeholder}}. \n\nNOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}",
+    "cn": "占位符"
+  },
+  "INTERIM_TEMPLATE_UNSURE": {
+    "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.",
+    "cn": "占位符"
+  },
+  "INTERIM_FEEDBACK": {
+    "en": "\n\nThanks for trusting CheckMate! 👋🏼 If this interim update was useful to you, we'd appreciate it if you'd let us know by tapping on “Yes, it's useful” below. Otherwise, tap on “No, it's not” to continue waiting for the final result. Either way, you can continue to request more updates as more votes come in.",
+    "cn": "占位符"
+  },
+  "INTERIM_PROMPT": {
+    "en": "Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. \n\nYou may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼",
+    "cn": "占位符"
+  },
+  "INTERIM_USEFUL": {
+    "en": "Thanks for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIn the meantime, if you'd like another update after more votes come in, just tap the button below to request one.",
+    "cn": "占位符"
+  },
+  "INTERIM_NOT_USEFUL": {
+    "en": "Sorry to hear that, but thanks anyway for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIf you'd like still another update after more votes come in, just tap the button below to request one.",
+    "cn": "占位符"
+  },
+  "ALREADY_REPLIED": {
+    "en": "CheckMate has already provided a final response to this message.",
+    "cn": "占位符"
+  },
+  "SCAMSHIELD_ON_DECLINE": {
+    "en": "No worries! We will not send your message to ScamShield. Thank you for sharing this message with us, and for keeping Singapore safe!",
+    "cn": "占位符"
+  },
+  "MENU": {
+    "en": "{{prefix}}\n\nIf you know what to do, please go ahead! Else, select \"View Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
+    "cn": "占位符"
+  },
+  "NEW_USER_MENU_PREFIX": {
+    "en": "Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined us to battle scams and misinformation😊.",
+    "cn": "占位符"
+  },
+  "IRRELEVANT_MENU_PREFIX": {
+    "en": "Thanks for waiting!🙏🏻 Our CheckMates didn't find anything to assess in this message.😕",
+    "cn": "占位符"
+  },
+  "IRRELEVANT_AUTO_MENU_PREFIX": {
+    "en": "Hmm...There doesn't seem to be anything to assess in this message.😕",
+    "cn": "占位符"
+  },
+  "MENU_PREFIX": {
+    "en": "Hi! Thanks for using CheckMate. 🙏🏻",
+    "cn": "占位符"
+  },
+  "PROCEED_TO_SEND": {
+    "en": "Nice! Just send/forward us the message. We'll help you check and/or report it! ✅✅\n\nIf you like, you can also send in screenshots 📷 or other images 🖼️! This can help to capture the sender's number, or a full conversation, which could help our CheckMates' assessment.\n\nOne last thing: by continuing to use CheckMate, you're agreeing to our privacy policy, which can be found at https://checkmate.sg/privacy-policy. In short, we only collect the messages sent to us and your number to facilitate a response!",
+    "cn": "占位符"
+  },
+  "HOW_TO": {
+    "en": "Check out https://youtube.com/shorts/gFeO_qFOchs?feature=share to see how CheckMate works!\n\nDone? You're now ready to use CheckMate! Let's do our part in the fight against scams and misinformation! 💪",
+    "cn": "占位符"
+  },
+  "LEARN_MORE": {
+    "en": "To learn more about CheckMate, you can visit our website at https://checkmate.sg",
+    "cn": "占位符"
+  },
+  "FEEDBACK": {
+    "en": "You can submit feedback at https://bit.ly/checkmate-feedback. Rest assured, we'll read it ASAP!",
+    "cn": "占位符"
+  },
+  "DISPUTE": {
+    "en": "Thanks for letting us know! Our CheckMates will review the assessment of this message.",
+    "cn": "占位符"
+  },
+  "CONTACT": {
+    "en": "Here's our contact! Do add us to your contact list so you can find us in future. 😊",
+    "cn": "占位符"
+  },
+  "REFERRAL": {
+    "en": "Have you started checking and reporting suspicious messages using CheckMate yet? Sign up by clicking this link and sending in the pre-loaded message!! {{link}}",
+    "cn": "占位符"
+  },
+  "REFERRAL_PREPOPULATED_PREFIX": {
+    "en": "Welcome to CheckMate! Send in this entire message (including the code) to get started, and credit your friend with your referral. Code:",
+    "cn": "占位符"
+  },
+  "GENERIC_PREPOPULATED_PREFIX": {
+    "en": "Welcome to Checkmate! Send in this entire message (including the code) to get started. Code:",
+    "cn": "占位符"
+  },
+  "REFERRAL_INVALID": {
+    "en": "Sorry, referrals are only credited upon your first interaction with CheckMate.",
+    "cn": "占位符"
+  },
+  "GENERIC_ERROR": {
+    "en": "Sorry, an error occured. 😔 We'll be looking into this! Meanwhile, you can try out other functions of the bot. Apologies!",
+    "cn": "占位符"
+  },
+  "SATISFACTION_SURVEY": {
+    "en": "Thanks so much for using CheckMate🙏. We're improving the product from time to time, and your feedback is valuable to us.\n\nOn a scale from 1-10, how likely are you to recommend us to a friend, colleague or family member?",
+    "cn": "占位符"
+  },
+  "SATISFACTION_SURVEY_THANKS": {
+    "en": "Thanks for your feedback!",
+    "cn": "占位符"
+  },
+  "HOWD_WE_TELL": {
+    "en": "*This is an experimental feature powered by generative AI*. Do let us know if it was useful below!\n \n{{rationalisation}}",
+    "cn": "占位符"
+  },
+  "RATIONALISATION_USEFUL": {
+    "en": "Thanks for your valuable feedback!",
+    "cn": "占位符"
+  },
+  "RATIONALISATION_NOT_USEFUL": {
+    "en": "Sorry to hear that, but thanks anyway for your valuable feedback!",
+    "cn": "占位符"
+  }
+}

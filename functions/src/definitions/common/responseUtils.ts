@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } from "./constants"
+import USER_BOT_RESPONSES from "./parameters/userResponses.json"
+import CHECKER_BOT_RESPONSES from "./parameters/checkerResponses.json"
 import {
   sendWhatsappButtonMessage,
   sendWhatsappTextListMessage,
@@ -12,6 +13,17 @@ import { sendTextMessage } from "./sendMessage"
 import { getCount } from "./counters"
 
 const db = admin.firestore()
+
+type BotResponses = {
+  [key: string]: {
+    en: string
+    cn?: string
+  }
+}
+
+type ResponseObject = {
+  [key: string]: string
+}
 
 function getInfoLiner(truthScore: null | number) {
   return `, with an average score of ${
@@ -82,25 +94,34 @@ async function respondToRationalisationFeedback(
   await sendWhatsappTextMessage("user", data.from, response)
 }
 
-async function getResponsesObj(
-  botType: "factChecker"
-): Promise<typeof FACTCHECKER_BOT_RESPONSES>
-async function getResponsesObj(
-  botType: "user"
-): Promise<typeof USER_BOT_RESPONSES>
+async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
+async function getResponsesObj(botType: "user"): Promise<ResponseObject>
 async function getResponsesObj(botType: "user" | "factChecker" = "user") {
   let path
-  let fallbackResponses
   if (botType === "factChecker") {
     path = "systemParameters/factCheckerBotResponses"
-    fallbackResponses = FACTCHECKER_BOT_RESPONSES
+    const checkerResponseSnap = await db.doc(path).get()
+    return checkerResponseSnap.data() ?? CHECKER_BOT_RESPONSES
   } else {
     path = "systemParameters/userBotResponses"
-    fallbackResponses = USER_BOT_RESPONSES
+    const userResponseSnap = await db.doc(path).get()
+    const userResponseObject = userResponseSnap.data() ?? USER_BOT_RESPONSES
+    const language = "en" //TODO: change this to read from user DB
+
+    const responseProxy = new Proxy(userResponseObject as BotResponses, {
+      get(target, prop: string) {
+        if (target[prop] && target[prop][language]) {
+          return target[prop][language]
+        } else if (target[prop] && target[prop]["en"]) {
+          // Fallback to English
+          return target[prop]["en"]
+        }
+        functions.logger.error(`Error getting ${prop} from user bot responses`)
+        return "error" // Or some default value or error handling
+      },
+    })
+    return responseProxy
   }
-  const defaultResponsesRef = db.doc(path)
-  const defaultResponsesSnap = await defaultResponsesRef.get()
-  return defaultResponsesSnap.data() ?? fallbackResponses
 }
 
 async function sendMenuMessage(
