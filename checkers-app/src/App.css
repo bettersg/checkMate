@@ -2,53 +2,33 @@
 @tailwind components;
 @tailwind utilities;  */
 
+:root {
+  --background-color: #ffffff;
+  --primary-color: #ff8932;
+  --primary-color2: #cc3502;
+  --primary-color3: #82080c;
+  --secondary-color: #ffd81b;
+  --secondary-color2: #ffbb0b;
+  --highlight-color: #00a8b1;
+  --success-color: #d0ffc5;
+  --pending-color: #fff485;
+  --error-color: #ffc7a5;
+}
+
 /* @layer components{ */
-  p.firebase-emulator-warning {
-    top: 0;
-    height: 30px;
-    width: 200px !important;
-    overflow: hidden;
-  }
+p.firebase-emulator-warning {
+  top: 0;
+  height: 30px;
+  width: 200px !important;
+  overflow: hidden;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 5vh 5vw 0vh 5vw;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.orange-glow {
+  box-shadow: 0 0 10px var(--primary-color); /* Change the color and radius as needed */
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-

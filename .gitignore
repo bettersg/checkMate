@@ -69,3 +69,6 @@ local_batch_jobs
 
 # local firebase emulator data
 local-data
+
+# testing data
+testing-data/**

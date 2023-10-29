@@ -1,21 +1,16 @@
-import React from "react";
 import { Typography } from "@material-tailwind/react";
 
-export default function Header() {
+interface HeaderProps {
+  children: string;
+}
+
+export default function Header({ children }: HeaderProps) {
   return (
-    <div className="container items-center justify-between flex-row flex">
-      <div
-        className="left-0 mx-0 px-1 mt-2 text-left"
-        style={{ alignItems: "start", position: "relative" }}
-      >
-        <Typography
-          variant="h2"
-          style={{ color: "#ff4d00", alignContent: "start" }}
-        >
-          Hello, Sally
-        </Typography>
+    <div className="container relative mb-4">
+      <div className="w-[78vw]">
+      <Typography variant="h2" className="text-primary-color2">Hello, {children}</Typography>
       </div>
-      <img className="rounded-full mr-4 h-[50px] w-[50px]" src="/logo-1.jpg" />
+      <img className="rounded-full absolute top-0 right-0 h-[12vw] w-[12vw] orange-glow" src="/logo-1.jpg" />
     </div>
   );
 }

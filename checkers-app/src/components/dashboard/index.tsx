@@ -1,17 +1,12 @@
 import NavbarDefault from "../BotNavBar";
 import Header from "../Header";
-import PopoverDefault from "../Popover";
+import PageHeader from "../PageHeader";
 
 export default function Dashboard() {
-  const dashboardLabel = {
-    title: "Dashboard",
-    info: "View your voting statistics",
-  };
   return (
-    <div style={{}}>
-      <Header />
-      {/* <TabsWithIcon /> */}
-      <PopoverDefault title={dashboardLabel.title} info={dashboardLabel.info} />
+    <div>
+      <Header>Samantha</Header> {/* To change to a dynamcially loaded name in the future */}
+      <PageHeader>DASHBOARD</PageHeader>
       <NavbarDefault />
     </div>
   );

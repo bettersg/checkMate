@@ -1,20 +1,12 @@
 import NavbarDefault from "../BotNavBar";
 import Header from "../Header";
-import PopoverDefault from "../Popover";
+import PageHeader from "../PageHeader";
 
 export default function Achievement() {
-  const achievementLabel = {
-    title: "Achievement",
-    info: "View voting achievements",
-  };
   return (
-    <div style={{}}>
-      <Header />
-      {/* <TabsWithIcon /> */}
-      <PopoverDefault
-        title={achievementLabel.title}
-        info={achievementLabel.info}
-      />
+    <div>
+      <Header>Samantha</Header>
+      <PageHeader>ACHIEVEMENTS</PageHeader>
       <NavbarDefault />
     </div>
   );

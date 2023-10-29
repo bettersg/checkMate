@@ -12,10 +12,10 @@ interface PropType {
 
 export default function PopoverDefault(props: PropType) {
   return (
-    <div className="left-0 p-2 flex mb-4">
+    <div className="mb-4">
       <Popover placement="right">
         <PopoverHandler>
-          <Button style={{ backgroundColor: "#00a8b1" }}>{props.title}</Button>
+          <Button className="bg-highlight-color">{props.title}</Button>
         </PopoverHandler>
         <PopoverContent>{props.info}</PopoverContent>
       </Popover>
