@@ -13,7 +13,7 @@ export default function FilterVoteButton() {
       <MenuHandler>
         <Button
           variant="text"
-          className="flex gap-3 text-base font-normal capitalize tracking-normal px-3 py-3 items-center m-0 rounded-full"
+          className="flex justify-center gap-3 text-primary-color3 text-md capitalize tracking-normal rounded-full w-full"
         >
           <FunnelIcon color="#61dafbaa" className="h-[20px] w-[20px]" />
           Filter
