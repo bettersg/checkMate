@@ -9,6 +9,8 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+const env = process.env.ENVIRONMENT
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -17,7 +19,12 @@ const getThresholds = async function () {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
-  return (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
+  const returnThresholds =
+    (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
+  if (env !== "PROD") {
+    returnThresholds.surveyLikelihood = 1
+  }
+  return returnThresholds
 }
 
 function normalizeSpaces(str: string) {

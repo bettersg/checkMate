@@ -220,8 +220,6 @@ const FACTCHECKER_BOT_RESPONSES = {
     "Great, you have no further messages to assess. Keep it up!💪",
 }
 
-const env = process.env.ENVIRONMENT
-
 const thresholds = {
   endVote: 0.5,
   endVoteSus: 0.2,
@@ -236,7 +234,7 @@ const thresholds = {
   falseUpperBound: 1.5,
   misleadingUpperBound: 3.5,
   sendInterimMinVotes: 1,
-  surveyLikelihood: env !== "PROD" ? 1 : 0.25,
+  surveyLikelihood: 0.25,
   satisfactionSurveyCooldownDays: 30,
 }
 
