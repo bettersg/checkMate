@@ -9,11 +9,11 @@ import { useNavigate } from "react-router-dom";
 import VeracitySlider from "./Tier2";
 
 const CATEGORIES = [
-  { name: "Scam", icon: <XMarkIcon className="h-6 w-6" /> },
-  { name: "Illicit", icon: <ShieldExclamationIcon className="h-6 w-6" /> },
-  { name: "News/Info/Opinion", icon: <LightBulbIcon className="h-6 w-6" /> },
-  { name: "Spam", icon: <FaceFrownIcon className="h-6 w-6" /> },
-  { name: "Trivial", icon: <CheckCircleIcon className="h-6 w-6" /> },
+  { name: "Scam", icon: <XMarkIcon className="h-7 w-7" /> },
+  { name: "Illicit", icon: <ShieldExclamationIcon className="h-7 w-7" /> },
+  { name: "News/Info/Opinion", icon: <LightBulbIcon className="h-7 w-7" /> },
+  { name: "Spam", icon: <FaceFrownIcon className="h-7 w-7" /> },
+  { name: "Trivial", icon: <CheckCircleIcon className="h-7 w-7" /> },
 ];
 
 export default function VoteCategories() {
@@ -25,16 +25,16 @@ export default function VoteCategories() {
   };
 
   const handleNext = () => {
+    //add in function to set vote to assessed
     navigate("/myvotes");
   };
 
   return (
-    <div className="grid grid-flow-row-dense gap-y-4 place-content-center m-2">
+    <div className="grid grid-flow-row gap-y-4 items-center">
       {CATEGORIES.map((category, index) => (
         <Button
-          className="flex flex-row items-center gap-2 max-w-md m-2 space-x-1"
+          className="flex flex-row items-center justify-start gap-2 max-w-md space-x-3 bg-primary-color text-sm"
           key={index}
-          style={{ backgroundColor: "#ff8932" }}
           onClick={() => handleVote(category.name)}
         >
           {category.icon}
@@ -43,14 +43,13 @@ export default function VoteCategories() {
       ))}
 
       {vote ? (
-        <div className="grid-flow-row gap-y-3">
-          <Typography className="m-3" variant="h6">
+        <div className="">
+          <Typography className="mb-3 text-primary-color3" variant="h6">
             You have chosen: {vote}
           </Typography>
           {vote == "News/Info/Opinion" ? <VeracitySlider /> : null}
           <Button
-            className="m-3"
-            style={{ backgroundColor: "#00a8b1" }}
+            className="bg-highlight-color"
             onClick={() => handleNext()}
           >
             Done!

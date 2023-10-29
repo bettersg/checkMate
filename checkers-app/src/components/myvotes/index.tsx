@@ -1,6 +1,6 @@
-import NavbarDefault from "../BotNavBar";
-import Header from "../Header";
-import PageHeader from "../PageHeader";
+import NavbarDefault from "../../shared/BotNavBar";
+import Header from "../../shared/Header";
+import PageHeader from "../../shared/PageHeader";
 import VoteInstanceButton from "./VoteInstanceButton";
 import FilterVoteButton from "./FilterVotes";
 

@@ -6,7 +6,6 @@ import {
 } from "firebase/auth";
 import "./App.css";
 import app from "./firebase";
-import MessageCard from "./components/voting/MessageCard";
 import {
   AchievementPage,
   DashboardPage,
@@ -20,7 +19,7 @@ const router = createBrowserRouter([
   { path: "myvotes", element: <MyVotesPage /> },
   { path: "achievements", element: <AchievementPage /> },
   {
-    path: "voting",
+    path: "messageId/voting",
     element: <VotingPage />,
   },
 ]);

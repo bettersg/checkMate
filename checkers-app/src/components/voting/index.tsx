@@ -5,10 +5,10 @@ import { BackButton } from "./BackButton";
 
 export default function VotingPage() {
   return (
-    <div className="flex-col items-center m-2 gap-y-4">
+    <div className="grid grid-flow-row items-center gap-2">
       <BackButton />
       <MessageCard />
-      <Typography variant="h4">Select category:</Typography>
+      <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
       <VoteCategories />
     </div>
   );
