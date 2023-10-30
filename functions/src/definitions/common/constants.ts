@@ -1,6 +1,6 @@
 const USER_BOT_RESPONSES = {
-  UNTRUE: `{{thanks}}{{matched}}{{methodology}}*untrue*.❌
-  
+  UNTRUE: `{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}
+
 Please do not spread it further⛔️⛔️
 
 Thank you for keeping Singapore informed!`,
