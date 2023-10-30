@@ -1,14 +1,14 @@
 {
   "UNTRUE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
+    "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
     "cn": "占位符"
   },
   "MISLEADING": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
+    "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
     "cn": "占位符"
   },
   "ACCURATE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*accurate*.✅\n\nThank you for keeping Singapore informed!",
+    "en": "{{thanks}}{{matched}}{{methodology}}*accurate*.✅{{image_caveat}}\n\nThank you for keeping Singapore informed!",
     "cn": "占位符"
   },
   "ERROR": {
@@ -20,19 +20,19 @@
     "cn": "占位符"
   },
   "SCAM": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*a scam*!🚫\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
+    "en": "{{thanks}}{{matched}}{{methodology}}*a scam*!🚫{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
     "cn": "占位符"
   },
   "ILLICIT": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
+    "en": "{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
     "cn": "占位符"
   },
   "SPAM": {
-    "en": "{{thanks}}{{matched}}{{methodology}}spam!🚧\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
+    "en": "{{thanks}}{{matched}}{{methodology}}spam!🚧{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
     "cn": "占位符"
   },
   "LEGITIMATE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅\n\nThank you for keeping Singapore safe!",
+    "en": "{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}\n\nThank you for keeping Singapore safe!",
     "cn": "占位符"
   },
   "UNSURE": {
@@ -57,6 +57,10 @@
   },
   "MATCHED": {
     "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
+    "cn": "占位符"
+  },
+  "IMAGE_CAVEAT": {
+    "en": "\n\nThis assessment refers to any claims made within the captions. If there are no claims/captions, it refers to the image itself.",
     "cn": "占位符"
   },
   "UNSUPPORTED_TYPE": {
