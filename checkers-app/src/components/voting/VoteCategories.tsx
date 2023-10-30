@@ -43,13 +43,13 @@ export default function VoteCategories() {
       ))}
 
       {vote ? (
-        <div className="">
+        <div className="place-self-center place-items-center flex flex-col">
           <Typography className="mb-3 text-primary-color3" variant="h6">
             You have chosen: {vote}
           </Typography>
           {vote == "News/Info/Opinion" ? <VeracitySlider /> : null}
           <Button
-            className="bg-highlight-color"
+            className="bg-highlight-color w-fit"
             onClick={() => handleNext()}
           >
             Done!

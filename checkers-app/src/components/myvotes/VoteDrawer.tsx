@@ -4,7 +4,6 @@ import {
 } from "@material-tailwind/react";
 import VoteResult from "./VoteResult";
 import MessageCard from "../../shared/MessageCard";
-import React, { useState } from "react";
 
 interface PropType {
     id: number,

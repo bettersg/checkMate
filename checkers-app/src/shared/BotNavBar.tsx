@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Navbar, Typography, List, ListItem } from "@material-tailwind/react";
 
 import {
@@ -11,8 +9,7 @@ import {
 export default function NavbarDefault() {
   return (
     <Navbar
-      className="mx-auto py-2 px-6 fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2"
-      // style={{ backgroundColor: "#ff8932" }}
+      className="mx-auto py-2 px-6 fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2 round-t-xl"
     >
       <div className="container mx-auto items-center justify-between flex-row gap-2">
         <List className="mt-0 mb-0 p-1 flex-row justify-between">

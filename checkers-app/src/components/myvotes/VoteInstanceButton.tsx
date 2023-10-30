@@ -5,14 +5,16 @@ interface PropType {
   isAssessed: boolean,
   isMatch: boolean,
   handleClick: () => void,
+
 }
+
 
 export default function VoteInstanceButton(Prop: PropType) {
 
-  const color = !Prop.isAssessed ? "yellow" : Prop.isMatch ? "green" : "red";
+  const color = !Prop.isAssessed ? "bg-pending-color" : Prop.isMatch ? "bg-success-color" : "bg-error-color";
   return (
     <div className="items-center col-span-2 mb-2">
-      <Button className="rounded-full" color={color} style={{ width: "100%" }} onClick={Prop.handleClick}>
+      <Button className={`rounded-full ${color} text-primary-color3`} style={{ width: "100%",}} onClick={Prop.handleClick}>
         {!Prop.isAssessed ? "pending" : Prop.isMatch ? "assessed" : "review"}
       </Button>
     </div>

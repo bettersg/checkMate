@@ -3,7 +3,7 @@ import Header from "../../shared/Header";
 import PageHeader from "../../shared/PageHeader";
 import VoteInstanceButton from "./VoteInstanceButton";
 import FilterVoteButton from "./FilterVotes";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VoteDrawer from "./VoteDrawer";
 

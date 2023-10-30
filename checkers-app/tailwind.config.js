@@ -4,10 +4,6 @@ module.exports = withMT({
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      gridTemplateColumns: {
-        sidebar: "1fr auto", //for sidebar layout
-        "sidebar-collapsed": "0.25fr auto", //for collapsed sidebar layout
-      },
       colors: {
         'background-color': '#ffffff',
         'primary-color': '#ff8932',
@@ -19,7 +15,7 @@ module.exports = withMT({
         'success-color': '#d0ffc5',
         'pending-color': '#fff485',
         'error-color': '#ffc7a5',
-      },
+      }, 
     },
   },
   plugins: [],
