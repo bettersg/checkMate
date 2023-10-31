@@ -1,6 +1,3 @@
-import NavbarDefault from "../../shared/BotNavBar";
-import Header from "../../shared/Header";
-import PageHeader from "../../shared/PageHeader";
 import VoteInstanceButton from "./VoteInstanceButton";
 import FilterVoteButton from "./FilterVotes";
 import { useState } from "react";
@@ -40,9 +37,6 @@ export default function MyVotes() {
 
   //TODO: Change to a whole "VoteDisplay" component once we have finalised the API for votes
   return (
-    <div style={{}}>
-      <Header>Samantha</Header>
-      <PageHeader>MY VOTES</PageHeader>
       <div className="grid grid-col-4 grid-flow-col gap-2">
         <div className="grid-flow-row col-span-3">
           {MESSAGES.map((msg) => (
@@ -63,7 +57,5 @@ export default function MyVotes() {
           <FilterVoteButton />
         </div>
       </div>
-      <NavbarDefault />
-    </div >
   );
 }
