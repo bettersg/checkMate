@@ -6,10 +6,11 @@ import PageHeader from "./PageHeader";
 interface LayoutProps {
     name: string,
     pageHeader: string,
-    children: ReactNode;
+    children: ReactNode,
+    user_unassessed: number
 }
 
-export default function Layout({ name, pageHeader, children }: LayoutProps) {
+export default function Layout({ name, pageHeader, children, user_unassessed }: LayoutProps) {
     return (
         <div>
             <Header>{name}</Header>
@@ -17,7 +18,7 @@ export default function Layout({ name, pageHeader, children }: LayoutProps) {
             <div className="pb-16">
                 {children}
             </div>
-            <NavbarDefault />
+            <NavbarDefault unassessed={user_unassessed}/>
         </div>
     )
 }
