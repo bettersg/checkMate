@@ -1,194 +1,334 @@
 {
   "UNTRUE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
-    "cn": "占位符"
+    "cn": "{thanks}}{{matched}}{{methodology}}*不属实*。❌{{image_caveat}}\n\n请不要再转发了⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
   },
   "MISLEADING": {
     "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
-    "cn": "占位符"
+    "cn": "{{thanks}}{{matched}}{{methodology}}虽然包含一些真实的信息，但整体来看，它*具有误导性或展现不平衡的观点*。⚠️{{image_caveat}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "ACCURATE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*accurate*.✅{{image_caveat}}\n\nThank you for keeping Singapore informed!",
-    "cn": "占位符"
+    "cn": "{{thanks}}{{matched}}{{methodology}}*是准确的*。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "ERROR": {
     "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
-    "cn": "占位符"
+    "cn": "抱歉，我们评估短信时出现了问题。\n\n您可以再次发送短信，或使用我们的反馈表格报告问题：https://bit.ly/checkmate-feedback。非常抱歉！😔"
   },
   "MESSAGE_NOT_YET_ASSESSED": {
     "en": "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
-    "cn": "占位符"
+    "cn": "你好！👋 感谢您的提交！我们的查哥查妹🕵🏻将尽快审查这条短信并回复。"
   },
   "SCAM": {
     "en": "{{thanks}}{{matched}}{{methodology}}*a scam*!🚫{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
-    "cn": "占位符"
+    "cn": "{{thanks}}{{matched}}{{methodology}}*是一种诈骗*!🚫{{image_caveat}}\n\n我们建议您不要再进行任何交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 报告此诈骗。\n\n如果您不想报告此短信，请选择\"不报告此短信\"。"
   },
   "ILLICIT": {
     "en": "{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
-    "cn": "占位符"
+    "cn": "{{thanks}}{{matched}}{{methodology}}**很可疑*！🚨{{image_caveat}}\n\n我们建议您不要再进行任何交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 报告这条可疑的短信。\n\n如果您不想报告此短信，请选择\"不报告此短信\"。"
   },
   "SPAM": {
     "en": "{{thanks}}{{matched}}{{methodology}}spam!🚧{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
-    "cn": "占位符"
+    "cn": "{{thanks}}{{matched}}{{methodology}}是垃圾信息！🚧{{image_caveat}}\n\n虽然可能无害，但请始终保持警惕 🧐\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "LEGITIMATE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}\n\nThank you for keeping Singapore safe!",
-    "cn": "占位符"
+    "cn": "{{thanks}}{{matched}}{{methodology}}*来自可靠的来源*。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "UNSURE": {
     "en": "{{thanks}}\n\nUnfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry, we're human too!😞\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.\n\nThank you for keeping Singapore safe!",
-    "cn": "占位符"
+    "cn": "{{thanks}}\n\n抱歉，我们的查哥查妹对这条短信*无法做出评估*🤷🏻‍♂️🤷🏻‍♀️。对不起，毕竟我们也只是普通人！😞\n\n如果可能的话，请提供更多详细资料，例如发信人电话号码或截图。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "THANKS_IMMEDIATE": {
-    "en": "Thanks for sending this in! ",
-    "cn": "占位符"
+    "en": "Thanks for sending this in!",
+    "cn": "感谢您提交这条短信！"
   },
   "THANKS_DELAYED": {
-    "en": "Thanks for waiting! ",
-    "cn": "占位符"
-  },
-  "METHODOLOGY_HUMAN": {
-    "en": "Our CheckMates have reviewed this message and think it's ",
-    "cn": "占位符"
-  },
-  "METHODOLOGY_AUTO": {
-    "en": "Based on pattern matching, our auto-classifier is confident that this message is ",
-    "cn": "占位符"
-  },
-  "MATCHED": {
-    "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
-    "cn": "占位符"
+    "en": "Thanks for waiting!",
+    "cn": "感谢您的耐心等待！"
   },
   "IMAGE_CAVEAT": {
     "en": "\n\nThis assessment refers to any claims made within the captions. If there are no claims/captions, it refers to the image itself.",
-    "cn": "占位符"
+    "cn": "这个评估是根据标题中的任何声明。如果短信里没有文字标题，此评估是根据图片里的内容。"
+  },
+  "METHODOLOGY_HUMAN": {
+    "en": "Our CheckMates have reviewed this message and think it's",
+    "cn": "我们的查哥查妹审查了这条短信后，认为它"
+  },
+  "METHODOLOGY_AUTO": {
+    "en": "Based on pattern matching, our auto-classifier is confident that this message is ",
+    "cn": "根据我们采用的人工智能技术，我们确信这条短信"
+  },
+  "MATCHED": {
+    "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
+    "cn": "其实查友已经收到了{{numberInstances}}条同样的短信。"
   },
   "UNSUPPORTED_TYPE": {
     "en": "Sorry, CheckMate currently doesn't support this type of message.",
-    "cn": "占位符"
+    "cn": "对不起，查友目前不支持这种类型的短信。"
   },
-  "SCAMSHIELD_EXPLAINER": {
-    "en": "ScamShield is an anti-scam product developed by the National Crime Prevention Council and Open Government Products. You can learn more at https://scamshield.org.sg.",
-    "cn": "占位符"
+  "STATS_TEMPLATE_1": {
+    "en": "{{top}}% of our CheckMates felt this was *{{category}}*{{info_placeholder}}.",
+    "cn": "我们的查哥查妹中有{{top}}%的人认为这条短信*{{category}}*{{info_placeholder}}。"
   },
-  "STATS_TEMPLATE": {
-    "en": "{{top}}% of our CheckMates identified this as *{{category1}}**{{info_placeholder}}*. *{{second}}*% felt this was *{{category2}}*.",
-    "cn": "占位符"
+  "STATS_TEMPLATE_2": {
+    "en": " {{second}}% felt this was *{{category}}*{{info_placeholder}}.",
+    "cn": "另外{{second}}%的人认为这条短信*{{category}}*{{info_placeholder}}。"
   },
   "INTERIM_TEMPLATE": {
-    "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think is that this {{prelim_assessment}}{{info_placeholder}}. \n\nNOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}",
-    "cn": "占位符"
+    "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think that this is {{prelim_assessment}}{{info_placeholder}}. \n\nNOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}",
+    "cn": "目前，我们的查哥查妹中有{{%voted}}%的人已经评估并对这条短信进行了投票。大多数人认为这条短信{{prelim_assessment}}{{info_placeholder}}。\n\n注意：这只是*初步结果*。我们的目标是在更多的查哥查妹投票，或者自您发送短信后24小时内，为您提供更可信的最终结果。{{get_feedback}}"
+  },
+  "INFO_PLACEHOLDER": {
+    "en": ", with an average score of {{score}} on a scale of 0-5 (5 = completely true)",
+    "cn": "在0-5的评分标准上，平均分数为{{score}}（5 = 完全正确）"
   },
   "INTERIM_TEMPLATE_UNSURE": {
     "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.",
-    "cn": "占位符"
+    "cn": "\n目前，我们的查哥查妹中{{%voted}}%的人已经投票评估了这条短信。不幸的是，他们要么没有一致意见，要么缺乏资料来评估这条短信。\n\n如果可能的话，请提供更多详细资料，例如发信人电话号码或截图。"
   },
   "INTERIM_FEEDBACK": {
     "en": "\n\nThanks for trusting CheckMate! 👋🏼 If this interim update was useful to you, we'd appreciate it if you'd let us know by tapping on “Yes, it's useful” below. Otherwise, tap on “No, it's not” to continue waiting for the final result. Either way, you can continue to request more updates as more votes come in.",
-    "cn": "占位符"
+    "cn": "感谢您对查友的信任！👋🏼 如果这个临时更新对您有帮助，我们会很感激如果您能点击下方的“有帮助”。否则，点击“没帮助”以继续等待最终结果。无论如何，随着更多投票的到来，您都可以继续请求更多更新。"
   },
   "INTERIM_PROMPT": {
     "en": "Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. \n\nYou may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼",
-    "cn": "占位符"
+    "cn": "感谢您的耐心等待！我们目前仍在等待我们的查友志愿者网络的评估，只有在收到足够的投票后，我们才能提供可信的最终结果。\n\n您可以点击下面的按钮*获取初步结果的临时更新*。但是，请注意，初步结果和最终结果之间可能存在差异，*应谨慎解读初步结果*。我们感谢您的耐心，并希望尽快向您提供最终结果！💪🏼"
   },
   "INTERIM_USEFUL": {
     "en": "Thanks for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIn the meantime, if you'd like another update after more votes come in, just tap the button below to request one.",
-    "cn": "占位符"
+    "cn": "感谢您的反馈！我们会尽快提供最终结果，一旦我们的查哥查投票更多或者已经过去24小时自您发送短信。\n\n如果您希望在更多投票后再次更新，请点击下方按钮请求。"
   },
   "INTERIM_NOT_USEFUL": {
     "en": "Sorry to hear that, but thanks anyway for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIf you'd like still another update after more votes come in, just tap the button below to request one.",
-    "cn": "占位符"
+    "cn": "很遗憾听到这个消息，但还是要感谢您的宝贵反馈！我们的查哥查妹们投票更多或者自您发送短信后已过24小时时，我们会尽快向您提供最终结果。\n\n如果您希望在更多投票进来后再次更新，请点击下方的按钮进行请求。"
   },
   "ALREADY_REPLIED": {
     "en": "CheckMate has already provided a final response to this message.",
-    "cn": "占位符"
+    "cn": "查友已经对这条短信给出了最终的回应。"
   },
   "SCAMSHIELD_ON_DECLINE": {
     "en": "No worries! We will not send your message to ScamShield. Thank you for sharing this message with us, and for keeping Singapore safe!",
-    "cn": "占位符"
+    "cn": "没关系！我们不会将您的短信发送给ScamShield。感谢您与我们分享这条短信，感谢您对新加坡网络安全的支持和贡献！\n！"
   },
   "MENU": {
     "en": "{{prefix}}\n\nIf you know what to do, please go ahead! Else, select \"View Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
-    "cn": "占位符"
+    "cn": "{{prefix}}\n\n如果你知道该怎么做，请继续！否则，请选择下方的\"查看菜单\"，看看查友能做什么！👈\n\n请注意，查友*只会帮你审查发送给查友的可疑短信，它不能与你自由对话*。\n\n无论何时你需要再次了解查友的功能，只需输入\"菜单\"即可返回这里！😊"
   },
   "NEW_USER_MENU_PREFIX": {
     "en": "Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined us to battle scams and misinformation😊.",
-    "cn": "占位符"
+    "cn": "您好，欢迎来到查友！我们注意到这是您第一次使用我们的服务。我们很高兴您加入我们，一起对抗诈骗和误导短信😊。"
   },
   "IRRELEVANT_MENU_PREFIX": {
     "en": "Thanks for waiting!🙏🏻 Our CheckMates didn't find anything to assess in this message.😕",
-    "cn": "占位符"
+    "cn": "感谢您的耐心等待！🙏🏻 我们的查哥查妹在这条短信中没有找到任何可以评估的内容。😕"
   },
   "IRRELEVANT_AUTO_MENU_PREFIX": {
     "en": "Hmm...There doesn't seem to be anything to assess in this message.😕",
-    "cn": "占位符"
+    "cn": "嗯...这条短信似乎没有什么可以评估的内容。😕"
   },
   "MENU_PREFIX": {
     "en": "Hi! Thanks for using CheckMate. 🙏🏻",
-    "cn": "占位符"
+    "cn": "你好！感谢你使用查友。🙏🏻"
   },
   "PROCEED_TO_SEND": {
     "en": "Nice! Just send/forward us the message. We'll help you check and/or report it! ✅✅\n\nIf you like, you can also send in screenshots 📷 or other images 🖼️! This can help to capture the sender's number, or a full conversation, which could help our CheckMates' assessment.\n\nOne last thing: by continuing to use CheckMate, you're agreeing to our privacy policy, which can be found at https://checkmate.sg/privacy-policy. In short, we only collect the messages sent to us and your number to facilitate a response!",
-    "cn": "占位符"
+    "cn": "好的！只需将短信发送给我们，我们会帮您检查和报告！✅✅\n\n如果愿意，也可以发截图📷或其他图片🖼️！这有助于我们获得发信人号码或完整的对话内容，帮助查哥查妹评估。\n\n最后一点：使用查友即表示同意我们的隐私政策，可在 https://checkmate.sg/privacy-policy 查看。简单来说，我们只收集您发送给我们的短信和您的号码以便回复您！"
   },
   "HOW_TO": {
     "en": "Check out https://youtube.com/shorts/gFeO_qFOchs?feature=share to see how CheckMate works!\n\nDone? You're now ready to use CheckMate! Let's do our part in the fight against scams and misinformation! 💪",
-    "cn": "占位符"
+    "cn": "请访问 https://youtube.com/shorts/gFeO_qFOchs?feature=share 查看查友的工作原理！\n\n完成了吗？您现在已经准备好使用查友了！让我们一起为打击诈骗和误导短信做出贡献！💪"
   },
   "LEARN_MORE": {
     "en": "To learn more about CheckMate, you can visit our website at https://checkmate.sg",
-    "cn": "占位符"
+    "cn": "要了解更多关于查友的短信，您可以访问我们的网站 https://checkmate.sg"
   },
   "FEEDBACK": {
     "en": "You can submit feedback at https://bit.ly/checkmate-feedback. Rest assured, we'll read it ASAP!",
-    "cn": "占位符"
+    "cn": "您可以在 https://bit.ly/checkmate-feedback 提交反馈。请放心，我们会尽快阅读并处理！"
   },
   "DISPUTE": {
     "en": "Thanks for letting us know! Our CheckMates will review the assessment of this message.",
-    "cn": "占位符"
+    "cn": "感谢您的反馈！我们的查哥查妹将会重新评估这条短信。"
   },
   "CONTACT": {
     "en": "Here's our contact! Do add us to your contact list so you can find us in future. 😊",
-    "cn": "占位符"
+    "cn": "这是我们的联系方式！请将我们添加到您的联系人列表中，以便您以后能找到我们。😊"
   },
   "REFERRAL": {
     "en": "Have you started checking and reporting suspicious messages using CheckMate yet? Sign up by clicking this link and sending in the pre-loaded message!! {{link}}",
-    "cn": "占位符"
+    "cn": "您是否已经开始使用查友来检查和报告可疑的短信了？点击此链接并发送预加载的短信进行注册！{{link}}"
   },
   "REFERRAL_PREPOPULATED_PREFIX": {
     "en": "Welcome to CheckMate! Send in this entire message (including the code) to get started, and credit your friend with your referral. Code:",
-    "cn": "占位符"
+    "cn": "欢迎使用查友！发送整条短信（包括代码）以开始使用，并将您的推荐人记入账户。代码："
   },
   "GENERIC_PREPOPULATED_PREFIX": {
     "en": "Welcome to Checkmate! Send in this entire message (including the code) to get started. Code:",
-    "cn": "占位符"
+    "cn": "欢迎使用查友！请将此整条短信（包括代码）发送给我们以开始使用。代码："
   },
   "REFERRAL_INVALID": {
     "en": "Sorry, referrals are only credited upon your first interaction with CheckMate.",
-    "cn": "占位符"
+    "cn": "对不起，只有在您首次与查友互动时，推荐才会被记入账户。"
   },
   "GENERIC_ERROR": {
     "en": "Sorry, an error occured. 😔 We'll be looking into this! Meanwhile, you can try out other functions of the bot. Apologies!",
-    "cn": "占位符"
+    "cn": "对不起，出现了一个错误。😔 我们会尽快解决这个问题！同时，您可以尝试使用查友的其他功能。再次为此道歉！"
   },
   "SATISFACTION_SURVEY": {
     "en": "Thanks so much for using CheckMate🙏. We're improving the product from time to time, and your feedback is valuable to us.\n\nOn a scale from 1-10, how likely are you to recommend us to a friend, colleague or family member?",
-    "cn": "占位符"
+    "cn": "非常感谢您使用查友🙏。您的反馈对我们非常重要，也会帮我们改进。\n\n请问在1-10的评分中，您有多大可能性向您的朋友、同事或家人推荐查友？"
   },
   "SATISFACTION_SURVEY_THANKS": {
     "en": "Thanks for your feedback!",
-    "cn": "占位符"
+    "cn": "感谢您的反馈！"
   },
   "HOWD_WE_TELL": {
     "en": "*This is an experimental feature powered by generative AI*. Do let us know if it was useful below!\n \n{{rationalisation}}",
-    "cn": "占位符"
+    "cn": "*这是一项由生成式人工智能驱动的实验性功能*。请在下方告诉我们它是否对您有所帮助！\n\n{{rationalisation}}"
   },
   "RATIONALISATION_USEFUL": {
     "en": "Thanks for your valuable feedback!",
-    "cn": "占位符"
+    "cn": "感谢您的反馈！"
   },
   "RATIONALISATION_NOT_USEFUL": {
     "en": "Sorry to hear that, but thanks anyway for your valuable feedback!",
-    "cn": "占位符"
+    "cn": "很遗憾得知此功能对您来说不是很有用。 我已将此消息传递给我们的产品团队，以便将来进一步增强此功能。感谢您的反馈！"
+  },
+  "MENU_BUTTON": {
+    "en": "Menu",
+    "cn": "菜单"
+  },
+  "MENU_TITLE_CHECK": {
+    "en": "Check/Report",
+    "cn": "查询/举报"
+  },
+  "MENU_DESCRIPTION_CHECK": {
+    "en": "Send in messages, images, or screenshots for checking!",
+    "cn": "提交消息、图片或截图进行检查！"
+  },
+  "MENU_TITLE_REFERRAL": {
+    "en": "Get Referral Link",
+    "cn": "获取推荐链接"
+  },
+  "MENU_DESCRIPTION_REFERRAL": {
+    "en": "Get referral link to forward to others",
+    "cn": "获取推荐链接以转发给亲戚好友加入查友"
+  },
+  "MENU_TITLE_HELP": {
+    "en": "Get Help",
+    "cn": "使用说明"
+  },
+  "MENU_DESCRIPTION_HELP": {
+    "en": "Find out how to use CheckMate to check or report dubious messages",
+    "cn": "了解如何使用查友来查询或举报可疑短信"
+  },
+  "MENU_TITLE_ABOUT": {
+    "en": "About CheckMate",
+    "cn": "关于查友"
+  },
+  "MENU_DESCRIPTION_ABOUT": {
+    "en": "Learn more about CheckMate and the team behind it",
+    "cn": "了解更多关于查友及其幕后团队的短信"
+  },
+  "MENU_TITLE_FEEDBACK": {
+    "en": "Send Feedback",
+    "cn": "给予反馈"
+  },
+  "MENU_DESCRIPTION_FEEDBACK": {
+    "en": "Send us feedback on anything to do with CheckMate",
+    "cn": "给予有关查友的任何反馈"
+  },
+  "MENU_TITLE_CONTACT": {
+    "en": "Get Contact",
+    "cn": "获取联系方式"
+  },
+  "MENU_DESCRIPTION_CONTACT": {
+    "en": "Get CheckMate's contact to add to your contact list",
+    "cn": "获取查友的联系方式并添加查友到您的通讯列表"
+  },
+  "MENU_TITLE_DISPUTE": {
+    "en": "Dispute Assessment",
+    "cn": "争议判断"
+  },
+  "MENU_DESCRIPTION_DISPUTE": {
+    "en": "Dispute CheckMate's assesment of this message",
+    "cn": "对查友对此消息的评估提出异议"
+  },
+  "MENU_DESCRIPTION_NPS_LIKELY": {
+    "en": "Extremely likely 🤩",
+    "cn": "一定会🤩"
+  },
+  "MENU_DESCRIPTION_NPS_UNLIKELY": {
+    "en": "Not at all likely 😥",
+    "cn": "休想😥"
+  },
+  "NPS_MENU_BUTTON": {
+    "en": "Respond",
+    "cn": "回应"
+  },
+  "BUTTON_USEFUL": {
+    "en": "Yes, it's useful",
+    "cn": "有帮助"
+  },
+  "BUTTON_NOT_USEFUL": {
+    "en": "No, it's not",
+    "cn": "没帮助"
+  },
+  "BUTTON_ANOTHER_UPDATE": {
+    "en": "Get another update",
+    "cn": "再提供审查状态更新"
+  },
+  "BUTTON_GET_INTERIM": {
+    "en": "Get interim update",
+    "cn": "提供审查状态更新"
+  },
+  "BUTTON_RESULTS": {
+    "en": "See voting results",
+    "cn": "查看投票结果"
+  },
+  "BUTTON_DECLINE_REPORT": {
+    "en": "Don't report this",
+    "cn": "不要举报"
+  },
+  "BUTTON_RATIONALISATION": {
+    "en": "How'd we tell?",
+    "cn": "我们是如何判断的？"
+  },
+  "PLACEHOLDER_SCAM": {
+    "en": "a scam🚫",
+    "cn": "是一种诈骗🚫"
+  },
+  "PLACEHOLDER_SUSPICIOUS": {
+    "en": "illicit🚨",
+    "cn": "具有非法性🚨"
+  },
+  "PLACEHOLDER_UNTRUE": {
+    "en": "untrue❌",
+    "cn": "不真实❌"
+  },
+  "PLACEHOLDER_MISLEADING": {
+    "en": "misleading⚠️",
+    "cn": "具有误导性⚠️"
+  },
+  "PLACEHOLDER_ACCURATE": {
+    "en": "accurate✅",
+    "cn": "是准确的✅"
+  },
+  "PLACEHOLDER_SPAM": {
+    "en": "spam🚧",
+    "cn": "是垃圾信息🚧"
+  },
+  "PLACEHOLDER_LEGITIMATE": {
+    "en": "legitimate✅",
+    "cn": "来自可靠的来源✅"
+  },
+  "PLACEHOLDER_IRRELEVANT": {
+    "en": "message doesn't contain a meaningful claim to assess.😕",
+    "cn": "没有包含有意义的声明进行评估😕"
+  },
+  "PLACEHOLDER_UNSURE": {
+    "en": "too difficult to assess",
+    "cn": "很难做评估"
   }
 }

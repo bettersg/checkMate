@@ -25,10 +25,11 @@ type ResponseObject = {
   [key: string]: string
 }
 
-function getInfoLiner(truthScore: null | number) {
-  return `, with an average score of ${
+function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
+  return infoPlaceholder.replace(
+    "{{score}}",
     typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
-  } on a scale of 0-5 (5 = completely true)`
+  )
 }
 
 async function respondToInterimFeedback(
@@ -48,7 +49,7 @@ async function respondToInterimFeedback(
       type: "reply",
       reply: {
         id: `sendInterim_${instancePath}`,
-        title: "Get another update",
+        title: responses.BUTTON_ANOTHER_UPDATE,
       },
     },
   ]
@@ -110,6 +111,10 @@ async function getResponsesObj(botType: "user" | "factChecker" = "user") {
 
     const responseProxy = new Proxy(userResponseObject as BotResponses, {
       get(target, prop: string) {
+        if (prop === "then") {
+          //somehow code tries to access then property
+          return undefined
+        }
         if (target[prop] && target[prop][language]) {
           return target[prop][language]
         } else if (target[prop] && target[prop]["en"]) {
@@ -149,34 +154,33 @@ async function sendMenuMessage(
       const rows = [
         {
           id: `${type}_check`,
-          title: "Check/Report",
-          description: "Send in messages, images, or screenshots for checking!",
+          title: responses.MENU_TITLE_CHECK,
+          description: responses.MENU_DESCRIPTION_CHECK,
         },
         {
           id: `${type}_referral`,
-          title: "Get Referral Link",
-          description: "Get referral link to forward to others",
+          title: responses.MENU_TITLE_REFERRAL,
+          description: responses.MENU_DESCRIPTION_REFERRAL,
         },
         {
           id: `${type}_help`,
-          title: "Get Help",
-          description:
-            "Find out how to use CheckMate to check or report dubious messages",
+          title: responses.MENU_TITLE_HELP,
+          description: responses.MENU_DESCRIPTION_HELP,
         },
         {
           id: `${type}_about`,
-          title: "About CheckMate",
-          description: "Learn more about CheckMate and the team behind it",
+          title: responses.MENU_TITLE_ABOUT,
+          description: responses.MENU_DESCRIPTION_ABOUT,
         },
         {
           id: `${type}_feedback`,
-          title: "Send Feedback",
-          description: "Send us feedback on anything to do with CheckMate",
+          title: responses.MENU_TITLE_FEEDBACK,
+          description: responses.MENU_DESCRIPTION_FEEDBACK,
         },
         {
           id: `${type}_contact`,
-          title: "Get Contact",
-          description: "Get CheckMate's contact to add to your contact list",
+          title: responses.MENU_TITLE_CONTACT,
+          description: responses.MENU_DESCRIPTION_CONTACT,
         },
 
         //TODO: Implement these next time
@@ -199,8 +203,8 @@ async function sendMenuMessage(
       if (disputedInstancePath) {
         rows.splice(5, 0, {
           id: `${type}_dispute_${disputedInstancePath}`,
-          title: "Dispute Assessment",
-          description: "Dispute CheckMate's assesment of this message",
+          title: responses.MENU_TITLE_DISPUTE,
+          description: responses.MENU_DESCRIPTION_DISPUTE,
         })
       }
       const sections = [
@@ -212,7 +216,7 @@ async function sendMenuMessage(
         "user",
         to,
         text,
-        "View Menu",
+        responses.MENU_BUTTON,
         sections,
         replyMessageId
       )
@@ -247,8 +251,8 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
           title: `${number}`,
         }
       })
-    rows[0].description = "Extremely likely 🤩"
-    rows[9].description = "Not at all likely 😥"
+    rows[0].description = responses.MENU_DESCRIPTION_NPS_LIKELY
+    rows[9].description = responses.MENU_DESCRIPTION_NPS_UNLIKELY
     const sections = [
       {
         rows: rows,
@@ -258,7 +262,7 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
       "user",
       data.from,
       responses.SATISFACTION_SURVEY,
-      "Tap to respond",
+      responses.NPS_MENU_BUTTON,
       sections
     )
     const batch = db.batch()
@@ -302,7 +306,7 @@ async function sendVotingStats(instancePath: string) {
     await sendTextMessage(
       "user",
       from,
-      "Sorry, an error occured!",
+      responses.GENERIC_ERROR,
       instanceSnap.get("id")
     )
     return
@@ -310,45 +314,62 @@ async function sendVotingStats(instancePath: string) {
 
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-      truthCategory = "untrue"
+      truthCategory = responses.PLACEHOLDER_UNTRUE
     } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
-      truthCategory = "misleading"
+      truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
-      truthCategory = "accurate"
+      truthCategory = responses.PLACEHOLDER_MISLEADING
     }
   } else truthCategory = "NA"
 
   const categories = [
     { name: "trivial", count: irrelevantCount, isInfo: false },
     {
-      name: scamCount >= illicitCount ? "scam" : "illicit",
+      name:
+        scamCount >= illicitCount
+          ? responses.PLACEHOLDER_SCAM
+          : responses.PLACEHOLDER_ILLICIT,
       count: susCount,
       isInfo: false,
     },
-    { name: "spam", count: spamCount, isInfo: false },
+    { name: responses.PLACEHOLDER_SPAM, count: spamCount, isInfo: false },
     { name: truthCategory, count: infoCount, isInfo: true },
-    { name: "legitimate", count: legitimateCount, isInfo: false },
+    {
+      name: responses.PLACEHOLDER_LEGITIMATE,
+      count: legitimateCount,
+      isInfo: false,
+    },
     { name: "unsure", count: unsureCount, isInfo: false },
   ]
 
   categories.sort((a, b) => b.count - a.count) // sort in descending order
-  const highestCategory =
-    categories[0].name === "scam" ? "a scam" : categories[0].name
-  const secondCategory =
-    categories[1].name === "scam" ? "a scam" : categories[1].name
+  const highestCategory = categories[0].name
+  const secondCategory = categories[1].name
   const highestPercentage = (categories[0].count / responseCount) * 100
   const secondPercentage = (categories[1].count / responseCount) * 100
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
-  const infoLiner = getInfoLiner(truthScore)
-  let response = `${highestPercentage.toFixed(2)}% of our CheckMates ${
-    isHighestInfo ? "collectively " : ""
-  }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
+  const infoLiner = getInfoLiner(truthScore, responses.INFO_PLACEHOLDER)
+  let response = responses.STATS_TEMPLATE_1.replace(
+    "{{top}}",
+    `${highestPercentage.toFixed(2)}`
+  )
+    .replace("{{category}}", highestCategory)
+    .replace("{{info_placeholder}}", isHighestInfo ? infoLiner : "")
+  // let response = `${highestPercentage.toFixed(2)}% of our CheckMates ${
+  //   isHighestInfo ? "collectively " : ""
+  // }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
   if (secondPercentage > 0) {
-    response += ` ${secondPercentage.toFixed(2)}% ${
-      isSecondInfo ? "collectively " : ""
-    } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
+    response += responses.STATS_TEMPLATE_2.replace(
+      "{{second}}",
+      `${secondPercentage.toFixed(2)}`
+    )
+      .replace("{{category}}", secondCategory)
+      .replace("{{info_placeholder}}", isSecondInfo ? infoLiner : "")
+    // response += ` ${secondPercentage.toFixed(2)}% ${
+    //   isSecondInfo ? "collectively " : ""
+    // } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
   }
 
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
@@ -411,14 +432,14 @@ async function sendRationalisation(instancePath: string) {
         type: "reply",
         reply: {
           id: `feedbackRationalisation_${instancePath}_yes`,
-          title: "Yes, it's useful",
+          title: responses.BUTTON_USEFUL,
         },
       },
       {
         type: "reply",
         reply: {
           id: `feedbackRationalisation_${instancePath}_no`,
-          title: "No, it's not",
+          title: responses.BUTTON_NOT_USEFUL,
         },
       },
     ]
@@ -478,38 +499,37 @@ async function sendInterimUpdate(instancePath: string) {
   const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
   let prelimAssessment
   let infoPlaceholder = ""
-  const infoLiner = getInfoLiner(truthScore)
+  const infoLiner = getInfoLiner(truthScore, responses.INFO_PLACEHOLDER)
   switch (primaryCategory) {
     case "scam":
-      prelimAssessment = "is a scam🚫"
+      prelimAssessment = responses.PLACEHOLDER_SCAM
       break
     case "illicit":
-      prelimAssessment = "is suspicious🚨"
+      prelimAssessment = responses.PLACEHOLDER_SUSPICIOUS
       break
     case "untrue":
-      prelimAssessment = "is untrue❌"
+      prelimAssessment = responses.PLACEHOLDER_UNTRUE
       infoPlaceholder = infoLiner
       break
     case "misleading":
-      prelimAssessment = "is misleading⚠️"
+      prelimAssessment = responses.PLACEHOLDER_MISLEADING
       infoPlaceholder = infoLiner
       break
     case "accurate":
-      prelimAssessment = "is accurate✅"
+      prelimAssessment = responses.PLACEHOLDER_ACCURATE
       infoPlaceholder = infoLiner
       break
     case "spam":
-      prelimAssessment = "is spam🚧"
+      prelimAssessment = responses.PLACEHOLDER_SPAM
       break
     case "legitimate":
-      prelimAssessment = "is legitimate✅"
+      prelimAssessment = responses.PLACEHOLDER_LEGITIMATE
       break
     case "irrelevant":
-      prelimAssessment =
-        "message doesn't contain a meaningful claim to assess.😕"
+      prelimAssessment = responses.PLACEHOLDER_IRRELEVANT
       break
     case "unsure":
-      prelimAssessment = "unsure"
+      prelimAssessment = responses.PLACEHOLDER_UNSURE
       break
     default:
       functions.logger.log("primaryCategory did not match available cases")
@@ -555,14 +575,14 @@ async function sendInterimUpdate(instancePath: string) {
         type: "reply",
         reply: {
           id: `feedbackInterim_${instancePath}_yes`,
-          title: "Yes, it's useful",
+          title: responses.BUTTON_USEFUL,
         },
       },
       {
         type: "reply",
         reply: {
           id: `feedbackInterim_${instancePath}_no`,
-          title: "No, it's not",
+          title: responses.BUTTON_NOT_USEFUL,
         },
       },
     ]
@@ -572,7 +592,7 @@ async function sendInterimUpdate(instancePath: string) {
         type: "reply",
         reply: {
           id: `sendInterim_${instancePath}`,
-          title: "Get another update",
+          title: responses.BUTTON_ANOTHER_UPDATE,
         },
       },
     ]
@@ -604,7 +624,7 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
       type: "reply",
       reply: {
         id: `sendInterim_${instanceSnap.ref.path}`,
-        title: "Get interim update",
+        title: responses.BUTTON_GET_INTERIM,
       },
     },
   ]
@@ -659,7 +679,7 @@ async function respondToInstance(
       .replace(
         "{{matched}}",
         instanceCount >= 5
-          ? `In fact, others have already sent this message in ${instanceCount} times. `
+          ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
           : ""
       )
       .replace(
@@ -698,7 +718,7 @@ async function respondToInstance(
     type: "reply",
     reply: {
       id: `votingResults_${instanceSnap.ref.path}`,
-      title: "See voting results",
+      title: responses.BUTTON_RESULTS,
     },
   }
 
@@ -706,7 +726,7 @@ async function respondToInstance(
     type: "reply",
     reply: {
       id: `scamshieldDecline_${instanceSnap.ref.path}`,
-      title: "Don't report this",
+      title: responses.BUTTON_DECLINE_REPORT,
     },
   }
 
@@ -714,7 +734,7 @@ async function respondToInstance(
     type: "reply",
     reply: {
       id: `rationalisation_${instanceSnap.ref.path}`,
-      title: "How'd we tell?",
+      title: responses.BUTTON_RATIONALISATION,
     },
   }
 
