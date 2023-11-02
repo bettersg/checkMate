@@ -5,7 +5,6 @@ import fs from "fs"
 import env from "./env.json"
 import CHECKER_BOT_REPONSES from "../functions/src/definitions/common/parameters/checkerResponses.json"
 import USER_BOT_RESPONSES from "../functions/src/definitions/common/parameters/userResponses.json"
-import { language } from "googleapis/build/src/apis/language"
 
 const factCheckerKeys = Object.keys(CHECKER_BOT_REPONSES).map((key) => {
   return `__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.${key}`
