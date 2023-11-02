@@ -16,13 +16,57 @@ const db = admin.firestore()
 
 type BotResponses = {
   [key: string]: {
-    en: string
-    cn?: string
+    [key: string]: string
   }
 }
 
 type ResponseObject = {
   [key: string]: string
+}
+
+async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
+async function getResponsesObj(botType: "user"): Promise<ResponseObject>
+async function getResponsesObj(
+  botType: "user",
+  user: string
+): Promise<ResponseObject>
+async function getResponsesObj(
+  botType: "user" | "factChecker" = "user",
+  user: string | null = null
+) {
+  let path
+  if (botType === "factChecker") {
+    path = "systemParameters/factCheckerBotResponses"
+    const checkerResponseSnap = await db.doc(path).get()
+    return checkerResponseSnap.data() ?? CHECKER_BOT_RESPONSES
+  } else {
+    if (typeof user !== "string") {
+      functions.logger.error("user not provided to getResponsesObj")
+      return "error"
+    }
+    path = "systemParameters/userBotResponses"
+    const userResponseSnap = await db.doc(path).get()
+    const userResponseObject = userResponseSnap.data() ?? USER_BOT_RESPONSES
+    const userSnap = await db.collection("users").doc(user).get()
+    const language = userSnap.get("language") ?? "en"
+    const responseProxy = new Proxy(userResponseObject as BotResponses, {
+      get(target, prop: string) {
+        if (prop === "then") {
+          //somehow code tries to access then property
+          return undefined
+        }
+        if (target[prop] && target[prop][language]) {
+          return target[prop][language]
+        } else if (target[prop] && target[prop]["en"]) {
+          // Fallback to English
+          return target[prop]["en"]
+        }
+        functions.logger.error(`Error getting ${prop} from user bot responses`)
+        return "error" // Or some default value or error handling
+      },
+    })
+    return responseProxy
+  }
 }
 
 function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
@@ -38,8 +82,9 @@ async function respondToInterimFeedback(
 ) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
-  const responses = await getResponsesObj("user")
   const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   if (!data) {
     functions.logger.log("Missing data in respondToInterimFeedback")
     return
@@ -65,7 +110,7 @@ async function respondToInterimFeedback(
       break
   }
 
-  await sendWhatsappButtonMessage("user", data.from, response, buttons, data.id)
+  await sendWhatsappButtonMessage("user", from, response, buttons, data.id)
 }
 
 async function respondToRationalisationFeedback(
@@ -74,8 +119,9 @@ async function respondToRationalisationFeedback(
 ) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
-  const responses = await getResponsesObj("user")
   const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   if (!data) {
     functions.logger.log("Missing data in respondToRationalisationFeedback")
     return
@@ -92,41 +138,7 @@ async function respondToRationalisationFeedback(
       break
   }
 
-  await sendWhatsappTextMessage("user", data.from, response)
-}
-
-async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
-async function getResponsesObj(botType: "user"): Promise<ResponseObject>
-async function getResponsesObj(botType: "user" | "factChecker" = "user") {
-  let path
-  if (botType === "factChecker") {
-    path = "systemParameters/factCheckerBotResponses"
-    const checkerResponseSnap = await db.doc(path).get()
-    return checkerResponseSnap.data() ?? CHECKER_BOT_RESPONSES
-  } else {
-    path = "systemParameters/userBotResponses"
-    const userResponseSnap = await db.doc(path).get()
-    const userResponseObject = userResponseSnap.data() ?? USER_BOT_RESPONSES
-    const language = "en" //TODO: change this to read from user DB
-
-    const responseProxy = new Proxy(userResponseObject as BotResponses, {
-      get(target, prop: string) {
-        if (prop === "then") {
-          //somehow code tries to access then property
-          return undefined
-        }
-        if (target[prop] && target[prop][language]) {
-          return target[prop][language]
-        } else if (target[prop] && target[prop]["en"]) {
-          // Fallback to English
-          return target[prop]["en"]
-        }
-        functions.logger.error(`Error getting ${prop} from user bot responses`)
-        return "error" // Or some default value or error handling
-      },
-    })
-    return responseProxy
-  }
+  await sendWhatsappTextMessage("user", from, response)
 }
 
 async function sendMenuMessage(
@@ -136,7 +148,7 @@ async function sendMenuMessage(
   replyMessageId: string | null = null,
   disputedInstancePath: string | null = null
 ) {
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", to)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
@@ -176,6 +188,11 @@ async function sendMenuMessage(
           id: `${type}_feedback`,
           title: responses.MENU_TITLE_FEEDBACK,
           description: responses.MENU_DESCRIPTION_FEEDBACK,
+        },
+        {
+          id: `${type}_language`,
+          title: responses.MENU_TITLE_LANGUAGE,
+          description: responses.MENU_DESCRIPTION_LANGUAGE,
         },
         {
           id: `${type}_contact`,
@@ -229,9 +246,10 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   if (!data) {
     return
   }
-  const responses = await getResponsesObj("user")
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
-  const userRef = db.collection("users").doc(data.from)
+  const userRef = db.collection("users").doc(from)
   const thresholds = await getThresholds()
   const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
   const userSnap = await userRef.get()
@@ -260,7 +278,7 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
     ]
     await sendWhatsappTextListMessage(
       "user",
-      data.from,
+      from,
       responses.SATISFACTION_SURVEY,
       responses.NPS_MENU_BUTTON,
       sections
@@ -295,8 +313,8 @@ async function sendVotingStats(instancePath: string) {
   const voteTotal = await getCount(messageRef, "totalVoteScore")
   const truthScore = infoCount > 0 ? voteTotal / infoCount : null
   const thresholds = await getThresholds()
-  const responses = await getResponsesObj("user")
   const from = instanceSnap.get("from")
+  const responses = await getResponsesObj("user", from)
   let truthCategory
 
   if (responseCount <= 0) {
@@ -406,7 +424,8 @@ async function sendRationalisation(instancePath: string) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
-  const responses = await getResponsesObj("user")
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   try {
     const messageRef = instanceRef.parent.parent
     if (!data) {
@@ -450,31 +469,34 @@ async function sendRationalisation(instancePath: string) {
     await instanceRef.update({
       isRationalisationSent: true,
     })
-    await sendWhatsappButtonMessage(
-      "user",
-      data.from,
-      replyText,
-      buttons,
-      data.id
-    )
+    await sendWhatsappButtonMessage("user", from, replyText, buttons, data.id)
   } catch (e) {
     functions.logger.error(`Error sending rationalisation: ${e}`)
     if (data?.from) {
-      await sendTextMessage("user", data.from, responses.GENERIC_ERROR)
+      await sendTextMessage("user", from, responses.GENERIC_ERROR)
     }
   }
+}
+
+async function updateLanguageAndSendMenu(from: string, language: string) {
+  const userRef = db.collection("users").doc(from)
+  await userRef.update({
+    language: language,
+  })
+  await sendMenuMessage(from, "MENU_PREFIX")
 }
 
 async function sendInterimUpdate(instancePath: string) {
   //get statistics
   const FEEDBACK_FEATURE_FLAG = true
-  const responses = await getResponsesObj("user")
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
   if (!data) {
     return
   }
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   if (instanceSnap.get("isReplied")) {
     await sendTextMessage(
       "user",
@@ -597,13 +619,7 @@ async function sendInterimUpdate(instancePath: string) {
       },
     ]
   }
-  await sendWhatsappButtonMessage(
-    "user",
-    data.from,
-    finalResponse,
-    buttons,
-    data.id
-  )
+  await sendWhatsappButtonMessage("user", from, finalResponse, buttons, data.id)
   if (!instanceSnap.get("isInterimReplySent")) {
     updateObj.isInterimReplySent = true
   }
@@ -618,7 +634,8 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
   if (!data) {
     return
   }
-  const responses = await getResponsesObj("user")
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   const buttons = [
     {
       type: "reply",
@@ -630,7 +647,7 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
   ]
   await sendWhatsappButtonMessage(
     "user",
-    data.from,
+    from,
     responses.INTERIM_PROMPT,
     buttons,
     data.id
@@ -654,7 +671,8 @@ async function respondToInstance(
     functions.logger.log("Missing 'from' field in instance data")
     return Promise.resolve()
   }
-  const responses = await getResponsesObj("user")
+  const from = data.from
+  const responses = await getResponsesObj("user", from)
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isIrrelevant = parentMessageSnap.get("isIrrelevant")
@@ -694,7 +712,7 @@ async function respondToInstance(
   if (!isAssessed && !forceReply) {
     await sendTextMessage(
       "user",
-      data.from,
+      from,
       responses.MESSAGE_NOT_YET_ASSESSED,
       data.id
     )
@@ -778,7 +796,7 @@ async function respondToInstance(
   switch (category) {
     case "irrelevant_auto":
       await sendMenuMessage(
-        data.from,
+        from,
         "IRRELEVANT_AUTO_MENU_PREFIX",
         "whatsapp",
         data.id,
@@ -787,7 +805,7 @@ async function respondToInstance(
       break
     case "irrelevant":
       await sendMenuMessage(
-        data.from,
+        from,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
         data.id,
@@ -796,7 +814,7 @@ async function respondToInstance(
       break
     case "error":
       responseText = getFinalResponseText(responses.ERROR)
-      await sendTextMessage("user", data.from, responseText, data.id)
+      await sendTextMessage("user", from, responseText, data.id)
       break
     default:
       if (!(category.toUpperCase() in responses)) {
@@ -825,13 +843,13 @@ async function respondToInstance(
       if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
           "user",
-          data.from,
+          from,
           responseText,
           buttons,
           data.id
         )
       } else {
-        await sendTextMessage("user", data.from, responseText, data.id)
+        await sendTextMessage("user", from, responseText, data.id)
       }
   }
   updateObj.replyCategory = category
@@ -849,7 +867,7 @@ async function respondToInstance(
 async function sendReferralMessage(user: string) {
   let referralResponse
   const code = (await db.collection("users").doc(user).get()).get("referralId")
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", user)
   if (code) {
     referralResponse = responses.REFERRAL.replace(
       "{{link}}",
@@ -860,6 +878,31 @@ async function sendReferralMessage(user: string) {
     functions.logger.error(`Referral code not found for ${user}`)
   }
   await sendTextMessage("user", user, referralResponse, null, "whatsapp", true)
+}
+
+async function sendLanguageSelection(user: string, newUser: boolean) {
+  const responses = await getResponsesObj("user", user)
+  const response = responses.LANGUAGE_SELECTION.replace(
+    "{{new_user_en}}",
+    newUser ? responses.NEW_USER_PREFIX_EN : ""
+  ).replace("{{new_user_cn}}", newUser ? responses.NEW_USER_PREFIX_CN : "")
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `languageSelection_en`,
+        title: responses.BUTTON_ENGLISH,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `languageSelection_cn`,
+        title: responses.BUTTON_CHINESE,
+      },
+    },
+  ]
+  await sendWhatsappButtonMessage("user", user, response, buttons)
 }
 
 export {
@@ -873,4 +916,6 @@ export {
   respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
+  updateLanguageAndSendMenu,
+  sendLanguageSelection,
 }

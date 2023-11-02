@@ -23,6 +23,8 @@ import {
   respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
+  updateLanguageAndSendMenu,
+  sendLanguageSelection,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -37,6 +39,7 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
+import { user } from "firebase-functions/v1/auth"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
@@ -62,7 +65,7 @@ const userHandlerWhatsapp = async function (message: Message) {
 
   let from = message.from // extract the phone number from the webhook payload
   let type = message.type
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", from)
 
   //check whether new user
   const userRef = db.collection("users").doc(from)
@@ -713,13 +716,13 @@ async function newImageInstanceHandler({
 }
 
 async function newUserHandler(from: string) {
-  await sendMenuMessage(from, "NEW_USER_MENU_PREFIX", "whatsapp", null, null)
+  await sendLanguageSelection(from, true)
 }
 
 async function onButtonReply(messageObj: Message, platform = "whatsapp") {
   const buttonId = messageObj.interactive.button_reply.id
   const from = messageObj.from
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", from)
   const [type, ...rest] = buttonId.split("_")
   let instancePath,
     selection,
@@ -763,6 +766,10 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       ;[instancePath, selection] = rest
       await respondToRationalisationFeedback(instancePath, selection)
       break
+    case "languageSelection":
+      ;[selection] = rest
+      await updateLanguageAndSendMenu(from, selection)
+      break
   }
   const step = type + (selection ? `_${selection}` : "")
   return Promise.resolve(step)
@@ -771,7 +778,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
 async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
   const listId = messageObj.interactive.list_reply.id
   const from = messageObj.from
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", from)
   const [type, selection, ...rest] = listId.split("_")
   let response, instancePath
   const step = `${type}_${selection}`
@@ -792,6 +799,11 @@ async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
 
         case "feedback":
           response = responses.FEEDBACK
+          break
+
+        case "language":
+          await sendLanguageSelection(from, false)
+          hasReplied = true
           break
 
         case "contact":
@@ -904,6 +916,7 @@ async function createNewUser(
     initialJourney: {},
     referralId: referralId,
     referralCount: 0,
+    language: "en",
   })
 }
 

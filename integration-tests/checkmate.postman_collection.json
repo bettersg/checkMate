@@ -988,7 +988,142 @@
 					"response": []
 				},
 				{
-					"name": "Get last message (NEW_USER_MENU)",
+					"name": "Get last message (SELECT LANGUAGE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Select language\", function () {\r",
+									"    const NEW_USER_PREFIX_EN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_EN.en\")\r",
+									"    const NEW_USER_PREFIX_CN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_CN.en\")\r",
+									"    const LANGUAGE_SELECTION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LANGUAGE_SELECTION.en\")\r",
+									"    const BUTTON_ENGLISH = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en\")\r",
+									"    const BUTTON_CHINESE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_CHINESE.en\")\r",
+									"    const BODY_TEXT = LANGUAGE_SELECTION.replace(\"{{new_user_en}}\",NEW_USER_PREFIX_EN).replace(\"{{new_user_cn}}\",NEW_USER_PREFIX_CN)\r",
+									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_en\",\r",
+									"                                \"title\": BUTTON_ENGLISH\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_cn\",\r",
+									"                                \"title\": BUTTON_CHINESE\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press English Button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"languageSelection_en\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (USER_MENU)",
 					"event": [
 						{
 							"listen": "test",
@@ -996,7 +1131,7 @@
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
-									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_MENU_PREFIX.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
 									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
@@ -1009,6 +1144,8 @@
 									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
 									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
 									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
 									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
 									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
 									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
@@ -1058,6 +1195,11 @@
 									"                                    \"id\": \"menu_feedback\",\r",
 									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
 									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_contact\",\r",
@@ -1241,6 +1383,8 @@
 									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
 									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
 									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
 									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
 									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
 									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
@@ -1296,6 +1440,11 @@
 									"                                    \"id\": \"menu_dispute_messages/*/instances/*\",\r",
 									"                                    \"title\": MENU_TITLE_DISPUTE,\r",
 									"                                    \"description\": MENU_DESCRIPTION_DISPUTE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_contact\",\r",
@@ -10991,6 +11140,8 @@
 									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
 									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
 									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
 									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
 									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
 									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
@@ -11040,6 +11191,11 @@
 									"                                    \"id\": \"menu_feedback\",\r",
 									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
 									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_contact\",\r",
@@ -11538,6 +11694,327 @@
 							"script": {
 								"exec": [
 									"setTimeout(() => {}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"Select Language\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// 1. Retrieve the current messageCounter and increment it.\r",
+									"let messageCounter = 34\r",
+									"\r",
+									"const whatsappId = \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFA1==\";\r",
+									"\r",
+									"// 3. Replace the last n characters (excluding the == at the end) of whatsappId with the new messageCounter\r",
+									"let n = messageCounter.toString().length;\r",
+									"let basePart = whatsappId.substring(0, whatsappId.length - n - 2);\r",
+									"let newId = basePart + messageCounter + \"==\";\r",
+									"\r",
+									"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_34}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_language\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en}}\",\r\n                    \"description\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en}}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (SELECT LANGUAGE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Select language\", function () {\r",
+									"    const NEW_USER_PREFIX_EN = \"\"\r",
+									"    const NEW_USER_PREFIX_CN = \"\"\r",
+									"    const LANGUAGE_SELECTION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LANGUAGE_SELECTION.en\")\r",
+									"    const BUTTON_ENGLISH = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en\")\r",
+									"    const BUTTON_CHINESE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_CHINESE.en\")\r",
+									"    const BODY_TEXT = LANGUAGE_SELECTION.replace(\"{{new_user_en}}\",NEW_USER_PREFIX_EN).replace(\"{{new_user_cn}}\",NEW_USER_PREFIX_CN)\r",
+									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_en\",\r",
+									"                                \"title\": BUTTON_ENGLISH\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_cn\",\r",
+									"                                \"title\": BUTTON_CHINESE\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press English Button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"languageSelection_en\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (USER_MENU)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
+									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
+									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
+									"        const MENU_TITLE_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_REFERRAL.en\");\r",
+									"        const MENU_DESCRIPTION_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_REFERRAL.en\");\r",
+									"        const MENU_TITLE_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_ABOUT.en\");\r",
+									"        const MENU_DESCRIPTION_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_ABOUT.en\");\r",
+									"        const MENU_TITLE_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_HELP.en\");\r",
+									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
+									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
+									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
+									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
+									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
+									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
+									"        const MENU_DESCRIPTION_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_DISPUTE.en\")\r",
+									"        \r",
+									"        const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
+									"        const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": MENU_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": MENU_BUTTON,\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_check\",\r",
+									"                                    \"title\": MENU_TITLE_CHECK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CHECK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_referral\",\r",
+									"                                    \"title\": MENU_TITLE_REFERRAL,\r",
+									"                                    \"description\": MENU_DESCRIPTION_REFERRAL\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_help\",\r",
+									"                                    \"title\": MENU_TITLE_HELP,\r",
+									"                                    \"description\": MENU_DESCRIPTION_HELP\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_about\",\r",
+									"                                    \"title\": MENU_TITLE_ABOUT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_ABOUT\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_feedback\",\r",
+									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_contact\",\r",
+									"                                    \"title\": MENU_TITLE_CONTACT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CONTACT\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -12180,6 +12657,7 @@
 									"    const actions = Object.values(initialJourney).map((obj) => obj.stringValue)\r",
 									"    const expected = [\r",
 									"        \"text_machine_irrelevant_length\",\r",
+									"        \"languageSelection_en\",\r",
 									"        \"text_machine_irrelevant_length\",\r",
 									"        \"menu_dispute\",\r",
 									"        \"text_machine_unsure\",\r",
@@ -12205,6 +12683,8 @@
 									"        \"menu_help\",\r",
 									"        \"menu_about\",\r",
 									"        \"menu_feedback\",\r",
+									"        \"menu_language\",\r",
+									"        \"languageSelection_en\",\r",
 									"        \"menu_contact\",\r",
 									"        \"menu_referral\",\r",
 									"        \"text_machine_scam\",\r",
@@ -12313,6 +12793,141 @@
 					"response": []
 				},
 				{
+					"name": "Get last message (SELECT LANGUAGE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Select language\", function () {\r",
+									"    const NEW_USER_PREFIX_EN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_EN.en\")\r",
+									"    const NEW_USER_PREFIX_CN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_CN.en\")\r",
+									"    const LANGUAGE_SELECTION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LANGUAGE_SELECTION.en\")\r",
+									"    const BUTTON_ENGLISH = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en\")\r",
+									"    const BUTTON_CHINESE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_CHINESE.en\")\r",
+									"    const BODY_TEXT = LANGUAGE_SELECTION.replace(\"{{new_user_en}}\",NEW_USER_PREFIX_EN).replace(\"{{new_user_cn}}\",NEW_USER_PREFIX_CN)\r",
+									"    const USER_2_NUMBER = pm.variables.get(\"USER_2_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_2_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_en\",\r",
+									"                                \"title\": BUTTON_ENGLISH\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_cn\",\r",
+									"                                \"title\": BUTTON_CHINESE\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press English Button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_2_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_2_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"languageSelection_en\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get last message (NEW_USER_MENU)",
 					"event": [
 						{
@@ -12321,7 +12936,7 @@
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
-									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_MENU_PREFIX.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
 									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
@@ -12334,6 +12949,8 @@
 									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
 									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
 									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
 									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
 									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
 									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
@@ -12383,6 +13000,11 @@
 									"                                    \"id\": \"menu_feedback\",\r",
 									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
 									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_contact\",\r",

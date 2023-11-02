@@ -112,12 +112,20 @@
     "cn": "没关系！我们不会将您的短信发送给ScamShield。感谢您与我们分享这条短信，感谢您对新加坡网络安全的支持和贡献！\n！"
   },
   "MENU": {
-    "en": "{{prefix}}\n\nIf you know what to do, please go ahead! Else, select \"View Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
-    "cn": "{{prefix}}\n\n如果你知道该怎么做，请继续！否则，请选择下方的\"查看菜单\"，看看查友能做什么！👈\n\n请注意，查友*只会帮你审查发送给查友的可疑短信，它不能与你自由对话*。\n\n无论何时你需要再次了解查友的功能，只需输入\"菜单\"即可返回这里！😊"
+    "en": "{{prefix}}\n\nIf you know what to do, please go ahead! Else, select \"Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
+    "cn": "{{prefix}}\n\n如果你知道该怎么做，请继续！否则，请选择下方的\"菜单\"，看看查友能做什么！👈\n\n请注意，查友*只会帮你审查发送给查友的可疑短信，它不能与你自由对话*。\n\n无论何时你需要再次了解查友的功能，只需输入\"菜单\"即可返回这里！😊"
   },
-  "NEW_USER_MENU_PREFIX": {
-    "en": "Hello and welcome to CheckMate! We noticed it's your first time here. We're glad you've joined us to battle scams and misinformation😊.",
-    "cn": "您好，欢迎来到查友！我们注意到这是您第一次使用我们的服务。我们很高兴您加入我们，一起对抗诈骗和误导短信😊。"
+  "NEW_USER_PREFIX_EN": {
+    "en": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊.",
+    "cn": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊."
+  },
+  "NEW_USER_PREFIX_CN": {
+    "en": "您好，欢迎来到查友！我们很高兴您加入我们，一起对抗诈骗和误导信息😊。\n",
+    "cn": "您好，欢迎来到查友！我们很高兴您加入我们，一起对抗诈骗和误导信息😊。\n"
+  },
+  "LANGUAGE_SELECTION": {
+    "en": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}\n请选择语言。",
+    "cn": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}\n请选择语言。"
   },
   "IRRELEVANT_MENU_PREFIX": {
     "en": "Thanks for waiting!🙏🏻 Our CheckMates didn't find anything to assess in this message.😕",
@@ -255,6 +263,14 @@
     "en": "Dispute CheckMate's assesment of this message",
     "cn": "对查友对此消息的评估提出异议"
   },
+  "MENU_TITLE_LANGUAGE": {
+    "en": "Language / 语言",
+    "cn": "Language / 语言"
+  },
+  "MENU_DESCRIPTION_LANGUAGE": {
+    "en": "Select Language / 选择语言",
+    "cn": "Select Language / 选择语言"
+  },
   "MENU_DESCRIPTION_NPS_LIKELY": {
     "en": "Extremely likely 🤩",
     "cn": "一定会🤩"
@@ -266,6 +282,14 @@
   "NPS_MENU_BUTTON": {
     "en": "Respond",
     "cn": "回应"
+  },
+  "BUTTON_ENGLISH": {
+    "en": "English",
+    "cn": "English"
+  },
+  "BUTTON_CHINESE": {
+    "en": "华语",
+    "cn": "华语"
   },
   "BUTTON_USEFUL": {
     "en": "Yes, it's useful",
