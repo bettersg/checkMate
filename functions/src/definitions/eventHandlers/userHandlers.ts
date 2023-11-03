@@ -171,8 +171,7 @@ const userHandlerWhatsapp = async function (message: Message) {
         }
         break
       }
-
-      if (message.text.body.toLowerCase() === "menu") {
+      if (checkMenu(message.text.body)) {
         step = "text_menu"
         await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         break
@@ -899,6 +898,11 @@ async function addInstanceToDb(
   } catch (e) {
     functions.logger.error(`Transaction failure for messageId ${id}!`, e)
   }
+}
+
+function checkMenu(text: string) {
+  const menuKeywords = ["menu", "菜单"]
+  return menuKeywords.includes(text.toLowerCase())
 }
 
 async function createNewUser(
