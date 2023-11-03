@@ -901,7 +901,7 @@ async function addInstanceToDb(
 }
 
 function checkMenu(text: string) {
-  const menuKeywords = ["menu", "菜单"]
+  const menuKeywords = ["menu", "菜单", "菜單"]
   return menuKeywords.includes(text.toLowerCase())
 }
 
