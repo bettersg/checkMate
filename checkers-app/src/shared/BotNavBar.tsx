@@ -11,28 +11,28 @@ interface NavBarProps {
   unassessed: number
 }
 
-export default function NavbarDefault(props: NavBarProps) {
-  return (
-    <Navbar
-      className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2"
-    >
-      <div className="flex self-end flex-row justify-around">
+export default function NavbarDefault({unassessed}: NavBarProps) {
+  // Helper function to decide if the badge is invisible
+  const isBadgeInvisible = unassessed === 0;
 
-        <Typography as="a" href="/" style={{ color: "#ffffff" }}>
-          <PresentationChartBarIcon className="h-[25px] w-[25px]" />
+  return (
+    <Navbar className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2">
+      <div className="flex items-center justify-around h-full">
+        <Typography as="a" href="/" className="text-background-color h-full flex items-center">
+          <PresentationChartBarIcon className="h-7 w-7" />
         </Typography>
 
-        <Typography as="a" href="myvotes" style={{ color: "#ffffff" }}>
-          <Badge invisible={props.unassessed != 0 ? false : true} color='teal' content={props.unassessed}>
-            <CheckBadgeIcon className="h-[25px] w-[25px]" />
+        <Typography as="a" href="/myvotes" className="text-background-color h-full flex items-center">
+          <Badge invisible={isBadgeInvisible} color='teal' content={unassessed} placement="top-end">
+            <CheckBadgeIcon className="h-7 w-7" />
           </Badge>
         </Typography>
 
-        <Typography as="a" href="achievements" style={{ color: "#ffffff" }}>
-          <TrophyIcon className="h-[25px] w-[25px]" />
+        <Typography as="a" href="/achievements" className="text-background-color h-full flex items-center">
+          <TrophyIcon className="h-7 w-7" />
         </Typography>
-        
       </div>
     </Navbar>
+
   );
 }
