@@ -832,7 +832,11 @@ async function respondToInstance(
       const rationalisation = parentMessageSnap.get("rationalisation")
 
       if ((category === "scam" || category === "illicit") && rationalisation) {
-        buttons.push(viewRationalisationButton)
+        const language =
+          (await db.collection("users").doc(from).get()).get("language") ?? "en"
+        if (language === "en") {
+          buttons.push(viewRationalisationButton)
+        }
       }
 
       if (category === "scam" || category === "illicit") {
