@@ -43,14 +43,12 @@ jobs:
           fi
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
-      - name: Set Firebase project
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            firebase use prod
-          else
-            firebase use uat
-          fi
-        working-directory: functions
       - name: Deploy Cloud Functions
-        run: export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json && npm run deploy
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            firebase deploy --only functions --project checkmate-373101
+          else
+            firebase deploy --only functions --project checkmate-uat
+          fi
         working-directory: functions
