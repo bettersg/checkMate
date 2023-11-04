@@ -1,15 +1,15 @@
 {
   "UNTRUE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
-    "cn": "{thanks}}{{matched}}{{methodology}}*不属实*。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
+    "cn": "{thanks}}{{matched}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
   },
   "MISLEADING": {
     "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}虽然包含一些真实的信息，但它*存在误导性或缺乏公正性*。⚠️{{image_caveat}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "cn": "{{thanks}}{{matched}}{{methodology}}虽然包含一些真实的信息，但它存在误导性或缺乏公正性。⚠️{{image_caveat}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "ACCURATE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*accurate*.✅{{image_caveat}}\n\nThank you for keeping Singapore informed!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}*是准确的*。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "cn": "{{thanks}}{{matched}}{{methodology}}是准确的。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "ERROR": {
     "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
@@ -21,11 +21,11 @@
   },
   "SCAM": {
     "en": "{{thanks}}{{matched}}{{methodology}}*a scam*!🚫{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
-    "cn": "{{thanks}}{{matched}}{{methodology}}*是诈骗信息*！ 🚫{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
+    "cn": "{{thanks}}{{matched}}{{methodology}}是诈骗信息！ 🚫{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
   },
   "ILLICIT": {
     "en": "{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
-    "cn": "{{thanks}}{{matched}}{{methodology}}**很可疑*！🚨{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
+    "cn": "{{thanks}}{{matched}}{{methodology}}很可疑！🚨{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
   },
   "SPAM": {
     "en": "{{thanks}}{{matched}}{{methodology}}spam!🚧{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
@@ -33,11 +33,11 @@
   },
   "LEGITIMATE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}\n\nThank you for keeping Singapore safe!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}*的来源是可靠的*。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "cn": "{{thanks}}{{matched}}{{methodology}}的来源是可靠的。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "UNSURE": {
     "en": "{{thanks}}\n\nUnfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry, we're human too!😞\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.\n\nThank you for keeping Singapore safe!",
-    "cn": "{{thanks}}\n\n抱歉，我们的查哥查妹对这条短信*无法得出结论*🤷🏻‍♂️🤷🏻‍♀️。对不起，我们尽力了！😞\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "cn": "{{thanks}}\n\n抱歉，我们的查哥查妹对这条短信无法得出结论🤷🏻‍♂️🤷🏻‍♀️。对不起，我们尽力了！😞\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "THANKS_IMMEDIATE": {
     "en": "Thanks for sending this in!",
@@ -69,15 +69,15 @@
   },
   "STATS_TEMPLATE_1": {
     "en": "{{top}}% of our CheckMates felt this was *{{category}}*{{info_placeholder}}.",
-    "cn": "{{top}}%的查哥查妹认为这条短信*{{category}}*{{info_placeholder}}。"
+    "cn": "{{top}}%的查哥查妹认为这条短信{{category}}{{info_placeholder}}。"
   },
   "STATS_TEMPLATE_2": {
     "en": " {{second}}% felt this was *{{category}}*{{info_placeholder}}.",
-    "cn": "另外{{second}}%的人认为这条短信*{{category}}*{{info_placeholder}}。"
+    "cn": "另外{{second}}%的人认为这条短信{{category}}{{info_placeholder}}。"
   },
   "INTERIM_TEMPLATE": {
     "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think that this is {{prelim_assessment}}{{info_placeholder}}. \n\nNOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}",
-    "cn": "目前，{{%voted}}%的查哥查妹已经对这条短信进行投票评估。大多数人认为这条短信{{prelim_assessment}}{{info_placeholder}}。\n\n注意：这只是*初步结果*。我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，为您提供最终的结果。{{get_feedback}}"
+    "cn": "目前，{{%voted}}%的查哥查妹已经对这条短信进行投票评估。大多数人认为这条短信{{prelim_assessment}}{{info_placeholder}}。\n\n注意：这只是初步结果。我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，为您提供最终的结果。{{get_feedback}}"
   },
   "INFO_PLACEHOLDER": {
     "en": ", with an average score of {{score}} on a scale of 0-5 (5 = completely true)",
@@ -93,7 +93,7 @@
   },
   "INTERIM_PROMPT": {
     "en": "Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. \n\nYou may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼",
-    "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击*获取初步结果*。请注意，初步结果和最终结果之间可能存在差异，*应谨慎解读初步结果*。我们感谢您的耐心，并希望尽快为您提供最终结果！💪🏼"
+    "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击获取初步结果。请注意，初步结果和最终结果之间可能存在差异，应谨慎解读初步结果。我们感谢您的耐心，并希望尽快为您提供最终结果！💪🏼"
   },
   "INTERIM_USEFUL": {
     "en": "Thanks for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIn the meantime, if you'd like another update after more votes come in, just tap the button below to request one.",
@@ -113,7 +113,7 @@
   },
   "MENU": {
     "en": "{{prefix}}\n\nIf you know what to do, please go ahead! Else, select \"Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
-    "cn": "{{prefix}}\n\n请点击“菜单\"查看查友的功能！👈\n\n请注意，查友*仅能评估您发送的短信，它无法与您进行对话*。\n\n您只需输入\"菜单\"即可随时返回这里，查看查友的功能！😊"
+    "cn": "{{prefix}}\n\n请点击“菜单\"查看查友的功能！👈\n\n请注意，查友仅能评估您发送的短信，它无法与您进行对话。\n\n您只需输入\"菜单\"即可随时返回这里，查看查友的功能！😊"
   },
   "NEW_USER_PREFIX_EN": {
     "en": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊.",
@@ -124,8 +124,8 @@
     "cn": "您好，欢迎使用查友！很高兴您加入我们，一起参与反击诈骗和虚假信息😊。"
   },
   "LANGUAGE_SELECTION": {
-    "en": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}\n请选择语言。",
-    "cn": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}\n请选择语言。"
+    "en": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。",
+    "cn": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。"
   },
   "IRRELEVANT_MENU_PREFIX": {
     "en": "Thanks for waiting!🙏🏻 Our CheckMates didn't find anything to assess in this message.😕",
@@ -185,7 +185,7 @@
   },
   "SATISFACTION_SURVEY": {
     "en": "Thanks so much for using CheckMate🙏. We're improving the product from time to time, and your feedback is valuable to us.\n\nOn a scale from 1-10, how likely are you to recommend us to a friend, colleague or family member?",
-    "cn": "非常感谢您使用查友🙏。您的反馈对我们非常重要，也会帮我们改进。\n\n请问在1-10之间，您愿意向朋友、同事或家人推荐查友吗？"
+    "cn": "非常感谢您使用查友🙏。您的反馈对于不断改进查友非常重要。\n\n请问在1-10之间，您愿意向朋友、同事或家人推荐查友吗？"
   },
   "SATISFACTION_SURVEY_THANKS": {
     "en": "Thanks for your feedback!",
@@ -193,7 +193,7 @@
   },
   "HOWD_WE_TELL": {
     "en": "*This is an experimental feature powered by generative AI*. Do let us know if it was useful below!\n \n{{rationalisation}}",
-    "cn": "*这是一项由AI技术提供的实验性功能。请在下方告诉我们它是否对您有所帮助！\n\n{{rationalisation}}"
+    "cn": "这是一项由AI技术提供的实验性功能。请在下方告诉我们它是否对您有所帮助！\n\n{{rationalisation}}"
   },
   "RATIONALISATION_USEFUL": {
     "en": "Thanks for your valuable feedback!",
@@ -237,7 +237,7 @@
   },
   "MENU_DESCRIPTION_ABOUT": {
     "en": "Learn more about CheckMate and the team behind it",
-    "cn": "了解更多关于查友及幕后团队的短信"
+    "cn": "了解查友及幕后团队"
   },
   "MENU_TITLE_FEEDBACK": {
     "en": "Send Feedback",
@@ -245,7 +245,7 @@
   },
   "MENU_DESCRIPTION_FEEDBACK": {
     "en": "Send us feedback on anything to do with CheckMate",
-    "cn": "给予有关查友的任何反馈"
+    "cn": "给予有关查友的反馈"
   },
   "MENU_TITLE_CONTACT": {
     "en": "Get Contact",
