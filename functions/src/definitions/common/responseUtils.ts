@@ -627,6 +627,7 @@ async function respondToInstance(
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
   const responseCount = await getCount(parentMessageRef, "responses")
+  const isImage = data?.type === "image"
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -646,6 +647,7 @@ async function respondToInstance(
           ? responses.METHODOLOGY_AUTO
           : responses.METHODOLOGY_HUMAN
       )
+      .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
   }
 
   if (!isAssessed && !forceReply) {
