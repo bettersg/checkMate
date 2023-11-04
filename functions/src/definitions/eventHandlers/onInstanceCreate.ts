@@ -9,11 +9,7 @@ import {
   CollectionTypes,
 } from "../common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
-import { defineInt } from "firebase-functions/params"
 import { Timestamp } from "firebase-admin/firestore"
-
-// Define some parameters
-const numInstanceShards = defineInt("NUM_SHARDS_INSTANCE_COUNT")
 
 interface MessageUpdate {
   [x: string]: any
