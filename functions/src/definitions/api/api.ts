@@ -37,7 +37,7 @@ main.use("/api", app)
 
 const apiHandler = onRequest(
   {
-    secrets: ["TELEGRAM_BOT_TOKEN"],
+    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
   },
   main
 )

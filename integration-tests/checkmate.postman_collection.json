@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5218f5ab-c512-43d1-b8a3-0831e12514c1",
+		"_postman_id": "c96bcaae-e133-42b3-b840-ed90f0840413",
 		"name": "checkmate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "25230076"
@@ -32,12 +32,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/healthcheck",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/healthcheck",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"healthcheck"
 							]
@@ -97,15 +97,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -147,14 +147,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents:listCollectionIds",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents:listCollectionIds",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents:listCollectionIds"
@@ -215,15 +215,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -334,15 +334,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -467,15 +467,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -599,15 +599,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -716,15 +716,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -835,15 +835,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -973,89 +973,247 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get last message (NEW_USER_MENU)",
+					"name": "Get last message (SELECT LANGUAGE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Select language\", function () {\r",
+									"    const NEW_USER_PREFIX_EN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_EN.en\")\r",
+									"    const NEW_USER_PREFIX_CN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_CN.en\")\r",
+									"    const LANGUAGE_SELECTION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LANGUAGE_SELECTION.en\")\r",
+									"    const BUTTON_ENGLISH = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en\")\r",
+									"    const BUTTON_CHINESE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_CHINESE.en\")\r",
+									"    const BODY_TEXT = LANGUAGE_SELECTION.replace(\"{{new_user_en}}\",NEW_USER_PREFIX_EN).replace(\"{{new_user_cn}}\",NEW_USER_PREFIX_CN)\r",
+									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_en\",\r",
+									"                                \"title\": BUTTON_ENGLISH\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_cn\",\r",
+									"                                \"title\": BUTTON_CHINESE\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press English Button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"languageSelection_en\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (USER_MENU)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
-									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_MENU_PREFIX\");\r",
-									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
-									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
-									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"recipient_type\": \"individual\",\r",
-									"        \"to\": USER_1_NUMBER,\r",
-									"        \"type\": \"interactive\",\r",
-									"        \"interactive\": {\r",
-									"            \"type\": \"list\",\r",
-									"            \"body\": {\r",
-									"                \"text\": MENU_TEXT\r",
-									"            },\r",
-									"            \"action\": {\r",
-									"                \"button\": \"View Menu\",\r",
-									"                \"sections\": [\r",
-									"                    {\r",
-									"                        \"rows\": [\r",
-									"                            {\r",
-									"                                \"id\": \"menu_check\",\r",
-									"                                \"title\": \"Check/Report\",\r",
-									"                                \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_referral\",\r",
-									"                                \"title\": \"Get Referral Link\",\r",
-									"                                \"description\": \"Get referral link to forward to others\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_help\",\r",
-									"                                \"title\": \"Get Help\",\r",
-									"                                \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_about\",\r",
-									"                                \"title\": \"About CheckMate\",\r",
-									"                                \"description\": \"Learn more about CheckMate and the team behind it\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_feedback\",\r",
-									"                                \"title\": \"Send Feedback\",\r",
-									"                                \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_contact\",\r",
-									"                                \"title\": \"Get Contact\",\r",
-									"                                \"description\": \"Get CheckMate's contact to add to your contact list\"\r",
-									"                            }\r",
-									"                        ]\r",
-									"                    }\r",
-									"                ]\r",
+									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
+									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
+									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
+									"        const MENU_TITLE_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_REFERRAL.en\");\r",
+									"        const MENU_DESCRIPTION_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_REFERRAL.en\");\r",
+									"        const MENU_TITLE_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_ABOUT.en\");\r",
+									"        const MENU_DESCRIPTION_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_ABOUT.en\");\r",
+									"        const MENU_TITLE_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_HELP.en\");\r",
+									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
+									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
+									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
+									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
+									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
+									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
+									"        const MENU_DESCRIPTION_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_DISPUTE.en\")\r",
+									"        \r",
+									"        const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
+									"        const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": MENU_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": MENU_BUTTON,\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_check\",\r",
+									"                                    \"title\": MENU_TITLE_CHECK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CHECK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_referral\",\r",
+									"                                    \"title\": MENU_TITLE_REFERRAL,\r",
+									"                                    \"description\": MENU_DESCRIPTION_REFERRAL\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_help\",\r",
+									"                                    \"title\": MENU_TITLE_HELP,\r",
+									"                                    \"description\": MENU_DESCRIPTION_HELP\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_about\",\r",
+									"                                    \"title\": MENU_TITLE_ABOUT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_ABOUT\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_feedback\",\r",
+									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_contact\",\r",
+									"                                    \"title\": MENU_TITLE_CONTACT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CONTACT\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
 									"            }\r",
-									"        }\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
@@ -1118,14 +1276,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -1189,15 +1347,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -1211,16 +1369,34 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Message auto-categorised as irrelevant returns correct menu\", function () {\r",
-									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
-									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IRRELEVANT_AUTO_MENU_PREFIX\");\r",
-									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
-									"    const wamid = pm.variables.get(\"whatsapp_id_9\")\r",
-									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
-									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
+									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IRRELEVANT_AUTO_MENU_PREFIX.en\");\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
+									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
+									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
+									"        const MENU_TITLE_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_REFERRAL.en\");\r",
+									"        const MENU_DESCRIPTION_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_REFERRAL.en\");\r",
+									"        const MENU_TITLE_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_ABOUT.en\");\r",
+									"        const MENU_DESCRIPTION_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_ABOUT.en\");\r",
+									"        const MENU_TITLE_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_HELP.en\");\r",
+									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
+									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
+									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
+									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
+									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
+									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
+									"        const MENU_DESCRIPTION_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_DISPUTE.en\")\r",
+									"        const wamid = pm.variables.get(\"whatsapp_id_9\")\r",
+									"        \r",
+									"        const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
+									"        const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
 									"            \"messaging_product\": \"whatsapp\",\r",
 									"            \"recipient_type\": \"individual\",\r",
 									"            \"to\": USER_1_NUMBER,\r",
@@ -1231,44 +1407,49 @@
 									"                    \"text\": MENU_TEXT\r",
 									"                },\r",
 									"                \"action\": {\r",
-									"                    \"button\": \"View Menu\",\r",
+									"                    \"button\": MENU_BUTTON,\r",
 									"                    \"sections\": [\r",
 									"                        {\r",
 									"                            \"rows\": [\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_check\",\r",
-									"                                    \"title\": \"Check/Report\",\r",
-									"                                    \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
+									"                                    \"title\": MENU_TITLE_CHECK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CHECK\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_referral\",\r",
-									"                                    \"title\": \"Get Referral Link\",\r",
-									"                                    \"description\": \"Get referral link to forward to others\",\r",
+									"                                    \"title\": MENU_TITLE_REFERRAL,\r",
+									"                                    \"description\": MENU_DESCRIPTION_REFERRAL\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_help\",\r",
-									"                                    \"title\": \"Get Help\",\r",
-									"                                    \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
+									"                                    \"title\": MENU_TITLE_HELP,\r",
+									"                                    \"description\": MENU_DESCRIPTION_HELP\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_about\",\r",
-									"                                    \"title\": \"About CheckMate\",\r",
-									"                                    \"description\": \"Learn more about CheckMate and the team behind it\"\r",
+									"                                    \"title\": MENU_TITLE_ABOUT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_ABOUT\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_feedback\",\r",
-									"                                    \"title\": \"Send Feedback\",\r",
-									"                                    \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
+									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_dispute_messages/*/instances/*\",\r",
-									"                                    \"title\": \"Dispute Assessment\",\r",
-									"                                    \"description\": \"Dispute CheckMate's assesment of this message\"\r",
+									"                                    \"title\": MENU_TITLE_DISPUTE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_DISPUTE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
 									"                                },\r",
 									"                                {\r",
 									"                                    \"id\": \"menu_contact\",\r",
-									"                                    \"title\": \"Get Contact\",\r",
-									"                                    \"description\": \"Get CheckMate's contact to add to your contact list\"\r",
+									"                                    \"title\": MENU_TITLE_CONTACT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CONTACT\r",
 									"                                }\r",
 									"                            ]\r",
 									"                        }\r",
@@ -1277,12 +1458,11 @@
 									"            },\r",
 									"            \"context\": {\r",
 									"                \"message_id\": wamid\r",
-									"            }\r",
+									"            },\r",
 									"        },\r",
 									"        \"method\": \"POST\"\r",
 									"    }\r",
 									"    var jsonData = pm.response.json();\r",
-									"    \r",
 									"    // get the id of \"Dispute Assessment\" for validation\r",
 									"    let disputeAssessmentId = jsonData.body.interactive.action.sections[0].rows.find(row => row.title === \"Dispute Assessment\").id;\r",
 									"    let [, , disputedInstancePath] = disputeAssessmentId.split(\"_\")\r",
@@ -1299,7 +1479,7 @@
 									"            return row;\r",
 									"        }\r",
 									"    });\r",
-									"\r",
+									"    \r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
@@ -1380,15 +1560,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -1455,7 +1635,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.DISPUTE\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.DISPUTE.en\");\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -1551,15 +1731,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -1576,7 +1756,7 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
-											"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED\");\r",
+											"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED.en\");\r",
 											"    const expected = {\r",
 											"    \"hostname\": \"resultserver\",\r",
 											"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -1998,15 +2178,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -2188,15 +2368,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -2393,15 +2573,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -2578,15 +2758,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -2631,14 +2811,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{spamMessageId}}/instances",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{spamMessageId}}/instances",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -2665,7 +2845,8 @@
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const INTERIM_PROMPT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_PROMPT\");\r",
+											"    const INTERIM_PROMPT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_PROMPT.en\");\r",
+											"    const BUTTON_GET_INTERIM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_GET_INTERIM.en\")\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -2685,7 +2866,7 @@
 											"                            \"type\": \"reply\",\r",
 											"                            \"reply\": {\r",
 											"                                \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                \"title\": \"Get interim update\"\r",
+											"                                \"title\": BUTTON_GET_INTERIM\r",
 											"                            }\r",
 											"                        }\r",
 											"                    ]\r",
@@ -2778,15 +2959,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -2805,11 +2986,13 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK\")\r",
+											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
+											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\");\r",
+											"    const BUTTON_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_USEFUL.en\");\r",
+											"    const BUTTON_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_NOT_USEFUL.en\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"is spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -2829,14 +3012,14 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_yes`,\r",
-											"                                    \"title\": \"Yes, it's useful\"\r",
+											"                                    \"title\": BUTTON_USEFUL\r",
 											"                                }\r",
 											"                            },\r",
 											"                            {\r",
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_no`,\r",
-											"                                    \"title\": \"No, it's not\"\r",
+											"                                    \"title\": BUTTON_NOT_USEFUL\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -2930,15 +3113,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -2957,7 +3140,8 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_USEFUL\");\r",
+											"    const INTERIM_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_USEFUL.en\");\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const expected = {\r",
@@ -2979,7 +3163,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -3060,15 +3244,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -3087,7 +3271,8 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_NOT_USEFUL\");\r",
+											"    const INTERIM_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_NOT_USEFUL.en\");\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const expected = {\r",
@@ -3109,7 +3294,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -3202,15 +3387,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -3229,11 +3414,12 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK\")\r",
+											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
+											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\")\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"is spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",\"\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -3253,7 +3439,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -3266,6 +3452,7 @@
 											"            \"method\": \"POST\"\r",
 											"        }\r",
 											"    var jsonData = pm.response.json();\r",
+											"    \r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
@@ -3330,15 +3517,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -3520,15 +3707,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -3725,15 +3912,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -3906,15 +4093,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -3933,7 +4120,8 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE\");\r",
+											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE.en\");\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"66.67\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
@@ -3956,7 +4144,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -4033,15 +4221,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -4223,15 +4411,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -4428,15 +4616,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -4570,16 +4758,21 @@
 											"pm.test(\"SPAM final reply sent to checker 1\", function () {\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER3\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const SPAM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM\");\r",
-											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED\");\r",
-											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\");\r",
-											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\");\r",
-											"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\");\r",
-											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX\");\r",
+											"    const SPAM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM.en\");\r",
+											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\");\r",
+											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\");\r",
+											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\");\r",
+											"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\");\r",
+											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\");\r",
+											"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+											"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
+											"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const isMachineCategorised = false\r",
 											"    const instanceCount = 1\r",
 											"    const isImmediate = false\r",
+											"    const isImage = false\r",
+											"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    function getFinalResponseText(responseText) {\r",
 											"        return responseText\r",
@@ -4600,6 +4793,7 @@
 											"            : METHODOLOGY_HUMAN\r",
 											"        )\r",
 											"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
+											"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
 											"    }\r",
 											"    const spamResponse = getFinalResponseText(SPAM)\r",
 											"    const expected = {\r",
@@ -4621,7 +4815,7 @@
 											"                            \"type\": \"reply\",\r",
 											"                            \"reply\": {\r",
 											"                                \"id\": `votingResults_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                \"title\": \"See voting results\"\r",
+											"                                \"title\": BUTTON_RESULTS\r",
 											"                            }\r",
 											"                        }\r",
 											"                    ]\r",
@@ -4675,7 +4869,10 @@
 											"pm.test(\"SATISFACTION_SURVEY sent to user1\", function () {\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER3\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const SATISFACTION_SURVEY = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SATISFACTION_SURVEY\");\r",
+											"    const SATISFACTION_SURVEY = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SATISFACTION_SURVEY.en\");\r",
+											"    const NPS_MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NPS_MENU_BUTTON.en\");\r",
+											"    const MENU_DESCRIPTION_NPS_LIKELY = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_NPS_LIKELY.en\");\r",
+											"    const MENU_DESCRIPTION_NPS_UNLIKELY = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_NPS_UNLIKELY.en\");\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
@@ -4691,14 +4888,14 @@
 											"                    \"text\": SATISFACTION_SURVEY\r",
 											"                },\r",
 											"                \"action\": {\r",
-											"                    \"button\": \"Tap to respond\",\r",
+											"                    \"button\": NPS_MENU_BUTTON,\r",
 											"                    \"sections\": [\r",
 											"                        {\r",
 											"                            \"rows\": [\r",
 											"                                {\r",
 											"                                    \"id\": `satisfactionSurvey_10_messages/${messageId}/instances/${instanceId}`,\r",
 											"                                    \"title\": \"10\",\r",
-											"                                    \"description\": \"Extremely likely 🤩\"\r",
+											"                                    \"description\": MENU_DESCRIPTION_NPS_LIKELY\r",
 											"                                },\r",
 											"                                {\r",
 											"                                    \"id\": `satisfactionSurvey_9_messages/${messageId}/instances/${instanceId}`,\r",
@@ -4735,7 +4932,7 @@
 											"                                {\r",
 											"                                    \"id\": `satisfactionSurvey_1_messages/${messageId}/instances/${instanceId}`,\r",
 											"                                    \"title\": \"1\",\r",
-											"                                    \"description\": \"Not at all likely 😥\"\r",
+											"                                    \"description\": MENU_DESCRIPTION_NPS_UNLIKELY\r",
 											"                                }\r",
 											"                            ]\r",
 											"                        }\r",
@@ -4815,15 +5012,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -4838,7 +5035,7 @@
 										"exec": [
 											"pm.test(\"ALREADY_REPLIED sent to user 1\", function () {\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const SATISFACTION_SURVEY_THANKS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SATISFACTION_SURVEY_THANKS\");\r",
+											"    const SATISFACTION_SURVEY_THANKS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SATISFACTION_SURVEY_THANKS.en\");\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -4915,14 +5112,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{spamMessageId}}/instances/{{spamInstanceId}}",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{spamMessageId}}/instances/{{spamInstanceId}}",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -4984,15 +5181,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -5007,7 +5204,7 @@
 										"exec": [
 											"pm.test(\"ALREADY_REPLIED sent to user 1\", function () {\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const ALREADY_REPLIED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.ALREADY_REPLIED\");\r",
+											"    const ALREADY_REPLIED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.ALREADY_REPLIED.en\");\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
@@ -5111,15 +5308,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -5141,7 +5338,7 @@
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"66.67% of our CheckMates thought this was *spam*. 33.33%  thought this was *legitimate*.\",\r",
+											"                \"body\": \"66.67% of our CheckMates felt this was *spam🚧*. 33.33% felt this was *legitimate✅*.\",\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -5152,6 +5349,7 @@
 											"        },\r",
 											"        \"method\": \"POST\"\r",
 											"    }\r",
+											"    console.log(JSON.stringify(expected,null,2))\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
@@ -5243,15 +5441,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -5268,7 +5466,7 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
-											"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED\");\r",
+											"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED.en\");\r",
 											"    const expected = {\r",
 											"    \"hostname\": \"resultserver\",\r",
 											"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -5689,15 +5887,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -5884,15 +6082,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -6046,14 +6244,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{infoMessageId}}/instances",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{infoMessageId}}/instances",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -6113,15 +6311,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -6142,7 +6340,8 @@
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"infoVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"infoInstanceId\")\r",
-											"    const INTERIM_PROMPT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_PROMPT\");\r",
+											"    const INTERIM_PROMPT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_PROMPT.en\");\r",
+											"    const BUTTON_GET_INTERIM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_GET_INTERIM.en\")\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -6162,7 +6361,7 @@
 											"                            \"type\": \"reply\",\r",
 											"                            \"reply\": {\r",
 											"                                \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                \"title\": \"Get interim update\"\r",
+											"                                \"title\": BUTTON_GET_INTERIM\r",
 											"                            }\r",
 											"                        }\r",
 											"                    ]\r",
@@ -6254,15 +6453,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -6281,11 +6480,13 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"infoVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK\")\r",
+											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
+											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\");\r",
+											"    const BUTTON_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_USEFUL.en\");\r",
+											"    const BUTTON_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_NOT_USEFUL.en\")\r",
 											"    const instanceId = pm.variables.get(\"infoInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"is untrue❌\").replace(\"{{info_placeholder}}\",\", with an average score of 1.00 on a scale of 0-5 (5 = completely true)\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"untrue❌\").replace(\"{{info_placeholder}}\",\", with an average score of 1.00 on a scale of 0-5 (5 = completely true)\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -6305,14 +6506,14 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_yes`,\r",
-											"                                    \"title\": \"Yes, it's useful\"\r",
+											"                                    \"title\": BUTTON_USEFUL\r",
 											"                                }\r",
 											"                            },\r",
 											"                            {\r",
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_no`,\r",
-											"                                    \"title\": \"No, it's not\"\r",
+											"                                    \"title\": BUTTON_NOT_USEFUL\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -6386,14 +6587,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{infoMessageId}}/instances/{{infoInstanceId}}",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{infoMessageId}}/instances/{{infoInstanceId}}",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -6439,15 +6640,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -6634,15 +6835,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -6774,16 +6975,21 @@
 											"pm.test(\"UNTRUE final reply sent to checker 1\", function () {\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"infoVoteRequestPath_CHECKER3\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"infoInstanceId\")\r",
-											"    const UNTRUE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.UNTRUE\");\r",
-											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED\");\r",
-											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\");\r",
-											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\");\r",
-											"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\");\r",
-											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX\");\r",
+											"    const UNTRUE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.UNTRUE.en\");\r",
+											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\");\r",
+											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\");\r",
+											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\");\r",
+											"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\");\r",
+											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\");\r",
+											"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+											"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
+											"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
 											"    const isMachineCategorised = false\r",
 											"    const instanceCount = 1\r",
 											"    const isImmediate = false\r",
+											"    const isImage = false\r",
+											"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    function getFinalResponseText(responseText) {\r",
 											"        return responseText\r",
@@ -6804,6 +7010,7 @@
 											"            : METHODOLOGY_HUMAN\r",
 											"        )\r",
 											"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
+											"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
 											"    }\r",
 											"    const response = getFinalResponseText(UNTRUE)\r",
 											"    const expected = {\r",
@@ -6825,7 +7032,7 @@
 											"                            \"type\": \"reply\",\r",
 											"                            \"reply\": {\r",
 											"                                \"id\": `votingResults_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                \"title\": \"See voting results\"\r",
+											"                                \"title\": BUTTON_RESULTS\r",
 											"                            }\r",
 											"                        }\r",
 											"                    ]\r",
@@ -6902,15 +7109,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -7097,15 +7304,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -7280,15 +7487,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -7304,13 +7511,16 @@
 											"pm.test(\"STATS_TEMPLATE sent to user 1\", function () {\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
+											"    const STATS_TEMPLATE_1 = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.STATS_TEMPLATE_1.en\")\r",
+											"    const PLACEHOLDER_MISLEADING = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_MISLEADING.en\")\r",
+											"    const expectedBody = STATS_TEMPLATE_1.replace(\"{{top}}\", \"100.00\").replace(\"{{category}}\",PLACEHOLDER_MISLEADING).replace(\"{{info_placeholder}}\",\", with an average score of 2.33 on a scale of 0-5 (5 = completely true)\")\r",
 											"    //we not using the template for this, its hardcoded.\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"100.00% of our CheckMates collectively thought this was *misleading*, with an average score of 2.33 on a scale of 0-5 (5 = completely true).\",\r",
+											"                \"body\": expectedBody,\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -7411,15 +7621,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -7436,7 +7646,7 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
-											"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED\");\r",
+											"    const MESSAGE_NOT_YET_ASSESSED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MESSAGE_NOT_YET_ASSESSED.en\");\r",
 											"    const expected = {\r",
 											"    \"hostname\": \"resultserver\",\r",
 											"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -7857,15 +8067,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -8047,15 +8257,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -8251,15 +8461,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -8433,15 +8643,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -8486,14 +8696,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{unsureMessageId}}/instances",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -8520,7 +8730,8 @@
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"unsureVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const INTERIM_PROMPT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_PROMPT\");\r",
+											"    const INTERIM_PROMPT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_PROMPT.en\");\r",
+											"    const BUTTON_GET_INTERIM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_GET_INTERIM.en\")\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -8540,7 +8751,7 @@
 											"                            \"type\": \"reply\",\r",
 											"                            \"reply\": {\r",
 											"                                \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                \"title\": \"Get interim update\"\r",
+											"                                \"title\": BUTTON_GET_INTERIM\r",
 											"                            }\r",
 											"                        }\r",
 											"                    ]\r",
@@ -8632,15 +8843,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -8660,7 +8871,8 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"unsureVoteRequestPath_CHECKER1\").split(\"/\")\r",
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE\");\r",
+											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE.en\");\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
 											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"33.33\")\r",
 											"    const expected = {\r",
@@ -8682,7 +8894,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -8756,14 +8968,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -8818,15 +9030,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -8996,15 +9208,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -9024,10 +9236,12 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
-											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK\")\r",
+											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
+											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\")\r",
+											"    const BUTTON_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_USEFUL.en\");\r",
+											"    const BUTTON_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_NOT_USEFUL.en\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"is legitimate✅\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"legitimate✅\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -9047,14 +9261,14 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_yes`,\r",
-											"                                    \"title\": \"Yes, it's useful\"\r",
+											"                                    \"title\": BUTTON_USEFUL\r",
 											"                                }\r",
 											"                            },\r",
 											"                            {\r",
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_no`,\r",
-											"                                    \"title\": \"No, it's not\"\r",
+											"                                    \"title\": BUTTON_NOT_USEFUL\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -9066,6 +9280,7 @@
 											"            },\r",
 											"            \"method\": \"POST\"\r",
 											"        }\r",
+											"    console.log(JSON.stringify(expected,null,2))\r",
 											"    var jsonData = pm.response.json();\r",
 											"    \r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
@@ -9128,14 +9343,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -9196,15 +9411,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -9224,7 +9439,8 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
-											"    const INTERIM_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_USEFUL\");\r",
+											"    const INTERIM_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_USEFUL.en\");\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
@@ -9245,7 +9461,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -9318,14 +9534,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
+									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
 									"host": [
 										"{{FIRESTORE_URL}}"
 									],
 									"path": [
 										"v1",
 										"projects",
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"databases",
 										"(default)",
 										"documents",
@@ -9371,15 +9587,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -9561,15 +9777,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -9763,15 +9979,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -9941,15 +10157,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -9969,9 +10185,11 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
-											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE\");\r",
+											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE.en\");\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\");\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
 											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"66.67\")\r",
+											"\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -9991,7 +10209,7 @@
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
 											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": \"Get another update\"\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -10070,15 +10288,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -10260,15 +10478,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -10464,15 +10682,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -10604,16 +10822,21 @@
 											"pm.test(\"UNSURE final reply sent to user 1\", function () {\r",
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"unsureVoteRequestPath_CHECKER3\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.UNSURE\");\r",
-											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED\");\r",
-											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\");\r",
-											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\");\r",
-											"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\");\r",
-											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX\");\r",
+											"    const UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.UNSURE.en\");\r",
+											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\");\r",
+											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\");\r",
+											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\");\r",
+											"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\");\r",
+											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\");\r",
+											"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+											"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
+											"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
 											"    const isMachineCategorised = false\r",
 											"    const instanceCount = 1\r",
 											"    const isImmediate = false\r",
+											"    const isImage = false\r",
+											"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    function getFinalResponseText(responseText) {\r",
 											"        return responseText\r",
@@ -10634,6 +10857,7 @@
 											"            : METHODOLOGY_HUMAN\r",
 											"        )\r",
 											"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
+											"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
 											"    }\r",
 											"    const response = getFinalResponseText(UNSURE)\r",
 											"    const expected = {\r",
@@ -10655,7 +10879,7 @@
 											"                            \"type\": \"reply\",\r",
 											"                            \"reply\": {\r",
 											"                                \"id\": `votingResults_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                \"title\": \"See voting results\"\r",
+											"                                \"title\": BUTTON_RESULTS\r",
 											"                            }\r",
 											"                        }\r",
 											"                    ]\r",
@@ -10752,15 +10976,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
 									"path": [
-										"checkmate-373101",
+										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"whatsapp"
+										"{{WEBHOOK_PATH}}"
 									]
 								}
 							},
@@ -10782,7 +11006,7 @@
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"33.33% of our CheckMates thought this was *spam*. 33.33% collectively  thought this was *misleading*, with an average score of 3.00 on a scale of 0-5 (5 = completely true).\",\r",
+											"                \"body\": \"33.33% of our CheckMates felt this was *spam🚧*. 33.33% felt this was *misleading⚠️*, with an average score of 3.00 on a scale of 0-5 (5 = completely true).\",\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -10880,15 +11104,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -10902,67 +11126,90 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
-									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX\");\r",
-									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
-									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
-									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"recipient_type\": \"individual\",\r",
-									"        \"to\": USER_1_NUMBER,\r",
-									"        \"type\": \"interactive\",\r",
-									"        \"interactive\": {\r",
-									"            \"type\": \"list\",\r",
-									"            \"body\": {\r",
-									"                \"text\": MENU_TEXT\r",
-									"            },\r",
-									"            \"action\": {\r",
-									"                \"button\": \"View Menu\",\r",
-									"                \"sections\": [\r",
-									"                    {\r",
-									"                        \"rows\": [\r",
-									"                            {\r",
-									"                                \"id\": \"menu_check\",\r",
-									"                                \"title\": \"Check/Report\",\r",
-									"                                \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_referral\",\r",
-									"                                \"title\": \"Get Referral Link\",\r",
-									"                                \"description\": \"Get referral link to forward to others\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_help\",\r",
-									"                                \"title\": \"Get Help\",\r",
-									"                                \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_about\",\r",
-									"                                \"title\": \"About CheckMate\",\r",
-									"                                \"description\": \"Learn more about CheckMate and the team behind it\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_feedback\",\r",
-									"                                \"title\": \"Send Feedback\",\r",
-									"                                \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_contact\",\r",
-									"                                \"title\": \"Get Contact\",\r",
-									"                                \"description\": \"Get CheckMate's contact to add to your contact list\"\r",
-									"                            }\r",
-									"                        ]\r",
-									"                    }\r",
-									"                ]\r",
+									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
+									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
+									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
+									"        const MENU_TITLE_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_REFERRAL.en\");\r",
+									"        const MENU_DESCRIPTION_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_REFERRAL.en\");\r",
+									"        const MENU_TITLE_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_ABOUT.en\");\r",
+									"        const MENU_DESCRIPTION_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_ABOUT.en\");\r",
+									"        const MENU_TITLE_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_HELP.en\");\r",
+									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
+									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
+									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
+									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
+									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
+									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
+									"        const MENU_DESCRIPTION_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_DISPUTE.en\")\r",
+									"        \r",
+									"        const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
+									"        const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": MENU_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": MENU_BUTTON,\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_check\",\r",
+									"                                    \"title\": MENU_TITLE_CHECK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CHECK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_referral\",\r",
+									"                                    \"title\": MENU_TITLE_REFERRAL,\r",
+									"                                    \"description\": MENU_DESCRIPTION_REFERRAL\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_help\",\r",
+									"                                    \"title\": MENU_TITLE_HELP,\r",
+									"                                    \"description\": MENU_DESCRIPTION_HELP\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_about\",\r",
+									"                                    \"title\": MENU_TITLE_ABOUT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_ABOUT\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_feedback\",\r",
+									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_contact\",\r",
+									"                                    \"title\": MENU_TITLE_CONTACT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CONTACT\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
 									"            }\r",
-									"        }\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
@@ -11043,15 +11290,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11065,7 +11312,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PROCEED_TO_SEND\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PROCEED_TO_SEND.en\");\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -11161,15 +11408,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11183,7 +11430,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.HOW_TO\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.HOW_TO.en\");\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -11279,15 +11526,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11301,7 +11548,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LEARN_MORE\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LEARN_MORE.en\");\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -11397,15 +11644,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11419,7 +11666,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.FEEDBACK\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.FEEDBACK.en\");\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -11447,6 +11694,327 @@
 							"script": {
 								"exec": [
 									"setTimeout(() => {}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Menu Selection (\"Select Language\")",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// 1. Retrieve the current messageCounter and increment it.\r",
+									"let messageCounter = 34\r",
+									"\r",
+									"const whatsappId = \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFA1==\";\r",
+									"\r",
+									"// 3. Replace the last n characters (excluding the == at the end) of whatsappId with the new messageCounter\r",
+									"let n = messageCounter.toString().length;\r",
+									"let basePart = whatsappId.substring(0, whatsappId.length - n - 2);\r",
+									"let newId = basePart + messageCounter + \"==\";\r",
+									"\r",
+									"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"15550933685\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_34}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"list_reply\",\r\n                  \"list_reply\": {\r\n                    \"id\": \"menu_language\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en}}\",\r\n                    \"description\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en}}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (SELECT LANGUAGE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Select language\", function () {\r",
+									"    const NEW_USER_PREFIX_EN = \"\"\r",
+									"    const NEW_USER_PREFIX_CN = \"\"\r",
+									"    const LANGUAGE_SELECTION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LANGUAGE_SELECTION.en\")\r",
+									"    const BUTTON_ENGLISH = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en\")\r",
+									"    const BUTTON_CHINESE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_CHINESE.en\")\r",
+									"    const BODY_TEXT = LANGUAGE_SELECTION.replace(\"{{new_user_en}}\",NEW_USER_PREFIX_EN).replace(\"{{new_user_cn}}\",NEW_USER_PREFIX_CN)\r",
+									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_en\",\r",
+									"                                \"title\": BUTTON_ENGLISH\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_cn\",\r",
+									"                                \"title\": BUTTON_CHINESE\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press English Button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"languageSelection_en\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (USER_MENU)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {\r",
+									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
+									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
+									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
+									"        const MENU_TITLE_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_REFERRAL.en\");\r",
+									"        const MENU_DESCRIPTION_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_REFERRAL.en\");\r",
+									"        const MENU_TITLE_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_ABOUT.en\");\r",
+									"        const MENU_DESCRIPTION_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_ABOUT.en\");\r",
+									"        const MENU_TITLE_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_HELP.en\");\r",
+									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
+									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
+									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
+									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
+									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
+									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
+									"        const MENU_DESCRIPTION_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_DISPUTE.en\")\r",
+									"        \r",
+									"        const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
+									"        const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_1_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": MENU_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": MENU_BUTTON,\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_check\",\r",
+									"                                    \"title\": MENU_TITLE_CHECK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CHECK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_referral\",\r",
+									"                                    \"title\": MENU_TITLE_REFERRAL,\r",
+									"                                    \"description\": MENU_DESCRIPTION_REFERRAL\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_help\",\r",
+									"                                    \"title\": MENU_TITLE_HELP,\r",
+									"                                    \"description\": MENU_DESCRIPTION_HELP\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_about\",\r",
+									"                                    \"title\": MENU_TITLE_ABOUT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_ABOUT\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_feedback\",\r",
+									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_contact\",\r",
+									"                                    \"title\": MENU_TITLE_CONTACT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CONTACT\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            }\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
 								],
 								"type": "text/javascript"
 							}
@@ -11515,15 +12083,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11608,7 +12176,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.CONTACT\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.CONTACT.en\");\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -11695,15 +12263,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11717,7 +12285,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL.en\");\r",
 									"    const link = pm.variables.get(\"referralLink_USER1\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const referralMessage = BODY_TEXT.replace(\"{{link}}\", link)\r",
@@ -11819,15 +12387,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -11841,14 +12409,17 @@
 							"script": {
 								"exec": [
 									"pm.test(\"scam immediate autocategorised no matched response\", function () {\r",
-									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SCAM\");\r",
-									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\")\r",
-									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED\")\r",
-									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN\")\r",
-									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\")\r",
-									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX\")\r",
+									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SCAM.en\");\r",
+									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\")\r",
+									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\")\r",
+									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\")\r",
+									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\")\r",
+									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\")\r",
+									"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+									"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
+									"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
 									"    const wamid = pm.variables.get(\"whatsapp_id_37\")\r",
-									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\").replace(\"{{results}}\",\"\")\r",
+									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\").replace(\"{{results}}\",\"\").replace(\"{{image_caveat}}\",\"\")\r",
 									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -11870,14 +12441,14 @@
 									"                            \"type\": \"reply\",\r",
 									"                            \"reply\": {\r",
 									"                                \"id\": \"ID\",\r",
-									"                                \"title\": \"How'd we tell?\"\r",
+									"                                \"title\": BUTTON_RATIONALISATION\r",
 									"                            }\r",
 									"                        },\r",
 									"                        {\r",
 									"                            \"type\": \"reply\",\r",
 									"                            \"reply\": {\r",
 									"                                \"id\": \"ID\",\r",
-									"                                \"title\": \"Don't report this\"\r",
+									"                                \"title\": BUTTON_DECLINE_REPORT\r",
 									"                            }\r",
 									"                        }\r",
 									"                    ]\r",
@@ -11988,15 +12559,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -12010,10 +12581,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"spam immediate autocategorised no matched response\", function () {\r",
-									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM\");\r",
-									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE\")\r",
-									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO\")\r",
-									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\")\r",
+									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM.en\");\r",
+									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\")\r",
+									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\")\r",
+									"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+									"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
+									"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
+									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\").replace(\"{{image_caveat}}\",\"\")\r",
 									"    const wamid = pm.variables.get(\"whatsapp_id_38\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 									"    const expected = {\r",
@@ -12083,6 +12657,7 @@
 									"    const actions = Object.values(initialJourney).map((obj) => obj.stringValue)\r",
 									"    const expected = [\r",
 									"        \"text_machine_irrelevant_length\",\r",
+									"        \"languageSelection_en\",\r",
 									"        \"text_machine_irrelevant_length\",\r",
 									"        \"menu_dispute\",\r",
 									"        \"text_machine_unsure\",\r",
@@ -12108,6 +12683,8 @@
 									"        \"menu_help\",\r",
 									"        \"menu_about\",\r",
 									"        \"menu_feedback\",\r",
+									"        \"menu_language\",\r",
+									"        \"languageSelection_en\",\r",
 									"        \"menu_contact\",\r",
 									"        \"menu_referral\",\r",
 									"        \"text_machine_scam\",\r",
@@ -12130,14 +12707,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -12193,7 +12770,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_39}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_39}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX.en}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -12201,15 +12778,150 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get last message (SELECT LANGUAGE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Select language\", function () {\r",
+									"    const NEW_USER_PREFIX_EN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_EN.en\")\r",
+									"    const NEW_USER_PREFIX_CN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_PREFIX_CN.en\")\r",
+									"    const LANGUAGE_SELECTION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.LANGUAGE_SELECTION.en\")\r",
+									"    const BUTTON_ENGLISH = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en\")\r",
+									"    const BUTTON_CHINESE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_CHINESE.en\")\r",
+									"    const BODY_TEXT = LANGUAGE_SELECTION.replace(\"{{new_user_en}}\",NEW_USER_PREFIX_EN).replace(\"{{new_user_cn}}\",NEW_USER_PREFIX_CN)\r",
+									"    const USER_2_NUMBER = pm.variables.get(\"USER_2_NUMBER\")\r",
+									"    const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_2_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"button\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": BODY_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"buttons\": [\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_en\",\r",
+									"                                \"title\": BUTTON_ENGLISH\r",
+									"                            }\r",
+									"                        },\r",
+									"                        {\r",
+									"                            \"type\": \"reply\",\r",
+									"                            \"reply\": {\r",
+									"                                \"id\": \"languageSelection_cn\",\r",
+									"                                \"title\": BUTTON_CHINESE\r",
+									"                            }\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
+									"            },\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.eql(expected);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RESULT_SERVER_URL}}/testresultdata",
+							"host": [
+								"{{RESULT_SERVER_URL}}"
+							],
+							"path": [
+								"testresultdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Press English Button",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_2_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_2_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"languageSelection_en\",\r\n                    \"title\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ENGLISH.en}}\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"host": [
+								"{{FUNCTIONS_URL}}"
+							],
+							"path": [
+								"{{PROJECT_ID}}",
+								"asia-southeast1",
+								"webhookHandlerV2",
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -12223,66 +12935,90 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Your test name\", function () {\r",
-									"    const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU\");\r",
-									"    const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.NEW_USER_MENU_PREFIX\");\r",
-									"    const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX)\r",
-									"    const USER_2_NUMBER = pm.variables.get(\"USER_2_NUMBER\")\r",
-									"    const expected = {\r",
-									"    \"hostname\": \"resultserver\",\r",
-									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-									"    \"body\": {\r",
-									"        \"messaging_product\": \"whatsapp\",\r",
-									"        \"recipient_type\": \"individual\",\r",
-									"        \"to\": USER_2_NUMBER,\r",
-									"        \"type\": \"interactive\",\r",
-									"        \"interactive\": {\r",
-									"            \"type\": \"list\",\r",
-									"            \"body\": {\r",
-									"                \"text\": MENU_TEXT\r",
-									"            },\r",
-									"            \"action\": {\r",
-									"                \"button\": \"View Menu\",\r",
-									"                \"sections\": [\r",
-									"                    {\r",
-									"                        \"rows\": [\r",
-									"                            {\r",
-									"                                \"id\": \"menu_check\",\r",
-									"                                \"title\": \"Check/Report\",\r",
-									"                                \"description\": \"Send in messages, images, or screenshots for checking!\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_referral\",\r",
-									"                                \"title\": \"Get Referral Link\",\r",
-									"                                \"description\": \"Get referral link to forward to others\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_help\",\r",
-									"                                \"title\": \"Get Help\",\r",
-									"                                \"description\": \"Find out how to use CheckMate to check or report dubious messages\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_about\",\r",
-									"                                \"title\": \"About CheckMate\",\r",
-									"                                \"description\": \"Learn more about CheckMate and the team behind it\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_feedback\",\r",
-									"                                \"title\": \"Send Feedback\",\r",
-									"                                \"description\": \"Send us feedback on anything to do with CheckMate\"\r",
-									"                            },\r",
-									"                            {\r",
-									"                                \"id\": \"menu_contact\",\r",
-									"                                \"title\": \"Get Contact\",\r",
-									"                                \"description\": \"Get CheckMate's contact to add to your contact list\"\r",
-									"                            }\r",
-									"                        ]\r",
-									"                    }\r",
-									"                ]\r",
+									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
+									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
+									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
+									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
+									"        const MENU_TITLE_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_REFERRAL.en\");\r",
+									"        const MENU_DESCRIPTION_REFERRAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_REFERRAL.en\");\r",
+									"        const MENU_TITLE_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_ABOUT.en\");\r",
+									"        const MENU_DESCRIPTION_ABOUT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_ABOUT.en\");\r",
+									"        const MENU_TITLE_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_HELP.en\");\r",
+									"        const MENU_DESCRIPTION_HELP = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_HELP.en\");\r",
+									"        const MENU_TITLE_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_FEEDBACK.en\");\r",
+									"        const MENU_DESCRIPTION_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_FEEDBACK.en\");\r",
+									"        const MENU_TITLE_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_LANGUAGE.en\")\r",
+									"        const MENU_DESCRIPTION_LANGUAGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_LANGUAGE.en\")\r",
+									"        const MENU_TITLE_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CONTACT.en\");\r",
+									"        const MENU_DESCRIPTION_CONTACT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CONTACT.en\");\r",
+									"        const MENU_TITLE_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_DISPUTE.en\")\r",
+									"        const MENU_DESCRIPTION_DISPUTE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_DISPUTE.en\")\r",
+									"        \r",
+									"        const USER_2_NAME = pm.variables.get(\"USER_2_NAME\")\r",
+									"        const USER_2_NUMBER = pm.variables.get(\"USER_2_NUMBER\")\r",
+									"        const expected = {\r",
+									"        \"hostname\": \"resultserver\",\r",
+									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
+									"        \"body\": {\r",
+									"            \"messaging_product\": \"whatsapp\",\r",
+									"            \"recipient_type\": \"individual\",\r",
+									"            \"to\": USER_2_NUMBER,\r",
+									"            \"type\": \"interactive\",\r",
+									"            \"interactive\": {\r",
+									"                \"type\": \"list\",\r",
+									"                \"body\": {\r",
+									"                    \"text\": MENU_TEXT\r",
+									"                },\r",
+									"                \"action\": {\r",
+									"                    \"button\": MENU_BUTTON,\r",
+									"                    \"sections\": [\r",
+									"                        {\r",
+									"                            \"rows\": [\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_check\",\r",
+									"                                    \"title\": MENU_TITLE_CHECK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CHECK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_referral\",\r",
+									"                                    \"title\": MENU_TITLE_REFERRAL,\r",
+									"                                    \"description\": MENU_DESCRIPTION_REFERRAL\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_help\",\r",
+									"                                    \"title\": MENU_TITLE_HELP,\r",
+									"                                    \"description\": MENU_DESCRIPTION_HELP\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_about\",\r",
+									"                                    \"title\": MENU_TITLE_ABOUT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_ABOUT\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_feedback\",\r",
+									"                                    \"title\": MENU_TITLE_FEEDBACK,\r",
+									"                                    \"description\": MENU_DESCRIPTION_FEEDBACK\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_language\",\r",
+									"                                    \"title\": MENU_TITLE_LANGUAGE,\r",
+									"                                    \"description\": MENU_DESCRIPTION_LANGUAGE\r",
+									"                                },\r",
+									"                                {\r",
+									"                                    \"id\": \"menu_contact\",\r",
+									"                                    \"title\": MENU_TITLE_CONTACT,\r",
+									"                                    \"description\": MENU_DESCRIPTION_CONTACT\r",
+									"                                }\r",
+									"                            ]\r",
+									"                        }\r",
+									"                    ]\r",
+									"                }\r",
 									"            }\r",
-									"        }\r",
-									"    },\r",
-									"    \"method\": \"POST\"\r",
-									"}\r",
+									"        },\r",
+									"        \"method\": \"POST\"\r",
+									"    }\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
@@ -12343,14 +13079,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -12401,7 +13137,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_40}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_40}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX.en}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -12409,15 +13145,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -12431,7 +13167,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"REFERRAL_INVALID response received\", function () {\r",
-									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_INVALID\");\r",
+									"    const BODY_TEXT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_INVALID.en\");\r",
 									"    const USER_2_NUMBER = pm.variables.get(\"USER_2_NUMBER\")\r",
 									"    const wamid = pm.variables.get(\"whatsapp_id_40\")\r",
 									"    const expected = {\r",
@@ -12513,14 +13249,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -12556,14 +13292,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages/{{infoMessageId}}/instances",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{infoMessageId}}/instances",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -12612,15 +13348,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -12663,14 +13399,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -12706,14 +13442,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents/messages",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents",
@@ -12773,15 +13509,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -12824,15 +13560,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/checkmate-373101/asia-southeast1/webhookHandlerV2/whatsapp",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"whatsapp"
+								"{{WEBHOOK_PATH}}"
 							]
 						}
 					},
@@ -12883,14 +13619,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents:runQuery",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents:runQuery",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents:runQuery"
@@ -12943,14 +13679,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/checkmate-373101/databases/(default)/documents:runQuery",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents:runQuery",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
 							"path": [
 								"v1",
 								"projects",
-								"checkmate-373101",
+								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
 								"documents:runQuery"

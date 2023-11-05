@@ -1,15 +1,18 @@
+//TODO: UPDATE THIS
+
 import _ from "lodash"
 import fs from "fs"
 import env from "./env.json"
-import * as constants from "../functions/src/definitions/common/constants"
+import CHECKER_BOT_REPONSES from "../functions/src/definitions/common/parameters/checkerResponses.json"
+import USER_BOT_RESPONSES from "../functions/src/definitions/common/parameters/userResponses.json"
 
-const factCheckerKeys = Object.keys(constants.FACTCHECKER_BOT_RESPONSES).map(
-  (key) => {
-    return `__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.${key}`
-  }
-)
-const userKeys = Object.keys(constants.USER_BOT_RESPONSES).map((key) => {
-  return `__CONSTANTS__.USER_BOT_RESPONSES.${key}`
+const factCheckerKeys = Object.keys(CHECKER_BOT_REPONSES).map((key) => {
+  return `__CONSTANTS__.FACTCHECKER_BOT_RESPONSES.${key}`
+})
+const userKeys = Object.entries(USER_BOT_RESPONSES).flatMap(([key, value]) => {
+  return Object.keys(value).map(
+    (language) => `__CONSTANTS__.USER_BOT_RESPONSES.${key}.${language}`
+  )
 })
 
 //combine the two lists
@@ -48,9 +51,13 @@ const envWithRemovedValues = env.values.filter((value) => {
 
 const envWithReplacedValues = envWithRemovedValues.map((value) => {
   if (value.key.startsWith("__CONSTANTS__.")) {
-    const key = value.key.replace("__CONSTANTS__.", "")
-    const newValue = _.get(constants, key)
-    value.value = newValue
+    const stringParts = value.key.split(".")
+    const key = stringParts.slice(2).join(".")
+    if (stringParts[1] === "FACTCHECKER_BOT_RESPONSES") {
+      value.value = _.get(CHECKER_BOT_REPONSES, key)
+    } else if (stringParts[1] === "USER_BOT_RESPONSES") {
+      value.value = _.get(USER_BOT_RESPONSES, key)
+    }
     return value
   } else {
     return value

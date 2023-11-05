@@ -5,7 +5,7 @@ import express from "express"
 import TelegramBot from "node-telegram-bot-api"
 import { onRequest } from "firebase-functions/v2/https"
 
-const TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const bot = new TelegramBot(TOKEN)
 
 const app = express()
@@ -23,7 +23,7 @@ app.post("/", async (req, res) => {
 
 const telegramHandler = onRequest(
   {
-    secrets: ["TELEGRAM_BOT_TOKEN"],
+    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
   },
   app
 )

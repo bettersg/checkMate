@@ -1,11 +1,14 @@
 name: Deploy Cloud Functions
+
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+      - develop
     paths:
-      - 'functions/**'
+      - "functions/**"
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -22,15 +25,30 @@ jobs:
             ${{ runner.os }}-node-
       - name: Create env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          else
+            echo "${{ secrets.ENV_FILE_NONPROD }}" > .env
+          fi
         working-directory: functions
       - name: Build Cloud Functions
         run: npm ci
         working-directory: functions
       - name: Create SA key
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $HOME/gcloud.json
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $HOME/gcloud.json
+          else
+            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NONPROD }}' > $HOME/gcloud.json
+          fi
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       - name: Deploy Cloud Functions
-        run: export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json && npm run deploy
-        working-directory: functions 
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            npm run deploy -- --project checkmate-373101
+          else
+            npm run deploy -- --project checkmate-uat
+          fi
+        working-directory: functions

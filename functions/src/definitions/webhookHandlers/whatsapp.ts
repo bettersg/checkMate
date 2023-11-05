@@ -6,16 +6,47 @@ import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
+import { Request, Response } from "express"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
+
+const webhookPath = process.env.WEBHOOK_PATH
+const ingressSetting =
+  process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 const app = express()
 
-// Accepts POST requests at /webhook endpoint
-app.post("/whatsapp", async (req, res) => {
+const getHandler = async (req: Request, res: Response) => {
+  /**
+   * UPDATE YOUR VERIFY TOKEN
+   *This will be the Verify Token value when you set up webhook
+   **/
+  const verifyToken = process.env.VERIFY_TOKEN
+  // Parse params from the webhook verification request
+  const mode = req.query["hub.mode"]
+  const token = req.query["hub.verify_token"]
+  const challenge = req.query["hub.challenge"]
+
+  // Check if a token and mode were sent
+  if (mode && token) {
+    // Check the mode and token sent are correct
+    if (mode === "subscribe" && token === verifyToken) {
+      // Respond with 200 OK and challenge token from the request
+      functions.logger.log("WEBHOOK_VERIFIED")
+      res.status(200).send(challenge)
+    } else {
+      // Responds with '403 Forbidden' if verify tokens do not match
+      res.sendStatus(403)
+    }
+  } else {
+    res.sendStatus(400)
+  }
+}
+
+const postHandler = async (req: Request, res: Response) => {
   if (req.body.object) {
     if (req?.body?.entry?.[0]?.changes?.[0]?.value) {
       let value = req.body.entry[0].changes[0].value
@@ -108,7 +139,11 @@ app.post("/whatsapp", async (req, res) => {
     functions.logger.log(JSON.stringify(req.body, null, 2))
     res.sendStatus(404)
   }
-})
+}
+
+// Accepts POST requests at /{webhookPath} endpoint
+app.post(`/${webhookPath}`, postHandler)
+app.get(`/${webhookPath}`, getHandler)
 
 app.post("/telegram", async (req, res) => {
   const db = admin.firestore()
@@ -118,35 +153,10 @@ app.post("/telegram", async (req, res) => {
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
-app.get("/whatsapp", (req, res) => {
-  /**
-   * UPDATE YOUR VERIFY TOKEN
-   *This will be the Verify Token value when you set up webhook
-   **/
-  const verifyToken = process.env.VERIFY_TOKEN
-  // Parse params from the webhook verification request
-  const mode = req.query["hub.mode"]
-  const token = req.query["hub.verify_token"]
-  const challenge = req.query["hub.challenge"]
-
-  // Check if a token and mode were sent
-  if (mode && token) {
-    // Check the mode and token sent are correct
-    if (mode === "subscribe" && token === verifyToken) {
-      // Respond with 200 OK and challenge token from the request
-      functions.logger.log("WEBHOOK_VERIFIED")
-      res.status(200).send(challenge)
-    } else {
-      // Responds with '403 Forbidden' if verify tokens do not match
-      res.sendStatus(403)
-    }
-  } else {
-    res.sendStatus(400)
-  }
-})
 
 const webhookHandlerV2 = onRequest(
   {
+    ingressSettings: ingressSetting,
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
