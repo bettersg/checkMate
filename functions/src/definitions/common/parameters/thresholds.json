@@ -1,0 +1,17 @@
+{
+  "endVote": 0.5,
+  "endVoteSus": 0.2,
+  "endVoteUnsure": 0.8,
+  "startVote": 1,
+  "isSpam": 0.5,
+  "isLegitimate": 0.5,
+  "isInfo": 0.5,
+  "isIrrelevant": 0.5,
+  "isUnsure": 0.5,
+  "isSus": 0.5,
+  "falseUpperBound": 1.5,
+  "misleadingUpperBound": 3.5,
+  "sendInterimMinVotes": 1,
+  "surveyLikelihood": 1,
+  "satisfactionSurveyCooldownDays": 30
+}

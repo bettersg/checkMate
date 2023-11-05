@@ -114,6 +114,7 @@ erDiagram
         string referralId "referral code"
         number referralCount
         map utm "map containing utm parameters, source, medium, content, campaign, term"
+        string language "en or cn, users preferred language"
     	}
 
     message ||--|{ instance: has
