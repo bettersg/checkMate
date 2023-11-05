@@ -1,9 +1,11 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
-import { USER_BOT_RESPONSES, FACTCHECKER_BOT_RESPONSES } from "./constants"
+import USER_BOT_RESPONSES from "./parameters/userResponses.json"
+import CHECKER_BOT_RESPONSES from "./parameters/checkerResponses.json"
 import {
   sendWhatsappButtonMessage,
   sendWhatsappTextListMessage,
+  sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getThresholds, sleep } from "./utils"
@@ -12,10 +14,66 @@ import { getCount } from "./counters"
 
 const db = admin.firestore()
 
-function getInfoLiner(truthScore: null | number) {
-  return `, with an average score of ${
+type BotResponses = {
+  [key: string]: {
+    [key: string]: string
+  }
+}
+
+type ResponseObject = {
+  [key: string]: string
+}
+
+async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
+async function getResponsesObj(botType: "user"): Promise<ResponseObject>
+async function getResponsesObj(
+  botType: "user",
+  user: string
+): Promise<ResponseObject>
+async function getResponsesObj(
+  botType: "user" | "factChecker" = "user",
+  user: string | null = null
+) {
+  let path
+  if (botType === "factChecker") {
+    path = "systemParameters/factCheckerBotResponses"
+    const checkerResponseSnap = await db.doc(path).get()
+    return checkerResponseSnap.data() ?? CHECKER_BOT_RESPONSES
+  } else {
+    if (typeof user !== "string") {
+      functions.logger.error("user not provided to getResponsesObj")
+      return "error"
+    }
+    path = "systemParameters/userBotResponses"
+    const userResponseSnap = await db.doc(path).get()
+    const userResponseObject = userResponseSnap.data() ?? USER_BOT_RESPONSES
+    const userSnap = await db.collection("users").doc(user).get()
+    const language = userSnap.get("language") ?? "en"
+    const responseProxy = new Proxy(userResponseObject as BotResponses, {
+      get(target, prop: string) {
+        if (prop === "then") {
+          //somehow code tries to access then property
+          return undefined
+        }
+        if (target[prop] && target[prop][language]) {
+          return target[prop][language]
+        } else if (target[prop] && target[prop]["en"]) {
+          // Fallback to English
+          return target[prop]["en"]
+        }
+        functions.logger.error(`Error getting ${prop} from user bot responses`)
+        return "error" // Or some default value or error handling
+      },
+    })
+    return responseProxy
+  }
+}
+
+function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
+  return infoPlaceholder.replace(
+    "{{score}}",
     typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
-  } on a scale of 0-5 (5 = completely true)`
+  )
 }
 
 async function respondToInterimFeedback(
@@ -24,8 +82,9 @@ async function respondToInterimFeedback(
 ) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
-  const responses = await getResponsesObj("user")
   const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   if (!data) {
     functions.logger.log("Missing data in respondToInterimFeedback")
     return
@@ -35,7 +94,7 @@ async function respondToInterimFeedback(
       type: "reply",
       reply: {
         id: `sendInterim_${instancePath}`,
-        title: "Get another update",
+        title: responses.BUTTON_ANOTHER_UPDATE,
       },
     },
   ]
@@ -51,28 +110,35 @@ async function respondToInterimFeedback(
       break
   }
 
-  await sendWhatsappButtonMessage("user", data.from, response, buttons, data.id)
+  await sendWhatsappButtonMessage("user", from, response, buttons, data.id)
 }
 
-async function getResponsesObj(
-  botType: "factChecker"
-): Promise<typeof FACTCHECKER_BOT_RESPONSES>
-async function getResponsesObj(
-  botType: "user"
-): Promise<typeof USER_BOT_RESPONSES>
-async function getResponsesObj(botType: "user" | "factChecker" = "user") {
-  let path
-  let fallbackResponses
-  if (botType === "factChecker") {
-    path = "systemParameters/factCheckerBotResponses"
-    fallbackResponses = FACTCHECKER_BOT_RESPONSES
-  } else {
-    path = "systemParameters/userBotResponses"
-    fallbackResponses = USER_BOT_RESPONSES
+async function respondToRationalisationFeedback(
+  instancePath: string,
+  isUseful: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
+  if (!data) {
+    functions.logger.log("Missing data in respondToRationalisationFeedback")
+    return
   }
-  const defaultResponsesRef = db.doc(path)
-  const defaultResponsesSnap = await defaultResponsesRef.get()
-  return defaultResponsesSnap.data() ?? fallbackResponses
+  let response
+  switch (isUseful) {
+    case "yes":
+      response = responses?.RATIONALISATION_USEFUL
+      await instanceRef.update({ isRationalisationUseful: true })
+      break
+    default:
+      response = responses?.RATIONALISATION_NOT_USEFUL
+      await instanceRef.update({ isRationalisationUseful: false })
+      break
+  }
+
+  await sendWhatsappTextMessage("user", from, response)
 }
 
 async function sendMenuMessage(
@@ -82,7 +148,7 @@ async function sendMenuMessage(
   replyMessageId: string | null = null,
   disputedInstancePath: string | null = null
 ) {
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", to)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
@@ -100,34 +166,38 @@ async function sendMenuMessage(
       const rows = [
         {
           id: `${type}_check`,
-          title: "Check/Report",
-          description: "Send in messages, images, or screenshots for checking!",
+          title: responses.MENU_TITLE_CHECK,
+          description: responses.MENU_DESCRIPTION_CHECK,
         },
         {
           id: `${type}_referral`,
-          title: "Get Referral Link",
-          description: "Get referral link to forward to others",
+          title: responses.MENU_TITLE_REFERRAL,
+          description: responses.MENU_DESCRIPTION_REFERRAL,
         },
         {
           id: `${type}_help`,
-          title: "Get Help",
-          description:
-            "Find out how to use CheckMate to check or report dubious messages",
+          title: responses.MENU_TITLE_HELP,
+          description: responses.MENU_DESCRIPTION_HELP,
         },
         {
           id: `${type}_about`,
-          title: "About CheckMate",
-          description: "Learn more about CheckMate and the team behind it",
+          title: responses.MENU_TITLE_ABOUT,
+          description: responses.MENU_DESCRIPTION_ABOUT,
         },
         {
           id: `${type}_feedback`,
-          title: "Send Feedback",
-          description: "Send us feedback on anything to do with CheckMate",
+          title: responses.MENU_TITLE_FEEDBACK,
+          description: responses.MENU_DESCRIPTION_FEEDBACK,
+        },
+        {
+          id: `${type}_language`,
+          title: responses.MENU_TITLE_LANGUAGE,
+          description: responses.MENU_DESCRIPTION_LANGUAGE,
         },
         {
           id: `${type}_contact`,
-          title: "Get Contact",
-          description: "Get CheckMate's contact to add to your contact list",
+          title: responses.MENU_TITLE_CONTACT,
+          description: responses.MENU_DESCRIPTION_CONTACT,
         },
 
         //TODO: Implement these next time
@@ -150,8 +220,8 @@ async function sendMenuMessage(
       if (disputedInstancePath) {
         rows.splice(5, 0, {
           id: `${type}_dispute_${disputedInstancePath}`,
-          title: "Dispute Assessment",
-          description: "Dispute CheckMate's assesment of this message",
+          title: responses.MENU_TITLE_DISPUTE,
+          description: responses.MENU_DESCRIPTION_DISPUTE,
         })
       }
       const sections = [
@@ -163,7 +233,7 @@ async function sendMenuMessage(
         "user",
         to,
         text,
-        "View Menu",
+        responses.MENU_BUTTON,
         sections,
         replyMessageId
       )
@@ -176,9 +246,10 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   if (!data) {
     return
   }
-  const responses = await getResponsesObj("user")
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
-  const userRef = db.collection("users").doc(data.from)
+  const userRef = db.collection("users").doc(from)
   const thresholds = await getThresholds()
   const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
   const userSnap = await userRef.get()
@@ -198,8 +269,8 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
           title: `${number}`,
         }
       })
-    rows[0].description = "Extremely likely 🤩"
-    rows[9].description = "Not at all likely 😥"
+    rows[0].description = responses.MENU_DESCRIPTION_NPS_LIKELY
+    rows[9].description = responses.MENU_DESCRIPTION_NPS_UNLIKELY
     const sections = [
       {
         rows: rows,
@@ -207,9 +278,9 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
     ]
     await sendWhatsappTextListMessage(
       "user",
-      data.from,
+      from,
       responses.SATISFACTION_SURVEY,
-      "Tap to respond",
+      responses.NPS_MENU_BUTTON,
       sections
     )
     const batch = db.batch()
@@ -223,10 +294,7 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(
-  instancePath: string,
-  triggerScamShieldConsent: boolean
-) {
+async function sendVotingStats(instancePath: string) {
   //get statistics
   const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
@@ -245,8 +313,8 @@ async function sendVotingStats(
   const voteTotal = await getCount(messageRef, "totalVoteScore")
   const truthScore = infoCount > 0 ? voteTotal / infoCount : null
   const thresholds = await getThresholds()
-  const responses = await getResponsesObj("user")
   const from = instanceSnap.get("from")
+  const responses = await getResponsesObj("user", from)
   let truthCategory
 
   if (responseCount <= 0) {
@@ -256,7 +324,7 @@ async function sendVotingStats(
     await sendTextMessage(
       "user",
       from,
-      "Sorry, an error occured!",
+      responses.GENERIC_ERROR,
       instanceSnap.get("id")
     )
     return
@@ -264,87 +332,171 @@ async function sendVotingStats(
 
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-      truthCategory = "untrue"
+      truthCategory = responses.PLACEHOLDER_UNTRUE
     } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
-      truthCategory = "misleading"
+      truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
-      truthCategory = "accurate"
+      truthCategory = responses.PLACEHOLDER_MISLEADING
     }
   } else truthCategory = "NA"
 
   const categories = [
     { name: "trivial", count: irrelevantCount, isInfo: false },
     {
-      name: scamCount >= illicitCount ? "scam" : "illicit",
+      name:
+        scamCount >= illicitCount
+          ? responses.PLACEHOLDER_SCAM
+          : responses.PLACEHOLDER_ILLICIT,
       count: susCount,
       isInfo: false,
     },
-    { name: "spam", count: spamCount, isInfo: false },
+    { name: responses.PLACEHOLDER_SPAM, count: spamCount, isInfo: false },
     { name: truthCategory, count: infoCount, isInfo: true },
-    { name: "legitimate", count: legitimateCount, isInfo: false },
+    {
+      name: responses.PLACEHOLDER_LEGITIMATE,
+      count: legitimateCount,
+      isInfo: false,
+    },
     { name: "unsure", count: unsureCount, isInfo: false },
   ]
 
   categories.sort((a, b) => b.count - a.count) // sort in descending order
-  const highestCategory =
-    categories[0].name === "scam" ? "a scam" : categories[0].name
-  const secondCategory =
-    categories[1].name === "scam" ? "a scam" : categories[1].name
+  const highestCategory = categories[0].name
+  const secondCategory = categories[1].name
   const highestPercentage = (categories[0].count / responseCount) * 100
   const secondPercentage = (categories[1].count / responseCount) * 100
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
-  const infoLiner = getInfoLiner(truthScore)
-  let response = `${highestPercentage.toFixed(2)}% of our CheckMates ${
-    isHighestInfo ? "collectively " : ""
-  }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
+  const infoLiner = getInfoLiner(truthScore, responses.INFO_PLACEHOLDER)
+  let response = responses.STATS_TEMPLATE_1.replace(
+    "{{top}}",
+    `${highestPercentage.toFixed(2)}`
+  )
+    .replace("{{category}}", highestCategory)
+    .replace("{{info_placeholder}}", isHighestInfo ? infoLiner : "")
+  // let response = `${highestPercentage.toFixed(2)}% of our CheckMates ${
+  //   isHighestInfo ? "collectively " : ""
+  // }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
   if (secondPercentage > 0) {
-    response += ` ${secondPercentage.toFixed(2)}% ${
-      isSecondInfo ? "collectively " : ""
-    } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
+    response += responses.STATS_TEMPLATE_2.replace(
+      "{{second}}",
+      `${secondPercentage.toFixed(2)}`
+    )
+      .replace("{{category}}", secondCategory)
+      .replace("{{info_placeholder}}", isSecondInfo ? infoLiner : "")
+    // response += ` ${secondPercentage.toFixed(2)}% ${
+    //   isSecondInfo ? "collectively " : ""
+    // } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
   }
 
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
 
-  if (triggerScamShieldConsent) {
-    await sleep(2000)
+  // if (triggerScamShieldConsent) {
+  //   await sleep(2000)
+  //   const buttons = [
+  //     {
+  //       type: "reply",
+  //       reply: {
+  //         id: `scamshieldConsent_${instancePath}_consent`,
+  //         title: "Yes",
+  //       },
+  //     },
+  //     {
+  //       type: "reply",
+  //       reply: {
+  //         id: `scamshieldConsent_${instancePath}_decline`,
+  //         title: "No",
+  //       },
+  //     },
+  //   ]
+  //   await sendWhatsappButtonMessage(
+  //     "user",
+  //     from,
+  //     responses.SCAMSHIELD_SEEK_CONSENT,
+  //     buttons,
+  //     instanceSnap.get("id")
+  //   )
+  // }
+}
+
+async function sendRationalisation(instancePath: string) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
+  try {
+    const messageRef = instanceRef.parent.parent
+    if (!data) {
+      throw new Error("instanceSnap data missing")
+    }
+    if (!messageRef) {
+      throw new Error("messageRef is null")
+    }
+    const messageSnap = await messageRef.get()
+    if (!messageSnap) {
+      throw new Error("messageSnap is null")
+    }
+    const rationalisation = messageSnap.get("rationalisation")
+    const category = messageSnap.get("primaryCategory")
+    if (!rationalisation) {
+      throw new Error("rationalisation is null")
+    }
+    if (!category) {
+      throw new Error("category is null")
+    }
     const buttons = [
       {
         type: "reply",
         reply: {
-          id: `scamshieldConsent_${instancePath}_consent`,
-          title: "Yes",
+          id: `feedbackRationalisation_${instancePath}_yes`,
+          title: responses.BUTTON_USEFUL,
         },
       },
       {
         type: "reply",
         reply: {
-          id: `scamshieldConsent_${instancePath}_decline`,
-          title: "No",
+          id: `feedbackRationalisation_${instancePath}_no`,
+          title: responses.BUTTON_NOT_USEFUL,
         },
       },
     ]
-    await sendWhatsappButtonMessage(
-      "user",
-      from,
-      responses.SCAMSHIELD_SEEK_CONSENT,
-      buttons,
-      instanceSnap.get("id")
+    const replyText = responses.HOWD_WE_TELL.replace(
+      "{{rationalisation}}",
+      rationalisation
     )
+    await instanceRef.update({
+      isRationalisationSent: true,
+    })
+    await sendWhatsappButtonMessage("user", from, replyText, buttons, data.id)
+  } catch (e) {
+    functions.logger.error(`Error sending rationalisation: ${e}`)
+    if (data?.from) {
+      await sendTextMessage("user", from, responses.GENERIC_ERROR)
+    }
   }
+}
+
+async function updateLanguageAndSendMenu(from: string, language: string) {
+  const userRef = db.collection("users").doc(from)
+  await userRef.update({
+    language: language,
+  })
+  await sendMenuMessage(from, "MENU_PREFIX")
 }
 
 async function sendInterimUpdate(instancePath: string) {
   //get statistics
   const FEEDBACK_FEATURE_FLAG = true
-  const responses = await getResponsesObj("user")
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
   if (!data) {
     return
   }
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   if (instanceSnap.get("isReplied")) {
     await sendTextMessage(
       "user",
@@ -369,38 +521,37 @@ async function sendInterimUpdate(instancePath: string) {
   const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
   let prelimAssessment
   let infoPlaceholder = ""
-  const infoLiner = getInfoLiner(truthScore)
+  const infoLiner = getInfoLiner(truthScore, responses.INFO_PLACEHOLDER)
   switch (primaryCategory) {
     case "scam":
-      prelimAssessment = "is a scam🚫"
+      prelimAssessment = responses.PLACEHOLDER_SCAM
       break
     case "illicit":
-      prelimAssessment = "is suspicious🚨"
+      prelimAssessment = responses.PLACEHOLDER_SUSPICIOUS
       break
     case "untrue":
-      prelimAssessment = "is untrue❌"
+      prelimAssessment = responses.PLACEHOLDER_UNTRUE
       infoPlaceholder = infoLiner
       break
     case "misleading":
-      prelimAssessment = "is misleading⚠️"
+      prelimAssessment = responses.PLACEHOLDER_MISLEADING
       infoPlaceholder = infoLiner
       break
     case "accurate":
-      prelimAssessment = "is accurate✅"
+      prelimAssessment = responses.PLACEHOLDER_ACCURATE
       infoPlaceholder = infoLiner
       break
     case "spam":
-      prelimAssessment = "is spam🚧"
+      prelimAssessment = responses.PLACEHOLDER_SPAM
       break
     case "legitimate":
-      prelimAssessment = "is legitimate✅"
+      prelimAssessment = responses.PLACEHOLDER_LEGITIMATE
       break
     case "irrelevant":
-      prelimAssessment =
-        "message doesn't contain a meaningful claim to assess.😕"
+      prelimAssessment = responses.PLACEHOLDER_IRRELEVANT
       break
     case "unsure":
-      prelimAssessment = "unsure"
+      prelimAssessment = responses.PLACEHOLDER_UNSURE
       break
     default:
       functions.logger.log("primaryCategory did not match available cases")
@@ -446,14 +597,14 @@ async function sendInterimUpdate(instancePath: string) {
         type: "reply",
         reply: {
           id: `feedbackInterim_${instancePath}_yes`,
-          title: "Yes, it's useful",
+          title: responses.BUTTON_USEFUL,
         },
       },
       {
         type: "reply",
         reply: {
           id: `feedbackInterim_${instancePath}_no`,
-          title: "No, it's not",
+          title: responses.BUTTON_NOT_USEFUL,
         },
       },
     ]
@@ -463,18 +614,12 @@ async function sendInterimUpdate(instancePath: string) {
         type: "reply",
         reply: {
           id: `sendInterim_${instancePath}`,
-          title: "Get another update",
+          title: responses.BUTTON_ANOTHER_UPDATE,
         },
       },
     ]
   }
-  await sendWhatsappButtonMessage(
-    "user",
-    data.from,
-    finalResponse,
-    buttons,
-    data.id
-  )
+  await sendWhatsappButtonMessage("user", from, finalResponse, buttons, data.id)
   if (!instanceSnap.get("isInterimReplySent")) {
     updateObj.isInterimReplySent = true
   }
@@ -489,19 +634,20 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
   if (!data) {
     return
   }
-  const responses = await getResponsesObj("user")
+  const from = data?.from ?? null
+  const responses = await getResponsesObj("user", from)
   const buttons = [
     {
       type: "reply",
       reply: {
         id: `sendInterim_${instanceSnap.ref.path}`,
-        title: "Get interim update",
+        title: responses.BUTTON_GET_INTERIM,
       },
     },
   ]
   await sendWhatsappButtonMessage(
     "user",
-    data.from,
+    from,
     responses.INTERIM_PROMPT,
     buttons,
     data.id
@@ -525,7 +671,8 @@ async function respondToInstance(
     functions.logger.log("Missing 'from' field in instance data")
     return Promise.resolve()
   }
-  const responses = await getResponsesObj("user")
+  const from = data.from
+  const responses = await getResponsesObj("user", from)
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isIrrelevant = parentMessageSnap.get("isIrrelevant")
@@ -539,6 +686,7 @@ async function respondToInstance(
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
   const responseCount = await getCount(parentMessageRef, "responses")
+  const isImage = data?.type === "image"
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -549,7 +697,7 @@ async function respondToInstance(
       .replace(
         "{{matched}}",
         instanceCount >= 5
-          ? `In fact, others have already sent this message in ${instanceCount} times. `
+          ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
           : ""
       )
       .replace(
@@ -558,13 +706,13 @@ async function respondToInstance(
           ? responses.METHODOLOGY_AUTO
           : responses.METHODOLOGY_HUMAN
       )
-      .replace("{{results}}", isImmediate ? "" : responses.VOTE_RESULTS_SUFFIX)
+      .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
   }
 
   if (!isAssessed && !forceReply) {
     await sendTextMessage(
       "user",
-      data.from,
+      from,
       responses.MESSAGE_NOT_YET_ASSESSED,
       data.id
     )
@@ -576,43 +724,37 @@ async function respondToInstance(
     isReplyImmediate: boolean
     replyCategory?: string
     replyTimestamp?: Timestamp
+    scamShieldConsent?: boolean
   } = {
     isReplied: true,
     isReplyForced: forceReply,
     isReplyImmediate: isImmediate,
   }
-  let buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: `votingResults_${instanceSnap.ref.path}`,
-        title: "See voting results",
-      },
+  let buttons = []
+
+  const votingResultsButton = {
+    type: "reply",
+    reply: {
+      id: `votingResults_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_RESULTS,
     },
-  ]
-  let scamShieldButtons = [
-    {
-      type: "reply",
-      reply: {
-        id: `scamshieldConsent_${instanceSnap.ref.path}_consent`,
-        title: "Yes",
-      },
+  }
+
+  const declineScamShieldButton = {
+    type: "reply",
+    reply: {
+      id: `scamshieldDecline_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_DECLINE_REPORT,
     },
-    {
-      type: "reply",
-      reply: {
-        id: `scamshieldConsent_${instanceSnap.ref.path}_decline`,
-        title: "No",
-      },
+  }
+
+  const viewRationalisationButton = {
+    type: "reply",
+    reply: {
+      id: `rationalisation_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_RATIONALISATION,
     },
-    {
-      type: "reply",
-      reply: {
-        id: `votingResults_${instanceSnap.ref.path}_scamshield`,
-        title: "See voting results",
-      },
-    },
-  ]
+  }
 
   let category
   if (isScam) {
@@ -654,7 +796,7 @@ async function respondToInstance(
   switch (category) {
     case "irrelevant_auto":
       await sendMenuMessage(
-        data.from,
+        from,
         "IRRELEVANT_AUTO_MENU_PREFIX",
         "whatsapp",
         data.id,
@@ -663,7 +805,7 @@ async function respondToInstance(
       break
     case "irrelevant":
       await sendMenuMessage(
-        data.from,
+        from,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
         data.id,
@@ -672,7 +814,7 @@ async function respondToInstance(
       break
     case "error":
       responseText = getFinalResponseText(responses.ERROR)
-      await sendTextMessage("user", data.from, responseText, data.id)
+      await sendTextMessage("user", from, responseText, data.id)
       break
     default:
       if (!(category.toUpperCase() in responses)) {
@@ -682,30 +824,36 @@ async function respondToInstance(
       responseText = getFinalResponseText(
         responses[category.toUpperCase() as keyof typeof responses]
       )
-      if (category === "scam" || category === "illicit") {
-        if (isMachineCategorised || responseCount <= 0) {
-          scamShieldButtons.pop()
+
+      if (!(isMachineCategorised || responseCount <= 0)) {
+        buttons.push(votingResultsButton)
+      }
+
+      const rationalisation = parentMessageSnap.get("rationalisation")
+
+      if ((category === "scam" || category === "illicit") && rationalisation) {
+        const language =
+          (await db.collection("users").doc(from).get()).get("language") ?? "en"
+        if (language === "en") {
+          buttons.push(viewRationalisationButton)
         }
-        buttons = scamShieldButtons
+      }
+
+      if (category === "scam" || category === "illicit") {
+        buttons.push(declineScamShieldButton)
+        updateObj.scamShieldConsent = true
+      }
+
+      if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
           "user",
-          data.from,
+          from,
           responseText,
           buttons,
           data.id
         )
       } else {
-        if (isMachineCategorised || responseCount <= 0) {
-          await sendTextMessage("user", data.from, responseText, data.id)
-        } else {
-          await sendWhatsappButtonMessage(
-            "user",
-            data.from,
-            responseText,
-            buttons,
-            data.id
-          )
-        }
+        await sendTextMessage("user", from, responseText, data.id)
       }
   }
   updateObj.replyCategory = category
@@ -723,7 +871,7 @@ async function respondToInstance(
 async function sendReferralMessage(user: string) {
   let referralResponse
   const code = (await db.collection("users").doc(user).get()).get("referralId")
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", user)
   if (code) {
     referralResponse = responses.REFERRAL.replace(
       "{{link}}",
@@ -736,6 +884,31 @@ async function sendReferralMessage(user: string) {
   await sendTextMessage("user", user, referralResponse, null, "whatsapp", true)
 }
 
+async function sendLanguageSelection(user: string, newUser: boolean) {
+  const responses = await getResponsesObj("user", user)
+  const response = responses.LANGUAGE_SELECTION.replace(
+    "{{new_user_en}}",
+    newUser ? responses.NEW_USER_PREFIX_EN : ""
+  ).replace("{{new_user_cn}}", newUser ? responses.NEW_USER_PREFIX_CN : "")
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `languageSelection_en`,
+        title: responses.BUTTON_ENGLISH,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `languageSelection_cn`,
+        title: responses.BUTTON_CHINESE,
+      },
+    },
+  ]
+  await sendWhatsappButtonMessage("user", user, response, buttons)
+}
+
 export {
   getResponsesObj,
   respondToInstance,
@@ -745,4 +918,8 @@ export {
   sendVotingStats,
   sendReferralMessage,
   respondToInterimFeedback,
+  sendRationalisation,
+  respondToRationalisationFeedback,
+  updateLanguageAndSendMenu,
+  sendLanguageSelection,
 }

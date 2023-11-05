@@ -1,12 +1,15 @@
-import { thresholds } from "./constants"
+import thresholds from "./parameters/thresholds.json"
 import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
+//import RE2 from "re2"
 import { Timestamp } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+
+const env = process.env.ENVIRONMENT
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -16,7 +19,12 @@ const getThresholds = async function () {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
-  return (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
+  const returnThresholds =
+    (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
+  if (env !== "PROD") {
+    returnThresholds.surveyLikelihood = 1
+  }
+  return returnThresholds
 }
 
 function normalizeSpaces(str: string) {
@@ -59,9 +67,19 @@ function stripPhone(originalStr: string, includePlaceholder = false) {
   return newStr
 }
 
+function checkUrlPresence(originalStr: string): boolean {
+  const urlRegex = new RegExp(
+    "\\b(?:https?:\\/\\/)?(?:www\\.)?[^ \\n\\r]+?\\.[a-z]{2,}(?:[^\\s]*)?",
+    "gi"
+  )
+  return urlRegex.test(originalStr)
+}
+
 function stripUrl(originalStr: string, includePlaceholder = false) {
-  const urlRegex =
-    /\b(?:https?:\/\/)?(?:www\.)?[^ \n\r]+?\.[a-z]{2,}(?:[^\s]*)?/gi
+  const urlRegex = new RegExp(
+    "\\b(?:https?:\\/\\/)?(?:www\\.)?[^ \\n\\r]+?\\.[a-z]{2,}(?:[^\\s]*)?",
+    "gi"
+  )
   const placeholder = includePlaceholder ? "<URL>" : ""
   const replacedString = originalStr.replace(urlRegex, placeholder)
   return replacedString
@@ -99,4 +117,5 @@ export {
   checkUrl,
   normalizeSpaces,
   checkMessageId,
+  checkUrlPresence,
 }

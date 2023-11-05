@@ -54,6 +54,8 @@ erDiagram
         boolean isInterimPromptSent "Have we sent an interim prompt"
         boolean isInterimUseful "Whether the interim message is useful"
         boolean isInterimReplySent "Have we sent an interim reply"
+        boolean isRationalisationSent "Has the rationalisation been sent"
+        boolean isRationalisationUseful "Is the rationalisation feature useful"
         boolean isReplyForced "track if final reply is forced"
         boolean isMatched "track if message was matched"
         boolean isReplyImmediate "track if final reply is immediate"
@@ -112,6 +114,7 @@ erDiagram
         string referralId "referral code"
         number referralCount
         map utm "map containing utm parameters, source, medium, content, campaign, term"
+        string language "en or cn, users preferred language"
     	}
 
     message ||--|{ instance: has

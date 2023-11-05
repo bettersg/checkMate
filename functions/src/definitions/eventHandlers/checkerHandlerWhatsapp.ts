@@ -225,18 +225,32 @@ async function onFactCheckerYes(
         latestInstanceSnap.get("storageUrl")
       )
       if (temporaryUrl) {
-        res = await sendImageMessage(
-          "factChecker",
-          from,
-          temporaryUrl,
-          latestInstanceSnap.get("caption"),
-          null,
-          platform
-        )
-        if (!res) {
+        try {
+          res = await sendImageMessage(
+            "factChecker",
+            from,
+            temporaryUrl,
+            latestInstanceSnap.get("caption"),
+            null,
+            platform
+          )
+          if (!res) {
+            return
+          }
+          updateObj.sentMessageId = res.data.messages[0].id
+        } catch {
+          functions.logger.error(
+            `Problem sending message ${messageRef.id} to ${from}}`
+          )
+          await sendTextMessage(
+            "factChecker",
+            from,
+            "Sorry, an error occured",
+            null,
+            platform
+          )
           return
         }
-        updateObj.sentMessageId = res.data.messages[0].id
       } else {
         functions.logger.error(
           `Problem creating URL while sending message ${messageRef.id} to ${from}}`
@@ -449,8 +463,10 @@ const onCheckerPublish = onMessagePublished(
   },
   async (event) => {
     if (event.data.message.json) {
-      functions.logger.log(`Processing ${event.data.message.messageId}`)
-      await checkerHandlerWhatsapp(event.data.message.json)
+      if (event.data.message.attributes.source === "whatsapp") {
+        functions.logger.log(`Processing ${event.data.message.messageId}`)
+        await checkerHandlerWhatsapp(event.data.message.json)
+      }
     } else {
       functions.logger.warn(
         `Unknown message type for messageId ${event.data.message.messageId})`

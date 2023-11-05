@@ -21,13 +21,17 @@ import {
   sendVotingStats,
   sendReferralMessage,
   respondToInterimFeedback,
+  sendRationalisation,
+  respondToRationalisationFeedback,
+  updateLanguageAndSendMenu,
+  sendLanguageSelection,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
   getHash,
   getSignedUrl,
 } from "../common/mediaUtils"
-import { anonymiseMessage } from "../common/genAI"
+import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
 import { performOCR } from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
@@ -35,6 +39,7 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
+import { user } from "firebase-functions/v1/auth"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
@@ -60,7 +65,7 @@ const userHandlerWhatsapp = async function (message: Message) {
 
   let from = message.from // extract the phone number from the webhook payload
   let type = message.type
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", from)
 
   //check whether new user
   const userRef = db.collection("users").doc(from)
@@ -166,8 +171,7 @@ const userHandlerWhatsapp = async function (message: Message) {
         }
         break
       }
-
-      if (message.text.body.toLowerCase() === "menu") {
+      if (checkMenu(message.text.body)) {
         step = "text_menu"
         await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         break
@@ -321,16 +325,26 @@ async function newTextInstanceHandler({
   }
 
   if (!hasMatch) {
+    const isMachineAssessed = !!(
+      machineCategory &&
+      machineCategory !== "error" &&
+      machineCategory !== "unsure" &&
+      machineCategory !== "info"
+    )
+
     const strippedMessage = await anonymiseMessage(text)
+    let rationalisation: null | string = null
+    if (
+      isMachineAssessed &&
+      strippedMessage &&
+      !machineCategory.includes("irrelevant")
+    ) {
+      rationalisation = await rationaliseMessage(text, machineCategory)
+    }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: !!(
-        machineCategory &&
-        machineCategory !== "error" &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ),
+      isMachineCategorised: isMachineAssessed,
       originalText: text,
       text: strippedMessage, //text
       caption: null,
@@ -339,36 +353,28 @@ async function newTextInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: !!(
-        machineCategory &&
-        machineCategory !== "error" &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ), //boolean, whether or not we have concluded the voting
+      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isIrrelevant:
-        !!machineCategory && machineCategory.includes("irrelevant")
+        isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
           : null, //bool, if majority voted irrelevant then update this
-      isScam: machineCategory === "scam" ? true : null,
-      isIllicit: machineCategory === "illicit" ? true : null,
-      isSpam: machineCategory === "spam" ? true : null,
+      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+      isIllicit:
+        isMachineAssessed && machineCategory === "illicit" ? true : null,
+      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
       isLegitimate: null,
       isUnsure: null,
       isInfo: machineCategory === "info" ? true : null,
-      primaryCategory:
-        !!machineCategory &&
-        machineCategory != "error" &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-          : null,
+      primaryCategory: isMachineAssessed
+        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+        : null,
       customReply: null, //string
       instanceCount: 0,
-      rationalisation: null,
+      rationalisation: rationalisation,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -398,6 +404,8 @@ async function newTextInstanceHandler({
     isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
+    isRationalisationSent: null,
+    isRationalisationUseful: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
@@ -405,7 +413,7 @@ async function newTextInstanceHandler({
     replyTimestamp: null,
     matchType: matchType,
     scamShieldConsent: null,
-    embedding: embedding,
+    embedding: embedding ?? null,
     closestMatch: {
       instanceRef: bestMatchingDocumentRef ?? null,
       text: bestMatchingText ?? null,
@@ -578,17 +586,32 @@ async function newImageInstanceHandler({
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
+    let rationalisation: null | string = null
     if (extractedMessage) {
       strippedMessage = await anonymiseMessage(extractedMessage)
+    }
+    const isMachineAssessed = !!(
+      machineCategory &&
+      !caption &&
+      machineCategory !== "error" &&
+      machineCategory !== "unsure" &&
+      machineCategory !== "info"
+    )
+    if (
+      extractedMessage &&
+      isMachineAssessed &&
+      strippedMessage &&
+      !machineCategory.includes("irrelevant")
+    ) {
+      rationalisation = await rationaliseMessage(
+        strippedMessage,
+        machineCategory
+      )
     }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: !!(
-        machineCategory &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ),
+      isMachineCategorised: isMachineAssessed,
       originalText: extractedMessage ?? null,
       text: strippedMessage ?? null, //text
       caption: caption ?? null,
@@ -597,34 +620,28 @@ async function newImageInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: !!(
-        machineCategory &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-      ), //boolean, whether or not we have concluded the voting
+      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       isIrrelevant:
-        !!machineCategory && machineCategory.includes("irrelevant")
+        isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
           : null, //bool, if majority voted irrelevant then update this
-      isScam: machineCategory === "scam" ? true : null,
-      isIllicit: machineCategory === "illicit" ? true : null,
-      isSpam: machineCategory === "spam" ? true : null,
+      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+      isIllicit:
+        isMachineAssessed && machineCategory === "illicit" ? true : null,
+      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: machineCategory === "info" ? true : null,
-      primaryCategory:
-        !!machineCategory &&
-        machineCategory !== "unsure" &&
-        machineCategory !== "info"
-          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-          : null,
+      isInfo: !caption && machineCategory === "info" ? true : null,
+      primaryCategory: isMachineAssessed
+        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+        : null,
       customReply: null, //string
       instanceCount: 0,
-      rationalisation: null,
+      rationalisation: rationalisation,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -666,6 +683,8 @@ async function newImageInstanceHandler({
     isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
+    isRationalisationSent: null,
+    isRationalisationUseful: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
@@ -696,29 +715,26 @@ async function newImageInstanceHandler({
 }
 
 async function newUserHandler(from: string) {
-  await sendMenuMessage(from, "NEW_USER_MENU_PREFIX", "whatsapp", null, null)
+  await sendLanguageSelection(from, true)
 }
 
 async function onButtonReply(messageObj: Message, platform = "whatsapp") {
   const buttonId = messageObj.interactive.button_reply.id
   const from = messageObj.from
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", from)
   const [type, ...rest] = buttonId.split("_")
   let instancePath,
     selection,
     instanceRef,
     updateObj: { scamShieldConsent?: boolean }
   switch (type) {
-    case "scamshieldConsent":
-      ;[instancePath, selection] = rest
+    case "scamshieldDecline":
+      ;[instancePath] = rest
       instanceRef = db.doc(instancePath)
-      updateObj = {}
-      const replyText =
-        selection === "consent"
-          ? responses?.SCAMSHIELD_ON_CONSENT
-          : responses?.SCAMSHIELD_ON_DECLINE
-      updateObj.scamShieldConsent = selection === "consent"
-      await instanceRef.update(updateObj)
+      const replyText = responses?.SCAMSHIELD_ON_DECLINE
+      await instanceRef.update({
+        scamShieldConsent: false,
+      })
       if (!replyText) {
         functions.logger.error("No replyText for scamshieldConsent")
         break
@@ -730,7 +746,8 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       ;[instancePath, ...scamShield] = rest
       const triggerScamShieldConsent =
         scamShield.length > 0 && scamShield[0] === "scamshield"
-      await sendVotingStats(instancePath, triggerScamShieldConsent)
+      //await sendVotingStats(instancePath, triggerScamShieldConsent)
+      await sendVotingStats(instancePath)
       break
     case "sendInterim":
       ;[instancePath] = rest
@@ -740,6 +757,18 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       ;[instancePath, selection] = rest
       await respondToInterimFeedback(instancePath, selection)
       break
+    case "rationalisation":
+      ;[instancePath] = rest
+      await sendRationalisation(instancePath)
+      break
+    case "feedbackRationalisation":
+      ;[instancePath, selection] = rest
+      await respondToRationalisationFeedback(instancePath, selection)
+      break
+    case "languageSelection":
+      ;[selection] = rest
+      await updateLanguageAndSendMenu(from, selection)
+      break
   }
   const step = type + (selection ? `_${selection}` : "")
   return Promise.resolve(step)
@@ -748,7 +777,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
 async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
   const listId = messageObj.interactive.list_reply.id
   const from = messageObj.from
-  const responses = await getResponsesObj("user")
+  const responses = await getResponsesObj("user", from)
   const [type, selection, ...rest] = listId.split("_")
   let response, instancePath
   const step = `${type}_${selection}`
@@ -769,6 +798,11 @@ async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
 
         case "feedback":
           response = responses.FEEDBACK
+          break
+
+        case "language":
+          await sendLanguageSelection(from, false)
+          hasReplied = true
           break
 
         case "contact":
@@ -866,6 +900,11 @@ async function addInstanceToDb(
   }
 }
 
+function checkMenu(text: string) {
+  const menuKeywords = ["menu", "菜单", "菜單"]
+  return menuKeywords.includes(text.toLowerCase())
+}
+
 async function createNewUser(
   userRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   messageTimestamp: Timestamp
@@ -881,6 +920,7 @@ async function createNewUser(
     initialJourney: {},
     referralId: referralId,
     referralCount: 0,
+    language: "en",
   })
 }
 
