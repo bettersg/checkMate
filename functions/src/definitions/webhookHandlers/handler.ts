@@ -10,7 +10,8 @@ import { Request, Response } from "express"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 
-const webhookPath = process.env.WEBHOOK_PATH
+const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
+const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
 const ingressSetting =
   process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
 
@@ -19,7 +20,7 @@ if (!admin.apps.length) {
 }
 const app = express()
 
-const getHandler = async (req: Request, res: Response) => {
+const getHandlerWhatsapp = async (req: Request, res: Response) => {
   /**
    * UPDATE YOUR VERIFY TOKEN
    *This will be the Verify Token value when you set up webhook
@@ -46,7 +47,7 @@ const getHandler = async (req: Request, res: Response) => {
   }
 }
 
-const postHandler = async (req: Request, res: Response) => {
+const postHandlerWhatsapp = async (req: Request, res: Response) => {
   if (req.body.object) {
     if (req?.body?.entry?.[0]?.changes?.[0]?.value) {
       let value = req.body.entry[0].changes[0].value
@@ -94,11 +95,11 @@ const postHandler = async (req: Request, res: Response) => {
               phoneNumberId === checkerPhoneNumberId
             ) {
               //put into checker queue
-              await publishToTopic("checkerEvents", message)
+              await publishToTopic("checkerEvents", message, "whatsapp")
             }
             if (phoneNumberId === userPhoneNumberId) {
               //put into user queue
-              await publishToTopic("userEvents", message)
+              await publishToTopic("userEvents", message, "whatsapp")
             }
           }
           res.sendStatus(200)
@@ -141,15 +142,25 @@ const postHandler = async (req: Request, res: Response) => {
   }
 }
 
-// Accepts POST requests at /{webhookPath} endpoint
-app.post(`/${webhookPath}`, postHandler)
-app.get(`/${webhookPath}`, getHandler)
-
-app.post("/telegram", async (req, res) => {
-  const db = admin.firestore()
-  console.log(JSON.stringify(req.body))
+const postHandlerTelegram = async (req: Request, res: Response) => {
+  if (
+    req.header("x-telegram-bot-api-secret-token") ===
+    process.env.TELEGRAM_WEBHOOK_TOKEN
+  ) {
+    await publishToTopic("checkerEvents", req.body, "telegram")
+  } else {
+    functions.logger.warn(
+      "Telegram handler endpoint was called from unexpected source"
+    )
+  }
   res.sendStatus(200)
-})
+}
+
+// Accepts POST requests at /{webhookPath} endpoint
+app.post(`/${webhookPathWhatsapp}`, postHandlerWhatsapp)
+app.get(`/${webhookPathWhatsapp}`, getHandlerWhatsapp)
+
+app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
@@ -163,6 +174,7 @@ const webhookHandlerV2 = onRequest(
       "VERIFY_TOKEN",
       "WHATSAPP_CHECKERS_WABA_ID",
       "WHATSAPP_USERS_WABA_ID",
+      "TELEGRAM_WEBHOOK_TOKEN",
     ],
   },
   app
