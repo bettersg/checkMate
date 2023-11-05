@@ -400,7 +400,6 @@ async function newTextInstanceHandler({
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
-    isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
@@ -679,7 +678,6 @@ async function newImageInstanceHandler({
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
-    isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
