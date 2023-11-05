@@ -108,8 +108,8 @@
     "cn": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊."
   },
   "NEW_USER_PREFIX_CN": {
-    "en": "您好，欢迎来到查友！我们很高兴您加入我们，一起对抗诈骗和误导信息😊。\n",
-    "cn": "您好，欢迎使用查友！很高兴您加入我们，一起参与反击诈骗和虚假信息😊。\n"
+    "en": "您好，欢迎来到查友！我们很高兴您加入我们，一起对抗诈骗和误导信息😊。\n\n",
+    "cn": "您好，欢迎使用查友！很高兴您加入我们，一起参与反击诈骗和虚假信息😊。\n\n"
   },
   "LANGUAGE_SELECTION": {
     "en": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。",
