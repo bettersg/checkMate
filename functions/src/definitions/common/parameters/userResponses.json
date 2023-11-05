@@ -76,8 +76,8 @@
     "cn": "另外{{second}}%的人认为这条短信{{category}}{{info_placeholder}}。"
   },
   "INTERIM_TEMPLATE": {
-    "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think that this is {{prelim_assessment}}{{info_placeholder}}. \n\nNOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.{{get_feedback}}",
-    "cn": "目前，{{%voted}}%的查哥查妹已经对这条短信进行投票评估。大多数人认为这条短信{{prelim_assessment}}{{info_placeholder}}。\n\n注意：这只是初步结果。我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，为您提供最终的结果。{{get_feedback}}"
+    "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. The majority think that this is {{prelim_assessment}}{{info_placeholder}}. \n\nNOTE: This is a *preliminary result*. We aim to provide you with a more credible final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.",
+    "cn": "目前，{{%voted}}%的查哥查妹已经对这条短信进行投票评估。大多数人认为这条短信{{prelim_assessment}}{{info_placeholder}}。\n\n注意：这只是初步结果。我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，为您提供最终的结果。"
   },
   "INFO_PLACEHOLDER": {
     "en": ", with an average score of {{score}} on a scale of 0-5 (5 = completely true)",
@@ -87,21 +87,9 @@
     "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.",
     "cn": "目前，{%voted}}%的查哥查妹已经对这条短信进行投票评估。不幸的是，他们无法达成一致，或缺乏足够的信息进行评估。\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。"
   },
-  "INTERIM_FEEDBACK": {
-    "en": "\n\nThanks for trusting CheckMate! 👋🏼 If this interim update was useful to you, we'd appreciate it if you'd let us know by tapping on “Yes, it's useful” below. Otherwise, tap on “No, it's not” to continue waiting for the final result. Either way, you can continue to request more updates as more votes come in.",
-    "cn": "感谢您对查友的信任！👋🏼 如果这个初步结果对您有帮助，请点击“有帮助”。否则，请点击“没帮助”以继续等待最终结果。您可以在最终结果发布之前随时要求最新的初步结果。"
-  },
   "INTERIM_PROMPT": {
     "en": "Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. \n\nYou may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼",
     "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击获取初步结果。请注意，初步结果和最终结果之间可能存在差异，应谨慎解读初步结果。我们感谢您的耐心，并希望尽快为您提供最终结果！💪🏼"
-  },
-  "INTERIM_USEFUL": {
-    "en": "Thanks for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIn the meantime, if you'd like another update after more votes come in, just tap the button below to request one.",
-    "cn": "感谢您的反馈！我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，为您提供最终的结果。\n\n请点击下方按钮再次获取最新的初步结果。"
-  },
-  "INTERIM_NOT_USEFUL": {
-    "en": "Sorry to hear that, but thanks anyway for your valuable feedback! We will provide you with the final result as soon as more of our CheckMates have voted, or when 24 hours has lapsed since you sent in your message.\n\nIf you'd like still another update after more votes come in, just tap the button below to request one.",
-    "cn": "感谢您的反馈！我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，尽快为您提供最终的结果。\n\n请点击下方按钮再次获取最新的初步结果。"
   },
   "ALREADY_REPLIED": {
     "en": "CheckMate has already provided a final response to this message.",

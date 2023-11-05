@@ -20,7 +20,6 @@ import {
   sendInterimUpdate,
   sendVotingStats,
   sendReferralMessage,
-  respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
@@ -752,10 +751,6 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
     case "sendInterim":
       ;[instancePath] = rest
       await sendInterimUpdate(instancePath)
-      break
-    case "feedbackInterim":
-      ;[instancePath, selection] = rest
-      await respondToInterimFeedback(instancePath, selection)
       break
     case "rationalisation":
       ;[instancePath] = rest
