@@ -132,7 +132,7 @@ const checkSessionExpiring = onSchedule(
     timeZone: "Asia/Singapore",
     secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
   },
-  deactivateAndRemind
+  checkConversationSessionExpiring
 )
 
 const scheduledDeactivation = onSchedule(
