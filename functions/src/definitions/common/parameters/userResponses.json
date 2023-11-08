@@ -89,7 +89,7 @@
   },
   "INTERIM_PROMPT": {
     "en": "Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. \n\nYou may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼",
-    "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击“获取初步结果”。请注意，初步结果和最终结果可能存在差异，应谨慎解读初步结果。我们感谢您的耐心，并会尽快提供最终结果！💪🏼"
+    "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹投票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击“获取初步结果”。请注意，初步结果和最终结果可能存在差异，应谨慎解读初步结果。我们感谢您的耐心，并会尽快提供最终结果！💪🏼"
   },
   "ALREADY_REPLIED": {
     "en": "CheckMate has already provided a final response to this message.",
@@ -100,7 +100,7 @@
     "cn": "我们不会将您的短信发送给ScamShield。感谢您与我们分享这条短信，也感谢您对新加坡网络安全的支持和贡献。"
   },
   "MENU": {
-    "en": "{{prefix}}\n\nIf you know what to do, please go ahead! Else, select \"Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
+    "en": "{{prefix}}\n\nSelect \"Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
     "cn": "{{prefix}}\n\n请点击“菜单\"查看查友的功能！👈\n\n请注意，查友只评估您发送的短信，它无法与您进行对话。\n\n您只需输入\"菜单\"即可随时返回这里，查看查友的功能！😊"
   },
   "NEW_USER_PREFIX_EN": {
