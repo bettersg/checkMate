@@ -131,6 +131,7 @@ const checkSessionExpiring = onSchedule(
     schedule: "1 * * * *",
     timeZone: "Asia/Singapore",
     secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+    region: "asia-southeast1",
   },
   checkConversationSessionExpiring
 )
@@ -140,6 +141,7 @@ const scheduledDeactivation = onSchedule(
     schedule: "11 20 * * *",
     timeZone: "Asia/Singapore",
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+    region: "asia-southeast1",
   },
   deactivateAndRemind
 )
@@ -149,6 +151,7 @@ const sendInterimPrompt = onSchedule(
     schedule: "2,22,42 * * * *",
     timeZone: "Asia/Singapore",
     secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+    region: "asia-southeast1",
   },
   interimPromptHandler
 )
