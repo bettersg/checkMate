@@ -76,43 +76,6 @@ function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
   )
 }
 
-async function respondToInterimFeedback(
-  instancePath: string,
-  isUseful: string
-) {
-  const instanceRef = db.doc(instancePath)
-  const instanceSnap = await instanceRef.get()
-  const data = instanceSnap.data()
-  const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
-  if (!data) {
-    functions.logger.log("Missing data in respondToInterimFeedback")
-    return
-  }
-  const buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: `sendInterim_${instancePath}`,
-        title: responses.BUTTON_ANOTHER_UPDATE,
-      },
-    },
-  ]
-  let response
-  switch (isUseful) {
-    case "yes":
-      response = responses?.INTERIM_USEFUL
-      await instanceRef.update({ isInterimUseful: true })
-      break
-    default:
-      response = responses?.INTERIM_NOT_USEFUL
-      await instanceRef.update({ isInterimUseful: false })
-      break
-  }
-
-  await sendWhatsappButtonMessage("user", from, response, buttons, data.id)
-}
-
 async function respondToRationalisationFeedback(
   instancePath: string,
   isUseful: string
@@ -558,18 +521,13 @@ async function sendInterimUpdate(instancePath: string) {
       return
   }
   const updateObj: {
-    isInterimUseful?: boolean
     isMeaningfulInterimReplySent?: boolean
     prelimAssessment?: string
     isInterimReplySent?: boolean
   } = {}
   let finalResponse
-  let isFirstMeaningfulReply = false
   if (primaryCategory === "unsure") {
     finalResponse = responses.INTERIM_TEMPLATE_UNSURE
-    if (data.isInterimUseful === null) {
-      updateObj.isInterimUseful = false
-    }
     if (data.isMeaningfulInterimReplySent === null) {
       updateObj.isMeaningfulInterimReplySent = false
     }
@@ -577,48 +535,22 @@ async function sendInterimUpdate(instancePath: string) {
     finalResponse = responses.INTERIM_TEMPLATE
     if (!data.isMeaningfulInterimReplySent) {
       updateObj.isMeaningfulInterimReplySent = true
-      isFirstMeaningfulReply = true
     }
   }
-  const getFeedback =
-    (data.isInterimUseful === null || isFirstMeaningfulReply) &&
-    primaryCategory !== "unsure" &&
-    FEEDBACK_FEATURE_FLAG
   finalResponse = finalResponse
     .replace("{{prelim_assessment}}", prelimAssessment)
     .replace("{{info_placeholder}}", infoPlaceholder)
     .replace("{{%voted}}", percentageVoted)
-    .replace("{{get_feedback}}", getFeedback ? responses.INTERIM_FEEDBACK : "")
 
-  let buttons
-  if (getFeedback) {
-    buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackInterim_${instancePath}_yes`,
-          title: responses.BUTTON_USEFUL,
-        },
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `sendInterim_${instancePath}`,
+        title: responses.BUTTON_ANOTHER_UPDATE,
       },
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackInterim_${instancePath}_no`,
-          title: responses.BUTTON_NOT_USEFUL,
-        },
-      },
-    ]
-  } else {
-    buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `sendInterim_${instancePath}`,
-          title: responses.BUTTON_ANOTHER_UPDATE,
-        },
-      },
-    ]
-  }
+    },
+  ]
   await sendWhatsappButtonMessage("user", from, finalResponse, buttons, data.id)
   if (!instanceSnap.get("isInterimReplySent")) {
     updateObj.isInterimReplySent = true
@@ -917,7 +849,6 @@ export {
   sendInterimUpdate,
   sendVotingStats,
   sendReferralMessage,
-  respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c96bcaae-e133-42b3-b840-ed90f0840413",
+		"_postman_id": "8ea99a98-6462-4c48-a8d0-ae5addd10b81",
 		"name": "checkmate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "25230076"
@@ -97,7 +97,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -105,7 +105,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -215,7 +215,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -223,7 +223,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -334,7 +334,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -342,7 +342,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -467,7 +467,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -475,7 +475,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -599,7 +599,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -607,7 +607,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -716,7 +716,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -724,7 +724,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -835,7 +835,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -843,7 +843,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -973,7 +973,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -981,7 +981,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -1108,7 +1108,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -1116,7 +1116,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -1347,7 +1347,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -1355,7 +1355,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -1560,7 +1560,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -1568,7 +1568,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -1731,7 +1731,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -1739,7 +1739,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -2178,7 +2178,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -2186,7 +2186,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -2368,7 +2368,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -2376,7 +2376,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -2573,7 +2573,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -2581,7 +2581,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -2758,7 +2758,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -2766,7 +2766,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -2959,7 +2959,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -2967,14 +2967,14 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "INTERIM_TEMPLATE_WITH_FEEDBACK",
+							"name": "INTERIM_TEMPLATE",
 							"event": [
 								{
 									"listen": "test",
@@ -2987,12 +2987,10 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\");\r",
-											"    const BUTTON_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_USEFUL.en\");\r",
-											"    const BUTTON_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_NOT_USEFUL.en\")\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\");\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -3011,15 +3009,8 @@
 											"                            {\r",
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
-											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_yes`,\r",
-											"                                    \"title\": BUTTON_USEFUL\r",
-											"                                }\r",
-											"                            },\r",
-											"                            {\r",
-											"                                \"type\": \"reply\",\r",
-											"                                \"reply\": {\r",
-											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_no`,\r",
-											"                                    \"title\": BUTTON_NOT_USEFUL\r",
+											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -3033,280 +3024,6 @@
 											"        }\r",
 											"    var jsonData = pm.response.json();\r",
 											"    \r",
-											"    pm.expect(jsonData).to.eql(expected);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"setTimeout(() => {}, 3000);"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-									"host": [
-										"{{RESULT_SERVER_URL}}"
-									],
-									"path": [
-										"testresultdata"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Press button \"Yes it's useful\"",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// 1. Retrieve the current messageCounter and increment it.\r",
-											"let messageCounter = 14\r",
-											"\r",
-											"const whatsappId = \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFA1==\";\r",
-											"\r",
-											"// 3. Replace the last n characters (excluding the == at the end) of whatsappId with the new messageCounter\r",
-											"let n = messageCounter.toString().length;\r",
-											"let basePart = whatsappId.substring(0, whatsappId.length - n - 2);\r",
-											"let newId = basePart + messageCounter + \"==\";\r",
-											"\r",
-											"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
-											"\r",
-											"// Allow time for firestore onUpdate event to complete\r"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_14}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"feedbackInterim_messages/{{spamMessageId}}/instances/{{spamInstanceId}}_yes\",\r\n                    \"title\": \"Yes, it's useful\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
-									"host": [
-										"{{FUNCTIONS_URL}}"
-									],
-									"path": [
-										"{{PROJECT_ID}}",
-										"asia-southeast1",
-										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "INTERIM_USEFUL",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"INTERIM_USEFUL sent to user\", function () {\r",
-											"    const CHECKER_PHONE_NUMBERS = [pm.variables.get(\"CHECKER_1_NUMBER\"), pm.variables.get(\"CHECKER_2_NUMBER\"), pm.variables.get(\"CHECKER_3_NUMBER\")]\r",
-											"    const CHECKER_NAMES = [pm.variables.get(\"CHECKER_1_NAME\"), pm.variables.get(\"CHECKER_2_NAME\"), pm.variables.get(\"CHECKER_3_NAME\")]\r",
-											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
-											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
-											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_USEFUL.en\");\r",
-											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
-											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
-											"    const expected = {\r",
-											"            \"hostname\": \"resultserver\",\r",
-											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-											"            \"body\": {\r",
-											"                \"messaging_product\": \"whatsapp\",\r",
-											"                \"recipient_type\": \"individual\",\r",
-											"                \"to\": USER_1_NUMBER,\r",
-											"                \"type\": \"interactive\",\r",
-											"                \"interactive\": {\r",
-											"                    \"type\": \"button\",\r",
-											"                    \"body\": {\r",
-											"                        \"text\": INTERIM_USEFUL\r",
-											"                    },\r",
-											"                    \"action\": {\r",
-											"                        \"buttons\": [\r",
-											"                            {\r",
-											"                                \"type\": \"reply\",\r",
-											"                                \"reply\": {\r",
-											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
-											"                                }\r",
-											"                            }\r",
-											"                        ]\r",
-											"                    }\r",
-											"                },\r",
-											"                \"context\": {\r",
-											"                    \"message_id\": wamid\r",
-											"                }\r",
-											"            },\r",
-											"            \"method\": \"POST\"\r",
-											"        }\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.eql(expected);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"setTimeout(() => {}, 3000);"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-									"host": [
-										"{{RESULT_SERVER_URL}}"
-									],
-									"path": [
-										"testresultdata"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Press button \"No it's not\"",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Allow time for firestore onUpdate event to complete\r"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"feedbackInterim_messages/{{spamMessageId}}/instances/{{spamInstanceId}}_no\",\r\n                    \"title\": \"No, it's not\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
-									"host": [
-										"{{FUNCTIONS_URL}}"
-									],
-									"path": [
-										"{{PROJECT_ID}}",
-										"asia-southeast1",
-										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "INTERIM_NOT_USEFUL",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"INTERIM_NOT_USEFUL sent to user\", function () {\r",
-											"    const CHECKER_PHONE_NUMBERS = [pm.variables.get(\"CHECKER_1_NUMBER\"), pm.variables.get(\"CHECKER_2_NUMBER\"), pm.variables.get(\"CHECKER_3_NUMBER\")]\r",
-											"    const CHECKER_NAMES = [pm.variables.get(\"CHECKER_1_NAME\"), pm.variables.get(\"CHECKER_2_NAME\"), pm.variables.get(\"CHECKER_3_NAME\")]\r",
-											"    const [, messageId, , voteRequestId] = pm.variables.get(\"spamVoteRequestPath_CHECKER1\").split(\"/\")\r",
-											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
-											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const INTERIM_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_NOT_USEFUL.en\");\r",
-											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
-											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
-											"    const expected = {\r",
-											"            \"hostname\": \"resultserver\",\r",
-											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-											"            \"body\": {\r",
-											"                \"messaging_product\": \"whatsapp\",\r",
-											"                \"recipient_type\": \"individual\",\r",
-											"                \"to\": USER_1_NUMBER,\r",
-											"                \"type\": \"interactive\",\r",
-											"                \"interactive\": {\r",
-											"                    \"type\": \"button\",\r",
-											"                    \"body\": {\r",
-											"                        \"text\": INTERIM_NOT_USEFUL\r",
-											"                    },\r",
-											"                    \"action\": {\r",
-											"                        \"buttons\": [\r",
-											"                            {\r",
-											"                                \"type\": \"reply\",\r",
-											"                                \"reply\": {\r",
-											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
-											"                                }\r",
-											"                            }\r",
-											"                        ]\r",
-											"                    }\r",
-											"                },\r",
-											"                \"context\": {\r",
-											"                    \"message_id\": wamid\r",
-											"                }\r",
-											"            },\r",
-											"            \"method\": \"POST\"\r",
-											"        }\r",
-											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
@@ -3387,7 +3104,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -3395,7 +3112,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -3415,7 +3132,6 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\")\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
@@ -3517,7 +3233,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -3525,7 +3241,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -3707,7 +3423,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -3715,7 +3431,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -3912,7 +3628,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -3920,7 +3636,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -4093,7 +3809,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -4101,7 +3817,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -4221,7 +3937,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -4229,7 +3945,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -4411,7 +4127,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -4419,7 +4135,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -4616,7 +4332,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -4624,7 +4340,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -5012,7 +4728,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -5020,7 +4736,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -5181,7 +4897,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -5189,7 +4905,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -5308,7 +5024,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -5316,7 +5032,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -5349,7 +5065,6 @@
 											"        },\r",
 											"        \"method\": \"POST\"\r",
 											"    }\r",
-											"    console.log(JSON.stringify(expected,null,2))\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
@@ -5441,7 +5156,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -5449,7 +5164,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -5887,7 +5602,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -5895,7 +5610,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -6082,7 +5797,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -6090,7 +5805,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -6311,7 +6026,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -6319,7 +6034,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -6453,7 +6168,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -6461,14 +6176,14 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "INTERIM_TEMPLATE_WITH_FEEDBACK",
+							"name": "INTERIM_TEMPLATE",
 							"event": [
 								{
 									"listen": "test",
@@ -6481,12 +6196,10 @@
 											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\");\r",
-											"    const BUTTON_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_USEFUL.en\");\r",
-											"    const BUTTON_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_NOT_USEFUL.en\")\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"infoInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"untrue❌\").replace(\"{{info_placeholder}}\",\", with an average score of 1.00 on a scale of 0-5 (5 = completely true)\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"untrue❌\").replace(\"{{info_placeholder}}\",\", with an average score of 1.00 on a scale of 0-5 (5 = completely true)\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -6505,15 +6218,8 @@
 											"                            {\r",
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
-											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_yes`,\r",
-											"                                    \"title\": BUTTON_USEFUL\r",
-											"                                }\r",
-											"                            },\r",
-											"                            {\r",
-											"                                \"type\": \"reply\",\r",
-											"                                \"reply\": {\r",
-											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_no`,\r",
-											"                                    \"title\": BUTTON_NOT_USEFUL\r",
+											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -6557,55 +6263,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "[DB CALL] Check interim values",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Check that instance interim data values are updated correctly\", function () {\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData?.fields?.isMeaningfulInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimPromptSent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimUseful?.nullValue).to.equal(null);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer owner",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{infoMessageId}}/instances/{{infoInstanceId}}",
-									"host": [
-										"{{FIRESTORE_URL}}"
-									],
-									"path": [
-										"v1",
-										"projects",
-										"{{PROJECT_ID}}",
-										"databases",
-										"(default)",
-										"documents",
-										"messages",
-										"{{infoMessageId}}",
-										"instances",
-										"{{infoInstanceId}}"
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				},
@@ -6640,7 +6297,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -6648,7 +6305,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -6835,7 +6492,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -6843,7 +6500,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -7109,7 +6766,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -7117,7 +6774,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -7304,7 +6961,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -7312,7 +6969,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -7487,7 +7144,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -7495,7 +7152,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -7621,7 +7278,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -7629,7 +7286,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -8067,7 +7724,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -8075,7 +7732,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -8257,7 +7914,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -8265,7 +7922,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -8461,7 +8118,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -8469,7 +8126,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -8643,7 +8300,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -8651,7 +8308,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -8843,7 +8500,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -8851,7 +8508,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -8938,55 +8595,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "[DB CALL] Check interim values",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Check that instance interim data values are updated correctly\", function () {\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData?.fields?.isMeaningfulInterimReplySent?.booleanValue).to.equal(false);\r",
-											"    pm.expect(jsonData?.fields?.isInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimPromptSent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimUseful?.booleanValue).to.equal(false);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer owner",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
-									"host": [
-										"{{FIRESTORE_URL}}"
-									],
-									"path": [
-										"v1",
-										"projects",
-										"{{PROJECT_ID}}",
-										"databases",
-										"(default)",
-										"documents",
-										"messages",
-										"{{unsureMessageId}}",
-										"instances",
-										"{{unsureInstanceId}}"
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				},
@@ -9030,7 +8638,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -9038,7 +8646,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -9208,7 +8816,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -9216,14 +8824,14 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "INTERIM_TEMPLATE_WITH_FEEDBACK",
+							"name": "INTERIM_TEMPLATE",
 							"event": [
 								{
 									"listen": "test",
@@ -9237,11 +8845,9 @@
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
-											"    const INTERIM_FEEDBACK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_FEEDBACK.en\")\r",
-											"    const BUTTON_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_USEFUL.en\");\r",
-											"    const BUTTON_NOT_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_NOT_USEFUL.en\")\r",
+											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"legitimate✅\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",INTERIM_FEEDBACK)\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"legitimate✅\").replace(\"{{info_placeholder}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -9260,15 +8866,8 @@
 											"                            {\r",
 											"                                \"type\": \"reply\",\r",
 											"                                \"reply\": {\r",
-											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_yes`,\r",
-											"                                    \"title\": BUTTON_USEFUL\r",
-											"                                }\r",
-											"                            },\r",
-											"                            {\r",
-											"                                \"type\": \"reply\",\r",
-											"                                \"reply\": {\r",
-											"                                    \"id\": `feedbackInterim_messages/${messageId}/instances/${instanceId}_no`,\r",
-											"                                    \"title\": BUTTON_NOT_USEFUL\r",
+											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
+											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
 											"                                }\r",
 											"                            }\r",
 											"                        ]\r",
@@ -9280,7 +8879,6 @@
 											"            },\r",
 											"            \"method\": \"POST\"\r",
 											"        }\r",
-											"    console.log(JSON.stringify(expected,null,2))\r",
 											"    var jsonData = pm.response.json();\r",
 											"    \r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
@@ -9309,246 +8907,6 @@
 									],
 									"path": [
 										"testresultdata"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "[DB CALL] Check interim values",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Check that instance interim data values are updated correctly\", function () {\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData?.fields?.isMeaningfulInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimPromptSent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimUseful?.booleanValue).to.equal(false);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer owner",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
-									"host": [
-										"{{FIRESTORE_URL}}"
-									],
-									"path": [
-										"v1",
-										"projects",
-										"{{PROJECT_ID}}",
-										"databases",
-										"(default)",
-										"documents",
-										"messages",
-										"{{unsureMessageId}}",
-										"instances",
-										"{{unsureInstanceId}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Press button \"Yes it's useful\"",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// 1. Retrieve the current messageCounter and increment it.\r",
-											"let messageCounter = 27\r",
-											"\r",
-											"const whatsappId = \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFA1==\";\r",
-											"\r",
-											"// 3. Replace the last n characters (excluding the == at the end) of whatsappId with the new messageCounter\r",
-											"let n = messageCounter.toString().length;\r",
-											"let basePart = whatsappId.substring(0, whatsappId.length - n - 2);\r",
-											"let newId = basePart + messageCounter + \"==\";\r",
-											"\r",
-											"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"6580431949\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              {\r\n                \"profile\": {\r\n                  \"name\": \"{{USER_1_NAME}}\"\r\n                },\r\n                \"wa_id\": \"{{USER_1_NUMBER}}\"\r\n              }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"context\": {\r\n                  \"from\": \"6580431949\",\r\n                  \"id\": \"wamid.HBgKNjU5Njg4MDMyMBUCABIYIEY4MDAwNTlEODQyMDZDMkNDOEU1NEVEQjc1MTNCMjlFAA==\"\r\n                },\r\n                \"from\": \"{{USER_1_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_27}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"type\": \"interactive\",\r\n                \"interactive\": {\r\n                  \"type\": \"button_reply\",\r\n                  \"button_reply\": {\r\n                    \"id\": \"feedbackInterim_messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}_yes\",\r\n                    \"title\": \"Yes, it's useful\"\r\n                  }\r\n                }\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
-									"host": [
-										"{{FUNCTIONS_URL}}"
-									],
-									"path": [
-										"{{PROJECT_ID}}",
-										"asia-southeast1",
-										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "INTERIM_USEFUL",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"INTERIM_USEFUL sent to user\", function () {\r",
-											"    const CHECKER_PHONE_NUMBERS = [pm.variables.get(\"CHECKER_1_NUMBER\"), pm.variables.get(\"CHECKER_2_NUMBER\"), pm.variables.get(\"CHECKER_3_NUMBER\")]\r",
-											"    const CHECKER_NAMES = [pm.variables.get(\"CHECKER_1_NAME\"), pm.variables.get(\"CHECKER_2_NAME\"), pm.variables.get(\"CHECKER_3_NAME\")]\r",
-											"    const [, messageId, , voteRequestId] = pm.variables.get(\"unsureVoteRequestPath_CHECKER1\").split(\"/\")\r",
-											"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
-											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
-											"    const wamid = pm.variables.get(\"whatsapp_id_23\")\r",
-											"    const INTERIM_USEFUL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_USEFUL.en\");\r",
-											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
-											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const expected = {\r",
-											"            \"hostname\": \"resultserver\",\r",
-											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
-											"            \"body\": {\r",
-											"                \"messaging_product\": \"whatsapp\",\r",
-											"                \"recipient_type\": \"individual\",\r",
-											"                \"to\": USER_1_NUMBER,\r",
-											"                \"type\": \"interactive\",\r",
-											"                \"interactive\": {\r",
-											"                    \"type\": \"button\",\r",
-											"                    \"body\": {\r",
-											"                        \"text\": INTERIM_USEFUL\r",
-											"                    },\r",
-											"                    \"action\": {\r",
-											"                        \"buttons\": [\r",
-											"                            {\r",
-											"                                \"type\": \"reply\",\r",
-											"                                \"reply\": {\r",
-											"                                    \"id\": `sendInterim_messages/${messageId}/instances/${instanceId}`,\r",
-											"                                    \"title\": BUTTON_ANOTHER_UPDATE\r",
-											"                                }\r",
-											"                            }\r",
-											"                        ]\r",
-											"                    }\r",
-											"                },\r",
-											"                \"context\": {\r",
-											"                    \"message_id\": wamid\r",
-											"                }\r",
-											"            },\r",
-											"            \"method\": \"POST\"\r",
-											"        }\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.eql(expected);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"setTimeout(() => {}, 3000);"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{RESULT_SERVER_URL}}/testresultdata",
-									"host": [
-										"{{RESULT_SERVER_URL}}"
-									],
-									"path": [
-										"testresultdata"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "[DB CALL] Check interim values",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Check that instance interim data values are updated correctly\", function () {\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData?.fields?.isMeaningfulInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimReplySent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimPromptSent?.booleanValue).to.equal(true);\r",
-											"    pm.expect(jsonData?.fields?.isInterimUseful?.booleanValue).to.equal(true);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer owner",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/messages/{{unsureMessageId}}/instances/{{unsureInstanceId}}",
-									"host": [
-										"{{FIRESTORE_URL}}"
-									],
-									"path": [
-										"v1",
-										"projects",
-										"{{PROJECT_ID}}",
-										"databases",
-										"(default)",
-										"documents",
-										"messages",
-										"{{unsureMessageId}}",
-										"instances",
-										"{{unsureInstanceId}}"
 									]
 								}
 							},
@@ -9587,7 +8945,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -9595,7 +8953,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -9777,7 +9135,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -9785,7 +9143,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -9979,7 +9337,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -9987,7 +9345,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -10157,7 +9515,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -10165,7 +9523,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -10288,7 +9646,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -10296,7 +9654,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -10417,7 +9775,6 @@
 											"        },\r",
 											"        \"method\": \"POST\"\r",
 											"    }\r",
-											"    //console.log(JSON.stringify(expected,null,2))\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
@@ -10478,7 +9835,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -10486,7 +9843,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -10682,7 +10039,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -10690,7 +10047,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -10976,7 +10333,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+									"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 									"host": [
 										"{{FUNCTIONS_URL}}"
 									],
@@ -10984,7 +10341,7 @@
 										"{{PROJECT_ID}}",
 										"asia-southeast1",
 										"webhookHandlerV2",
-										"{{WEBHOOK_PATH}}"
+										"{{WEBHOOK_PATH_WHATSAPP}}"
 									]
 								}
 							},
@@ -11104,7 +10461,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11112,7 +10469,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -11290,7 +10647,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11298,7 +10655,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -11408,7 +10765,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11416,7 +10773,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -11526,7 +10883,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11534,7 +10891,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -11644,7 +11001,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11652,7 +11009,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -11762,7 +11119,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11770,7 +11127,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -11897,7 +11254,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -11905,7 +11262,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -12083,7 +11440,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -12091,7 +11448,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -12263,7 +11620,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -12271,7 +11628,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -12387,7 +11744,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -12395,7 +11752,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -12559,7 +11916,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -12567,7 +11924,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -12662,8 +12019,6 @@
 									"        \"menu_dispute\",\r",
 									"        \"text_machine_unsure\",\r",
 									"        \"sendInterim\",\r",
-									"        \"feedbackInterim_yes\",\r",
-									"        \"feedbackInterim_no\",\r",
 									"        \"sendInterim\",\r",
 									"        \"sendInterim\",\r",
 									"        \"satisfactionSurvey_10\",\r",
@@ -12675,7 +12030,6 @@
 									"        \"text_machine_unsure\",\r",
 									"        \"sendInterim\",\r",
 									"        \"sendInterim\",\r",
-									"        \"feedbackInterim_yes\",\r",
 									"        \"sendInterim\",\r",
 									"        \"votingResults\",\r",
 									"        \"text_menu\",\r",
@@ -12759,6 +12113,11 @@
 									"let newId = basePart + messageCounter + \"==\";\r",
 									"\r",
 									"pm.collectionVariables.set(`whatsapp_id_${messageCounter}`, newId)\r",
+									"\r",
+									"// Get the variable that contains new lines\r",
+									"let responseBody = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX.en\");\r",
+									"// Escape new lines and set it to a new variable\r",
+									"pm.variables.set(\"escapedPrepopulatedPrefix\", responseBody.replace(/(\\r\\n|\\n|\\r)/gm, \"\\\\n\"));\r",
 									""
 								],
 								"type": "text/javascript"
@@ -12770,7 +12129,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_39}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX.en}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_39}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{escapedPrepopulatedPrefix}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -12778,7 +12137,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -12786,7 +12145,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -12913,7 +12272,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -12921,7 +12280,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -13137,7 +12496,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_40}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX.en}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"object\": \"whatsapp_business_account\",\r\n  \"entry\": [\r\n    {\r\n      \"id\": \"WHATSAPP_TEST_USER_WABA_ID\",\r\n      \"changes\": [\r\n        {\r\n          \"value\": {\r\n            \"messaging_product\": \"whatsapp\",\r\n            \"metadata\": {\r\n              \"display_phone_number\": \"15550933685\",\r\n              \"phone_number_id\": \"WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID\"\r\n            },\r\n            \"contacts\": [\r\n              { \"profile\": { \"name\": \"{{USER_2_NAME}}\" }, \"wa_id\": \"{{USER_2_NUMBER}}\" }\r\n            ],\r\n            \"messages\": [\r\n              {\r\n                \"from\": \"{{USER_2_NUMBER}}\",\r\n                \"id\": \"{{whatsapp_id_40}}\",\r\n                \"timestamp\": {{$timestamp}},\r\n                \"text\": { \"body\": \"{{escapedPrepopulatedPrefix}} {{referralId_USER1}}\" },\r\n                \"type\": \"text\"\r\n              }\r\n            ]\r\n          },\r\n          \"field\": \"messages\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -13145,7 +12504,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -13153,7 +12512,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -13348,7 +12707,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -13356,7 +12715,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -13509,7 +12868,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -13517,7 +12876,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},
@@ -13560,7 +12919,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH}}",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/webhookHandlerV2/{{WEBHOOK_PATH_WHATSAPP}}",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
@@ -13568,7 +12927,7 @@
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
 								"webhookHandlerV2",
-								"{{WEBHOOK_PATH}}"
+								"{{WEBHOOK_PATH_WHATSAPP}}"
 							]
 						}
 					},

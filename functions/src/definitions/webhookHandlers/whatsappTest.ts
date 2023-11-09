@@ -1,4 +1,4 @@
-import { app } from "./whatsapp"
+import { app } from "./handler"
 import { agent } from "supertest"
 
 process.env.VERIFY_TOKEN = "testToken"

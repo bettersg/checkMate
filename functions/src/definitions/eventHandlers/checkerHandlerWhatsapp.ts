@@ -463,8 +463,10 @@ const onCheckerPublish = onMessagePublished(
   },
   async (event) => {
     if (event.data.message.json) {
-      functions.logger.log(`Processing ${event.data.message.messageId}`)
-      await checkerHandlerWhatsapp(event.data.message.json)
+      if (event.data.message.attributes.source === "whatsapp") {
+        functions.logger.log(`Processing ${event.data.message.messageId}`)
+        await checkerHandlerWhatsapp(event.data.message.json)
+      }
     } else {
       functions.logger.warn(
         `Unknown message type for messageId ${event.data.message.messageId})`
