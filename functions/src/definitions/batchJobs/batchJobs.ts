@@ -9,6 +9,7 @@ import { Timestamp } from "firebase-admin/firestore"
 import { getCount } from "../common/counters"
 import { getThresholds } from "../common/utils"
 import { defineString } from "firebase-functions/params"
+import { onSchedule } from "firebase-functions/v2/scheduler"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 
@@ -125,28 +126,32 @@ async function interimPromptHandler() {
   }
 }
 
-const checkSessionExpiring = functions
-  .region("asia-southeast1")
-  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
-  .pubsub.schedule("1 * * * *")
-  .timeZone("Asia/Singapore")
-  .onRun(checkConversationSessionExpiring)
+const checkSessionExpiring = onSchedule(
+  {
+    schedule: "1 * * * *",
+    timeZone: "Asia/Singapore",
+    secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+  },
+  checkConversationSessionExpiring
+)
 
-const scheduledDeactivation = functions
-  .region("asia-southeast1")
-  .runWith({
+const scheduledDeactivation = onSchedule(
+  {
+    schedule: "11 20 * * *",
+    timeZone: "Asia/Singapore",
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
-  })
-  .pubsub.schedule("11 20 * * *")
-  .timeZone("Asia/Singapore")
-  .onRun(deactivateAndRemind)
+  },
+  deactivateAndRemind
+)
 
-const sendInterimPrompt = functions
-  .region("asia-southeast1")
-  .runWith({ secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"] })
-  .pubsub.schedule("*/20 * * * *")
-  .timeZone("Asia/Singapore")
-  .onRun(interimPromptHandler)
+const sendInterimPrompt = onSchedule(
+  {
+    schedule: "2,22,42 * * * *",
+    timeZone: "Asia/Singapore",
+    secrets: ["WHATSAPP_USER_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+  },
+  interimPromptHandler
+)
 
 export {
   checkSessionExpiring,
