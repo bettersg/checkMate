@@ -13,7 +13,11 @@ if (env === "PROD") {
   })
 }
 
-async function publishToTopic(topicName: string, messageData: object) {
+async function publishToTopic(
+  topicName: string,
+  messageData: object,
+  source: string
+) {
   if (env !== "PROD") {
     const [exists] = await pubsub.topic(topicName).exists() //Doesn't seem to autocreate in emulator
     if (!exists) {
@@ -23,7 +27,12 @@ async function publishToTopic(topicName: string, messageData: object) {
   const topic = pubsub.topic(topicName)
   try {
     // Publish the message
-    const messageId = await topic.publishMessage({ json: messageData })
+    const messageId = await topic.publishMessage({
+      json: messageData,
+      attributes: {
+        source: source,
+      },
+    })
     functions.logger.log(`Message ${messageId} published.`)
   } catch (error) {
     functions.logger.log(`Error publishing message: ${error}`)

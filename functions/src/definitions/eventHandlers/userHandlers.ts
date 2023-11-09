@@ -20,7 +20,6 @@ import {
   sendInterimUpdate,
   sendVotingStats,
   sendReferralMessage,
-  respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
@@ -401,7 +400,6 @@ async function newTextInstanceHandler({
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
-    isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
@@ -680,7 +678,6 @@ async function newImageInstanceHandler({
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
-    isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
@@ -752,10 +749,6 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
     case "sendInterim":
       ;[instancePath] = rest
       await sendInterimUpdate(instancePath)
-      break
-    case "feedbackInterim":
-      ;[instancePath, selection] = rest
-      await respondToInterimFeedback(instancePath, selection)
       break
     case "rationalisation":
       ;[instancePath] = rest
