@@ -52,7 +52,7 @@
     "cn": "我们的评估基于图片标题中的内容。如果您提交的短信里没有文字标题，我们对图片本身的内容进行了评估。"
   },
   "METHODOLOGY_HUMAN": {
-    "en": "Our CheckMates have reviewed this message and think it's",
+    "en": "Our CheckMates have reviewed this message and think it's ",
     "cn": "经过查哥查妹的评估，我们认为这条短信"
   },
   "METHODOLOGY_AUTO": {
