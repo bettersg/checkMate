@@ -331,7 +331,11 @@ async function newTextInstanceHandler({
       machineCategory !== "info"
     )
 
-    const strippedMessage = await anonymiseMessage(text)
+    const strippedMessage =
+      machineCategory === "legitimate"
+        ? await anonymiseMessage(text, false)
+        : await anonymiseMessage(text, true)
+
     let rationalisation: null | string = null
     if (
       isMachineAssessed &&

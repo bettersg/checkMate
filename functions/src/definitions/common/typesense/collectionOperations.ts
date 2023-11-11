@@ -85,7 +85,7 @@ async function updateOne(
     await getClient()
       .collections(`${collection}${getEnvSuffix()}`)
       .documents()
-      .update(document)
+      .update(document, {})
   } catch (error) {
     console.error("Error in updateOne: ", error)
     throw error
