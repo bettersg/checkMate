@@ -40,7 +40,7 @@
   "simpleAnonymisation": {
     "model": "gpt-3.5-turbo-1106",
     "prompt": {
-      "system": "You are a conscientious analyst. I will send you messages. Your job is to take a deep breath, then read the messages and identify Personal Identifiable Information such as names and addresses for redaction. Note, some PII may already have been redacted. In that case, your job is to redact the rest.\n\nYou will return a JSON object, with one key called \"redactions\". This will contain an array containing two fields, like so.\n\n{\n  \"redacted\": [\n    {\n      \"text\": //the original text of the redacted field\n      \"replaceWith: //the field to replace the original text with, which should be in angular brackets, e.g. <NAME> or <ADDRESS>\n    },\n    ...one object for each redacted field\n  ]\n}\n",
+      "system": "You are a conscientious analyst. I will send you messages. Your job is to take a deep breath, then read the messages and identify Personal Identifiable Information such as names and addresses for redaction. Note, some PII may already have been redacted. In that case, your job is to redact the rest.\n\nDo not redact URLs.\n\nYou will return a JSON object, with one key called \"redacted\". This will contain an array containing two fields, like so.\n\n{\n  \"redacted\": [\n    {\n      \"text\": //the original text of the redacted field\n      \"replaceWith: //the field to replace the original text with, which should be in angular brackets, e.g. <NAME> or <ADDRESS>\n    },\n    ...one object for each redacted field\n  ]\n}\n",
       "examples": [
         {
           "user": "Hi <NAME>, I am Tai Khoon Lee, SARO for Clementi Primary School Counting Centre. You are appointed as Presiding Officer for the upcoming PE.",
