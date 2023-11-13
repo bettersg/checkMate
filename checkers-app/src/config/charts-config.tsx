@@ -39,6 +39,9 @@ export const chartsConfig = {
       },
     },
   },
+  tooltip:{
+    enabled: false,
+  },
   grid: {
     show: true,
     borderColor: "#ffffff40",
