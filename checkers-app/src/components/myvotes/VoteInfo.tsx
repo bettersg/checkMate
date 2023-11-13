@@ -10,11 +10,11 @@ import VoteResult from "./VoteResult";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
 interface PropType {
-    id: number,
+    id: string,
     open: boolean,
     text: string,
     primaryCategory: string,
-    voteRequest: { userid: number, category: string },
+    category: string | null,
     handleOpen: () => void,
     justification: string
 }
@@ -35,7 +35,7 @@ export function VoteInfoDialog(Prop: PropType) {
                         <div className='flex w-full gap-x-2'>
                             <div className='flex-1'>
                                 <Typography className='text-primary-color3 text-center' variant='h5'>Your vote</Typography>
-                                <VoteResult category={Prop.voteRequest.category} />
+                                <VoteResult category={Prop.category} />
                             </div>
                             <div className='flex-1'>
                                 <Typography className='text-primary-color3 text-center' variant='h5'>Crowd vote</Typography>

@@ -2,6 +2,7 @@ import { Button } from "@material-tailwind/react";
 
 interface PropType {
   title: string,
+  category: string | null,
   isAssessed: boolean,
   isMatch: boolean,
   handleClick: () => void,
@@ -12,7 +13,13 @@ interface PropType {
 
 export default function VoteInstanceButton(Prop: PropType) {
 
-  const color = !Prop.isAssessed ? "bg-pending-color" : Prop.primaryCategory == "" ? "bg-waiting-color" : Prop.isMatch ? "bg-success-color" : "bg-error-color";
+  const color = (!Prop.isAssessed && Prop.category === null) 
+  ? "bg-pending-color" 
+  : (!Prop.isAssessed && Prop.category !== null) 
+  ? "bg-waiting-color" 
+  : Prop.isMatch 
+  ? "bg-success-color" 
+  : "bg-error-color";
   const textStyle = Prop.isView ? "font-normal" : "font-bold"; // Apply font-bold if isView is false
 
   return (

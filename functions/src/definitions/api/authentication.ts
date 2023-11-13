@@ -80,7 +80,8 @@ app.post("/", async (req, res) => {
     if (userSnap.exists) {
       try {
         const customToken = await admin.auth().createCustomToken(userId)
-        return res.json({ customToken: customToken })
+        const userName = userSnap.data()?.name
+        return res.json({ customToken: customToken, userId:userId, name:userName })
       } catch (error) {
         functions.logger.error("Error creating custom token:", error)
         return res.status(500).send("Error creating custom token")

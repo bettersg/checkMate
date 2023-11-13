@@ -1,54 +1,38 @@
 import VoteInstanceButton from "./VoteInstanceButton";
-import { useState} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { VoteInfoDialog } from "./VoteInfo";
+import { useUser } from '../../UserContext';
 import {
   Accordion,
   AccordionHeader,
   AccordionBody,
   Chip
 } from "@material-tailwind/react";
+import { Timestamp } from "firebase/firestore";
 
 interface VoteRequest {
-  userid: number;
-  category: string;
-  }
+  factCheckerDocRef: string;
+  category: string | null;
+  acceptedTimestamp: Timestamp | null;
+  hasAgreed: boolean;
+  vote: number | null;
+  votedTimestamp: Timestamp | null;
+}
 
 interface Message {
-  id: number;
-  title: string;
+  id: string;
+  caption: string | null;
   text: string;
   isAssessed: boolean;
   isMatch: boolean;
   primaryCategory: string;
-  voteRequest: VoteRequest;
+  voteRequests: VoteRequest;
   justification: string;
-  isView: boolean
+  truthScore: number | null;
+  isView: boolean //checks if checker has clicked in to view results/msg
 }
 
-//should be arranged by date (most recent first)
-const MESSAGES: Message[] = [
-  {
-    id: 1, text: "This is a message to be checked", title: "Police warn against fake online articles of PM Lee endorsing investment in cryptocurrencies.", isAssessed: false, isMatch: false, primaryCategory: "",
-    voteRequest: { userid: 2, category: "" }, justification: "", isView: false
-  },
-  {
-    id: 2, text: "This is a message already assessed", title: "HDB letter with QR code for motorists to scan, pay parking fees - Is it a scam?", isAssessed: true, isMatch: false, primaryCategory: "Scam",
-    voteRequest: { userid: 2, category: "News/Info/Opinion" }, justification: "ChatGPT is figuring out", isView: false
-  },
-  {
-    id: 3, text: "This is a message already assessed", title: "SingPost to hike rate for standard regular mail from Oct 9 to meet rising costs", isAssessed: true, isMatch: true, primaryCategory: "Scam",
-    voteRequest: { userid: 2, category: "Scam" }, justification: "ChatGPT is figuring out", isView: false
-  },
-  {
-    id: 4, text: "This is a message already assessed", title: "$1.4 trillion lost to scams globally, Singapore has lost the most on average.", isAssessed: true, isMatch: false, primaryCategory: "Scam",
-    voteRequest: { userid: 2, category: "Illicit" }, justification: "ChatGPT is figuring out", isView: true
-  },
-  {
-    id: 5, text: "This is a message voted but waiting for crowd vote update", title: "Did Toxic Fukushima Water Kill Fish In Indonesia?", isAssessed: true, isMatch: false, primaryCategory: "",
-    voteRequest: { userid: 2, category: "Illicit" }, justification: "ChatGPT is figuring out", isView: true
-  },
-]
 
 interface IconProps {
   open: boolean;
@@ -71,12 +55,14 @@ function Icon({ open }: IconProps) {
 
 export default function MyVotes() {
   const navigate = useNavigate();
-  
+  const { userId } = useUser();
+  const [messages, setMessages] = useState<Message[]>([]);
+
   //message to be displayed when button is clicked
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [openPending, setPending] = useState<boolean>(true);
   const [openAssessed, setAssessed] = useState<boolean>(false);
-  // const [openMatch, setMatch] = useState<boolean>(false)
+  //for assessed msg info
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   //go to voting page for pending msg
@@ -90,10 +76,38 @@ export default function MyVotes() {
   const handlePending = () => { setPending(!openPending) };
   const handleAssessed = () => setAssessed(!openAssessed);
 
-  const PENDING: Message[] = MESSAGES.filter(msg => !msg.isAssessed || msg.primaryCategory == "");
-  const ASSESSED: Message[] = MESSAGES.filter(msg => msg.isAssessed && msg.primaryCategory != "");
+  const PENDING: Message[] = messages.filter((msg: Message) => !msg.isAssessed || msg.primaryCategory == "");
+  const ASSESSED: Message[] = messages.filter((msg: Message) => msg.isAssessed && msg.primaryCategory != "");
 
+
+  useEffect(() => {
+    //only calls api after authentication is done
+    if (userId) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch("/api/getVotes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setMessages(data.messages);
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      };
+      fetchData();
+    }
+  }, [userId]);
   //TODO: Change to a whole "VoteDisplay" component once we have finalised the API for votes
+  //TODO: change the order of display of voting buttons in pending to be in order of voteRequest.category, isReplied, TimeStamp 
   return (
     <div>
       <Accordion open={openPending} icon={<Icon open={openPending} />}>
@@ -108,7 +122,8 @@ export default function MyVotes() {
             <div>
               <VoteInstanceButton
                 key={msg.id}
-                title={msg.title}
+                title={msg.text}
+                category={msg.voteRequests?.category || null}
                 isAssessed={msg.isAssessed}
                 isMatch={msg.isMatch}
                 primaryCategory={msg.primaryCategory}
@@ -132,7 +147,8 @@ export default function MyVotes() {
             <div>
               <VoteInstanceButton
                 key={msg.id}
-                title={msg.title}
+                title={msg.text}
+                category={msg.voteRequests?.category || null}
                 isAssessed={msg.isAssessed}
                 isMatch={msg.isMatch}
                 primaryCategory={msg.primaryCategory}
@@ -148,7 +164,7 @@ export default function MyVotes() {
       {selectedMessage && <VoteInfoDialog id={selectedMessage.id}
         text={selectedMessage.text}
         primaryCategory={selectedMessage.primaryCategory}
-        voteRequest={selectedMessage.voteRequest}
+        category={selectedMessage.voteRequests?.category || null}
         open={openDialog}
         handleOpen={() => setOpenDialog(!openDialog)}
         justification={selectedMessage.justification} />

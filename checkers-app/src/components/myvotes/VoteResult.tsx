@@ -6,7 +6,7 @@ import { FaceFrownIcon } from "@heroicons/react/24/solid";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
 interface PropType {
-    category: string,
+    category: string | null,
 }
 
 export default function VoteResult(Prop: PropType) {
