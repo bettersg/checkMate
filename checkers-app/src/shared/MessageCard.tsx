@@ -1,7 +1,7 @@
 import { Card, CardBody, Typography } from "@material-tailwind/react";
 
 interface PropType {
-  id: number,
+  id: string,
   text: string,
 }
 //pass message data into message card
