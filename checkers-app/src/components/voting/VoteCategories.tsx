@@ -7,6 +7,12 @@ import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VeracitySlider from "./Tier2";
+import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
+
+
+interface PropType {
+  voteCategory: string;
+}
 
 const CATEGORIES = [
   { name: "Scam", icon: <XMarkIcon className="h-7 w-7" /> },
@@ -14,11 +20,13 @@ const CATEGORIES = [
   { name: "News/Info/Opinion", icon: <LightBulbIcon className="h-7 w-7" /> },
   { name: "Spam", icon: <FaceFrownIcon className="h-7 w-7" /> },
   { name: "Trivial", icon: <CheckCircleIcon className="h-7 w-7" /> },
+  { name: "Unsure", icon: <QuestionMarkCircleIcon className="h-7 w-7" /> }
 ];
 
-export default function VoteCategories() {
+export default function VoteCategories(Prop: PropType) {
   const navigate = useNavigate();
-  const [vote, setVote] = useState<string | null>(null);
+  const initialVote = Prop.voteCategory !== "" ? Prop.voteCategory : null;
+  const [vote, setVote] = useState<string | null>(initialVote);
 
   const handleVote = (categoryName: string) => {
     setVote(categoryName);

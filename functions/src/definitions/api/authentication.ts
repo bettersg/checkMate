@@ -74,7 +74,8 @@ app.post("/", async (req, res) => {
   if (userId) {
     const userSnap = await db
       .collection("factCheckers")
-      .doc(CHECKER1_PHONE_NUMBER)
+      // .doc(CHECKER1_PHONE_NUMBER)
+      .doc(userId)
       .get() //later change to userId
     if (userSnap.exists) {
       try {

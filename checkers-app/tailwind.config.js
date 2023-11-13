@@ -15,6 +15,7 @@ module.exports = withMT({
         'success-color': '#d0ffc5',
         'pending-color': '#fff485',
         'error-color': '#ffc7a5',
+        'waiting-color': '#e0e0e0'
       }, 
     },
   },
