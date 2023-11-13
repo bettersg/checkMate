@@ -6,6 +6,7 @@ import {
 } from "firebase/auth";
 import "./App.css";
 import app from "./firebase";
+import { UserProvider } from './UserContext';
 import {
   AchievementPage,
   DashboardPage,
@@ -32,6 +33,9 @@ if (import.meta.env.MODE === "dev") {
 function App() {
   const [count, setCount] = useState(0);
   const [telegramApp, setTelegramApp] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [name, setName] = useState('');
+
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
@@ -61,7 +65,8 @@ function App() {
           })
           .then((data) => {
             if (data.customToken) {
-              alert(data.customToken);
+              setUserId(data.userId);
+              setName(data.name);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
                 console.error(
                   "Error during Firebase signInWithCustomToken",
@@ -103,7 +108,11 @@ function App() {
     }
   };
 
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider value={{userId, name}}>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 }
 
 export default App;
