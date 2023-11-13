@@ -13,9 +13,11 @@
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@material-tailwind/react": "^2.1.4",
+    "apexcharts": "^3.44.0",
     "firebase": "^10.4.0",
     "heroicons": "^2.0.18",
     "react": "^18.2.0",
+    "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.17.0"
   },
