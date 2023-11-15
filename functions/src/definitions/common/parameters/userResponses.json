@@ -40,11 +40,11 @@
     "cn": "{{thanks}}\n\n抱歉，我们的查哥查妹对这条短信无法得出结论🤷🏻‍♂️🤷🏻‍♀️。对不起，我们尽力了！😞\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "THANKS_IMMEDIATE": {
-    "en": "Thanks for sending this in!",
+    "en": "Thanks for sending this in! ",
     "cn": "感谢您提交这条短信！"
   },
   "THANKS_DELAYED": {
-    "en": "Thanks for waiting!",
+    "en": "Thanks for waiting! ",
     "cn": "感谢您的耐心等待！"
   },
   "IMAGE_CAVEAT": {
