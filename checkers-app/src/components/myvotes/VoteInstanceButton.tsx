@@ -1,4 +1,5 @@
 import { Button } from "@material-tailwind/react";
+import { Timestamp } from "firebase/firestore";
 
 interface PropType {
   title: string,
@@ -8,6 +9,7 @@ interface PropType {
   handleClick: () => void,
   primaryCategory: string,
   isView: boolean
+  firstTimestamp: Timestamp | null
 }
 
 

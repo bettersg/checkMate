@@ -1,3 +1,4 @@
+import LoadingPage from "./LoadingPage";
 import VoteInstanceButton from "./VoteInstanceButton";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,7 @@ interface Message {
   voteRequests: VoteRequest;
   justification: string;
   truthScore: number | null;
+  firstTimestamp: Timestamp | null;
   isView: boolean //checks if checker has clicked in to view results/msg
 }
 
@@ -57,6 +59,8 @@ export default function MyVotes() {
   const navigate = useNavigate();
   const { userId } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
+  //set loading page before data is received from firebase
+  const [loading, setLoading] = useState<boolean>(true);
 
   //message to be displayed when button is clicked
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -92,13 +96,15 @@ export default function MyVotes() {
             },
             body: JSON.stringify({ userId }),
           });
-
+          console.log("After fetch");
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
 
           const data = await response.json();
           setMessages(data.messages);
+          setLoading(false);
+
         } catch (error) {
           console.error("Error fetching votes:", error);
         }
@@ -106,69 +112,94 @@ export default function MyVotes() {
       fetchData();
     }
   }, [userId]);
+
+
   //TODO: Change to a whole "VoteDisplay" component once we have finalised the API for votes
   //TODO: change the order of display of voting buttons in pending to be in order of voteRequest.category, isReplied, TimeStamp 
   return (
     <div>
-      <Accordion open={openPending} icon={<Icon open={openPending} />}>
-        <AccordionHeader onClick={handlePending} className={`transition-colors ${openPending ? "text-secondary-color2" : ""} justify-between`}>
-          <div className="flex items-center gap-2">
-            Pending
-            <Chip value="1 unread" size="sm" className="rounded-full bg-primary-color" />
-          </div>
-        </AccordionHeader>
-        <AccordionBody>
-          {PENDING.map((msg) => (
-            <div>
-              <VoteInstanceButton
-                key={msg.id}
-                title={msg.text}
-                category={msg.voteRequests?.category || null}
-                isAssessed={msg.isAssessed}
-                isMatch={msg.isMatch}
-                primaryCategory={msg.primaryCategory}
-                isView={msg.isView}
-                handleClick={goVoting}
-              />
-            </div>
-          )
-          )}
-        </AccordionBody>
-      </Accordion>
-      <Accordion open={openAssessed} icon={<Icon open={openAssessed} />}>
-        <AccordionHeader onClick={handleAssessed} className={`transition-colors ${openAssessed ? "text-primary-color2" : ""} justify-between`}>
-          <div className="flex items-center gap-2">
-            Assessed
-            <Chip value="2 unread" size="sm" className="rounded-full bg-primary-color" />
-          </div>
-        </AccordionHeader>
-        <AccordionBody>
-          {ASSESSED.map((msg) => (
-            <div>
-              <VoteInstanceButton
-                key={msg.id}
-                title={msg.text}
-                category={msg.voteRequests?.category || null}
-                isAssessed={msg.isAssessed}
-                isMatch={msg.isMatch}
-                primaryCategory={msg.primaryCategory}
-                isView={msg.isView}
-                handleClick={() => handleOpenDialog(msg)}
-              />
-            </div>
-          )
-          )}
-        </AccordionBody>
-      </Accordion>
+      {loading ? (
+        // Show loading state while messages are being fetched
+        <LoadingPage />
+      ) : (
+        <>
+          <Accordion open={openPending} icon={<Icon open={openPending} />}>
+            <AccordionHeader onClick={handlePending} className={`transition-colors ${openPending ? "text-secondary-color2" : ""} justify-between`}>
+              <div className="flex items-center gap-2">
+                Pending
+                <Chip value="1 unread" size="sm" className="rounded-full bg-primary-color" />
+              </div>
+            </AccordionHeader>
+            <AccordionBody>
+              {messages.length === 0 && <div className="text-primary-color">You have no pending messages</div>}
+              {PENDING
+                .sort((a, b) => {
+                  // Sort by null category first (havent vote)
+                  if (a.voteRequests.category === null && b.voteRequests.category !== null) {
+                    return -1;
+                  }
+                  if (a.voteRequests.category !== null && b.voteRequests.category === null) {
+                    return 1;
+                  }
+                  // If categories are the same or both are null, sort by firstTimestamp
+                  return (a.firstTimestamp ? a.firstTimestamp.toMillis() : 0) - (b.firstTimestamp ? b.firstTimestamp.toMillis() : 0);
+                })
+                .map((msg) => (
+                  <div>
+                    <VoteInstanceButton
+                      key={msg.id}
+                      title={msg.text}
+                      category={msg.voteRequests?.category || null}
+                      isAssessed={msg.isAssessed}
+                      isMatch={msg.isMatch}
+                      primaryCategory={msg.primaryCategory}
+                      isView={msg.isView}
+                      handleClick={goVoting}
+                      firstTimestamp={msg.firstTimestamp}
+                    />
+                  </div>
+                )
+                )}
+            </AccordionBody>
+          </Accordion>
+          <Accordion open={openAssessed} icon={<Icon open={openAssessed} />}>
+            <AccordionHeader onClick={handleAssessed} className={`transition-colors ${openAssessed ? "text-primary-color2" : ""} justify-between`}>
+              <div className="flex items-center gap-2">
+                Assessed
+                <Chip value="2 unread" size="sm" className="rounded-full bg-primary-color" />
+              </div>
+            </AccordionHeader>
+            <AccordionBody>
+              {messages.length === 0 && <div>You have no messages</div>}
+              {ASSESSED.map((msg) => (
+                <div>
+                  <VoteInstanceButton
+                    key={msg.id}
+                    title={msg.text}
+                    category={msg.voteRequests?.category || null}
+                    isAssessed={msg.isAssessed}
+                    isMatch={msg.isMatch}
+                    primaryCategory={msg.primaryCategory}
+                    isView={msg.isView}
+                    handleClick={() => handleOpenDialog(msg)}
+                    firstTimestamp={msg.firstTimestamp}
+                  />
+                </div>
+              )
+              )}
+            </AccordionBody>
+          </Accordion>
 
-      {selectedMessage && <VoteInfoDialog id={selectedMessage.id}
-        text={selectedMessage.text}
-        primaryCategory={selectedMessage.primaryCategory}
-        category={selectedMessage.voteRequests?.category || null}
-        open={openDialog}
-        handleOpen={() => setOpenDialog(!openDialog)}
-        justification={selectedMessage.justification} />
-      }
+          {selectedMessage && <VoteInfoDialog id={selectedMessage.id}
+            text={selectedMessage.text}
+            primaryCategory={selectedMessage.primaryCategory}
+            category={selectedMessage.voteRequests?.category || null}
+            open={openDialog}
+            handleOpen={() => setOpenDialog(!openDialog)}
+            justification={selectedMessage.justification} />
+          }
+        </>
+      )}
     </div>
   );
 }

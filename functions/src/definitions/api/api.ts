@@ -65,7 +65,7 @@ const fetchMessagesByUserId = async (userId: string) => {
     //convert each messages doc into Message object
     let messagesData: Message[] = [];
 
-    messagesQuery.forEach( async (doc) => {
+    await Promise.all(messagesQuery.map( async (doc) => {
       const data = doc.data();
       if (data){
         // Fetch the specific document from the voteRequests subcollection
@@ -97,12 +97,11 @@ const fetchMessagesByUserId = async (userId: string) => {
           isView: (voteRequestData && voteRequestData.acceptedTimestamp) ? true : false,
         };
         //print to see what the message obj looks like
-        console.log(message);
+        // console.log(message);
         messagesData.push(message);
       }
-    });
-    // Add a delay to allow the asynchronous forEach loop to complete
-    await new Promise(resolve => setTimeout(resolve, 0));
+    }));
+    // console.log(messagesData);
     return messagesData;
   } catch (err) {
     console.log(err);
