@@ -1,23 +1,60 @@
 import VoteCategories from "./VoteCategories";
 import MessageCard from "../../shared/MessageCard";
-import { Typography} from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { BackButton } from "../../shared/BackButton";
+import { useEffect, useState } from "react";
+import { useUser } from '../../UserContext';
+import { Message } from "../../types";
 
-const MESSAGE = {
-  id: 1,
-  text: "This is a message to be checked",
-  isAssessed: true,
-  voteRequest: { userid: 2, category: "Unsure" },
-  primaryCategory: "",
+interface PropType {
+  msgId: string | undefined
 }
-//TODO: make this adapt to diff msg id
-export default function VotingPage() {
+
+//TODO: link slider values for truthscore and triggerL2Vote field
+export default function VotingPage(Prop: PropType) {
+  const { userId } = useUser();
+  const [msg, setMsg] = useState<Message | null>(null);
+  useEffect(() => {
+    //only calls api after authentication is done
+    if (userId && Prop.msgId) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch("/api/getVoteRequest", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId, msgId: Prop.msgId }),
+          });
+          console.log("After fetch");
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setMsg(data.message);
+          // setLoading(false);
+
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      };
+      fetchData();
+    }
+  }, [userId, Prop.msgId]);
+
   return (
-    <div className="grid grid-flow-row items-center gap-2 pb-2">
-      <BackButton />
-      <MessageCard id={MESSAGE.id} text={MESSAGE.text} />
-      <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
-      <VoteCategories voteCategory={MESSAGE.voteRequest.category} />
-    </div>
+    <>
+      {!msg
+        ? null
+        :
+        <div className="grid grid-flow-row items-center gap-2 pb-2">
+          < BackButton />
+          <MessageCard text={msg.text} />
+          <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
+          <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} />
+        </div >
+      }
+    </>
   );
 }

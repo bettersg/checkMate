@@ -2,7 +2,7 @@ import LoadingPage from "./LoadingPage";
 import VoteInstanceButton from "./VoteInstanceButton";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { VoteInfoDialog } from "./VoteInfo";
+import VoteInfoDialog from "./VoteInfo";
 import { useUser } from '../../UserContext';
 import {
   Accordion,
@@ -10,31 +10,7 @@ import {
   AccordionBody,
   Chip
 } from "@material-tailwind/react";
-import { Timestamp } from "firebase/firestore";
-
-interface VoteRequest {
-  factCheckerDocRef: string;
-  category: string | null;
-  acceptedTimestamp: Timestamp | null;
-  hasAgreed: boolean;
-  vote: number | null;
-  votedTimestamp: Timestamp | null;
-}
-
-interface Message {
-  id: string;
-  caption: string | null;
-  text: string;
-  isAssessed: boolean;
-  isMatch: boolean;
-  primaryCategory: string;
-  voteRequests: VoteRequest;
-  justification: string;
-  truthScore: number | null;
-  firstTimestamp: Timestamp | null;
-  isView: boolean //checks if checker has clicked in to view results/msg
-}
-
+import { Message } from "../../types";
 
 interface IconProps {
   open: boolean;
@@ -57,8 +33,10 @@ function Icon({ open }: IconProps) {
 
 export default function MyVotes() {
   const navigate = useNavigate();
+
   const { userId } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
+
   //set loading page before data is received from firebase
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -70,18 +48,21 @@ export default function MyVotes() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   //go to voting page for pending msg
-  const goVoting = () => { navigate('/messageId/voting') };
+  const goVoting = (messageId: string) => {
+    navigate(`/${messageId}/voting`);
+  };
+
   //go to vote info for review/correct msg
   const handleOpenDialog = (message: Message) => {
     setSelectedMessage(message);
     setOpenDialog(!openDialog);
   };
   //displays vote instance buttons for each accordion
-  const handlePending = () => { setPending(!openPending) };
+  const handlePending = () => setPending(!openPending);
   const handleAssessed = () => setAssessed(!openAssessed);
 
-  const PENDING: Message[] = messages.filter((msg: Message) => !msg.isAssessed || msg.primaryCategory == "");
-  const ASSESSED: Message[] = messages.filter((msg: Message) => msg.isAssessed && msg.primaryCategory != "");
+  const PENDING: Message[] = messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
+  const ASSESSED: Message[] = messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
 
 
   useEffect(() => {
@@ -113,9 +94,7 @@ export default function MyVotes() {
     }
   }, [userId]);
 
-
   //TODO: Change to a whole "VoteDisplay" component once we have finalised the API for votes
-  //TODO: change the order of display of voting buttons in pending to be in order of voteRequest.category, isReplied, TimeStamp 
   return (
     <div>
       {loading ? (
@@ -154,7 +133,7 @@ export default function MyVotes() {
                       isMatch={msg.isMatch}
                       primaryCategory={msg.primaryCategory}
                       isView={msg.isView}
-                      handleClick={goVoting}
+                      handleClick={() => goVoting(msg.id)}
                       firstTimestamp={msg.firstTimestamp}
                     />
                   </div>
@@ -190,13 +169,12 @@ export default function MyVotes() {
             </AccordionBody>
           </Accordion>
 
-          {selectedMessage && <VoteInfoDialog id={selectedMessage.id}
+          {selectedMessage && openDialog && <VoteInfoDialog id={selectedMessage.id}
             text={selectedMessage.text}
             primaryCategory={selectedMessage.primaryCategory}
             category={selectedMessage.voteRequests?.category || null}
-            open={openDialog}
             handleOpen={() => setOpenDialog(!openDialog)}
-            justification={selectedMessage.justification} />
+            rationalisation={selectedMessage.rationalisation} />
           }
         </>
       )}

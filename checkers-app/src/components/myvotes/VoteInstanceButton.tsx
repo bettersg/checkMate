@@ -15,18 +15,21 @@ interface PropType {
 
 export default function VoteInstanceButton(Prop: PropType) {
 
-  const color = (!Prop.isAssessed && Prop.category === null) 
-  ? "bg-pending-color" 
-  : (!Prop.isAssessed && Prop.category !== null) 
-  ? "bg-waiting-color" 
-  : Prop.isMatch 
-  ? "bg-success-color" 
-  : "bg-error-color";
+  const color = (Prop.category === null)
+    ? "bg-pending-color"
+    : (!Prop.isAssessed && Prop.category !== null)
+      ? "bg-waiting-color"
+      : Prop.isMatch
+        ? "bg-success-color"
+        : "bg-error-color";
   const textStyle = Prop.isView ? "font-normal" : "font-bold"; // Apply font-bold if isView is false
 
   return (
     <div className="items-center col-span-2 mb-2">
-      <Button className={`rounded-full ${color} text-primary-color3 truncate inline-block whitespace-nowrap ${textStyle}`} style={{ width: "100%", }} onClick={Prop.handleClick}>
+      <Button
+        className={`rounded-full ${color} text-primary-color3 truncate inline-block whitespace-nowrap ${textStyle}`}
+        style={{ width: "100%", fontFamily: "Open Sans, sans-serif" }}
+        onClick={Prop.handleClick}>
         {Prop.title}
       </Button>
     </div>

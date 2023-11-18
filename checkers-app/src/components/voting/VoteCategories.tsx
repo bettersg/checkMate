@@ -8,10 +8,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VeracitySlider from "./Tier2";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
-
+import { HandThumbUpIcon } from "@heroicons/react/20/solid";
+import { useUser } from '../../UserContext';
 
 interface PropType {
-  voteCategory: string;
+  msgId: string | undefined;
+  voteCategory: string | null;
 }
 
 const CATEGORIES = [
@@ -20,20 +22,42 @@ const CATEGORIES = [
   { name: "News/Info/Opinion", icon: <LightBulbIcon className="h-7 w-7" /> },
   { name: "Spam", icon: <FaceFrownIcon className="h-7 w-7" /> },
   { name: "Trivial", icon: <CheckCircleIcon className="h-7 w-7" /> },
-  { name: "Unsure", icon: <QuestionMarkCircleIcon className="h-7 w-7" /> }
+  { name: "Unsure", icon: <QuestionMarkCircleIcon className="h-7 w-7" /> },
+  { name: "Legitimate", icon: <HandThumbUpIcon className="h-7 w-7" /> }
 ];
 
 export default function VoteCategories(Prop: PropType) {
   const navigate = useNavigate();
-  const initialVote = Prop.voteCategory !== "" ? Prop.voteCategory : null;
+  const initialVote = Prop.voteCategory != null ? Prop.voteCategory : null;
   const [vote, setVote] = useState<string | null>(initialVote);
+  const { userId } = useUser();
 
   const handleVote = (categoryName: string) => {
     setVote(categoryName);
   };
 
-  const handleNext = () => {
+  const handleNext = (vote: string, msgId: string | undefined) => {
     //add in function to set vote to assessed
+    if (userId && msgId) {
+      const fetchData = async () => {
+        try {
+          fetch("/api/vote", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId, msgId, vote }),
+          });
+          console.log("Data sent successfully");
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      };
+      fetchData();
+    }
+    else {
+      console.log("Error: userId or msgId is null")
+    }
     navigate("/myvotes");
   };
 
@@ -58,7 +82,7 @@ export default function VoteCategories(Prop: PropType) {
           {vote == "News/Info/Opinion" ? <VeracitySlider /> : null}
           <Button
             className="bg-highlight-color w-fit"
-            onClick={() => handleNext()}
+            onClick={() => handleNext(vote, Prop.msgId)}
           >
             Done!
           </Button>

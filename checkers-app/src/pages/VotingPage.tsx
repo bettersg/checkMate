@@ -1,5 +1,7 @@
 import Voting from "../components/voting";
+import { useParams } from "react-router-dom";
 
 export default function VotingPage (){
-    return <Voting/>;
+    const { messageId } = useParams();
+    return <Voting msgId={messageId}/>;
 }

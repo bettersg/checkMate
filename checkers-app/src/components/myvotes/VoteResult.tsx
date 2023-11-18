@@ -4,6 +4,7 @@ import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
 import { LightBulbIcon } from "@heroicons/react/24/solid";
 import { FaceFrownIcon } from "@heroicons/react/24/solid";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 
 interface PropType {
     category: string | null,
@@ -22,6 +23,8 @@ export default function VoteResult(Prop: PropType) {
                 return <FaceFrownIcon className="h-7 w-7" />;
             case 'Trivial':
                 return <CheckCircleIcon className="h-7 w-7" />;
+            case 'Legitimate':
+                 return <HandThumbUpIcon className="h-7 w-7" />;
             default:
                 return null;
         }

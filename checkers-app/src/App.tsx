@@ -20,10 +20,10 @@ const router = createBrowserRouter([
   { path: "myvotes", element: <MyVotesPage /> },
   { path: "achievements", element: <AchievementPage /> },
   {
-    path: "messageId/voting",
+    path: ":messageId/voting",
     element: <VotingPage />,
   },
-]);
+  ]);
 
 const auth = getAuth(app);
 if (import.meta.env.MODE === "dev") {
@@ -109,7 +109,7 @@ function App() {
   };
 
   return (
-    <UserProvider value={{userId, name}}>
+    <UserProvider value={{ userId, name }}>
       <RouterProvider router={router} />
     </UserProvider>
   );
