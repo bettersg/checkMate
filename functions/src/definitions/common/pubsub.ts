@@ -18,6 +18,7 @@ async function publishToTopic(
   messageData: object,
   source: string
 ) {
+  functions.logger.log(`Publishing to topic ${topicName}`)
   if (env !== "PROD") {
     const [exists] = await pubsub.topic(topicName).exists() //Doesn't seem to autocreate in emulator
     if (!exists) {
