@@ -1,7 +1,7 @@
 {
   "UNTRUE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
-    "cn": "{thanks}}{{matched}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
+    "cn": "{{thanks}}{{matched}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
   },
   "MISLEADING": {
     "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
@@ -40,11 +40,11 @@
     "cn": "{{thanks}}\n\n抱歉，我们的查哥查妹对这条短信无法得出结论🤷🏻‍♂️🤷🏻‍♀️。对不起，我们尽力了！😞\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "THANKS_IMMEDIATE": {
-    "en": "Thanks for sending this in!",
+    "en": "Thanks for sending this in! ",
     "cn": "感谢您提交这条短信！"
   },
   "THANKS_DELAYED": {
-    "en": "Thanks for waiting!",
+    "en": "Thanks for waiting! ",
     "cn": "感谢您的耐心等待！"
   },
   "IMAGE_CAVEAT": {
@@ -52,7 +52,7 @@
     "cn": "我们的评估基于图片标题中的内容。如果您提交的短信里没有文字标题，我们对图片本身的内容进行了评估。"
   },
   "METHODOLOGY_HUMAN": {
-    "en": "Our CheckMates have reviewed this message and think it's",
+    "en": "Our CheckMates have reviewed this message and think it's ",
     "cn": "经过查哥查妹的评估，我们认为这条短信"
   },
   "METHODOLOGY_AUTO": {

@@ -11,13 +11,15 @@ type redaction = {
 
 const env = process.env.ENVIRONMENT
 
-async function anonymiseMessage(message: string) {
+async function anonymiseMessage(message: string, isComplex: boolean = true) {
   if (env === "SIT") {
     return message
   }
   let returnMessage = message.replace(/\u00a0/g, " ")
   try {
-    const anonymisationHyperparameters = hyperparameters?.anonymisation
+    let anonymisationHyperparameters = isComplex
+      ? hyperparameters?.complexAnonymisation
+      : hyperparameters?.simpleAnonymisation
     if (anonymisationHyperparameters) {
       const model: string = anonymisationHyperparameters.model
       const systemMessage: string = anonymisationHyperparameters?.prompt?.system
@@ -34,7 +36,10 @@ async function anonymiseMessage(message: string) {
           model,
           systemMessage,
           examples,
-          userMessage
+          userMessage,
+          0,
+          isComplex ? false : true, //update when GPT-4 ready
+          11
         )
         if (response) {
           try {
