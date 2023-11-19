@@ -1,7 +1,7 @@
 {
   "UNTRUE": {
     "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
-    "cn": "{thanks}}{{matched}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
+    "cn": "{{thanks}}{{matched}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
   },
   "MISLEADING": {
     "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
