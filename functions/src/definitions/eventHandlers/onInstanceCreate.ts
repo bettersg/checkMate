@@ -70,7 +70,7 @@ const onInstanceCreate = functions
           data?.type === "text" &&
           data?.text != parentMessageSnap.get("originalText")
         ) {
-          const strippedMessage = await anonymiseMessage(data.text)
+          const strippedMessage = await anonymiseMessage(data.text, true)
           messageUpdateObj.originalText = data.text
           messageUpdateObj.text = strippedMessage
         } else if (data?.type === "image") {

@@ -304,7 +304,11 @@ async function sendVotingStats(instancePath: string) {
   } else truthCategory = "NA"
 
   const categories = [
-    { name: "trivial", count: irrelevantCount, isInfo: false },
+    {
+      name: responses.PLACEHOLDER_IRRELEVANT,
+      count: irrelevantCount,
+      isInfo: false,
+    },
     {
       name:
         scamCount >= illicitCount
