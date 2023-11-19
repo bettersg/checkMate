@@ -1,8 +1,10 @@
 import { defineString } from "firebase-functions/params"
 import axios, { AxiosError } from "axios"
 import * as functions from "firebase-functions"
+import { GoogleAuth } from "google-auth-library"
 
 const embedderHost = defineString("EMBEDDER_HOST")
+const env = process.env.ENVIRONMENT
 
 interface EmbedResponse {
   embedding: number[]
@@ -93,15 +95,42 @@ async function performOCR(url: string): Promise<camelCasedOCRResponse> {
   return camelCaseResponse
 }
 
+async function getGoogleIdentityToken(audience: string) {
+  try {
+    const auth = new GoogleAuth()
+    const client = await auth.getIdTokenClient(audience)
+    const idToken = await client.idTokenProvider.fetchIdToken(audience)
+    return idToken
+  } catch (error) {
+    if (env === "SIT" || env === "DEV") {
+      functions.logger.log(
+        "Unable to get Google identity token in lower environments"
+      )
+      return ""
+    } else {
+      if (error instanceof AxiosError) {
+        functions.logger.error(error.message)
+      } else {
+        functions.logger.error(error)
+      }
+      throw new Error("Unable to get Google identity token in prod environment")
+    }
+  }
+}
+
 async function callAPI<T>(endpoint: string, data: object) {
   try {
+    const hostName = embedderHost.value()
+    // Fetch identity token
+    const identityToken = await getGoogleIdentityToken(hostName)
     const response = await axios<T>({
       method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-      url: `${embedderHost.value()}/${endpoint}`,
+      url: `${hostName}/${endpoint}`,
       data: data,
       headers: {
         "Content-Type": "application/json",
-        apikey: process.env.ML_SERVER_TOKEN ?? "",
+        Authorization: `Bearer ${identityToken}`,
+        //apikey: process.env.ML_SERVER_TOKEN ?? "",
       },
     })
     return response

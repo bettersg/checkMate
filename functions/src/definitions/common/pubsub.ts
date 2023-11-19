@@ -5,7 +5,7 @@ const env = process.env.ENVIRONMENT
 
 let pubsub: PubSub
 
-if (env === "PROD") {
+if (env === "PROD" || env === "UAT") {
   pubsub = new PubSub()
 } else {
   pubsub = new PubSub({
