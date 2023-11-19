@@ -102,9 +102,9 @@ async function getGoogleIdentityToken(audience: string) {
     const idToken = await client.idTokenProvider.fetchIdToken(audience)
     return idToken
   } catch (error) {
-    if (env !== "PROD") {
+    if (env === "SIT" || env === "DEV") {
       functions.logger.log(
-        "Unable to get Google identity token in nonprod environment"
+        "Unable to get Google identity token in lower environments"
       )
       return ""
     } else {
