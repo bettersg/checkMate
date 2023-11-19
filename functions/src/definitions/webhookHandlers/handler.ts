@@ -48,7 +48,6 @@ const getHandlerWhatsapp = async (req: Request, res: Response) => {
 }
 
 const postHandlerWhatsapp = async (req: Request, res: Response) => {
-  functions.logger.log("postHandlerWhatsapp called")
   if (req.body.object) {
     if (req?.body?.entry?.[0]?.changes?.[0]?.value) {
       let value = req.body.entry[0].changes[0].value
@@ -68,7 +67,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
         (phoneNumberId === checkerPhoneNumberId && wabaID === checkerWabaId) ||
         (phoneNumberId === userPhoneNumberId && wabaID === userWabaId)
       ) {
-        functions.logger.log(`message received from ${phoneNumberId}`)
         if (value?.messages?.[0]) {
           let message = value.messages[0]
           let type = message.type
@@ -81,7 +79,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
             await handleSpecialCommands(message)
           } else {
             if (message?.id) {
-              functions.logger.log("not special command")
               //if message has been processed before, don't even put it in queue.
               if (await checkMessageId(message.id)) {
                 functions.logger.warn(`message ${message.id} already processed`)
@@ -101,7 +98,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
               await publishToTopic("checkerEvents", message, "whatsapp")
             }
             if (phoneNumberId === userPhoneNumberId) {
-              functions.logger.log("putting into user queue")
               //put into user queue
               await publishToTopic("userEvents", message, "whatsapp")
             }

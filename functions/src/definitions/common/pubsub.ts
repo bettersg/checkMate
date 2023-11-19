@@ -5,7 +5,7 @@ const env = process.env.ENVIRONMENT
 
 let pubsub: PubSub
 
-if (env === "PROD") {
+if (env === "PROD" || env === "UAT") {
   pubsub = new PubSub()
 } else {
   pubsub = new PubSub({
@@ -18,7 +18,6 @@ async function publishToTopic(
   messageData: object,
   source: string
 ) {
-  functions.logger.log(`Publishing to topic ${topicName}`)
   if (env !== "PROD") {
     const [exists] = await pubsub.topic(topicName).exists() //Doesn't seem to autocreate in emulator
     if (!exists) {
