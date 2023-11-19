@@ -88,7 +88,7 @@
     "cn": "目前，{%voted}}%的查哥查妹已经对这条短信进行投票评估。但是，他们无法达成一致，或缺乏足够的信息进行评估。\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。"
   },
   "INTERIM_PROMPT": {
-    "en": "Thanks for waiting! Our network of trusted CheckMate volunteers is still assessing your message.\n\nYou may press the button below to see how our volunteers have rated your message so far. However, *do interpret this preliminary rating with caution* as the final result may differ. \n\nWe appreciate your patience and hope to deliver the final result soon!",
+    "en": "Thanks for waiting! Our network of trusted CheckMate volunteers is still assessing your message.\n\nYou may press the button below to see how our volunteers have rated your message so far. However, *do interpret this preliminary rating with caution* as the final result may differ. \n\nWe appreciate your patience and hope to deliver the final result soon!",
     "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹投票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击“获取初步结果”。请注意，初步结果和最终结果可能存在差异，应谨慎解读初步结果。我们感谢您的耐心，并会尽快提供最终结果！💪🏼"
   },
   "ALREADY_REPLIED": {
