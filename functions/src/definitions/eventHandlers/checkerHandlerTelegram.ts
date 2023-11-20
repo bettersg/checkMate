@@ -17,6 +17,7 @@ const db = admin.firestore()
 const responsesSnap = db.collection("systemParameters").doc("factCheckerBotResponses").get()
 
 let name : string ="";
+let phoneNo : string ="";
 const ONBOARDING_4 : string ="Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! Use the '/info' command for more resources. Thanks again for joining our community of CheckMates!";
 
 // General message handler
@@ -103,6 +104,7 @@ bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
       numVoted: 0,
       numCorrectVotes: 0,
       numVerifiedLinks: 0,
+      platformId: userId,
       preferredPlatform: "telegram",
       lastVotedTimestamp: null,})
     .then(() => {

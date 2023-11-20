@@ -15,6 +15,7 @@ import {
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Message } from "./types";
+import { set } from "firebase/database";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
@@ -38,6 +39,7 @@ function App() {
   const [userId, setUserId] = useState(null);
   const [name, setName] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [phoneNo, setPhoneNo] = useState('');
 
   useEffect(() => {
     if (
@@ -70,6 +72,7 @@ function App() {
             if (data.customToken) {
               setUserId(data.userId);
               setName(data.name);
+              setPhoneNo(data.phoneNo);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
                 console.error(
                   "Error during Firebase signInWithCustomToken",
@@ -114,7 +117,7 @@ function App() {
   };
 
   return (
-    <UserProvider value={{ userId, name, messages, updateMessages: setMessages }}>
+    <UserProvider value={{ userId, name, messages, updateMessages: setMessages, phoneNo: phoneNo }}>
       <RouterProvider router={router} />
     </UserProvider>
   );

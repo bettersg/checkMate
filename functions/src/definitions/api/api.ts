@@ -18,12 +18,12 @@ app.get("/helloworld", (req, res) => {
   res.send({ hello: "hello from /helloworld" })
 })
 
-const fetchMessagesByUserId = async (userId: string) => {
+const fetchMessagesByUserPhone = async (phoneNo: string) => {
   try {
     //find all the voteRequests sent to user
     const voteRequestsSnapshot = await db
       .collectionGroup("voteRequests")
-      .where("factCheckerDocRef", "==", `/factCheckers/${userId}`)
+      .where("factCheckerDocRef", "==", `/factCheckers/${phoneNo}`)
       .get();
 
     //find the corresponding messages doc id
@@ -50,7 +50,7 @@ const fetchMessagesByUserId = async (userId: string) => {
       if (data){
         // Fetch the specific document from the voteRequests subcollection
         const voteRequestDocRef = await doc.ref.collection("voteRequests")
-        .where("factCheckerDocRef", "==", `/factCheckers/${userId}`)
+        .where("factCheckerDocRef", "==", `/factCheckers/${phoneNo}`)
         .limit(1)
         .get();
 
@@ -64,17 +64,19 @@ const fetchMessagesByUserId = async (userId: string) => {
           isMatch: data.primaryCategory === voteRequestData.category,
           primaryCategory: data.primaryCategory || null,
           voteRequests: {
+            id: voteRequestDocRef.docs[0]?.id,
             factCheckerDocRef: voteRequestData.factCheckerDocRef || "",
             category: voteRequestData?.category || null,
             acceptedTimestamp: voteRequestData?.acceptedTimestamp || null, 
             hasAgreed: voteRequestData?.hasAgreed || false, 
             vote: voteRequestData?.vote || null,
-            votedTimestamp: voteRequestData?.votedTimestamp || null, 
+            votedTimestamp: voteRequestData?.votedTimestamp || null,
+            checkTimestamp: voteRequestData?.checkTimestamp || null,
           },
           rationalisation: data.rationalisation || null,
           truthScore: data.truthScore || null,
           //edit isView logic (read/unread)
-          isView: (voteRequestData && voteRequestData.acceptedTimestamp && voteRequestData.hasAgreed) ? true : false,
+          isView: (data.isAssessed && voteRequestData.checkTimestamp && voteRequestData.category) || (!data.isAssessed && voteRequestData.acceptedTimestamp && voteRequestData.hasAgreed) ? true : false,
         };
         //print to see what the message obj looks like
         // console.log(message);
@@ -91,19 +93,19 @@ const fetchMessagesByUserId = async (userId: string) => {
 
 //get all messages for myVotes page
 app.post("/getVotes", async (req, res) => {
-  const userId = req.body.userId;
-  console.log(userId); 
-  const messages = await fetchMessagesByUserId(userId);
+  const phoneNo = req.body.phoneNo;
+  console.log(phoneNo); 
+  const messages = await fetchMessagesByUserPhone(phoneNo);
   return res.json({ messages: messages})
 })
 
 //get info for voting page, set isView to true
 app.post("/updateView", async (req, res) => {
   //TODO TONGYING: To implement
-  const userId = req.body.userId;
+  const phoneNo = req.body.phoneNo;
   const msgId = req.body.msgId;
   try {
-    const messageDoc = await db.collection('messages').doc(msgId).get();
+        const messageDoc = await db.collection('messages').doc(msgId).get();
 
     if (!messageDoc.exists) {
       res.status(404).json({ error: 'Message not found' });
@@ -116,8 +118,8 @@ app.post("/updateView", async (req, res) => {
 
         // Query to get the specific VoteRequest document by checker
         const voteRequestQuery = await voteRequestsCollection
-          .where('factCheckerDocRef', '==', `/factCheckers/${userId}`)
-          .get();
+        .where('factCheckerDocRef', '==', `/factCheckers/${phoneNo}`)
+        .get();
 
         if (voteRequestQuery.docs.length === 0) {
           return res.status(404).json({ error: 'VoteRequest not found' });
@@ -125,24 +127,22 @@ app.post("/updateView", async (req, res) => {
           const voteRequestDoc = voteRequestQuery.docs[0];
           const voteRequestData = voteRequestDoc.data();
           console.log('Existing data:', voteRequestData);
-          // Update the hasAgreed and acceptedTimestamp if its first time viewing file
-          if (voteRequestData.hasAgreed == false){
-              await voteRequestDoc.ref.update({
-              hasAgreed: true,
-              acceptedTimestamp: Timestamp.fromDate(new Date()),
+          // Update the hasAgreed and acceptedTimestamp if its first time viewing file (not voted)
+          if (data.isAssessed && voteRequestData.checkTimestamp == null && voteRequestData.category != null){
+            await voteRequestDoc.ref.update({
+              checkTimestamp: Timestamp.fromDate(new Date()),
             });
           }
-
           res.status(200).json({ success: true  });
           return;
         }
       }
-     
-  } catch (error) {
+  
+   } catch (error) {
     console.error('Error fetching message:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-  
+
 })
 
 //vote for a message
@@ -150,18 +150,17 @@ app.post("/vote", async (req, res) => {
   //TODO TONGYING: To implement, probably when they vote here
   const vote = req.body.vote;
   const msgId = req.body.msgId;
-  const userId = req.body.userId;
-
+  const phoneNo = req.body.phoneNo;
     try {
       // Reference to the message document
       const messageRef = db.collection('messages').doc(msgId);
-  
+
       // Reference to the VoteRequests subcollection
       const voteRequestsCollection = messageRef.collection('voteRequests');
   
       // Query to get the specific VoteRequest document by checker
       const voteRequestQuery = await voteRequestsCollection
-        .where('factCheckerDocRef', '==', `/factCheckers/${userId}`)
+        .where('factCheckerDocRef', '==', `/factCheckers/${phoneNo}`)
         .get();
   
         if (voteRequestQuery.empty) {
@@ -174,14 +173,19 @@ app.post("/vote", async (req, res) => {
           if (!voteRequestDoc) {
             res.status(404).json({ error: 'VoteRequest document not found' });
           } else {
-            // Update the document
-            if (voteRequestDoc) {
+            console.log('Existing data:', voteRequestDoc.data());
+             //update isView after first vote
+            if(voteRequestDoc.data()?.hasAgreed == false && !voteRequestDoc.data()?.acceptedTimestamp){
               await voteRequestDoc.ref.update({
-                category: vote,
-                votedTimestamp: Timestamp.fromDate(new Date())
+                hasAgreed: true,
+                acceptedTimestamp: Timestamp.fromDate(new Date()),
               });
             }
-        
+            // Update the document
+            await voteRequestDoc.ref.update({
+              category: vote,
+              votedTimestamp: Timestamp.fromDate(new Date())
+            });
             res.status(200).json({ success: true });}
           }
           

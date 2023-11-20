@@ -14,7 +14,7 @@ import { useUser } from '../../UserContext';
 interface PropType {
   msgId: string | undefined;
   voteCategory: string | null;
-}
+  }
 
 const CATEGORIES = [
   { name: "Scam", icon: <XMarkIcon className="h-7 w-7" /> },
@@ -30,7 +30,7 @@ export default function VoteCategories(Prop: PropType) {
   const navigate = useNavigate();
   const initialVote = Prop.voteCategory != null ? Prop.voteCategory : null;
   const [vote, setVote] = useState<string | null>(initialVote);
-  const { userId, updateMessages } = useUser();
+  const { phoneNo, updateMessages } = useUser();
 
   const handleVote = (categoryName: string) => {
     setVote(categoryName);
@@ -38,7 +38,7 @@ export default function VoteCategories(Prop: PropType) {
 
   const handleNext = (vote: string, msgId: string | undefined) => {
     //add in function to set vote to assessed
-    if (userId && msgId) {
+    if (phoneNo && msgId) {
       const fetchData = async () => {
         try {
           fetch("/api/vote", {
@@ -46,7 +46,7 @@ export default function VoteCategories(Prop: PropType) {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId, msgId, vote }),
+            body: JSON.stringify({ phoneNo, msgId, vote}),
           });
           console.log("Data sent successfully");
 
@@ -56,7 +56,7 @@ export default function VoteCategories(Prop: PropType) {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId }),
+            body: JSON.stringify({ phoneNo }),
           });
 
           if (!response.ok) {
@@ -64,7 +64,6 @@ export default function VoteCategories(Prop: PropType) {
           }
 
           const data = await response.json();
-
           // Update the messages in the context
           updateMessages(data.messages);
 
@@ -75,7 +74,7 @@ export default function VoteCategories(Prop: PropType) {
       fetchData();
     }
     else {
-      console.log("Error: userId or msgId is null")
+      console.log("Error: phoneNo or msgId is null")
     }
     navigate("/myvotes");
   };

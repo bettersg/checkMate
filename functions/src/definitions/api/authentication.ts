@@ -74,14 +74,16 @@ app.post("/", async (req, res) => {
   if (userId) {
     const userSnap = await db
       .collection("factCheckers")
-      // .doc(CHECKER1_PHONE_NUMBER)
-      .doc(userId)
-      .get() //later change to userId
-    if (userSnap.exists) {
+      .where("platformId", "==", userId)
+      .limit(1)
+      .get() 
+    if (!userSnap.empty) {
       try {
+        const userDoc = userSnap.docs[0];
         const customToken = await admin.auth().createCustomToken(userId)
-        const userName = userSnap.data()?.name
-        return res.json({ customToken: customToken, userId:userId, name:userName })
+        const userName = userDoc.data()?.name
+        const phoneNo = userDoc.id
+        return res.json({ customToken: customToken, userId:userId, name:userName, phoneNo: phoneNo })
       } catch (error) {
         functions.logger.error("Error creating custom token:", error)
         return res.status(500).send("Error creating custom token")

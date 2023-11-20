@@ -5,7 +5,8 @@ interface UserContextProps {
     userId: string | null;
     name: string,
     messages: Message[]; // Include messages here
-    updateMessages: (messages: Message[]) => void; 
+    updateMessages: (messages: Message[]) => void;
+    phoneNo: string | null;
 }
 
 const UserContext = createContext<UserContextProps | undefined>(undefined);

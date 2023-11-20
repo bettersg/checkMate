@@ -39,12 +39,14 @@ export type Message = {
 }
 
 export type VoteRequest = {
+  id: string, 
   factCheckerDocRef: string;
   category: string | null;
   acceptedTimestamp: Timestamp | null;
   hasAgreed: boolean;
   vote: number | null;
   votedTimestamp: Timestamp | null;
+  checkTimestamp: Timestamp | null,
 }
 
 export type TeleMessage = {
