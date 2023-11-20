@@ -2,7 +2,8 @@ import * as admin from "firebase-admin"
 import express from "express"
 import { validateFirebaseIdToken } from "./middleware/validator"
 import { onRequest } from "firebase-functions/v2/https"
-import { Timestamp, collectionGroup, query, where, serverTimestamp } from "firebase/firestore";
+// import { Timestamp, collectionGroup, query, where, serverTimestamp } from "firebase/firestore";
+import { Timestamp  } from 'firebase-admin/firestore';
 import { DocumentReference } from '@google-cloud/firestore';
 import { TeleMessage } from "../../types";
 
@@ -73,7 +74,7 @@ const fetchMessagesByUserId = async (userId: string) => {
           rationalisation: data.rationalisation || null,
           truthScore: data.truthScore || null,
           //edit isView logic (read/unread)
-          isView: (voteRequestData && voteRequestData.acceptedTimestamp) ? true : false,
+          isView: (voteRequestData && voteRequestData.acceptedTimestamp && voteRequestData.hasAgreed) ? true : false,
         };
         //print to see what the message obj looks like
         // console.log(message);
@@ -97,7 +98,7 @@ app.post("/getVotes", async (req, res) => {
 })
 
 //get info for voting page, set isView to true
-app.post("/getVoteRequest", async (req, res) => {
+app.post("/updateView", async (req, res) => {
   //TODO TONGYING: To implement
   const userId = req.body.userId;
   const msgId = req.body.msgId;
@@ -123,35 +124,16 @@ app.post("/getVoteRequest", async (req, res) => {
         } else {
           const voteRequestDoc = voteRequestQuery.docs[0];
           const voteRequestData = voteRequestDoc.data();
-          // Update the isAccepted and acceptedTimestamp if its first time viewing file
-          if (voteRequestData.isAccepted == false){
+          console.log('Existing data:', voteRequestData);
+          // Update the hasAgreed and acceptedTimestamp if its first time viewing file
+          if (voteRequestData.hasAgreed == false){
               await voteRequestDoc.ref.update({
-              isAccepted: true,
-              acceptedTimestamp: admin.firestore.FieldValue.serverTimestamp(),
+              hasAgreed: true,
+              acceptedTimestamp: Timestamp.fromDate(new Date()),
             });
           }
 
-          const message: TeleMessage = {
-            id: messageDoc.id,
-            text: data.text || "",
-            caption: data.caption || null,
-            isAssessed: data.isAssessed || false,
-            isMatch: data.primaryCategory === voteRequestData.category,
-            primaryCategory: data.primaryCategory || null,
-            voteRequests: {
-              factCheckerDocRef: voteRequestData.factCheckerDocRef || "",
-              category: voteRequestData?.category || null,
-              acceptedTimestamp: voteRequestData?.acceptedTimestamp || null, 
-              hasAgreed: voteRequestData?.hasAgreed || false, 
-              vote: voteRequestData?.vote || null,
-              votedTimestamp: voteRequestData?.votedTimestamp || null, 
-            },
-            rationalisation: data.rationalisation || null,
-            truthScore: data.truthScore || null,
-            //edit isView logic (read/unread)
-            isView: (voteRequestData && voteRequestData.acceptedTimestamp) ? true : false,
-          };
-          res.status(200).json({ message: message });
+          res.status(200).json({ success: true  });
           return;
         }
       }
@@ -193,10 +175,12 @@ app.post("/vote", async (req, res) => {
             res.status(404).json({ error: 'VoteRequest document not found' });
           } else {
             // Update the document
-            await voteRequestDoc.ref.update({
-              category: vote,
-              votedTimestamp: admin.firestore.FieldValue.serverTimestamp(),
-            });
+            if (voteRequestDoc) {
+              await voteRequestDoc.ref.update({
+                category: vote,
+                votedTimestamp: Timestamp.fromDate(new Date())
+              });
+            }
         
             res.status(200).json({ success: true });}
           }

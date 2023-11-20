@@ -14,6 +14,7 @@ import {
   MyVotesPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Message } from "./types";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
@@ -33,8 +34,10 @@ if (import.meta.env.MODE === "dev") {
 function App() {
   const [count, setCount] = useState(0);
   const [telegramApp, setTelegramApp] = useState(null);
+  //for global states: userID, name and messages
   const [userId, setUserId] = useState(null);
   const [name, setName] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     if (
@@ -79,6 +82,8 @@ function App() {
             alert(err);
             console.error("Error fetching custom token:", err);
           });
+
+          
       }
     }
   }, []);
@@ -109,7 +114,7 @@ function App() {
   };
 
   return (
-    <UserProvider value={{ userId, name }}>
+    <UserProvider value={{ userId, name, messages, updateMessages: setMessages }}>
       <RouterProvider router={router} />
     </UserProvider>
   );

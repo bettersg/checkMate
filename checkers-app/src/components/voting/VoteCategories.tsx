@@ -30,7 +30,7 @@ export default function VoteCategories(Prop: PropType) {
   const navigate = useNavigate();
   const initialVote = Prop.voteCategory != null ? Prop.voteCategory : null;
   const [vote, setVote] = useState<string | null>(initialVote);
-  const { userId } = useUser();
+  const { userId, updateMessages } = useUser();
 
   const handleVote = (categoryName: string) => {
     setVote(categoryName);
@@ -49,6 +49,25 @@ export default function VoteCategories(Prop: PropType) {
             body: JSON.stringify({ userId, msgId, vote }),
           });
           console.log("Data sent successfully");
+
+          // Fetch the latest messages after the vote is updated
+          const response = await fetch("/api/getVotes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Update the messages in the context
+          updateMessages(data.messages);
+
         } catch (error) {
           console.error("Error fetching votes:", error);
         }

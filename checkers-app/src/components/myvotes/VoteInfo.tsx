@@ -18,7 +18,7 @@ interface PropType {
 export default function VoteInfoDialog(Prop: PropType) {
     return (
         <div className="grid place-items-center pb-14 top-0 left-0 absolute w-screen h-screen px-2 max-w-screen max-h-screen bg-black bg-opacity-60 backdrop-blur-sm z-0 overscroll-contain" >
-            <div className="z-50 bg-white p-2 rounded-lg shadow-2xl h-5/6 max-h-5/6 w-full max-w-full overscroll-y-auto overflow-scroll" >
+            <div className="z-50 bg-white p-2 rounded-lg shadow-2xl h-5/6 max-h-5/6 w-full max-w-full overscroll-y-auto overflow-auto" >
                 <XMarkIcon className="h-6 w-6 text-gray-500 m-1" onClick={Prop.handleOpen} />
                 <div className="w-5/6 mx-auto">
                     <div className="flex flex-col gap-3">

@@ -15,7 +15,7 @@ export default function MessageCard(prop: PropType) {
   const truncatedText = prop.text.slice(0, 300) + "..."; // Adjust the number of characters to truncate
 
   return (
-    <Card className="bg-error-color overflow-scroll max-w-md w-full h-full max-h-full overflow-x-hidden">
+    <Card className="bg-error-color overflow-auto max-w-md w-full h-full max-h-full">
       <CardBody>
         <Typography variant="h5" className="text-primary-color3">Message Text</Typography>
         <Typography >

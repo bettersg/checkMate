@@ -34,8 +34,8 @@ function Icon({ open }: IconProps) {
 export default function MyVotes() {
   const navigate = useNavigate();
 
-  const { userId } = useUser();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { userId, messages, updateMessages } = useUser();
+  // const [messages, setMessages] = useState<Message[]>([]);
 
   //set loading page before data is received from firebase
   const [loading, setLoading] = useState<boolean>(true);
@@ -83,7 +83,7 @@ export default function MyVotes() {
           }
 
           const data = await response.json();
-          setMessages(data.messages);
+          updateMessages(data.messages);
           setLoading(false);
 
         } catch (error) {
