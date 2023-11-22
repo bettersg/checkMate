@@ -106,9 +106,8 @@ export default function MyVotes() {
 
   useEffect(() => {
     //only calls api after authentication is done
-    console.log(phoneNo);
+    console.log(`Fetching votes for ${phoneNo}`);
     if (phoneNo) {
-      console.log(phoneNo);
       const fetchData = async () => {
         try {
           const response = await fetch("/api/getVotes", {

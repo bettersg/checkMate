@@ -3,7 +3,7 @@ import express from "express"
 import { validateFirebaseIdToken } from "./middleware/validator"
 import { onRequest } from "firebase-functions/v2/https"
 // import { Timestamp, collectionGroup, query, where, serverTimestamp } from "firebase/firestore";
-import { Timestamp  } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { DocumentReference } from '@google-cloud/firestore';
 import { TeleMessage } from "../../types";
 
@@ -14,45 +14,128 @@ const db = admin.firestore();
 const app = express()
 // app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
 
-app.get("/helloworld", (req, res) => {
-  res.send({ hello: "hello from /helloworld" })
+const testFetch = async () => {
+  try {
+    const snapshot = await db.collection("messages").get();
+
+    snapshot.forEach((doc) => {
+      console.log(doc.id, "=>", doc.data())
+    })
+    return snapshot
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+const stringToTimestamp = (dateString: string) => {
+  const date = new Date(dateString)
+  return Timestamp.fromDate(date)
+}
+
+app.get("/helloworld", async (req, res) => {
+  const snapshot = await testFetch()
+  res.send({ snapshot })
 })
+
+app.post("/addMessage", async (req, res) => {
+  // Assume we already have the data parsed
+  try {
+    const { instances, ...data } = req.body; // Get the instances data from the request body
+    const { replyTimestamp, timestamp, ...instancesData } = instances; // Get the instances data from the request body
+    const { assessedTimestamp, assessmentExpiry, firstTimestamp, lastRefreshedTimestamp, lastTimestamp, ...messageData } = data; // Get the message data from the request body
+    const docRef = await db.collection("message").doc();
+
+    // Set the instances data fields
+    const instancesRef = await docRef.collection("instances").doc();
+    await instancesRef.set({...instancesData, 
+      replyTimestamp: stringToTimestamp(replyTimestamp), 
+      timestamp: stringToTimestamp(timestamp)
+    })
+
+    await docRef.set({...messageData, 
+      latestInstance: instancesRef, 
+      assessedTimestamp: stringToTimestamp(assessedTimestamp), 
+      assessmentExpiry: stringToTimestamp(assessmentExpiry), 
+      firstTimestamp: stringToTimestamp(firstTimestamp), 
+      lastRefreshedTimestamp: stringToTimestamp(lastRefreshedTimestamp), 
+      lastTimestamp: stringToTimestamp(lastTimestamp)
+    });
+
+    const messageIdRef = await db.collection("messageIds").doc();
+    await messageIdRef.set({ instanceRef: instancesRef });
+
+    res.status(200).json({ success: true, docId: docRef.id, instancesId: instancesRef.id, messageId: messageIdRef.id });
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+})
+
+app.post("/addFactCheckers", async (req, res) => {
+  try {
+    const { phoneNumber, lastVotedTimestamp, ...data } = req.body;
+
+    if (!phoneNumber || !lastVotedTimestamp) {
+      res.status(400).json({ success: false, error: "Missing phoneNumber or lastVotedTimestamp" });
+      return;
+    }
+
+    // Parse the lastVotedTimestamp from the request body into a Date object
+    const timestampDate = new Date(lastVotedTimestamp);
+    // Convert the Date object into a Firestore Timestamp
+    const timestamp = Timestamp.fromDate(timestampDate);
+
+    const docRef = await db.collection("factCheckers").doc(phoneNumber);
+
+    // Set the Firestore Timestamp as the value of the "lastVotedTimestamp" field
+    await docRef.set({ ...data, lastVotedTimestamp: timestamp });
+
+    res.status(200).json({ success: true, id: docRef.id });
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
 
 const fetchMessagesByUserPhone = async (phoneNo: string) => {
   try {
     //find all the voteRequests sent to user
+    const factCheckerRef = db.doc(`factCheckers/${phoneNo}`);
+    console.log(`Fetch messages by user phone: ${phoneNo}`);
     const voteRequestsSnapshot = await db
       .collectionGroup("voteRequests")
-      .where("factCheckerDocRef", "==", `/factCheckers/${phoneNo}`)
+      .where("factCheckerDocRef", "==", factCheckerRef)
       .get();
 
     //find the corresponding messages doc id
     const documentIds: string[] = [];
     voteRequestsSnapshot.forEach((doc) => {
       const parentId = doc.ref.parent?.parent?.id;
-      if (parentId){
+      if (parentId) {
         documentIds.push(parentId)
       }
     });
+
     //get all the messages doc
     const messagesQuery = await Promise.all(
       documentIds.map(async (documentId) => {
         const doc = await db.collection("messages").doc(documentId).get();
+        console.log(doc);
         return doc;
       })
     );
-    
+
     //convert each messages doc into Message object
     let messagesData: TeleMessage[] = [];
 
-    await Promise.all(messagesQuery.map( async (doc) => {
+    await Promise.all(messagesQuery.map(async (doc) => {
       const data = doc.data();
-      if (data){
+      if (data) {
         // Fetch the specific document from the voteRequests subcollection
         const voteRequestDocRef = await doc.ref.collection("voteRequests")
-        .where("factCheckerDocRef", "==", `/factCheckers/${phoneNo}`)
-        .limit(1)
-        .get();
+          .where("factCheckerDocRef", "==", factCheckerRef)
+          .limit(1)
+          .get();
 
         const voteRequestData = voteRequestDocRef.docs[0]?.data();
 
@@ -67,8 +150,8 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
             id: voteRequestDocRef.docs[0]?.id,
             factCheckerDocRef: voteRequestData.factCheckerDocRef || "",
             category: voteRequestData?.category || null,
-            acceptedTimestamp: voteRequestData?.acceptedTimestamp || null, 
-            hasAgreed: voteRequestData?.hasAgreed || false, 
+            acceptedTimestamp: voteRequestData?.acceptedTimestamp || null,
+            hasAgreed: voteRequestData?.hasAgreed || false,
             vote: voteRequestData?.vote || null,
             votedTimestamp: voteRequestData?.votedTimestamp || null,
             checkTimestamp: voteRequestData?.checkTimestamp || null,
@@ -94,9 +177,15 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
 //get all messages for myVotes page
 app.post("/getVotes", async (req, res) => {
   const phoneNo = req.body.phoneNo;
-  console.log(phoneNo); 
+  console.log(`Calling /api/getVotes with: ${phoneNo}`);
   const messages = await fetchMessagesByUserPhone(phoneNo);
-  return res.json({ messages: messages})
+  if (messages.length === 0) {
+    console.log("No messages found");
+  }
+  else {
+    console.log(messages);
+  }
+  return res.json({ messages: messages })
 })
 
 //get info for voting page, set isView to true
@@ -105,40 +194,40 @@ app.post("/updateView", async (req, res) => {
   const phoneNo = req.body.phoneNo;
   const msgId = req.body.msgId;
   try {
-        const messageDoc = await db.collection('messages').doc(msgId).get();
+    const messageDoc = await db.collection('messages').doc(msgId).get();
 
     if (!messageDoc.exists) {
       res.status(404).json({ error: 'Message not found' });
-    } 
-    
-    const data = messageDoc.data();
-      if (data){
-        // Access the VoteRequests subcollection
-        const voteRequestsCollection = messageDoc.ref.collection('voteRequests');
+    }
 
-        // Query to get the specific VoteRequest document by checker
-        const voteRequestQuery = await voteRequestsCollection
+    const data = messageDoc.data();
+    if (data) {
+      // Access the VoteRequests subcollection
+      const voteRequestsCollection = messageDoc.ref.collection('voteRequests');
+
+      // Query to get the specific VoteRequest document by checker
+      const voteRequestQuery = await voteRequestsCollection
         .where('factCheckerDocRef', '==', `/factCheckers/${phoneNo}`)
         .get();
 
-        if (voteRequestQuery.docs.length === 0) {
-          return res.status(404).json({ error: 'VoteRequest not found' });
-        } else {
-          const voteRequestDoc = voteRequestQuery.docs[0];
-          const voteRequestData = voteRequestDoc.data();
-          console.log('Existing data:', voteRequestData);
-          // Update the hasAgreed and acceptedTimestamp if its first time viewing file (not voted)
-          if (data.isAssessed && voteRequestData.checkTimestamp == null && voteRequestData.category != null){
-            await voteRequestDoc.ref.update({
-              checkTimestamp: Timestamp.fromDate(new Date()),
-            });
-          }
-          res.status(200).json({ success: true  });
-          return;
+      if (voteRequestQuery.docs.length === 0) {
+        return res.status(404).json({ error: 'VoteRequest not found' });
+      } else {
+        const voteRequestDoc = voteRequestQuery.docs[0];
+        const voteRequestData = voteRequestDoc.data();
+        console.log('Existing data:', voteRequestData);
+        // Update the hasAgreed and acceptedTimestamp if its first time viewing file (not voted)
+        if (data.isAssessed && voteRequestData.checkTimestamp == null && voteRequestData.category != null) {
+          await voteRequestDoc.ref.update({
+            checkTimestamp: Timestamp.fromDate(new Date()),
+          });
         }
+        res.status(200).json({ success: true });
+        return;
       }
-  
-   } catch (error) {
+    }
+
+  } catch (error) {
     console.error('Error fetching message:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -151,51 +240,52 @@ app.post("/vote", async (req, res) => {
   const vote = req.body.vote;
   const msgId = req.body.msgId;
   const phoneNo = req.body.phoneNo;
-    try {
-      // Reference to the message document
-      const messageRef = db.collection('messages').doc(msgId);
+  try {
+    // Reference to the message document
+    const messageRef = db.collection('messages').doc(msgId);
 
-      // Reference to the VoteRequests subcollection
-      const voteRequestsCollection = messageRef.collection('voteRequests');
-  
-      // Query to get the specific VoteRequest document by checker
-      const voteRequestQuery = await voteRequestsCollection
-        .where('factCheckerDocRef', '==', `/factCheckers/${phoneNo}`)
-        .get();
-  
-        if (voteRequestQuery.empty) {
-          res.status(404).json({ error: 'VoteRequest not found' });
-        } else {
-          
-          // Assuming there's only one matching document, you can retrieve it
-          const voteRequestDoc = voteRequestQuery.docs[0];
-          console.log('Existing data:', voteRequestDoc.data());
-          if (!voteRequestDoc) {
-            res.status(404).json({ error: 'VoteRequest document not found' });
-          } else {
-            console.log('Existing data:', voteRequestDoc.data());
-             //update isView after first vote
-            if(voteRequestDoc.data()?.hasAgreed == false && !voteRequestDoc.data()?.acceptedTimestamp){
-              await voteRequestDoc.ref.update({
-                hasAgreed: true,
-                acceptedTimestamp: Timestamp.fromDate(new Date()),
-              });
-            }
-            // Update the document
-            await voteRequestDoc.ref.update({
-              category: vote,
-              votedTimestamp: Timestamp.fromDate(new Date())
-            });
-            res.status(200).json({ success: true });}
-          }
-          
-    } catch (error) {
-      console.error('Error updating vote request:', error);
-      res.sendStatus(500);
+    // Reference to the VoteRequests subcollection
+    const voteRequestsCollection = messageRef.collection('voteRequests');
+
+    // Query to get the specific VoteRequest document by checker
+    const voteRequestQuery = await voteRequestsCollection
+      .where('factCheckerDocRef', '==', `/factCheckers/${phoneNo}`)
+      .get();
+
+    if (voteRequestQuery.empty) {
+      res.status(404).json({ error: 'VoteRequest not found' });
+    } else {
+
+      // Assuming there's only one matching document, you can retrieve it
+      const voteRequestDoc = voteRequestQuery.docs[0];
+      console.log('Existing data:', voteRequestDoc.data());
+      if (!voteRequestDoc) {
+        res.status(404).json({ error: 'VoteRequest document not found' });
+      } else {
+        console.log('Existing data:', voteRequestDoc.data());
+        //update isView after first vote
+        if (voteRequestDoc.data()?.hasAgreed == false && !voteRequestDoc.data()?.acceptedTimestamp) {
+          await voteRequestDoc.ref.update({
+            hasAgreed: true,
+            acceptedTimestamp: Timestamp.fromDate(new Date()),
+          });
+        }
+        // Update the document
+        await voteRequestDoc.ref.update({
+          category: vote,
+          votedTimestamp: Timestamp.fromDate(new Date())
+        });
+        res.status(200).json({ success: true });
+      }
     }
-  
+
+  } catch (error) {
+    console.error('Error updating vote request:', error);
+    res.sendStatus(500);
+  }
+
 })
-  
+
 
 app.get("/checkerData", (req, res) => {
   //TODO TONGYING: To implement
