@@ -7,6 +7,8 @@ import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
 import thresholds from "../common/parameters/thresholds.json"
 import { interimPromptHandler } from "../batchJobs/batchJobs"
+import { sendBlast } from "../common/responseUtils"
+import { Timestamp } from "firebase-admin/firestore"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")
@@ -31,6 +33,10 @@ const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
         return
       case "/interim":
         await interimPromptHandler()
+        return
+      case "/blast":
+        await sendBlast(messageObj.from)
+        return
     }
   }
 }
@@ -86,6 +92,28 @@ const mockDb = async function () {
       },
       { merge: true }
     )
+    /*
+    string type "image or text"
+    string text "text or caption (if image)"
+    string storageUrl "image storage url if applicable"
+    boolean isActive "the one that should be sent"
+    timestamp createdDate "is active"
+    timestamp blastDate ""
+    */
+    await db
+      .collection("blasts")
+      .doc()
+      .set(
+        {
+          type: "text",
+          text: "This is a test blast",
+          storageUrl: null,
+          isActive: true,
+          createdDate: Timestamp.fromDate(new Date()),
+          blastDate: Timestamp.fromDate(new Date()),
+        },
+        { merge: true }
+      )
   }
   functions.logger.log("mocked")
 }

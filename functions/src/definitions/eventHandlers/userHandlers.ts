@@ -24,6 +24,8 @@ import {
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
   sendLanguageSelection,
+  sendBlast,
+  respondToBlastFeedback,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -38,7 +40,6 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
-import { user } from "firebase-functions/v1/auth"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
@@ -217,10 +218,10 @@ const userHandlerWhatsapp = async function (message: Message) {
       const button = message.button
       switch (button.text) {
         case "Get Latest Update":
-          //TODO
+          await sendBlast(from)
           break
         case "Unsubscribe":
-          //TODO
+          await toggleUserSubscription(from, false)
           break
         case "Get Referral Message":
           await sendReferralMessage(from)
@@ -725,10 +726,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
   const from = messageObj.from
   const responses = await getResponsesObj("user", from)
   const [type, ...rest] = buttonId.split("_")
-  let instancePath,
-    selection,
-    instanceRef,
-    updateObj: { scamShieldConsent?: boolean }
+  let instancePath, selection, instanceRef, blastPath
   switch (type) {
     case "scamshieldDecline":
       ;[instancePath] = rest
@@ -762,6 +760,10 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
     case "feedbackRationalisation":
       ;[instancePath, selection] = rest
       await respondToRationalisationFeedback(instancePath, selection)
+      break
+    case "feedbackBlast":
+      ;[blastPath, selection] = rest
+      await respondToBlastFeedback(blastPath, selection, from)
       break
     case "languageSelection":
       ;[selection] = rest
@@ -846,6 +848,14 @@ async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
           )
           response = responses.DISPUTE
           break
+        case "unsubscribeUpdates":
+          await toggleUserSubscription(from, false)
+          response = responses.UNSUBSCRIBE
+          break
+        case "subscribeUpdates":
+          await toggleUserSubscription(from, true)
+          response = responses.SUBSCRIBE
+          break
       }
       break
     case "satisfactionSurvey":
@@ -903,6 +913,12 @@ function checkMenu(text: string) {
   return menuKeywords.includes(text.toLowerCase())
 }
 
+async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
+  db.collection("users").doc(userId).update({
+    isSubscribedUpdates: toSubscribe,
+  })
+}
+
 async function createNewUser(
   userRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   messageTimestamp: Timestamp
@@ -919,6 +935,7 @@ async function createNewUser(
     referralId: referralId,
     referralCount: 0,
     language: "en",
+    isSubscribedUpdates: true,
   })
 }
 
