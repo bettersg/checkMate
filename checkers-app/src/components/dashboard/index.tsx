@@ -1,24 +1,34 @@
 import PendingMessageAlert from "./PendingMsgAlert";
-import StatisticsChart from "../charts/stats_chart";
-import SelectTimePeriod from "./PeriodSelection";
-import statisticsChartsData from "../charts/stats_data";
 
+import { useUser } from "../../UserContext";
+import StatCard from "./StatsCard";
+import { Typography } from "@material-tailwind/react";
+
+//TODO: link to firebase
+const STATS_CAT = [
+  { name: "total votes", img_src: "/votes.png", stat: "100" },
+  { name: "average accuracy rate", img_src: "/accuracy.png", stat: "100%" },
+  { name: "average response time", img_src: "/response.png", stat: "90 s" },
+  { name: "people helped", img_src: "/users_helped.png", stat: "88" }
+];
 
 export default function Dashboard() {
+  const { unassessed, unchecked } = useUser();
+
   return (
     <div className="flex flex-col gap-y-4">
-
-
-      <PendingMessageAlert Type={true} />
-      <PendingMessageAlert Type={false} />
-      <SelectTimePeriod />
-      <div className="my-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-        {statisticsChartsData.map((props) => (
-          <StatisticsChart
-            key={props.title}
-            title={props.title}
-            description={props.description}
-            chart={props.chart}
+    {unassessed > 0 && <PendingMessageAlert Type={true} />}
+    {unchecked > 0 && <PendingMessageAlert Type={false} />}
+      <Typography variant="h4" className="text-primary-color">
+        In the past 30 days
+      </Typography>
+      <div className="my-6 flex flex-col gap-y-4 mx-2">
+        {STATS_CAT.map((props) => (
+          <StatCard
+            key={props.name}
+            name={props.name}
+            img_src={props.img_src}
+            stat={props.stat}
           />
         ))}
       </div>
