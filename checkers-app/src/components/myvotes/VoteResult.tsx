@@ -6,36 +6,61 @@ import { FaceFrownIcon } from "@heroicons/react/24/solid";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
+import { BugAntIcon } from "@heroicons/react/20/solid";
 
 interface PropType {
     category: string | null,
 }
 
 export default function VoteResult(Prop: PropType) {
-    const catIcon = () => {
+    const getIconAndName = () => {
+        let catIcon, catName;
         switch (Prop.category) {
-            case 'Scam':
-                return <XMarkIcon className="h-7 w-7" />;
-            case 'Illicit':
-                return <ShieldExclamationIcon className="h-7 w-7" />;
-            case 'News/Info/Opinion':
-                return <LightBulbIcon className="h-7 w-7" />;
-            case 'Spam':
-                return <FaceFrownIcon className="h-7 w-7" />;
-            case 'Trivial':
-                return <CheckCircleIcon className="h-7 w-7" />;
-            case 'Unsure':
-                return <QuestionMarkCircleIcon className="h-7 w-7" />;
-            case 'Legitimate':
-                 return <HandThumbUpIcon className="h-7 w-7" />;
+            case 'scam':
+                catName = "Scam";
+                catIcon = <XMarkIcon className="h-7 w-7" />;
+                break;
+            case 'illicit':
+                catName = "Illicit";
+                catIcon = <ShieldExclamationIcon className="h-7 w-7" />;
+                break;
+            case 'info':
+                catName = "News/Info/Opinion";
+                catIcon = <LightBulbIcon className="h-7 w-7" />;
+                break;
+            case 'spam':
+                catName = "Spam";
+                catIcon = <FaceFrownIcon className="h-7 w-7" />;
+                break;
+            case 'trivial':
+                catName = "Trivial";
+                catIcon = <CheckCircleIcon className="h-7 w-7" />;
+                break;
+            case 'unsure':
+                catName = "Unsure";
+                catIcon = <QuestionMarkCircleIcon className="h-7 w-7" />;
+                break;
+            case 'legitimate':
+                catName = "Legitimate";
+                catIcon = <HandThumbUpIcon className="h-7 w-7" />;
+                break;
+            case 'satire':
+                catName = "Satire";
+                catIcon = <BugAntIcon className="h-7 w-7" />;
+                break;
             default:
-                return null;
+                catName = "Unknown";
+                catIcon = null;
+                break;
         }
+        return [catIcon, catName];
     };
+    const [catIcon, catName] = getIconAndName();
+
     return (
         <div className="grid grid-flow-row justify-items-center rounded-lg shadow-md p-3 bg-primary-color text-background-color">
-            {catIcon()}
-            <Typography>{Prop.category}</Typography>
+            {catIcon}
+            <Typography>{catName}</Typography>
         </div>
     )
 }
