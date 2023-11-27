@@ -15,17 +15,16 @@ import {
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Message } from "./types";
-import { set } from "firebase/database";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
-  { path: "myvotes", element: <MyVotesPage /> },
-  { path: "achievements", element: <AchievementPage /> },
+  { path: "/checkers/:phoneNo/messages", element: <MyVotesPage /> },
+  { path: "/achievements", element: <AchievementPage /> },
   {
-    path: ":messageId/voting",
+    path: "/checkers/:phoneNo/messages/:msgId/voteRequest",
     element: <VotingPage />,
   },
-  ]);
+]);
 
 const auth = getAuth(app);
 if (import.meta.env.MODE === "dev") {
@@ -40,6 +39,10 @@ function App() {
   const [name, setName] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [phoneNo, setPhoneNo] = useState('');
+  const [unassessed, setUnassessed] = useState(0);
+  const [unchecked, setUnchecked] = useState(0);
+  const [pending, setPending] = useState<Message[]>([]);
+  const [assessed, setAssessed] = useState<Message[]>([]);
 
   useEffect(() => {
     if (
@@ -85,39 +88,53 @@ function App() {
             alert(err);
             console.error("Error fetching custom token:", err);
           });
-
-          
       }
     }
   }, []);
 
-  const testAPI = async () => {
-    try {
-      const user = auth.currentUser;
-      let token;
-      if (user) {
-        token = await user.getIdToken();
-      }
+  useEffect(() => {
+    // Only call the API when userId is available to update messages
+    if (userId && phoneNo) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`/api/checkers/${phoneNo}/messages`, {
+            method: "GET",
+          });
+          console.log("After fetch");
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
 
-      const response = await fetch("/api/helloworld", {
-        method: "GET", // or POST, PUT, etc. depending on your needs
-        headers: {
-          Authorization: `Bearer ${token}`, // Set the ID token here
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
+          const data = await response.json();
+          setMessages(data.messages);
 
-      // Do something with the data
-      alert(JSON.stringify(data));
-    } catch (error) {
-      console.error("Error fetching data from API:", error);
-      alert("Error fetching data");
+          const PENDING: Message[] = data.messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
+          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+
+          setPending(PENDING);
+          setAssessed(ASSESSED);
+
+          //calculate & update context pending unread
+          const pending_unread = pending.filter((msg: Message) => !msg.voteRequests.isView).length;
+          setUnassessed(pending_unread);
+          //calculate & update assessed unread
+          const assessed_unread = assessed.filter((msg: Message) => !msg.voteRequests.isView).length;
+          setUnchecked(assessed_unread);
+
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      };
+      fetchData();
     }
-  };
+  }, [userId, phoneNo, messages, pending, assessed]);
+
 
   return (
-    <UserProvider value={{ userId, name, messages, updateMessages: setMessages, phoneNo: phoneNo }}>
+    <UserProvider value={{
+      userId, name, phoneNo: phoneNo, messages, updateMessages: setMessages, unassessed, updateUnassessed: setUnassessed, unchecked, updateUnchecked: setUnchecked, pending: pending,
+      assessed: assessed, updatePending: setPending, updateAssessed: setAssessed
+    }}>
       <RouterProvider router={router} />
     </UserProvider>
   );

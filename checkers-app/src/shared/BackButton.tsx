@@ -1,8 +1,10 @@
 import { Button } from "@material-tailwind/react";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../UserContext";
 
 export function BackButton() {
+  const { phoneNo } = useUser();
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-4">
@@ -11,7 +13,7 @@ export function BackButton() {
         className="rounded-full absolute left-1 top-0"
         style={{ color: "#ff8932" }}
         onClick={() => {
-          navigate("/myvotes");
+          navigate(`/checkers/${phoneNo}/messages`);
         }}
       >
         <ArrowLeftIcon className="h-5 w-5" />

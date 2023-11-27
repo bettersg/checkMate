@@ -38,7 +38,7 @@ export default function VotingPage(Prop: PropType) {
         :
         <div className="grid grid-flow-row items-center gap-2 pb-2">
           < BackButton />
-          <MessageCard text={msg.text} />
+          <MessageCard text={msg.text} imageUrl={null} caption={msg.caption} />
           <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
           <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} />
         </div >

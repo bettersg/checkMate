@@ -5,14 +5,12 @@ import PageHeader from "./PageHeader";
 import { useUser } from '../UserContext';
 
 interface LayoutProps {
-    name: string,
     pageHeader: string,
     children: ReactNode,
-    user_unassessed: number
 }
 
-export default function Layout({pageHeader, children, user_unassessed }: LayoutProps) {
-    const {name} = useUser();
+export default function Layout({pageHeader, children }: LayoutProps) {
+    const {name, unassessed, unchecked} = useUser();
     
     return (
         <div>
@@ -21,7 +19,7 @@ export default function Layout({pageHeader, children, user_unassessed }: LayoutP
             <div className="pb-16">
                 {children}
             </div>
-            <NavbarDefault unassessed={user_unassessed} />
+            <NavbarDefault unread={unassessed + unchecked} />
         </div>
     )
 }

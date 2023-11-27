@@ -1,5 +1,6 @@
 import { IncomingHttpHeaders } from "http"
-import { Timestamp } from "firebase-admin/firestore"
+// import { Timestamp } from "firebase-admin/firestore"
+import {Timestamp} from "firebase/firestore"
 
 export type WhatsappMessage = {
   from: string
@@ -39,7 +40,7 @@ export type Message = {
 }
 
 export type VoteRequest = {
-  id: string, 
+  id: string; 
   factCheckerDocRef: string;
   category: string | null;
   acceptedTimestamp: Timestamp | null;
@@ -47,6 +48,8 @@ export type VoteRequest = {
   vote: number | null;
   votedTimestamp: Timestamp | null;
   checkTimestamp: Timestamp | null,
+  truthScore: number | null;
+  isView: boolean //checks if checker has clicked in to view results/msg
 }
 
 export type TeleMessage = {
@@ -59,5 +62,5 @@ export type TeleMessage = {
   voteRequests: VoteRequest;
   rationalisation: string;
   truthScore: number | null;
-  isView: boolean //checks if checker has clicked in to view results/msg
+  firstTimestamp: Timestamp | null;
 }

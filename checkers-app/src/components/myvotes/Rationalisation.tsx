@@ -27,7 +27,7 @@ export default function CategoryRationalisation(Props: PropType) {
 
                 </AccordionHeader>
                 <AccordionBody className="pt-2 text-base font-normal">
-                    {Props.rationalisation}
+                    {Props.rationalisation != null ? Props.rationalisation : "Message is still undergoing analysis."}
                 </AccordionBody>
             </Accordion>
         </>

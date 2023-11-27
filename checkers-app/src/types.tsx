@@ -9,6 +9,7 @@ export type VoteRequest = {
   vote: number | null;
   votedTimestamp: Timestamp | null;
   checkTimestamp: Timestamp | null;
+  isView: boolean; //checks if checker has clicked in to view results/msg
 }
 
 export type Message = {
@@ -22,5 +23,5 @@ export type Message = {
   rationalisation: string;
   truthScore: number | null;
   firstTimestamp: Timestamp | null;
-  isView: boolean //checks if checker has clicked in to view results/msg
+  // imageUrl: string | null;
 }
