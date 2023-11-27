@@ -5,6 +5,7 @@ import MessageCard from "../../shared/MessageCard";
 import VoteResult from "../myvotes/VoteResult";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import CategoryRationalisation from "../myvotes/Rationalisation";
+import VotePercentage from "./VotePercentage";
 
 interface PropType {
     id: string,
@@ -12,7 +13,9 @@ interface PropType {
     primaryCategory: string,
     category: string | null,
     handleClose: () => void,
-    rationalisation: string
+    rationalisation: string,
+    imageUrl: string | null,
+    caption: string | null
 }
 
 export default function VoteInfoDialog(Prop: PropType) {
@@ -22,15 +25,17 @@ export default function VoteInfoDialog(Prop: PropType) {
                 <XMarkIcon className="h-6 w-6 text-gray-500 m-1" onClick={Prop.handleClose} />
                 <div className="w-5/6 mx-auto">
                     <div className="flex flex-col gap-3">
-                        <MessageCard text={Prop.text} />
+                        <MessageCard text={Prop.text} imageUrl={Prop.imageUrl} caption={Prop.caption} />
                         <div className='flex w-full gap-x-2'>
                             <div className='flex-1'>
                                 <Typography className='text-primary-color3 text-center' variant='h5'>Your vote</Typography>
                                 <VoteResult category={Prop.category} />
+                                <VotePercentage percentage={40}/>
                             </div>
                             <div className='flex-1'>
                                 <Typography className='text-primary-color3 text-center' variant='h5'>Crowd vote</Typography>
                                 <VoteResult category={Prop.primaryCategory} />
+                                <VotePercentage percentage={60}/>
                             </div>
                         </div>
                         <CategoryRationalisation rationalisation={Prop.rationalisation} />
