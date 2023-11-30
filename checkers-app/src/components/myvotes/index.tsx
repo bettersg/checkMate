@@ -3,6 +3,7 @@ import VoteInstanceButton from "./VoteInstanceButton";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import VoteInfoDialog from "./VoteInfo";
+import InformationButton from "./InformationButton";
 import { useUser } from '../../UserContext';
 import {
   Accordion,
@@ -106,8 +107,13 @@ export default function MyVotes() {
         <LoadingPage />
       ) : (
         <>
-          <Accordion open={openPending} icon={<Icon open={openPending} />}>
-            <AccordionHeader onClick={handlePending} className={`transition-colors ${openPending ? "text-secondary-color2" : ""} justify-between`}>
+          <InformationButton />
+          <Accordion open={openPending} icon={<Icon open={openPending} />}
+            className="mb-2 rounded-lg border border-secondary-color2 px-4">
+            <AccordionHeader onClick={handlePending}
+              className={`text-secondary-color2 ${openPending == false ? "border-b-0" : "border-secondary-color2"}`}
+            // className={`transition-colors ${openPending ? "text-secondary-color2" : ""} justify-between`}
+            >
               <div className="flex items-center gap-2">
                 Pending
                 {unassessed != 0 && <Chip value={`${unassessed} unread`} size="sm" className="rounded-full bg-primary-color" />}
@@ -150,8 +156,11 @@ export default function MyVotes() {
                 )}
             </AccordionBody>
           </Accordion>
-          <Accordion open={openAssessed} icon={<Icon open={openAssessed} />}>
-            <AccordionHeader onClick={handleAssessed} className={`transition-colors ${openAssessed ? "text-primary-color2" : ""} justify-between`}>
+          <Accordion open={openAssessed} icon={<Icon open={openAssessed} />}
+            className="mb-2 rounded-lg border border-primary-color2 px-4">
+            <AccordionHeader onClick={handleAssessed}
+              // className={`transition-colors ${openAssessed ? "text-primary-color2" : ""} justify-between`}
+              className={`text-primary-color2 ${openAssessed == false ? "border-b-0" : "border-primary-color2"}`}>
               <div className="flex items-center gap-2">
                 Assessed
                 {unchecked != 0 && <Chip value={`${unchecked} unread`} size="sm" className="rounded-full bg-primary-color" />}
@@ -212,8 +221,9 @@ export default function MyVotes() {
           />
           }
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 

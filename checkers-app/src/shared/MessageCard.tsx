@@ -19,7 +19,7 @@ export default function MessageCard(prop: PropType) {
 
   return (
     <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
-      <Typography variant="h5" className="text-primary-color3 my-2 mx-2">Message</Typography>
+      {/* <Typography variant="h5" className="text-primary-color3 my-2 mx-2">Message</Typography> */}
       
         {prop.imageUrl != null && 
         <img

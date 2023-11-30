@@ -25,6 +25,7 @@ export default function VoteInfoDialog(Prop: PropType) {
                 <XMarkIcon className="h-6 w-6 text-gray-500 m-1" onClick={Prop.handleClose} />
                 <div className="w-5/6 mx-auto">
                     <div className="flex flex-col gap-3">
+                        <Typography variant="h5" className="text-primary-color3">Message</Typography>
                         <MessageCard text={Prop.text} imageUrl={Prop.imageUrl} caption={Prop.caption} />
                         <div className='flex w-full gap-x-2'>
                             <div className='flex-1'>
