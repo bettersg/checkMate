@@ -317,6 +317,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
           truthScore: updatedVoteRequestData?.truthScore || null,
           isView: (data?.isAssessed && updatedVoteRequestData?.checkTimestamp && updatedVoteRequestData.category) || (!data?.isAssessed && updatedVoteRequestData?.acceptedTimestamp && updatedVoteRequestData.hasAgreed) ? true : false,
         };
+        console.log('Updated data:', voteReq);
         res.status(200).json({ success: true, voteRequest: voteReq });
       }
     }

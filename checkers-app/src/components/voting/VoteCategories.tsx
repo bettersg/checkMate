@@ -11,12 +11,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
 import { useUser } from '../../UserContext';
+import { Message } from "../../types";
 
 import InfoOptions from "./Tier2";
 
 interface PropType {
   msgId: string | undefined;
   voteCategory: string | null;
+  truthScore: number | null;
 }
 
 const CATEGORIES = [
@@ -33,18 +35,25 @@ export default function VoteCategories(Prop: PropType) {
   const navigate = useNavigate();
   const initialVote = Prop.voteCategory != null ? Prop.voteCategory : null;
   const [vote, setVote] = useState<string | null>(initialVote);
-  const { phoneNo, messages, updateMessages } = useUser();
-  const [truthScoreOptions, showTruthScoreOptions] = useState<boolean>(false);
-  const [truthScore, setTruthScore] = useState<number | null>(null);
+  //take global values from user context
+  const { phoneNo, messages, updateMessages, updatePending, updateUnassessed, updateAssessed, updateUnchecked } = useUser();
+
+  const initialTruthScore = Prop.truthScore != null ? Prop.truthScore : null;
+  const [truthScore, setTruthScore] = useState<number | null>(initialTruthScore);
+
+  const initialSatireState = Prop.voteCategory == "info" && Prop.truthScore != null ? false : null;
+  const [satireState, setSatireState] = useState<boolean | null>(initialSatireState);
 
   const handleSatireChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value === "yes") {
-      showTruthScoreOptions(false);
+
+      setTruthScore(null);
       setVote("satire");
     }
     else {
       setVote("info");
-      showTruthScoreOptions(true);
+      setSatireState(false);
+
     }
   }
 
@@ -57,7 +66,7 @@ export default function VoteCategories(Prop: PropType) {
   };
 
   //function to update vote request in firebase
-  const handleNext = (vote: string, msgId: string | undefined, truthScore: number | null) => {
+  const handleSubmitVote = (vote: string, msgId: string | undefined, truthScore: number | null) => {
     if (phoneNo && msgId) {
       const fetchData = async () => {
         try {
@@ -72,17 +81,25 @@ export default function VoteCategories(Prop: PropType) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           const data = await response.json();
-          const updatedVoteRequests = data.voteRequest;
+          const latestVoteReq = data.voteRequest;
 
           // Update the specifc voteRequest in messages array
-          const updatedMessages = messages.map(message => {
+          const latestMessages = messages.map(message => {
             if (message.id === msgId) {
-              return { ...message, voteRequests: updatedVoteRequests };
+              return { ...message, voteRequests: latestVoteReq };
             }
             return message;
           });
-          // console.log("UPDATED: ", updateMessages);
-          updateMessages(updatedMessages);
+          console.log("UPDATED: ", latestMessages);
+          updateMessages(latestMessages);
+          const PENDING: Message[] = latestMessages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
+          updatePending(PENDING);
+          const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
+          updateUnassessed(pending_unread);
+          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+          updateAssessed(ASSESSED);
+          const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
+          updateUnchecked(assessed_unread);
 
         } catch (error) {
           console.error("Error fetching votes:", error);
@@ -112,7 +129,7 @@ export default function VoteCategories(Prop: PropType) {
 
       {vote ? (
         <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
-          {vote == "info" ? <InfoOptions truthScoreOptions={truthScoreOptions} selectedTruthScore={truthScore} handleSatireChange={handleSatireChange} handleTruthScoreChange={handleTruthScoreChange} /> : null}
+          {vote == "info" ? <InfoOptions isSatire={satireState} selectedTruthScore={truthScore} handleSatireChange={handleSatireChange} handleTruthScoreChange={handleTruthScoreChange} /> : null}
           {vote == "satire" ?
             <Button
               className={`flex flex-row items-center justify-start gap-2 max-w-md w-full space-x-3 text-sm
@@ -124,7 +141,7 @@ export default function VoteCategories(Prop: PropType) {
             </Button> : null}
           <Button
             className="bg-highlight-color w-fit place-self-center"
-            onClick={() => handleNext(vote, Prop.msgId, truthScore)}
+            onClick={() => handleSubmitVote(vote, Prop.msgId, truthScore)}
           >
             Done!
           </Button>

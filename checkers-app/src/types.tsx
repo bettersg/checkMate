@@ -10,6 +10,7 @@ export type VoteRequest = {
   votedTimestamp: Timestamp | null;
   checkTimestamp: Timestamp | null;
   isView: boolean; //checks if checker has clicked in to view results/msg
+  truthScore: number | null;
 }
 
 export type Message = {

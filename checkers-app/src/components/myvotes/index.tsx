@@ -1,6 +1,6 @@
 import LoadingPage from "./LoadingPage";
 import VoteInstanceButton from "./VoteInstanceButton";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import VoteInfoDialog from "./VoteInfo";
 import { useUser } from '../../UserContext';
@@ -34,10 +34,10 @@ function Icon({ open }: IconProps) {
 export default function MyVotes() {
   const navigate = useNavigate();
 
-  const { userId, phoneNo, messages, updateMessages, updateUnassessed, updateUnchecked, pending, assessed, updateAssessed, updatePending, unassessed, unchecked } = useUser();
+  const { phoneNo, messages, updateMessages, updateUnchecked, pending, assessed, updateAssessed, unassessed, unchecked } = useUser();
 
   //set loading page before data is received from firebase
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   //message to be displayed when button is clicked
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -66,18 +66,22 @@ export default function MyVotes() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        const updatedVoteRequests = data.voteRequest;
+        const latestVoteReq = data.voteRequest;
 
         // Update the specifc voteRequest in messages array
-        const updatedMessages = messages.map(message => {
+        const latestMessages = messages.map(message => {
           if (message.id === msg.id) {
-            return { ...message, voteRequests: updatedVoteRequests };
+            return { ...message, voteRequests: latestVoteReq };
           }
           return message;
         });
         console.log("UPDATED: ", updateMessages);
-        updateMessages(updatedMessages);
+        updateMessages(latestMessages);
 
+        const ASSESSED: Message[] = latestMessages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+        updateAssessed(ASSESSED);
+        const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
+        updateUnchecked(assessed_unread);
 
       } catch (error) {
         console.error("Error fetching vote result:", error);
@@ -89,68 +93,11 @@ export default function MyVotes() {
   const handlePending = () => setPending(!openPending);
   const handleAssessed = () => setAssessed(!openAssessed);
 
-  // Memoize the messages array
-  const memoizedMessages = useMemo(() => messages, [messages]);
-
-  // Memoize the filtered pending messages
-  const memoizedPending = useMemo(() => {
-    return messages.filter((msg) => !msg.isAssessed || msg.voteRequests.category == null);
-  }, [messages]);
-
-  // Memoize the filtered assessed messages
-  const memoizedAssessed = useMemo(() => {
-    return messages.filter((msg) => msg.isAssessed && msg.voteRequests.category != null);
-  }, [messages]);
-
   useEffect(() => {
-    //only calls api after authentication is done
-    console.log(`Fetching votes for ${phoneNo}`);
     if (phoneNo) {
-      const fetchData = async () => {
-        try {
-          const response = await fetch(`/api/checkers/${phoneNo}/messages`, {
-            method: "GET",
-          });
-          console.log("After fetch");
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          // Check if the messages array has changed
-          if (!arraysEqual(memoizedMessages, data.messages)) {
-            // Update messages in the context
-            updateMessages(data.messages);
-          }
-          updateMessages(data.messages);
-
-          const PENDING: Message[] = data.messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
-          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
-
-          updatePending(PENDING);
-          updateAssessed(ASSESSED);
-
-          const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
-          updateUnassessed(pending_unread);
-          //calculate assessed unread
-          const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
-          updateUnchecked(assessed_unread);
-
-          setLoading(false);
-        } catch (error) {
-          console.error("Error fetching votes:", error);
-        }
-      };
-      fetchData();
+      setLoading(false);
     }
-  }, [phoneNo, updateMessages, messages, updatePending, updateAssessed, updateUnchecked, updateUnassessed, memoizedMessages]);
-
-
-  // const PENDING: Message[] = messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
-  // const ASSESSED: Message[] = messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
-  //calculate pending unread
-
-
+  }, [phoneNo, messages]);
 
   return (
     <div>
@@ -167,24 +114,24 @@ export default function MyVotes() {
               </div>
             </AccordionHeader>
             <AccordionBody>
-              {memoizedPending.length === 0 && <div className="text-primary-color">You have no pending messages</div>}
-              {memoizedPending.length !== 0 && memoizedPending
-                .sort((a, b) => {
-                  // Sort by null category first (havent vote)
-                  if (a.voteRequests.category === null && b.voteRequests.category !== null) {
-                    return -1;
-                  }
-                  if (a.voteRequests.category !== null && b.voteRequests.category === null) {
-                    return 1;
-                  }
-                  // If categories are the same or both are null, sort by firstTimestamp
-                  console.log("a.firstTimestamp:", a.firstTimestamp);
-                  console.log("b.firstTimestamp:", b.firstTimestamp);
-                  return (
-                    (a.firstTimestamp ? a.firstTimestamp.toDate()?.getTime() : 0) -
-                    (b.firstTimestamp ? b.firstTimestamp.toDate()?.getTime() : 0)
-                  );
-                })
+              {pending.length === 0 && <div className="text-primary-color">You have no pending messages</div>}
+              {pending.length !== 0 && pending
+                // .sort((a, b) => {
+                //   // Sort by null category first (havent vote)
+                //   if (a.voteRequests.category === null && b.voteRequests.category !== null) {
+                //     return -1;
+                //   }
+                //   if (a.voteRequests.category !== null && b.voteRequests.category === null) {
+                //     return 1;
+                //   }
+                //   // If categories are the same or both are null, sort by firstTimestamp
+                //   console.log("a.firstTimestamp:", a.firstTimestamp);
+                //   console.log("b.firstTimestamp:", b.firstTimestamp);
+                //   return (
+                //     (a.firstTimestamp ? a.firstTimestamp.toDate()?.getTime() : 0) -
+                //     (b.firstTimestamp ? b.firstTimestamp.toDate()?.getTime() : 0)
+                //   );
+                // })
                 .map((msg) => (
                   <div>
                     <VoteInstanceButton
@@ -211,8 +158,8 @@ export default function MyVotes() {
               </div>
             </AccordionHeader>
             <AccordionBody>
-              {memoizedAssessed.length === 0 && <div>You have no messages</div>}
-              {memoizedAssessed.length !== 0 && memoizedAssessed
+              {assessed.length === 0 && <div>You have no messages</div>}
+              {assessed.length !== 0 && assessed
                 // .sort((a, b) => {
                 //   // Sort by checktimestamp first (havent see crowd vote)
                 //   if (a.voteRequests.checkTimestamp === null && b.voteRequests.checkTimestamp !== null) {
@@ -270,8 +217,3 @@ export default function MyVotes() {
   );
 }
 
-
-// Helper function to check if two arrays are equal
-function arraysEqual(a: Message[], b: Message[]): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}

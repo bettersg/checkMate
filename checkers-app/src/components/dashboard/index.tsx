@@ -8,7 +8,7 @@ import { Typography } from "@material-tailwind/react";
 const STATS_CAT = [
   { name: "total votes", img_src: "/votes.png", stat: "100" },
   { name: "average accuracy rate", img_src: "/accuracy.png", stat: "100%" },
-  { name: "average response time", img_src: "/response.png", stat: "90 s" },
+  { name: "average response time", img_src: "/response.png", stat: "90s" },
   { name: "people helped", img_src: "/users_helped.png", stat: "88" }
 ];
 

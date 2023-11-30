@@ -115,10 +115,10 @@ function App() {
           setAssessed(ASSESSED);
 
           //calculate & update context pending unread
-          const pending_unread = pending.filter((msg: Message) => !msg.voteRequests.isView).length;
+          const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
           setUnassessed(pending_unread);
           //calculate & update assessed unread
-          const assessed_unread = assessed.filter((msg: Message) => !msg.voteRequests.isView).length;
+          const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
           setUnchecked(assessed_unread);
 
         } catch (error) {
@@ -127,7 +127,7 @@ function App() {
       };
       fetchData();
     }
-  }, [userId, phoneNo, messages, pending, assessed]);
+  }, [phoneNo]);
 
 
   return (

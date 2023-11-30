@@ -29,8 +29,6 @@ export default function VotingPage(Prop: PropType) {
     }
   }, [phoneNo, msg, Prop.msgId, messages]);
 
-
-
   return (
     <>
       {!msg
@@ -40,7 +38,7 @@ export default function VotingPage(Prop: PropType) {
           < BackButton />
           <MessageCard text={msg.text} imageUrl={null} caption={msg.caption} />
           <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
-          <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} />
+          <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} truthScore={msg.voteRequests.truthScore}/>
         </div >
       }
     </>

@@ -6,8 +6,8 @@ interface TruthScoreOptionsProps {
 }
 
 interface InfoOptionsProps {
-  truthScoreOptions: boolean;
   selectedTruthScore: number | null;
+  isSatire: boolean | null;
   handleSatireChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleTruthScoreChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -49,6 +49,7 @@ function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
 
 //display tier 2 voting (satire/truthscore) on "info" cat selection
 export default function InfoOptions(Prop: InfoOptionsProps) {
+  
   return (
     <div>
       <Typography className="text-primary-color3">
@@ -79,10 +80,11 @@ export default function InfoOptions(Prop: InfoOptionsProps) {
           }
           value="no"
           onChange={Prop.handleSatireChange}
+          checked={Prop.isSatire === false}
           crossOrigin="anonymous"
         />
       </div>
-      {Prop.truthScoreOptions &&
+      {Prop.isSatire === false &&
         <>
           <Typography className="text-primary-color3 text-justify my-3">
             Please assess the veracity of the claim(s) in the message on a scale
