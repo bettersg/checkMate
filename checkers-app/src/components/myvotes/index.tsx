@@ -35,7 +35,7 @@ function Icon({ open }: IconProps) {
 export default function MyVotes() {
   const navigate = useNavigate();
 
-  const { phoneNo, messages, updateMessages, updateUnchecked, pending, assessed, updateAssessed, unassessed, unchecked } = useUser();
+  const { phoneNo, messages, updateMessages, updateUnchecked, pending, assessed, updateAssessed, unassessed, unchecked, updatePending, updateUnassessed } = useUser();
 
   //set loading page before data is received from firebase
   const [loading, setLoading] = useState<boolean>(true);
@@ -79,6 +79,11 @@ export default function MyVotes() {
         console.log("UPDATED: ", updateMessages);
         updateMessages(latestMessages);
 
+        const PENDING: Message[] = latestMessages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
+        updatePending(PENDING);
+        const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
+        updateUnassessed(pending_unread);
+
         const ASSESSED: Message[] = latestMessages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
         updateAssessed(ASSESSED);
         const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
@@ -95,7 +100,7 @@ export default function MyVotes() {
   const handleAssessed = () => setAssessed(!openAssessed);
 
   useEffect(() => {
-    if (phoneNo) {
+    if (phoneNo && messages) {
       setLoading(false);
     }
   }, [phoneNo, messages]);

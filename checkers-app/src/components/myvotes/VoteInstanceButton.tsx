@@ -16,7 +16,7 @@ interface PropType {
 
 export default function VoteInstanceButton(Prop: PropType) {
 
-  const color = (!Prop.isAssessed)
+  const color = (Prop.category === null || !Prop.isAssessed)
     ? "bg-pending-color"
     : Prop.isMatch
       ? "bg-success-color"
