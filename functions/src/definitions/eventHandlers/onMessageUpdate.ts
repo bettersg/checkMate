@@ -60,7 +60,8 @@ const onMessageUpdate = functions
     }
     if (
       before.data().primaryCategory !== primaryCategory &&
-      primaryCategory === "legitimate"
+      primaryCategory === "legitimate" &&
+      text
     ) {
       const anonymisedText = await anonymiseMessage(text, false)
       await after.ref.update({
