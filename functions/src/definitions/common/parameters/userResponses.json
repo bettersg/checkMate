@@ -153,23 +153,23 @@
   },
   "UNSUBSCRIBE": {
     "en": "Sorry to see you go.😞 If you change your mind, you can always come back to the menu to subscribe again!",
-    "cn": "很遗憾看到您离开。😞 如果您改变主意，您可以随时回到菜单重新订阅！"
+    "cn": "我们很遗憾您选择离开。😞 如果您改变主意，您可以随时回到菜单重新订阅！"
   },
   "SUBSCRIBE": {
     "en": "Thanks for subscribing!🙏🏻 CheckMate will now send you content occasionally. Hope you find it useful!",
-    "cn": "感谢您的订阅！查友将偶尔向您发送内容。希望您觉得它有用！"
+    "cn": "感谢您的订阅！🙏🏻 查友将偶尔向您发送内容。希望它对您有帮助！"
   },
   "REFERRAL": {
     "en": "Have you started checking and reporting suspicious messages using CheckMate yet? Sign up by clicking this link and sending in the pre-loaded message!! {{link}}",
     "cn": "您是否已经开始使用查友？点击此链接进行注册！{{link}}"
   },
   "REFERRAL_PREPOPULATED_PREFIX": {
-    "en": "Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral.\n\n欢迎使用查友！请发送这条短信以开始使用。\n\nCode:",
-    "cn": "Welcome to CheckMate! Send in this message to get started, and credit your friend with your referral.\n\n欢迎使用查友！请发送这条短信以开始使用。\n\nCode:"
+    "en": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉",
+    "cn": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉"
   },
   "GENERIC_PREPOPULATED_PREFIX": {
-    "en": "Welcome to CheckMate! Send in this message to get started.\n\n欢迎使用查友！请发送这条短信以开始使用。\n\nCode:",
-    "cn": "Welcome to CheckMate! Send in this message to get started.\n\n欢迎使用查友！请发送这条短信以开始使用。\n\nCode:"
+    "en": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉",
+    "cn": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉"
   },
   "REFERRAL_INVALID": {
     "en": "Sorry, referrals are only credited upon your first interaction with CheckMate.",
