@@ -4,11 +4,13 @@ import USER_BOT_RESPONSES from "./parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "./parameters/checkerResponses.json"
 import {
   sendWhatsappButtonMessage,
+  sendWhatsappImageMessage,
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getThresholds, sleep } from "./utils"
+import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getCount } from "./counters"
 
@@ -92,7 +94,7 @@ async function respondToRationalisationFeedback(
   let response
   switch (isUseful) {
     case "yes":
-      response = responses?.RATIONALISATION_USEFUL
+      response = responses?.FEEDBACK_THANKS
       await instanceRef.update({ isRationalisationUseful: true })
       break
     default:
@@ -104,6 +106,19 @@ async function respondToRationalisationFeedback(
   await sendWhatsappTextMessage("user", from, response)
 }
 
+async function respondToBlastFeedback(
+  blastPath: string,
+  feedbackCategory: string,
+  from: string
+) {
+  const blastFeedbackRef = db.doc(blastPath).collection("recipients").doc(from)
+  const responses = await getResponsesObj("user", from)
+  blastFeedbackRef.update({
+    feebackCategory: feedbackCategory,
+  })
+  await sendWhatsappTextMessage("user", from, responses.FEEDBACK_THANKS)
+}
+
 async function sendMenuMessage(
   to: string,
   prefixName: string,
@@ -111,6 +126,8 @@ async function sendMenuMessage(
   replyMessageId: string | null = null,
   disputedInstancePath: string | null = null
 ) {
+  const userSnap = await db.collection("users").doc(to).get()
+  const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
   const responses = await getResponsesObj("user", to)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
@@ -161,6 +178,17 @@ async function sendMenuMessage(
           id: `${type}_contact`,
           title: responses.MENU_TITLE_CONTACT,
           description: responses.MENU_DESCRIPTION_CONTACT,
+        },
+        {
+          id: isSubscribedUpdates
+            ? `${type}_unsubscribeUpdates`
+            : `${type}_subscribeUpdates`,
+          title: isSubscribedUpdates
+            ? responses.MENU_TITLE_UNSUB
+            : responses.MENU_TITLE_SUB,
+          description: isSubscribedUpdates
+            ? responses.MENU_DESCRIPTION_UNSUB
+            : responses.MENU_DESCRIPTION_SUB,
         },
 
         //TODO: Implement these next time
@@ -845,6 +873,96 @@ async function sendLanguageSelection(user: string, newUser: boolean) {
   await sendWhatsappButtonMessage("user", user, response, buttons)
 }
 
+async function sendBlast(user: string) {
+  const blastQuerySnap = await db
+    .collection("blasts")
+    .where("isActive", "==", true)
+    .orderBy("createdDate", "desc") // Order by createdDate in descending order
+    .limit(1) // Limit to 1 document
+    .get()
+  const responses = await getResponsesObj("user", user)
+  if (blastQuerySnap.empty) {
+    functions.logger.warn(
+      `No active blast found when attempting to send blast to user ${user}`
+    )
+    await sendTextMessage("user", user, responses.GENERIC_ERROR)
+    return
+  }
+  const blastSnap = blastQuerySnap.docs[0]
+  const blastData = blastSnap.data()
+  switch (blastData.type) {
+    case "image":
+      if (!blastData.storageUrl) {
+        functions.logger.error(
+          `No image url found for blast ${blastSnap.ref.path}`
+        )
+        await sendTextMessage("user", user, responses.GENERIC_ERROR)
+        return
+      } else {
+        //send image to user
+        const signedUrl = await getSignedUrl(blastData.storageUrl)
+        await sendWhatsappImageMessage(
+          "user",
+          user,
+          null,
+          signedUrl,
+          blastData.text ?? null,
+          null
+        )
+      }
+      break
+    case "text":
+      if (!blastData.text) {
+        functions.logger.error(`No text found for blast ${blastSnap.ref.path}`)
+        await sendTextMessage("user", user, responses.GENERIC_ERROR)
+        return
+      } else {
+        //send text to user
+        await sendTextMessage("user", user, blastData.text)
+      }
+      break
+  }
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackBlast_${blastSnap.ref.path}_negative`,
+        title: responses.BUTTON_BOO,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackBlast_${blastSnap.ref.path}_neutral`,
+        title: responses.BUTTON_MEH,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackBlast_${blastSnap.ref.path}_positive`,
+        title: responses.BUTTON_SHIOK,
+      },
+    },
+  ]
+  await blastSnap.ref
+    .collection("recipients")
+    .doc(user)
+    .set(
+      {
+        feebackCategory: null,
+        sentTimestamp: Timestamp.fromDate(new Date()),
+      },
+      { merge: true }
+    )
+  await sendWhatsappButtonMessage(
+    "user",
+    user,
+    responses.BLAST_FEEDBACK,
+    buttons
+  )
+}
+
 export {
   getResponsesObj,
   respondToInstance,
@@ -857,4 +975,6 @@ export {
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
   sendLanguageSelection,
+  sendBlast,
+  respondToBlastFeedback,
 }

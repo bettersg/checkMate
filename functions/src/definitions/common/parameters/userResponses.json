@@ -88,7 +88,7 @@
     "cn": "目前，{%voted}}%的查哥查妹已经对这条短信进行投票评估。但是，他们无法达成一致，或缺乏足够的信息进行评估。\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。"
   },
   "INTERIM_PROMPT": {
-    "en": "Thanks for waiting! We are currently still pending the assessment from some of our network of trusted CheckMate volunteers and will only be able to provide a credible final result once enough votes have come in. \n\nYou may press the button below *to get an interim update of the preliminary result*. However, do note that there may be discrepancies between the preliminary and the final result, and *the preliminary result should be interpreted with caution*. We appreciate your patience and hope to deliver the final result to you soon! 💪🏼",
+    "en": "Thanks for waiting! Our network of trusted CheckMate volunteers is still assessing your message.\n\nYou may press the button below to see how our volunteers have rated your message so far. However, *do interpret this preliminary rating with caution* as the final result may differ. \n\nWe appreciate your patience and hope to deliver the final result soon!",
     "cn": "感谢您的耐心等待！查哥查妹正在对您提交的短信进行投票评估。我们将在足够多的查哥查妹投票后，为您提供最终结果。\n\n在最终结果发布之前，您可以点击“获取初步结果”。请注意，初步结果和最终结果可能存在差异，应谨慎解读初步结果。我们感谢您的耐心，并会尽快提供最终结果！💪🏼"
   },
   "ALREADY_REPLIED": {
@@ -151,6 +151,14 @@
     "en": "Here's our contact! Do add us to your contact list so you can find us in future. 😊",
     "cn": "这是我们的联系方式！请将我们添加到您的联系人列表中，以便您以后能找到我们。😊"
   },
+  "UNSUBSCRIBE": {
+    "en": "Sorry to see you go.😞 If you change your mind, you can always come back to the menu to subscribe again!",
+    "cn": "很遗憾看到您离开。😞 如果您改变主意，您可以随时回到菜单重新订阅！"
+  },
+  "SUBSCRIBE": {
+    "en": "Thanks for subscribing!🙏🏻 CheckMate will now send you content occasionally. Hope you find it useful!",
+    "cn": "感谢您的订阅！查友将偶尔向您发送内容。希望您觉得它有用！"
+  },
   "REFERRAL": {
     "en": "Have you started checking and reporting suspicious messages using CheckMate yet? Sign up by clicking this link and sending in the pre-loaded message!! {{link}}",
     "cn": "您是否已经开始使用查友？点击此链接进行注册！{{link}}"
@@ -183,13 +191,17 @@
     "en": "*This is an experimental feature powered by generative AI*. Do let us know if it was useful below!\n \n{{rationalisation}}",
     "cn": "这是一项由AI技术提供的实验性功能。请在下方告诉我们它是否对您有所帮助！\n\n{{rationalisation}}"
   },
-  "RATIONALISATION_USEFUL": {
+  "FEEDBACK_THANKS": {
     "en": "Thanks for your valuable feedback!",
     "cn": "感谢您的反馈！"
   },
   "RATIONALISATION_NOT_USEFUL": {
     "en": "Sorry to hear that, but thanks anyway for your valuable feedback!",
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
+  },
+  "BLAST_FEEDBACK": {
+    "en": "Did you find this content useful?\n\nIf you wish to unsubscribe, type \"menu\" and select the \"Unsubscribe\" option",
+    "cn": "是否认为这份内容对您有帮助？\n\n如果您希望取消订阅，请输入“菜单”并选择“取消订阅”选项。"
   },
   "MENU_BUTTON": {
     "en": "Menu",
@@ -259,6 +271,22 @@
     "en": "Select Language / 选择语言",
     "cn": "Select Language / 选择语言"
   },
+  "MENU_TITLE_UNSUB": {
+    "en": "Unsubscribe",
+    "cn": "取消订阅"
+  },
+  "MENU_DESCRIPTION_UNSUB": {
+    "en": "Unsubscribe from receiving content from CheckMate",
+    "cn": "取消订阅查友不时内容"
+  },
+  "MENU_TITLE_SUB": {
+    "en": "Subscribe",
+    "cn": "订阅"
+  },
+  "MENU_DESCRIPTION_SUB": {
+    "en": "Subscribe to occasional content from CheckMate",
+    "cn": "订阅查友不时内容"
+  },
   "MENU_DESCRIPTION_NPS_LIKELY": {
     "en": "Extremely likely 🤩",
     "cn": "一定会🤩"
@@ -306,6 +334,18 @@
   "BUTTON_RATIONALISATION": {
     "en": "How'd we tell?",
     "cn": "我们是如何判断的？"
+  },
+  "BUTTON_SHIOK": {
+    "en": "😍",
+    "cn": "😍"
+  },
+  "BUTTON_MEH": {
+    "en": "😐",
+    "cn": "😐"
+  },
+  "BUTTON_BOO": {
+    "en": "😞",
+    "cn": "😞"
   },
   "PLACEHOLDER_SCAM": {
     "en": "a scam🚫",

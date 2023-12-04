@@ -115,7 +115,24 @@ erDiagram
         number referralCount
         map utm "map containing utm parameters, source, medium, content, campaign, term"
         string language "en or cn, users preferred language"
+        boolean isSubscribedUpdates "whether to blast msgs to this user"
     	}
+
+      blasts {
+        string type "image or text"
+        string text "text or caption (if image)"
+        string storageUrl "image storage url if applicable"
+        boolean isActive "the one that should be sent"
+        timestamp createdDate "is active"
+        timestamp blastDate ""
+        collection recipients
+      }
+
+      recipients {
+        string id PK "phone number"
+        string feebackCategory "positive, negative or neutral"
+        timestamp sentTimestamp "when blast was sent to user"
+      }
 
     message ||--|{ instance: has
     user ||--|{ instance: sends
