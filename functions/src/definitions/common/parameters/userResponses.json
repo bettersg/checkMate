@@ -167,10 +167,6 @@
     "en": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉",
     "cn": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉"
   },
-  "GENERIC_PREPOPULATED_PREFIX": {
-    "en": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉",
-    "cn": "Referral Code/推荐码: {{code}}\n\n按发送按钮/Click the send button to get started!👉"
-  },
   "REFERRAL_INVALID": {
     "en": "Sorry, referrals are only credited upon your first interaction with CheckMate.",
     "cn": "对不起，推荐人代码仅在您首次与查友互动时才有效。"

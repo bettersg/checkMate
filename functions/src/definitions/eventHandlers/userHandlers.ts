@@ -92,12 +92,12 @@ const userHandlerWhatsapp = async function (message: Message) {
       const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
         textNormalised.startsWith(
-          responses?.GENERIC_PREPOPULATED_PREFIX.split(
+          responses?.REFERRAL_PREPOPULATED_PREFIX.split(
             "{{code}}"
           )[0].toLowerCase()
         ) &&
         textNormalised.endsWith(
-          responses?.GENERIC_PREPOPULATED_PREFIX.split("{{code}}")
+          responses?.REFERRAL_PREPOPULATED_PREFIX.split("{{code}}")
             .slice(-1)[0]
             .toLowerCase()
         )
