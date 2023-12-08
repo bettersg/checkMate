@@ -124,7 +124,8 @@ async function sendMenuMessage(
   prefixName: string,
   platform = "whatsapp",
   replyMessageId: string | null = null,
-  disputedInstancePath: string | null = null
+  disputedInstancePath: string | null = null,
+  isTruncated: boolean = false
 ) {
   const userSnap = await db.collection("users").doc(to).get()
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
@@ -215,9 +216,14 @@ async function sendMenuMessage(
           description: responses.MENU_DESCRIPTION_DISPUTE,
         })
       }
+      //filter truncated rows such that only those containing check, referral, and contact in the id are kept
+      const keep = ["check", "referral", "contact"]
+      const truncatedRows = rows.filter((row) =>
+        keep.some((id) => row.id.includes(id))
+      )
       const sections = [
         {
-          rows: rows,
+          rows: isTruncated ? truncatedRows : rows,
         },
       ]
       await sendWhatsappTextListMessage(
@@ -478,7 +484,7 @@ async function updateLanguageAndSendMenu(from: string, language: string) {
   await userRef.update({
     language: language,
   })
-  await sendMenuMessage(from, "MENU_PREFIX")
+  await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
 }
 
 async function sendInterimUpdate(instancePath: string) {
