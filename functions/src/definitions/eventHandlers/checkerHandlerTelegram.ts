@@ -2,7 +2,7 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
-import TelegramBot, { Update, InlineKeyboardMarkup, ForceReply, Message } from "node-telegram-bot-api"
+import TelegramBot, { Update} from "node-telegram-bot-api"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)

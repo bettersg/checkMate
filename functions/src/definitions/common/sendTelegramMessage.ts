@@ -1,6 +1,7 @@
 import axios from "axios"
 import * as functions from "firebase-functions"
 import FormData from "form-data"
+import { Update, InlineKeyboardMarkup, ForceReply, Message } from "node-telegram-bot-api"
 
 const telegramHost =
   process.env["TEST_SERVER_URL"] || "https://api.telegram.org" //only exists in integration test environment
@@ -9,10 +10,11 @@ const sendTelegramTextMessage = async function (
   bot: string,
   to: string,
   text: string,
-  replyId: string | null = null
+  replyId: string | null = null,
+  reply_markup: InlineKeyboardMarkup | null = null
 ) {
   let token
-  let data: { chat_id: string; text: string; reply_to_message_id?: string }
+  let data: { chat_id: string; text: string; reply_to_message_id?: string, reply_markup?: InlineKeyboardMarkup }
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else if (bot === "report") {
@@ -26,6 +28,9 @@ const sendTelegramTextMessage = async function (
   }
   if (replyId) {
     data.reply_to_message_id = replyId
+  }
+  if (reply_markup){
+    data.reply_markup = reply_markup
   }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET

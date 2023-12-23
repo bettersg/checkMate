@@ -10,6 +10,7 @@ import {
 } from "../common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
 import { Timestamp } from "firebase-admin/firestore"
+import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 
 interface MessageUpdate {
   [x: string]: any
@@ -158,6 +159,8 @@ function sendTemplateMessageAndCreateVoteRequest(
   factCheckerDocSnap: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
+  const factCheckerId = factCheckerDocSnap.id;
+  const msgId = messageRef.id;
   const factChecker = factCheckerDocSnap.data()
   if (factChecker?.preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
@@ -191,7 +194,38 @@ function sendTemplateMessageAndCreateVoteRequest(
       })
   } else if (factChecker?.preferredPlatform === "telegram") {
     //not yet implemented
-  } else {
+    // First, add the voteRequest object to the "voteRequests" sub-collection
+    return messageRef
+      .collection("voteRequests")
+      .add({
+        factCheckerDocRef: factCheckerDocSnap.ref,
+        platformId: factChecker.platformId,
+        hasAgreed: false,
+        triggerL2Vote: null,
+        triggerL2Others: null,
+        platform: "telegram",
+        sentMessageId: null,
+        category: null,
+        vote: null,
+        createdTimestamp: Timestamp.fromDate(new Date()),
+        acceptedTimestamp: null,
+        votedTimestamp: null,
+      })
+      .then(() => {
+        const voteRequestUrl = `https://tongyingsite.tanbingwen.com/checkers/${factCheckerId}/messages/${msgId}/voteRequest`;
+        // After the voteRequest object is added, send the Telegram template message with the additional voteRequestId parameter
+        return sendTelegramTextMessage(
+          "factChecker",
+          factChecker.platformId,
+          "New message received! Would you like to help assess it?",
+          null,
+          {
+            inline_keyboard: [
+              [{ text: "Yes!", web_app: {url: voteRequestUrl} }],
+            ]
+          })
+      })
+} else {
     return Promise.reject(
       new Error(
         `Preferred platform not supported for factChecker ${factChecker.id}`
