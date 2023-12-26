@@ -98,7 +98,7 @@ export default function VoteCategories(Prop: PropType) {
           const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
           updateUnassessed(pending_unread);
           
-          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+          const ASSESSED: Message[] = latestMessages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
           updateAssessed(ASSESSED);
           const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
           updateUnchecked(assessed_unread);
