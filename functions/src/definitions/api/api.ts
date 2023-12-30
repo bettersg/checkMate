@@ -1,16 +1,20 @@
 import * as admin from "firebase-admin"
 import express from "express"
+import * as functions from "firebase-functions"
 import { validateFirebaseIdToken } from "./middleware/validator"
 import { onRequest } from "firebase-functions/v2/https"
-// import { Timestamp, collectionGroup, query, where, serverTimestamp } from "firebase/firestore";
 import { Timestamp } from 'firebase-admin/firestore';
-import { DocumentReference } from '@google-cloud/firestore';
 import { TeleMessage, VoteRequest } from "../../types";
+import { getCount } from "../common/counters"
+import { config } from 'dotenv';
+
+config();
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 const db = admin.firestore();
+
 const app = express()
 // app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
 
@@ -99,17 +103,19 @@ app.post("/addMessage", async (req, res) => {
 
     // Set the instances data fields
     const instancesRef = await docRef.collection("instances").doc();
-    await instancesRef.set({...instancesData, 
-      replyTimestamp: stringToTimestamp(replyTimestamp), 
+    await instancesRef.set({
+      ...instancesData,
+      replyTimestamp: stringToTimestamp(replyTimestamp),
       timestamp: stringToTimestamp(timestamp)
     })
 
-    await docRef.set({...messageData, 
-      latestInstance: instancesRef, 
-      assessedTimestamp: stringToTimestamp(assessedTimestamp), 
-      assessmentExpiry: stringToTimestamp(assessmentExpiry), 
-      firstTimestamp: stringToTimestamp(firstTimestamp), 
-      lastRefreshedTimestamp: stringToTimestamp(lastRefreshedTimestamp), 
+    await docRef.set({
+      ...messageData,
+      latestInstance: instancesRef,
+      assessedTimestamp: stringToTimestamp(assessedTimestamp),
+      assessmentExpiry: stringToTimestamp(assessmentExpiry),
+      firstTimestamp: stringToTimestamp(firstTimestamp),
+      lastRefreshedTimestamp: stringToTimestamp(lastRefreshedTimestamp),
       lastTimestamp: stringToTimestamp(lastTimestamp)
     });
 
@@ -149,12 +155,15 @@ app.post("/addFactCheckers", async (req, res) => {
   }
 });
 
+
+
 //function that fetches all messages for the checker
 const fetchMessagesByUserPhone = async (phoneNo: string) => {
   try {
     //find all the voteRequests sent to user
     const factCheckerRef = db.doc(`factCheckers/${phoneNo}`);
-    console.log(`Fetch messages by user phone: ${phoneNo}`);
+    // console.log(`Fetch messages by user phone: ${phoneNo}`);
+
     const voteRequestsSnapshot = await db
       .collectionGroup("voteRequests")
       .where("factCheckerDocRef", "==", factCheckerRef)
@@ -187,17 +196,83 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
 
         const voteRequestData = voteRequestDocRef.docs[0]?.data();
 
+        // Fetch the latest instance document for image url
+        const latestInstanceRef = data.latestInstance;
+        const latestInstanceDoc = await latestInstanceRef?.get();
+        const latestInstanceData = latestInstanceDoc?.data();
+        const storageUrl = latestInstanceData?.storageUrl || null;
+        let temporaryUrl = null;
+
+        if (process.env.ENVIRONMENT !== "PROD") {
+          temporaryUrl = process.env.TEST_IMAGE_URL;;
+        }
+
+        try {
+          const storage = admin.storage();
+          [temporaryUrl] = await storage
+            .bucket()
+            .file(storageUrl)
+            .getSignedUrl({
+              action: "read",
+              expires: Date.now() + 60 * 60 * 1000,
+            });
+        } catch (error) {
+          functions.logger.error(error)
+        }
+
+        let isMatch = false;
+        if (voteRequestData) {
+          isMatch = data.primaryCategory === voteRequestData.category;
+
+          if (data.primaryCategory === "info" || data.primaryCategory === "misleading" || data.primaryCategory === "untrue" || data.primaryCategory === "accurate") {
+            if (voteRequestData.category === "info") {
+              if (voteRequestData.truthScore - data.truthScore < 1 && voteRequestData.truthScore - data.truthScore > -1) {
+                isMatch = true;
+              }
+            }
+          }
+        }
+
+        //calculate voting percentages
+        const messageRef = doc.ref;
+        const responseCount = await getCount(messageRef, "responses");
+
+        let crowdCount = 0;
+        let votedCount = 0;
+
+        if (data.primaryCategory === "untrue" || data.primaryCategory === "misleading" || data.primaryCategory === "accurate") {
+          crowdCount = await getCount(messageRef, "info")
+        }
+        else {
+          crowdCount = await getCount(messageRef, `${data.primaryCategory}`)
+        }
+
+        const crowdPercentage = crowdCount / responseCount * 100;
+        if (isMatch){
+          votedCount = crowdCount;
+        }
+        else{
+          if (data.primaryCategory === "untrue" || data.primaryCategory === "misleading" || data.primaryCategory === "accurate") {
+            votedCount = await getCount(messageRef, "info")
+          }
+          else {
+            votedCount = await getCount(messageRef, `${voteRequestData.category}`)
+          }
+        }
+        const votedPercentage = votedCount / responseCount * 100;
+
         const message: TeleMessage = {
           id: doc.id,
           text: data.text || "",
           caption: data.caption || null,
           isAssessed: data.isAssessed || false,
-          isMatch: data.primaryCategory === voteRequestData.category,
+          isMatch: isMatch,
           primaryCategory: data.primaryCategory || null,
           voteRequests: {
             id: voteRequestDocRef.docs[0]?.id,
             factCheckerDocRef: voteRequestData.factCheckerDocRef || null,
             category: voteRequestData?.category || null,
+            createdTimestamp: voteRequestData.createdTimestamp,
             acceptedTimestamp: voteRequestData?.acceptedTimestamp || null,
             hasAgreed: voteRequestData?.hasAgreed || false,
             vote: voteRequestData?.vote || null,
@@ -207,9 +282,13 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
             isView: (data.isAssessed && voteRequestData.checkTimestamp && voteRequestData.category) || (!data.isAssessed && voteRequestData.acceptedTimestamp && voteRequestData.hasAgreed) ? true : false,
           },
           rationalisation: data.rationalisation || null,
-          truthScore: data.truthScore || null,
+          avgTruthScore: data.truthScore || null,
           firstTimestamp: data.firstTimestamp.toDate().toISOString() || new Date().toISOString(),
+          storageUrl: temporaryUrl || null,
+          crowdPercentage: crowdPercentage,
+          votedPercentage: votedPercentage,
           //isView is true if the checker has read msg before
+          
         };
         //print to see what the message obj looks like
         // console.log(message);
@@ -232,9 +311,9 @@ app.get("/checkers/:phoneNo/messages", async (req, res) => {
   if (messages.length === 0) {
     console.log("No messages found");
   }
-  else {
-    console.log(messages);
-  }
+  // else {
+  //   console.log(messages);
+  // }
   return res.json({ messages: messages })
 })
 
@@ -279,10 +358,11 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteResult", async (req, res) => {
         const updatedVoteRequestDoc = await voteRequestDoc.ref.get();
         const updatedVoteRequestData = updatedVoteRequestDoc.data();
 
-        const voteReq : VoteRequest = {
+        const voteReq: VoteRequest = {
           id: updatedVoteRequestDoc.ref.id,
           factCheckerDocRef: updatedVoteRequestData?.factCheckerDocRef || null,
           category: updatedVoteRequestData?.category || null,
+          createdTimestamp: updatedVoteRequestData?.createdTimestamp,
           acceptedTimestamp: updatedVoteRequestData?.acceptedTimestamp || null,
           hasAgreed: updatedVoteRequestData?.hasAgreed || false,
           vote: updatedVoteRequestData?.vote || null,
@@ -309,7 +389,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
   const truthScore = req.body.truthScore;
   const msgId = req.params.msgId;
   const phoneNo = req.params.phoneNo;
-  
+
   try {
     // Reference to the message document
     const messageRef = db.collection('messages').doc(msgId);
@@ -353,10 +433,11 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
         const updatedVoteRequestDoc = await voteRequestDoc.ref.get();
         const updatedVoteRequestData = updatedVoteRequestDoc.data();
 
-        const voteReq : VoteRequest = {
+        const voteReq: VoteRequest = {
           id: updatedVoteRequestDoc.ref.id,
           factCheckerDocRef: updatedVoteRequestData?.factCheckerDocRef || null,
           category: updatedVoteRequestData?.category || null,
+          createdTimestamp: updatedVoteRequestData?.createdTimestamp,
           acceptedTimestamp: updatedVoteRequestData?.acceptedTimestamp || null,
           hasAgreed: updatedVoteRequestData?.hasAgreed || false,
           vote: updatedVoteRequestData?.vote || null,
@@ -365,7 +446,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
           truthScore: updatedVoteRequestData?.truthScore || null,
           isView: (data?.isAssessed && updatedVoteRequestData?.checkTimestamp && updatedVoteRequestData.category) || (!data?.isAssessed && updatedVoteRequestData?.acceptedTimestamp && updatedVoteRequestData.hasAgreed) ? true : false,
         };
-        console.log('Updated data:', voteReq);
+        // console.log('Updated data:', voteReq);
         res.status(200).json({ success: true, voteRequest: voteReq });
       }
     }

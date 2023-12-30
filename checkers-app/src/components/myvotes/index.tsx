@@ -112,7 +112,7 @@ export default function MyVotes() {
         // Show loading state while messages are being fetched
         <LoadingPage />
       ) : (
-        <>
+        <div>
           <InformationButton />
 
           {/* ----------------- TO BE CHNAGED TO TABS ----------------- */}
@@ -132,22 +132,19 @@ export default function MyVotes() {
             <AccordionBody>
               {pending.length === 0 && <div className="text-primary-color">You have no pending messages</div>}
               {pending.length !== 0 && pending
-                // .sort((a, b) => {
-                //   // Sort by null category first (havent vote)
-                //   if (a.voteRequests.category === null && b.voteRequests.category !== null) {
-                //     return -1;
-                //   }
-                //   if (a.voteRequests.category !== null && b.voteRequests.category === null) {
-                //     return 1;
-                //   }
-                //   // If categories are the same or both are null, sort by firstTimestamp
-                //   console.log("a.firstTimestamp:", a.firstTimestamp);
-                //   console.log("b.firstTimestamp:", b.firstTimestamp);
-                //   return (
-                //     (a.firstTimestamp ? a.firstTimestamp.toDate()?.getTime() : 0) -
-                //     (b.firstTimestamp ? b.firstTimestamp.toDate()?.getTime() : 0)
-                //   );
-                // })
+                .sort((a, b) => {
+                  // Sort by null category first (havent vote)
+                  if (a.voteRequests.category === null && b.voteRequests.category !== null) {
+                    return -1;
+                  }
+                  if (a.voteRequests.category !== null && b.voteRequests.category === null) {
+                    return 1;
+                  }
+                  // If categories are the same or both are null, sort by firstTimestamp
+                  const aTimestamp = a.firstTimestamp && a.firstTimestamp.toMillis ? a.firstTimestamp.toMillis() : 0;
+                  const bTimestamp = b.firstTimestamp && b.firstTimestamp.toMillis ? b.firstTimestamp.toMillis() : 0;
+                  return aTimestamp - bTimestamp;
+                })
                 .map((msg) => (
                   <div>
                     <VoteInstanceButton
@@ -179,22 +176,20 @@ export default function MyVotes() {
             <AccordionBody>
               {assessed.length === 0 && <div>You have no messages</div>}
               {assessed.length !== 0 && assessed
-                // .sort((a, b) => {
-                //   // Sort by checktimestamp first (havent see crowd vote)
-                //   if (a.voteRequests.checkTimestamp === null && b.voteRequests.checkTimestamp !== null) {
-                //     return -1;
-                //   }
-                //   if (a.voteRequests.checkTimestamp !== null && b.voteRequests.checkTimestamp === null) {
-                //     return 1;
-                //   }
-                //   // If categories are the same or both are null, sort by firstTimestamp
-                //   console.log("a.firstTimestamp:", a.firstTimestamp);
-                //   console.log("b.firstTimestamp:", b.firstTimestamp);
-                //   return (
-                //     (a.firstTimestamp ? a.firstTimestamp?.toDate()?.getTime() : 0) -
-                //     (b.firstTimestamp ? b.firstTimestamp?.toDate()?.getTime() : 0)
-                //   );
-                // })
+                .sort((a, b) => {
+                  // Sort by checktimestamp first (haven't seen crowd vote)
+                  if (a.voteRequests.checkTimestamp === null && b.voteRequests.checkTimestamp !== null) {
+                    return -1;
+                  }
+                  if (a.voteRequests.checkTimestamp !== null && b.voteRequests.checkTimestamp === null) {
+                    return 1;
+                  }
+
+                  // If categories are the same or both are null, sort by firstTimestamp
+                  const aTimestamp = a.firstTimestamp && a.firstTimestamp.toMillis ? a.firstTimestamp.toMillis() : 0;
+                  const bTimestamp = b.firstTimestamp && b.firstTimestamp.toMillis ? b.firstTimestamp.toMillis() : 0;
+                  return aTimestamp - bTimestamp;
+                })
                 .map((msg) => (
                   <div>
                     <VoteInstanceButton
@@ -214,26 +209,30 @@ export default function MyVotes() {
             </AccordionBody>
           </Accordion>
 
-          {selectedMessage && openDialog && <VoteInfoDialog id={selectedMessage.id}
-            text={selectedMessage.text}
-            primaryCategory={selectedMessage.primaryCategory}
-            category={selectedMessage.voteRequests?.category || null}
-            handleClose={() => {
-              setOpenDialog(!openDialog);
-              navigate(`/checkers/${phoneNo}/messages`);
-            }}
-            rationalisation={selectedMessage.rationalisation}
-            // imageUrl={selectedMessage.imageUrl}
-            caption={null}
-            // imageUrl = "https://images.unsplash.com/photo-1629367494173-c78a56567877?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=927&q=80"
-            // imageUrl = "/sample.jpg"
-            imageUrl="/sample2.jpg"
-          />
+          {selectedMessage && openDialog &&
+
+            <VoteInfoDialog id={selectedMessage.id}
+              text={selectedMessage.text}
+              primaryCategory={selectedMessage.primaryCategory}
+              avgTruthScore={selectedMessage.avgTruthScore}
+              category={selectedMessage.voteRequests?.category || null}
+              truthScore={selectedMessage.voteRequests?.truthScore || null}
+              handleClose={() => {
+                setOpenDialog(!openDialog);
+                navigate(`/checkers/${phoneNo}/messages`);
+              }}
+              rationalisation={selectedMessage.rationalisation}
+              storageUrl={selectedMessage.storageUrl}
+              caption={selectedMessage.caption}
+              crowdPercentage={selectedMessage.crowdPercentage}
+              votedPercentage={selectedMessage.votedPercentage}
+            />
+
           } */}
-        </>
+        </div>
       )
       }
-    </div >
+    </div>
   );
 }
 

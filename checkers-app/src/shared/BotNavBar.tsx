@@ -19,7 +19,7 @@ export default function NavbarDefault({ unread }: NavBarProps) {
   const isBadgeInvisible = unread === 0;
 
   return (
-    <Navbar className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2">
+    <Navbar className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2 border-0">
       <div className="flex items-center justify-around h-full">
         <Button variant="text" className="rounded-full"
           onClick={() => navigate('/')}>

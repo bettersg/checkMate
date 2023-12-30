@@ -10,6 +10,7 @@ import { BugAntIcon } from "@heroicons/react/20/solid";
 
 interface PropType {
     category: string | null,
+    truthScore: number | null
 }
 
 export default function VoteResult(Prop: PropType) {
@@ -25,8 +26,12 @@ export default function VoteResult(Prop: PropType) {
                 catIcon = <ShieldExclamationIcon className="h-7 w-7" />;
                 break;
             case 'info':
-                catName = "News/Info/Opinion";
+            case 'untrue':
+            case 'misleading':
+            case 'accurate':
+                catName = `News/Info/Opinion\n${Prop.truthScore}`;
                 catIcon = <LightBulbIcon className="h-7 w-7" />;
+                break;
                 break;
             case 'spam':
                 catName = "Spam";
@@ -35,10 +40,6 @@ export default function VoteResult(Prop: PropType) {
             case 'trivial':
                 catName = "Trivial";
                 catIcon = <CheckCircleIcon className="h-7 w-7" />;
-                break;
-            case 'unsure':
-                catName = "Unsure";
-                catIcon = <QuestionMarkCircleIcon className="h-7 w-7" />;
                 break;
             case 'legitimate':
                 catName = "Legitimate";
@@ -49,8 +50,8 @@ export default function VoteResult(Prop: PropType) {
                 catIcon = <BugAntIcon className="h-7 w-7" />;
                 break;
             default:
-                catName = "Unknown";
-                catIcon = null;
+                catName = "Unsure";
+                catIcon = <QuestionMarkCircleIcon className="h-7 w-7" />;
                 break;
         }
         return [catIcon, catName];
@@ -58,7 +59,7 @@ export default function VoteResult(Prop: PropType) {
     const [catIcon, catName] = getIconAndName();
 
     return (
-        <div className="grid grid-flow-row justify-items-center rounded-lg shadow-md p-3 bg-primary-color text-background-color">
+        <div className="grid grid-flow-row justify-items-center text-center rounded-lg shadow-md p-3 bg-primary-color text-background-color">
             {catIcon}
             <Typography>{catName}</Typography>
         </div>

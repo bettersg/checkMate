@@ -101,18 +101,22 @@ export default function MessageCard(props: MessageCardProps) {
                 </div>
             </div>
             {openMsgInfo && 
-                <VoteInfoDialog 
-                id={msg.id}
-                text={msg.text}
-                primaryCategory={msg.primaryCategory}
-                category={msg.voteRequests?.category || null}
-                handleClose={() => {
-                    setOpenMsgInfo(!openMsgInfo);
-                }}
-                rationalisation={msg.rationalisation}
-                caption={null}
-                imageUrl="/sample2.jpg"
-                />}
+            <VoteInfoDialog id={msg.id}
+            text={msg.text}
+            primaryCategory={msg.primaryCategory}
+            avgTruthScore={msg.avgTruthScore}
+            category={msg.voteRequests?.category || null}
+            truthScore={msg.voteRequests?.truthScore || null}
+            handleClose={() => {
+                setOpenMsgInfo(!openMsgInfo);
+            }}
+            rationalisation={msg.rationalisation}
+            storageUrl={msg.storageUrl}
+            caption={msg.caption}
+            crowdPercentage={msg.crowdPercentage}
+            votedPercentage={msg.votedPercentage}
+          />
+        }
         </div>
     );
 }

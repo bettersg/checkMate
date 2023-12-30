@@ -1,6 +1,5 @@
 import { Button } from "@material-tailwind/react";
-import { Timestamp } from "firebase/firestore";
-import { ClockIcon } from "@heroicons/react/20/solid";
+import { Timestamp } from "firebase-admin/firestore";
 
 interface PropType {
   title: string,
@@ -12,7 +11,6 @@ interface PropType {
   isView: boolean
   firstTimestamp: Timestamp | null
 }
-
 
 export default function VoteInstanceButton(Prop: PropType) {
 
