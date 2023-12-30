@@ -23,6 +23,6 @@ export type Message = {
   voteRequests: VoteRequest;
   rationalisation: string;
   truthScore: number | null;
-  firstTimestamp: Timestamp | null;
+  firstTimestamp: string;
   // imageUrl: string | null;
 }

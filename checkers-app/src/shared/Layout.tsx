@@ -14,8 +14,10 @@ export default function Layout({pageHeader, children }: LayoutProps) {
     
     return (
         <div>
-            <Header name={name}/>
-            <PageHeader>{pageHeader}</PageHeader>
+            <div className='layout-padding'>
+                <Header name={name}/>
+                <PageHeader>{pageHeader}</PageHeader>
+            </div>
             <div className="pb-16">
                 {children}
             </div>

@@ -34,7 +34,7 @@ export default function VotingPage(Prop: PropType) {
       {!msg
         ? null
         :
-        <div className="grid grid-flow-row items-center gap-2 pb-2">
+        <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding">
           < BackButton />
           <MessageCard text={msg.text} imageUrl={null} caption={msg.caption} />
           <Typography variant="h4" className="text-primary-color3">Select category:</Typography>

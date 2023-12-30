@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import VoteInfoDialog from "./VoteInfo";
 import InformationButton from "./InformationButton";
 import { useUser } from '../../UserContext';
+import MessagesDisplay from "./MessagesDisplay";
 import {
   Accordion,
   AccordionHeader,
@@ -113,7 +114,11 @@ export default function MyVotes() {
       ) : (
         <>
           <InformationButton />
-          <Accordion open={openPending} icon={<Icon open={openPending} />}
+
+          {/* ----------------- TO BE CHNAGED TO TABS ----------------- */}
+          <MessagesDisplay/>
+          {/* ----------------- OLD DESIGN ----------------- */}
+          {/* <Accordion open={openPending} icon={<Icon open={openPending} />}
             className="mb-2 rounded-lg border border-secondary-color2 px-4">
             <AccordionHeader onClick={handlePending}
               className={`text-secondary-color2 ${openPending == false ? "border-b-0" : "border-secondary-color2"}`}
@@ -224,7 +229,7 @@ export default function MyVotes() {
             // imageUrl = "/sample.jpg"
             imageUrl="/sample2.jpg"
           />
-          }
+          } */}
         </>
       )
       }

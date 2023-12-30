@@ -40,6 +40,55 @@ app.get("/helloworld", async (req, res) => {
   res.send("Hello World!")
 })
 
+app.post("/addVoteRequest", async (req, res) => {
+  try {
+    const { phoneNumber, platformId, ...data } = req.body;
+
+    if (!phoneNumber || !platformId) {
+      res.status(400).json({ success: false, error: "Missing phoneNumber or platformId" });
+      return;
+    }
+
+    // Use the current time as the createdTimestamp
+    const timestampDate = new Date();
+    // Convert the Date object into a Firestore Timestamp
+    const timestamp = Timestamp.fromDate(timestampDate);
+
+    // Get the factCheckers document reference from the database
+    const factCheckerRef = db.doc(`factCheckers/${phoneNumber}`);
+
+    // Get all messages from the messages collection
+    const messages = await db.collection('messages').get();
+
+    // Add a new voteRequest to each message
+    const promises = messages.docs.map(messageDoc => {
+      const voteRequestRef = messageDoc.ref.collection('voteRequests').doc();
+      return voteRequestRef.set({
+        acceptedTimestamp: null,
+        category: null,
+        createdTimestamp: timestamp,
+        factCheckerDocRef: factCheckerRef,
+        hasAgreed: false,
+        platform: 'telegram',
+        platformId: platformId,
+        sentMessageId: null,
+        triggerL2Others: null,
+        triggerL2Vote: null,
+        vote: null,
+        votedTimestamp: null
+      });
+    });
+
+    // Wait for all the voteRequests to be added
+    await Promise.all(promises);
+
+    res.status(200).json({ success: true, message: "Vote requests added successfully" });
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
 app.post("/addMessage", async (req, res) => {
   // Assume we already have the data parsed
   try {
@@ -159,9 +208,8 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
           },
           rationalisation: data.rationalisation || null,
           truthScore: data.truthScore || null,
-          firstTimestamp: data.firstTimestamp || null,
+          firstTimestamp: data.firstTimestamp.toDate().toISOString() || new Date().toISOString(),
           //isView is true if the checker has read msg before
-          
         };
         //print to see what the message obj looks like
         // console.log(message);

@@ -28,7 +28,14 @@ p.firebase-emulator-warning {
 #root {
   max-width: 1280px;
   margin: 0 auto;
+}
+
+.layout-padding {
   padding: 5vh 5vw 0vh 5vw;
+}
+
+.left-right-padding {
+  padding: 0vh 5vw 0vh 5vw;
 }
 
 .orange-glow {

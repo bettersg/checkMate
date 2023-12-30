@@ -11,7 +11,7 @@ const BADGES = [
 ]
 export default function Achievement() {
   return (
-    <div>
+    <div className="left-right-padding">
       <AchievementCard number={3} rank='Rookie' />
       <Typography variant="h4" className="text-primary-color3 mt-2">Badges</Typography>
       {BADGES.map((badge, index) => (

@@ -111,6 +111,10 @@ function App() {
           const PENDING: Message[] = data.messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
           const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
 
+          // Sort by date
+          PENDING.sort((a, b) => new Date(b.firstTimestamp).getTime() - new Date(a.firstTimestamp).getTime());
+          ASSESSED.sort((a, b) => new Date(b.firstTimestamp).getTime() - new Date(a.firstTimestamp).getTime());
+
           setPending(PENDING);
           setAssessed(ASSESSED);
 

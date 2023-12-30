@@ -16,7 +16,7 @@ export default function Dashboard() {
   const { unassessed, unchecked } = useUser();
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 left-right-padding">
     {unassessed > 0 && <PendingMessageAlert Type={true} />}
     {unchecked > 0 && <PendingMessageAlert Type={false} />}
       <Typography variant="h4" className="text-primary-color">

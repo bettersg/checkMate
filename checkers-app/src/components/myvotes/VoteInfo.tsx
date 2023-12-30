@@ -20,9 +20,10 @@ interface PropType {
 
 export default function VoteInfoDialog(Prop: PropType) {
     return (
-        <div className="grid place-items-center pb-14 top-0 left-0 absolute w-screen h-screen px-2 max-w-screen max-h-screen bg-black bg-opacity-60 backdrop-blur-sm z-0 overscroll-contain" >
+        <div className="grid place-items-center pb-14 top-0 left-0 absolute w-screen h-screen px-2 max-w-screen max-h-screen bg-black bg-opacity-60 backdrop-blur-sm z-0 overscroll-contain"
+            onClick={(event) => event.stopPropagation()}>
             <div className="z-50 bg-white p-2 rounded-lg shadow-2xl h-5/6 max-h-5/6 w-full max-w-full overscroll-y-auto overflow-auto" >
-                <XMarkIcon className="h-6 w-6 text-gray-500 m-1" onClick={Prop.handleClose} />
+                <XMarkIcon className="h-6 w-6 text-gray-500 m-1 hover:text-black" onClick={Prop.handleClose} />
                 <div className="w-5/6 mx-auto">
                     <div className="flex flex-col gap-3">
                         <Typography variant="h5" className="text-primary-color3">Message</Typography>
@@ -31,16 +32,15 @@ export default function VoteInfoDialog(Prop: PropType) {
                             <div className='flex-1'>
                                 <Typography className='text-primary-color3 text-center' variant='h5'>Your vote</Typography>
                                 <VoteResult category={Prop.category} />
-                                <VotePercentage percentage={40}/>
+                                <VotePercentage percentage={40} />
                             </div>
                             <div className='flex-1'>
                                 <Typography className='text-primary-color3 text-center' variant='h5'>Crowd vote</Typography>
                                 <VoteResult category={Prop.primaryCategory} />
-                                <VotePercentage percentage={60}/>
+                                <VotePercentage percentage={60} />
                             </div>
                         </div>
                         <CategoryRationalisation rationalisation={Prop.rationalisation} />
-
                     </div>
                 </div>
             </div>
