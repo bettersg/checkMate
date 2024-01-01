@@ -106,14 +106,32 @@ function App() {
           }
 
           const data = await response.json();
+
+          // Convert the ISO string to Date object for all messages
+          data.messages.forEach((msg: Message) => {
+            msg.firstTimestamp = new Date(msg.firstTimestamp);
+            if (msg.voteRequests.acceptedTimestamp != null) {
+              msg.voteRequests.acceptedTimestamp = new Date(msg.voteRequests.acceptedTimestamp);
+            }
+            if (msg.voteRequests.createdTimestamp != null) {
+              msg.voteRequests.createdTimestamp = new Date(msg.voteRequests.createdTimestamp);
+            }
+            if (msg.voteRequests.votedTimestamp != null) {
+              msg.voteRequests.votedTimestamp = new Date(msg.voteRequests.votedTimestamp);
+            }
+            if (msg.voteRequests.checkTimestamp != null) {
+              msg.voteRequests.checkTimestamp = new Date(msg.voteRequests.checkTimestamp);
+            }
+          });
+
           setMessages(data.messages);
 
           const PENDING: Message[] = data.messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
           const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
 
           // Sort by date
-          PENDING.sort((a, b) => new Date(b.firstTimestamp).getTime() - new Date(a.firstTimestamp).getTime());
-          ASSESSED.sort((a, b) => new Date(b.firstTimestamp).getTime() - new Date(a.firstTimestamp).getTime());
+          PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
+          ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
 
           setPending(PENDING);
           setAssessed(ASSESSED);

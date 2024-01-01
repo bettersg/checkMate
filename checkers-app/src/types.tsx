@@ -1,15 +1,13 @@
-import { Timestamp } from "firebase-admin/firestore";
-
 export type VoteRequest = {
   id: string,
   factCheckerDocRef: string;
   category: string | null;
-  createdTimestamp: Timestamp;
-  acceptedTimestamp: Timestamp | null;
+  createdTimestamp: Date | null;
+  acceptedTimestamp: Date | null;
   hasAgreed: boolean;
   vote: number | null;
-  votedTimestamp: Timestamp | null;
-  checkTimestamp: Timestamp | null;
+  votedTimestamp: Date | null;
+  checkTimestamp: Date | null;
   isView: boolean; //checks if checker has clicked in to view results/msg
   truthScore: number | null;
 }
@@ -24,7 +22,7 @@ export type Message = {
   voteRequests: VoteRequest;
   rationalisation: string;
   avgTruthScore: number | null;
-  firstTimestamp: string;
+  firstTimestamp: Date;
   storageUrl: string | null;
   crowdPercentage: number;
   votedPercentage: number;

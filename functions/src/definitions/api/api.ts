@@ -44,6 +44,7 @@ app.get("/helloworld", async (req, res) => {
   res.send("Hello World!")
 })
 
+// Helper function for testing environment to add voteRequests to all messages
 app.post("/addVoteRequest", async (req, res) => {
   try {
     const { phoneNumber, platformId, ...data } = req.body;
@@ -92,70 +93,6 @@ app.post("/addVoteRequest", async (req, res) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
-
-app.post("/addMessage", async (req, res) => {
-  // Assume we already have the data parsed
-  try {
-    const { instances, ...data } = req.body; // Get the instances data from the request body
-    const { replyTimestamp, timestamp, ...instancesData } = instances; // Get the instances data from the request body
-    const { assessedTimestamp, assessmentExpiry, firstTimestamp, lastRefreshedTimestamp, lastTimestamp, ...messageData } = data; // Get the message data from the request body
-    const docRef = await db.collection("message").doc();
-
-    // Set the instances data fields
-    const instancesRef = await docRef.collection("instances").doc();
-    await instancesRef.set({
-      ...instancesData,
-      replyTimestamp: stringToTimestamp(replyTimestamp),
-      timestamp: stringToTimestamp(timestamp)
-    })
-
-    await docRef.set({
-      ...messageData,
-      latestInstance: instancesRef,
-      assessedTimestamp: stringToTimestamp(assessedTimestamp),
-      assessmentExpiry: stringToTimestamp(assessmentExpiry),
-      firstTimestamp: stringToTimestamp(firstTimestamp),
-      lastRefreshedTimestamp: stringToTimestamp(lastRefreshedTimestamp),
-      lastTimestamp: stringToTimestamp(lastTimestamp)
-    });
-
-    const messageIdRef = await db.collection("messageIds").doc();
-    await messageIdRef.set({ instanceRef: instancesRef });
-
-    res.status(200).json({ success: true, docId: docRef.id, instancesId: instancesRef.id, messageId: messageIdRef.id });
-  } catch (error) {
-    console.error("Error adding document: ", error);
-    res.status(500).json({ success: false, error: "Internal server error" });
-  }
-})
-
-app.post("/addFactCheckers", async (req, res) => {
-  try {
-    const { phoneNumber, lastVotedTimestamp, ...data } = req.body;
-
-    if (!phoneNumber || !lastVotedTimestamp) {
-      res.status(400).json({ success: false, error: "Missing phoneNumber or lastVotedTimestamp" });
-      return;
-    }
-
-    // Parse the lastVotedTimestamp from the request body into a Date object
-    const timestampDate = new Date(lastVotedTimestamp);
-    // Convert the Date object into a Firestore Timestamp
-    const timestamp = Timestamp.fromDate(timestampDate);
-
-    const docRef = await db.collection("factCheckers").doc(phoneNumber);
-
-    // Set the Firestore Timestamp as the value of the "lastVotedTimestamp" field
-    await docRef.set({ ...data, lastVotedTimestamp: timestamp });
-
-    res.status(200).json({ success: true, id: docRef.id });
-  } catch (error) {
-    console.error("Error adding document: ", error);
-    res.status(500).json({ success: false, error: "Internal server error" });
-  }
-});
-
-
 
 //function that fetches all messages for the checker
 const fetchMessagesByUserPhone = async (phoneNo: string) => {
@@ -206,18 +143,19 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
         if (process.env.ENVIRONMENT !== "PROD") {
           temporaryUrl = process.env.TEST_IMAGE_URL;;
         }
-
-        try {
-          const storage = admin.storage();
-          [temporaryUrl] = await storage
-            .bucket()
-            .file(storageUrl)
-            .getSignedUrl({
-              action: "read",
-              expires: Date.now() + 60 * 60 * 1000,
-            });
-        } catch (error) {
-          functions.logger.error(error)
+        else {
+          try {
+            const storage = admin.storage();
+            [temporaryUrl] = await storage
+              .bucket()
+              .file(storageUrl)
+              .getSignedUrl({
+                action: "read",
+                expires: Date.now() + 60 * 60 * 1000,
+              });
+          } catch (error) {
+            functions.logger.error(error)
+          }
         }
 
         let isMatch = false;
@@ -248,10 +186,10 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
         }
 
         const crowdPercentage = crowdCount / responseCount * 100;
-        if (isMatch){
+        if (isMatch) {
           votedCount = crowdCount;
         }
-        else{
+        else {
           if (data.primaryCategory === "untrue" || data.primaryCategory === "misleading" || data.primaryCategory === "accurate") {
             votedCount = await getCount(messageRef, "info")
           }
@@ -272,12 +210,12 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
             id: voteRequestDocRef.docs[0]?.id,
             factCheckerDocRef: voteRequestData.factCheckerDocRef || null,
             category: voteRequestData?.category || null,
-            createdTimestamp: voteRequestData.createdTimestamp,
-            acceptedTimestamp: voteRequestData?.acceptedTimestamp || null,
+            createdTimestamp: voteRequestData.createdTimestamp ? voteRequestData.createdTimestamp.toDate().toISOString() : null,
+            acceptedTimestamp: voteRequestData?.acceptedTimestamp ? voteRequestData.acceptedTimestamp.toDate().toISOString() : null,
             hasAgreed: voteRequestData?.hasAgreed || false,
             vote: voteRequestData?.vote || null,
-            votedTimestamp: voteRequestData?.votedTimestamp || null,
-            checkTimestamp: voteRequestData?.checkTimestamp || null,
+            votedTimestamp: voteRequestData?.votedTimestamp ? voteRequestData.votedTimestamp.toDate().toISOString() : null,
+            checkTimestamp: voteRequestData?.checkTimestamp ? voteRequestData.checkTimestamp.toDate().toISOString() : null,
             truthScore: voteRequestData?.truthScore || null,
             isView: (data.isAssessed && voteRequestData.checkTimestamp && voteRequestData.category) || (!data.isAssessed && voteRequestData.acceptedTimestamp && voteRequestData.hasAgreed) ? true : false,
           },
@@ -288,13 +226,15 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
           crowdPercentage: crowdPercentage,
           votedPercentage: votedPercentage,
           //isView is true if the checker has read msg before
-          
+
         };
         //print to see what the message obj looks like
         // console.log(message);
         messagesData.push(message);
       }
     }));
+
+
     // console.log(messagesData);
     return messagesData;
   } catch (err) {
@@ -311,9 +251,6 @@ app.get("/checkers/:phoneNo/messages", async (req, res) => {
   if (messages.length === 0) {
     console.log("No messages found");
   }
-  // else {
-  //   console.log(messages);
-  // }
   return res.json({ messages: messages })
 })
 
