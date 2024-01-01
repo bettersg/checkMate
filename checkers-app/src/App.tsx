@@ -126,8 +126,8 @@ function App() {
 
           setMessages(data.messages);
 
-          const PENDING: Message[] = data.messages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
-          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+          const PENDING: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category == null);
+          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category != null);
 
           // Sort by date
           PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());

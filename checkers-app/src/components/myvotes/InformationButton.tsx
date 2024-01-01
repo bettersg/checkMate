@@ -22,21 +22,21 @@ export function InformationDialog(Prop: InfoDialogProps) {
             <Typography variant="h4" className="text-primary-color3 mx-4">Navigating MyVotes</Typography>
             <DialogBody className="flex flex-col gap-y-2 align-center">
                 <Typography variant="h5" className="text-secondary-color2">Pending</Typography>
-                <Typography variant="paragraph" className="text-secondary-color2">Messages waiting to be crowd-assessed.</Typography>
+                <Typography variant="paragraph" className="text-secondary-color2">Messages waiting for your vote.</Typography>
                 <Button
                     className="flex rounded-full justify-start text-left gap-3 bg-pending-color text-primary-color3 font-bold"
                     style={{ width: "100%", fontFamily: "Open Sans, sans-serif" }}>
                     You have not voted.
                 </Button>
                 <Button
-                    className="flex flex-row rounded-full justify-self-start gap-3 bg-pending-color text-primary-color3 font-normal"
+                    className="flex flex-row rounded-full justify-self-start gap-3 bg-waiting-color text-primary-color3 font-normal"
                     style={{ width: "100%", fontFamily: "Open Sans, sans-serif", textAlign:"start"}}>
                     You voted but waiting for crowd assessment.
                 </Button>
                 <Typography variant="small" className="self-center">(You can still change your vote!)</Typography>
 
-                <Typography variant="h5" className="text-primary-color2">Assessed</Typography>
-                <Typography variant="paragraph" className="text-primary-color2">Crowd-assessed messages that you voted.</Typography>
+                <Typography variant="h5" className="text-primary-color2">Voted</Typography>
+                <Typography variant="paragraph" className="text-primary-color2">Messages that you voted.</Typography>
                 <Button
                     className="flex rounded-full items-center gap-3 bg-error-color text-primary-color3 font-bold"
                     style={{ width: "100%", fontFamily: "Open Sans, sans-serif" }}>
