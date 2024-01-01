@@ -94,15 +94,17 @@ export default function VoteCategories(Prop: PropType) {
           updateMessages(latestMessages);
 
           const PENDING: Message[] = latestMessages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
+          PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
           updatePending(PENDING);
           const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
           updateUnassessed(pending_unread);
           
           const ASSESSED: Message[] = latestMessages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+          ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
           updateAssessed(ASSESSED);
           const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
           updateUnchecked(assessed_unread);
-
+          
         } catch (error) {
           console.error("Error fetching votes:", error);
         }
