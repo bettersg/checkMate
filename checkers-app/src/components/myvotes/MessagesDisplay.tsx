@@ -16,9 +16,8 @@ Idea:
 - Have a nested component for each button
 */
 
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { useUser } from '../../UserContext';
-import VoteInstanceButton from "./VoteInstanceButton";
 import MessageCard from "./MessageCard";
 import { useNavigate } from "react-router-dom";
 
@@ -51,7 +50,7 @@ export default function MessagesDisplay(props: any) {
             </div>
             {/* Display the messages based on the active tab
             NOTE: Height is hardcoded, to be changed */}
-            <div className="h-[54vh] overflow-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="overflow-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 <style>
                     {`
                     ::-webkit-scrollbar {

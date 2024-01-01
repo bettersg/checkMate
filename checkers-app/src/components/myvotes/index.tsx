@@ -1,17 +1,9 @@
 import LoadingPage from "./LoadingPage";
-import VoteInstanceButton from "./VoteInstanceButton";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import VoteInfoDialog from "./VoteInfo";
 import InformationButton from "./InformationButton";
 import { useUser } from '../../UserContext';
 import MessagesDisplay from "./MessagesDisplay";
-import {
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
-  Chip
-} from "@material-tailwind/react";
 import { Message } from "../../types";
 
 interface IconProps {

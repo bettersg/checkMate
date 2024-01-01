@@ -19,12 +19,17 @@ const colours: ColourMap = {
     "INCORRECT": "error-color",
     "HIGHLIGHT": "highlight-color",
     "DEFAULT": "primary-color",
+    "WAITING": "waiting-color"
 };
 
 function getCategory(msg: Message): string {
-    if (!msg.isAssessed || msg.voteRequests.category == null) {
+    if (msg.voteRequests.category == null) {
         return "PENDING";
-    } else {
+    }
+    else if (!msg.isAssessed && msg.voteRequests.category != null) {
+        return "WAITING";
+    }
+    else {
         if (msg.isMatch) {
             return "CORRECT"
         }
@@ -34,12 +39,11 @@ function getCategory(msg: Message): string {
     }
 }
 
-function ISOStringToDateString(isoString: string | null): string {
+function dateToDateString(date: Date | null): string {
     // Parse the ISO string into a Date object
-    if (isoString === null) {
+    if (date === null) {
         return "No date";
     }
-    const date = new Date(isoString);
 
     // Extract the day, month, and year from the Date object
     const day = date.getDate();
@@ -61,11 +65,11 @@ function ISOStringToDateString(isoString: string | null): string {
 
 export default function MessageCard(props: MessageCardProps) {
     const msg = props.message;
-    const {phoneNo } = useUser();
+    const { phoneNo, messages, updateAssessed, updateMessages, updatePending, updateUnassessed, updateUnchecked } = useUser();
     const category: string = getCategory(msg);
     const colour: string = colours[category];
     const navigate = useNavigate();
-    let dateString = ISOStringToDateString(msg.firstTimestamp);
+    const dateString = dateToDateString(msg.firstTimestamp);
     const [openMsgInfo, setOpenMsgInfo] = useState<boolean>(false);
 
     // If the message is PENDING, clicking the button should go to the voting page
@@ -73,20 +77,58 @@ export default function MessageCard(props: MessageCardProps) {
         navigate(`/checkers/${phoneNo}/messages/${messageId}/voteRequest`);
     };
 
-    const handleOpenMsgInfo = () => {
+    const handleOpenMsgInfo = async () => {
         setOpenMsgInfo(!openMsgInfo);
+
+        if (msg && !msg.voteRequests.isView) {
+            try {
+                const response = await fetch(`/api/checkers/${phoneNo}/messages/${msg.id}/voteResult`, {
+                    method: "PATCH",
+                });
+                console.log("After fetch");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                const latestVoteReq = data.voteRequest;
+
+                // Update the specifc voteRequest in messages array
+                const latestMessages = messages.map(message => {
+                    if (message.id === msg.id) {
+                        return { ...message, voteRequests: latestVoteReq };
+                    }
+                    return message;
+                });
+                console.log("UPDATED: ", updateMessages);
+                updateMessages(latestMessages);
+
+                const PENDING: Message[] = latestMessages.filter((msg: Message) => !msg.isAssessed || msg.voteRequests.category == null);
+                updatePending(PENDING);
+                const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
+                updateUnassessed(pending_unread);
+
+                const ASSESSED: Message[] = latestMessages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
+                updateAssessed(ASSESSED);
+                const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
+                updateUnchecked(assessed_unread);
+
+            } catch (error) {
+                console.error("Error fetching vote result:", error);
+            }
+        }
     }
 
+    const textStyle = msg.voteRequests.isView ? "font-normal" : "font-bold";
 
 
     return (
-        <div 
-            className="flex border-b border-gray-500 h-16 hover-shadow" 
-            onClick={category==="PENDING" ? ()=>goVoting(msg.id) : ()=>{handleOpenMsgInfo()}}>
+        <div
+            className="flex border-b border-gray-500 h-16 hover-shadow"
+            onClick={(category === "PENDING" || category === "WAITING") ? () => goVoting(msg.id) : () => { handleOpenMsgInfo() }}>
 
             {/* Coloured dot */}
             <div className="w-1/12 flex items-center justify-center">
-                <div 
+                <div
                     className={`w-4 h-4 rounded-full bg-${colour}`}
                 ></div>
             </div>
@@ -94,29 +136,29 @@ export default function MessageCard(props: MessageCardProps) {
             {/* Message content */}
             <div className="w-11/12 p-2" >
                 <p className="font-bold">{dateString}</p>
-                <div 
-                    className="truncate inline-block overflow-hidden"
+                <div
+                    className={`truncate inline-block overflow-hidden ${textStyle}`}
                     style={{ width: "100%", fontFamily: "Open Sans, sans-serif" }}>
-                        {msg.text}
+                    {msg.text}
                 </div>
             </div>
-            {openMsgInfo && 
-            <VoteInfoDialog id={msg.id}
-            text={msg.text}
-            primaryCategory={msg.primaryCategory}
-            avgTruthScore={msg.avgTruthScore}
-            category={msg.voteRequests?.category || null}
-            truthScore={msg.voteRequests?.truthScore || null}
-            handleClose={() => {
-                setOpenMsgInfo(!openMsgInfo);
-            }}
-            rationalisation={msg.rationalisation}
-            storageUrl={msg.storageUrl}
-            caption={msg.caption}
-            crowdPercentage={msg.crowdPercentage}
-            votedPercentage={msg.votedPercentage}
-          />
-        }
+            {openMsgInfo &&
+                <VoteInfoDialog id={msg.id}
+                    text={msg.text}
+                    primaryCategory={msg.primaryCategory}
+                    avgTruthScore={msg.avgTruthScore}
+                    category={msg.voteRequests?.category || null}
+                    truthScore={msg.voteRequests?.truthScore || null}
+                    handleClose={() => {
+                        setOpenMsgInfo(!openMsgInfo);
+                    }}
+                    rationalisation={msg.rationalisation}
+                    storageUrl={msg.storageUrl}
+                    caption={msg.caption}
+                    crowdPercentage={msg.crowdPercentage}
+                    votedPercentage={msg.votedPercentage}
+                />
+            }
         </div>
     );
 }

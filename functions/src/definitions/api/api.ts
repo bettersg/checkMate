@@ -174,7 +174,7 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
         //calculate voting percentages
         const messageRef = doc.ref;
         const responseCount = await getCount(messageRef, "responses");
-
+        console.log("responseCount: ", responseCount);
         let crowdCount = 0;
         let votedCount = 0;
 
@@ -184,8 +184,8 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
         else {
           crowdCount = await getCount(messageRef, `${data.primaryCategory}`)
         }
-
-        const crowdPercentage = crowdCount / responseCount * 100;
+        console.log("crowdCount: ", crowdCount);
+        const crowdPercentage = crowdCount > 0 ? Number((crowdCount / responseCount * 100).toFixed(2)) : 0;
         if (isMatch) {
           votedCount = crowdCount;
         }
@@ -197,7 +197,7 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
             votedCount = await getCount(messageRef, `${voteRequestData.category}`)
           }
         }
-        const votedPercentage = votedCount / responseCount * 100;
+        const votedPercentage = votedCount > 0 ? Number((votedCount / responseCount * 100).toFixed(2)) : 0;
 
         const message: TeleMessage = {
           id: doc.id,
@@ -229,7 +229,7 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
 
         };
         //print to see what the message obj looks like
-        // console.log(message);
+        console.log(message);
         messagesData.push(message);
       }
     }));
