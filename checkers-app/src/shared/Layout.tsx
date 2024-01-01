@@ -1,7 +1,6 @@
 import { ReactNode} from 'react';
 import Header from "./Header";
 import NavbarDefault from "./BotNavBar";
-import PageHeader from "./PageHeader";
 import { useUser } from '../UserContext';
 
 interface LayoutProps {
@@ -10,13 +9,13 @@ interface LayoutProps {
 }
 
 export default function Layout({pageHeader, children }: LayoutProps) {
-    const {name, unassessed, unchecked} = useUser();
+    const {unassessed, unchecked} = useUser();
     
     return (
         <div>
             <div className='layout-padding'>
-                <Header name={name}/>
-                <PageHeader>{pageHeader}</PageHeader>
+                <Header name={pageHeader}/>
+                {/* <PageHeader>{pageHeader}</PageHeader> */}
             </div>
             <div className="pb-16">
                 {children}

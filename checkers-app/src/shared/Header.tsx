@@ -6,11 +6,9 @@ interface HeaderProps {
 
 export default function Header({name}: HeaderProps) {
   return (
-    <div className="container relative mb-4">
-      <div className="w-[78vw]">
-      <Typography variant="h2" className="text-primary-color2">Hello, {name}</Typography>
-      </div>
-      <img className="rounded-full absolute top-0 right-0 h-[12vw] w-[12vw] orange-glow" src="./logo-1.jpg" />
+    <div className="flex justify-between items-center mb-4">
+      <Typography variant="h3" className="text-primary-color2">{name}</Typography>
+      <img className="rounded-full h-[12vw] w-[12vw] orange-glow" src="./logo-1.jpg" />
     </div>
   );
 }
