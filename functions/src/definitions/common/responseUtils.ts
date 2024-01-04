@@ -358,7 +358,7 @@ async function sendVotingStats(instancePath: string) {
       count: legitimateCount,
       isInfo: false,
     },
-    { name: "unsure", count: unsureCount, isInfo: false },
+    { name: responses.PLACEHOLDER_UNSURE, count: unsureCount, isInfo: false },
   ]
 
   categories.sort((a, b) => b.count - a.count) // sort in descending order
