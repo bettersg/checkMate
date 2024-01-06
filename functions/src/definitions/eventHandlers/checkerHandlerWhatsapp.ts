@@ -457,7 +457,6 @@ const onCheckerPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
     ],
   },

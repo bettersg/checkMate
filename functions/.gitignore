@@ -3,3 +3,5 @@ node_modules/
 .secret.local
 lib
 .env
+.env.prod
+.env.uat

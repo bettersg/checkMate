@@ -2,7 +2,7 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
-import TelegramBot, { Update} from "node-telegram-bot-api"
+import TelegramBot, { Update } from "node-telegram-bot-api"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
@@ -14,11 +14,10 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 // More bot handlers can go here...
-const responsesSnap = db.collection("systemParameters").doc("factCheckerBotResponses").get()
 
-let name : string ="";
-let phoneNo : string ="";
-const ONBOARDING_4 : string ="Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! Use the '/info' command for more resources. Thanks again for joining our community of CheckMates!";
+let name: string = "";
+let phoneNo: string = "";
+const ONBOARDING_4: string = "Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! Use the '/info' command for more resources. Thanks again for joining our community of CheckMates!";
 
 // General message handler
 bot.on("message", (msg) => {
@@ -32,19 +31,19 @@ bot.on("message", (msg) => {
 
 // '/start' command should check if the chatId is in database, if not, start onboarding process
 bot.onText(/\/start/, async (msg) => {
-  if (msg.from){
+  if (msg.from) {
     const userId = (msg.from.id).toString()
     const chatId = msg.chat.id.toString();
     const userSnap = db
-        .collection("factCheckers")
-        .doc(userId)
-        .get() 
+      .collection("factCheckers")
+      .doc(userId)
+      .get()
     //check if user exists in database
     if ((await userSnap).exists) {
       bot.sendMessage(chatId, "Welcome to the checker bot! You will receive messages for fact checking soon!")
       //add function to start receiving messsages
     }
-    else{
+    else {
       onboardingFlow(chatId);
     }
   }
@@ -55,12 +54,14 @@ bot.onText(/\/start/, async (msg) => {
 
 async function onboardingFlow(chatId: string) {
   // Send the initial onboarding message and await the response
+  const responsesSnap = db.collection("systemParameters").doc("factCheckerBotResponses").get()
+
   const msgToReply = await bot.sendMessage(
     chatId,
     (await responsesSnap).get("ONBOARDING_1"),
     { reply_markup: { force_reply: true } }
   );
-  
+
   bot.on("message", async (msg) => {
     if (msg.reply_to_message && msg.reply_to_message.message_id == msgToReply.message_id) {
       if (msg.from && msg.text) {
@@ -77,26 +78,33 @@ async function onboardingFlow(chatId: string) {
               ],
             },
           }
-      )}
+        )
+      }
     }
   });
 }
 
 bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
   // increment counter when everytime the button is pressed
+  const responsesSnap = db.collection("systemParameters").doc("factCheckerBotResponses").get()
+
   if (callbackQuery.data == "Got it!" && callbackQuery.message) {
-    bot.sendMessage(callbackQuery.message.chat.id, (await responsesSnap).get("ONBOARDING_3"), 
-    {reply_markup: {inline_keyboard:[
-      [{ text: "Take me to quiz!", url: "https://bit.ly/checkmates-quiz" }], 
-      [{text: "Finished the quiz!", callback_data:"Quiz done!"}]]}
-    });
+    bot.sendMessage(callbackQuery.message.chat.id, (await responsesSnap).get("ONBOARDING_3"),
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "Take me to quiz!", url: "https://bit.ly/checkmates-quiz" }],
+            [{ text: "Finished the quiz!", callback_data: "Quiz done!" }]]
+        }
+      });
   }
-  else if (callbackQuery.data =="Quiz done!" && callbackQuery.message){
+  else if (callbackQuery.data == "Quiz done!" && callbackQuery.message) {
     bot.sendMessage(callbackQuery.message.chat.id, ONBOARDING_4);
     const userId = (callbackQuery.from.id).toString();
     // Store the user's name in Firebase Firestore
     const userRef = db.collection("factCheckers").doc(userId);
-    userRef.set({ name: name,
+    userRef.set({
+      name: name,
       isActive: true,
       isOnboardingComplete: true,
       level: 1,
@@ -106,11 +114,12 @@ bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
       numVerifiedLinks: 0,
       platformId: userId,
       preferredPlatform: "telegram",
-      lastVotedTimestamp: null,})
-    .then(() => {
-    console.log("User stored in Firebase");
-    //add function to begin receiving messages
-  });
+      lastVotedTimestamp: null,
+    })
+      .then(() => {
+        console.log("User stored in Firebase");
+        //add function to begin receiving messages
+      });
   }
 });
 
@@ -122,7 +131,7 @@ bot.onText(/\/info/, async (msg) => {
         [
           { text: "Private Policy", url: "https://bit.ly/checkmate-privacy" },
         ],
-        [{ text: "Wiki!", url:"https://bit.ly/checkmates-wiki" }],
+        [{ text: "Wiki!", url: "https://bit.ly/checkmates-wiki" }],
       ],
     },
   });
@@ -138,7 +147,6 @@ const onCheckerPublishTelegram = onMessagePublished(
     topic: "checkerEvents",
     secrets: [
       "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
       "TELEGRAM_CHECKER_BOT_TOKEN",
     ],

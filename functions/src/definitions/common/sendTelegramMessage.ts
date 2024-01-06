@@ -29,7 +29,7 @@ const sendTelegramTextMessage = async function (
   if (replyId) {
     data.reply_to_message_id = replyId
   }
-  if (reply_markup){
+  if (reply_markup) {
     data.reply_markup = reply_markup
   }
   const response = await axios({

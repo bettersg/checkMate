@@ -232,7 +232,7 @@ async function newTextInstanceHandler({
   let textHash = hashMessage(text)
   // 1 - check if the exact same message exists in database
   try {
-    ;({ embedding, similarity } = await calculateSimilarity(
+    ; ({ embedding, similarity } = await calculateSimilarity(
       text,
       textHash,
       null
@@ -500,11 +500,11 @@ async function newImageInstanceHandler({
   if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
     try {
       textHash = hashMessage(extractedMessage)
-      ;({ embedding, similarity } = await calculateSimilarity(
-        extractedMessage,
-        textHash,
-        captionHash
-      ))
+        ; ({ embedding, similarity } = await calculateSimilarity(
+          extractedMessage,
+          textHash,
+          captionHash
+        ))
     } catch (error) {
       functions.logger.error("Error in calculateSimilarity:", error)
       embedding = null
@@ -682,7 +682,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       break
     case "votingResults":
       let scamShield
-      ;[instancePath, ...scamShield] = rest
+        ;[instancePath, ...scamShield] = rest
       const triggerScamShieldConsent =
         scamShield.length > 0 && scamShield[0] === "scamshield"
       //await sendVotingStats(instancePath, triggerScamShieldConsent)
@@ -955,7 +955,6 @@ const onUserPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
       "OPENAI_API_KEY",
     ],

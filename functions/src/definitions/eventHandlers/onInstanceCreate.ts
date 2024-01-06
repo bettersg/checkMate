@@ -20,6 +20,8 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+const checkerAppHost = process.env.CHECKER_APP_HOST
+
 const onInstanceCreate = functions
   .region("asia-southeast1")
   .runWith({
@@ -28,7 +30,7 @@ const onInstanceCreate = functions
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
+      "TELEGRAM_CHECKER_BOT_TOKEN",
       "OPENAI_API_KEY",
     ],
   })
@@ -155,7 +157,7 @@ async function despatchPoll(
   }
 }
 
-function sendTemplateMessageAndCreateVoteRequest(
+async function sendTemplateMessageAndCreateVoteRequest(
   factCheckerDocSnap: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
@@ -212,7 +214,7 @@ function sendTemplateMessageAndCreateVoteRequest(
         votedTimestamp: null,
       })
       .then(() => {
-        const voteRequestUrl = `https://tongyingsite.tanbingwen.com/checkers/${factCheckerId}/messages/${msgId}/voteRequest`;
+        const voteRequestUrl = `${checkerAppHost}/checkers/${factCheckerId}/messages/${msgId}/voteRequest`;
         // After the voteRequest object is added, send the Telegram template message with the additional voteRequestId parameter
         return sendTelegramTextMessage(
           "factChecker",
@@ -221,11 +223,11 @@ function sendTemplateMessageAndCreateVoteRequest(
           null,
           {
             inline_keyboard: [
-              [{ text: "Yes!", web_app: {url: voteRequestUrl} }],
+              [{ text: "Yes!", web_app: { url: voteRequestUrl } }],
             ]
           })
       })
-} else {
+  } else {
     return Promise.reject(
       new Error(
         `Preferred platform not supported for factChecker ${factChecker.id}`
