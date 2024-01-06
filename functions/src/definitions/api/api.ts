@@ -23,11 +23,11 @@ const testFetch = async () => {
     const snapshot = await db.collection("messages").get();
 
     snapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data())
+      functions.logger.log(doc.id, "=>", doc.data())
     })
     return snapshot
   } catch (err) {
-    console.log(err)
+    functions.logger.log(err)
   }
 }
 
@@ -39,7 +39,7 @@ const stringToTimestamp = (dateString: string) => {
 app.get("/helloworld", async (req, res) => {
   const snapshot = await testFetch()
   if (snapshot && !snapshot.empty) {
-    console.log("success");
+    functions.logger.log("success");
   }
   res.send("Hello World!")
 })
@@ -99,7 +99,7 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
   try {
     //find all the voteRequests sent to user
     const factCheckerRef = db.doc(`factCheckers/${phoneNo}`);
-    // console.log(`Fetch messages by user phone: ${phoneNo}`);
+    functions.logger.log(`Fetch messages by user phone: ${phoneNo}`);
 
     const voteRequestsSnapshot = await db
       .collectionGroup("voteRequests")
@@ -174,7 +174,7 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
         //calculate voting percentages
         const messageRef = doc.ref;
         const responseCount = await getCount(messageRef, "responses");
-        console.log("responseCount: ", responseCount);
+        functions.logger.log("responseCount: ", responseCount);
         let crowdCount = 0;
         let votedCount = 0;
 
@@ -184,7 +184,7 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
         else {
           crowdCount = await getCount(messageRef, `${data.primaryCategory}`)
         }
-        console.log("crowdCount: ", crowdCount);
+        functions.logger.log("crowdCount: ", crowdCount);
         const crowdPercentage = crowdCount > 0 ? Number((crowdCount / responseCount * 100).toFixed(2)) : 0;
         if (isMatch) {
           votedCount = crowdCount;
@@ -229,16 +229,16 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
 
         };
         //print to see what the message obj looks like
-        console.log(message);
+        functions.logger.log(message);
         messagesData.push(message);
       }
     }));
 
 
-    // console.log(messagesData);
+    // functions.logger.log(messagesData);
     return messagesData;
   } catch (err) {
-    console.log(err);
+    functions.logger.log(err);
     return [];
   }
 };
@@ -246,10 +246,10 @@ const fetchMessagesByUserPhone = async (phoneNo: string) => {
 //get all of checker's messages for myVotes page
 app.get("/checkers/:phoneNo/messages", async (req, res) => {
   const phoneNo = req.params.phoneNo;
-  // console.log(`Calling /api/getVotes with: ${phoneNo}`);
+  // functions.logger.log(`Calling /api/getVotes with: ${phoneNo}`);
   const messages = await fetchMessagesByUserPhone(phoneNo);
   if (messages.length === 0) {
-    console.log("No messages found");
+    functions.logger.log("No messages found");
   }
   return res.json({ messages: messages })
 })
@@ -283,7 +283,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteResult", async (req, res) => {
       } else {
         const voteRequestDoc = voteRequestQuery.docs[0];
         const voteRequestData = voteRequestDoc.data();
-        // console.log('Existing data:', voteRequestData);
+        // functions.logger.log('Existing data:', voteRequestData);
 
         // Update the hasAgreed and acceptedTimestamp if its first time viewing file (not voted)
         if (data.isAssessed && voteRequestData.checkTimestamp == null && voteRequestData.category != null) {
@@ -308,7 +308,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteResult", async (req, res) => {
           truthScore: updatedVoteRequestData?.truthScore || null,
           isView: (data.isAssessed && updatedVoteRequestData?.checkTimestamp && updatedVoteRequestData.category) || (!data.isAssessed && updatedVoteRequestData?.acceptedTimestamp && updatedVoteRequestData.hasAgreed) ? true : false,
         };
-        // console.log('Updated data:', voteReq);
+        // functions.logger.log('Updated data:', voteReq);
         res.status(200).json({ success: true, voteRequest: voteReq });
         return;
       }
@@ -351,7 +351,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
       if (!voteRequestDoc) {
         res.status(404).json({ error: 'VoteRequest document not found' });
       } else {
-        // console.log('Existing data:', voteRequestDoc.data());
+        // functions.logger.log('Existing data:', voteRequestDoc.data());
         //update isView after first vote
         if (voteRequestDoc.data()?.hasAgreed == false && !voteRequestDoc.data()?.acceptedTimestamp) {
           await voteRequestDoc.ref.update({
@@ -383,7 +383,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
           truthScore: updatedVoteRequestData?.truthScore || null,
           isView: (data?.isAssessed && updatedVoteRequestData?.checkTimestamp && updatedVoteRequestData.category) || (!data?.isAssessed && updatedVoteRequestData?.acceptedTimestamp && updatedVoteRequestData.hasAgreed) ? true : false,
         };
-        // console.log('Updated data:', voteReq);
+        // functions.logger.log('Updated data:', voteReq);
         res.status(200).json({ success: true, voteRequest: voteReq });
       }
     }
