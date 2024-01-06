@@ -333,7 +333,7 @@ async function sendVotingStats(instancePath: string) {
     } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
       truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
-      truthCategory = responses.PLACEHOLDER_MISLEADING
+      truthCategory = responses.PLACEHOLDER_ACCURATE
     }
   } else truthCategory = "NA"
 
