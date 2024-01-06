@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import { respondToInstance } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { rationaliseMessage } from "../common/genAI"
+import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
 
 const onMessageUpdate = functions
   .region("asia-southeast1")
@@ -56,6 +56,16 @@ const onMessageUpdate = functions
       }
       await after.ref.update({
         rationalisation: rationalisation,
+      })
+    }
+    if (
+      before.data().primaryCategory !== primaryCategory &&
+      primaryCategory === "legitimate" &&
+      text
+    ) {
+      const anonymisedText = await anonymiseMessage(text, false)
+      await after.ref.update({
+        text: anonymisedText,
       })
     }
     return Promise.resolve()

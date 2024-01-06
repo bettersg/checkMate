@@ -11,6 +11,6 @@
   "scripts": {
     "lint": "eslint . --ext js,jsx,ts,tsx --fix",
     "postinstall": "cd functions && npm install && cd ../checkers-app && npm install",
-    "serve": "firebase emulators:start --import ./local-data --export-on-exit ./local-data"
+    "serve": "firebase emulators:start --project checkmate-uat --import ./local-data --export-on-exit ./local-data"
   }
 }

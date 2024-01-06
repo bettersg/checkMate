@@ -4,11 +4,13 @@ import USER_BOT_RESPONSES from "./parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "./parameters/checkerResponses.json"
 import {
   sendWhatsappButtonMessage,
+  sendWhatsappImageMessage,
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getThresholds, sleep } from "./utils"
+import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getCount } from "./counters"
 
@@ -76,43 +78,6 @@ function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
   )
 }
 
-async function respondToInterimFeedback(
-  instancePath: string,
-  isUseful: string
-) {
-  const instanceRef = db.doc(instancePath)
-  const instanceSnap = await instanceRef.get()
-  const data = instanceSnap.data()
-  const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
-  if (!data) {
-    functions.logger.log("Missing data in respondToInterimFeedback")
-    return
-  }
-  const buttons = [
-    {
-      type: "reply",
-      reply: {
-        id: `sendInterim_${instancePath}`,
-        title: responses.BUTTON_ANOTHER_UPDATE,
-      },
-    },
-  ]
-  let response
-  switch (isUseful) {
-    case "yes":
-      response = responses?.INTERIM_USEFUL
-      await instanceRef.update({ isInterimUseful: true })
-      break
-    default:
-      response = responses?.INTERIM_NOT_USEFUL
-      await instanceRef.update({ isInterimUseful: false })
-      break
-  }
-
-  await sendWhatsappButtonMessage("user", from, response, buttons, data.id)
-}
-
 async function respondToRationalisationFeedback(
   instancePath: string,
   isUseful: string
@@ -129,7 +94,7 @@ async function respondToRationalisationFeedback(
   let response
   switch (isUseful) {
     case "yes":
-      response = responses?.RATIONALISATION_USEFUL
+      response = responses?.FEEDBACK_THANKS
       await instanceRef.update({ isRationalisationUseful: true })
       break
     default:
@@ -141,13 +106,29 @@ async function respondToRationalisationFeedback(
   await sendWhatsappTextMessage("user", from, response)
 }
 
+async function respondToBlastFeedback(
+  blastPath: string,
+  feedbackCategory: string,
+  from: string
+) {
+  const blastFeedbackRef = db.doc(blastPath).collection("recipients").doc(from)
+  const responses = await getResponsesObj("user", from)
+  blastFeedbackRef.update({
+    feebackCategory: feedbackCategory,
+  })
+  await sendWhatsappTextMessage("user", from, responses.FEEDBACK_THANKS)
+}
+
 async function sendMenuMessage(
   to: string,
   prefixName: string,
   platform = "whatsapp",
   replyMessageId: string | null = null,
-  disputedInstancePath: string | null = null
+  disputedInstancePath: string | null = null,
+  isTruncated: boolean = false
 ) {
+  const userSnap = await db.collection("users").doc(to).get()
+  const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
   const responses = await getResponsesObj("user", to)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
@@ -199,6 +180,17 @@ async function sendMenuMessage(
           title: responses.MENU_TITLE_CONTACT,
           description: responses.MENU_DESCRIPTION_CONTACT,
         },
+        {
+          id: isSubscribedUpdates
+            ? `${type}_unsubscribeUpdates`
+            : `${type}_subscribeUpdates`,
+          title: isSubscribedUpdates
+            ? responses.MENU_TITLE_UNSUB
+            : responses.MENU_TITLE_SUB,
+          description: isSubscribedUpdates
+            ? responses.MENU_DESCRIPTION_UNSUB
+            : responses.MENU_DESCRIPTION_SUB,
+        },
 
         //TODO: Implement these next time
         // {
@@ -224,9 +216,14 @@ async function sendMenuMessage(
           description: responses.MENU_DESCRIPTION_DISPUTE,
         })
       }
+      //filter truncated rows such that only those containing check, referral, and contact in the id are kept
+      const keep = ["check", "referral", "contact"]
+      const truncatedRows = rows.filter((row) =>
+        keep.some((id) => row.id.includes(id))
+      )
       const sections = [
         {
-          rows: rows,
+          rows: isTruncated ? truncatedRows : rows,
         },
       ]
       await sendWhatsappTextListMessage(
@@ -341,7 +338,11 @@ async function sendVotingStats(instancePath: string) {
   } else truthCategory = "NA"
 
   const categories = [
-    { name: "trivial", count: irrelevantCount, isInfo: false },
+    {
+      name: responses.PLACEHOLDER_IRRELEVANT,
+      count: irrelevantCount,
+      isInfo: false,
+    },
     {
       name:
         scamCount >= illicitCount
@@ -357,7 +358,7 @@ async function sendVotingStats(instancePath: string) {
       count: legitimateCount,
       isInfo: false,
     },
-    { name: "unsure", count: unsureCount, isInfo: false },
+    { name: responses.PLACEHOLDER_UNSURE, count: unsureCount, isInfo: false },
   ]
 
   categories.sort((a, b) => b.count - a.count) // sort in descending order
@@ -483,7 +484,7 @@ async function updateLanguageAndSendMenu(from: string, language: string) {
   await userRef.update({
     language: language,
   })
-  await sendMenuMessage(from, "MENU_PREFIX")
+  await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
 }
 
 async function sendInterimUpdate(instancePath: string) {
@@ -558,18 +559,13 @@ async function sendInterimUpdate(instancePath: string) {
       return
   }
   const updateObj: {
-    isInterimUseful?: boolean
     isMeaningfulInterimReplySent?: boolean
     prelimAssessment?: string
     isInterimReplySent?: boolean
   } = {}
   let finalResponse
-  let isFirstMeaningfulReply = false
   if (primaryCategory === "unsure") {
     finalResponse = responses.INTERIM_TEMPLATE_UNSURE
-    if (data.isInterimUseful === null) {
-      updateObj.isInterimUseful = false
-    }
     if (data.isMeaningfulInterimReplySent === null) {
       updateObj.isMeaningfulInterimReplySent = false
     }
@@ -577,48 +573,22 @@ async function sendInterimUpdate(instancePath: string) {
     finalResponse = responses.INTERIM_TEMPLATE
     if (!data.isMeaningfulInterimReplySent) {
       updateObj.isMeaningfulInterimReplySent = true
-      isFirstMeaningfulReply = true
     }
   }
-  const getFeedback =
-    (data.isInterimUseful === null || isFirstMeaningfulReply) &&
-    primaryCategory !== "unsure" &&
-    FEEDBACK_FEATURE_FLAG
   finalResponse = finalResponse
     .replace("{{prelim_assessment}}", prelimAssessment)
     .replace("{{info_placeholder}}", infoPlaceholder)
     .replace("{{%voted}}", percentageVoted)
-    .replace("{{get_feedback}}", getFeedback ? responses.INTERIM_FEEDBACK : "")
 
-  let buttons
-  if (getFeedback) {
-    buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackInterim_${instancePath}_yes`,
-          title: responses.BUTTON_USEFUL,
-        },
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `sendInterim_${instancePath}`,
+        title: responses.BUTTON_ANOTHER_UPDATE,
       },
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackInterim_${instancePath}_no`,
-          title: responses.BUTTON_NOT_USEFUL,
-        },
-      },
-    ]
-  } else {
-    buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `sendInterim_${instancePath}`,
-          title: responses.BUTTON_ANOTHER_UPDATE,
-        },
-      },
-    ]
-  }
+    },
+  ]
   await sendWhatsappButtonMessage("user", from, finalResponse, buttons, data.id)
   if (!instanceSnap.get("isInterimReplySent")) {
     updateObj.isInterimReplySent = true
@@ -909,6 +879,96 @@ async function sendLanguageSelection(user: string, newUser: boolean) {
   await sendWhatsappButtonMessage("user", user, response, buttons)
 }
 
+async function sendBlast(user: string) {
+  const blastQuerySnap = await db
+    .collection("blasts")
+    .where("isActive", "==", true)
+    .orderBy("createdDate", "desc") // Order by createdDate in descending order
+    .limit(1) // Limit to 1 document
+    .get()
+  const responses = await getResponsesObj("user", user)
+  if (blastQuerySnap.empty) {
+    functions.logger.warn(
+      `No active blast found when attempting to send blast to user ${user}`
+    )
+    await sendTextMessage("user", user, responses.GENERIC_ERROR)
+    return
+  }
+  const blastSnap = blastQuerySnap.docs[0]
+  const blastData = blastSnap.data()
+  switch (blastData.type) {
+    case "image":
+      if (!blastData.storageUrl) {
+        functions.logger.error(
+          `No image url found for blast ${blastSnap.ref.path}`
+        )
+        await sendTextMessage("user", user, responses.GENERIC_ERROR)
+        return
+      } else {
+        //send image to user
+        const signedUrl = await getSignedUrl(blastData.storageUrl)
+        await sendWhatsappImageMessage(
+          "user",
+          user,
+          null,
+          signedUrl,
+          blastData.text ?? null,
+          null
+        )
+      }
+      break
+    case "text":
+      if (!blastData.text) {
+        functions.logger.error(`No text found for blast ${blastSnap.ref.path}`)
+        await sendTextMessage("user", user, responses.GENERIC_ERROR)
+        return
+      } else {
+        //send text to user
+        await sendTextMessage("user", user, blastData.text)
+      }
+      break
+  }
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackBlast_${blastSnap.ref.path}_negative`,
+        title: responses.BUTTON_BOO,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackBlast_${blastSnap.ref.path}_neutral`,
+        title: responses.BUTTON_MEH,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackBlast_${blastSnap.ref.path}_positive`,
+        title: responses.BUTTON_SHIOK,
+      },
+    },
+  ]
+  await blastSnap.ref
+    .collection("recipients")
+    .doc(user)
+    .set(
+      {
+        feebackCategory: null,
+        sentTimestamp: Timestamp.fromDate(new Date()),
+      },
+      { merge: true }
+    )
+  await sendWhatsappButtonMessage(
+    "user",
+    user,
+    responses.BLAST_FEEDBACK,
+    buttons
+  )
+}
+
 export {
   getResponsesObj,
   respondToInstance,
@@ -917,9 +977,10 @@ export {
   sendInterimUpdate,
   sendVotingStats,
   sendReferralMessage,
-  respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
   sendLanguageSelection,
+  sendBlast,
+  respondToBlastFeedback,
 }

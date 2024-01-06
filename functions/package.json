@@ -27,6 +27,7 @@
     "firebase": "^9.15.0",
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.5.0",
+    "google-auth-library": "^9.2.0",
     "googleapis": "^112.0.0",
     "hashids": "^2.3.0",
     "image-hash": "^5.3.1",

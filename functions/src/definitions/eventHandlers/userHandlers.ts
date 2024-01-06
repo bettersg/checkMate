@@ -20,11 +20,12 @@ import {
   sendInterimUpdate,
   sendVotingStats,
   sendReferralMessage,
-  respondToInterimFeedback,
   sendRationalisation,
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
   sendLanguageSelection,
+  sendBlast,
+  respondToBlastFeedback,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -39,7 +40,6 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
-import { user } from "firebase-functions/v1/auth"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
@@ -89,85 +89,24 @@ const userHandlerWhatsapp = async function (message: Message) {
       if (!message.text || !message.text.body) {
         break
       }
+      const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
-        //case where user clicks generic acquisition links
-        normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
-          .toLowerCase()
-          .startsWith(responses?.GENERIC_PREPOPULATED_PREFIX.toLowerCase())
+        textNormalised.startsWith(
+          responses?.REFERRAL_PREPOPULATED_PREFIX.split(
+            "{{code}}"
+          )[0].toLowerCase()
+        ) &&
+        textNormalised.endsWith(
+          responses?.REFERRAL_PREPOPULATED_PREFIX.split("{{code}}")
+            .slice(-1)[0]
+            .toLowerCase()
+        )
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
-          const code = message.text.body.split(":")[1].trim()
-          if (code.length > 0) {
-            const referralClickSnap = await db
-              .collection("referralClicks")
-              .doc(code)
-              .get()
-            await userRef.update({
-              firstMessageType: "prepopulated",
-              utm: {
-                source: referralClickSnap.get("utmSource") ?? "none",
-                medium: referralClickSnap.get("utmMedium") ?? "none",
-                content: referralClickSnap.get("utmContent") ?? "none",
-                campaign: referralClickSnap.get("utmCampaign") ?? "none",
-                term: referralClickSnap.get("utmTerm") ?? "none",
-              },
-            })
-          }
+          await referralHandler(message.text.body, from)
         } else {
           await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
-        }
-        break
-      }
-      if (
-        //case where user clicks unique referral links
-        normalizeSpaces(message.text.body) //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
-          .toLowerCase()
-          .startsWith(responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase())
-      ) {
-        step = "text_prepopulated"
-        let referrer = "none"
-        if (isFirstTimeUser) {
-          const code = message.text.body.split(":")[1].trim()
-          if (code.length > 0) {
-            try {
-              referrer = String(hashids.decode(code)[0])
-              const referralSourceSnap = await db
-                .collection("users")
-                .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
-                .get()
-              if (!referralSourceSnap.exists) {
-                functions.logger.warn(
-                  `Referral code ${code}, sent by ${from} does not decode to any user id`
-                )
-              } else {
-                await referralSourceSnap.ref.update({
-                  referralCount: FieldValue.increment(1),
-                })
-                await userRef.update({
-                  firstMessageType: "prepopulated",
-                  utm: {
-                    source: referrer,
-                    medium: "uniqueLink",
-                    content: "none",
-                    campaign: "none",
-                    term: "none",
-                  },
-                })
-              }
-            } catch (error) {
-              functions.logger.error(
-                `Error processing referral code ${code}, sent by ${from}: ${error}`
-              )
-            }
-          }
-        } else {
-          await sendWhatsappTextMessage(
-            "user",
-            from,
-            responses?.REFERRAL_INVALID,
-            message.id
-          )
         }
         break
       }
@@ -218,10 +157,10 @@ const userHandlerWhatsapp = async function (message: Message) {
       const button = message.button
       switch (button.text) {
         case "Get Latest Update":
-          //TODO
+          await sendBlast(from)
           break
         case "Unsubscribe":
-          //TODO
+          await toggleUserSubscription(from, false)
           break
         case "Get Referral Message":
           await sendReferralMessage(from)
@@ -332,7 +271,12 @@ async function newTextInstanceHandler({
       machineCategory !== "info"
     )
 
-    const strippedMessage = await anonymiseMessage(text)
+    let strippedMessage = await anonymiseMessage(text, true)
+
+    if (strippedMessage && machineCategory === "legitimate") {
+      strippedMessage = await anonymiseMessage(strippedMessage, false) //won't run for now till machineCategory returns legitimate
+    }
+
     let rationalisation: null | string = null
     if (
       isMachineAssessed &&
@@ -401,7 +345,6 @@ async function newTextInstanceHandler({
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
-    isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
@@ -680,7 +623,6 @@ async function newImageInstanceHandler({
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
     isInterimPromptSent: null,
-    isInterimUseful: null,
     isInterimReplySent: null,
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
@@ -723,10 +665,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
   const from = messageObj.from
   const responses = await getResponsesObj("user", from)
   const [type, ...rest] = buttonId.split("_")
-  let instancePath,
-    selection,
-    instanceRef,
-    updateObj: { scamShieldConsent?: boolean }
+  let instancePath, selection, instanceRef, blastPath
   switch (type) {
     case "scamshieldDecline":
       ;[instancePath] = rest
@@ -753,10 +692,6 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       ;[instancePath] = rest
       await sendInterimUpdate(instancePath)
       break
-    case "feedbackInterim":
-      ;[instancePath, selection] = rest
-      await respondToInterimFeedback(instancePath, selection)
-      break
     case "rationalisation":
       ;[instancePath] = rest
       await sendRationalisation(instancePath)
@@ -764,6 +699,10 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
     case "feedbackRationalisation":
       ;[instancePath, selection] = rest
       await respondToRationalisationFeedback(instancePath, selection)
+      break
+    case "feedbackBlast":
+      ;[blastPath, selection] = rest
+      await respondToBlastFeedback(blastPath, selection, from)
       break
     case "languageSelection":
       ;[selection] = rest
@@ -848,6 +787,14 @@ async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
           )
           response = responses.DISPUTE
           break
+        case "unsubscribeUpdates":
+          await toggleUserSubscription(from, false)
+          response = responses.UNSUBSCRIBE
+          break
+        case "subscribeUpdates":
+          await toggleUserSubscription(from, true)
+          response = responses.SUBSCRIBE
+          break
       }
       break
     case "satisfactionSurvey":
@@ -905,6 +852,80 @@ function checkMenu(text: string) {
   return menuKeywords.includes(text.toLowerCase())
 }
 
+async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
+  db.collection("users").doc(userId).update({
+    isSubscribedUpdates: toSubscribe,
+  })
+}
+
+async function referralHandler(message: string, from: string) {
+  const code = message.split("\n")[0].split(": ")[1]
+  const userRef = db.collection("users").doc(from)
+  let tryGeneric = true
+  if (code.length > 0) {
+    let referrer
+    try {
+      referrer = String(hashids.decode(code)[0])
+    } catch (error) {
+      functions.logger.error(
+        `Error decoding referral code ${code}, sent by ${from}: ${error}`
+      )
+    }
+    try {
+      if (referrer) {
+        const referralSourceSnap = await db
+          .collection("users")
+          .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
+          .get()
+        if (referralSourceSnap.exists) {
+          tryGeneric = false
+          await referralSourceSnap.ref.update({
+            referralCount: FieldValue.increment(1),
+          })
+          await userRef.update({
+            firstMessageType: "prepopulated",
+            utm: {
+              source: referrer,
+              medium: "uniqueLink",
+              content: "none",
+              campaign: "none",
+              term: "none",
+            },
+          })
+          return
+        }
+      }
+
+      if (tryGeneric) {
+        const referralClickSnap = await db
+          .collection("referralClicks")
+          .doc(code)
+          .get()
+        if (referralClickSnap.exists) {
+          await userRef.update({
+            firstMessageType: "prepopulated",
+            utm: {
+              source: referralClickSnap.get("utmSource") ?? "none",
+              medium: referralClickSnap.get("utmMedium") ?? "none",
+              content: referralClickSnap.get("utmContent") ?? "none",
+              campaign: referralClickSnap.get("utmCampaign") ?? "none",
+              term: referralClickSnap.get("utmTerm") ?? "none",
+            },
+          })
+        } else {
+          functions.logger.warn(
+            "Referral code not found in either users or referralClicks collection"
+          )
+        }
+      }
+    } catch (error) {
+      functions.logger.error(
+        `Error processing referral code ${code}, sent by ${from}: ${error}`
+      )
+    }
+  }
+}
+
 async function createNewUser(
   userRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   messageTimestamp: Timestamp
@@ -921,6 +942,7 @@ async function createNewUser(
     referralId: referralId,
     referralCount: 0,
     language: "en",
+    isSubscribedUpdates: true,
   })
 }
 
