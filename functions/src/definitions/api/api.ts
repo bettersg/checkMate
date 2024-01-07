@@ -89,7 +89,7 @@ app.post("/addVoteRequest", async (req, res) => {
 
     res.status(200).json({ success: true, message: "Vote requests added successfully" });
   } catch (error) {
-    console.error("Error adding document: ", error);
+    functions.logger.error("Error adding document: ", error);
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
@@ -315,7 +315,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteResult", async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Error fetching message:', error);
+    functions.logger.error('Error fetching message:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 })
@@ -363,6 +363,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
         await voteRequestDoc.ref.update({
           category: vote,
           votedTimestamp: Timestamp.fromDate(new Date()),
+          vote: truthScore, //otherwise onVoteRequestUpdate won't work...TO REVIEW
           truthScore: truthScore,
         });
 
@@ -389,7 +390,7 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
     }
 
   } catch (error) {
-    console.error('Error updating vote request:', error);
+    functions.logger.error('Error updating vote request:', error);
     res.sendStatus(500);
   }
 
