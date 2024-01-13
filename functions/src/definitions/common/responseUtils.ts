@@ -956,7 +956,7 @@ async function sendBlast(user: string) {
     .doc(user)
     .set(
       {
-        feebackCategory: null,
+        feedbackCategory: null,
         sentTimestamp: Timestamp.fromDate(new Date()),
       },
       { merge: true }
