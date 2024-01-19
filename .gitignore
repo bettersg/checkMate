@@ -63,7 +63,8 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env*
+.secret*
 
 local_batch_jobs
 
