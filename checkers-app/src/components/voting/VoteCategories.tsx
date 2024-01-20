@@ -10,7 +10,7 @@ import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
-import { useUser } from '../../UserContext';
+import { useUser } from '../../providers/UserContext';
 import { Message } from "../../types";
 
 import InfoOptions from "./Tier2";
@@ -98,13 +98,12 @@ export default function VoteCategories(Prop: PropType) {
           updatePending(PENDING);
           const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
           updateUnassessed(pending_unread);
-          
+
           const ASSESSED: Message[] = latestMessages.filter((msg: Message) => msg.isAssessed && msg.voteRequests.category != null);
           ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
           updateAssessed(ASSESSED);
           const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
           updateUnchecked(assessed_unread);
-          
         } catch (error) {
           console.error("Error fetching votes:", error);
         }

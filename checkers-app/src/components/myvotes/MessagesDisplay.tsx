@@ -16,8 +16,8 @@ Idea:
 - Have a nested component for each button
 */
 
-import { useState} from "react";
-import { useUser } from '../../UserContext';
+import { useState } from "react";
+import { useUser } from '../../providers/UserContext';
 import MessageCard from "./MessageCard";
 import { useNavigate } from "react-router-dom";
 

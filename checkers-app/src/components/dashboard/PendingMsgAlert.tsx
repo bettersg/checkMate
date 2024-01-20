@@ -1,7 +1,7 @@
 import { Alert } from "@material-tailwind/react";
 import { EnvelopeIcon } from "@heroicons/react/20/solid";
 import { BellAlertIcon } from "@heroicons/react/20/solid";
-import { useUser } from "../../UserContext";
+import { useUser } from "../../providers/UserContext";
 
 //true for pending messages, fale for update on pending VOTE
 export default function PendingMessageAlert({ Type }: { Type: boolean }) {

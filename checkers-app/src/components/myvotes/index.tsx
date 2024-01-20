@@ -2,7 +2,7 @@ import LoadingPage from "./LoadingPage";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InformationButton from "./InformationButton";
-import { useUser } from '../../UserContext';
+import { useUser } from '../../providers/UserContext';
 import MessagesDisplay from "./MessagesDisplay";
 import { Message } from "../../types";
 
@@ -108,7 +108,7 @@ export default function MyVotes() {
           <InformationButton />
 
           {/* ----------------- TO BE CHNAGED TO TABS ----------------- */}
-          <MessagesDisplay/>
+          <MessagesDisplay />
           {/* ----------------- OLD DESIGN ----------------- */}
           {/* <Accordion open={openPending} icon={<Icon open={openPending} />}
             className="mb-2 rounded-lg border border-secondary-color2 px-4">

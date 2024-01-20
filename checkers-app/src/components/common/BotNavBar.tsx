@@ -1,5 +1,5 @@
 import { Navbar, Badge, Button } from "@material-tailwind/react";
-import { useUser } from '../UserContext';
+import { useUser } from '../../providers/UserContext';
 import { useNavigate } from "react-router-dom";
 import {
   PresentationChartBarIcon,

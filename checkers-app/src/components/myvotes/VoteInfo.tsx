@@ -1,7 +1,7 @@
 import {
     Typography,
 } from "@material-tailwind/react";
-import MessageCard from "../../shared/MessageCard";
+import MessageCard from "../common/MessageCard";
 import VoteResult from "../myvotes/VoteResult";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import CategoryRationalisation from "../myvotes/Rationalisation";

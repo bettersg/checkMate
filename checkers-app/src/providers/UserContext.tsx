@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { Message } from './types';
+import { Message } from '../types';
 
 interface UserContextProps {
     userId: string | null;
@@ -27,6 +27,7 @@ export const UserProvider = ({ children, value }: { children: React.ReactNode, v
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useUser = (): UserContextProps => {
     const context = useContext(UserContext);
     if (!context) {

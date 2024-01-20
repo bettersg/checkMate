@@ -6,7 +6,7 @@ import {
 } from "firebase/auth";
 import "./App.css";
 import app from "./firebase";
-import { UserProvider } from './UserContext';
+import { UserProvider } from './providers/UserContext';
 import {
   AchievementPage,
   DashboardPage,
@@ -33,7 +33,7 @@ if (import.meta.env.MODE === "dev") {
 
 function App() {
   const [count, setCount] = useState(0);
-  const [telegramApp, setTelegramApp] = useState(null);
+  const [telegramApp, setTelegramApp] = useState({});
   //for global states: userID, name and messages
   const [userId, setUserId] = useState(null);
   const [name, setName] = useState('');
@@ -52,7 +52,7 @@ function App() {
     ) {
       setTelegramApp(window.Telegram.WebApp);
       const initData = window.Telegram.WebApp.initData;
-      if (true || initData) {
+      if (initData) {
         // Call your Firebase function to validate the receivedData and get custom token
         fetch("/telegramAuth/", {
           method: "POST",
@@ -93,8 +93,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Only call the API when userId is available to update messages
-    if (userId && phoneNo) {
+    // Only call the API when phoneNo is available to update messages
+    if (phoneNo) {
       const fetchData = async () => {
         try {
           const response = await fetch(`/api/checkers/${phoneNo}/messages`, {

@@ -1,7 +1,7 @@
 import { Typography } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import PendingMessageAlert from "./PendingMsgAlert";
-import { useUser } from "../../UserContext";
+import { useUser } from "../../providers/UserContext";
 import StatCard from "./StatsCard";
 import { Message } from "../../types";
 //TODO: link to firebase
@@ -24,8 +24,8 @@ export default function Dashboard() {
     setAccuracyRate(parseFloat(accuracyRate.toFixed(2)));
 
     const responseTimes = assessed.map((msg: Message) => {
-      if (msg.voteRequests.acceptedTimestamp && msg.voteRequests.createdTimestamp && msg.voteRequests.acceptedTimestamp.toMillis && msg.voteRequests.createdTimestamp.toMillis) {
-        const millisecondsTime = msg.voteRequests.acceptedTimestamp.toMillis() - msg.voteRequests.createdTimestamp.toMillis();
+      if (msg.voteRequests.acceptedTimestamp && msg.voteRequests.createdTimestamp) {
+        const millisecondsTime = msg.voteRequests.acceptedTimestamp.getMilliseconds() - msg.voteRequests.createdTimestamp.getMilliseconds();
         return millisecondsTime / 1000;
       } else {
         return 0; // or any other default value
@@ -40,8 +40,8 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-y-4 left-right-padding">
-    {unassessed > 0 && <PendingMessageAlert Type={true} />}
-    {unchecked > 0 && <PendingMessageAlert Type={false} />}
+      {unassessed > 0 && <PendingMessageAlert Type={true} />}
+      {unchecked > 0 && <PendingMessageAlert Type={false} />}
       <Typography variant="h4" className="text-primary-color">
         In the past 30 days
       </Typography>

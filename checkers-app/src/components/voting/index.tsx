@@ -1,9 +1,9 @@
 import VoteCategories from "./VoteCategories";
-import MessageCard from "../../shared/MessageCard";
+import MessageCard from "../common/MessageCard";
 import { Typography } from "@material-tailwind/react";
-import { BackButton } from "../../shared/BackButton";
+import { BackButton } from "../common/BackButton";
 import { useEffect, useState } from "react";
-import { useUser } from '../../UserContext';
+import { useUser } from '../../providers/UserContext';
 import { Message } from "../../types";
 
 interface PropType {
@@ -14,7 +14,7 @@ interface PropType {
 export default function VotingPage(Prop: PropType) {
   const { phoneNo, messages } = useUser();
   const [msg, setMsg] = useState<Message | null>(null);
-  
+
   useEffect(() => {
     //only calls api after authentication is done
     if (phoneNo && Prop.msgId) {
@@ -23,11 +23,11 @@ export default function VotingPage(Prop: PropType) {
       // If a matching message is found, set it as the msg state
       if (foundMessage) {
         setMsg(foundMessage);
-              } else {
+      } else {
         console.error(`Message with id ${Prop.msgId} not found in the messages array.`);
       }
     }
-    }, [phoneNo, msg, Prop.msgId, messages]);
+  }, [phoneNo, msg, Prop.msgId, messages]);
 
   return (
     <>
@@ -38,7 +38,7 @@ export default function VotingPage(Prop: PropType) {
           < BackButton />
           <MessageCard text={msg.text} storageUrl={msg.storageUrl} caption={msg.caption} />
           <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
-          <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} truthScore={msg.voteRequests.truthScore}/>
+          <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} truthScore={msg.voteRequests.truthScore} />
         </div >
       }
     </>

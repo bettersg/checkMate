@@ -1,5 +1,5 @@
 import Achievement from "../components/achievements";
-import Layout from "../shared/Layout";
+import Layout from "../components/common/Layout";
 
 export default function AcheivementPage() {
     return (

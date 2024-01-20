@@ -49,7 +49,7 @@ function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
 
 //display tier 2 voting (satire/truthscore) on "info" cat selection
 export default function InfoOptions(Prop: InfoOptionsProps) {
-  
+
   return (
     <div>
       <Typography className="text-primary-color3">
