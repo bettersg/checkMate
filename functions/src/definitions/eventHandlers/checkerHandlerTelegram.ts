@@ -66,10 +66,16 @@ async function onboardingFlow(chatId: string) {
     if (msg.reply_to_message && msg.reply_to_message.message_id == msgToReply.message_id) {
       if (msg.from && msg.text) {
         name = msg.text;
+        var message = (await responsesSnap).get("ONBOARDING_2")
+        if (name && message) {
+          message = String(message).replace("{{name}}", name)
+        } else {
+          message = "Error encountered, please try again"
+        }
         // Send the second onboarding message
         await bot.sendMessage(
           chatId,
-          (await responsesSnap).get("ONBOARDING_2"),
+          message,
           {
             reply_markup: {
               inline_keyboard: [
