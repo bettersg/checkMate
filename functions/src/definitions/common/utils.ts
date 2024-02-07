@@ -49,22 +49,29 @@ async function checkMessageId(messageId: string) {
 }
 
 function stripPhone(originalStr: string, includePlaceholder = false) {
-  const phoneNumbers = findPhoneNumbersInText(originalStr)
-  let newStr = originalStr
-  let offset = 0
+  let transformedString = originalStr
+
+  const maxTransformsThreshold = 30
+  let transformationsCount = 0
+
   const placeholder = includePlaceholder ? "<PHONE_NUM>" : ""
-  phoneNumbers.forEach((phoneNumber) => {
-    const { startsAt, endsAt } = phoneNumber
-    const adjustedStartsAt = startsAt - offset
-    const adjustedEndsAt = endsAt - offset
-    newStr =
-      newStr.slice(0, adjustedStartsAt) +
+
+  while (
+    transformationsCount < maxTransformsThreshold &&
+    findPhoneNumbersInText(transformedString).length !== 0
+  ) {
+    const currentModification = findPhoneNumbersInText(transformedString)[0]
+    const { startsAt, endsAt } = currentModification
+
+    transformedString =
+      transformedString.slice(0, startsAt) +
       placeholder +
-      newStr.slice(adjustedEndsAt)
-    offset += endsAt - startsAt
-  })
-  newStr = newStr.replace(/[0-9]{7,}/g, placeholder)
-  return newStr
+      transformedString.slice(endsAt)
+
+    transformationsCount++
+  }
+  transformedString = transformedString.replace(/[0-9]{7,}/g, placeholder)
+  return transformedString
 }
 
 function checkUrlPresence(originalStr: string): boolean {
