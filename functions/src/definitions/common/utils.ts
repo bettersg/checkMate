@@ -48,30 +48,19 @@ async function checkMessageId(messageId: string) {
   return messageSnap.exists
 }
 
-function stripPhone(originalStr: string, includePlaceholder = false) {
-  let transformedString = originalStr
+function stripPhone(text: string, includePlaceholder = false): string {
+  if (findPhoneNumbersInText(text).length === 0) {
+    return text.replace(/[0-9]{7,}/g, includePlaceholder ? "<PHONE_NUM>" : "")
+  }
 
-  const maxTransformsThreshold = 30
-  let transformationsCount = 0
+  const currentModification = findPhoneNumbersInText(text)[0]
+  const { startsAt, endsAt } = currentModification
 
   const placeholder = includePlaceholder ? "<PHONE_NUM>" : ""
 
-  while (
-    transformationsCount < maxTransformsThreshold &&
-    findPhoneNumbersInText(transformedString).length !== 0
-  ) {
-    const currentModification = findPhoneNumbersInText(transformedString)[0]
-    const { startsAt, endsAt } = currentModification
+  text = text.slice(0, startsAt) + placeholder + text.slice(endsAt)
 
-    transformedString =
-      transformedString.slice(0, startsAt) +
-      placeholder +
-      transformedString.slice(endsAt)
-
-    transformationsCount++
-  }
-  transformedString = transformedString.replace(/[0-9]{7,}/g, placeholder)
-  return transformedString
+  return stripPhone(text, includePlaceholder)
 }
 
 function checkUrlPresence(originalStr: string): boolean {
