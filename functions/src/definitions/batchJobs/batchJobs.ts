@@ -17,6 +17,9 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+/**
+ *
+ */
 async function deactivateAndRemind() {
   try {
     const db = admin.firestore()
@@ -60,6 +63,14 @@ async function deactivateAndRemind() {
   }
 }
 
+/**
+ * Retrieves stale conversations threads within the window (now - 24H, now - 23H] that are
+ * expiring in the next hour and triggers a forced response from our bot to these threads.
+ * 
+ * More information on Conversation-Based Pricing below.
+ * 
+ * @link https://developers.facebook.com/docs/whatsapp/pricing/
+ */
 async function checkConversationSessionExpiring() {
   try {
     const db = admin.firestore()
@@ -85,6 +96,9 @@ async function checkConversationSessionExpiring() {
   }
 }
 
+/**
+ *
+ */
 async function interimPromptHandler() {
   try {
     const db = admin.firestore()
@@ -126,6 +140,11 @@ async function interimPromptHandler() {
   }
 }
 
+/**
+ * Cloud Scheduler for checkConversationSessionExpiring.
+ *
+ * Runs "At minute 1". Example: 00:01, 01:01, 02:01, 03:01, ...
+ */
 const checkSessionExpiring = onSchedule(
   {
     schedule: "1 * * * *",
@@ -146,6 +165,11 @@ const scheduledDeactivation = onSchedule(
   deactivateAndRemind
 )
 
+/**
+ * Cloud Scheduler to run interimPromptHandler
+ *
+ * Runs "At minute 2, 22 and 42". Example: 00:02, 00:22, 00:42, 01:02, 01:22, 01:42, ...
+ */
 const sendInterimPrompt = onSchedule(
   {
     schedule: "2,22,42 * * * *",

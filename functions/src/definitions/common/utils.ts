@@ -14,7 +14,7 @@ const env = process.env.ENVIRONMENT
 /**
  * Triggers an artificial delay in specified milliseconds. 
  * 
- * @param { number } ms - The delay duration in milliseconds.
+ * @param { number } ms The delay duration in milliseconds.
  * @returns { Promise<unknown> }
  */
 function sleep(ms: number) {
@@ -41,8 +41,8 @@ const getThresholds = async function () {
 /**
  * Normalizes all spaces in a string to U+0020 unicode. 
  * 
- * @param { string } str - String to be normalized.
- * @returns { string } - Normalized string.
+ * @param { string } str String to be normalized.
+ * @returns { string } Normalized string.
  */
 function normalizeSpaces(str: string) {
   return str.replace(/\u00A0/g, " ")
@@ -51,8 +51,8 @@ function normalizeSpaces(str: string) {
 /**
  * Checks if a string conforms to HTTP or HTTPS protocol.
  * 
- * @param { string } urlString - String to be checked.
- * @returns { boolean } - Result of whether a string is a valid URL.
+ * @param { string } urlString String to be checked.
+ * @returns { boolean } Result of whether a string is a valid URL.
  */
 const checkUrl = function (urlString: string) {
   let url
@@ -67,8 +67,8 @@ const checkUrl = function (urlString: string) {
 /**
  * Checks string provided is an existing message ID in Firestore.
  * 
- * @param { string } messageId - String being verified.
- * @returns { boolean } - Result of whether the string is a message ID in Firestore.
+ * @param { string } messageId String being verified.
+ * @returns { boolean } Result of whether the string is a message ID in Firestore.
  */
 async function checkMessageId(messageId: string) {
   const db = admin.firestore()
