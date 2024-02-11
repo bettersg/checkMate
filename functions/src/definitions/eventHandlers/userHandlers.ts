@@ -340,6 +340,8 @@ async function newTextInstanceHandler({
     caption: null,
     captionHash: null,
     sender: null, //sender name or number (for now not collected)
+    imageType: null, //either "convo", "email", "letter" or "others"
+    ocrVersion: null,
     from: from, //sender phone number, taken from webhook object
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
@@ -601,7 +603,8 @@ async function newImageInstanceHandler({
     caption: caption ?? null,
     captionHash: captionHash,
     sender: sender ?? null, //sender name or number extracted from OCR
-    imageType: imageType, //either "convo", "email", "letter", or "others"
+    imageType: imageType, //either "convo", "email", "letter" or "others"
+    ocrVersion: "2",
     from: from, //sender phone number, taken from webhook object
     hash: hash,
     mediaId: mediaId,
