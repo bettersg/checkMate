@@ -4,6 +4,21 @@
     "prod": "checkmate-373101",
     "uat": "checkmate-uat"
   },
-  "targets": {},
+  "targets": {
+    "checkmate-uat": {
+      "hosting": {
+        "checkers": [
+          "checkmate-checkers-uat"
+        ]
+      }
+    },
+    "checkmate-373101": {
+      "hosting": {
+        "checkers": [
+          "checkmate-373101-checkers"
+        ]
+      }
+    }
+  },
   "etags": {}
 }

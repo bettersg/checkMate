@@ -11,6 +11,10 @@
   "scripts": {
     "lint": "eslint . --ext js,jsx,ts,tsx --fix",
     "postinstall": "cd functions && npm install && cd ../checkers-app && npm install",
-    "serve": "firebase emulators:start --project checkmate-uat --import ./local-data --export-on-exit ./local-data"
+    "serve": "firebase emulators:start --project checkmate-uat --import ./local-data --export-on-exit ./local-data",
+    "predeploy:uat": "cd checkers-app && npm run build:uat && cd ../functions && npm run build",
+    "predeploy:prod": "cd checkers-app && npm run build && cd ../functions && npm run build",
+    "deploy:uat": "firebase deploy --project=uat --only functions,hosting",
+    "deploy:prod": "firebase deploy --project=prod --only functions,hosting"
   }
 }

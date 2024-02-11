@@ -19,9 +19,6 @@ if (!admin.apps.length) {
 
 const onVoteRequestUpdate = functions
   .region("asia-southeast1")
-  .runWith({
-    secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
-  })
   .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
   .onUpdate(async (change, context) => {
     // Grab the current value of what was written to Firestore.
@@ -33,14 +30,7 @@ const onVoteRequestUpdate = functions
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
-    if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
-      await sendVotingMessage(change.after, messageRef)
-    } else if (
-      before.triggerL2Others !== true &&
-      after.triggerL2Others === true
-    ) {
-      await sendL2OthersCategorisationMessage(change.after, messageRef)
-    } else if (before.vote != after.vote || before.category != after.category) {
+   if (before.vote != after.vote || before.category != after.category) {
       await updateCounts(messageRef, before, after)
       await updateCheckerVoteCount(before, after)
       const db = admin.firestore()
@@ -121,7 +111,6 @@ const onVoteRequestUpdate = functions
       })
       if (after.category !== null) {
         //vote has ended
-        await sendRemainingReminder(after.factCheckerDocRef.id, after.platform)
         if (after.votedTimestamp !== before.votedTimestamp) {
           await after.factCheckerDocRef.set(
             {

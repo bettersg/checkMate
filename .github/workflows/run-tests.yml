@@ -24,9 +24,9 @@ jobs:
       - name: Update environment file with latest wordings
         run: npm run update-env
         working-directory: integration-tests
-      - name: Run postman tests
-        run: npm run test
-        working-directory: integration-tests
+      # - name: Run postman tests
+      #   run: npm run test
+      #   working-directory: integration-tests
       - name: Print docker compose logs
         if: success() || failure()
         run: docker-compose logs

@@ -29,6 +29,7 @@ erDiagram
         number instanceCount
         collection instances
         collection voteRequests
+        string imageUrl "url of where the image is stored"
     }
 
     instance {
@@ -82,9 +83,11 @@ erDiagram
         string sentMessageId "message id of the forwarded dubious message to checkers"
         number vote
         sting category "scam, irrelevant, or number"
-        timestamp createdTimestamp
-        timestamp acceptedTimestamp
-        timestamp votedTimestamp
+        timestamp createdTimestamp "time when vote request is sent to user"
+        timestamp acceptedTimestamp "time when user first viewed the message"
+        timestamp votedTimestamp "time when user has voted"
+        timestamp checkTimestamp "time when user checked voted category with crowd vote category"
+        boolean isView "true if user has voted/viewed vote result"
     }
 
     factChecker {

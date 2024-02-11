@@ -1,4 +1,5 @@
 import { IncomingHttpHeaders } from "http"
+import {Timestamp} from "firebase-admin/firestore"
 
 export type WhatsappMessage = {
   from: string
@@ -35,4 +36,34 @@ export type Message = {
   context: { id: string; forwarded: boolean; frequently_forwarded: boolean }
   timestamp: number
   image?: { caption: string; id: string; mime_type: string }
+}
+
+export type VoteRequest = {
+  id: string; 
+  factCheckerDocRef: string;
+  category: string | null;
+  createdTimestamp: Timestamp;
+  acceptedTimestamp: Timestamp | null;
+  hasAgreed: boolean;
+  vote: number | null;
+  votedTimestamp: Timestamp | null;
+  checkTimestamp: Timestamp | null,
+  truthScore: number | null;
+  isView: boolean //checks if checker has clicked in to view results/msg
+}
+
+export type TeleMessage = {
+  id: string;
+  caption: string | null;
+  text: string;
+  isAssessed: boolean;
+  isMatch: boolean;
+  primaryCategory: string;
+  voteRequests: VoteRequest;
+  rationalisation: string;
+  avgTruthScore: number | null;
+  firstTimestamp: Timestamp | null;
+  storageUrl: string | null;
+  crowdPercentage: number;
+  votedPercentage: number;
 }

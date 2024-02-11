@@ -4,10 +4,27 @@ import {
   signInWithCustomToken,
   connectAuthEmulator,
 } from "firebase/auth";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import app from "./firebase";
+import { UserProvider } from './providers/UserContext';
+import {
+  AchievementPage,
+  DashboardPage,
+  VotingPage,
+  MyVotesPage,
+} from "./pages";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Message } from "./types";
+
+const router = createBrowserRouter([
+  { path: "/", element: <DashboardPage /> },
+  { path: "/checkers/:phoneNo/messages", element: <MyVotesPage /> },
+  { path: "/achievements", element: <AchievementPage /> },
+  {
+    path: "/checkers/:phoneNo/messages/:msgId/voteRequest",
+    element: <VotingPage />,
+  },
+]);
 
 const auth = getAuth(app);
 if (import.meta.env.MODE === "dev") {
@@ -16,7 +33,17 @@ if (import.meta.env.MODE === "dev") {
 
 function App() {
   const [count, setCount] = useState(0);
-  const [telegramApp, setTelegramApp] = useState(null);
+  const [telegramApp, setTelegramApp] = useState({});
+  //for global states: userID, name and messages
+  const [userId, setUserId] = useState(null);
+  const [name, setName] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [phoneNo, setPhoneNo] = useState('');
+  const [unassessed, setUnassessed] = useState(0);
+  const [unchecked, setUnchecked] = useState(0);
+  const [pending, setPending] = useState<Message[]>([]);
+  const [assessed, setAssessed] = useState<Message[]>([]);
+
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
@@ -25,7 +52,7 @@ function App() {
     ) {
       setTelegramApp(window.Telegram.WebApp);
       const initData = window.Telegram.WebApp.initData;
-      if (true || initData) {
+      if (initData) {
         // Call your Firebase function to validate the receivedData and get custom token
         fetch("/telegramAuth/", {
           method: "POST",
@@ -46,7 +73,9 @@ function App() {
           })
           .then((data) => {
             if (data.customToken) {
-              alert(data.customToken);
+              setUserId(data.userId);
+              setName(data.name);
+              setPhoneNo(data.phoneNo);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
                 console.error(
                   "Error during Firebase signInWithCustomToken",
@@ -63,52 +92,73 @@ function App() {
     }
   }, []);
 
-  const testAPI = async () => {
-    try {
-      const user = auth.currentUser;
-      let token;
-      if (user) {
-        token = await user.getIdToken();
-      }
+  useEffect(() => {
+    // Only call the API when phoneNo is available to update messages
+    if (phoneNo) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`/api/checkers/${phoneNo}/messages`, {
+            method: "GET",
+          });
+          console.log("After fetch");
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
 
-      const response = await fetch("/api/helloworld", {
-        method: "GET", // or POST, PUT, etc. depending on your needs
-        headers: {
-          Authorization: `Bearer ${token}`, // Set the ID token here
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
+          const data = await response.json();
 
-      // Do something with the data
-      alert(JSON.stringify(data));
-    } catch (error) {
-      console.error("Error fetching data from API:", error);
-      alert("Error fetching data");
+          // Convert the ISO string to Date object for all messages
+          data.messages.forEach((msg: Message) => {
+            msg.firstTimestamp = new Date(msg.firstTimestamp);
+            if (msg.voteRequests.acceptedTimestamp != null) {
+              msg.voteRequests.acceptedTimestamp = new Date(msg.voteRequests.acceptedTimestamp);
+            }
+            if (msg.voteRequests.createdTimestamp != null) {
+              msg.voteRequests.createdTimestamp = new Date(msg.voteRequests.createdTimestamp);
+            }
+            if (msg.voteRequests.votedTimestamp != null) {
+              msg.voteRequests.votedTimestamp = new Date(msg.voteRequests.votedTimestamp);
+            }
+            if (msg.voteRequests.checkTimestamp != null) {
+              msg.voteRequests.checkTimestamp = new Date(msg.voteRequests.checkTimestamp);
+            }
+          });
+
+          setMessages(data.messages);
+
+          const PENDING: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category == null);
+          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category != null);
+
+          // Sort by date
+          PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
+          ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
+
+          setPending(PENDING);
+          setAssessed(ASSESSED);
+
+          //calculate & update context pending unread
+          const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
+          setUnassessed(pending_unread);
+          //calculate & update assessed unread
+          const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
+          setUnchecked(assessed_unread);
+
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      };
+      fetchData();
     }
-  };
+  }, [phoneNo]);
+
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={testAPI}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <UserProvider value={{
+      userId, name, phoneNo: phoneNo, messages, updateMessages: setMessages, unassessed, updateUnassessed: setUnassessed, unchecked, updateUnchecked: setUnchecked, pending: pending,
+      assessed: assessed, updatePending: setPending, updateAssessed: setAssessed
+    }}>
+      <RouterProvider router={router} />
+    </UserProvider>
   );
 }
 

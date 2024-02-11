@@ -8,7 +8,7 @@ import { getEmbedding } from "../common/machineLearningServer/operations"
 const onInstanceUpdate = functions
   .region("asia-southeast1")
   .runWith({
-    secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN"],
+    secrets: ["TYPESENSE_TOKEN"],
   })
   .firestore.document("/messages/{messageId}/instances/{instanceId}")
   .onUpdate(async (change, context) => {
