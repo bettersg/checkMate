@@ -62,7 +62,7 @@ async function performOCR(storageURL: string): Promise<camelCasedOCRResponse> {
   const data = {
     url: storageURL,
   }
-  const response = await callAPI<OCRResponse>("ocr", data)
+  const response = await callAPI<OCRResponse>("ocr-v2", data)
   const camelCaseResponse = {
     imageType: response.data.image_type ?? null,
     extractedMessage: response.data.extracted_message ?? null,
