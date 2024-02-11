@@ -466,7 +466,8 @@ async function newImageInstanceHandler({
         sender = ocrOutput?.sender ?? null
         imageType = ocrOutput?.imageType ?? null
         extractedMessage = ocrOutput?.extractedMessage ?? null
-        machineCategory = ocrOutput?.prediction ?? null //changed 11 Feb to predict on everything
+        machineCategory =
+          imageType !== "others" ? ocrOutput?.prediction ?? null : null //don't make a prediction if it's under others.
         subject = ocrOutput?.subject ?? null
         ocrSuccess = true
       } catch (error) {
