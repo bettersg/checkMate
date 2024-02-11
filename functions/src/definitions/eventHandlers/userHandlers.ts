@@ -31,6 +31,7 @@ import {
   downloadWhatsappMedia,
   getHash,
   getSignedUrl,
+  getCloudStorageUrl,
 } from "../common/mediaUtils"
 import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
@@ -343,6 +344,7 @@ async function newTextInstanceHandler({
     imageType: null, //either "convo", "email", "letter" or "others"
     ocrVersion: null,
     from: from, //sender phone number, taken from webhook object
+    subject: null,
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
@@ -451,19 +453,21 @@ async function newImageInstanceHandler({
   //do OCR
   let ocrSuccess = false
   let sender = null
+  let subject = null
   let imageType = null
   let extractedMessage = null
   let strippedMessage = null
   let machineCategory = null
   if (!hasMatch || !matchedInstanceSnap) {
-    const temporaryUrl = await getSignedUrl(filename)
-    if (temporaryUrl) {
+    const cloudStorageUrl = getCloudStorageUrl(filename)
+    if (cloudStorageUrl) {
       try {
-        const ocrOutput = await performOCR(temporaryUrl)
+        const ocrOutput = await performOCR(cloudStorageUrl)
         sender = ocrOutput?.sender ?? null
         imageType = ocrOutput?.imageType ?? null
-        extractedMessage = ocrOutput.extractedMessage || null
+        extractedMessage = ocrOutput?.extractedMessage ?? null
         machineCategory = ocrOutput?.prediction ?? null //changed 11 Feb to predict on everything
+        subject = ocrOutput?.subject ?? null
         ocrSuccess = true
       } catch (error) {
         functions.logger.error("Error in performOCR:", error)
@@ -606,6 +610,7 @@ async function newImageInstanceHandler({
     imageType: imageType, //either "convo", "email", "letter" or "others"
     ocrVersion: "2",
     from: from, //sender phone number, taken from webhook object
+    subject: subject,
     hash: hash,
     mediaId: mediaId,
     mimeType: mimeType,

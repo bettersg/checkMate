@@ -45,6 +45,7 @@ erDiagram
         string imageType "either convo, email, letter, others"
         string ocrVersion "1 (paddleOCR) or 2 (genAI-vertex)"
         string from "Sender ID or phone number"
+        string subject "letter or email subject"
         string hash "Image hash, for image only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
