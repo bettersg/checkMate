@@ -42,7 +42,7 @@ erDiagram
         string caption "caption of image, if applicable"
         string captionHash "md5 hash of caption"
         string sender "sender name or number, extracted by OCR, if applicable"
-        string isConvo "whether the image is of a convo, if applicable"
+        string imageType "either convo, email, letter, or others"
         string from "Sender ID or phone number"
         string hash "Image hash, for image only"
         string mediaId "Media ID from whatsApp, for image only"

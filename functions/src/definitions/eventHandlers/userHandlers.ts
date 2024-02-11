@@ -449,7 +449,7 @@ async function newImageInstanceHandler({
   //do OCR
   let ocrSuccess = false
   let sender = null
-  let isConvo = null
+  let imageType = null
   let extractedMessage = null
   let strippedMessage = null
   let machineCategory = null
@@ -459,21 +459,9 @@ async function newImageInstanceHandler({
       try {
         const ocrOutput = await performOCR(temporaryUrl)
         sender = ocrOutput?.sender ?? null
-        isConvo = ocrOutput?.isConvo ?? null
-
-        const textMessages = ocrOutput?.output?.textMessages ?? []
-        const longestLHSMessage = textMessages
-          .filter((message) => message.isLeft)
-          .reduce(
-            (longest, current) => {
-              return current.text.length > longest.text.length
-                ? current
-                : longest
-            },
-            { text: "" }
-          ) // Initial value with an empty text property
-        extractedMessage = longestLHSMessage.text || null
-        machineCategory = isConvo ? ocrOutput?.prediction ?? null : null //only assign machineCategory if it's a screenshot of a conversation, otherwise we dont even know what's being OCRed.
+        imageType = ocrOutput?.imageType ?? null
+        extractedMessage = ocrOutput.extractedMessage || null
+        machineCategory = ocrOutput?.prediction ?? null //changed 11 Feb to predict on everything
         ocrSuccess = true
       } catch (error) {
         functions.logger.error("Error in performOCR:", error)
@@ -484,7 +472,7 @@ async function newImageInstanceHandler({
   } else {
     //this is so that we don't do an unnecessary OCR which is more compute intensive.
     sender = matchedInstanceSnap.get("sender") ?? null
-    isConvo = matchedInstanceSnap.get("isConvo") ?? null
+    imageType = matchedInstanceSnap.get("imageType") ?? null
     extractedMessage = matchedInstanceSnap.get("text") ?? null
     machineCategory = matchedInstanceSnap.get("machineCategory") ?? null
   }
@@ -497,7 +485,7 @@ async function newImageInstanceHandler({
   let matchedParentMessageRef = null
   let textHash = null
 
-  if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
+  if (ocrSuccess && !!extractedMessage && !hasMatch) {
     try {
       textHash = hashMessage(extractedMessage)
       ;({ embedding, similarity } = await calculateSimilarity(
@@ -613,7 +601,7 @@ async function newImageInstanceHandler({
     caption: caption ?? null,
     captionHash: captionHash,
     sender: sender ?? null, //sender name or number extracted from OCR
-    isConvo: isConvo, //boolean, whether or not the image is that of a conversation
+    imageType: imageType, //either "convo", "email", "letter", or "others"
     from: from, //sender phone number, taken from webhook object
     hash: hash,
     mediaId: mediaId,
