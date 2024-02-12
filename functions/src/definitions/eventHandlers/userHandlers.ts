@@ -31,6 +31,7 @@ import {
   downloadWhatsappMedia,
   getHash,
   getSignedUrl,
+  getCloudStorageUrl,
 } from "../common/mediaUtils"
 import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
@@ -340,7 +341,10 @@ async function newTextInstanceHandler({
     caption: null,
     captionHash: null,
     sender: null, //sender name or number (for now not collected)
+    imageType: null, //either "convo", "email", "letter" or "others"
+    ocrVersion: null,
     from: from, //sender phone number, taken from webhook object
+    subject: null,
     isForwarded: isForwarded, //boolean, taken from webhook object
     isFrequentlyForwarded: isFrequentlyForwarded, //boolean, taken from webhook object
     isReplied: false,
@@ -449,31 +453,22 @@ async function newImageInstanceHandler({
   //do OCR
   let ocrSuccess = false
   let sender = null
-  let isConvo = null
+  let subject = null
+  let imageType = null
   let extractedMessage = null
   let strippedMessage = null
   let machineCategory = null
   if (!hasMatch || !matchedInstanceSnap) {
-    const temporaryUrl = await getSignedUrl(filename)
-    if (temporaryUrl) {
+    const cloudStorageUrl = getCloudStorageUrl(filename)
+    if (cloudStorageUrl) {
       try {
-        const ocrOutput = await performOCR(temporaryUrl)
+        const ocrOutput = await performOCR(cloudStorageUrl)
         sender = ocrOutput?.sender ?? null
-        isConvo = ocrOutput?.isConvo ?? null
-
-        const textMessages = ocrOutput?.output?.textMessages ?? []
-        const longestLHSMessage = textMessages
-          .filter((message) => message.isLeft)
-          .reduce(
-            (longest, current) => {
-              return current.text.length > longest.text.length
-                ? current
-                : longest
-            },
-            { text: "" }
-          ) // Initial value with an empty text property
-        extractedMessage = longestLHSMessage.text || null
-        machineCategory = isConvo ? ocrOutput?.prediction ?? null : null //only assign machineCategory if it's a screenshot of a conversation, otherwise we dont even know what's being OCRed.
+        imageType = ocrOutput?.imageType ?? null
+        extractedMessage = ocrOutput?.extractedMessage ?? null
+        machineCategory =
+          imageType !== "others" ? ocrOutput?.prediction ?? null : null //don't make a prediction if it's under others.
+        subject = ocrOutput?.subject ?? null
         ocrSuccess = true
       } catch (error) {
         functions.logger.error("Error in performOCR:", error)
@@ -484,7 +479,7 @@ async function newImageInstanceHandler({
   } else {
     //this is so that we don't do an unnecessary OCR which is more compute intensive.
     sender = matchedInstanceSnap.get("sender") ?? null
-    isConvo = matchedInstanceSnap.get("isConvo") ?? null
+    imageType = matchedInstanceSnap.get("imageType") ?? null
     extractedMessage = matchedInstanceSnap.get("text") ?? null
     machineCategory = matchedInstanceSnap.get("machineCategory") ?? null
   }
@@ -497,7 +492,7 @@ async function newImageInstanceHandler({
   let matchedParentMessageRef = null
   let textHash = null
 
-  if (ocrSuccess && isConvo && !!extractedMessage && !hasMatch) {
+  if (ocrSuccess && !!extractedMessage && !hasMatch) {
     try {
       textHash = hashMessage(extractedMessage)
       ;({ embedding, similarity } = await calculateSimilarity(
@@ -613,8 +608,10 @@ async function newImageInstanceHandler({
     caption: caption ?? null,
     captionHash: captionHash,
     sender: sender ?? null, //sender name or number extracted from OCR
-    isConvo: isConvo, //boolean, whether or not the image is that of a conversation
+    imageType: imageType, //either "convo", "email", "letter" or "others"
+    ocrVersion: "2",
     from: from, //sender phone number, taken from webhook object
+    subject: subject,
     hash: hash,
     mediaId: mediaId,
     mimeType: mimeType,

@@ -19,29 +19,17 @@ interface L1CategoryResponse {
 }
 
 interface OCRResponse {
-  output: {
-    sender_name_or_phone_number: string
-    text_messages: {
-      is_left: boolean
-      text: string
-    }[]
-  }
-  is_convo: boolean
+  image_type: string
   extracted_message: string
+  subject: string
   sender: string
   prediction: string
 }
 
 interface camelCasedOCRResponse {
-  output: {
-    sender: string | null
-    textMessages: {
-      isLeft: boolean
-      text: string
-    }[]
-  }
-  isConvo: boolean | null
+  imageType: string | null
   extractedMessage: string | null
+  subject: string | null
   sender: string | null
   prediction: string | null
 }
@@ -70,25 +58,15 @@ async function getL1Category(text: string): Promise<string> {
   return response.data.prediction
 }
 
-async function performOCR(url: string): Promise<camelCasedOCRResponse> {
+async function performOCR(storageURL: string): Promise<camelCasedOCRResponse> {
   const data = {
-    url: url,
+    url: storageURL,
   }
-  const response = await callAPI<OCRResponse>("ocr", data)
+  const response = await callAPI<OCRResponse>("ocr-v2", data)
   const camelCaseResponse = {
-    output: {
-      sender: response.data.output.sender_name_or_phone_number ?? null,
-      textMessages: (response.data.output.text_messages ?? []).map(
-        (message) => {
-          return {
-            isLeft: message.is_left,
-            text: message.text,
-          }
-        }
-      ),
-    },
-    isConvo: response.data.is_convo ?? null,
+    imageType: response.data.image_type ?? null,
     extractedMessage: response.data.extracted_message ?? null,
+    subject: response.data.subject ?? null,
     sender: response.data.sender ?? null,
     prediction: response.data.prediction ?? null,
   }
