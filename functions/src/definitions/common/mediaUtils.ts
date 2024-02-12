@@ -63,7 +63,7 @@ async function getHash(buffer: Buffer) {
 }
 
 async function getSignedUrl(storageUrl: string) {
-  if (runtimeEnvironment.value() !== "PROD") {
+  if (runtimeEnvironment.value() === "DEV") {
     return testImageUrl.value()
   }
   try {
