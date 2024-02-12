@@ -59,6 +59,10 @@
     "en": "Based on pattern matching, our auto-classifier is confident that this message is ",
     "cn": "根据我们的AI技术，我们认为这条短信"
   },
+  "METHODOLOGY_HUMAN_PREVIOUS": {
+    "en": "Our CheckMates previously reviewed this message and thought it's ",
+    "cn": "经过查哥查妹之前的评估，我们认为这条短信"
+  },
   "MATCHED": {
     "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
     "cn": "其实查友已收到{{numberInstances}}条同样的短信。"
@@ -85,7 +89,7 @@
   },
   "INTERIM_TEMPLATE_UNSURE": {
     "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.",
-    "cn": "目前，{%voted}}%的查哥查妹已经对这条短信进行投票评估。但是，他们无法达成一致，或缺乏足够的信息进行评估。\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。"
+    "cn": "目前，{{%voted}}%的查哥查妹已经对这条短信进行投票评估。但是，他们无法达成一致，或缺乏足够的信息进行评估。\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。"
   },
   "INTERIM_PROMPT": {
     "en": "Thanks for waiting! Our network of trusted CheckMate volunteers is still assessing your message.\n\nYou may press the button below to see how our volunteers have rated your message so far. However, *do interpret this preliminary rating with caution* as the final result may differ. \n\nWe appreciate your patience and hope to deliver the final result soon!",
@@ -368,7 +372,7 @@
     "cn": "来自可靠的来源✅"
   },
   "PLACEHOLDER_IRRELEVANT": {
-    "en": "message doesn't contain a meaningful claim to assess.😕",
+    "en": "trivial, meaning the message didn't contain a meaningful claim to assess.😕",
     "cn": "没有可以评估的内容😕"
   },
   "PLACEHOLDER_UNSURE": {

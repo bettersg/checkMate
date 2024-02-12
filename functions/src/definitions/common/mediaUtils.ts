@@ -63,7 +63,7 @@ async function getHash(buffer: Buffer) {
 }
 
 async function getSignedUrl(storageUrl: string) {
-  if (runtimeEnvironment.value() !== "PROD") {
+  if (runtimeEnvironment.value() === "DEV") {
     return testImageUrl.value()
   }
   try {
@@ -82,4 +82,9 @@ async function getSignedUrl(storageUrl: string) {
   }
 }
 
-export { downloadWhatsappMedia, getHash, getSignedUrl }
+function getCloudStorageUrl(storageUrl: string) {
+  const bucketName = admin.storage().bucket().name
+  return `gs://${bucketName}/${storageUrl}`
+}
+
+export { downloadWhatsappMedia, getHash, getSignedUrl, getCloudStorageUrl }

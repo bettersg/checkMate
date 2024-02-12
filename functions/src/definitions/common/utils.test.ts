@@ -9,6 +9,73 @@ describe("firestoreTimestampToYYYYMM should work correctly", () => {
   })
 })
 
+// Test strings are messages from actual Firestore. Phone numbers jumbled for anonymity.
+describe("stripPhone function", () => {
+  describe("when text contains a valid phone number to be extracted", () => {
+    describe("when includePlaceholder is set to false", () => {
+      it("should strip phone numbers from the original string", () => {
+        const testCases = [
+          { originalStr: "Phone call: 83294023", expectedStr: "Phone call: " },
+          {
+            originalStr:
+              "https://youtu.be/oglCjESHJ70?si=JznEryFFXUZ6y2ma ~Dayan +6583294023 Who are you ~SLTan米+6583294023 你是红桂桥Ada？ ~Dayan +6583294023 No",
+            expectedStr:
+              "https://youtu.be/oglCjESHJ70?si=JznEryFFXUZ6y2ma ~Dayan  Who are you ~SLTan米 你是红桂桥Ada？ ~Dayan  No",
+          },
+        ]
+
+        testCases.forEach(({ originalStr, expectedStr }) => {
+          expect(stripPhone(originalStr)).toEqual(expectedStr)
+        })
+      })
+    }),
+      describe("when includePlaceholder is set to true", () => {
+        it("should replace phone numbers with placeholder from the original string", () => {
+          const testCases = [
+            {
+              originalStr: "Phone call: 83294023",
+              expectedStr: "Phone call: <PHONE_NUM>",
+            },
+            {
+              originalStr:
+                "https://youtu.be/oglCjESHJ70?si=JznEryFFXUZ6y2ma ~Dayan +6588888888 Who are you ~SLTan米+6599999999 你是红桂桥Ada？ ~Dayan +6589898989 No",
+              expectedStr:
+                "https://youtu.be/oglCjESHJ70?si=JznEryFFXUZ6y2ma ~Dayan <PHONE_NUM> Who are you ~SLTan米<PHONE_NUM> 你是红桂桥Ada？ ~Dayan <PHONE_NUM> No",
+            },
+            {
+              originalStr: "you ~SLTan米+6583294023",
+              expectedStr: "you ~SLTan米<PHONE_NUM>",
+            },
+          ]
+          testCases.forEach(({ originalStr, expectedStr }) => {
+            expect(stripPhone(originalStr, true)).toEqual(expectedStr)
+          })
+        })
+      })
+  }),
+    describe("when text does not contain a valid phone number", () => {
+      it("should return the original string", () => {
+        const testCases = [
+          {
+            originalStr:
+              "Here are some signs that this message is a scam: 1) The message claims that a delivery failed and that goods have been returned to a collection center, but it does not provide any specific details about the delivery or the goods in question. 2) The message includes a shortened URL (https://goo.su/PTvJGC), which could potentially lead to a malicious website or phishing attempt. 3) The message creates a sense of urgency by asking the recipient to schedule a new delivery immediately, which could be a tactic to pressure the recipient into clicking the link without thinking critically about its legitimacy.",
+            expectedStr:
+              "Here are some signs that this message is a scam: 1) The message claims that a delivery failed and that goods have been returned to a collection center, but it does not provide any specific details about the delivery or the goods in question. 2) The message includes a shortened URL (https://goo.su/PTvJGC), which could potentially lead to a malicious website or phishing attempt. 3) The message creates a sense of urgency by asking the recipient to schedule a new delivery immediately, which could be a tactic to pressure the recipient into clicking the link without thinking critically about its legitimacy.",
+          },
+          {
+            originalStr:
+              "https://www.instagram.com/reel/CvsSNvzJH38/?igshid=MzRlODBiNWFlZA== is this for real?",
+            expectedStr:
+              "https://www.instagram.com/reel/CvsSNvzJH38/?igshid=MzRlODBiNWFlZA== is this for real?",
+          },
+        ]
+        testCases.forEach(({ originalStr, expectedStr }) => {
+          expect(stripPhone(originalStr)).toEqual(expectedStr)
+        })
+      })
+    })
+})
+
 describe("stripUrl should strip URLs correctly", () => {
   test("should strip standalone URLs", () => {
     const standaloneUrls = [

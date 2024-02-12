@@ -333,7 +333,7 @@ async function sendVotingStats(instancePath: string) {
     } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
       truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
-      truthCategory = responses.PLACEHOLDER_MISLEADING
+      truthCategory = responses.PLACEHOLDER_ACCURATE
     }
   } else truthCategory = "NA"
 
@@ -358,7 +358,7 @@ async function sendVotingStats(instancePath: string) {
       count: legitimateCount,
       isInfo: false,
     },
-    { name: "unsure", count: unsureCount, isInfo: false },
+    { name: responses.PLACEHOLDER_UNSURE, count: unsureCount, isInfo: false },
   ]
 
   categories.sort((a, b) => b.count - a.count) // sort in descending order
@@ -657,6 +657,7 @@ async function respondToInstance(
   const instanceCount = parentMessageSnap.get("instanceCount")
   const responseCount = await getCount(parentMessageRef, "responses")
   const isImage = data?.type === "image"
+  const isMatched = data?.isMatched ?? false
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -674,7 +675,7 @@ async function respondToInstance(
         "{{methodology}}",
         isMachineCategorised
           ? responses.METHODOLOGY_AUTO
-          : responses.METHODOLOGY_HUMAN
+          : isMatched ? responses.METHODOLOGY_HUMAN_PREVIOUS : responses.METHODOLOGY_HUMAN
       )
       .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
   }
@@ -956,7 +957,7 @@ async function sendBlast(user: string) {
     .doc(user)
     .set(
       {
-        feebackCategory: null,
+        feedbackCategory: null,
         sentTimestamp: Timestamp.fromDate(new Date()),
       },
       { merge: true }
