@@ -114,9 +114,11 @@ async function onSignUp(from: string, platform = "whatsapp") {
   }
   await db.collection("factCheckers").doc(`${from}`).set({
     name: "",
+    type: "human",
     isActive: true,
     isOnboardingComplete: false,
-    platformId: from,
+    telegramId: null,
+    whatsappId: from,
     level: 1,
     experience: 0,
     numVoted: 0,

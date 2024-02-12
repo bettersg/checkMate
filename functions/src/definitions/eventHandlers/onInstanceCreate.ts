@@ -165,7 +165,7 @@ function sendTemplateMessageAndCreateVoteRequest(
       .collection("voteRequests")
       .add({
         factCheckerDocRef: factCheckerDocSnap.ref,
-        platformId: factChecker.platformId,
+        platformId: factChecker.whatsappId,
         hasAgreed: false,
         triggerL2Vote: null,
         triggerL2Others: null,
@@ -181,7 +181,7 @@ function sendTemplateMessageAndCreateVoteRequest(
         // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
         return sendWhatsappTemplateMessage(
           "factChecker",
-          factChecker.platformId,
+          factChecker.whatsappId,
           "new_message_received",
           "en",
           [factChecker?.name || "CheckMate"],

@@ -78,9 +78,11 @@ const mockDb = async function () {
     await factCheckersRef.doc(checker1PhoneNumber.value()).set(
       {
         name: "CHECKER1",
+        type: "human",
         isActive: true,
         isOnboardingComplete: true,
-        platformId: checker1PhoneNumber.value(),
+        telegramId: null,
+        whatsappId: checker1PhoneNumber.value(),
         level: 1,
         experience: 0,
         numVoted: 0,

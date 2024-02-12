@@ -88,11 +88,13 @@ erDiagram
     }
 
     factChecker {
-        string id PK "using their sender ID or phone number"
+        string id PK "unique ID, assigned by firestore"
+        string type "human or ai"
         string name
         boolean isActive
         boolean isOnboardingComplete
-        string platformId
+        string telegramId "telegram ID"
+        string whatsappId "whatsapp phone number"
         number level "Not used for now"
         number experience "Not used for now"
         number numVoted
