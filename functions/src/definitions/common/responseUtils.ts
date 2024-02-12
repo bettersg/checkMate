@@ -657,6 +657,7 @@ async function respondToInstance(
   const instanceCount = parentMessageSnap.get("instanceCount")
   const responseCount = await getCount(parentMessageRef, "responses")
   const isImage = data?.type === "image"
+  const isMatched = data?.isMatched ?? false
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -674,7 +675,7 @@ async function respondToInstance(
         "{{methodology}}",
         isMachineCategorised
           ? responses.METHODOLOGY_AUTO
-          : responses.METHODOLOGY_HUMAN
+          : isMatched ? responses.METHODOLOGY_HUMAN_PREVIOUS : responses.METHODOLOGY_HUMAN
       )
       .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
   }
