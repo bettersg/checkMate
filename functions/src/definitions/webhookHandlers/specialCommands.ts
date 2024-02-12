@@ -81,6 +81,7 @@ const mockDb = async function () {
         type: "human",
         isActive: true,
         isOnboardingComplete: true,
+        singpassOpenId: null,
         telegramId: null,
         whatsappId: checker1PhoneNumber.value(),
         level: 1,

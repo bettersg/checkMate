@@ -16,4 +16,5 @@ export { onCheckerPublish } from "./definitions/eventHandlers/checkerHandlerWhat
 export { telegramAuthHandler } from "./definitions/api/authentication"
 export { onCheckerPublishTelegram } from "./definitions/eventHandlers/checkerHandlerTelegram"
 export { apiHandler } from "./definitions/api/api"
+export { internalApiHandler } from "./definitions/api/apiInternal"
 export { batchJobs }

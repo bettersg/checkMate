@@ -10,6 +10,7 @@ import {
 } from "../common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
 import { Timestamp } from "firebase-admin/firestore"
+import { publishToTopic } from "../common/pubsub"
 
 interface MessageUpdate {
   [x: string]: any
@@ -118,6 +119,7 @@ const onInstanceCreate = functions
         parentInstanceCount >= thresholds.startVote &&
         !parentMessageSnap.get("isPollStarted")
       ) {
+        await triggerAgents(snap)
         await despatchPoll(parentMessageRef)
         return parentMessageRef.update({ isPollStarted: true })
       }
@@ -137,12 +139,23 @@ async function upsertUser(from: string, messageTimestamp: Timestamp) {
   )
 }
 
+async function triggerAgents(instanceSnap: admin.firestore.DocumentSnapshot) {
+  const instanceData = {
+    type: instanceSnap.get("type"),
+    text: instanceSnap.get("text"),
+    caption: instanceSnap.get("caption"),
+    storageUrl: instanceSnap.get("storageUrl"),
+  }
+  await publishToTopic("agentQueue", instanceData)
+}
+
 async function despatchPoll(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const db = admin.firestore()
   const factCheckersSnapshot = await db
     .collection("factCheckers")
+    .where("type", "==", "human")
     .where("isActive", "==", true)
     .get()
   if (!factCheckersSnapshot.empty) {
