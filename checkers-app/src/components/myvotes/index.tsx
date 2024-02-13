@@ -6,24 +6,25 @@ import { useUser } from '../../providers/UserContext';
 import MessagesDisplay from "./MessagesDisplay";
 import { Message } from "../../types";
 
-interface IconProps {
-  open: boolean;
-}
+// TODO: BRENNAN - Clean up
+// interface IconProps {
+//   open: boolean;
+// }
 
-function Icon({ open }: IconProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2}
-      stroke="currentColor"
-      className={`${open ? "rotate-180" : ""} h-5 w-5 transition-transform`}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-    </svg>
-  );
-}
+// function Icon({ open }: IconProps) {
+//   return (
+//     <svg
+//       xmlns="http://www.w3.org/2000/svg"
+//       fill="none"
+//       viewBox="0 0 24 24"
+//       strokeWidth={2}
+//       stroke="currentColor"
+//       className={`${open ? "rotate-180" : ""} h-5 w-5 transition-transform`}
+//     >
+//       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+//     </svg>
+//   );
+// }
 
 export default function MyVotes() {
   const navigate = useNavigate();
@@ -91,6 +92,10 @@ export default function MyVotes() {
   //displays vote instance buttons for each accordion
   const handlePending = () => setPending(!openPending);
   const handleAssessed = () => setAssessed(!openAssessed);
+
+  // TOOD BRENNAN - Clean up
+  console.log(handlePending, handleAssessed, handleOpenDialog, goVoting, selectedMessage, pending, assessed, unassessed, unchecked
+  )
 
   useEffect(() => {
     if (phoneNo && messages) {

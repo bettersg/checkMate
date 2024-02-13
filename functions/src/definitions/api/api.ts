@@ -396,10 +396,19 @@ app.patch("/checkers/:phoneNo/messages/:msgId/voteRequest", async (req, res) => 
 
 })
 
+// TODO: BRENNAN: Complete implementation for not found
+app.get("/checkerData/:id", async (req, res) => {
+  const { id } = req.params;
 
-app.get("/checkerData", (req, res) => {
-  //TODO TONGYING: To implement
-  res.sendStatus(200)
+  try {
+    const factChecker = await db.collection("factCheckers").doc(id).get()
+    const data = factChecker.data()
+    console.log(data)
+    res.status(200).json({ success: true, data })
+  } catch (err) {
+    functions.logger.log(err)
+    res.status(500)
+  }
 })
 
 //TODO TONGYING: decide other routes and implement

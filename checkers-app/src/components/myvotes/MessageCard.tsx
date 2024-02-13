@@ -1,7 +1,7 @@
 import { Message } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import VoteInfoDialog from "./VoteInfo";
 import "./MessageCard.css";
 

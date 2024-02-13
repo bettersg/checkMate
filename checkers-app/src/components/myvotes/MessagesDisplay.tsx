@@ -21,7 +21,7 @@ import { useUser } from '../../providers/UserContext';
 import MessageCard from "./MessageCard";
 import { useNavigate } from "react-router-dom";
 
-export default function MessagesDisplay(props: any) {
+export default function MessagesDisplay() {
     const navigate = useNavigate();
 
     // Get the messages from the UserContext
@@ -32,6 +32,10 @@ export default function MessagesDisplay(props: any) {
     const goVoting = (messageId: string) => {
         navigate(`/checkers/${phoneNo}/messages/${messageId}/voteRequest`);
     };
+    // TODO: BRENNAN - Clean up
+    console.log(goVoting)
+    console.log(messages, updateMessages, updateUnchecked, updateAssessed, unassessed, unchecked, updatePending, updateUnassessed)
+
 
     return (
         <div>

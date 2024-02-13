@@ -44,6 +44,9 @@ function App() {
   const [pending, setPending] = useState<Message[]>([]);
   const [assessed, setAssessed] = useState<Message[]>([]);
 
+  // TODO: BRENNAN - Clean up
+  console.log(count, setCount, telegramApp)
+
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
