@@ -5,7 +5,8 @@ import Onboarding from "./Onboarding";
 
 export default function DashboardPage() {
 
-    const { data } = useFactChecker(607439831)
+    const { data } = useFactChecker("607439831")
+
 
     if (!data) {
         return (
@@ -14,7 +15,7 @@ export default function DashboardPage() {
     }
 
     if (!data.data.isOnboardingComplete) {
-        return <Onboarding />
+        return <Onboarding factChecker={data.data} />
     }
 
     return (

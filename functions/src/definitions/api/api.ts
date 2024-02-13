@@ -411,6 +411,22 @@ app.get("/checkerData/:id", async (req, res) => {
   }
 })
 
+app.put("/checkerData/:id", async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+
+  // console.log(`HERE ID: ${id}`)
+  // console.log(`REQUEST BODY: ${JSON.stringify(req.body)}`)
+
+  try {
+    await db.collection("factCheckers").doc(id).set(data)
+    res.status(200).json({ success: true })
+  } catch (err) {
+    functions.logger.log(err)
+    res.status(500)
+  }
+})
+
 //TODO TONGYING: decide other routes and implement
 
 const main = express()
