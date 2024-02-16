@@ -34,10 +34,17 @@ export default function VotingPage(Prop: PropType) {
       {!msg
         ? null
         :
-        <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding">
+        <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding dark:bg-dark-background-color">
+          <style>
+                {`
+                    ::-webkit-scrollbar {
+                        display: none;
+                    }
+                    `}
+            </style>
           < BackButton />
           <MessageCard text={msg.text} storageUrl={msg.storageUrl} caption={msg.caption} />
-          <Typography variant="h4" className="text-primary-color3">Select category:</Typography>
+          <Typography variant="h4" className="text-primary-color3 dark:text-white">Select category:</Typography>
           <VoteCategories msgId={Prop.msgId} voteCategory={msg.voteRequests.category} truthScore={msg.voteRequests.truthScore} />
         </div >
       }

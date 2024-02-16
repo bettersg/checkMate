@@ -28,12 +28,12 @@ export default function MessageCard(prop: PropType) {
       )}
 
       <CardBody className="-m-3">
-        {prop.caption != null && <Typography className="italic">{prop.caption}</Typography>}
-        <Typography className="w-full">
+        {prop.caption != null && <Typography className="italic text-primary-color3">{prop.caption}</Typography>}
+        <Typography className="w-full text-balance text-primary-color3 break-words">
           {prop.text.length <= 300 ? prop.text : isExpanded ? prop.text : truncatedText}
         </Typography>
         {prop.text.length > 300 ? (
-          <Button onClick={toggleExpansion} variant="text" className="p-0 text-primary-color3" size="sm">
+          <Button onClick={toggleExpansion} variant="text" className="p-0 text-primary-color3 underline" size="sm">
             {isExpanded ? "Show Less" : "Read More"}
           </Button>
         ) : null}

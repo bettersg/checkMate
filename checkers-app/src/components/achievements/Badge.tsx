@@ -13,7 +13,7 @@ interface BadgeType {
 export default function Badge(Props: BadgeType) {
     return (
         <div className='w-full my-2 '>
-            <div className="flex flew-row rounded-lg shadow-md gap-x-2 p-5 border-error-color border-2 text-primary-color3">
+            <div className="flex flew-row rounded-lg shadow-md gap-x-2 p-5 border-error-color border-2 text-primary-color">
                 <div className="flex flex-col basis-1/3 flex-1 justify-center items-center rounded-lg shadow-lg bg-secondary-color p-1">
                     <img src={Props.icon} className='object-contain p-2' />
                 </div>

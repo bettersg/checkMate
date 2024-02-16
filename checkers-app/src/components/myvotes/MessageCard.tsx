@@ -123,7 +123,7 @@ export default function MessageCard(props: MessageCardProps) {
 
     return (
         <div
-            className="flex border-b border-gray-500 h-16 hover-shadow"
+            className="flex border-b border-gray-500 h-16 hover-shadow dark:bg-dark-background-color"
             onClick={(category === "PENDING" || category === "WAITING") ? () => goVoting(msg.id) : () => { handleOpenMsgInfo() }}>
 
             {/* Coloured dot */}

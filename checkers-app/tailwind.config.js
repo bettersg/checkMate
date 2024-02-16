@@ -15,10 +15,14 @@ module.exports = withMT({
         'success-color': '#d0ffc5',
         'pending-color': '#fff485',
         'error-color': '#ffc7a5',
-        'waiting-color': '#bbbbbb'
+        'waiting-color': '#bbbbbb',
+        'dark-background-color': '#212121',
+        'dark-component-color': '#282828',
+        'dark-highlight-color': '#121212',
       }, 
     },
   },
   plugins: [],
+  darkMode: "class"
 });
 

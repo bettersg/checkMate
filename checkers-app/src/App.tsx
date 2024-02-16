@@ -51,6 +51,7 @@ function App() {
       window.Telegram.WebApp
     ) {
       setTelegramApp(window.Telegram.WebApp);
+      if (window.Telegram.WebApp.colorScheme === "dark") {document.documentElement.classList.add('dark');}
       const initData = window.Telegram.WebApp.initData;
       if (initData) {
         // Call your Firebase function to validate the receivedData and get custom token

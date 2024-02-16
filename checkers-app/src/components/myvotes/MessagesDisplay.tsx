@@ -20,6 +20,7 @@ import { useState } from "react";
 import { useUser } from '../../providers/UserContext';
 import MessageCard from "./MessageCard";
 import { useNavigate } from "react-router-dom";
+import { Typography } from "@material-tailwind/react";
 
 export default function MessagesDisplay(props: any) {
     const navigate = useNavigate();
@@ -36,21 +37,21 @@ export default function MessagesDisplay(props: any) {
     return (
         <div>
             {/* 2 buttons ('PENDING' and 'VOTING') that act as tabs. */}
-            <div className="flex justify-around relative border-b-2 border-primary-color2" style={{ boxShadow: '0 7px 9px -7px rgba(0,0,0,0.7)' }}>
+            <div className="relative flex justify-around shadow-md shadow-primary-color2/50" >
                 <button
-                    className={`w-1/2 text-center py-2 ${activeTab === "PENDING" ? "border-b-4 border-primary-color2 text-primary-color2" : "text-black"} font-bold`}
+                    className={`w-1/2 text-center py-2 ${activeTab === "PENDING" ? "border-b-2 border-primary-color2 text-primary-color2" : "text-gray-400"} font-bold`}
                     onClick={() => setActiveTab("PENDING")}>
                     PENDING
                 </button>
                 <button
-                    className={`w-1/2 text-center py-2 ${activeTab === "VOTED" ? "border-b-4 border-primary-color2 text-primary-color2" : "text-black"} font-bold`}
+                    className={`w-1/2 text-center py-2 ${activeTab === "VOTED" ? "border-b-2 border-primary-color2 text-primary-color2" : "text-gray-400"} font-bold`}
                     onClick={() => setActiveTab("VOTED")}>
                     VOTED
                 </button>
             </div>
             {/* Display the messages based on the active tab
             NOTE: Height is hardcoded, to be changed */}
-            <div className="overflow-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="overflow-auto min-h-full" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 <style>
                     {`
                     ::-webkit-scrollbar {
@@ -58,7 +59,7 @@ export default function MessagesDisplay(props: any) {
                     }
                     `}
                 </style>
-                {pending.length === 0 && activeTab === "PENDING" && <div className="text-primary-color">You have no pending messages</div>}
+                {pending.length === 0 && activeTab === "PENDING" && <div className="text-primary-color h-full flex justify-center pt-16"><Typography>You have no pending messages.</Typography></div>}
                 {pending.length !== 0 && activeTab === "PENDING" && pending
                     .map((msg) => (
                         <div>
@@ -66,7 +67,7 @@ export default function MessagesDisplay(props: any) {
                         </div>
                     )
                     )}
-                {assessed.length === 0 && activeTab === "VOTED" && <div>You have no messages</div>}
+                {assessed.length === 0 && activeTab === "VOTED" && <div className="text-primary-color h-full flex justify-center pt-16"><Typography>You have no voted messages.</Typography></div>}
                 {assessed.length !== 0 && activeTab === "VOTED" && assessed
                     .map((msg) => (
                         <div>

@@ -5,7 +5,6 @@
 :root {
   --background-color: #ffffff;
   --primary-color: #ff8932;
-  /* --primary-color2: #cc3502;*/
   --primary-color2: #ff4d00;
   --primary-color3: #82080c;
   --secondary-color: #ffd81b;
@@ -15,7 +14,11 @@
   --pending-color: #fff485;
   --error-color: #ffc7a5;
   --waiting-color: #bbbbbb;
+  --dark-background-color: #212121;
+  --dark-component-color: #282828;
+  --dark-highlight-color: #121212;
 }
+
 
 /* @layer components{ */
 p.firebase-emulator-warning {

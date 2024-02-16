@@ -17,20 +17,21 @@ function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
   const numberList = Array.from({ length: 6 }, (_, index) => index);
 
   return (
-    <Card className="w-full max-w-[24rem] my-3">
+    <Card className="w-full max-w-[24rem] my-3 dark:bg-dark-component-color">
       <List className="flex-row">
         {numberList.map((number) => (
           <ListItem className="p-0" key={number}>
             <Radio
               name="truth-score-options"
               id={`truth-score-${number}`}
-              className="border-gray-900/10 bg-primary-color/50 p-0 transition-all"
+              ripple={false}
+              className="border-primary-color p-0 transition-all focus:outline-none focus:ring-0"
               containerProps={{
                 className: "p-2",
               }}
               label={
                 <Typography
-                  className="font-normal"
+                  className="font-normal text-primary-color"
                 >
                   {number}
                 </Typography>
@@ -39,6 +40,7 @@ function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
               onChange={Prop.onChange}
               checked={Prop.selectedTruthScore === number}
               crossOrigin="anonymous"
+              color="orange"
             />
           </ListItem>
         ))}
@@ -52,41 +54,46 @@ export default function InfoOptions(Prop: InfoOptionsProps) {
 
   return (
     <div>
-      <Typography className="text-primary-color3">
+      <Typography className="text-primary-color">
         Is it a satire?
       </Typography>
       <div className="flex flex-row justify-around">
         <Radio
-          className="border-gray-900/10 bg-primary-color/50 p-2 transition-all"
+          className="p-2 transition-all border border-primary-color"
           label={
             <Typography
-              className="font-normal"
+              className="font-normal text-primary-color"
             >
               Yes
             </Typography>
           }
           value="yes"
+          ripple={false}
           onChange={Prop.handleSatireChange}
+          checked={Prop.isSatire === true}
           crossOrigin="anonymous"
+          color="orange"
         />
         <Radio
-          className="border-gray-900/10 bg-primary-color/50 p-2 transition-all"
+          className="border border-primary-color p-2  focus:outline-none focus:ring-0"
           label={
             <Typography
-              className="font-normal"
+              className="font-normal text-primary-color"
             >
               No
             </Typography>
           }
           value="no"
+          ripple={false}
           onChange={Prop.handleSatireChange}
           checked={Prop.isSatire === false}
           crossOrigin="anonymous"
+          color="orange"
         />
       </div>
       {Prop.isSatire === false &&
         <>
-          <Typography className="text-primary-color3 text-justify my-3">
+          <Typography className="text-primary-color text-justify my-3">
             Please assess the veracity of the claim(s) in the message on a scale
             from 0 (entirely false) to 5 (entirely true).
           </Typography>

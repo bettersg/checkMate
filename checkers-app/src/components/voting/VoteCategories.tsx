@@ -35,6 +35,7 @@ export default function VoteCategories(Prop: PropType) {
   const navigate = useNavigate();
   const initialVote = Prop.voteCategory != null ? Prop.voteCategory : null;
   const [vote, setVote] = useState<string | null>(initialVote);
+  const [selectName, setSelectName] = useState<string | null>(initialVote);
   //take global values from user context
   const { phoneNo, messages, updateMessages, updatePending, updateUnassessed, updateAssessed, updateUnchecked } = useUser();
 
@@ -46,14 +47,14 @@ export default function VoteCategories(Prop: PropType) {
 
   const handleSatireChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value === "yes") {
-
+      setSatireState(true);
       setTruthScore(null);
       setVote("satire");
     }
     else {
+      setSatireState(false);
       setVote("info");
       setSatireState(false);
-
     }
   }
 
@@ -63,6 +64,7 @@ export default function VoteCategories(Prop: PropType) {
 
   const handleVote = (categoryName: string) => {
     setVote(categoryName);
+    setSelectName(categoryName);
   };
 
   //function to update vote request in firebase
@@ -121,7 +123,7 @@ export default function VoteCategories(Prop: PropType) {
       {CATEGORIES.map((category, index) => (
         <Button
           className={`flex flex-row items-center justify-start gap-2 max-w-md space-x-3 text-sm
-          ${vote === category.name ? 'bg-primary-color3' : 'bg-primary-color'}`}
+          ${selectName === category.name ? 'bg-primary-color3' : 'bg-primary-color'}`}
           key={index}
           onClick={() => handleVote(category.name)}
         >
@@ -132,8 +134,8 @@ export default function VoteCategories(Prop: PropType) {
 
       {vote ? (
         <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
-          {vote == "info" ? <InfoOptions isSatire={satireState} selectedTruthScore={truthScore} handleSatireChange={handleSatireChange} handleTruthScoreChange={handleTruthScoreChange} /> : null}
-          {vote == "satire" ?
+          {(vote == "info" || vote == "satire") ? <InfoOptions isSatire={satireState} selectedTruthScore={truthScore} handleSatireChange={handleSatireChange} handleTruthScoreChange={handleTruthScoreChange} /> : null}
+          {/* {vote == "satire" ?
             <Button
               className={`flex flex-row items-center justify-start gap-2 max-w-md w-full space-x-3 text-sm
            ${vote === "satire" ? 'bg-primary-color3' : 'bg-primary-color'}`}
@@ -141,7 +143,7 @@ export default function VoteCategories(Prop: PropType) {
             >
               <BugAntIcon className="h-7 w-7" />
               Satire
-            </Button> : null}
+            </Button> : null} */}
           <Button
             className="bg-highlight-color w-fit place-self-center"
             onClick={() => handleSubmitVote(vote, Prop.msgId, truthScore)}

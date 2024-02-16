@@ -13,7 +13,7 @@ export default function Achievement() {
   return (
     <div className="left-right-padding">
       <AchievementCard number={3} rank='Rookie' />
-      <Typography variant="h4" className="text-primary-color3 mt-2">Badges</Typography>
+      <Typography variant="h4" className="text-primary-color mt-2">Badges</Typography>
       {BADGES.map((badge, index) => (
         <Badge key={index} name={badge.name} icon={badge.icon} description={badge.description} status={badge.status} />
       ))}
