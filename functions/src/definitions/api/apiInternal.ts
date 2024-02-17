@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin"
-import * as functions from "firebase-functions"
+import { Checker } from "../../types"
 import express from "express"
 import { onRequest } from "firebase-functions/v2/https"
 import { Timestamp } from "firebase-admin/firestore"
@@ -59,7 +59,7 @@ app.post("/:messageId/voteRequests", async (req, res) => {
     return res.status(404).send("Message not found")
   }
   //check if factChecker exists in firestore
-  const factCheckerRef = db.collection("factCheckers").doc(factCheckerId)
+  const factCheckerRef = db.collection("checkers").doc(factCheckerId)
   const factCheckerSnap = await factCheckerRef.get()
   if (!factCheckerSnap.exists) {
     return res.status(404).send("factChecker not found")
@@ -142,7 +142,7 @@ app.post("/checkers", async (req, res) => {
   if (!name || !type || !telegramId) {
     return res.status(400).send("Name, type, and telegramId are required")
   }
-  const newChecker = {
+  const newChecker: Checker = {
     name,
     type,
     isActive: isActive || false,
@@ -157,9 +157,10 @@ app.post("/checkers", async (req, res) => {
     numVerifiedLinks: numVerifiedLinks || 0,
     preferredPlatform: preferredPlatform || "telegram",
     lastVotedTimestamp: lastVotedTimestamp || null,
+    getNameMessageId: null,
   }
   //create new factChecker in message
-  const ref = await db.collection("factCheckers").add(newChecker)
+  const ref = await db.collection("checkers").add(newChecker)
   return res.status(200).send({
     success: true,
     factCheckerPath: ref.path,

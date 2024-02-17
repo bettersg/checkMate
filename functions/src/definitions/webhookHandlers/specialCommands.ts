@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
-import { WhatsappMessage } from "../../types"
+import { WhatsappMessage, Checker } from "../../types"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
@@ -62,6 +62,9 @@ const archiveMessages = async function () {
 }
 
 const mockDb = async function () {
+  if (runtimeEnvironment.value() === "PROD") {
+    return
+  }
   functions.logger.log("mocking...")
   const db = admin.firestore()
   const systemParametersRef = db.collection("systemParameters")
@@ -73,36 +76,34 @@ const mockDb = async function () {
     whatsapp: ["text", "image"],
   })
   await systemParametersRef.doc("thresholds").set(thresholds)
-  const factCheckersRef = db.collection("factCheckers")
-  if (runtimeEnvironment.value() !== "PROD") {
-    await factCheckersRef.doc(checker1PhoneNumber.value()).set(
-      {
-        name: "CHECKER1",
-        type: "human",
-        isActive: true,
-        isOnboardingComplete: true,
-        singpassOpenId: null,
-        telegramId: null,
-        whatsappId: checker1PhoneNumber.value(),
-        level: 1,
-        experience: 0,
-        numVoted: 0,
-        numCorrectVotes: 0,
-        numVerifiedLinks: 0,
-        preferredPlatform: "whatsapp",
-        lastVotedTimestamp: null,
-        getNameMessageId: null,
-      },
-      { merge: true }
-    )
-    /*
-    string type "image or text"
-    string text "text or caption (if image)"
-    string storageUrl "image storage url if applicable"
-    boolean isActive "the one that should be sent"
-    timestamp createdDate "is active"
-    timestamp blastDate ""
-    */
+  const checkersCollectionRef = db.collection("checkers")
+  const querySnap = await checkersCollectionRef
+    .where("whatsappId", "==", checker1PhoneNumber.value())
+    .limit(1)
+    .get()
+  const checkerObj: Checker = {
+    name: "CHECKER1",
+    type: "human",
+    isActive: true,
+    isOnboardingComplete: true,
+    singpassOpenId: null,
+    telegramId: null,
+    whatsappId: checker1PhoneNumber.value(),
+    level: 1,
+    experience: 0,
+    numVoted: 0,
+    numCorrectVotes: 0,
+    numVerifiedLinks: 0,
+    preferredPlatform: "whatsapp",
+    lastVotedTimestamp: null,
+    getNameMessageId: null,
+  }
+  if (querySnap.empty) {
+    await checkersCollectionRef.add(checkerObj)
+  } else {
+    await querySnap.docs[0].ref.set(checkerObj, { merge: true })
+  }
+  {
     await db
       .collection("blasts")
       .doc()

@@ -43,7 +43,6 @@ const onVoteRequestUpdate = functions
     } else if (before.vote != after.vote || before.category != after.category) {
       await updateCounts(messageRef, before, after)
       await updateCheckerVoteCount(before, after)
-      const db = admin.firestore()
       const voteRequestQuerySnapshot = await messageRef
         .collection("voteRequests")
         .get()
@@ -121,7 +120,7 @@ const onVoteRequestUpdate = functions
       })
       if (after.category !== null) {
         //vote has ended
-        await sendRemainingReminder(after.factCheckerDocRef.id, after.platform)
+        await sendRemainingReminder(after.platformId, after.platform)
         if (after.votedTimestamp !== before.votedTimestamp) {
           await after.factCheckerDocRef.set(
             {

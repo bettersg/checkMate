@@ -154,7 +154,7 @@ async function despatchPoll(
 ) {
   const db = admin.firestore()
   const factCheckersSnapshot = await db
-    .collection("factCheckers")
+    .collection("checkers")
     .where("type", "==", "human")
     .where("isActive", "==", true)
     .get()

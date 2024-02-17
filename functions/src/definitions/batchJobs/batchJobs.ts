@@ -22,13 +22,13 @@ async function deactivateAndRemind() {
     const db = admin.firestore()
     const cutoffHours = 72
     const activeCheckMatesSnap = await db
-      .collection("factCheckers")
+      .collection("checkers")
       .where("isActive", "==", true)
       .get()
     const promisesArr = activeCheckMatesSnap.docs.map(async (doc) => {
       const lastVotedTimestamp =
         doc.get("lastVotedTimestamp") ?? Timestamp.fromDate(new Date(0))
-      const factCheckerId = doc.id
+      const factCheckerId = doc.get("whatsappId")
       const lastVotedDate = lastVotedTimestamp.toDate()
       //set cutoff to 72 hours ago
       const cutoffDate = new Date(Date.now() - cutoffHours * 60 * 60 * 1000)
