@@ -141,6 +141,7 @@ async function upsertUser(from: string, messageTimestamp: Timestamp) {
 
 async function triggerAgents(instanceSnap: admin.firestore.DocumentSnapshot) {
   const instanceData = {
+    messageId: instanceSnap.ref.parent.parent?.id,
     type: instanceSnap.get("type"),
     text: instanceSnap.get("text"),
     caption: instanceSnap.get("caption"),

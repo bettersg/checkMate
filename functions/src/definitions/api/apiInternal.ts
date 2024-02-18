@@ -142,6 +142,17 @@ app.post("/checkers", async (req, res) => {
   if (!name || !type || !telegramId) {
     return res.status(400).send("Name, type, and telegramId are required")
   }
+  if (type === "ai") {
+    //check if name already exists:
+    const checkersRef = db.collection("checkers")
+    const checkersSnap = await checkersRef
+      .where("type", "==", type)
+      .where("name", "==", name)
+      .get()
+    if (!checkersSnap.empty) {
+      return res.status(400).send("Checker agent name already exists")
+    }
+  }
   const newChecker: Checker = {
     name,
     type,
