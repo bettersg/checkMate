@@ -17,7 +17,7 @@ app.post("/checkers", postCheckerHandler)
 
 const internalApiHandler = onRequest(
   {
-    invoker: "private",
+    invoker: "private", //use google cloud IAM to limit access
   },
   app
 )
