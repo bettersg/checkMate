@@ -30,13 +30,15 @@ RUN mkdir $NVM_DIR && \
     bash $NVM_DIR/nvm.sh ${NODE_VERSION}
 
 # Install firebase-tools and emulators \
-RUN npm i -g firebase-tools && \
+RUN npm i -g firebase-tools@13.3.0 && \
     firebase setup:emulators:database && \
     firebase setup:emulators:firestore && \
     firebase setup:emulators:pubsub && \
     firebase setup:emulators:storage && \
     firebase setup:emulators:ui && \
     firebase experiments:enable webframeworks
+#note: Query breaks in firebase-tools@13.3.1 with error 500
+
 
 # Preserve firebase emulators cache
 VOLUME $HOME/.cache
