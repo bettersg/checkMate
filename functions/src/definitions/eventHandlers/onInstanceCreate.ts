@@ -11,6 +11,7 @@ import {
 import { FieldValue } from "@google-cloud/firestore"
 import { Timestamp } from "firebase-admin/firestore"
 import { publishToTopic } from "../common/pubsub"
+import { VoteRequest } from "../../types"
 
 interface MessageUpdate {
   [x: string]: any
@@ -175,22 +176,23 @@ function sendTemplateMessageAndCreateVoteRequest(
   const factChecker = factCheckerDocSnap.data()
   if (factChecker?.preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
+    const newVoteRequest: VoteRequest = {
+      factCheckerDocRef: factCheckerDocSnap.ref,
+      platformId: factChecker.whatsappId,
+      hasAgreed: false,
+      triggerL2Vote: null,
+      triggerL2Others: null,
+      platform: "whatsapp",
+      sentMessageId: null,
+      category: null,
+      vote: null,
+      createdTimestamp: Timestamp.fromDate(new Date()),
+      acceptedTimestamp: null,
+      votedTimestamp: null,
+    }
     return messageRef
       .collection("voteRequests")
-      .add({
-        factCheckerDocRef: factCheckerDocSnap.ref,
-        platformId: factChecker.whatsappId,
-        hasAgreed: false,
-        triggerL2Vote: null,
-        triggerL2Others: null,
-        platform: "whatsapp",
-        sentMessageId: null,
-        category: null,
-        vote: null,
-        createdTimestamp: Timestamp.fromDate(new Date()),
-        acceptedTimestamp: null,
-        votedTimestamp: null,
-      })
+      .add(newVoteRequest)
       .then((writeResult) => {
         // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
         return sendWhatsappTemplateMessage(

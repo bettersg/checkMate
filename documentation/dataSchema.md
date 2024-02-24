@@ -77,7 +77,7 @@ erDiagram
         string id PK "Assigned by Firestore"
         reference factCheckerDocRef FK "link to factChecker"
         string platformId "whatsapp number or telegram Id"
-        string platform "whatsapp/telegram"
+        string platform "whatsapp/telegram/agent"
         boolean hasAgreed "whether person has agreed to vote"
         boolean triggerL2Vote "whether or not a vote should be triggered"
         boolean triggerL2Others "whether or not L2 scam message should be triggered"

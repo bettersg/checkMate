@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore"
+import { DocumentReference } from "@google-cloud/firestore"
 
 export type WhatsappMessage = {
   from: string
@@ -53,4 +54,19 @@ export type Checker = {
   preferredPlatform: string | null
   lastVotedTimestamp: Timestamp | null
   getNameMessageId: string | null
+}
+
+export type VoteRequest = {
+  factCheckerDocRef: DocumentReference
+  platformId: string | null
+  platform: "whatsapp" | "telegram" | "agent"
+  hasAgreed: boolean | null
+  triggerL2Vote: boolean | null
+  triggerL2Others: boolean | null
+  sentMessageId: string | null
+  vote: 0 | 1 | 2 | 3 | 4 | 5 | null
+  category: string | null
+  createdTimestamp: Timestamp | null
+  acceptedTimestamp: Timestamp | null
+  votedTimestamp: Timestamp | null
 }
