@@ -38,7 +38,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       .where("name", "==", name)
       .get()
     if (!checkersSnap.empty) {
-      return res.status(400).send("Checker agent name already exists")
+      return res.status(409).send("Checker agent name already exists")
     }
   }
   const newChecker: Checker = {
