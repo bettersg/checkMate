@@ -5,7 +5,7 @@ interface createVoteRequest {
 
 interface updateVoteRequest {
   category: string
-  vote?: number //between 0 and 5
+  truthScore?: number //between 0 and 5
 }
 
 interface createChecker {

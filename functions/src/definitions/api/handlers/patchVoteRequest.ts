@@ -18,19 +18,19 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(400).send("Message Id or vote request Id missing.")
   }
   //confirm category in body
-  const { category, vote } = req.body as updateVoteRequest
+  const { category, truthScore } = req.body as updateVoteRequest
   if (!category) {
     return res.status(400).send("A category is required in the body")
   }
 
-  if (vote) {
+  if (truthScore) {
     if (category !== "info") {
       return res
         .status(400)
         .send("Vote can only be submitted for info category")
     }
-    if (typeof vote !== "number" || vote < 0 || vote > 5) {
-      return res.status(400).send("Vote must be a number between 0 and 5")
+    if (typeof truthScore !== "number" || truthScore < 0 || truthScore > 5) {
+      return res.status(400).send("truthScore must be a number between 0 and 5")
     }
   }
   //check if vote request exists in firestore
@@ -45,7 +45,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   }
   await voteRequestRef.update({
     category: category,
-    vote: vote ?? null,
+    vote: truthScore ?? null,
     votedTimestamp: Timestamp.fromDate(new Date()),
   })
   return res.status(200).send({
