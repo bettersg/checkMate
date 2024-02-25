@@ -23,6 +23,10 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(400).send("A category is required in the body")
   }
 
+  if (category === "info" && !truthScore) {
+    return res.status(400).send("truthScore is required for info category")
+  }
+
   if (truthScore) {
     if (category !== "info") {
       return res

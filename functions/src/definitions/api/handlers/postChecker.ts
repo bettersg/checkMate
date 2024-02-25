@@ -27,10 +27,6 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     preferredPlatform,
     lastVotedTimestamp,
   } = req.body as createChecker
-  console.log(req.body)
-  console.log(name)
-  console.log(type)
-  console.log(telegramId)
   if (!name || !type || (!telegramId && telegramId !== null)) {
     return res.status(400).send("Name, type, and telegramId are required")
   }
