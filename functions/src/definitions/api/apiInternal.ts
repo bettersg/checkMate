@@ -9,9 +9,12 @@ const app = express()
 
 app.use(express.json())
 
-app.post("/:messageId/voteRequests", postVoteRequestHandler)
+app.post("messages/:messageId/voteRequests", postVoteRequestHandler)
 
-app.patch("/:messageId/voteRequests/:voteRequestId", patchVoteRequestHandler)
+app.patch(
+  "messages/:messageId/voteRequests/:voteRequestId",
+  patchVoteRequestHandler
+)
 
 app.post("/checkers", postCheckerHandler)
 
