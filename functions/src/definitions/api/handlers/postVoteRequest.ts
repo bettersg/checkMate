@@ -1,8 +1,13 @@
 import { Request, Response } from "express"
 import { createVoteRequest } from "../interfaces"
-import { Timestamp } from "firebase-admin/firestore"
+import {
+  Timestamp,
+  DocumentReference,
+  DocumentSnapshot,
+} from "firebase-admin/firestore"
 import { VoteRequest } from "../../../types"
 import * as admin from "firebase-admin"
+import * as functions from "firebase-functions"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -18,9 +23,16 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     return
   }
   //confirm factCheckerId in body
-  const { factCheckerId } = req.body as createVoteRequest
-  if (!factCheckerId) {
-    return res.status(400).send("FactCheckerId is required in body")
+  const { factCheckerId, factCheckerName } = req.body as createVoteRequest
+  if (!factCheckerId && !factCheckerName) {
+    return res
+      .status(400)
+      .send("One of facctCheckerId or factCheckerName is required in body")
+  }
+  if (factCheckerId && factCheckerName) {
+    return res
+      .status(400)
+      .send("Only one of factCheckerId or factCheckerName should be passed")
   }
   //check if message exists in firestore
   const messageRef = db.collection("messages").doc(messageId)
@@ -29,12 +41,36 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(404).send("Message not found")
   }
   //check if factChecker exists in firestore
-  const factCheckerRef = db.collection("checkers").doc(factCheckerId)
-  const factCheckerSnap = await factCheckerRef.get()
-  if (!factCheckerSnap.exists) {
-    return res.status(404).send("factChecker not found")
+  let factCheckerRef: DocumentReference
+  let factCheckerSnap: DocumentSnapshot
+  if (factCheckerId) {
+    factCheckerRef = db.collection("checkers").doc(factCheckerId)
+    factCheckerSnap = await factCheckerRef.get()
+    if (!factCheckerSnap.exists) {
+      return res.status(404).send("factChecker not found")
+    }
+  } else {
+    const factCheckerQuerySnap = await db
+      .collection("checkers")
+      .where("type", "==", "ai")
+      .where("name", "==", factCheckerName)
+      .get()
+    if (factCheckerQuerySnap.empty) {
+      return res
+        .status(404)
+        .send(
+          "ai factChecker of this name not found. if you are intending to create a voteRequest for a human factChecker, please pass the factCheckerId instead"
+        )
+    }
+    if (factCheckerQuerySnap.size > 1) {
+      functions.logger.warn(
+        `Multiple ai factCheckers with name ${factCheckerName} found`
+      )
+      return res.status(400).send("Multiple ai factCheckers found")
+    }
+    factCheckerRef = factCheckerQuerySnap.docs[0].ref
+    factCheckerSnap = factCheckerQuerySnap.docs[0]
   }
-
   const newVoteRequest: VoteRequest = {
     factCheckerDocRef: factCheckerRef,
     platformId: factCheckerSnap.get("whatsappId") ?? null,

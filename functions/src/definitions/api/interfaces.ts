@@ -1,5 +1,6 @@
 interface createVoteRequest {
-  factCheckerId: string
+  factCheckerId?: string
+  factCheckerName?: string
 }
 
 interface updateVoteRequest {
