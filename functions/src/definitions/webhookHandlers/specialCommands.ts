@@ -89,6 +89,7 @@ const mockDb = async function () {
     singpassOpenId: null,
     telegramId: null,
     whatsappId: checker1PhoneNumber.value(),
+    voteWeight: 1,
     level: 1,
     experience: 0,
     numVoted: 0,

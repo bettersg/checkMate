@@ -103,6 +103,7 @@ erDiagram
         number numVoted
         number numCorrectVotes "Not used for now"
         number numVerifiedLinks "Not used for now"
+        number voteWeight "Not used for now"
         string preferredPlatform "whatsapp/telegram, only whatsapp used for now"
     		string getNameMessageId "ID of the message sent to prompt factChecker for their name. Used to track reply."
         timestamp lastVotedTimestamp

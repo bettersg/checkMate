@@ -49,6 +49,7 @@ export type Checker = {
   level: number
   experience: number
   numVoted: number
+  voteWeight: number
   numCorrectVotes: number
   numVerifiedLinks: number
   preferredPlatform: string | null

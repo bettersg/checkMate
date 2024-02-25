@@ -53,6 +53,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     singpassOpenId: singpassOpenId || null,
     telegramId,
     whatsappId: whatsappId || null,
+    voteWeight: 1,
     level: level || 0,
     experience: experience || 0,
     numVoted: numVoted || 0,

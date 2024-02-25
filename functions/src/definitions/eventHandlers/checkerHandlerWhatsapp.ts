@@ -120,6 +120,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     singpassOpenId: null,
     telegramId: null,
     whatsappId: from,
+    voteWeight: 1,
     level: 1,
     experience: 0,
     numVoted: 0,
