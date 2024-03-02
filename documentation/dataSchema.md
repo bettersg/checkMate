@@ -77,7 +77,7 @@ erDiagram
         string id PK "Assigned by Firestore"
         reference factCheckerDocRef FK "link to factChecker"
         string platformId "whatsapp number or telegram Id"
-        string platform "whatsapp/telegram"
+        string platform "whatsapp/telegram/agent"
         boolean hasAgreed "whether person has agreed to vote"
         boolean triggerL2Vote "whether or not a vote should be triggered"
         boolean triggerL2Others "whether or not L2 scam message should be triggered"
@@ -90,16 +90,20 @@ erDiagram
     }
 
     factChecker {
-        string id PK "using their sender ID or phone number"
+        string id PK "unique ID, assigned by firestore"
+        string type "human or ai"
         string name
         boolean isActive
         boolean isOnboardingComplete
-        string platformId
+        string singpassOpenId "Singpass Open ID"
+        string telegramId "telegram ID"
+        string whatsappId "whatsapp phone number"
         number level "Not used for now"
         number experience "Not used for now"
         number numVoted
         number numCorrectVotes "Not used for now"
         number numVerifiedLinks "Not used for now"
+        number voteWeight "Not used for now"
         string preferredPlatform "whatsapp/telegram, only whatsapp used for now"
     		string getNameMessageId "ID of the message sent to prompt factChecker for their name. Used to track reply."
         timestamp lastVotedTimestamp
