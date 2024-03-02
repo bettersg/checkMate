@@ -16,7 +16,7 @@ import {
 import { getSignedUrl } from "../common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { resetL2Status } from "../common/voteUtils"
-import { Message } from "../../types"
+import { Message, Checker } from "../../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -112,11 +112,15 @@ async function onSignUp(from: string, platform = "whatsapp") {
     )
     return
   }
-  await db.collection("factCheckers").doc(`${from}`).set({
+  const checkerObj: Checker = {
     name: "",
+    type: "human",
     isActive: true,
     isOnboardingComplete: false,
-    platformId: from,
+    singpassOpenId: null,
+    telegramId: null,
+    whatsappId: from,
+    voteWeight: 1,
     level: 1,
     experience: 0,
     numVoted: 0,
@@ -125,7 +129,8 @@ async function onSignUp(from: string, platform = "whatsapp") {
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
     lastVotedTimestamp: null,
-  })
+  }
+  await db.collection("checkers").add(checkerObj)
 }
 
 async function onMsgReplyReceipt(
@@ -135,7 +140,16 @@ async function onMsgReplyReceipt(
   platform = "whatsapp"
 ) {
   const responses = await getResponsesObj("factChecker")
-  const factCheckerSnap = await db.collection("factCheckers").doc(from).get()
+  const factCheckerQuerySnap = await db
+    .collection("checkers")
+    .where("whatsappId", "==", from)
+    .limit(1)
+    .get()
+  if (factCheckerQuerySnap.empty) {
+    functions.logger.error(`No factChecker found with whatsappId ${from}`)
+    return
+  }
+  const factCheckerSnap = factCheckerQuerySnap.docs[0]
   if (factCheckerSnap.get("getNameMessageId") === messageId) {
     await factCheckerSnap.ref.update({
       name: text.trim(),
@@ -333,7 +347,19 @@ async function onButtonReply(
           "whatsapp",
           true
         )
-        await db.collection("factCheckers").doc(`${from}`).update({
+        const checkersQuerySnap = await db
+          .collection("checkers")
+          .where("whatsappId", "==", from)
+          .limit(1)
+          .get()
+        if (checkersQuerySnap.empty) {
+          functions.logger.error(
+            `No factChecker found with whatsappId ${from} for onboarding`
+          )
+          return
+        }
+        const factCheckerDocRef = checkersQuerySnap.docs[0].ref
+        await factCheckerDocRef.update({
           isOnboardingComplete: true,
         })
         break
@@ -442,7 +468,19 @@ async function onTextListReceipt(
 }
 
 async function onContinue(factCheckerId: string) {
-  await db.collection("factCheckers").doc(factCheckerId).update({
+  const checkerQuery = await db
+    .collection("checkers")
+    .where("whatsappId", "==", factCheckerId)
+    .limit(1)
+    .get()
+  if (checkerQuery.empty) {
+    functions.logger.error(
+      `No factChecker found with whatsappId ${factCheckerId}`
+    )
+    return
+  }
+  const factCheckerRef = checkerQuery.docs[0].ref
+  await factCheckerRef.update({
     isActive: true,
   })
   await sendRemainingReminder(factCheckerId, "whatsapp")

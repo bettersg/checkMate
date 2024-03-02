@@ -17,6 +17,8 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+const db = admin.firestore()
+
 const onVoteRequestUpdate = functions
   .region("asia-southeast1")
   .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
@@ -33,7 +35,6 @@ const onVoteRequestUpdate = functions
    if (before.vote != after.vote || before.category != after.category) {
       await updateCounts(messageRef, before, after)
       await updateCheckerVoteCount(before, after)
-      const db = admin.firestore()
       const voteRequestQuerySnapshot = await messageRef
         .collection("voteRequests")
         .get()
@@ -111,13 +112,20 @@ const onVoteRequestUpdate = functions
       })
       if (after.category !== null) {
         //vote has ended
+        if (after.platform !== "agent" && !!after.platformId) {
+          await sendRemainingReminder(after.platformId, after.platform)
+        }
         if (after.votedTimestamp !== before.votedTimestamp) {
-          await after.factCheckerDocRef.set(
-            {
-              lastVotedTimestamp: after.votedTimestamp,
-            },
-            { merge: true }
+          const factCheckerDocRef = await switchLegacyCheckerRef(
+            after.factCheckerDocRef
           )
+          factCheckerDocRef === null ||
+            (await factCheckerDocRef.set(
+              {
+                lastVotedTimestamp: after.votedTimestamp,
+              },
+              { merge: true }
+            ))
         }
       }
     }
@@ -173,17 +181,45 @@ async function updateCheckerVoteCount(
   before: admin.firestore.DocumentData,
   after: admin.firestore.DocumentData
 ) {
-  let factCheckerRef
+  let factCheckerRef: admin.firestore.DocumentReference<admin.firestore.DocumentData> | null
+  factCheckerRef = await switchLegacyCheckerRef(after.factCheckerDocRef)
+  if (factCheckerRef === null) {
+    functions.logger.error("Checker not found")
+    return
+  }
   if (before.category === null && after.category !== null) {
-    factCheckerRef = after.factCheckerDocRef
     factCheckerRef.update({
       numVoted: FieldValue.increment(1),
     })
   } else if (before.category !== null && after.category === null) {
-    factCheckerRef = after.factCheckerDocRef
     factCheckerRef.update({
       numVoted: FieldValue.increment(-1),
     })
+  }
+}
+
+async function switchLegacyCheckerRef(
+  factCheckerDocRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
+) {
+  if (factCheckerDocRef.path.startsWith("factCheckers")) {
+    const factCheckerSnap = await db
+      .collection("checkers")
+      .where("whatsappId", "==", factCheckerDocRef.id)
+      .limit(1)
+      .get()
+    if (factCheckerSnap.empty) {
+      functions.logger.error(
+        "Legacy factChecker not found in new checkers collection"
+      )
+      return null
+    } else {
+      return factCheckerSnap.docs[0].ref
+    }
+  } else if (factCheckerDocRef.path.startsWith("checkers")) {
+    return factCheckerDocRef
+  } else {
+    functions.logger.error("Invalid factCheckerDocRef path")
+    return null
   }
 }
 

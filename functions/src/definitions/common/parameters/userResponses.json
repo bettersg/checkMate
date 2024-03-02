@@ -59,6 +59,10 @@
     "en": "Based on pattern matching, our auto-classifier is confident that this message is ",
     "cn": "根据我们的AI技术，我们认为这条短信"
   },
+  "METHODOLOGY_HUMAN_PREVIOUS": {
+    "en": "Our CheckMates previously reviewed this message and thought it's ",
+    "cn": "经过查哥查妹之前的评估，我们认为这条短信"
+  },
   "MATCHED": {
     "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
     "cn": "其实查友已收到{{numberInstances}}条同样的短信。"

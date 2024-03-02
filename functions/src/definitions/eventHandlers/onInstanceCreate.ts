@@ -11,6 +11,8 @@ import {
 import { FieldValue } from "@google-cloud/firestore"
 import { Timestamp } from "firebase-admin/firestore"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
+import { publishToTopic } from "../common/pubsub"
+import { VoteRequest } from "../../types"
 
 interface MessageUpdate {
   [x: string]: any
@@ -121,6 +123,7 @@ const onInstanceCreate = functions
         parentInstanceCount >= thresholds.startVote &&
         !parentMessageSnap.get("isPollStarted")
       ) {
+        await triggerAgents(snap)
         await despatchPoll(parentMessageRef)
         return parentMessageRef.update({ isPollStarted: true })
       }
@@ -140,12 +143,24 @@ async function upsertUser(from: string, messageTimestamp: Timestamp) {
   )
 }
 
+async function triggerAgents(instanceSnap: admin.firestore.DocumentSnapshot) {
+  const instanceData = {
+    messageId: instanceSnap.ref.parent.parent?.id,
+    type: instanceSnap.get("type"),
+    text: instanceSnap.get("text"),
+    caption: instanceSnap.get("caption"),
+    storageUrl: instanceSnap.get("storageUrl"),
+  }
+  await publishToTopic("agentQueue", instanceData)
+}
+
 async function despatchPoll(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const db = admin.firestore()
   const factCheckersSnapshot = await db
-    .collection("factCheckers")
+    .collection("checkers")
+    .where("type", "==", "human")
     .where("isActive", "==", true)
     .get()
   if (!factCheckersSnapshot.empty) {
@@ -166,27 +181,28 @@ async function sendTemplateMessageAndCreateVoteRequest(
   const factChecker = factCheckerDocSnap.data()
   if (factChecker?.preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
+    const newVoteRequest: VoteRequest = {
+      factCheckerDocRef: factCheckerDocSnap.ref,
+      platformId: factChecker.whatsappId,
+      hasAgreed: false,
+      triggerL2Vote: null,
+      triggerL2Others: null,
+      platform: "whatsapp",
+      sentMessageId: null,
+      category: null,
+      vote: null,
+      createdTimestamp: Timestamp.fromDate(new Date()),
+      acceptedTimestamp: null,
+      votedTimestamp: null,
+    }
     return messageRef
       .collection("voteRequests")
-      .add({
-        factCheckerDocRef: factCheckerDocSnap.ref,
-        platformId: factChecker.platformId,
-        hasAgreed: false,
-        triggerL2Vote: null,
-        triggerL2Others: null,
-        platform: "whatsapp",
-        sentMessageId: null,
-        category: null,
-        vote: null,
-        createdTimestamp: Timestamp.fromDate(new Date()),
-        acceptedTimestamp: null,
-        votedTimestamp: null,
-      })
+      .add(newVoteRequest)
       .then((writeResult) => {
         // After the voteRequest object is added, send the WhatsApp template message with the additional voteRequestId parameter
         return sendWhatsappTemplateMessage(
           "factChecker",
-          factChecker.platformId,
+          factChecker.whatsappId,
           "new_message_received",
           "en",
           [factChecker?.name || "CheckMate"],
