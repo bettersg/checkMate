@@ -27,7 +27,7 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
   if (!factCheckerId && !factCheckerName) {
     return res
       .status(400)
-      .send("One of facctCheckerId or factCheckerName is required in body")
+      .send("One of factCheckerId or factCheckerName is required in body")
   }
   if (factCheckerId && factCheckerName) {
     return res
