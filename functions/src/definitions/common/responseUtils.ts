@@ -333,7 +333,7 @@ async function sendVotingStats(instancePath: string) {
     } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
       truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
-      truthCategory = responses.PLACEHOLDER_MISLEADING
+      truthCategory = responses.PLACEHOLDER_ACCURATE
     }
   } else truthCategory = "NA"
 
@@ -956,7 +956,7 @@ async function sendBlast(user: string) {
     .doc(user)
     .set(
       {
-        feebackCategory: null,
+        feedbackCategory: null,
         sentTimestamp: Timestamp.fromDate(new Date()),
       },
       { merge: true }
