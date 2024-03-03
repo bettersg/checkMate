@@ -171,21 +171,36 @@ async function updateCounts(
   //END REMOVE IN APRIL//
   if (previousCategory === null) {
     if (currentCategory !== null) {
-      await incrementCounter(messageRef, "responses")
+      await incrementCounter(messageRef, "responses", numVoteShards.value())
     }
   } else {
     if (currentCategory === null) {
-      await incrementCounter(messageRef, "responses", -1) //if previous category is not null and current category is, reduce the response count
+      await incrementCounter(messageRef, "responses", numVoteShards.value(), -1) //if previous category is not null and current category is, reduce the response count
     }
-    await incrementCounter(messageRef, previousCategory, -1) //if previous category is not null and current category also not now, reduce the count of the previous category
+    await incrementCounter(
+      messageRef,
+      previousCategory,
+      numVoteShards.value(),
+      -1
+    ) //if previous category is not null and current category also not now, reduce the count of the previous category
     if (previousCategory === "info") {
-      await incrementCounter(messageRef, "totalVoteScore", -previousScore) //if previous category is info, reduce the total vote score
+      await incrementCounter(
+        messageRef,
+        "totalVoteScore",
+        numVoteShards.value(),
+        -previousScore
+      ) //if previous category is info, reduce the total vote score
     }
   }
   if (currentCategory !== null) {
-    await incrementCounter(messageRef, currentCategory)
+    await incrementCounter(messageRef, currentCategory, numVoteShards.value())
     if (currentCategory === "info") {
-      await incrementCounter(messageRef, "totalVoteScore", currentScore)
+      await incrementCounter(
+        messageRef,
+        "totalVoteScore",
+        numVoteShards.value(),
+        currentScore
+      )
     }
   }
 }
