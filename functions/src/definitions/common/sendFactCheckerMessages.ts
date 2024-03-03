@@ -43,6 +43,11 @@ const sendL1CategorisationMessage = async function (
             "Messages intended to inform/convince/mislead a broad base of people",
         },
         {
+          id: `${type}_${messageRef.id}_${voteRequestSnap.id}_satire`,
+          title: "Satire",
+          description: "Content clearly satirical in nature",
+        },
+        {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_others`,
           title: "It's something else",
           description: "Messages that don't fall into the other categories",
@@ -152,14 +157,14 @@ const sendVotingMessage = async function sendVotingMessage(
         description?: string
       }[] = []
       const max_score = 5
-      for (let i = 0; i <= max_score; i++) {
+      for (let i = 1; i <= max_score; i++) {
         rows.push({
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_${i}`,
           title: `${i}`,
         })
       }
       rows[0].description = "Totally false"
-      rows[max_score].description = "Totally true"
+      rows[max_score - 1].description = "Totally true"
       const sections = [
         {
           rows: rows,

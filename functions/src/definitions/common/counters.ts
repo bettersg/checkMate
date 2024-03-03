@@ -4,28 +4,20 @@ import { DocumentReference } from "firebase-admin/firestore"
 const incrementCounter = async function (
   docRef: DocumentReference,
   type: string,
-  numShards: number,
   increment = 1
 ) {
   if (!docRef) {
     return
   }
-  const shardId = Math.floor(Math.random() * numShards)
-  const shardRef = docRef.collection("shards").doc(shardId.toString())
-  return shardRef.set(
+  return docRef.set(
     { [`${type}Count`]: FieldValue.increment(increment) },
     { merge: true }
   )
 }
 
 const getCount = async function (docRef: DocumentReference, type: string) {
-  const querySnapshot = await docRef.collection("shards").get()
-  const documents = querySnapshot.docs
-  let count = 0
-  for (const doc of documents) {
-    count += doc.get(`${type}Count`) ?? 0
-  }
-  return count
+  const docSnap = await docRef.get()
+  return docSnap.get(`${type}Count`) ?? 0
 }
 
 export { getCount, incrementCounter }

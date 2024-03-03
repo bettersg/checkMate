@@ -42,8 +42,14 @@ const onVoteRequestUpdate = functions
       after.triggerL2Others === true
     ) {
       await sendL2OthersCategorisationMessage(change.after, messageRef)
-    } else if (before.vote != after.vote || before.category != after.category) {
-      await updateCounts(messageRef, before, after)
+    } else if (
+      before.truthScore != after.truthScore ||
+      before.category != after.category ||
+      before.vote != after.vote
+    ) {
+      const isLegacy =
+        after.truthScore === undefined && after.vote !== undefined
+      await updateCounts(messageRef, before, after, isLegacy)
       await updateCheckerVoteCount(before, after)
       const voteRequestQuerySnapshot = await messageRef
         .collection("voteRequests")
@@ -57,14 +63,16 @@ const onVoteRequestUpdate = functions
       const spamCount = await getCount(messageRef, "spam")
       const legitimateCount = await getCount(messageRef, "legitimate")
       const unsureCount = await getCount(messageRef, "unsure")
+      const satireCount = await getCount(messageRef, "satire")
       const susCount = scamCount + illicitCount
       const voteTotal = await getCount(messageRef, "totalVoteScore")
-      const truthScore = infoCount > 0 ? voteTotal / infoCount : null
+      const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
       const thresholds = await getThresholds()
       const isSus = susCount > thresholds.isSus * responseCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
       const isInfo = infoCount > thresholds.isInfo * responseCount
+      const isSatire = satireCount > thresholds.isSatire * responseCount
       const isSpam = spamCount > thresholds.isSpam * responseCount
       const isLegitimate =
         legitimateCount > thresholds.isLegitimate * responseCount
@@ -85,13 +93,15 @@ const onVoteRequestUpdate = functions
         primaryCategory = "scam"
       } else if (isIllicit) {
         primaryCategory = "illicit"
+      } else if (isSatire) {
+        primaryCategory = "satire"
       } else if (isInfo) {
         if (truthScore === null) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
-        } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+        } else if (truthScore < (thresholds.falseUpperBound || 2)) {
           primaryCategory = "untrue"
-        } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+        } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
           primaryCategory = "misleading"
         } else {
           primaryCategory = "accurate"
@@ -145,44 +155,37 @@ const onVoteRequestUpdate = functions
 async function updateCounts(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   before: admin.firestore.DocumentData,
-  after: admin.firestore.DocumentData
+  after: admin.firestore.DocumentData,
+  isLegacy: boolean = false
 ) {
   const previousCategory = before.category
   const currentCategory = after.category
-  const previousVote = before.vote
-  const currentVote = after.vote
+  //START REMOVE IN APRIL//
+  let previousScore = before.truthScore
+  let currentScore = after.truthScore
+
+  if (isLegacy) {
+    previousScore = before.vote
+    currentScore = after.vote
+  }
+  //END REMOVE IN APRIL//
   if (previousCategory === null) {
     if (currentCategory !== null) {
-      await incrementCounter(messageRef, "responses", numVoteShards.value())
+      await incrementCounter(messageRef, "responses")
     }
   } else {
     if (currentCategory === null) {
-      await incrementCounter(messageRef, "responses", numVoteShards.value(), -1) //if previous category is not null and current category is, reduce the response count
+      await incrementCounter(messageRef, "responses", -1) //if previous category is not null and current category is, reduce the response count
     }
-    await incrementCounter(
-      messageRef,
-      previousCategory,
-      numVoteShards.value(),
-      -1
-    ) //if previous category is not null and current category also not now, reduce the count of the previous category
+    await incrementCounter(messageRef, previousCategory, -1) //if previous category is not null and current category also not now, reduce the count of the previous category
     if (previousCategory === "info") {
-      await incrementCounter(
-        messageRef,
-        "totalVoteScore",
-        numVoteShards.value(),
-        -previousVote
-      ) //if previous category is info, reduce the total vote score
+      await incrementCounter(messageRef, "totalVoteScore", -previousScore) //if previous category is info, reduce the total vote score
     }
   }
   if (currentCategory !== null) {
-    await incrementCounter(messageRef, currentCategory, numVoteShards.value())
+    await incrementCounter(messageRef, currentCategory)
     if (currentCategory === "info") {
-      await incrementCounter(
-        messageRef,
-        "totalVoteScore",
-        numVoteShards.value(),
-        currentVote
-      )
+      await incrementCounter(messageRef, "totalVoteScore", currentScore)
     }
   }
 }
@@ -230,6 +233,22 @@ async function switchLegacyCheckerRef(
   } else {
     functions.logger.error("Invalid factCheckerDocRef path")
     return null
+  }
+}
+
+function computeTruthScore(
+  infoCount: number,
+  voteTotal: number,
+  isLegacy: boolean
+) {
+  if (infoCount === 0) {
+    return null
+  }
+  const truthScore = voteTotal / infoCount
+  if (isLegacy) {
+    return (truthScore / 5) * 4 + 1
+  } else {
+    return truthScore
   }
 }
 

@@ -297,18 +297,19 @@ async function sendVotingStats(instancePath: string) {
   if (!messageRef) {
     return
   }
+  const messageSnap = await messageRef.get()
   const instanceSnap = await db.doc(instancePath).get()
   const responseCount = await getCount(messageRef, "responses")
   const irrelevantCount = await getCount(messageRef, "irrelevant")
   const scamCount = await getCount(messageRef, "scam")
   const illicitCount = await getCount(messageRef, "illicit")
   const infoCount = await getCount(messageRef, "info")
+  const satireCount = await getCount(messageRef, "satire")
   const spamCount = await getCount(messageRef, "spam")
   const legitimateCount = await getCount(messageRef, "legitimate")
   const unsureCount = await getCount(messageRef, "unsure")
   const susCount = scamCount + illicitCount
-  const voteTotal = await getCount(messageRef, "totalVoteScore")
-  const truthScore = infoCount > 0 ? voteTotal / infoCount : null
+  const truthScore = messageSnap.get("truthScore")
   const thresholds = await getThresholds()
   const from = instanceSnap.get("from")
   const responses = await getResponsesObj("user", from)
@@ -358,6 +359,7 @@ async function sendVotingStats(instancePath: string) {
       count: legitimateCount,
       isInfo: false,
     },
+    { name: responses.PLACEHOLDER_SATIRE, count: satireCount, isInfo: false },
     { name: responses.PLACEHOLDER_UNSURE, count: unsureCount, isInfo: false },
   ]
 
@@ -489,7 +491,6 @@ async function updateLanguageAndSendMenu(from: string, language: string) {
 
 async function sendInterimUpdate(instancePath: string) {
   //get statistics
-  const FEEDBACK_FEATURE_FLAG = true
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
@@ -541,6 +542,9 @@ async function sendInterimUpdate(instancePath: string) {
     case "accurate":
       prelimAssessment = responses.PLACEHOLDER_ACCURATE
       infoPlaceholder = infoLiner
+      break
+    case "satire":
+      prelimAssessment = responses.PLACEHOLDER_SATIRE
       break
     case "spam":
       prelimAssessment = responses.PLACEHOLDER_SPAM
@@ -645,19 +649,12 @@ async function respondToInstance(
   const responses = await getResponsesObj("user", from)
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
-  const isIrrelevant = parentMessageSnap.get("isIrrelevant")
-  const isScam = parentMessageSnap.get("isScam")
-  const isIllicit = parentMessageSnap.get("isIllicit")
-  const truthScore = parentMessageSnap.get("truthScore")
-  const isSpam = parentMessageSnap.get("isSpam")
-  const isUnsure = parentMessageSnap.get("isUnsure")
-  const isInfo = parentMessageSnap.get("isInfo")
-  const isLegitimate = parentMessageSnap.get("isLegitimate")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
   const responseCount = await getCount(parentMessageRef, "responses")
   const isImage = data?.type === "image"
   const isMatched = data?.isMatched ?? false
+  const primaryCategory = parentMessageSnap.get("primaryCategory")
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -675,7 +672,9 @@ async function respondToInstance(
         "{{methodology}}",
         isMachineCategorised
           ? responses.METHODOLOGY_AUTO
-          : isMatched ? responses.METHODOLOGY_HUMAN_PREVIOUS : responses.METHODOLOGY_HUMAN
+          : isMatched
+          ? responses.METHODOLOGY_HUMAN_PREVIOUS
+          : responses.METHODOLOGY_HUMAN
       )
       .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
   }
@@ -727,40 +726,19 @@ async function respondToInstance(
     },
   }
 
-  let category
-  if (isScam) {
-    category = "scam"
-  } else if (isIllicit) {
-    category = "illicit"
-  } else if (isSpam) {
-    category = "spam"
-  } else if (isLegitimate) {
-    category = "legitimate"
-  } else if (isIrrelevant) {
-    if (isMachineCategorised) {
-      category = "irrelevant_auto"
-    } else {
-      category = "irrelevant"
-    }
-  } else if (isInfo) {
-    if (truthScore === null) {
-      functions.logger.error(
-        "Null truth score despite category info, error response sent"
-      )
-      category = "error"
-    } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
-      category = "untrue"
-    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
-      category = "misleading"
-    } else {
-      category = "accurate"
-    }
-  } else if (isUnsure) {
-    category = "unsure"
-  } else {
-    functions.logger.error("No category assigned, error response sent")
+  let category = primaryCategory
+
+  if (
+    category !== "irrelevant" &&
+    !Object.keys(responses).includes(category.toUpperCase())
+  ) {
+    functions.logger.error("Unknown category assigned, error response sent")
     updateObj.replyCategory = "error"
     return
+  }
+
+  if (category === "irrelevant" && isMachineCategorised) {
+    category = "irrelevant_auto"
   }
 
   let responseText

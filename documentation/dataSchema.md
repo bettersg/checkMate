@@ -82,7 +82,7 @@ erDiagram
         boolean triggerL2Vote "whether or not a vote should be triggered"
         boolean triggerL2Others "whether or not L2 scam message should be triggered"
         string sentMessageId "message id of the forwarded dubious message to checkers"
-        number vote
+        number vote "number between 1 and 5"
         sting category "scam, irrelevant, or number"
         timestamp createdTimestamp
         timestamp acceptedTimestamp

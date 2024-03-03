@@ -25,18 +25,17 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
 
   if (
     category === "info" &&
-    (typeof truthScore !== "number" || truthScore < 0 || truthScore > 5)
+    (typeof truthScore !== "number" || truthScore < 1 || truthScore > 5)
   ) {
     return res
       .status(400)
-      .send("A truthscore between 0 and 5 is required for the info category")
+      .send("A truthscore between 1 and 5 is required for the info category")
   }
 
-  if (
-    category !== "info" &&
-    (truthScore !== undefined || truthScore !== null)
-  ) {
-    return res.status(400).send("Vote can only be submitted for info category")
+  if (category !== "info" && truthScore != null) {
+    return res
+      .status(400)
+      .send("Truthscore can only be submitted for info category")
   }
   //check if vote request exists in firestore
   const voteRequestRef = db
@@ -50,7 +49,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   }
   await voteRequestRef.update({
     category: category,
-    vote: truthScore ?? null,
+    truthScore: truthScore ?? null,
     votedTimestamp: Timestamp.fromDate(new Date()),
   })
   return res.status(200).send({

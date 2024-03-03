@@ -1,6 +1,6 @@
 {
   "VOTE_NO": "No problem! If you wish to come back and assess the message, you may do so by clicking the 'yes' button. See you soon!😊",
-  "FACTCHECK_PROMPT": "Please assess the veracity of the claim(s) in this message on a scale from 0 to 5, where 0 means the claim(s) are entirely false, and 5 means the claim(s) are entirely true.",
+  "FACTCHECK_PROMPT": "Please assess the veracity of the claim(s) in this message on a scale from 1 to 5, where 1 means the claim(s) are entirely false, and 5 means the claim(s) are entirely true. You can also mark the message as 'satire' if appropriate.",
   "L1_ASSESSMENT_PROMPT": "Which of these categories best describes this message?",
   "L2_OTHERS_ASSESSEMENT_PROMPT": "Which of these subcategories best describes this message?",
   "RESPONSE_RECORDED": "Got it! Your response has been recorded. Thank you for playing your part in the fight against scams and misinformation, one message at a time! 💪",

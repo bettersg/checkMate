@@ -80,7 +80,7 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     platform: "agent",
     sentMessageId: null,
     category: null,
-    vote: null,
+    truthScore: null,
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: Timestamp.fromDate(new Date()),
     votedTimestamp: null,
