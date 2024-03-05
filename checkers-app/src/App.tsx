@@ -95,64 +95,64 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    // Only call the API when phoneNo is available to update messages
-    if (phoneNo) {
-      const fetchData = async () => {
-        try {
-          const response = await fetch(`/api/checkers/${phoneNo}/messages`, {
-            method: "GET",
-          });
-          console.log("After fetch");
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
+  // useEffect(() => {
+  //   // Only call the API when phoneNo is available to update messages
+  //   if (phoneNo) {
+  //     const fetchData = async () => {
+  //       try {
+  //         const response = await fetch(`/api/checkers/${phoneNo}/messages`, {
+  //           method: "GET",
+  //         });
+  //         console.log("After fetch");
+  //         if (!response.ok) {
+  //           throw new Error(`HTTP error! Status: ${response.status}`);
+  //         }
 
-          const data = await response.json();
+  //         const data = await response.json();
 
-          // Convert the ISO string to Date object for all messages
-          data.messages.forEach((msg: Message) => {
-            msg.firstTimestamp = new Date(msg.firstTimestamp);
-            if (msg.voteRequests.acceptedTimestamp != null) {
-              msg.voteRequests.acceptedTimestamp = new Date(msg.voteRequests.acceptedTimestamp);
-            }
-            if (msg.voteRequests.createdTimestamp != null) {
-              msg.voteRequests.createdTimestamp = new Date(msg.voteRequests.createdTimestamp);
-            }
-            if (msg.voteRequests.votedTimestamp != null) {
-              msg.voteRequests.votedTimestamp = new Date(msg.voteRequests.votedTimestamp);
-            }
-            if (msg.voteRequests.checkTimestamp != null) {
-              msg.voteRequests.checkTimestamp = new Date(msg.voteRequests.checkTimestamp);
-            }
-          });
+  //         // Convert the ISO string to Date object for all messages
+  //         data.messages.forEach((msg: Message) => {
+  //           msg.firstTimestamp = new Date(msg.firstTimestamp);
+  //           if (msg.voteRequests.acceptedTimestamp != null) {
+  //             msg.voteRequests.acceptedTimestamp = new Date(msg.voteRequests.acceptedTimestamp);
+  //           }
+  //           if (msg.voteRequests.createdTimestamp != null) {
+  //             msg.voteRequests.createdTimestamp = new Date(msg.voteRequests.createdTimestamp);
+  //           }
+  //           if (msg.voteRequests.votedTimestamp != null) {
+  //             msg.voteRequests.votedTimestamp = new Date(msg.voteRequests.votedTimestamp);
+  //           }
+  //           if (msg.voteRequests.checkTimestamp != null) {
+  //             msg.voteRequests.checkTimestamp = new Date(msg.voteRequests.checkTimestamp);
+  //           }
+  //         });
 
-          setMessages(data.messages);
+  //         setMessages(data.messages);
 
-          const PENDING: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category == null);
-          const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category != null);
+  //         const PENDING: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category == null);
+  //         const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category != null);
 
-          // Sort by date
-          PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
-          ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
+  //         // Sort by date
+  //         PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
+  //         ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
 
-          setPending(PENDING);
-          setAssessed(ASSESSED);
+  //         setPending(PENDING);
+  //         setAssessed(ASSESSED);
 
-          //calculate & update context pending unread
-          const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
-          setUnassessed(pending_unread);
-          //calculate & update assessed unread
-          const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
-          setUnchecked(assessed_unread);
+  //         //calculate & update context pending unread
+  //         const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
+  //         setUnassessed(pending_unread);
+  //         //calculate & update assessed unread
+  //         const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
+  //         setUnchecked(assessed_unread);
 
-        } catch (error) {
-          console.error("Error fetching votes:", error);
-        }
-      };
-      fetchData();
-    }
-  }, [phoneNo]);
+  //       } catch (error) {
+  //         console.error("Error fetching votes:", error);
+  //       }
+  //     };
+  //     fetchData();
+  //   }
+  // }, [phoneNo]);
 
 
   return (
