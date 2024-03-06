@@ -3,6 +3,7 @@ import * as functions from "firebase-functions"
 import express from "express"
 import * as crypto from "crypto"
 import { onRequest } from "firebase-functions/v2/https"
+import { logger } from "firebase-functions"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -69,21 +70,21 @@ app.post("/", async (req, res) => {
     //1hr
     functions.logger.warn("Telegram data is outdated")
     return res.status(403).send("No Access")
-  }
+}
 
   if (userId) {
     const userSnap = await db
-      .collection("factCheckers")
-      .where("platformId", "==", userId)
+      .collection("checkers")
+      .where("telegramId", "==", parseInt(userId))
       .limit(1)
-      .get() 
+      .get()
+
     if (!userSnap.empty) {
       try {
         const userDoc = userSnap.docs[0];
         const customToken = await admin.auth().createCustomToken(userId)
-        const userName = userDoc.data()?.name
-        const phoneNo = userDoc.id
-        return res.json({ customToken: customToken, userId:userId, name:userName, phoneNo: phoneNo })
+        const checkerName = userDoc.data()?.name
+        return res.json({ customToken: customToken, userId: userId, name: checkerName })
       } catch (error) {
         functions.logger.error("Error creating custom token:", error)
         return res.status(500).send("Error creating custom token")

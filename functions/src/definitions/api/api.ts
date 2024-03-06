@@ -1,11 +1,8 @@
 import * as admin from "firebase-admin"
 import express from "express"
 import * as functions from "firebase-functions"
-import { validateFirebaseIdToken } from "./middleware/validator"
 import { onRequest } from "firebase-functions/v2/https"
 import { Timestamp } from 'firebase-admin/firestore';
-import { TeleMessage, VoteRequest } from "../../types";
-import { getCount } from "../common/counters"
 import { config } from 'dotenv';
 
 config();
@@ -400,11 +397,12 @@ app.get("/helloworld", async (req, res) => {
 app.get("/checkerData/:id", async (req, res) => {
   const { id } = req.params;
 
-  try { 
-    const factChecker = await db.collection("checkers").doc(id).get()
-    const data = factChecker.data()
-    console.log(data)
-    res.status(200).json({ success: true, data })
+  try {
+    const checker = await db.collection("checkers").where("telegramId", "==", id).limit(1).get();
+
+    console.log(`checker here: ${checker}`)
+
+    res.status(200).json({ success: true, data: checker })
   } catch (err) {
     functions.logger.log(err)
     res.status(500)
