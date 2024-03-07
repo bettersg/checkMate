@@ -185,7 +185,7 @@ function sendTemplateMessageAndCreateVoteRequest(
       platform: "whatsapp",
       sentMessageId: null,
       category: null,
-      vote: null,
+      truthScore: null,
       createdTimestamp: Timestamp.fromDate(new Date()),
       acceptedTimestamp: null,
       votedTimestamp: null,
