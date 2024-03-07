@@ -27,33 +27,37 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
-    if (!event?.data?.before || !event?.data?.before) {
+    if (!event?.data?.before || !event?.data?.after) {
       return Promise.resolve()
     }
-    const before = event.data.before.data()
-    const after = event.data.after.data()
+    const preChangeData = event.data.before.data()
+    const postChangeData = event.data.after.data()
     const docSnap = event.data.after
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
-    if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
+    if (
+      preChangeData.triggerL2Vote !== true &&
+      postChangeData.triggerL2Vote === true
+    ) {
       await sendVotingMessage(docSnap, messageRef)
     } else if (
-      before.triggerL2Others !== true &&
-      after.triggerL2Others === true
+      preChangeData.triggerL2Others !== true &&
+      postChangeData.triggerL2Others === true
     ) {
       await sendL2OthersCategorisationMessage(docSnap, messageRef)
     } else if (
-      before.truthScore != after.truthScore ||
-      before.category != after.category ||
-      before.vote != after.vote
+      preChangeData.truthScore != postChangeData.truthScore ||
+      preChangeData.category != postChangeData.category ||
+      preChangeData.vote != postChangeData.vote
     ) {
       const isLegacy =
-        after.truthScore === undefined && after.vote !== undefined
-      await updateCounts(messageRef, before, after, isLegacy)
-      await updateCheckerVoteCount(before, after)
+        postChangeData.truthScore === undefined &&
+        postChangeData.vote !== undefined
+      await updateCounts(messageRef, preChangeData, postChangeData, isLegacy)
+      await updateCheckerVoteCount(preChangeData, postChangeData)
       const voteRequestQuerySnapshot = await messageRef
         .collection("voteRequests")
         .get()
@@ -133,19 +137,25 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         isAssessed: isAssessed,
         primaryCategory: primaryCategory,
       })
-      if (after.category !== null) {
+      if (postChangeData.category !== null) {
         //vote has ended
-        if (after.platform !== "agent" && !!after.platformId) {
-          await sendRemainingReminder(after.platformId, after.platform)
+        if (
+          postChangeData.platform !== "agent" &&
+          !!postChangeData.platformId
+        ) {
+          await sendRemainingReminder(
+            postChangeData.platformId,
+            postChangeData.platform
+          )
         }
-        if (after.votedTimestamp !== before.votedTimestamp) {
+        if (postChangeData.votedTimestamp !== preChangeData.votedTimestamp) {
           const factCheckerDocRef = await switchLegacyCheckerRef(
-            after.factCheckerDocRef
+            postChangeData.factCheckerDocRef
           )
           factCheckerDocRef === null ||
             (await factCheckerDocRef.set(
               {
-                lastVotedTimestamp: after.votedTimestamp,
+                lastVotedTimestamp: postChangeData.votedTimestamp,
               },
               { merge: true }
             ))

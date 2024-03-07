@@ -38,7 +38,7 @@ const onInstanceCreateV2 = onDocumentCreated(
     const snap = event.data
     if (!snap) {
       console.log("No data associated with the event")
-      return
+      return Promise.resolve()
     }
     const data = snap.data()
     if (!data.from) {
