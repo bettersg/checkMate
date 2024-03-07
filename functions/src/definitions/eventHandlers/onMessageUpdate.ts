@@ -2,21 +2,24 @@ import * as functions from "firebase-functions"
 import { respondToInstance } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
+import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
-const onMessageUpdate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onMessageUpdateV2 = onDocumentUpdated(
+  {
+    document: "messages/{messageId}",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "OPENAI_API_KEY",
     ],
-  })
-  .firestore.document("/messages/{messageId}")
-  .onUpdate(async (change, context) => {
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = change.before
-    const after = change.after
+    const before = event?.data?.before
+    const after = event?.data?.after
+    if (!before || !after) {
+      return Promise.resolve()
+    }
     const messageData = after.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
@@ -69,7 +72,8 @@ const onMessageUpdate = functions
       })
     }
     return Promise.resolve()
-  })
+  }
+)
 
 async function replyPendingInstances(
   docSnap: functions.firestore.QueryDocumentSnapshot
@@ -83,4 +87,4 @@ async function replyPendingInstances(
   })
 }
 
-export { onMessageUpdate }
+export { onMessageUpdateV2 }

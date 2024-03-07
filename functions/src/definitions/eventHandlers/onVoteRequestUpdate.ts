@@ -9,6 +9,7 @@ import {
 import { incrementCounter, getCount } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
+import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -19,29 +20,31 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
-const onVoteRequestUpdate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onVoteRequestUpdateV2 = onDocumentUpdated(
+  {
+    document: "messages/{messageId}/voteRequests/{voteRequestId}",
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
-  })
-  .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
-  .onUpdate(async (change, context) => {
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = change.before.data()
-    const docSnap = change.after
-    const after = docSnap.data()
+    if (!event?.data?.before || !event?.data?.before) {
+      return Promise.resolve()
+    }
+    const before = event.data.before.data()
+    const after = event.data.after.data()
+    const docSnap = event.data.after
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
     if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
-      await sendVotingMessage(change.after, messageRef)
+      await sendVotingMessage(docSnap, messageRef)
     } else if (
       before.triggerL2Others !== true &&
       after.triggerL2Others === true
     ) {
-      await sendL2OthersCategorisationMessage(change.after, messageRef)
+      await sendL2OthersCategorisationMessage(docSnap, messageRef)
     } else if (
       before.truthScore != after.truthScore ||
       before.category != after.category ||
@@ -150,7 +153,8 @@ const onVoteRequestUpdate = functions
       }
     }
     return Promise.resolve()
-  })
+  }
+)
 
 async function updateCounts(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
@@ -267,4 +271,4 @@ function computeTruthScore(
   }
 }
 
-export { onVoteRequestUpdate }
+export { onVoteRequestUpdateV2 }
