@@ -8,7 +8,7 @@ import { onDocumentDeleted } from "firebase-functions/v2/firestore"
 
 const onInstanceDeleteV2 = onDocumentDeleted(
   {
-    document: "/messages/{messageId}/instances/{instanceId}",
+    document: "messages/{messageId}/instances/{instanceId}",
     secrets: ["TYPESENSE_TOKEN"],
   },
   async (event) => {

@@ -13,7 +13,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
-    if (!event?.data?.before || !event?.data?.before) {
+    if (!event?.data?.before || !event?.data?.after) {
       return Promise.resolve()
     }
     const before = event.data.before.data()

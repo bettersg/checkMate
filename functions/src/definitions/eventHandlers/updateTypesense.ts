@@ -17,7 +17,7 @@ const onMessageWriteV2 = onDocumentWritten(
     const id = event.params.messageId
     // If the message is deleted, delete from the Typesense index
     const messageSnap = event?.data?.after
-    if (messageSnap == undefined || !messageSnap.exists) {
+    if (messageSnap === undefined || !messageSnap.exists) {
       try {
         await deleteOne(id, CollectionTypes.Messages)
       } catch {
