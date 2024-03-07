@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FactChecker } from "../types/factChecker";
-import { updateFactChecker } from "./api";
+import { Checker } from "../types";
+import { postFactChecker } from "./api";
 
 export function useUpdateFactChecker() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: FactChecker) => updateFactChecker(data),
+    mutationFn: (data: Checker) => postFactChecker(data),
     onSettled: async (_, error, variables) => {
       if (error) {
         console.log(error);
       } else {
-        await queryClient.invalidateQueries({ queryKey: ["factChecker", { id: variables.platformId }] });
+        await queryClient.invalidateQueries({ queryKey: ["factChecker", { id: variables.telegramId }] });
       }
     }
   })

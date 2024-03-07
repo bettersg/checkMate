@@ -14,7 +14,6 @@ import {
   MyVotesPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Message } from "./types";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
@@ -37,12 +36,6 @@ function App() {
   //for global states: userID, name and messages
   const [userId, setUserId] = useState(null);
   const [name, setName] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [phoneNo, setPhoneNo] = useState('');
-  const [unassessed, setUnassessed] = useState(0);
-  const [unchecked, setUnchecked] = useState(0);
-  const [pending, setPending] = useState<Message[]>([]);
-  const [assessed, setAssessed] = useState<Message[]>([]);
 
   // TODO: BRENNAN - Clean up
   console.log(count, setCount, telegramApp)
@@ -78,7 +71,6 @@ function App() {
             if (data.customToken) {
               setUserId(data.userId);
               setName(data.name);
-              setPhoneNo(data.phoneNo);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
                 console.error(
                   "Error during Firebase signInWithCustomToken",
@@ -157,8 +149,7 @@ function App() {
 
   return (
     <UserProvider value={{
-      userId, name, phoneNo: phoneNo, messages, updateMessages: setMessages, unassessed, updateUnassessed: setUnassessed, unchecked, updateUnchecked: setUnchecked, pending: pending,
-      assessed: assessed, updatePending: setPending, updateAssessed: setAssessed
+      userId, name
     }}>
       <RouterProvider router={router} />
     </UserProvider>

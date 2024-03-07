@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUpdateFactChecker } from "../services/mutations"
-import { FactChecker } from "../types/factChecker";
+import { Checker } from "../types";
 
 const text = "Welcome to our community of CheckMates! 👋🏻 We're grateful to have you on board to combat misinformation and scams. 🙇‍♀️🙇🏻 We'd love to get to know you better - could you *reply to this message* and share your name with us? (Reply to this message by swiping right)!"
 console.log(text)
@@ -90,7 +90,7 @@ const steps: { [key: number]: JSX.Element } = {
 const numberOfSteps = Object.keys(steps).length;
 
 
-const Onboarding = ({ factChecker }: { factChecker: FactChecker }) => {
+const Onboarding = ({ factChecker }: { factChecker: Checker }) => {
   const [name, setName] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
 
