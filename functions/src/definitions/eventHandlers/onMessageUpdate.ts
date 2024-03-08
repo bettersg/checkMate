@@ -15,15 +15,15 @@ const onMessageUpdateV2 = onDocumentUpdated(
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = event?.data?.before
-    const after = event?.data?.after
-    if (!before || !after) {
+    const preChangeSnap = event?.data?.before
+    const postChangeSnap = event?.data?.after
+    if (!preChangeSnap || !postChangeSnap) {
       return Promise.resolve()
     }
-    const messageData = after.data()
+    const messageData = postChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
-    if (!before.data().isAssessed && messageData.isAssessed) {
+    if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
       //TODO: rationalisation here
       let rationalisation: null | string = null
       let primaryCategory = messageData.primaryCategory
@@ -36,16 +36,16 @@ const onMessageUpdateV2 = onDocumentUpdated(
       ) {
         rationalisation = await rationaliseMessage(text, primaryCategory)
       }
-      await after.ref.update({
+      await postChangeSnap.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
         rationalisation: rationalisation,
       })
-      await replyPendingInstances(after)
+      await replyPendingInstances(postChangeSnap)
     }
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
     else if (
-      before.data().text !== text ||
-      before.data().primaryCategory !== primaryCategory
+      preChangeSnap.data().text !== text ||
+      preChangeSnap.data().primaryCategory !== primaryCategory
     ) {
       let rationalisation: null | string = null
       if (
@@ -57,17 +57,17 @@ const onMessageUpdateV2 = onDocumentUpdated(
       ) {
         rationalisation = await rationaliseMessage(text, primaryCategory)
       }
-      await after.ref.update({
+      await postChangeSnap.ref.update({
         rationalisation: rationalisation,
       })
     }
     if (
-      before.data().primaryCategory !== primaryCategory &&
+      preChangeSnap.data().primaryCategory !== primaryCategory &&
       primaryCategory === "legitimate" &&
       text
     ) {
       const anonymisedText = await anonymiseMessage(text, false)
-      await after.ref.update({
+      await postChangeSnap.ref.update({
         text: anonymisedText,
       })
     }

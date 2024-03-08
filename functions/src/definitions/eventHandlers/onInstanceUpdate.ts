@@ -8,7 +8,7 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
 const onInstanceUpdateV2 = onDocumentUpdated(
   {
-    document: "/messages/{messageId}/instances/{instanceId}",
+    document: "messages/{messageId}/instances/{instanceId}",
     secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN"],
   },
   async (event) => {
@@ -16,15 +16,20 @@ const onInstanceUpdateV2 = onDocumentUpdated(
     if (!event?.data?.before || !event?.data?.after) {
       return Promise.resolve()
     }
-    const before = event.data.before.data()
+    const preChangeData = event.data.before.data()
     const snap = event.data.after
-    const after = snap.data()
-    if (after.type === "text" && before.originalText !== after.originalText) {
-      const embedding = await getEmbedding(after.text)
+    const postChangeData = snap.data()
+    if (
+      postChangeData.type === "text" &&
+      preChangeData.originalText !== postChangeData.originalText
+    ) {
+      const embedding = await getEmbedding(postChangeData.text)
       const updateDocument = {
         id: snap.ref.path,
-        message: after.text,
-        captionHash: after.captionHash ? after.captionHash : "__NULL__",
+        message: postChangeData.text,
+        captionHash: postChangeData.captionHash
+          ? postChangeData.captionHash
+          : "__NULL__",
         embedding: embedding,
       }
       await updateOne(updateDocument, CollectionTypes.Instances)
