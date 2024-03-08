@@ -9,6 +9,7 @@ import {
 import { incrementCounter, getCount } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
+import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -19,38 +20,44 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
-const onVoteRequestUpdate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onVoteRequestUpdateV2 = onDocumentUpdated(
+  {
+    document: "messages/{messageId}/voteRequests/{voteRequestId}",
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
-  })
-  .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
-  .onUpdate(async (change, context) => {
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = change.before.data()
-    const docSnap = change.after
-    const after = docSnap.data()
+    if (!event?.data?.before || !event?.data?.after) {
+      return Promise.resolve()
+    }
+    const preChangeData = event.data.before.data()
+    const postChangeData = event.data.after.data()
+    const docSnap = event.data.after
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
-    if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
-      await sendVotingMessage(change.after, messageRef)
-    } else if (
-      before.triggerL2Others !== true &&
-      after.triggerL2Others === true
+    if (
+      preChangeData.triggerL2Vote !== true &&
+      postChangeData.triggerL2Vote === true
     ) {
-      await sendL2OthersCategorisationMessage(change.after, messageRef)
+      await sendVotingMessage(docSnap, messageRef)
     } else if (
-      before.truthScore != after.truthScore ||
-      before.category != after.category ||
-      before.vote != after.vote
+      preChangeData.triggerL2Others !== true &&
+      postChangeData.triggerL2Others === true
+    ) {
+      await sendL2OthersCategorisationMessage(docSnap, messageRef)
+    } else if (
+      preChangeData.truthScore != postChangeData.truthScore ||
+      preChangeData.category != postChangeData.category ||
+      preChangeData.vote != postChangeData.vote
     ) {
       const isLegacy =
-        after.truthScore === undefined && after.vote !== undefined
-      await updateCounts(messageRef, before, after, isLegacy)
-      await updateCheckerVoteCount(before, after)
+        postChangeData.truthScore === undefined &&
+        postChangeData.vote !== undefined
+      await updateCounts(messageRef, preChangeData, postChangeData, isLegacy)
+      await updateCheckerVoteCount(preChangeData, postChangeData)
       const voteRequestQuerySnapshot = await messageRef
         .collection("voteRequests")
         .get()
@@ -130,19 +137,25 @@ const onVoteRequestUpdate = functions
         isAssessed: isAssessed,
         primaryCategory: primaryCategory,
       })
-      if (after.category !== null) {
+      if (postChangeData.category !== null) {
         //vote has ended
-        if (after.platform !== "agent" && !!after.platformId) {
-          await sendRemainingReminder(after.platformId, after.platform)
+        if (
+          postChangeData.platform !== "agent" &&
+          !!postChangeData.platformId
+        ) {
+          await sendRemainingReminder(
+            postChangeData.platformId,
+            postChangeData.platform
+          )
         }
-        if (after.votedTimestamp !== before.votedTimestamp) {
+        if (postChangeData.votedTimestamp !== preChangeData.votedTimestamp) {
           const factCheckerDocRef = await switchLegacyCheckerRef(
-            after.factCheckerDocRef
+            postChangeData.factCheckerDocRef
           )
           factCheckerDocRef === null ||
             (await factCheckerDocRef.set(
               {
-                lastVotedTimestamp: after.votedTimestamp,
+                lastVotedTimestamp: postChangeData.votedTimestamp,
               },
               { merge: true }
             ))
@@ -150,7 +163,8 @@ const onVoteRequestUpdate = functions
       }
     }
     return Promise.resolve()
-  })
+  }
+)
 
 async function updateCounts(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
@@ -267,4 +281,4 @@ function computeTruthScore(
   }
 }
 
-export { onVoteRequestUpdate }
+export { onVoteRequestUpdateV2 }

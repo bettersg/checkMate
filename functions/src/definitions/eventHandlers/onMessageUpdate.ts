@@ -2,25 +2,28 @@ import * as functions from "firebase-functions"
 import { respondToInstance } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
+import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
-const onMessageUpdate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onMessageUpdateV2 = onDocumentUpdated(
+  {
+    document: "messages/{messageId}",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "OPENAI_API_KEY",
     ],
-  })
-  .firestore.document("/messages/{messageId}")
-  .onUpdate(async (change, context) => {
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = change.before
-    const after = change.after
-    const messageData = after.data()
+    const preChangeSnap = event?.data?.before
+    const postChangeSnap = event?.data?.after
+    if (!preChangeSnap || !postChangeSnap) {
+      return Promise.resolve()
+    }
+    const messageData = postChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
-    if (!before.data().isAssessed && messageData.isAssessed) {
+    if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
       //TODO: rationalisation here
       let rationalisation: null | string = null
       let primaryCategory = messageData.primaryCategory
@@ -33,16 +36,16 @@ const onMessageUpdate = functions
       ) {
         rationalisation = await rationaliseMessage(text, primaryCategory)
       }
-      await after.ref.update({
+      await postChangeSnap.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
         rationalisation: rationalisation,
       })
-      await replyPendingInstances(after)
+      await replyPendingInstances(postChangeSnap)
     }
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
     else if (
-      before.data().text !== text ||
-      before.data().primaryCategory !== primaryCategory
+      preChangeSnap.data().text !== text ||
+      preChangeSnap.data().primaryCategory !== primaryCategory
     ) {
       let rationalisation: null | string = null
       if (
@@ -54,22 +57,23 @@ const onMessageUpdate = functions
       ) {
         rationalisation = await rationaliseMessage(text, primaryCategory)
       }
-      await after.ref.update({
+      await postChangeSnap.ref.update({
         rationalisation: rationalisation,
       })
     }
     if (
-      before.data().primaryCategory !== primaryCategory &&
+      preChangeSnap.data().primaryCategory !== primaryCategory &&
       primaryCategory === "legitimate" &&
       text
     ) {
       const anonymisedText = await anonymiseMessage(text, false)
-      await after.ref.update({
+      await postChangeSnap.ref.update({
         text: anonymisedText,
       })
     }
     return Promise.resolve()
-  })
+  }
+)
 
 async function replyPendingInstances(
   docSnap: functions.firestore.QueryDocumentSnapshot
@@ -83,4 +87,4 @@ async function replyPendingInstances(
   })
 }
 
-export { onMessageUpdate }
+export { onMessageUpdateV2 }

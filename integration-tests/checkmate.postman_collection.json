@@ -33,14 +33,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/healthcheck",
+							"raw": "{{FUNCTIONS_URL}}/{{PROJECT_ID}}/asia-southeast1/healthcheckV2",
 							"host": [
 								"{{FUNCTIONS_URL}}"
 							],
 							"path": [
 								"{{PROJECT_ID}}",
 								"asia-southeast1",
-								"healthcheck"
+								"healthcheckV2"
 							]
 						}
 					},
