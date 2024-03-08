@@ -16,8 +16,8 @@ const onMessageWriteV2 = onDocumentWritten(
     // Grab the current value of what was written to Firestore.
     const id = event.params.messageId
     // If the message is deleted, delete from the Typesense index
-    const messageSnap = event?.data?.after
-    if (messageSnap === undefined || !messageSnap.exists) {
+    const postChangeSnap = event?.data?.after
+    if (postChangeSnap === undefined || !postChangeSnap.exists) {
       try {
         await deleteOne(id, CollectionTypes.Messages)
       } catch {
@@ -27,7 +27,7 @@ const onMessageWriteV2 = onDocumentWritten(
     }
 
     // Otherwise, create/update the message in the the Typesense index
-    const messageData = messageSnap.data()
+    const messageData = postChangeSnap.data()
     if (messageData) {
       const lastTimestamp = messageData.lastTimestamp
       const lastMonth = firestoreTimestampToYYYYMM(lastTimestamp)
