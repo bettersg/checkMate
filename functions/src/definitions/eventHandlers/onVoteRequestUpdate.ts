@@ -86,7 +86,12 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       const isIrrelevant =
         irrelevantCount > thresholds.isIrrelevant * responseCount
       const isUnsure =
-        (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) ||
+        (!isSus &&
+          !isInfo &&
+          !isSpam &&
+          !isLegitimate &&
+          !isIrrelevant &&
+          !isSatire) ||
         unsureCount > thresholds.isUnsure * responseCount
       const isAssessed =
         (isUnsure &&
