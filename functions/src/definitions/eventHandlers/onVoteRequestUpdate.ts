@@ -135,6 +135,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         isScam: isScam,
         isIllicit: isIllicit,
         isInfo: isInfo,
+        isSatire: isSatire,
         isSpam: isSpam,
         isLegitimate: isLegitimate,
         isIrrelevant: isIrrelevant,
