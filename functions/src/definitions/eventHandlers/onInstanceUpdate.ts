@@ -4,30 +4,40 @@ import {
   CollectionTypes,
 } from "../common/typesense/collectionOperations"
 import { getEmbedding } from "../common/machineLearningServer/operations"
+import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
-const onInstanceUpdate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onInstanceUpdateV2 = onDocumentUpdated(
+  {
+    document: "messages/{messageId}/instances/{instanceId}",
     secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN"],
-  })
-  .firestore.document("/messages/{messageId}/instances/{instanceId}")
-  .onUpdate(async (change, context) => {
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = change.before.data()
-    const after = change.after.data()
-    if (after.type === "text" && before.originalText !== after.originalText) {
-      const embedding = await getEmbedding(after.text)
+    if (!event?.data?.before || !event?.data?.after) {
+      return Promise.resolve()
+    }
+    const preChangeData = event.data.before.data()
+    const snap = event.data.after
+    const postChangeData = snap.data()
+    if (
+      postChangeData.type === "text" &&
+      preChangeData.originalText !== postChangeData.originalText
+    ) {
+      const embedding = await getEmbedding(postChangeData.text)
       const updateDocument = {
-        id: change.after.ref.path,
-        message: after.text,
-        captionHash: after.captionHash ? after.captionHash : "__NULL__",
+        id: snap.ref.path,
+        message: postChangeData.text,
+        captionHash: postChangeData.captionHash
+          ? postChangeData.captionHash
+          : "__NULL__",
         embedding: embedding,
       }
       await updateOne(updateDocument, CollectionTypes.Instances)
-      await change.after.ref.update({
+      await snap.ref.update({
         embedding: embedding,
       })
     }
-  })
+  }
+)
 
-export { onInstanceUpdate }
+export { onInstanceUpdateV2 }

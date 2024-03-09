@@ -4,15 +4,18 @@ import {
   CollectionTypes,
 } from "../common/typesense/collectionOperations"
 import { FieldValue } from "@google-cloud/firestore"
+import { onDocumentDeleted } from "firebase-functions/v2/firestore"
 
-const onInstanceDelete = functions
-  .region("asia-southeast1")
-  .runWith({
+const onInstanceDeleteV2 = onDocumentDeleted(
+  {
+    document: "messages/{messageId}/instances/{instanceId}",
     secrets: ["TYPESENSE_TOKEN"],
-  })
-  .firestore.document("/messages/{messageId}/instances/{instanceId}")
-  .onDelete(async (snap, context) => {
-    // Grab the current value of what was written to Firestore.
+  },
+  async (event) => {
+    const snap = event.data
+    if (!snap) {
+      return Promise.resolve()
+    }
     const parentMessageRef = snap.ref.parent.parent
 
     if (parentMessageRef) {
@@ -53,6 +56,7 @@ const onInstanceDelete = functions
         `Failed to delete instance ${snap.ref.path} from Typesense`
       )
     }
-  })
+  }
+)
 
-export { onInstanceDelete }
+export { onInstanceDeleteV2 }

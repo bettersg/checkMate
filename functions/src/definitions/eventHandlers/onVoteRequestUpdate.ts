@@ -9,6 +9,7 @@ import {
 import { incrementCounter, getCount } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
+import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -19,32 +20,44 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
-const onVoteRequestUpdate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onVoteRequestUpdateV2 = onDocumentUpdated(
+  {
+    document: "messages/{messageId}/voteRequests/{voteRequestId}",
     secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
-  })
-  .firestore.document("/messages/{messageId}/voteRequests/{voteRequestId}")
-  .onUpdate(async (change, context) => {
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const before = change.before.data()
-    const docSnap = change.after
-    const after = docSnap.data()
+    if (!event?.data?.before || !event?.data?.after) {
+      return Promise.resolve()
+    }
+    const preChangeData = event.data.before.data()
+    const postChangeData = event.data.after.data()
+    const docSnap = event.data.after
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
-    if (before.triggerL2Vote !== true && after.triggerL2Vote === true) {
-      await sendVotingMessage(change.after, messageRef)
-    } else if (
-      before.triggerL2Others !== true &&
-      after.triggerL2Others === true
+    if (
+      preChangeData.triggerL2Vote !== true &&
+      postChangeData.triggerL2Vote === true
     ) {
-      await sendL2OthersCategorisationMessage(change.after, messageRef)
-    } else if (before.vote != after.vote || before.category != after.category) {
-      await updateCounts(messageRef, before, after)
-      await updateCheckerVoteCount(before, after)
+      await sendVotingMessage(docSnap, messageRef)
+    } else if (
+      preChangeData.triggerL2Others !== true &&
+      postChangeData.triggerL2Others === true
+    ) {
+      await sendL2OthersCategorisationMessage(docSnap, messageRef)
+    } else if (
+      preChangeData.truthScore != postChangeData.truthScore ||
+      preChangeData.category != postChangeData.category ||
+      preChangeData.vote != postChangeData.vote
+    ) {
+      const isLegacy =
+        postChangeData.truthScore === undefined &&
+        postChangeData.vote !== undefined
+      await updateCounts(messageRef, preChangeData, postChangeData, isLegacy)
+      await updateCheckerVoteCount(preChangeData, postChangeData)
       const voteRequestQuerySnapshot = await messageRef
         .collection("voteRequests")
         .get()
@@ -57,21 +70,28 @@ const onVoteRequestUpdate = functions
       const spamCount = await getCount(messageRef, "spam")
       const legitimateCount = await getCount(messageRef, "legitimate")
       const unsureCount = await getCount(messageRef, "unsure")
+      const satireCount = await getCount(messageRef, "satire")
       const susCount = scamCount + illicitCount
       const voteTotal = await getCount(messageRef, "totalVoteScore")
-      const truthScore = infoCount > 0 ? voteTotal / infoCount : null
+      const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
       const thresholds = await getThresholds()
       const isSus = susCount > thresholds.isSus * responseCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
       const isInfo = infoCount > thresholds.isInfo * responseCount
+      const isSatire = satireCount > thresholds.isSatire * responseCount
       const isSpam = spamCount > thresholds.isSpam * responseCount
       const isLegitimate =
         legitimateCount > thresholds.isLegitimate * responseCount
       const isIrrelevant =
         irrelevantCount > thresholds.isIrrelevant * responseCount
       const isUnsure =
-        (!isSus && !isInfo && !isSpam && !isLegitimate && !isIrrelevant) ||
+        (!isSus &&
+          !isInfo &&
+          !isSpam &&
+          !isLegitimate &&
+          !isIrrelevant &&
+          !isSatire) ||
         unsureCount > thresholds.isUnsure * responseCount
       const isAssessed =
         (isUnsure &&
@@ -85,13 +105,15 @@ const onVoteRequestUpdate = functions
         primaryCategory = "scam"
       } else if (isIllicit) {
         primaryCategory = "illicit"
+      } else if (isSatire) {
+        primaryCategory = "satire"
       } else if (isInfo) {
         if (truthScore === null) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
-        } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
+        } else if (truthScore < (thresholds.falseUpperBound || 2)) {
           primaryCategory = "untrue"
-        } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+        } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
           primaryCategory = "misleading"
         } else {
           primaryCategory = "accurate"
@@ -113,6 +135,7 @@ const onVoteRequestUpdate = functions
         isScam: isScam,
         isIllicit: isIllicit,
         isInfo: isInfo,
+        isSatire: isSatire,
         isSpam: isSpam,
         isLegitimate: isLegitimate,
         isIrrelevant: isIrrelevant,
@@ -120,19 +143,25 @@ const onVoteRequestUpdate = functions
         isAssessed: isAssessed,
         primaryCategory: primaryCategory,
       })
-      if (after.category !== null) {
+      if (postChangeData.category !== null) {
         //vote has ended
-        if (after.platform !== "agent" && !!after.platformId) {
-          await sendRemainingReminder(after.platformId, after.platform)
+        if (
+          postChangeData.platform !== "agent" &&
+          !!postChangeData.platformId
+        ) {
+          await sendRemainingReminder(
+            postChangeData.platformId,
+            postChangeData.platform
+          )
         }
-        if (after.votedTimestamp !== before.votedTimestamp) {
+        if (postChangeData.votedTimestamp !== preChangeData.votedTimestamp) {
           const factCheckerDocRef = await switchLegacyCheckerRef(
-            after.factCheckerDocRef
+            postChangeData.factCheckerDocRef
           )
           factCheckerDocRef === null ||
             (await factCheckerDocRef.set(
               {
-                lastVotedTimestamp: after.votedTimestamp,
+                lastVotedTimestamp: postChangeData.votedTimestamp,
               },
               { merge: true }
             ))
@@ -140,17 +169,26 @@ const onVoteRequestUpdate = functions
       }
     }
     return Promise.resolve()
-  })
+  }
+)
 
 async function updateCounts(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   before: admin.firestore.DocumentData,
-  after: admin.firestore.DocumentData
+  after: admin.firestore.DocumentData,
+  isLegacy: boolean = false
 ) {
   const previousCategory = before.category
   const currentCategory = after.category
-  const previousVote = before.vote
-  const currentVote = after.vote
+  //START REMOVE IN APRIL//
+  let previousScore = before.truthScore
+  let currentScore = after.truthScore
+
+  if (isLegacy) {
+    previousScore = before.vote
+    currentScore = after.vote
+  }
+  //END REMOVE IN APRIL//
   if (previousCategory === null) {
     if (currentCategory !== null) {
       await incrementCounter(messageRef, "responses", numVoteShards.value())
@@ -170,7 +208,7 @@ async function updateCounts(
         messageRef,
         "totalVoteScore",
         numVoteShards.value(),
-        -previousVote
+        -previousScore
       ) //if previous category is info, reduce the total vote score
     }
   }
@@ -181,7 +219,7 @@ async function updateCounts(
         messageRef,
         "totalVoteScore",
         numVoteShards.value(),
-        currentVote
+        currentScore
       )
     }
   }
@@ -233,4 +271,20 @@ async function switchLegacyCheckerRef(
   }
 }
 
-export { onVoteRequestUpdate }
+function computeTruthScore(
+  infoCount: number,
+  voteTotal: number,
+  isLegacy: boolean
+) {
+  if (infoCount === 0) {
+    return null
+  }
+  const truthScore = voteTotal / infoCount
+  if (isLegacy) {
+    return (truthScore / 5) * 4 + 1
+  } else {
+    return truthScore
+  }
+}
+
+export { onVoteRequestUpdateV2 }
