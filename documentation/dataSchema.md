@@ -22,6 +22,7 @@ erDiagram
         boolean isLegitimate
         boolean isUnsure
         boolean isInfo
+        boolean isSatire
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or error"
