@@ -43,7 +43,6 @@ const getVoteHandler = async (req: Request, res: Response) => {
     if (!latestInstanceSnap.exists) {
       return res.status(500).send("Latest instance not found")
     }
-
     const [
       irrelevantCount,
       scamCount,
@@ -69,10 +68,8 @@ const getVoteHandler = async (req: Request, res: Response) => {
     const latestType = latestInstanceSnap.get("type") ?? "text"
 
     const storageBucketUrl = latestInstanceSnap.get("storageUrl")
-
     const signedUrl =
       latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
-
     const isAssessed = messageSnap.get("isAssessed")
 
     const returnData: Vote = {
@@ -95,13 +92,13 @@ const getVoteHandler = async (req: Request, res: Response) => {
             irrelevantCount: irrelevantCount,
             legitimateCount: legitimateCount,
             unsureCount: unsureCount,
-            truthScore: 0,
-            primaryCategory: "info",
-            rationalisation: null,
+            truthScore: messageSnap.get("truthScore"),
+            primaryCategory: messageSnap.get("primaryCategory"),
+            rationalisation: messageSnap.get("rationalisation"),
           }
         : null,
     }
-    return returnData
+    return res.status(200).send(returnData)
   } catch {
     logger.error("Error retrieving vote.")
     return res.status(500).send("Error retrieving vote.")

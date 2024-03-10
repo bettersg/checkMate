@@ -77,3 +77,4 @@ testing-data/**
 # Others
 .idea
 .DS_Store
+.vscode
