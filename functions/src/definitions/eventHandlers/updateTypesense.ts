@@ -5,16 +5,19 @@ import {
   CollectionTypes,
 } from "../common/typesense/collectionOperations"
 import { firestoreTimestampToYYYYMM } from "../common/utils"
+import { onDocumentWritten } from "firebase-functions/v2/firestore"
 
-const onMessageWrite = functions
-  .region("asia-southeast1")
-  .runWith({ secrets: ["TYPESENSE_TOKEN"] })
-  .firestore.document("/messages/{messageId}")
-  .onWrite(async (snap, context) => {
+const onMessageWriteV2 = onDocumentWritten(
+  {
+    document: "messages/{messageId}",
+    secrets: ["TYPESENSE_TOKEN"],
+  },
+  async (event) => {
     // Grab the current value of what was written to Firestore.
-    const id = context.params.messageId
+    const id = event.params.messageId
     // If the message is deleted, delete from the Typesense index
-    if (!snap.after.exists) {
+    const postChangeSnap = event?.data?.after
+    if (postChangeSnap === undefined || !postChangeSnap.exists) {
       try {
         await deleteOne(id, CollectionTypes.Messages)
       } catch {
@@ -24,7 +27,7 @@ const onMessageWrite = functions
     }
 
     // Otherwise, create/update the message in the the Typesense index
-    const messageData = snap.after.data()
+    const messageData = postChangeSnap.data()
     if (messageData) {
       const lastTimestamp = messageData.lastTimestamp
       const lastMonth = firestoreTimestampToYYYYMM(lastTimestamp)
@@ -49,6 +52,7 @@ const onMessageWrite = functions
         functions.logger.error(`Failed to upsert message ${id} to Typesense`)
       }
     }
-  })
+  }
+)
 
-export { onMessageWrite }
+export { onMessageWriteV2 }
