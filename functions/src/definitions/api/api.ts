@@ -4,6 +4,10 @@ import * as functions from "firebase-functions"
 import { onRequest } from "firebase-functions/v2/https"
 import { Timestamp } from 'firebase-admin/firestore';
 import { config } from 'dotenv';
+import getCheckerHandler from "./handlers/getChecker"
+import getCheckerVotesHandler from "./handlers/getCheckerVotes"
+import getVoteHandler from "./handlers/getVote"
+import patchVoteRequestHandler from "./handlers/patchVoteRequest"
 
 config();
 
@@ -425,7 +429,17 @@ app.put("/checkerData/:id", async (req, res) => {
   }
 })
 
-//TODO TONGYING: decide other routes and implement
+app.get("/checkers/:checkerId", getCheckerHandler)
+
+app.get("/checkers/:checkerId/votes", getCheckerVotesHandler)
+
+app.get("/messages/:messageId/voteRequests/:voteRequestId", getVoteHandler)
+
+app.patch(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  patchVoteRequestHandler
+)
+
 
 const main = express()
 main.use("/api", app)
