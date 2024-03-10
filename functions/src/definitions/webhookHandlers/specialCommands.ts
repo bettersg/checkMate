@@ -12,6 +12,7 @@ import { Timestamp } from "firebase-admin/firestore"
 
 const runtimeEnvironment = defineString("ENVIRONMENT")
 const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")
+const checker1TelegramId = defineString("CHECKER1_TELEGRAM_ID")
 
 const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
   const command = messageObj.text.body.toLowerCase()
@@ -87,7 +88,7 @@ const mockDb = async function () {
     isActive: true,
     isOnboardingComplete: true,
     singpassOpenId: null,
-    telegramId: null,
+    telegramId: checker1TelegramId.value(),
     whatsappId: checker1PhoneNumber.value(),
     voteWeight: 1,
     level: 1,

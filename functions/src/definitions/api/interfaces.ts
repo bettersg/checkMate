@@ -52,8 +52,8 @@ interface VoteSummary {
 interface Vote {
   type: "image" | "text"
   text: string | null //only for type text
-  caption: string | null  //only for type image
-  storageBucketUrl: string | null //only for type image
+  caption: string | null //only for type image
+  signedImageUrl: string | null //only for type image
   category: string | null
   truthScore: number | null
   isAssessed: boolean //if the message is assessed
@@ -80,9 +80,17 @@ interface AssessedInfo {
   spamCount: number
   irrelevantCount: number
   legitimateCount: number
+  unsureCount: number
   truthScore: number
   primaryCategory: string
   rationalisation: string | null
 }
 
-export { createVoteRequest, updateVoteRequest, createChecker, Checker, VoteSummary, Vote }
+export {
+  createVoteRequest,
+  updateVoteRequest,
+  createChecker,
+  Checker,
+  VoteSummary,
+  Vote,
+}

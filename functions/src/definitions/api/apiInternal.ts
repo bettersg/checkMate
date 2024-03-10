@@ -17,8 +17,7 @@ app.patch(
   patchVoteRequestHandler
 )
 
-
-app.post("/checkers", () => logger.info("entered"), postCheckerHandler)
+app.post("/checkers", postCheckerHandler)
 
 const internalApiHandler = onRequest(
   {
