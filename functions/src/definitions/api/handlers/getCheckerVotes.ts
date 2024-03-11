@@ -36,7 +36,11 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
       query = query.where("category", "!=", null)
     }
 
-    query = query.orderBy("createdTimestamp", "asc").limit(n)
+    const sortOrder = status === "pending" ? "asc" : "desc"
+    const sortField =
+      status === "pending" ? "createdTimestamp" : "votedTimestamp"
+
+    query = query.orderBy(sortField, sortOrder).limit(n)
 
     if (last) {
       const lastDocRef = db.doc(last)
@@ -81,8 +85,8 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
         const category = doc.get("category") ?? null
         const truthScore = doc.get("truthScore") ?? null
         const type = latestInstanceSnap.get("type") ?? null
-        const createdTimestamp = doc.get("createdTimestamp").toDate() ?? null
-        const votedTimestamp = doc.get("votedTimestamp").toDate() ?? null
+        const createdTimestamp = doc.get("createdTimestamp")?.toDate() ?? null
+        const votedTimestamp = doc.get("votedTimestamp")?.toDate() ?? null
         const text = parentMessageSnap.get("text") ?? null
         const caption = latestInstanceSnap.get("caption") ?? null
         const isAssessed = parentMessageSnap.get("isAssessed") ?? false
