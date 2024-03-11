@@ -18,14 +18,25 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
     }
     const n = req.query.n ? parseInt(req.query.n as string) : 10
     const last = req.query.last ? (req.query.last as string) : null //should be a path
+    const status = req.query.status ? (req.query.status as string) : "pending"
+
+    if (!["pending", "voted", "both"].includes(status)) {
+      return res.status(400).send("Invalid status")
+    }
 
     const checkerDocRef = db.collection("checkers").doc(checkerId)
 
     let query = db
       .collectionGroup("voteRequests")
       .where("factCheckerDocRef", "==", checkerDocRef)
-      .orderBy("createdTimestamp", "asc")
-      .limit(n)
+
+    if (status === "pending") {
+      query = query.where("category", "==", null)
+    } else if (status === "voted") {
+      query = query.where("category", "!=", null)
+    }
+
+    query = query.orderBy("createdTimestamp", "asc").limit(n)
 
     if (last) {
       const lastDocRef = db.doc(last)
@@ -71,7 +82,7 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
         const truthScore = doc.get("truthScore") ?? null
         const type = latestInstanceSnap.get("type") ?? null
         const createdTimestamp = doc.get("createdTimestamp").toDate() ?? null
-        const votedTimestamp = doc.get("createdTimestamp").toDate() ?? null
+        const votedTimestamp = doc.get("votedTimestamp").toDate() ?? null
         const text = parentMessageSnap.get("text") ?? null
         const caption = latestInstanceSnap.get("caption") ?? null
         const isAssessed = parentMessageSnap.get("isAssessed") ?? false
