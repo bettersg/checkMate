@@ -17,16 +17,16 @@ jobs:
       - name: Start docker compose for testing
         run: docker-compose -f docker-compose-base.yml up -d
       - name: Wait for emulator to start
-        run: timeout 30 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:15001/checkmate-uat/asia-southeast1/healthcheck)" != "200" ]]; do sleep 1; done' || false
+        run: timeout 30 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:15001/checkmate-uat/asia-southeast1/healthcheckV2)" != "200" ]]; do sleep 1; done' || false
       - name: Install newman and lodash
         run: npm ci
         working-directory: integration-tests
       - name: Update environment file with latest wordings
         run: npm run update-env
         working-directory: integration-tests
-      # - name: Run postman tests
-      #   run: npm run test
-      #   working-directory: integration-tests
+      - name: Run postman tests
+        run: npm run test
+        working-directory: integration-tests
       - name: Print docker compose logs
         if: success() || failure()
         run: docker-compose logs

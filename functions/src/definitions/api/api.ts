@@ -2,22 +2,27 @@ import * as admin from "firebase-admin"
 import express from "express"
 import * as functions from "firebase-functions"
 import { onRequest } from "firebase-functions/v2/https"
-import { Timestamp } from 'firebase-admin/firestore';
-import { config } from 'dotenv';
+import { Timestamp } from "firebase-admin/firestore"
+import { config } from "dotenv"
+import getCheckerHandler from "./handlers/getChecker"
+import getCheckerVotesHandler from "./handlers/getCheckerVotes"
+import getVoteHandler from "./handlers/getVote"
+import patchVoteRequestHandler from "./handlers/patchVoteRequest"
+import postCheckerHandler from "./handlers/postChecker"
 
-config();
+config()
 
 if (!admin.apps.length) {
-  admin.initializeApp();
+  admin.initializeApp()
 }
-const db = admin.firestore();
+const db = admin.firestore()
 
 const app = express()
 // app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
 
 const testFetch = async () => {
   try {
-    const snapshot = await db.collection("messages").get();
+    const snapshot = await db.collection("messages").get()
 
     snapshot.forEach((doc) => {
       functions.logger.log(doc.id, "=>", doc.data())
@@ -36,7 +41,7 @@ const stringToTimestamp = (dateString: string) => {
 app.get("/helloworld", async (req, res) => {
   const snapshot = await testFetch()
   if (snapshot && !snapshot.empty) {
-    functions.logger.log("success");
+    functions.logger.log("success")
   }
   res.send("Hello World!")
 })
@@ -231,7 +236,6 @@ app.get("/helloworld", async (req, res) => {
 //       }
 //     }));
 
-
 //     // functions.logger.log(messagesData);
 //     return messagesData;
 //   } catch (err) {
@@ -394,38 +398,49 @@ app.get("/helloworld", async (req, res) => {
 // })
 
 // TODO: BRENNAN: Complete implementation for not found
-app.get("/checkerData/:id", async (req, res) => {
-  const { id } = req.params;
+// app.get("/checkerData/:id", async (req, res) => {
+//   const { id } = req.params;
 
-  try {
-    const checker = await db.collection("checkers").where("telegramId", "==", id).limit(1).get();
+//   try {
+//     const checker = await db.collection("checkers").where("telegramId", "==", id).limit(1).get();
 
-    console.log(`checker here: ${checker}`)
+//     console.log(`checker here: ${checker}`)
 
-    res.status(200).json({ success: true, data: checker })
-  } catch (err) {
-    functions.logger.log(err)
-    res.status(500)
-  }
-})
+//     res.status(200).json({ success: true, data: checker })
+//   } catch (err) {
+//     functions.logger.log(err)
+//     res.status(500)
+//   }
+// })
 
-app.put("/checkerData/:id", async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+// app.put("/checkerData/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const data = req.body;
 
-  // console.log(`HERE ID: ${id}`)
-  // console.log(`REQUEST BODY: ${JSON.stringify(req.body)}`)
+//   // console.log(`HERE ID: ${id}`)
+//   // console.log(`REQUEST BODY: ${JSON.stringify(req.body)}`)
 
-  try {
-    await db.collection("factCheckers").doc(id).set(data)
-    res.status(200).json({ success: true })
-  } catch (err) {
-    functions.logger.log(err)
-    res.status(500)
-  }
-})
+//   try {
+//     await db.collection("factCheckers").doc(id).set(data)
+//     res.status(200).json({ success: true })
+//   } catch (err) {
+//     functions.logger.log(err)
+//     res.status(500)
+//   }
+// })
 
-//TODO TONGYING: decide other routes and implement
+app.get("/checkers/:checkerId", getCheckerHandler)
+
+app.post("/checkers", postCheckerHandler)
+
+app.get("/checkers/:checkerId/votes", getCheckerVotesHandler)
+
+app.get("/messages/:messageId/voteRequests/:voteRequestId", getVoteHandler)
+
+app.patch(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  patchVoteRequestHandler
+)
 
 const main = express()
 main.use("/api", app)

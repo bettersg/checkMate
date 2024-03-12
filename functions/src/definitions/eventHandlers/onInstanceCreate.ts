@@ -13,6 +13,7 @@ import { Timestamp } from "firebase-admin/firestore"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { publishToTopic } from "../common/pubsub"
 import { VoteRequest } from "../../types"
+import { onDocumentCreated } from "firebase-functions/v2/firestore"
 
 interface MessageUpdate {
   [x: string]: any
@@ -24,9 +25,9 @@ if (!admin.apps.length) {
 
 const checkerAppHost = process.env.CHECKER_APP_HOST
 
-const onInstanceCreate = functions
-  .region("asia-southeast1")
-  .runWith({
+const onInstanceCreateV2 = onDocumentCreated(
+  {
+    document: "messages/{messageId}/instances/{instanceId}",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
@@ -35,10 +36,13 @@ const onInstanceCreate = functions
       "TELEGRAM_CHECKER_BOT_TOKEN",
       "OPENAI_API_KEY",
     ],
-  })
-  .firestore.document("/messages/{messageId}/instances/{instanceId}")
-  .onCreate(async (snap, context) => {
-    // Grab the current value of what was written to Firestore.
+  },
+  async (event) => {
+    const snap = event.data
+    if (!snap) {
+      console.log("No data associated with the event")
+      return Promise.resolve()
+    }
     const data = snap.data()
     if (!data.from) {
       functions.logger.log("Missing 'from' field in instance data")
@@ -129,7 +133,8 @@ const onInstanceCreate = functions
       }
       return Promise.resolve()
     }
-  })
+  }
+)
 
 async function upsertUser(from: string, messageTimestamp: Timestamp) {
   const db = admin.firestore()
@@ -190,7 +195,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
       platform: "whatsapp",
       sentMessageId: null,
       category: null,
-      vote: null,
+      truthScore: null,
       createdTimestamp: Timestamp.fromDate(new Date()),
       acceptedTimestamp: null,
       votedTimestamp: null,
@@ -252,4 +257,4 @@ async function sendTemplateMessageAndCreateVoteRequest(
   }
 }
 
-export { onInstanceCreate }
+export { onInstanceCreateV2 }

@@ -388,12 +388,16 @@ async function onTextListReceipt(
     .collection("voteRequests")
     .doc(voteRequestId)
   const voteRequestSnap = await voteRequestRef.get()
+  const isLegacy =
+    voteRequestSnap.get("truthScore") === undefined &&
+    voteRequestSnap.get("vote") !== undefined
   const updateObj: {
     category?: string
-    vote?: number | null
+    truthScore?: number | null
     triggerL2Vote?: boolean
     triggerL2Others?: boolean
     votedTimestamp?: Timestamp
+    vote?: number | null //legacy
   } = {}
   let isEnd = false
   let response
@@ -401,9 +405,13 @@ async function onTextListReceipt(
     case "vote":
       const vote = selection
       updateObj.category = "info"
-      updateObj.vote = parseInt(vote)
-      response = responses.RESPONSE_RECORDED
-      isEnd = true
+      if (isNaN(parseInt(vote))) {
+        functions.logger.warn("Non-integer vote received")
+      } else {
+        updateObj.truthScore = parseInt(vote)
+        response = responses.RESPONSE_RECORDED
+        isEnd = true
+      }
       break
 
     case "categorize":
@@ -412,7 +420,7 @@ async function onTextListReceipt(
           updateObj.triggerL2Vote = false
           updateObj.triggerL2Others = false
           updateObj.category = "scam"
-          updateObj.vote = null
+          updateObj.truthScore = null
           response = responses.RESPONSE_RECORDED
           isEnd = true
           break
@@ -420,7 +428,16 @@ async function onTextListReceipt(
           updateObj.triggerL2Vote = false
           updateObj.triggerL2Others = false
           updateObj.category = "illicit"
-          updateObj.vote = null
+          updateObj.truthScore = null
+          response = responses.RESPONSE_RECORDED
+          isEnd = true
+          break
+
+        case "satire":
+          updateObj.triggerL2Vote = false
+          updateObj.triggerL2Others = false
+          updateObj.category = "satire"
+          updateObj.truthScore = null
           response = responses.RESPONSE_RECORDED
           isEnd = true
           break
@@ -443,11 +460,18 @@ async function onTextListReceipt(
 
     case "others":
       updateObj.category = selection
-      updateObj.vote = null
+      updateObj.truthScore = null
       response = responses.RESPONSE_RECORDED
       isEnd = true
       break
   }
+  //if isLegacy and updateObject has truthScore, remove truthScore and change it to vote
+  //START REMOVE IN APRIL//
+  if (isLegacy && updateObj.truthScore !== undefined) {
+    updateObj.vote = updateObj.truthScore
+    delete updateObj.truthScore
+  }
+  //END REMOVE IN APRIL//
   if (!response) {
     functions.logger.warn(
       `Response not set for id ${voteRequestId} for message ${messageId}. Unexpected text list selection likely the cause.`

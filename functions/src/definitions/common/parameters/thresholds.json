@@ -9,8 +9,9 @@
   "isIrrelevant": 0.5,
   "isUnsure": 0.5,
   "isSus": 0.5,
-  "falseUpperBound": 1.5,
-  "misleadingUpperBound": 3.5,
+  "isSatire": 0.5,
+  "falseUpperBound": 2,
+  "misleadingUpperBound": 4,
   "sendInterimMinVotes": 1,
   "surveyLikelihood": 1,
   "satisfactionSurveyCooldownDays": 30
