@@ -49,6 +49,12 @@ interface VoteSummary {
   firestorePath: string
 }
 
+interface VoteSummaryApiResponse {
+  votes: VoteSummary[]
+  lastPath: string | null
+  totalPages: number
+}
+
 interface Vote {
   type: "image" | "text"
   text: string | null //only for type text
@@ -93,4 +99,5 @@ export {
   Checker,
   VoteSummary,
   Vote,
+  VoteSummaryApiResponse,
 }
