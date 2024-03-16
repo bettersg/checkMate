@@ -29,6 +29,7 @@ interface Checker {
   name: string
   type: "human" | "ai"
   isActive: boolean | null
+  isOnboardingComplete: boolean | null
   pendingVoteCount: number
   last30days: last30DaysStats
   achievements: Achievements | null
@@ -73,6 +74,10 @@ interface last30DaysStats {
   peopleHelped: number
 }
 
+interface PendingCountApiResponse {
+  pendingCount: number
+}
+
 interface Achievements {
   //TODO: add more achievements in future
 }
@@ -100,4 +105,5 @@ export {
   VoteSummary,
   Vote,
   VoteSummaryApiResponse,
+  PendingCountApiResponse,
 }

@@ -129,6 +129,7 @@ const getCheckerHandler = async (req: Request, res: Response) => {
       name: checkerData.name,
       type: checkerData.type,
       isActive: checkerData.isActive,
+      isOnboardingComplete: checkerData.isOnboardingComplete,
       pendingVoteCount: pendingVoteCount,
       last30days: {
         totalVoted: totalVoted,

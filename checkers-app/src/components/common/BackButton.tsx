@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
 
 export function BackButton() {
-  const { phoneNo } = useUser();
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-4">
@@ -13,7 +12,7 @@ export function BackButton() {
         className="rounded-full absolute left-1 top-0"
         style={{ color: "#ff8932" }}
         onClick={() => {
-          navigate(`/checkers/${phoneNo}/messages`);
+          navigate(`/votes`);
         }}
       >
         <ArrowLeftIcon className="h-5 w-5" />

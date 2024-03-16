@@ -10,7 +10,7 @@ import { UserProvider } from "./providers/UserContext";
 import {
   AchievementPage,
   DashboardPage,
-  VotingPage,
+  ViewVotePage,
   MyVotesPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -21,7 +21,7 @@ const router = createBrowserRouter([
   { path: "/achievements", element: <AchievementPage /> },
   {
     path: "/messages/:messageId/voteRequests/:voteRequestId",
-    element: <VotingPage />,
+    element: <ViewVotePage />,
   },
 ]);
 

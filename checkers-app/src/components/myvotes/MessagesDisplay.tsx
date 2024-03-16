@@ -29,7 +29,7 @@ const MessagesDisplay: FC = () => {
   const { checkerId } = useUser();
   const [votes, setVotes] = useState<VoteSummary[]>([]);
   const [lastPath, setLastPath] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"PENDING" | "VOTED">("PENDING");
+  const [activeTab, setActiveTab] = useState<"pending" | "voted">("pending");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -49,10 +49,11 @@ const MessagesDisplay: FC = () => {
           5,
           lastPath
         );
-        console.log(response);
         // Assuming your API correctly maps to the ApiResponse interface
-        setVotes(response.votes); // Adjust according to your actual API response structure
-        setTotalPages(response.totalPages); // Ensure your API provides this information
+        if (response.votes) {
+          setVotes(response.votes);
+        }
+        setTotalPages(response.totalPages);
         setLastPath(response.lastPath);
         setIsLoading(false);
       } catch (err) {
@@ -65,14 +66,17 @@ const MessagesDisplay: FC = () => {
     }
   }, [checkerId, activeTab, currentPage]);
 
-  const handleTabChange = (tab: "PENDING" | "VOTED") => {
+  const handleTabChange = (tab: "pending" | "voted") => {
     setActiveTab(tab);
-    setCurrentPage(1); // Reset to the first page whenever the tab changes
+    handlePageChange(1); // Reset to the first page whenever the tab changes
   };
 
   // Function to handle page change from the Pagination component
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    if (page === 1) {
+      setLastPath(null);
+    }
   };
 
   return (
@@ -83,21 +87,21 @@ const MessagesDisplay: FC = () => {
       >
         <button
           className={`w-1/2 text-center py-2 ${
-            activeTab === "PENDING"
+            activeTab === "pending"
               ? "border-b-4 border-primary-color2 text-primary-color2"
               : "text-black"
           } font-bold`}
-          onClick={() => handleTabChange("PENDING")}
+          onClick={() => handleTabChange("pending")}
         >
           PENDING
         </button>
         <button
           className={`w-1/2 text-center py-2 ${
-            activeTab === "VOTED"
+            activeTab === "voted"
               ? "border-b-4 border-primary-color2 text-primary-color2"
               : "text-black"
           } font-bold`}
-          onClick={() => handleTabChange("VOTED")}
+          onClick={() => handleTabChange("voted")}
         >
           VOTED
         </button>
@@ -113,9 +117,9 @@ const MessagesDisplay: FC = () => {
         )}
         {!isLoading &&
           !error &&
-          votes.map((msg, index) => (
+          votes.map((voteSummary, index) => (
             <div key={index}>
-              <MessageCard message={msg} />
+              <MessageCard voteSummary={voteSummary} status={activeTab} />
             </div>
           ))}
       </div>

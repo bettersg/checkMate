@@ -3,45 +3,42 @@ import { useState, useEffect } from "react";
 import PendingMessageAlert from "./PendingMsgAlert";
 import { useUser } from "../../providers/UserContext";
 import StatCard from "./StatsCard";
-import { Message } from "../../types";
+import { Checker } from "../../types";
+import { getChecker } from "../../services/api";
 //TODO: link to firebase
 
-
 export default function Dashboard() {
-  const { unassessed, unchecked, assessed } = useUser();
+  const { checkerId, pendingCount, setPendingCount } = useUser();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [accuracyRate, setAccuracyRate] = useState<number>(0);
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
   const [peopleHelped, setPeopleHelped] = useState<number>(0);
 
   useEffect(() => {
-
-    const votes = assessed.length;
-    setTotalVotes(votes);
-
-    const matched = assessed.filter((msg: Message) => msg.voteRequests.category == msg.primaryCategory);
-    const accuracyRate = (matched.length / assessed.length) * 100;
-    setAccuracyRate(parseFloat(accuracyRate.toFixed(2)));
-
-    const responseTimes = assessed.map((msg: Message) => {
-      if (msg.voteRequests.acceptedTimestamp && msg.voteRequests.createdTimestamp) {
-        const millisecondsTime = msg.voteRequests.acceptedTimestamp.getMilliseconds() - msg.voteRequests.createdTimestamp.getMilliseconds();
-        return millisecondsTime / 1000;
-      } else {
-        return 0; // or any other default value
+    const fetchChecker = async () => {
+      if (checkerId) {
+        console.log(checkerId);
+        const checker: Checker = await getChecker(checkerId);
+        if (checker) {
+          setTotalVotes(checker.last30days.totalVoted);
+          setAccuracyRate(checker.last30days.accuracyRate);
+          setAvgResponseTime(checker.last30days.averageResponseTime);
+          setPeopleHelped(checker.last30days.peopleHelped);
+          setPendingCount(checker.pendingVoteCount);
+        }
       }
-    });
-    const sum = responseTimes.reduce((a, b) => a + b, 0);
-    setAvgResponseTime(sum / responseTimes.length);
-
-    setPeopleHelped(0);
-
-  }, [assessed])
+    };
+    fetchChecker();
+  }, []);
 
   return (
     <div className="flex flex-col gap-y-4 left-right-padding">
-      {unassessed > 0 && <PendingMessageAlert Type={true} />}
-      {unchecked > 0 && <PendingMessageAlert Type={false} />}
+      {pendingCount > 0 && (
+        <PendingMessageAlert hasPending={true} pendingCount={pendingCount} />
+      )}
+      {/* {reviewCount > 0 && (
+        <PendingMessageAlert hasPending={false} pendingCount={pendingCount} />
+      )} */}
       <Typography variant="h4" className="text-primary-color">
         In the past 30 days
       </Typography>
@@ -54,12 +51,12 @@ export default function Dashboard() {
         <StatCard
           name="average accuracy rate"
           img_src="/accuracy.png"
-          stat={`${accuracyRate}%`}
+          stat={`${accuracyRate.toFixed(2)}%`}
         />
         <StatCard
           name="average response time"
           img_src="/response.png"
-          stat={`${avgResponseTime}s`}
+          stat={`${avgResponseTime.toFixed(2)} mins`}
         />
         <StatCard
           name="people helped"

@@ -1,7 +1,6 @@
 import AchievementPage from "./AchievementPage";
 import DashboardPage from "./DashboardPage";
-import VotingPage from "./VotingPage";
+import ViewVotePage from "./VotingPage";
 import MyVotesPage from "./MyVotesPage";
 
-
-export { AchievementPage, DashboardPage, VotingPage, MyVotesPage };
+export { AchievementPage, DashboardPage, ViewVotePage, MyVotesPage };

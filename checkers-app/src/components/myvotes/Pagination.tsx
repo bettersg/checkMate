@@ -34,7 +34,7 @@ const Pagination: FC<PaginationProps> = ({
       >
         First
       </button>
-      <button
+      {/* <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
@@ -51,7 +51,7 @@ const Pagination: FC<PaginationProps> = ({
         >
           {number}
         </button>
-      ))}
+      ))} */}
       <button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -59,13 +59,13 @@ const Pagination: FC<PaginationProps> = ({
       >
         Next
       </button>
-      <button
+      {/* <button
         onClick={() => handlePageChange(totalPages)}
         disabled={currentPage === totalPages}
         className="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
       >
         Last
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -1,7 +1,9 @@
-import Voting from "../components/voting";
-import { useParams } from "react-router-dom";
-
-export default function VotingPage (){
-    const { msgId } = useParams();
-    return <Voting msgId={msgId}/>;
+import VotePage from "../components/vote";
+import Layout from "../components/common/Layout";
+export default function ViewVotePage() {
+  return (
+    <Layout pageName="VOTE">
+      <VotePage />
+    </Layout>
+  );
 }

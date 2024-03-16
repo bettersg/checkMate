@@ -1,15 +1,27 @@
 import axios from "axios";
-import { Checker, Vote, VoteSummary, VoteSummaryApiResponse } from "../types";
+import {
+  Checker,
+  Vote,
+  VoteSummary,
+  VoteSummaryApiResponse,
+  PendingCountApiResponse,
+} from "../types";
 
-export const getFactChecker = async (id: string) => {
+export const getChecker = async (id: string) => {
   return (await axios.get(`/api/checkers/${id}`)).data;
+};
+
+export const getCheckerPendingCount = async (
+  checkerId: string
+): Promise<PendingCountApiResponse> => {
+  return (await axios.get(`/api/checkers/${checkerId}/pendingCount`)).data;
 };
 
 // export const updateFactChecker = async (data: FactChecker) => {
 //   return (await axios.put(`/api/checkerData/${data.platformId}`, data));
 // }
 
-export const postFactChecker = async (data: Checker) => {
+export const postChecker = async (data: Checker) => {
   return (await axios.post("/checkers", data)).data;
 };
 
@@ -30,16 +42,42 @@ export const getCheckerVotes = async (
     last: lastPath,
     status,
   };
-  console.log(checkerId);
-  console.log("calling getCheckerVotes", query);
   return (
     await axios.get(`/api/checkers/${checkerId}/votes`, { params: query })
   ).data;
 };
 
-export const getVote = async (firestorePath: string): Promise<Vote> => {
-  if (!firestorePath) {
-    throw new Error("Firestore path missing.");
+export const getVote = async (
+  messageId: string,
+  voteRequestId: string
+): Promise<Vote> => {
+  if (!messageId || !voteRequestId) {
+    throw new Error("Message Id or Vote Request Id missing.");
   }
-  return (await axios.get(`/api/votes/${firestorePath}`)).data;
+  return (
+    await axios.get(`/api/messages/${messageId}/voteRequests/${voteRequestId}`)
+  ).data;
+};
+
+export const patchVote = async (
+  messageId: string,
+  voteRequestId: string,
+  category: string,
+  truthScore: number | null
+) => {
+  if (!messageId || !voteRequestId) {
+    throw new Error("Message Id or Vote Request Id missing.");
+  }
+  if (category === "info" && truthScore == null) {
+    throw new Error("Truth score required for info vote.");
+  }
+  return (
+    await axios.patch(
+      `/api/messages/${messageId}/voteRequests/${voteRequestId}`,
+      {
+        category,
+        truthScore,
+      }
+    )
+  ).data;
 };
