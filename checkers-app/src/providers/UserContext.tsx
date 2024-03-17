@@ -14,9 +14,7 @@ interface UserContextProps {
 const UserContext = createContext<UserContextProps | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [checkerId, setCheckerId] = useState<string | null>(
-    import.meta.env.MODE === "dev" ? import.meta.env.VITE_CHECKER_ID : null
-  );
+  const [checkerId, setCheckerId] = useState<string | null>(null);
   const [checkerName, setCheckerName] = useState<string>(
     import.meta.env.MODE === "dev" ? import.meta.env.VITE_CHECKER_NAME : null
   );

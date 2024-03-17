@@ -46,7 +46,10 @@ function App() {
       window.Telegram.WebApp
     ) {
       setTelegramApp(window.Telegram.WebApp);
-      const initData = window.Telegram.WebApp.initData;
+      let initData = window.Telegram.WebApp.initData;
+      if (!initData && import.meta.env.MODE === "dev") {
+        initData = "devdummy";
+      }
       if (initData) {
         // Call your Firebase function to validate the receivedData and get custom token
         fetch("/telegramAuth/", {
@@ -75,18 +78,20 @@ function App() {
               // router.navigate("/onboarding");
             } else {
               //if existing user
-              setCheckerId(data.userId);
-              setCheckerName(data.name);
-              signInWithCustomToken(auth, data.customToken).catch((error) => {
-                console.error(
-                  "Error during Firebase signInWithCustomToken",
-                  error
-                );
-              });
+              signInWithCustomToken(auth, data.customToken)
+                .then(() => {
+                  setCheckerId(data.checkerId);
+                  setCheckerName(data.name);
+                })
+                .catch((error) => {
+                  console.error(
+                    "Error during Firebase signInWithCustomToken",
+                    error
+                  );
+                });
             }
           })
           .catch((err) => {
-            alert(err);
             console.error("Error fetching custom token:", err);
           });
       }

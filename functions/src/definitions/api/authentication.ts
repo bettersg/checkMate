@@ -5,6 +5,7 @@ import * as crypto from "crypto"
 import { onRequest } from "firebase-functions/v2/https"
 import { logger } from "firebase-functions"
 import { Checker } from "../../types"
+import { defineString } from "firebase-functions/params"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -12,11 +13,16 @@ if (!admin.apps.length) {
 const app = express()
 const db = admin.firestore()
 
-const CHECKER1_PHONE_NUMBER: string = String(process.env.CHECKER1_PHONE_NUMBER) //remove later once migrated fully
+const env = process.env.ENVIRONMENT
+const devTeleId = defineString("CHECKER1_TELEGRAM_ID")
 
 app.post("/", async (req, res) => {
   const initData = req.body // Assuming you send initData in the body of your requests
   const botToken = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN) // Replace with your bot token
+  console.log(initData)
+  if (!initData) {
+    return res.status(400).send("No initData")
+  }
 
   // Extract the data from initData (convert from query string format)
   const params = new URLSearchParams(initData)
@@ -30,48 +36,52 @@ app.post("/", async (req, res) => {
 
   let userId = ""
 
-  try {
-    const userObject = JSON.parse(params.get("user") ?? "{}")
-    userId = String(userObject.id ?? "")
-  } catch (error) {
-    return res.status(403).send("No Access")
-  }
-
-  if (!userId) {
-    logger.warn("User likely not from Telegram, userId does not exist")
-    return res.status(403).send("No Access")
-  }
-  console.log(`userid is ${userId}`) //TODO: remove once finish dev
-
-  // Generate the data-check-string
-  const dataCheckStringParts = []
-  for (const [key, value] of params.entries()) {
-    if (key !== "hash") {
-      // Exclude the hash itself from the data-check-string
-      dataCheckStringParts.push(`${key}=${value}`)
+  if (env !== "DEV" || initData !== "devdummy") {
+    try {
+      const userObject = JSON.parse(params.get("user") ?? "{}")
+      userId = String(userObject.id ?? "")
+    } catch (error) {
+      return res.status(403).send("No Access")
     }
-  }
 
-  const dataCheckString = dataCheckStringParts.sort().join("\n")
-  // Compute the hash
-  const computedHash = crypto
-    .createHmac("sha256", secretKey)
-    .update(dataCheckString)
-    .digest("hex")
+    if (!userId) {
+      logger.warn("User likely not from Telegram, userId does not exist")
+      return res.status(403).send("No Access")
+    }
+    console.log(`userid is ${userId}`) //TODO: remove once finish dev
 
-  // Validate the hash
-  if (computedHash !== receivedHash) {
-    functions.logger.warn("User not from Telegram")
-    return res.status(403).send("No Access")
-  }
+    // Generate the data-check-string
+    const dataCheckStringParts = []
+    for (const [key, value] of params.entries()) {
+      if (key !== "hash") {
+        // Exclude the hash itself from the data-check-string
+        dataCheckStringParts.push(`${key}=${value}`)
+      }
+    }
 
-  // Check the auth_date for data freshness (e.g., within 24 hours)
-  const authDate = Number(params.get("auth_date"))
-  const timeNow = Math.floor(Date.now() / 1000) // Convert to Unix timestamp
-  if (timeNow - authDate > 3600) {
-    //1hr
-    functions.logger.warn("Telegram data is outdated")
-    return res.status(403).send("No Access")
+    const dataCheckString = dataCheckStringParts.sort().join("\n")
+    // Compute the hash
+    const computedHash = crypto
+      .createHmac("sha256", secretKey)
+      .update(dataCheckString)
+      .digest("hex")
+
+    // Validate the hash
+    if (computedHash !== receivedHash) {
+      functions.logger.warn("User not from Telegram")
+      return res.status(403).send("No Access")
+    }
+
+    // Check the auth_date for data freshness (e.g., within 24 hours)
+    const authDate = Number(params.get("auth_date"))
+    const timeNow = Math.floor(Date.now() / 1000) // Convert to Unix timestamp
+    if (timeNow - authDate > 3600) {
+      //1hr
+      functions.logger.warn("Telegram data is outdated")
+      return res.status(403).send("No Access")
+    }
+  } else {
+    userId = devTeleId.value()
   }
 
   const checkerSnap = await db

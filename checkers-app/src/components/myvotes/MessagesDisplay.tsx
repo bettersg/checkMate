@@ -38,7 +38,6 @@ const MessagesDisplay: FC = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       setIsLoading(true);
-      console.log("Fetching messages");
       try {
         if (!checkerId) {
           throw new Error("Checker Id missing.");

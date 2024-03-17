@@ -1,7 +1,6 @@
 import { VoteSummary } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import VoteInfoDialog from "./VoteInfo";
 import "./MessageCard.css";
 
 interface MessageCardProps {

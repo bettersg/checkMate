@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { defineString } from "firebase-functions/params"
 
-const devCheckerId = defineString("CHECKER1_ID")
 const env = process.env.ENVIRONMENT
 
 if (!admin.apps.length) {
@@ -24,10 +22,10 @@ async function validateFirebaseIdToken(
   next: NextFunction
 ) {
   //go next in development
-  if (env === "DEV") {
-    next()
-    return
-  }
+  // if (env === "DEV") {
+  //   next()
+  //   return
+  // }
   const authorizationHeader = req.headers.authorization || ""
   const components = authorizationHeader.split(" ")
 
