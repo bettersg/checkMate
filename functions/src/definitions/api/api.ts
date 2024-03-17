@@ -9,6 +9,7 @@ import getCheckerVotesHandler from "./handlers/getCheckerVotes"
 import getVoteHandler from "./handlers/getVote"
 import patchVoteRequestHandler from "./handlers/patchVoteRequest"
 import postCheckerHandler from "./handlers/postChecker"
+import patchCheckerHandler from "./handlers/patchChecker"
 import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
 
 config()
@@ -431,6 +432,8 @@ app.get("/helloworld", async (req, res) => {
 // })
 
 app.get("/checkers/:checkerId", getCheckerHandler)
+
+app.patch("/checkers/:checkerId", patchCheckerHandler)
 
 app.get("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
 
