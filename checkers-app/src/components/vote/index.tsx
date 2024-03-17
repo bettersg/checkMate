@@ -4,6 +4,7 @@ import { Typography } from "@material-tailwind/react";
 import { BackButton } from "../common/BackButton";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useUser } from "../../providers/UserContext";
 import { Vote } from "../../types";
 import { getVote } from "../../services/api";
 import CategoryRationalisation from "./Rationalisation";
@@ -11,6 +12,7 @@ import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 
 export default function VotePage() {
+  const { checkerId } = useUser();
   const { messageId, voteRequestId } = useParams();
   const [vote, setVote] = useState<Vote | null>(null);
 
@@ -22,10 +24,10 @@ export default function VotePage() {
       }
     };
 
-    if (messageId && voteRequestId) {
+    if (messageId && voteRequestId && checkerId) {
       fetchVote();
     }
-  }, []);
+  }, [checkerId]);
 
   if (!vote) {
     return null;

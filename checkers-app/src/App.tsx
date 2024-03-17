@@ -6,7 +6,6 @@ import {
 } from "firebase/auth";
 import "./App.css";
 import app from "./firebase";
-import { UserProvider } from "./providers/UserContext";
 import {
   AchievementPage,
   DashboardPage,
@@ -14,6 +13,7 @@ import {
   MyVotesPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useUser } from "./providers/UserContext";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
@@ -31,11 +31,10 @@ if (import.meta.env.MODE === "dev") {
 }
 
 function App() {
+  const { setCheckerId, setCheckerName } = useUser();
   const [count, setCount] = useState(0);
   const [telegramApp, setTelegramApp] = useState({});
   //for global states: userID, name and messages
-  const [userId, setUserId] = useState(null);
-  const [name, setName] = useState("");
 
   // TODO: BRENNAN - Clean up
   console.log(count, setCount, telegramApp);
@@ -68,9 +67,16 @@ function App() {
             return response.json();
           })
           .then((data) => {
-            if (data.customToken) {
-              setUserId(data.userId);
-              setName(data.name);
+            if (!data.customToken) {
+              throw new Error("Custom token not found in response");
+            }
+            if (data.isNewUser) {
+              // TODO BRENNAN: Redirect to onboarding page
+              // router.navigate("/onboarding");
+            } else {
+              //if existing user
+              setCheckerId(data.userId);
+              setCheckerName(data.name);
               signInWithCustomToken(auth, data.customToken).catch((error) => {
                 console.error(
                   "Error during Firebase signInWithCustomToken",
@@ -87,11 +93,7 @@ function App() {
     }
   }, []);
 
-  return (
-    <UserProvider>
-      <RouterProvider router={router} />
-    </UserProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

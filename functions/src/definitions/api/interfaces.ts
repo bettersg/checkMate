@@ -14,7 +14,7 @@ interface createChecker {
   isActive?: boolean
   isOnboardingComplete?: boolean
   singpassOpenId: string | null
-  telegramId: string | null
+  telegramId: number | null
   whatsappId?: string | null
   level?: number
   experience?: number

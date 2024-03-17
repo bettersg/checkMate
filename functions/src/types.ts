@@ -44,7 +44,7 @@ export type Checker = {
   isActive: boolean | null
   isOnboardingComplete: boolean | null
   singpassOpenId: string | null
-  telegramId: string | null
+  telegramId: number | null
   whatsappId?: string | null
   level: number
   experience: number
@@ -73,17 +73,17 @@ export type VoteRequest = {
 }
 
 export type TeleMessage = {
-  id: string;
-  caption: string | null;
-  text: string;
-  isAssessed: boolean;
-  isMatch: boolean;
-  primaryCategory: string;
-  voteRequests: VoteRequest;
-  rationalisation: string;
-  avgTruthScore: number | null;
-  firstTimestamp: Timestamp | null;
-  storageUrl: string | null;
-  crowdPercentage: number;
-  votedPercentage: number;
+  id: string
+  caption: string | null
+  text: string
+  isAssessed: boolean
+  isMatch: boolean
+  primaryCategory: string
+  voteRequests: VoteRequest
+  rationalisation: string
+  avgTruthScore: number | null
+  firstTimestamp: Timestamp | null
+  storageUrl: string | null
+  crowdPercentage: number
+  votedPercentage: number
 }

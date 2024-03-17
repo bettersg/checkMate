@@ -11,6 +11,7 @@ import patchVoteRequestHandler from "./handlers/patchVoteRequest"
 import postCheckerHandler from "./handlers/postChecker"
 import patchCheckerHandler from "./handlers/patchChecker"
 import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
+import { validateFirebaseIdToken } from "./middleware/validator"
 
 config()
 
@@ -20,7 +21,7 @@ if (!admin.apps.length) {
 const db = admin.firestore()
 
 const app = express()
-// app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
+app.use(validateFirebaseIdToken)
 
 const testFetch = async () => {
   try {

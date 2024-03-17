@@ -16,20 +16,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchChecker = async () => {
-      if (checkerId) {
-        console.log(checkerId);
-        const checker: Checker = await getChecker(checkerId);
-        if (checker) {
-          setTotalVotes(checker.last30days.totalVoted);
-          setAccuracyRate(checker.last30days.accuracyRate);
-          setAvgResponseTime(checker.last30days.averageResponseTime);
-          setPeopleHelped(checker.last30days.peopleHelped);
-          setPendingCount(checker.pendingVoteCount);
-        }
+      if (!checkerId) {
+        return;
+      }
+      const checker: Checker = await getChecker(checkerId);
+      if (checker) {
+        setTotalVotes(checker.last30days.totalVoted);
+        setAccuracyRate(checker.last30days.accuracyRate);
+        setAvgResponseTime(checker.last30days.averageResponseTime);
+        setPeopleHelped(checker.last30days.peopleHelped);
+        setPendingCount(checker.pendingVoteCount);
       }
     };
-    fetchChecker();
-  }, []);
+    if (checkerId) {
+      fetchChecker();
+    }
+  }, [checkerId]);
 
   return (
     <div className="flex flex-col gap-y-4 left-right-padding">

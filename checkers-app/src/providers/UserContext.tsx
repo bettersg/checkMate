@@ -3,10 +3,10 @@ import React, { createContext, useContext, useState } from "react";
 
 interface UserContextProps {
   checkerId: string | null;
-  name: string;
+  checkerName: string;
   pendingCount: number;
   setCheckerId: (checkerId: string | null) => void;
-  setName: (name: string) => void;
+  setCheckerName: (name: string) => void;
   setPendingCount: (pendingCount: number) => void;
   incrementSessionVotedCount: () => void;
 }
@@ -17,7 +17,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [checkerId, setCheckerId] = useState<string | null>(
     import.meta.env.MODE === "dev" ? import.meta.env.VITE_CHECKER_ID : null
   );
-  const [name, setName] = useState<string>(
+  const [checkerName, setCheckerName] = useState<string>(
     import.meta.env.MODE === "dev" ? import.meta.env.VITE_CHECKER_NAME : null
   );
 
@@ -33,8 +33,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     checkerId,
     setCheckerId,
-    name,
-    setName,
+    checkerName,
+    setCheckerName,
     pendingCount,
     setPendingCount,
     incrementSessionVotedCount,
@@ -51,7 +51,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           console.error(error);
         });
     }
-  }, [sessionVotedCount]);
+  }, [sessionVotedCount, checkerId]);
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };

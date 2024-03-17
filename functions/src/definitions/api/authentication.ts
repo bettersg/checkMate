@@ -4,6 +4,7 @@ import express from "express"
 import * as crypto from "crypto"
 import { onRequest } from "firebase-functions/v2/https"
 import { logger } from "firebase-functions"
+import { Checker } from "../../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -37,6 +38,7 @@ app.post("/", async (req, res) => {
   }
 
   if (!userId) {
+    logger.warn("User likely not from Telegram, userId does not exist")
     return res.status(403).send("No Access")
   }
   console.log(`userid is ${userId}`) //TODO: remove once finish dev
@@ -70,32 +72,67 @@ app.post("/", async (req, res) => {
     //1hr
     functions.logger.warn("Telegram data is outdated")
     return res.status(403).send("No Access")
-}
+  }
 
-  if (userId) {
-    const userSnap = await db
-      .collection("checkers")
-      .where("telegramId", "==", parseInt(userId))
-      .limit(1)
-      .get()
+  const checkerSnap = await db
+    .collection("checkers")
+    .where("telegramId", "==", parseInt(userId))
+    .limit(1)
+    .get()
 
-    if (!userSnap.empty) {
-      try {
-        const userDoc = userSnap.docs[0];
-        const customToken = await admin.auth().createCustomToken(userId)
-        const checkerName = userDoc.data()?.name
-        return res.json({ customToken: customToken, userId: userId, name: checkerName })
-      } catch (error) {
-        functions.logger.error("Error creating custom token:", error)
-        return res.status(500).send("Error creating custom token")
-      }
-    } else {
-      functions.logger.warn("User not a checker")
-      return res.status(403).send("No Access")
+  if (!checkerSnap.empty) {
+    try {
+      const userDoc = checkerSnap.docs[0]
+      const customToken = await admin.auth().createCustomToken(userDoc.id)
+      const checkerName = userDoc.data()?.name
+      return res.status(200).json({
+        customToken: customToken,
+        checkerId: userDoc.id,
+        name: checkerName,
+        isNewUser: false,
+        isOnboardingComplete: userDoc.data()?.isOnboardingComplete,
+        isActive: userDoc.data()?.isActive,
+      })
+    } catch (error) {
+      functions.logger.error("Error creating custom token:", error)
+      return res.status(500).send("Error creating custom token")
     }
   } else {
-    functions.logger.warn("No User Id")
-    return res.status(403).send("No Access")
+    //from telegram but not yet a user in database
+    functions.logger.info("Creating new user")
+    const checkerObject: Checker = {
+      name: "",
+      type: "human",
+      isActive: false,
+      isOnboardingComplete: false,
+      singpassOpenId: null,
+      whatsappId: null,
+      telegramId: parseInt(userId),
+      voteWeight: 1,
+      level: 0,
+      experience: 0,
+      numVoted: 0,
+      numCorrectVotes: 0,
+      numVerifiedLinks: 0,
+      preferredPlatform: "telegram",
+      lastVotedTimestamp: null,
+      getNameMessageId: null,
+    }
+
+    try {
+      const newCheckerRef = await db.collection("checkers").add(checkerObject)
+      const customToken = await admin.auth().createCustomToken(newCheckerRef.id)
+      return res.status(200).json({
+        customToken: customToken,
+        checkerId: newCheckerRef.id,
+        isNewUser: true,
+        isOnboardingComplete: false,
+        isActive: false,
+      })
+    } catch (error) {
+      functions.logger.error("Error creating new user:", error)
+      return res.status(500).send("Error creating new user")
+    }
   }
 })
 

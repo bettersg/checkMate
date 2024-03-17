@@ -1,9 +1,7 @@
 import { Request, Response } from "express"
 import { Checker } from "../../../types"
 import * as admin from "firebase-admin"
-import { Timestamp } from "firebase-admin/firestore"
 import { logger } from "firebase-functions/v2"
-import { checkAccuracy } from "../../common/statistics"
 if (!admin.apps.length) {
   admin.initializeApp()
 }

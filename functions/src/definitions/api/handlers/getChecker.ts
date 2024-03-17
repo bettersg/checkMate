@@ -13,8 +13,6 @@ const db = admin.firestore()
 const getCheckerHandler = async (req: Request, res: Response) => {
   try {
     const checkerId = req.params.checkerId
-    //TODO: GET RETURN FIELDS FROM FIRESTORE
-
     if (!checkerId) {
       return res.status(400).send("Checker ID missing.")
     }
