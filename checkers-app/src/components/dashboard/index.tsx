@@ -53,7 +53,7 @@ export default function Dashboard() {
         <StatCard
           name="average accuracy rate"
           img_src="/accuracy.png"
-          stat={`${accuracyRate.toFixed(2)}%`}
+          stat={`${(accuracyRate * 100).toFixed(2)}%`}
         />
         <StatCard
           name="average response time"
