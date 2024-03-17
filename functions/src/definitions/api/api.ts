@@ -11,6 +11,8 @@ import patchVoteRequestHandler from "./handlers/patchVoteRequest"
 import postCheckerHandler from "./handlers/postChecker"
 import patchCheckerHandler from "./handlers/patchChecker"
 import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
+import postOTPHandler from "./handlers/postOTP"
+import checkOTPHandler from "./handlers/checkOTP"
 import { validateFirebaseIdToken } from "./middleware/validator"
 
 config()
@@ -440,6 +442,10 @@ app.get("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
 
 app.post("/checkers", postCheckerHandler)
 
+app.post("/checkers/:checkerId/otp", postOTPHandler)
+
+app.post("/checkers/:checkerId/otp/check", checkOTPHandler)
+
 app.get("/checkers/:checkerId/votes", getCheckerVotesHandler)
 
 app.get("/messages/:messageId/voteRequests/:voteRequestId", getVoteHandler)
@@ -454,7 +460,11 @@ main.use("/api", app)
 
 const apiHandler = onRequest(
   {
-    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
+    secrets: [
+      "TELEGRAM_CHECKER_BOT_TOKEN",
+      "WHATSAPP_TOKEN",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+    ],
   },
   main
 )

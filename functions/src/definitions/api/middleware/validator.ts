@@ -21,12 +21,12 @@ async function validateFirebaseIdToken(
   res: Response,
   next: NextFunction
 ) {
-  //go next in development
-  // if (env === "DEV") {
-  //   next()
-  //   return
-  // }
   const authorizationHeader = req.headers.authorization || ""
+  //go next in development
+  if (!authorizationHeader && env === "DEV") {
+    next()
+    return
+  }
   const components = authorizationHeader.split(" ")
 
   // Check if the header has the correct format "Bearer [token]"
