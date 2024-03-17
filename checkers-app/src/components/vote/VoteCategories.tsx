@@ -30,6 +30,16 @@ const CATEGORIES = [
     display: "Illicit",
   },
   {
+    name: "info",
+    icon: <NewspaperIcon className="h-7 w-7" />,
+    display: "News/Info/Opinion",
+  },
+  {
+    name: "satire",
+    icon: <FaceSmileIcon className="h-7 w-7" />,
+    display: "Satire",
+  },
+  {
     name: "spam",
     icon: <FaceFrownIcon className="h-7 w-7" />,
     display: "Spam",
@@ -48,16 +58,6 @@ const CATEGORIES = [
     name: "legitimate",
     icon: <HandThumbUpIcon className="h-7 w-7" />,
     display: "Legitimate",
-  },
-  {
-    name: "info",
-    icon: <NewspaperIcon className="h-7 w-7" />,
-    display: "News/Info/Opinion",
-  },
-  {
-    name: "satire",
-    icon: <FaceSmileIcon className="h-7 w-7" />,
-    display: "Satire",
   },
 ];
 
