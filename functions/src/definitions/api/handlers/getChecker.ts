@@ -45,7 +45,7 @@ const getCheckerHandler = async (req: Request, res: Response) => {
       .collectionGroup("voteRequests")
       .where("factCheckerDocRef", "==", checkerRef)
       .where("createdTimestamp", ">=", cutoffTimestamp)
-      .where("category", "!=", null)
+    // .where("category", "!=", null)
 
     const last30DaysSnap = await last30DaysQuery.get()
 
