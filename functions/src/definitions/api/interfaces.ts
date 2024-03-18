@@ -14,7 +14,7 @@ interface createChecker {
   isActive?: boolean
   isOnboardingComplete?: boolean
   singpassOpenId: string | null
-  telegramId: string | null
+  telegramId: number | null
   whatsappId?: string | null
   level?: number
   experience?: number
@@ -29,6 +29,7 @@ interface Checker {
   name: string
   type: "human" | "ai"
   isActive: boolean | null
+  isOnboardingComplete: boolean | null
   pendingVoteCount: number
   last30days: last30DaysStats
   achievements: Achievements | null
@@ -49,6 +50,12 @@ interface VoteSummary {
   firestorePath: string
 }
 
+interface VoteSummaryApiResponse {
+  votes: VoteSummary[]
+  lastPath: string | null
+  totalPages: number
+}
+
 interface Vote {
   type: "image" | "text"
   text: string | null //only for type text
@@ -67,6 +74,10 @@ interface last30DaysStats {
   peopleHelped: number
 }
 
+interface PendingCountApiResponse {
+  pendingCount: number
+}
+
 interface Achievements {
   //TODO: add more achievements in future
 }
@@ -75,7 +86,14 @@ interface AssessedInfo {
   responseCount: number
   scamCount: number
   illicitCount: number
-  infoCount: number
+  infoCount: {
+    total?: number
+    1?: number | null
+    2?: number | null
+    3?: number | null
+    4?: number | null
+    5?: number | null
+  }
   satireCount: number
   spamCount: number
   irrelevantCount: number
@@ -93,4 +111,7 @@ export {
   Checker,
   VoteSummary,
   Vote,
+  VoteSummaryApiResponse,
+  PendingCountApiResponse,
+  AssessedInfo,
 }

@@ -9,6 +9,11 @@ import getCheckerVotesHandler from "./handlers/getCheckerVotes"
 import getVoteHandler from "./handlers/getVote"
 import patchVoteRequestHandler from "./handlers/patchVoteRequest"
 import postCheckerHandler from "./handlers/postChecker"
+import patchCheckerHandler from "./handlers/patchChecker"
+import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
+import postOTPHandler from "./handlers/postOTP"
+import checkOTPHandler from "./handlers/checkOTP"
+import { validateFirebaseIdToken } from "./middleware/validator"
 
 config()
 
@@ -18,7 +23,7 @@ if (!admin.apps.length) {
 const db = admin.firestore()
 
 const app = express()
-// app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
+app.use(validateFirebaseIdToken)
 
 const testFetch = async () => {
   try {
@@ -431,7 +436,15 @@ app.get("/helloworld", async (req, res) => {
 
 app.get("/checkers/:checkerId", getCheckerHandler)
 
+app.patch("/checkers/:checkerId", patchCheckerHandler)
+
+app.get("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
+
 app.post("/checkers", postCheckerHandler)
+
+app.post("/checkers/:checkerId/otp", postOTPHandler)
+
+app.post("/checkers/:checkerId/otp/check", checkOTPHandler)
 
 app.get("/checkers/:checkerId/votes", getCheckerVotesHandler)
 
@@ -447,7 +460,11 @@ main.use("/api", app)
 
 const apiHandler = onRequest(
   {
-    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
+    secrets: [
+      "TELEGRAM_CHECKER_BOT_TOKEN",
+      "WHATSAPP_TOKEN",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+    ],
   },
   main
 )

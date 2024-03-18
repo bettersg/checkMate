@@ -181,8 +181,6 @@ async function sendTemplateMessageAndCreateVoteRequest(
   factCheckerDocSnap: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
-  const factCheckerId = factCheckerDocSnap.id;
-  const msgId = messageRef.id;
   const factChecker = factCheckerDocSnap.data()
   if (factChecker?.preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
@@ -222,7 +220,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
       .collection("voteRequests")
       .add({
         factCheckerDocRef: factCheckerDocSnap.ref,
-        platformId: factChecker.platformId,
+        platformId: factChecker.telegramId,
         hasAgreed: false,
         triggerL2Vote: null,
         triggerL2Others: null,
@@ -234,19 +232,22 @@ async function sendTemplateMessageAndCreateVoteRequest(
         acceptedTimestamp: null,
         votedTimestamp: null,
       })
-      .then(() => {
-        const voteRequestUrl = `${checkerAppHost}/checkers/${factCheckerId}/messages/${msgId}/voteRequest`;
+      .then((voteRequestRef) => {
+        const voteRequestPath = voteRequestRef.path
+        console.log(voteRequestPath)
+        const voteRequestUrl = `${checkerAppHost}/${voteRequestPath}`
         // After the voteRequest object is added, send the Telegram template message with the additional voteRequestId parameter
         return sendTelegramTextMessage(
           "factChecker",
-          factChecker.platformId,
+          factChecker.telegramId,
           "New message received! Would you like to help assess it?",
           null,
           {
             inline_keyboard: [
               [{ text: "Yes!", web_app: { url: voteRequestUrl } }],
-            ]
-          })
+            ],
+          }
+        )
       })
   } else {
     return Promise.reject(

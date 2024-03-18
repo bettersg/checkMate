@@ -6,22 +6,22 @@ import {
 } from "firebase/auth";
 import "./App.css";
 import app from "./firebase";
-import { UserProvider } from './providers/UserContext';
 import {
   AchievementPage,
   DashboardPage,
-  VotingPage,
+  ViewVotePage,
   MyVotesPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useUser } from "./providers/UserContext";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
-  { path: "/checkers/:phoneNo/messages", element: <MyVotesPage /> },
+  { path: "/votes", element: <MyVotesPage /> },
   { path: "/achievements", element: <AchievementPage /> },
   {
-    path: "/checkers/:phoneNo/messages/:msgId/voteRequest",
-    element: <VotingPage />,
+    path: "/messages/:messageId/voteRequests/:voteRequestId",
+    element: <ViewVotePage />,
   },
 ]);
 
@@ -31,14 +31,13 @@ if (import.meta.env.MODE === "dev") {
 }
 
 function App() {
+  const { setCheckerId, setCheckerName } = useUser();
   const [count, setCount] = useState(0);
   const [telegramApp, setTelegramApp] = useState({});
   //for global states: userID, name and messages
-  const [userId, setUserId] = useState(null);
-  const [name, setName] = useState('');
 
   // TODO: BRENNAN - Clean up
-  console.log(count, setCount, telegramApp)
+  console.log(count, setCount, telegramApp);
 
   useEffect(() => {
     if (
@@ -47,7 +46,10 @@ function App() {
       window.Telegram.WebApp
     ) {
       setTelegramApp(window.Telegram.WebApp);
-      const initData = window.Telegram.WebApp.initData;
+      let initData = window.Telegram.WebApp.initData;
+      if (!initData && import.meta.env.MODE === "dev") {
+        initData = "devdummy";
+      }
       if (initData) {
         // Call your Firebase function to validate the receivedData and get custom token
         fetch("/telegramAuth/", {
@@ -68,92 +70,35 @@ function App() {
             return response.json();
           })
           .then((data) => {
-            if (data.customToken) {
-              setUserId(data.userId);
-              setName(data.name);
-              signInWithCustomToken(auth, data.customToken).catch((error) => {
-                console.error(
-                  "Error during Firebase signInWithCustomToken",
-                  error
-                );
-              });
+            if (!data.customToken) {
+              throw new Error("Custom token not found in response");
+            }
+            if (data.isNewUser) {
+              // TODO BRENNAN: Redirect to onboarding page
+              // router.navigate("/onboarding");
+            } else {
+              //if existing user
+              signInWithCustomToken(auth, data.customToken)
+                .then(() => {
+                  setCheckerId(data.checkerId);
+                  setCheckerName(data.name);
+                })
+                .catch((error) => {
+                  console.error(
+                    "Error during Firebase signInWithCustomToken",
+                    error
+                  );
+                });
             }
           })
           .catch((err) => {
-            alert(err);
             console.error("Error fetching custom token:", err);
           });
       }
     }
   }, []);
 
-  // useEffect(() => {
-  //   // Only call the API when phoneNo is available to update messages
-  //   if (phoneNo) {
-  //     const fetchData = async () => {
-  //       try {
-  //         const response = await fetch(`/api/checkers/${phoneNo}/messages`, {
-  //           method: "GET",
-  //         });
-  //         console.log("After fetch");
-  //         if (!response.ok) {
-  //           throw new Error(`HTTP error! Status: ${response.status}`);
-  //         }
-
-  //         const data = await response.json();
-
-  //         // Convert the ISO string to Date object for all messages
-  //         data.messages.forEach((msg: Message) => {
-  //           msg.firstTimestamp = new Date(msg.firstTimestamp);
-  //           if (msg.voteRequests.acceptedTimestamp != null) {
-  //             msg.voteRequests.acceptedTimestamp = new Date(msg.voteRequests.acceptedTimestamp);
-  //           }
-  //           if (msg.voteRequests.createdTimestamp != null) {
-  //             msg.voteRequests.createdTimestamp = new Date(msg.voteRequests.createdTimestamp);
-  //           }
-  //           if (msg.voteRequests.votedTimestamp != null) {
-  //             msg.voteRequests.votedTimestamp = new Date(msg.voteRequests.votedTimestamp);
-  //           }
-  //           if (msg.voteRequests.checkTimestamp != null) {
-  //             msg.voteRequests.checkTimestamp = new Date(msg.voteRequests.checkTimestamp);
-  //           }
-  //         });
-
-  //         setMessages(data.messages);
-
-  //         const PENDING: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category == null);
-  //         const ASSESSED: Message[] = data.messages.filter((msg: Message) => msg.voteRequests.category != null);
-
-  //         // Sort by date
-  //         PENDING.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
-  //         ASSESSED.sort((a, b) => b.firstTimestamp.getTime() - a.firstTimestamp.getTime());
-
-  //         setPending(PENDING);
-  //         setAssessed(ASSESSED);
-
-  //         //calculate & update context pending unread
-  //         const pending_unread = PENDING.filter((msg: Message) => !msg.voteRequests.isView).length;
-  //         setUnassessed(pending_unread);
-  //         //calculate & update assessed unread
-  //         const assessed_unread = ASSESSED.filter((msg: Message) => !msg.voteRequests.isView).length;
-  //         setUnchecked(assessed_unread);
-
-  //       } catch (error) {
-  //         console.error("Error fetching votes:", error);
-  //       }
-  //     };
-  //     fetchData();
-  //   }
-  // }, [phoneNo]);
-
-
-  return (
-    <UserProvider value={{
-      userId, name
-    }}>
-      <RouterProvider router={router} />
-    </UserProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

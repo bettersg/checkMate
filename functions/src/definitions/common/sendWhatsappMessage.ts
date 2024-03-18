@@ -158,6 +158,65 @@ async function sendWhatsappTemplateMessage(
   return response
 }
 
+async function sendWhatsappOTP(bot: string, to: string, otp: string) {
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    template: {
+      name: string
+      language: {
+        code: string
+      }
+      components: {
+        type: string
+        sub_type?: string
+        index?: string
+        parameters: {
+          type: string
+          text: string
+        }[]
+      }[]
+    }
+  } = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: to,
+    type: "template",
+    template: {
+      name: "whatsapp_otp",
+      language: {
+        code: "en",
+      },
+      components: [
+        {
+          type: "body",
+          parameters: [
+            {
+              type: "text",
+              text: otp,
+            },
+          ],
+        },
+        {
+          type: "button",
+          sub_type: "url",
+          index: "0",
+          parameters: [
+            {
+              type: "text",
+              text: otp,
+            },
+          ],
+        },
+      ],
+    },
+  }
+  const response = await callWhatsappSendMessageApi(data, bot)
+  return response
+}
+
 async function sendWhatsappTextListMessage(
   bot: string,
   to: string,
@@ -351,4 +410,5 @@ export {
   sendWhatsappButtonMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
+  sendWhatsappOTP,
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { VoteSummary } from "../interfaces"
+import { VoteSummary, VoteSummaryApiResponse } from "../interfaces"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
 import { checkAccuracy } from "../../common/statistics"
@@ -35,6 +35,8 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
     } else if (status === "voted") {
       query = query.where("category", "!=", null)
     }
+
+    const totalCount = (await query.count().get()).data().count
 
     const sortOrder = status === "pending" ? "asc" : "desc"
     const sortField =
@@ -113,11 +115,37 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
       }
     })
 
-    const responseData = await Promise.all(promises)
-    res.status(200).send(responseData.filter((d) => d !== null))
+    const votes = (await Promise.all(promises)).filter(
+      (d): d is VoteSummary => d !== null
+    ) as VoteSummary[]
+
+    if (votes.length === 0) {
+      return res.status(200).send([])
+    }
+
+    if (votes === null) {
+      return res.status(500).send("Error fetching documents")
+    }
+
+    const lastVote = votes[votes.length - 1]
+    if (!lastVote) {
+      return res.status(500).send("Error fetching documents")
+    }
+
+    const lastVotePath = lastVote.firestorePath
+
+    const totalPages = Math.ceil(totalCount / n)
+
+    const response: VoteSummaryApiResponse = {
+      votes: votes,
+      lastPath: lastVotePath,
+      totalPages,
+    }
+
+    return res.status(200).send(response)
   } catch (error) {
     logger.error("Error fetching documents: ", error)
-    res.status(500).send(error)
+    return res.status(500).send(error)
   }
 }
 

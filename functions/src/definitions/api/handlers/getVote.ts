@@ -4,7 +4,6 @@ import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
 import { getCount } from "../../common/counters"
 import { getSignedUrl } from "../../common/mediaUtils"
-import { info } from "console"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -43,6 +42,18 @@ const getVoteHandler = async (req: Request, res: Response) => {
     if (!latestInstanceSnap.exists) {
       return res.status(500).send("Latest instance not found")
     }
+
+    const latestType = latestInstanceSnap.get("type") ?? "text"
+
+    const storageBucketUrl = latestInstanceSnap.get("storageUrl")
+    const signedUrl =
+      latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
+    const isAssessed = messageSnap.get("isAssessed")
+
+    const isLegacy =
+      voteRequestSnap.get("truthScore") === undefined &&
+      voteRequestSnap.get("vote") !== undefined
+
     const [
       irrelevantCount,
       scamCount,
@@ -65,12 +76,45 @@ const getVoteHandler = async (req: Request, res: Response) => {
       getCount(messageRef, "responses"),
     ])
 
-    const latestType = latestInstanceSnap.get("type") ?? "text"
+    //get counts from each truthScore
 
-    const storageBucketUrl = latestInstanceSnap.get("storageUrl")
-    const signedUrl =
-      latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
-    const isAssessed = messageSnap.get("isAssessed")
+    const truthScoreCountPromiseArr = Array.from(
+      { length: 5 },
+      (_, index) => index + 1
+    ).map((truthScore) =>
+      messageRef
+        .collection("voteRequests")
+        .where("truthScore", "==", truthScore)
+        .count()
+        .get()
+        .then((snapshot) => snapshot.data().count)
+    )
+
+    let oneCount, twoCount, threeCount, fourCount, fiveCount, hasDiscrepancy
+
+    if (isLegacy) {
+      ;[oneCount, twoCount, threeCount, fourCount, fiveCount] = new Array(
+        5
+      ).fill(null)
+    } else {
+      try {
+        ;[oneCount, twoCount, threeCount, fourCount, fiveCount] =
+          await Promise.all(truthScoreCountPromiseArr)
+        //if sum not equals to infoCount, then it is a legacy message
+        if (
+          oneCount + twoCount + threeCount + fourCount + fiveCount !==
+          infoCount
+        ) {
+          logger.warn(
+            "Mismatch in truth score counts for message: " + messageId
+          )
+          hasDiscrepancy = true
+        }
+      } catch (e) {
+        logger.error("Error retrieving truth score counts")
+        hasDiscrepancy = true
+      }
+    }
 
     const returnData: Vote = {
       type: latestType,
@@ -86,7 +130,18 @@ const getVoteHandler = async (req: Request, res: Response) => {
             responseCount: responseCount,
             scamCount: scamCount,
             illicitCount: illicitCount,
-            infoCount: infoCount,
+            infoCount:
+              isLegacy || hasDiscrepancy
+                ? {
+                    total: infoCount,
+                  }
+                : {
+                    1: oneCount,
+                    2: twoCount,
+                    3: threeCount,
+                    4: fourCount,
+                    5: fiveCount,
+                  },
             satireCount: satireCount,
             spamCount: spamCount,
             irrelevantCount: irrelevantCount,
