@@ -14,6 +14,7 @@ import {
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useUser } from "./providers/UserContext";
+import Onboarding from "./pages/Onboarding";
 
 const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: "/messages/:messageId/voteRequests/:voteRequestId",
     element: <ViewVotePage />,
+  },
+  {
+    path: "/onboarding",
+    element: <Onboarding />,
   },
 ]);
 
@@ -75,7 +80,11 @@ function App() {
             }
             if (data.isNewUser) {
               // TODO BRENNAN: Redirect to onboarding page
-              // router.navigate("/onboarding");
+              router.navigate("/onboarding", {
+                state: {
+                  checkerId: data.checkerId,
+                },
+              });
             } else {
               //if existing user
               signInWithCustomToken(auth, data.customToken)
