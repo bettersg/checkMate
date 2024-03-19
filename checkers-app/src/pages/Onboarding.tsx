@@ -123,14 +123,15 @@ const Onboarding = () => {
   const [name, setName] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
 
-  const handleOnCompleteOnboarding = async () => {
+  const handleOnCompleteOnboarding = () => {
     const updateFactChecker = async () => {
+      console.log(name);
       await axiosInstance.patch(
-        `http://127.0.0.1:5001/checkmate-uat/asia-southeast1/apiHandler/api/checkers/${factChecker.checkerId}`,
+        `/api/checkers/${factChecker.checkerId}`,
         { name, isOnboardingComplete: true }
       );
     };
-    await updateFactChecker();
+    updateFactChecker();
     router.navigate("/");
   };
 
