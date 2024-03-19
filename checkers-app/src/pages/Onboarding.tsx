@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { redirect, useLocation } from "react-router-dom";
-import { axiosInstance } from "../services/api";
+import { useLocation } from "react-router-dom";
 import { router } from "../App";
+import { useUpdateFactChecker } from "../services/mutations";
+import { Checker } from "../types";
 
 const NameForm = ({
   name,
@@ -118,28 +119,22 @@ const numberOfSteps = Object.keys(steps).length;
 const Onboarding = () => {
   const { state } = useLocation();
 
-  const factChecker = state.factChecker;
+  const updateFactChecker = useUpdateFactChecker();
 
   const [name, setName] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
 
-  const handleOnCompleteOnboarding = () => {
-    const updateFactChecker = async () => {
-      console.log(name);
-      await axiosInstance.patch(
-        `/api/checkers/${factChecker.checkerId}`,
-        { name, isOnboardingComplete: true }
-      );
-    };
-    updateFactChecker();
+  const handleOnCompleteOnboarding = (factCheckerData: Checker) => {
+    console.log(state?.factChecker.checkerId);
+    updateFactChecker.mutate({
+      checkerData: { ...factCheckerData, name, isOnboardingComplete: true },
+      checkerId: state?.factChecker.checkerId,
+    });
     router.navigate("/");
   };
 
   return (
     <div className="bg-checkBG min-h-screen flex flex-col items-center justify-center border border-black mt-4">
-      <p className="text-4xl max-w-[200px]">
-        {JSON.stringify(factChecker, null, 2)}
-      </p>
       {/* <p className="text-3xl">{JSON.stringify(factChecker)}</p> */}
       <h1 className="text-checkPrimary600 font-medium text-2xl">
         FactChecker's Onboarding
@@ -162,7 +157,7 @@ const Onboarding = () => {
         ) : (
           <button
             className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
-            onClick={() => handleOnCompleteOnboarding()}
+            onClick={() => handleOnCompleteOnboarding(state.factCheckerData)}
           >
             Complete Onboarding
           </button>

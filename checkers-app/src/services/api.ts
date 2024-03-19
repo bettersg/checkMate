@@ -42,12 +42,25 @@ export const getCheckerPendingCount = async (
     .data;
 };
 
-// export const updateFactChecker = async (data: FactChecker) => {
-//   return (await axiosInstance.put(`/api/checkerData/${data.platformId}`, data));
-// }
+export const updateChecker = async ({
+  checkerData,
+  checkerId,
+}: {
+  checkerData: Checker;
+  checkerId: string;
+}) => {
+  await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerData);
+};
 
-export const postChecker = async (data: Checker) => {
-  return (await axiosInstance.post("/checkers", data)).data;
+export const postChecker = async ({
+  checkerData,
+  checkerId,
+}: {
+  checkerData: Checker;
+  checkerId: string;
+}) => {
+  return (await axiosInstance.post(`/api/checkers/${checkerId}`, checkerData))
+    .data;
 };
 
 export const getCheckerVotes = async (
