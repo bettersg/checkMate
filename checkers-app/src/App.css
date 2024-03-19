@@ -74,6 +74,8 @@ p.firebase-emulator-warning {
   /* The phone number input should shrink
 	   to make room for the extension input */
   min-width: 0;
+  padding: 1rem;
+  border-radius: 4px;
 }
 
 .PhoneInputCountryIcon {

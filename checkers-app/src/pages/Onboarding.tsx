@@ -136,8 +136,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="bg-checkBG min-h-screen flex flex-col items-center justify-center border border-black mt-4">
-      {/* <p className="text-3xl">{JSON.stringify(factChecker)}</p> */}
+    <div className="bg-checkBG min-h-screen flex flex-col items-center border border-black mt-4">
       <h1 className="text-checkPrimary600 font-medium text-2xl">
         FactChecker's Onboarding
       </h1>
@@ -149,11 +148,13 @@ const Onboarding = () => {
         <p className="pb-3">{steps[currentStep]}</p>
         {currentStep === 1 && <NameForm name={name} setName={setName} />}
         {currentStep === 1 && (
-          <PhoneInput
-            placeholder="Enter phone number"
-            value={phoneNumber}
-            onChange={setPhoneNumber}
-          />
+          <div className="p-2 pb-3">
+            <PhoneInput
+              placeholder="Enter phone number"
+              value={phoneNumber}
+              onChange={setPhoneNumber}
+            />
+          </div>
         )}
 
         {currentStep !== numberOfSteps ? (
