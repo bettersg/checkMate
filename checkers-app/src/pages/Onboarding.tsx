@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { router } from "../App";
 import { useUpdateFactChecker } from "../services/mutations";
 import { Checker } from "../types";
+import PhoneInput from "react-phone-number-input";
 
 const NameForm = ({
   name,
@@ -118,6 +119,7 @@ const numberOfSteps = Object.keys(steps).length;
 
 const Onboarding = () => {
   const { state } = useLocation();
+  const [phoneNumber, setPhoneNumber] = useState();
 
   const updateFactChecker = useUpdateFactChecker();
 
@@ -146,6 +148,13 @@ const Onboarding = () => {
         {currentStep === 2 && <ThankYou name={name} />}
         <p className="pb-3">{steps[currentStep]}</p>
         {currentStep === 1 && <NameForm name={name} setName={setName} />}
+        {currentStep === 1 && (
+          <PhoneInput
+            placeholder="Enter phone number"
+            value={phoneNumber}
+            onChange={setPhoneNumber}
+          />
+        )}
 
         {currentStep !== numberOfSteps ? (
           <button
