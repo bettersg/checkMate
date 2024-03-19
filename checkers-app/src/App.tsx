@@ -16,7 +16,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useUser } from "./providers/UserContext";
 import Onboarding from "./pages/Onboarding";
 
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
   { path: "/votes", element: <MyVotesPage /> },
   { path: "/achievements", element: <AchievementPage /> },
@@ -82,7 +82,7 @@ function App() {
               // TODO BRENNAN: Redirect to onboarding page
               router.navigate("/onboarding", {
                 state: {
-                  checkerId: data.checkerId,
+                  factChecker: data,
                 },
               });
             } else {
@@ -105,7 +105,7 @@ function App() {
           });
       }
     }
-  }, []);
+  }, [setCheckerId, setCheckerName]);
 
   return <RouterProvider router={router} />;
 }

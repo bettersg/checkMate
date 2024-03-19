@@ -2,7 +2,6 @@ import axios from "axios";
 import {
   Checker,
   Vote,
-  VoteSummary,
   VoteSummaryApiResponse,
   PendingCountApiResponse,
 } from "../types";
@@ -14,7 +13,7 @@ if (import.meta.env.MODE === "dev") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099"); //TODO: FOR DEV ONLY, need to change env variables later.
 }
 // Create an Axios instance
-const axiosInstance = axios.create();
+export const axiosInstance = axios.create();
 
 axiosInstance.interceptors.request.use(
   async (config) => {

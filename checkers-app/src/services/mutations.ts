@@ -7,12 +7,12 @@ export function useUpdateFactChecker() {
 
   return useMutation({
     mutationFn: (data: Checker) => postChecker(data),
-    onSettled: async (_, error, variables) => {
+    onSettled: async (_, error) => {
       if (error) {
         console.log(error);
       } else {
         await queryClient.invalidateQueries({
-          queryKey: ["factChecker", { id: variables.telegramId }],
+          queryKey: ["factChecker"],
         });
       }
     },

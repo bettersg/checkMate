@@ -1,11 +1,7 @@
 import { useState } from "react";
-import { useUpdateFactChecker } from "../services/mutations";
-import { Checker } from "../types";
-import { useLocation } from "react-router-dom";
-
-const text =
-  "Welcome to our community of CheckMates! 👋🏻 We're grateful to have you on board to combat misinformation and scams. 🙇‍♀️🙇🏻 We'd love to get to know you better - could you *reply to this message* and share your name with us? (Reply to this message by swiping right)!";
-console.log(text);
+import { redirect, useLocation } from "react-router-dom";
+import { axiosInstance } from "../services/api";
+import { router } from "../App";
 
 const NameForm = ({
   name,
@@ -122,23 +118,28 @@ const numberOfSteps = Object.keys(steps).length;
 const Onboarding = () => {
   const { state } = useLocation();
 
-  console.log(state);
+  const factChecker = state.factChecker;
 
   const [name, setName] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
 
-  // const updateFactChecker = useUpdateFactChecker();
-  // const handleOnCompleteOnboarding = () => {
-  //   updateFactChecker.mutate({
-  //     ...factChecker,
-  //     name,
-  //     isOnboardingComplete: true,
-  //   });
-  // };
+  const handleOnCompleteOnboarding = async () => {
+    const updateFactChecker = async () => {
+      await axiosInstance.patch(
+        `http://127.0.0.1:5001/checkmate-uat/asia-southeast1/apiHandler/api/checkers/${factChecker.checkerId}`,
+        { name, isOnboardingComplete: true }
+      );
+    };
+    await updateFactChecker();
+    router.navigate("/");
+  };
 
   return (
     <div className="bg-checkBG min-h-screen flex flex-col items-center justify-center border border-black mt-4">
-      <p className="text-4xl">{JSON.stringify(state)}</p>
+      <p className="text-4xl max-w-[200px]">
+        {JSON.stringify(factChecker, null, 2)}
+      </p>
+      {/* <p className="text-3xl">{JSON.stringify(factChecker)}</p> */}
       <h1 className="text-checkPrimary600 font-medium text-2xl">
         FactChecker's Onboarding
       </h1>
@@ -160,7 +161,7 @@ const Onboarding = () => {
         ) : (
           <button
             className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
-            onClick={() => console.log("e")}
+            onClick={() => handleOnCompleteOnboarding()}
           >
             Complete Onboarding
           </button>

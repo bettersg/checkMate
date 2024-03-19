@@ -19,7 +19,7 @@ const devTeleId = defineString("CHECKER1_TELEGRAM_ID")
 app.post("/", async (req, res) => {
   const initData = req.body // Assuming you send initData in the body of your requests
   const botToken = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN) // Replace with your bot token
-  console.log(initData)
+
   if (!initData) {
     return res.status(400).send("No initData")
   }
