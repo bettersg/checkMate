@@ -21,6 +21,7 @@ import { useUser } from "../../providers/UserContext";
 import Loading from "../common/Loading";
 import MessageCard from "./MessageCard";
 import { useNavigate } from "react-router-dom";
+import { Typography } from "@material-tailwind/react";
 import { getCheckerVotes } from "../../services/api";
 import { VoteSummary, VoteSummaryApiResponse } from "../../types";
 import Pagination from "./Pagination"; // Make sure to create this component
@@ -85,15 +86,12 @@ const MessagesDisplay: FC = () => {
 
   return (
     <div>
-      <div
-        className="flex justify-around relative border-b-2 border-primary-color2"
-        style={{ boxShadow: "0 7px 9px -7px rgba(0,0,0,0.7)" }}
-      >
+      <div className="flex justify-around relative shadow-md shadow-primary-color2/50">
         <button
           className={`w-1/2 text-center py-2 ${
             activeTab === "pending"
-              ? "border-b-4 border-primary-color2 text-primary-color2"
-              : "text-black"
+              ? "border-b-2 border-primary-color2 text-primary-color2"
+              : "text-gray-400"
           } font-bold`}
           onClick={() => handleTabChange("pending")}
         >
@@ -102,8 +100,8 @@ const MessagesDisplay: FC = () => {
         <button
           className={`w-1/2 text-center py-2 ${
             activeTab === "voted"
-              ? "border-b-4 border-primary-color2 text-primary-color2"
-              : "text-black"
+              ? "border-b-2 border-primary-color2 text-primary-color2"
+              : "text-gray-400"
           } font-bold`}
           onClick={() => handleTabChange("voted")}
         >
@@ -111,11 +109,15 @@ const MessagesDisplay: FC = () => {
         </button>
       </div>
       <div
-        className="overflow-auto"
+        className="overflow-auto min-h-full"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {error && <div>{error}</div>}
-        {!error && votes.length === 0 && <div>No messages found</div>}
+        {!error && votes.length === 0 && (
+          <div className="text-primary-color h-full flex justify-center pt-16">
+            <Typography>No messages found.</Typography>
+          </div>
+        )}
         {!error &&
           votes.map((voteSummary, index) => (
             <div key={index}>

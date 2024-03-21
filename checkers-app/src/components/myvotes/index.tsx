@@ -30,7 +30,6 @@ export default function MyVotes() {
   return (
     <div>
       <div>
-        <InformationButton />
         <MessagesDisplay />
       </div>
     </div>

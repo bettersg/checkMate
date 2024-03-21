@@ -97,62 +97,11 @@ export default function MessageCard(props: MessageCardProps) {
     navigate(`/${firestorePath}`);
   };
 
-  //   const handleOpenMsgInfo = async () => {
-  //     setOpenMsgInfo(!openMsgInfo);
-
-  //     if (msg && !msg.voteRequests.isView) {
-  //       try {
-  //         const response = await fetch(
-  //           `/api/checkers/${phoneNo}/messages/${msg.id}/voteResult`,
-  //           {
-  //             method: "PATCH",
-  //           }
-  //         );
-  //         console.log("After fetch");
-  //         if (!response.ok) {
-  //           throw new Error(`HTTP error! Status: ${response.status}`);
-  //         }
-  //         const data = await response.json();
-  //         const latestVoteReq = data.voteRequest;
-
-  //         // Update the specifc voteRequest in messages array
-  //         const latestMessages = messages.map((message) => {
-  //           if (message.id === msg.id) {
-  //             return { ...message, voteRequests: latestVoteReq };
-  //           }
-  //           return message;
-  //         });
-  //         console.log("UPDATED: ", updateMessages);
-  //         updateMessages(latestMessages);
-
-  //         const PENDING: Message[] = latestMessages.filter(
-  //           (msg: Message) => !msg.isAssessed || msg.voteRequests.category == null
-  //         );
-  //         updatePending(PENDING);
-  //         const pending_unread = PENDING.filter(
-  //           (msg: Message) => !msg.voteRequests.isView
-  //         ).length;
-  //         updateUnassessed(pending_unread);
-
-  //         const ASSESSED: Message[] = latestMessages.filter(
-  //           (msg: Message) => msg.isAssessed && msg.voteRequests.category != null
-  //         );
-  //         updateAssessed(ASSESSED);
-  //         const assessed_unread = ASSESSED.filter(
-  //           (msg: Message) => !msg.voteRequests.isView
-  //         ).length;
-  //         updateUnchecked(assessed_unread);
-  //       } catch (error) {
-  //         console.error("Error fetching vote result:", error);
-  //       }
-  //     }
-  //   };
-
   const textStyle = "font-normal"; //add bold in future
 
   return (
     <div
-      className="flex border-b border-gray-500 h-16 hover-shadow"
+      className="flex border-b border-gray-500 h-16 hover-shadow dark:bg-dark-background-color"
       onClick={() => viewVote(firestorePath)}
     >
       {/* Coloured dot if needs review*/}
@@ -173,24 +122,6 @@ export default function MessageCard(props: MessageCardProps) {
           {type === "text" ? text : "Image"}
         </div>
       </div>
-      {/* {openMsgInfo && (
-        <VoteInfoDialog
-          id={msg.id}
-          text={msg.text}
-          primaryCategory={msg.primaryCategory}
-          avgTruthScore={msg.avgTruthScore}
-          category={msg.voteRequests?.category || null}
-          truthScore={msg.voteRequests?.truthScore || null}
-          handleClose={() => {
-            setOpenMsgInfo(!openMsgInfo);
-          }}
-          rationalisation={msg.rationalisation}
-          storageUrl={msg.storageUrl}
-          caption={msg.caption}
-          crowdPercentage={msg.crowdPercentage}
-          votedPercentage={msg.votedPercentage}
-        />
-      )} */}
     </div>
   );
 }

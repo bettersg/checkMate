@@ -66,7 +66,16 @@ export type VoteRequest = {
   triggerL2Others: boolean | null
   sentMessageId: string | null
   truthScore: 1 | 2 | 3 | 4 | 5 | null
-  category: string | null
+  category:
+    | "scam"
+    | "illicit"
+    | "info"
+    | "satire"
+    | "spam"
+    | "legitimate"
+    | "irrelevant"
+    | "unsure"
+    | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null

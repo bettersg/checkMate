@@ -20,17 +20,22 @@ export default function CategoryRationalisation(Props: PropType) {
       <Accordion
         open={open}
         className="mb-2 rounded-lg border border-primary-color px-4"
-        icon={<SparklesIcon className="h-6 w-6 text-primary-color3" />}
+        icon={
+          <SparklesIcon className="h-6 w-6 text-primary-color3 dark:text-white" />
+        }
       >
         <AccordionHeader
           onClick={() => handleOpen()}
           className="text-primary-color3 border-b-0"
         >
-          <Typography variant="h5" className="text-primary-color3 font-bold">
+          <Typography
+            variant="h5"
+            className="text-primary-color3 font-bold dark:text-white"
+          >
             AI Analysis
           </Typography>
         </AccordionHeader>
-        <AccordionBody className="pt-2 text-base font-normal">
+        <AccordionBody className="pt-2 text-black font-normal dark:text-white">
           {Props.rationalisation != null
             ? Props.rationalisation
             : "GenAI rationalisation not available for this message."}

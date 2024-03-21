@@ -38,7 +38,7 @@ export default function VoteResult(Prop: PropType) {
         catName = "Spam";
         catIcon = <FaceFrownIcon className="h-7 w-7" />;
         break;
-      case "trivial":
+      case "irrelevant":
         catName = "Trivial";
         catIcon = <CheckCircleIcon className="h-7 w-7" />;
         break;

@@ -91,6 +91,7 @@ app.post("/", async (req, res) => {
 
   if (!checkerSnap.empty) {
     try {
+      console.log("Checker exists")
       const userDoc = checkerSnap.docs[0]
       const customToken = await admin.auth().createCustomToken(userDoc.id)
       const checkerName = userDoc.data()?.name

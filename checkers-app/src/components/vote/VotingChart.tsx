@@ -80,7 +80,7 @@ export default function VotingChart(Props: VotingChartProps) {
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" angle={-30} tick={{ fontSize: 12, dy: 5 }} />
+        <XAxis dataKey="name" angle={-45} tick={{ fontSize: 12, dy: 5 }} />
         <YAxis allowDecimals={false} />
         <Tooltip />
         <Legend />
