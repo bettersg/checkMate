@@ -14,12 +14,13 @@ export default function NavbarDefault() {
   const isBadgeInvisible = pendingCount === 0;
 
   return (
-    <Navbar className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2 border-0">
+    <Navbar className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2 dark:bg-dark-highlight-color border-0">
       <div className="flex items-center justify-around h-full">
         <Button
           variant="text"
           className="rounded-full"
           onClick={() => navigate("/")}
+          ripple
         >
           <PresentationChartBarIcon className="h-7 w-7 text-white" />
         </Button>
@@ -28,6 +29,7 @@ export default function NavbarDefault() {
           variant="text"
           className="rounded-full"
           onClick={() => navigate(`/votes`)}
+          ripple
         >
           <Badge
             invisible={isBadgeInvisible}
@@ -45,6 +47,7 @@ export default function NavbarDefault() {
           onClick={() => {
             navigate("/achievements");
           }}
+          ripple
         >
           <TrophyIcon className="h-7 w-7 text-white" />
         </Button>

@@ -9,12 +9,19 @@ interface LayoutProps {
 
 export default function Layout({ pageName, children }: LayoutProps) {
   return (
-    <div>
-      <div className="layout-padding">
-        <Header pageName={pageName} />
-        {/* <PageHeader>{pageHeader}</PageHeader> */}
-      </div>
-      <div className="pb-16">{children}</div>
+    <div className="dark:bg-dark-background-color min-h-screen overflow-x-hidden">
+      <style>
+        {`
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        `}
+      </style>
+      {/* <div className='layout-padding'> */}
+      <Header pageName={pageName} />
+      {/* <PageHeader>{pageHeader}</PageHeader>
+    </div> */}
+      <div className="pb-16 mt-16">{children}</div>
       <NavbarDefault />
     </div>
   );

@@ -45,7 +45,7 @@ const CATEGORIES = [
     display: "Spam",
   },
   {
-    name: "trivial",
+    name: "irrelevant",
     icon: <CheckCircleIcon className="h-7 w-7" />,
     display: "Trivial",
   },

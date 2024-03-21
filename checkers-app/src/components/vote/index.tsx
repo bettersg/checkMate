@@ -44,6 +44,13 @@ export default function VotePage() {
   return (
     <>
       <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding">
+        <style>
+          {`
+            ::-webkit-scrollbar {
+              display: none;
+            }
+          `}
+        </style>
         <BackButton />
         <MessageCard
           type={vote.type}
@@ -53,7 +60,10 @@ export default function VotePage() {
         />
         {vote.category === null || !vote.isAssessed ? (
           <>
-            <Typography variant="h4" className="text-primary-color3">
+            <Typography
+              variant="h4"
+              className="text-primary-color3 dark:text-white"
+            >
               Select category:
             </Typography>
             <VoteCategories
@@ -66,24 +76,24 @@ export default function VotePage() {
         ) : (
           <>
             <div className="flex w-full gap-x-2">
-              <div className="flex-1">
+              <div className="flex flex-1 flex-col justify-center">
                 <Typography
-                  className="text-primary-color3 text-center"
+                  className="text-primary-color3 text-center dark:text-white"
                   variant="h5"
                 >
-                  Your vote
+                  Your Vote
                 </Typography>
                 <VoteResult
                   category={vote.category}
                   truthScore={vote.truthScore}
                 />
               </div>
-              <div className="flex-1">
+              <div className="flex flex-1 flex-col justify-center">
                 <Typography
-                  className="text-primary-color3 text-center"
+                  className="text-primary-color3 text-center dark:text-white"
                   variant="h5"
                 >
-                  Aggregated Result
+                  Final Result
                 </Typography>
                 <VoteResult
                   category={vote.finalStats?.primaryCategory ?? null}

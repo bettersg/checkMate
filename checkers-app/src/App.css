@@ -5,8 +5,8 @@
 :root {
   --background-color: #ffffff;
   --primary-color: #ff8932;
-  /* --primary-color2: #cc3502;*/
   --primary-color2: #ff4d00;
+  --component-color: #ffffff;
   --primary-color3: #82080c;
   --secondary-color: #ffd81b;
   --secondary-color2: #ffbb0b;
@@ -35,6 +35,18 @@
   --PhoneInputCountryFlag-borderColor: rgba(0, 0, 0, 0.5);
   --PhoneInputCountryFlag-borderColor--focus: var(--PhoneInput-color--focus);
   --PhoneInputCountryFlag-backgroundColor--loading: rgba(0, 0, 0, 0.1);
+}
+
+.dark :root {
+  /* Dark mode variables */
+  --background-color: #212121;
+  --component-color: #282828;
+  --highlight-color: #121212;
+  /* Add other variables as needed */
+}
+
+.dark .background-color {
+  background-color: var(--background-color);
 }
 
 /* @layer components{ */

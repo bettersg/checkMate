@@ -37,6 +37,9 @@ function App() {
       window.Telegram &&
       window.Telegram.WebApp
     ) {
+      if (window.Telegram.WebApp.colorScheme === "dark") {
+        document.documentElement.classList.add("dark");
+      }
       let initData = window.Telegram.WebApp.initData;
       if (!initData && import.meta.env.MODE === "dev") {
         initData = "devdummy";

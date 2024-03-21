@@ -6,7 +6,7 @@ interface HeaderProps {
 
 export default function Header({ pageName }: HeaderProps) {
   return (
-    <div className="flex justify-between items-center mb-4">
+    <div className="flex justify-between items-center fixed top-0 left-0 right-0 z-30 px-[5vw] pt-[3vh] bg-white dark:bg-dark-background-color">
       <Typography variant="h3" className="text-primary-color2">
         {pageName}
       </Typography>

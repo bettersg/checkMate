@@ -21,22 +21,28 @@ function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
   const numberList = Array.from({ length: 5 }, (_, index) => index + 1);
 
   return (
-    <Card className="w-full max-w-[24rem] my-3">
+    <Card className="w-full max-w-[24rem] my-3 dark:bg-dark-component-color">
       <List className="flex-row">
         {numberList.map((number) => (
           <ListItem className="p-0" key={number}>
             <Radio
               name="truth-score-options"
               id={`truth-score-${number}`}
-              className="border-gray-900/10 bg-primary-color/50 p-0 transition-all"
+              ripple={false}
+              className="border-primary-color p-0 transition-all focus:outline-none focus:ring-0"
               containerProps={{
                 className: "p-2",
               }}
-              label={<Typography className="font-normal">{number}</Typography>}
+              label={
+                <Typography className="font-normal text-primary-color">
+                  {number}
+                </Typography>
+              }
               value={number}
               onChange={Prop.onChange}
               checked={Prop.selectedTruthScore === number}
               crossOrigin="anonymous"
+              color="orange"
             />
           </ListItem>
         ))}
@@ -51,7 +57,7 @@ export default function InfoOptions(Prop: InfoOptionsProps) {
     <div>
       {
         <>
-          <Typography className="text-primary-color3 text-justify my-3">
+          <Typography className="text-primary-color text-justify my-3">
             Please assess the veracity of the claim(s) in the message on a scale
             from 0 (entirely false) to 5 (entirely true).
           </Typography>

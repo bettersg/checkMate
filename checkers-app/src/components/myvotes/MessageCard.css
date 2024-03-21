@@ -1,5 +1,9 @@
 .hover-shadow:hover {
-    transition: 0.3s;
-    box-shadow: 0 0 6px 1px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 6px 1px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.dark {
+  color: white;
 }
