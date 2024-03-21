@@ -18,6 +18,7 @@ Idea:
 
 import { useState, useEffect, FC } from "react";
 import { useUser } from "../../providers/UserContext";
+import Loading from "../common/Loading";
 import MessageCard from "./MessageCard";
 import { useNavigate } from "react-router-dom";
 import { getCheckerVotes } from "../../services/api";
@@ -27,12 +28,12 @@ import Pagination from "./Pagination"; // Make sure to create this component
 const MessagesDisplay: FC = () => {
   const navigate = useNavigate();
   const { checkerId } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
   const [votes, setVotes] = useState<VoteSummary[]>([]);
   const [lastPath, setLastPath] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"pending" | "voted">("pending");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
@@ -78,6 +79,10 @@ const MessagesDisplay: FC = () => {
     }
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div>
       <div
@@ -109,20 +114,16 @@ const MessagesDisplay: FC = () => {
         className="overflow-auto"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {isLoading && <div>Loading messages...</div>}
-        {!isLoading && error && <div>{error}</div>}
-        {!isLoading && !error && votes.length === 0 && (
-          <div>No messages found</div>
-        )}
-        {!isLoading &&
-          !error &&
+        {error && <div>{error}</div>}
+        {!error && votes.length === 0 && <div>No messages found</div>}
+        {!error &&
           votes.map((voteSummary, index) => (
             <div key={index}>
               <MessageCard voteSummary={voteSummary} status={activeTab} />
             </div>
           ))}
       </div>
-      {!isLoading && !error && votes.length > 0 && (
+      {!error && votes.length > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

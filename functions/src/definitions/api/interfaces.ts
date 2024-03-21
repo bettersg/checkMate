@@ -25,6 +25,23 @@ interface createChecker {
   lastVotedTimestamp?: null
 }
 
+interface updateChecker {
+  name?: string
+  type?: "human" | "ai"
+  isActive?: boolean
+  isOnboardingComplete?: boolean
+  singpassOpenId?: string | null
+  telegramId?: number | null
+  whatsappId?: string | null
+  level?: number
+  experience?: number
+  numVoted?: number
+  numCorrectVotes?: number
+  numVerifiedLinks?: number
+  preferredPlatform?: string | null
+  lastVotedTimestamp?: null
+}
+
 interface Checker {
   name: string
   type: "human" | "ai"
@@ -114,4 +131,5 @@ export {
   VoteSummaryApiResponse,
   PendingCountApiResponse,
   AssessedInfo,
+  updateChecker,
 }

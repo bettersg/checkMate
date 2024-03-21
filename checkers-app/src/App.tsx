@@ -1,11 +1,6 @@
-import { useState, useEffect } from "react";
-import {
-  getAuth,
-  signInWithCustomToken,
-  connectAuthEmulator,
-} from "firebase/auth";
+import { useEffect, useState } from "react";
 import "./App.css";
-import app from "./firebase";
+import { signInWithToken } from "./utils/signin";
 import {
   AchievementPage,
   DashboardPage,
@@ -15,6 +10,7 @@ import {
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useUser } from "./providers/UserContext";
 import Onboarding from "./pages/Onboarding";
+import Loading from "./components/common/Loading";
 
 export const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
@@ -30,19 +26,10 @@ export const router = createBrowserRouter([
   },
 ]);
 
-const auth = getAuth(app);
-if (import.meta.env.MODE === "dev") {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099"); //TODO: FOR DEV ONLY, need to change env variables later.
-}
-
 function App() {
   const { setCheckerId, setCheckerName } = useUser();
-  const [count, setCount] = useState(0);
-  const [telegramApp, setTelegramApp] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
   //for global states: userID, name and messages
-
-  // TODO: BRENNAN - Clean up
-  console.log(count, setCount, telegramApp);
 
   useEffect(() => {
     if (
@@ -50,7 +37,6 @@ function App() {
       window.Telegram &&
       window.Telegram.WebApp
     ) {
-      setTelegramApp(window.Telegram.WebApp);
       let initData = window.Telegram.WebApp.initData;
       if (!initData && import.meta.env.MODE === "dev") {
         initData = "devdummy";
@@ -78,34 +64,49 @@ function App() {
             if (!data.customToken) {
               throw new Error("Custom token not found in response");
             }
-            if (data.isNewUser) {
+            if (data.isNewUser || data.isOnboardingComplete === false) {
               // TODO BRENNAN: Redirect to onboarding page
               router.navigate("/onboarding", {
                 state: {
-                  factChecker: data,
+                  authScope: data,
                 },
               });
             } else {
               //if existing user
-              signInWithCustomToken(auth, data.customToken)
+              signInWithToken(
+                data.customToken,
+                setCheckerId,
+                setCheckerName,
+                data.checkerId,
+                data.name
+              )
                 .then(() => {
-                  setCheckerId(data.checkerId);
-                  setCheckerName(data.name);
+                  // Handle post-signIn success actions here, if any
+                  console.log("Sign-in successful");
                 })
-                .catch((error) => {
+                .catch((err) => {
                   console.error(
-                    "Error during Firebase signInWithCustomToken",
-                    error
+                    "Error during Firebase signInWithCustomToken:",
+                    err
                   );
+                  // Handle sign-in error here, if necessary
                 });
             }
           })
           .catch((err) => {
             console.error("Error fetching custom token:", err);
+          })
+          .finally(() => {
+            console.log("sign-in complete");
+            setIsLoading(false);
           });
       }
     }
   }, [setCheckerId, setCheckerName]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return <RouterProvider router={router} />;
 }

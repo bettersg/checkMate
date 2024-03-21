@@ -1,18 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Checker } from "../types";
-import { updateChecker } from "./api";
+import { updateChecker } from "../types";
+import { patchChecker } from "./api";
 
 export function useUpdateFactChecker() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
-      checkerData,
+      checkerUpdateData,
       checkerId,
     }: {
-      checkerData: Checker;
+      checkerUpdateData: updateChecker;
       checkerId: string;
-    }) => updateChecker({ checkerData, checkerId }),
+    }) => patchChecker({ checkerUpdateData, checkerId }),
     onSettled: async (_, error, variables) => {
       if (error) {
         console.log(error);

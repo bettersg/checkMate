@@ -48,7 +48,6 @@ app.post("/", async (req, res) => {
       logger.warn("User likely not from Telegram, userId does not exist")
       return res.status(403).send("No Access")
     }
-    console.log(`userid is ${userId}`) //TODO: remove once finish dev
 
     // Generate the data-check-string
     const dataCheckStringParts = []
@@ -135,6 +134,7 @@ app.post("/", async (req, res) => {
       return res.status(200).json({
         customToken: customToken,
         checkerId: newCheckerRef.id,
+        name: "",
         isNewUser: true,
         isOnboardingComplete: false,
         isActive: false,

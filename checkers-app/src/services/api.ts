@@ -1,12 +1,15 @@
 import axios from "axios";
 import {
-  Checker,
   Vote,
   VoteSummaryApiResponse,
   PendingCountApiResponse,
 } from "../types";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import app from "../firebase";
+import {
+  createChecker,
+  updateChecker,
+} from "../../../functions/src/definitions/api/interfaces";
 
 const auth = getAuth(app);
 if (import.meta.env.MODE === "dev") {
@@ -42,21 +45,52 @@ export const getCheckerPendingCount = async (
     .data;
 };
 
-export const updateChecker = async ({
-  checkerData,
+export const patchChecker = async ({
+  checkerUpdateData,
   checkerId,
 }: {
-  checkerData: Checker;
+  checkerUpdateData: updateChecker;
   checkerId: string;
 }) => {
-  await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerData);
+  await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData);
+};
+
+export const checkOTP = async (checkerId: string, otp: string) => {
+  const response = await axiosInstance.post(
+    `/api/checkers/${checkerId}/otp/check`,
+    {
+      otp,
+    }
+  );
+  //check response http code
+  if (response.status === 202) {
+    //handles the case where user came from the whatsapp era
+    const customToken = response.data?.customToken;
+    const updatedCheckerId = response.data?.checkerId;
+    if (!customToken || !updatedCheckerId) {
+      throw new Error("Custom token or checkerId not found in response");
+    }
+    if (checkerId === updatedCheckerId) {
+      throw new Error(`Unexpected - checkerId ${checkerId} not updated`);
+    }
+    await axiosInstance.delete(`/api/checkers/${checkerId}`);
+  }
+  return response.data;
+};
+
+export const sendOTP = async (checkerId: string, whatsappId: string) => {
+  return (
+    await axiosInstance.post(`/api/checkers/${checkerId}/otp`, {
+      whatsappId,
+    })
+  ).data;
 };
 
 export const postChecker = async ({
   checkerData,
   checkerId,
 }: {
-  checkerData: Checker;
+  checkerData: createChecker;
   checkerId: string;
 }) => {
   return (await axiosInstance.post(`/api/checkers/${checkerId}`, checkerData))

@@ -187,3 +187,62 @@ p.firebase-emulator-warning {
   opacity: 1;
   color: var(--PhoneInputCountrySelectArrow-color--focus);
 }
+
+.phone-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.phone-input {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.verify-button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.verify-button:disabled {
+  background-color: grey; /* Grey out the button */
+  color: darkgray; /* Optional: change the text color to indicate it's disabled */
+  cursor: not-allowed; /* Changes the cursor to indicate the button is not clickable */
+}
+
+.otp-input-container {
+  display: none; /* Hide it by default */
+}
+
+.otp-input-container.active {
+  /* Add the active class when the phone is verified */
+  display: block;
+}
+
+.otp-input {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+.submit-button {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.submit-button:disabled {
+  background-color: grey; /* Grey out the button */
+  color: darkgray; /* Optional: change the text color to indicate it's disabled */
+  cursor: not-allowed; /* Changes the cursor to indicate the button is not clickable */
+}

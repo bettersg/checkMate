@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUser } from "../providers/UserContext";
 import { useLocation } from "react-router-dom";
 import { router } from "../App";
 import { useUpdateFactChecker } from "../services/mutations";
-import { Checker } from "../types";
+import { sendOTP, checkOTP } from "../services/api";
+import { signInWithToken } from "../utils/signin";
 import PhoneInput from "react-phone-number-input";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 const NameForm = ({
   name,
@@ -58,8 +61,8 @@ const StepTwo = () => {
         misinformation and scams.😊
       </p>
       <p>
-        By using the CheckMate bot, you are accepting our privacy policy which
-        can be found here:
+        By hitting "Next step" and continuing, you are accepting our privacy
+        policy which can be found here:
       </p>
       <br />
       <a
@@ -86,13 +89,13 @@ const StepThree = () => {
           className="underline text-checkLink"
           href="https://bit.ly/checkmates-quiz)"
         >
-          https://bit.ly/checkmates-quiz)
+          https://bit.ly/checkmates-quiz
         </a>
       </p>
       <br />
       <p>
-        Once you've completed it, come back to this chat and click on "I've done
-        the quiz!" to notify me.Let's get started! 🤖
+        Once you've completed it, come back here and hit "Next step" to
+        continue. We trust you've done it! 🌟
       </p>
     </>
   );
@@ -119,20 +122,107 @@ const numberOfSteps = Object.keys(steps).length;
 
 const Onboarding = () => {
   const { state } = useLocation();
-  const [phoneNumber, setPhoneNumber] = useState();
+  const { setCheckerId, setCheckerName } = useUser();
+  const [whatsappId, setWhatsappId] = useState("");
+  const [isOTPSent, setIsOTPSent] = useState(false);
+  const [isOTPValidated, setIsOTPValidated] = useState(false);
+  const [singpassOpenId, setSingpassOpenId] = useState(null);
+  const [otp, setOtp] = useState("");
 
-  const updateFactChecker = useUpdateFactChecker();
-
-  const [name, setName] = useState("");
+  const { mutate: updateFactChecker } = useUpdateFactChecker();
+  const [customAuthToken, setCustomAuthToken] = useState(
+    state?.authScope?.customToken ?? ""
+  );
+  const [checkerId, updateCheckerId] = useState(
+    state?.authScope?.checkerId ?? ""
+  );
+  const [name, setName] = useState(state?.authScope?.name ?? "");
   const [currentStep, setCurrentStep] = useState(1);
 
-  const handleOnCompleteOnboarding = (factCheckerData: Checker) => {
-    console.log(state?.factChecker.checkerId);
-    updateFactChecker.mutate({
-      checkerData: { ...factCheckerData, name, isOnboardingComplete: true },
-      checkerId: state?.factChecker.checkerId,
+  const sendWhatsappOTP = () => {
+    // Here you would add the logic to actually verify the phone number, probably by sending an API request
+    // For now, we'll just set the phone as verified
+    if (!checkerId) {
+      throw new Error("Checker ID not found");
+    }
+    if (!whatsappId) {
+      throw new Error("Whatsapp ID not found");
+    }
+    setIsOTPSent(true);
+    sendOTP(checkerId, whatsappId.replace("+", "")).catch((error) => {
+      console.error("Error sending OTP", error);
     });
-    router.navigate("/");
+  };
+
+  const checkWhatsappOTP = () => {
+    checkOTP(checkerId, otp)
+      .then((data) => {
+        if (data?.existing === true) {
+          //only for existing checkers
+          const customToken = data?.customToken;
+          const updatedCheckerId = data?.checkerId;
+          if (!customToken || !updatedCheckerId) {
+            throw new Error("Custom token or checkerId not found in response");
+          }
+          console.log("202");
+          updateCheckerId(updatedCheckerId);
+          setCustomAuthToken(customToken);
+        }
+        setIsOTPValidated(true);
+        console.log("OTP checked");
+      })
+      .catch((error) => {
+        console.error("Error checking OTP", error);
+      });
+  };
+
+  const handleOnCompleteOnboarding = () => {
+    console.log(state?.authScope?.checkerId);
+    if (!checkerId) {
+      throw new Error("Checker ID not found");
+    }
+    if (!whatsappId) {
+      throw new Error("Whatsapp ID not found");
+    }
+    if (!name) {
+      throw new Error("Checker name not found");
+    }
+    // if (!singpassId) {
+    //   throw new Error("Singpass ID not found");
+    // }
+    updateFactChecker(
+      {
+        checkerUpdateData: {
+          singpassOpenId: singpassOpenId,
+          name: name,
+          isOnboardingComplete: true,
+          isActive: true,
+          preferredPlatform: "telegram",
+        },
+        checkerId: checkerId,
+      },
+      {
+        onSuccess: () => {
+          try {
+            if (customAuthToken) {
+              signInWithToken(
+                customAuthToken,
+                setCheckerId,
+                setCheckerName,
+                checkerId,
+                name
+              ).then(() => {
+                console.log("Sign-in successful");
+                router.navigate("/");
+              });
+            }
+          } catch (error) {
+            console.error("Error during Firebase signInWithCustomToken", error);
+            throw new Error("Error during Firebase signInWithCustomToken");
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -148,30 +238,61 @@ const Onboarding = () => {
         <p className="pb-3">{steps[currentStep]}</p>
         {currentStep === 1 && <NameForm name={name} setName={setName} />}
         {currentStep === 1 && (
-          <div className="p-2 pb-3">
+          <div className="phone-input-container">
             <PhoneInput
-              placeholder="Enter phone number"
-              value={phoneNumber}
-              onChange={setPhoneNumber}
+              placeholder="Your WhatsApp Number"
+              defaultCountry="SG"
+              value={formatPhoneNumberIntl(whatsappId)}
+              onChange={(value: string) => {
+                setWhatsappId(value);
+              }}
+              className="phone-input"
             />
+            <button
+              className="verify-button"
+              onClick={sendWhatsappOTP}
+              disabled={!whatsappId}
+            >
+              {isOTPSent ? "Resend" : "Verify"}
+            </button>
+          </div>
+        )}
+        {currentStep === 1 && isOTPSent && (
+          <div className="otp-input-container active">
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="otp-input"
+              placeholder="Enter OTP"
+            />
+            <button
+              className="submit-button"
+              disabled={otp.length != 6}
+              onClick={checkWhatsappOTP}
+            >
+              Submit
+            </button>
           </div>
         )}
 
-        {currentStep !== numberOfSteps ? (
-          <button
-            className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
-            onClick={() => setCurrentStep(currentStep + 1)}
-          >
-            Next step
-          </button>
-        ) : (
-          <button
-            className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
-            onClick={() => handleOnCompleteOnboarding(state.factCheckerData)}
-          >
-            Complete Onboarding
-          </button>
-        )}
+        {currentStep !== numberOfSteps
+          ? isOTPValidated && (
+              <button
+                className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
+                onClick={() => setCurrentStep(currentStep + 1)}
+              >
+                Next step
+              </button>
+            )
+          : isOTPValidated && (
+              <button
+                className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
+                onClick={() => handleOnCompleteOnboarding()}
+              >
+                Complete Onboarding
+              </button>
+            )}
       </div>
     </div>
   );

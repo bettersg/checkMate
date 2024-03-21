@@ -5,7 +5,7 @@ interface UserContextProps {
   checkerId: string | null;
   checkerName: string;
   pendingCount: number;
-  setCheckerId: (checkerId: string | null) => void;
+  setCheckerId: (checkerId: string) => void;
   setCheckerName: (name: string) => void;
   setPendingCount: (pendingCount: number) => void;
   incrementSessionVotedCount: () => void;

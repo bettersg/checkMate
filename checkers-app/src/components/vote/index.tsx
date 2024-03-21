@@ -5,6 +5,7 @@ import { BackButton } from "../common/BackButton";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
+import Loading from "../common/Loading";
 import { Vote } from "../../types";
 import { getVote } from "../../services/api";
 import CategoryRationalisation from "./Rationalisation";
@@ -14,20 +15,27 @@ import VotingChart from "./VotingChart";
 export default function VotePage() {
   const { checkerId } = useUser();
   const { messageId, voteRequestId } = useParams();
+  const [isLoading, setIsLoading] = useState(false);
   const [vote, setVote] = useState<Vote | null>(null);
 
   useEffect(() => {
+    setIsLoading(true);
     const fetchVote = async () => {
       if (messageId && voteRequestId) {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
       }
+      setIsLoading(false);
     };
 
     if (messageId && voteRequestId && checkerId) {
       fetchVote();
     }
   }, [checkerId]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   if (!vote) {
     return null;

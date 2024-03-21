@@ -28,6 +28,10 @@ const postOTPHandler = async (req: Request, res: Response) => {
     if (!whatsappId) {
       return res.status(400).send("whatsappId is required")
     }
+    //check if whatsapp id is numeric
+    if (isNaN(Number(whatsappId))) {
+      return res.status(400).send("whatsappId must be numeric")
+    }
     const checkerDocRef = db.collection("checkers").doc(checkerId)
     const checkerDocSnap = await checkerDocRef.get()
     if (!checkerDocSnap.exists) {

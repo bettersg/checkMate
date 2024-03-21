@@ -6,6 +6,7 @@ import {
   VoteSummaryApiResponse,
   PendingCountApiResponse,
   AssessedInfo,
+  updateChecker,
 } from "../../functions/src/definitions/api/interfaces";
 
 export type {
@@ -16,4 +17,5 @@ export type {
   VoteSummaryApiResponse,
   PendingCountApiResponse,
   AssessedInfo,
+  updateChecker,
 };

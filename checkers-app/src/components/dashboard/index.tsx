@@ -5,9 +5,11 @@ import { useUser } from "../../providers/UserContext";
 import StatCard from "./StatsCard";
 import { Checker } from "../../types";
 import { getChecker } from "../../services/api";
+import Loading from "../common/Loading";
 //TODO: link to firebase
 
 export default function Dashboard() {
+  const [isLoading, setIsLoading] = useState(false);
   const { checkerId, pendingCount, setPendingCount } = useUser();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [accuracyRate, setAccuracyRate] = useState<number>(0);
@@ -16,6 +18,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchChecker = async () => {
+      setIsLoading(true);
       if (!checkerId) {
         return;
       }
@@ -26,12 +29,17 @@ export default function Dashboard() {
         setAvgResponseTime(checker.last30days.averageResponseTime);
         setPeopleHelped(checker.last30days.peopleHelped);
         setPendingCount(checker.pendingVoteCount);
+        setIsLoading(false);
       }
     };
     if (checkerId) {
       fetchChecker();
     }
   }, [checkerId]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex flex-col gap-y-4 left-right-padding">
@@ -46,7 +54,7 @@ export default function Dashboard() {
       </Typography>
       <div className="my-6 flex flex-col gap-y-4 mx-2">
         <StatCard
-          name="total votes"
+          name="messages voted on"
           img_src="/votes.png"
           stat={`${totalVotes}`}
         />
