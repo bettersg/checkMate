@@ -249,9 +249,11 @@ const Onboarding = () => {
         {currentStep === 1 && (
           <div className="phone-input-container">
             <PhoneInput
+              international
+              countryCallingCodeEditable={false}
               placeholder="Your WhatsApp Number"
               defaultCountry="SG"
-              value={formatPhoneNumberIntl(whatsappId)}
+              value={whatsappId}
               onChange={(value: string) => {
                 setWhatsappId(value);
               }}

@@ -1,6 +1,7 @@
 import { VoteSummary } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { PencilIcon } from "@heroicons/react/20/solid";
 import "./MessageCard.css";
 
 interface MessageCardProps {
@@ -109,6 +110,18 @@ export default function MessageCard(props: MessageCardProps) {
       {isAssessed && needsReview && status === "voted" && (
         <div className="w-1/12 flex items-center justify-center">
           <div className={`w-4 h-4 rounded-full bg-${colours.INCORRECT}`}></div>
+        </div>
+      )}
+
+      {isAssessed && !needsReview && status === "voted" && (
+        <div className="w-1/12 flex items-center justify-center">
+          <div className={`w-4 h-4 rounded-full bg-${colours.CORRECT}`}></div>
+        </div>
+      )}
+
+      {!isAssessed && status === "voted" && (
+        <div className="w-1/12 flex items-center justify-center">
+          <PencilIcon className="h-4 w-4" />
         </div>
       )}
 
