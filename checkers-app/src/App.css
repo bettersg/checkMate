@@ -209,6 +209,7 @@ p.firebase-emulator-warning {
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 4px;
+  color: #000000;
 }
 
 .verify-button {
@@ -240,6 +241,7 @@ p.firebase-emulator-warning {
   padding: 10px;
   margin-top: 10px;
   border-radius: 4px;
+  color: #000000;
 }
 
 .submit-button {

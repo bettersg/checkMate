@@ -235,7 +235,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="bg-checkBG min-h-screen flex flex-col items-center border border-black mt-4">
+    <div className="bg-checkBG min-h-screen flex flex-col items-center border border-black mt-4 dark:bg-dark-background-color">
       <h1 className="text-checkPrimary600 font-medium text-2xl">
         FactChecker's Onboarding
       </h1>
