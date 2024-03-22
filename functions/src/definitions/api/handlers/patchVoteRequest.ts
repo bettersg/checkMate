@@ -40,7 +40,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   }
 
   if (
-    [
+    ![
       "scam",
       "illicit",
       "info",
