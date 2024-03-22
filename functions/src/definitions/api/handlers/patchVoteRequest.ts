@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { updateVoteRequest } from "../interfaces"
 import { Timestamp } from "firebase-admin/firestore"
+import { VoteRequest } from "../../../types"
 import * as admin from "firebase-admin"
 
 if (!admin.apps.length) {
@@ -37,6 +38,22 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
       .status(400)
       .send("Truthscore can only be submitted for info category")
   }
+
+  if (
+    ![
+      "scam",
+      "illicit",
+      "info",
+      "satire",
+      "spam",
+      "legitimate",
+      "irrelevant",
+      "unsure",
+    ].includes(category)
+  ) {
+    return res.status(400).send(`${category} is not a valid category`)
+  }
+
   //check if vote request exists in firestore
   const voteRequestRef = db
     .collection("messages")

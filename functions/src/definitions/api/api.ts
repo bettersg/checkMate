@@ -1,43 +1,72 @@
 import * as admin from "firebase-admin"
+import express, { RequestHandler } from "express"
 import * as functions from "firebase-functions"
-import express from "express"
-import { validateFirebaseIdToken } from "./middleware/validator"
 import { onRequest } from "firebase-functions/v2/https"
+import { Timestamp } from "firebase-admin/firestore"
+import { config } from "dotenv"
+import getCheckerHandler from "./handlers/getChecker"
+import getCheckerVotesHandler from "./handlers/getCheckerVotes"
+import getVoteHandler from "./handlers/getVote"
+import patchVoteRequestHandler from "./handlers/patchVoteRequest"
+import postCheckerHandler from "./handlers/postChecker"
+import patchCheckerHandler from "./handlers/patchChecker"
+import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
+import postOTPHandler from "./handlers/postOTP"
+import checkOTPHandler from "./handlers/checkOTP"
+import deleteCheckerHandler from "./handlers/deleteChecker"
+import { validateFirebaseIdToken } from "./middleware/validator"
+
+// Type for supported HTTP methods
+type HttpMethod = "get" | "post" | "put" | "delete" | "patch"
+
+config()
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
+// Usage
+
 const app = express()
-app.use(validateFirebaseIdToken) //TODO: uncomment if you want to turn off validation
 
-app.get("/helloworld", (req, res) => {
-  res.send({ hello: "hello from /helloworld" })
-})
+// Route Registration Helper
+function secureRoute(
+  path: string,
+  handler: RequestHandler,
+  method: HttpMethod = "get"
+) {
+  app[method](path, validateFirebaseIdToken, handler)
+}
 
-app.get("/voteRequest", (req, res) => {
-  //TODO TONGYING: To implement
-  res.sendStatus(200)
-})
-
-app.post("/voteRequest", (req, res) => {
-  //TODO TONGYING: To implement, probably when they vote here
-  res.sendStatus(200)
-})
-
-app.get("/checkerData", (req, res) => {
-  //TODO TONGYING: To implement
-  res.sendStatus(200)
-})
-
-//TODO TONGYING: decide other routes and implement
+secureRoute("/checkers/:checkerId", getCheckerHandler, "get")
+secureRoute("/checkers/:checkerId", patchCheckerHandler, "patch")
+secureRoute("/checkers/:checkerId", deleteCheckerHandler, "delete")
+secureRoute("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
+secureRoute("/checkers", postCheckerHandler, "post")
+secureRoute("/checkers/:checkerId/otp/check", checkOTPHandler, "post")
+secureRoute("/checkers/:checkerId/otp", postOTPHandler, "post")
+secureRoute("/checkers/:checkerId/votes", getCheckerVotesHandler, "get")
+secureRoute(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  getVoteHandler,
+  "get"
+)
+secureRoute(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  patchVoteRequestHandler,
+  "patch"
+)
 
 const main = express()
 main.use("/api", app)
 
 const apiHandler = onRequest(
   {
-    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
+    secrets: [
+      "TELEGRAM_CHECKER_BOT_TOKEN",
+      "WHATSAPP_TOKEN",
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+    ],
   },
   main
 )

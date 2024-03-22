@@ -44,7 +44,7 @@ export type Checker = {
   isActive: boolean | null
   isOnboardingComplete: boolean | null
   singpassOpenId: string | null
-  telegramId: string | null
+  telegramId: number | null
   whatsappId?: string | null
   level: number
   experience: number
@@ -66,8 +66,33 @@ export type VoteRequest = {
   triggerL2Others: boolean | null
   sentMessageId: string | null
   truthScore: 1 | 2 | 3 | 4 | 5 | null
-  category: string | null
+  category:
+    | "scam"
+    | "illicit"
+    | "info"
+    | "satire"
+    | "spam"
+    | "legitimate"
+    | "irrelevant"
+    | "unsure"
+    | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
+}
+
+export type TeleMessage = {
+  id: string
+  caption: string | null
+  text: string
+  isAssessed: boolean
+  isMatch: boolean
+  primaryCategory: string
+  voteRequests: VoteRequest
+  rationalisation: string
+  avgTruthScore: number | null
+  firstTimestamp: Timestamp | null
+  storageUrl: string | null
+  crowdPercentage: number
+  votedPercentage: number
 }

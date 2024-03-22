@@ -4,6 +4,7 @@ import { onRequest } from "firebase-functions/v2/https"
 import postCheckerHandler from "./handlers/postChecker"
 import postVoteRequestHandler from "./handlers/postVoteRequest"
 import patchVoteRequestHandler from "./handlers/patchVoteRequest"
+import { logger } from "firebase-functions/v2"
 
 const app = express()
 
