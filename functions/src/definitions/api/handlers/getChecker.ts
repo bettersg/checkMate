@@ -44,15 +44,19 @@ const getCheckerHandler = async (req: Request, res: Response) => {
     const last30DaysQuery = db
       .collectionGroup("voteRequests")
       .where("factCheckerDocRef", "==", checkerRef)
-      .where("createdTimestamp", ">=", cutoffTimestamp)
-      .where("category", "!=", null)
+      .where("createdTimestamp", ">", cutoffTimestamp)
 
     const last30DaysSnap = await last30DaysQuery.get()
 
-    const totalVoted = last30DaysSnap.size
+    //filter client side for category != null, since firestore doesn't support inequality on 2 fields
+    const last30DaysData = last30DaysSnap.docs.filter(
+      (doc) => doc.get("category") !== null
+    )
+
+    const totalVoted = last30DaysData.length
 
     // Map each document to a promise to fetch the parent message and count instances
-    const fetchDataPromises = last30DaysSnap.docs.map((doc) => {
+    const fetchDataPromises = last30DaysData.map((doc) => {
       const parentMessageRef = doc.ref.parent.parent // Assuming this is how you get the reference
       if (!parentMessageRef) {
         logger.error(`Vote request ${doc.id} has no parent message`)
