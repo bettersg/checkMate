@@ -120,7 +120,11 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
     ) as VoteSummary[]
 
     if (votes.length === 0) {
-      return res.status(200).send([])
+      return res.status(200).send({
+        votes: [],
+        lastPath: null,
+        totalPages: 1,
+      })
     }
 
     if (votes === null) {
@@ -141,7 +145,6 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
       lastPath: lastVotePath,
       totalPages,
     }
-
     return res.status(200).send(response)
   } catch (error) {
     logger.error("Error fetching documents: ", error)
