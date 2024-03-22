@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin"
-import express from "express"
+import express, { RequestHandler } from "express"
 import * as functions from "firebase-functions"
 import { onRequest } from "firebase-functions/v2/https"
 import { Timestamp } from "firebase-admin/firestore"
@@ -16,37 +16,45 @@ import checkOTPHandler from "./handlers/checkOTP"
 import deleteCheckerHandler from "./handlers/deleteChecker"
 import { validateFirebaseIdToken } from "./middleware/validator"
 
+// Type for supported HTTP methods
+type HttpMethod = "get" | "post" | "put" | "delete" | "patch"
+
 config()
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
-const db = admin.firestore()
+
+// Usage
 
 const app = express()
-app.use(validateFirebaseIdToken)
 
-app.get("/checkers/:checkerId", getCheckerHandler)
+// Route Registration Helper
+function secureRoute(
+  path: string,
+  handler: RequestHandler,
+  method: HttpMethod = "get"
+) {
+  app[method](path, validateFirebaseIdToken, handler)
+}
 
-app.patch("/checkers/:checkerId", patchCheckerHandler)
-
-app.delete("/checkers/:checkerId", deleteCheckerHandler)
-
-app.get("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
-
-app.post("/checkers", postCheckerHandler)
-
-app.post("/checkers/:checkerId/otp/check", checkOTPHandler)
-
-app.post("/checkers/:checkerId/otp", postOTPHandler)
-
-app.get("/checkers/:checkerId/votes", getCheckerVotesHandler)
-
-app.get("/messages/:messageId/voteRequests/:voteRequestId", getVoteHandler)
-
-app.patch(
+secureRoute("/checkers/:checkerId", getCheckerHandler, "get")
+secureRoute("/checkers/:checkerId", patchCheckerHandler, "patch")
+secureRoute("/checkers/:checkerId", deleteCheckerHandler, "delete")
+secureRoute("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
+secureRoute("/checkers", postCheckerHandler, "post")
+secureRoute("/checkers/:checkerId/otp/check", checkOTPHandler, "post")
+secureRoute("/checkers/:checkerId/otp", postOTPHandler, "post")
+secureRoute("/checkers/:checkerId/votes", getCheckerVotesHandler, "get")
+secureRoute(
   "/messages/:messageId/voteRequests/:voteRequestId",
-  patchVoteRequestHandler
+  getVoteHandler,
+  "get"
+)
+secureRoute(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  patchVoteRequestHandler,
+  "patch"
 )
 
 const main = express()

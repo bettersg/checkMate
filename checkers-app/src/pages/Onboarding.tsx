@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { router } from "../App";
 import { useUpdateFactChecker } from "../services/mutations";
 import { sendOTP, checkOTP } from "../services/api";
-import { signInWithToken } from "../utils/signin";
+import { signInWithToken, signOut } from "../utils/authManagement";
 import PhoneInput from "react-phone-number-input";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -121,22 +121,19 @@ const steps: { [key: number]: JSX.Element } = {
 const numberOfSteps = Object.keys(steps).length;
 
 const Onboarding = () => {
-  const { state } = useLocation();
+  const { authScopes } = useUser();
   const { setCheckerId, setCheckerName } = useUser();
   const [whatsappId, setWhatsappId] = useState("");
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [isOTPValidated, setIsOTPValidated] = useState(false);
   const [singpassOpenId, setSingpassOpenId] = useState(null);
   const [otp, setOtp] = useState("");
-
   const { mutate: updateFactChecker } = useUpdateFactChecker();
   const [customAuthToken, setCustomAuthToken] = useState(
-    state?.authScope?.customToken ?? ""
+    authScopes?.customToken ?? ""
   );
-  const [checkerId, updateCheckerId] = useState(
-    state?.authScope?.checkerId ?? ""
-  );
-  const [name, setName] = useState(state?.authScope?.name ?? "");
+  const [checkerId, updateCheckerId] = useState(authScopes?.checkerId ?? "");
+  const [name, setName] = useState(authScopes?.name ?? "");
   const [currentStep, setCurrentStep] = useState(1);
 
   const sendWhatsappOTP = () => {
@@ -177,7 +174,6 @@ const Onboarding = () => {
   };
 
   const handleOnCompleteOnboarding = () => {
-    console.log(state?.authScope?.checkerId);
     if (!checkerId) {
       throw new Error("Checker ID not found");
     }
@@ -205,15 +201,17 @@ const Onboarding = () => {
         onSuccess: () => {
           try {
             if (customAuthToken) {
-              signInWithToken(
-                customAuthToken,
-                setCheckerId,
-                setCheckerName,
-                checkerId,
-                name
-              ).then(() => {
-                console.log("Sign-in successful");
-                router.navigate("/");
+              signOut().then(() => {
+                signInWithToken(
+                  customAuthToken,
+                  setCheckerId,
+                  setCheckerName,
+                  checkerId,
+                  name
+                ).then(() => {
+                  console.log("Sign-in successful");
+                  router.navigate("/");
+                });
               });
             }
           } catch (error) {

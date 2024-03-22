@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { signInWithToken } from "./utils/signin";
+import { signInWithToken, signOut } from "./utils/authManagement";
 import {
   AchievementPage,
   DashboardPage,
@@ -27,11 +27,16 @@ export const router = createBrowserRouter([
 ]);
 
 function App() {
-  const { setCheckerId, setCheckerName } = useUser();
+  const { setCheckerId, setCheckerName, setAuthScopes } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   //for global states: userID, name and messages
 
   useEffect(() => {
+    if (import.meta.env.MODE === "dev") {
+      signOut().then(() => {
+        console.log("Signed out");
+      });
+    }
     if (
       typeof window !== "undefined" &&
       window.Telegram &&
@@ -69,11 +74,27 @@ function App() {
             }
             if (data.isNewUser || data.isOnboardingComplete === false) {
               // TODO BRENNAN: Redirect to onboarding page
-              router.navigate("/onboarding", {
-                state: {
-                  authScope: data,
-                },
-              });
+              signInWithToken(
+                data.customToken,
+                setCheckerId,
+                setCheckerName,
+                data.checkerId,
+                data.name
+              )
+                .then(() => {
+                  // Handle post-signIn success actions here, if any
+                  console.log("Sign-in successful");
+                  setAuthScopes(data);
+                  router.navigate("/onboarding");
+                })
+                .catch((err) => {
+                  console.error(
+                    "Error during Firebase signInWithCustomToken:",
+                    err
+                  );
+                  // Handle sign-in error here, if necessary
+                });
+              setAuthScopes(data);
             } else {
               //if existing user
               signInWithToken(
@@ -100,7 +121,7 @@ function App() {
             console.error("Error fetching custom token:", err);
           })
           .finally(() => {
-            console.log("sign-in complete");
+            console.log("Sign-in complete");
             setIsLoading(false);
           });
       }

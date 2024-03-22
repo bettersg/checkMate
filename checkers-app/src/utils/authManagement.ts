@@ -22,3 +22,13 @@ export const signInWithToken = async (
     throw new Error("Error during Firebase signInWithCustomToken");
   }
 };
+
+export const signOut = async () => {
+  const auth = getAuth(app);
+  try {
+    await auth.signOut();
+  } catch (error) {
+    console.error("Error signing out", error);
+    throw new Error("Error signing out");
+  }
+};

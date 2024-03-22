@@ -40,7 +40,7 @@ const onInstanceCreateV2 = onDocumentCreated(
   async (event) => {
     const snap = event.data
     if (!snap) {
-      console.log("No data associated with the event")
+      functions.logger.log("No data associated with the event")
       return Promise.resolve()
     }
     const data = snap.data()
@@ -234,7 +234,6 @@ async function sendTemplateMessageAndCreateVoteRequest(
       })
       .then((voteRequestRef) => {
         const voteRequestPath = voteRequestRef.path
-        console.log(voteRequestPath)
         const voteRequestUrl = `${checkerAppHost}/${voteRequestPath}`
         // After the voteRequest object is added, send the Telegram template message with the additional voteRequestId parameter
         return sendTelegramTextMessage(

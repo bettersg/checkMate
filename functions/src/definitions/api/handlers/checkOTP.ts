@@ -62,7 +62,6 @@ const checkOTPHandler = async (req: Request, res: Response) => {
       .where("whatsappId", "==", whatsappId)
       .get()
 
-    console.log(checkerQuery.docs.length)
     if (checkerQuery.docs.length === 1) {
       const telegramId = checkerSnap.data()?.telegramId
       const existingCheckerRef = checkerQuery.docs[0].ref
@@ -72,8 +71,6 @@ const checkOTPHandler = async (req: Request, res: Response) => {
           .status(500)
           .send("New checker record for existing checker has no TelegramId")
       }
-      console.log(checkerSnap.ref.id)
-      console.log(telegramId)
       try {
         await existingCheckerRef.update({ telegramId: telegramId })
       } catch (error) {
@@ -97,7 +94,6 @@ const checkOTPHandler = async (req: Request, res: Response) => {
         .status(500)
         .send("Multiple checkers found with same whatsappID")
     } else if (checkerQuery.empty) {
-      console.log("New Checker!")
       try {
         const checkerRef = db.collection("checkers").doc(checkerId)
         await checkerRef.update({ whatsappId: whatsappId })

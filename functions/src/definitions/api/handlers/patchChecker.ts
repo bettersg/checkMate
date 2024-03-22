@@ -34,11 +34,11 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
       return res.status(400).send("Invalid keys in request body")
     }
 
-    if ("whatsappId" in keys) {
+    if (keys.includes("whatsappId")) {
       return res.status(400).send("whatsappId cannot be updated")
     }
 
-    if ("telegramId" in keys) {
+    if (keys.includes("telegramId")) {
       return res.status(400).send("telegramId cannot be updated")
     }
 
