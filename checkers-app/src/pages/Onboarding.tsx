@@ -164,6 +164,17 @@ const Onboarding = () => {
           console.log("202");
           updateCheckerId(updatedCheckerId);
           setCustomAuthToken(customToken);
+          signOut().then(() => {
+            signInWithToken(
+              customToken,
+              setCheckerId,
+              setCheckerName,
+              updatedCheckerId,
+              name
+            ).then(() => {
+              console.log("Sign-in successful");
+            });
+          });
         }
         setIsOTPValidated(true);
         console.log("OTP checked");
