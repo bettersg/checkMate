@@ -47,8 +47,7 @@ jobs:
         run: |
           export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            npm run deploy -- --project checkmate-373101
+            npm run deploy:prod
           else
-            npm run deploy -- --project checkmate-uat
+            npm run deploy:uat
           fi
-        working-directory: functions

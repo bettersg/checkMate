@@ -17,6 +17,7 @@ export const signInWithToken = async (
     setCheckerId(checkerId);
     setCheckerName(checkerName);
   } catch (error) {
+    alert(`Error signing in with custom token ${error}`);
     console.error("Error during Firebase signInWithCustomToken", error);
     // Rethrow or handle the error as needed
     throw new Error("Error during Firebase signInWithCustomToken");

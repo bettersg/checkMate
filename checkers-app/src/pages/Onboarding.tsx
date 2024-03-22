@@ -164,6 +164,17 @@ const Onboarding = () => {
           console.log("202");
           updateCheckerId(updatedCheckerId);
           setCustomAuthToken(customToken);
+          signOut().then(() => {
+            signInWithToken(
+              customToken,
+              setCheckerId,
+              setCheckerName,
+              updatedCheckerId,
+              name
+            ).then(() => {
+              console.log("Sign-in successful");
+            });
+          });
         }
         setIsOTPValidated(true);
         console.log("OTP checked");
@@ -224,7 +235,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="bg-checkBG min-h-screen flex flex-col items-center border border-black mt-4">
+    <div className="bg-checkBG min-h-screen flex flex-col items-center border border-black mt-4 dark:bg-dark-background-color">
       <h1 className="text-checkPrimary600 font-medium text-2xl">
         FactChecker's Onboarding
       </h1>
@@ -238,9 +249,11 @@ const Onboarding = () => {
         {currentStep === 1 && (
           <div className="phone-input-container">
             <PhoneInput
+              international
+              countryCallingCodeEditable={false}
               placeholder="Your WhatsApp Number"
               defaultCountry="SG"
-              value={formatPhoneNumberIntl(whatsappId)}
+              value={whatsappId}
               onChange={(value: string) => {
                 setWhatsappId(value);
               }}

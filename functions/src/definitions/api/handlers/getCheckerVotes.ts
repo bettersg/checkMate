@@ -33,7 +33,7 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
     if (status === "pending") {
       query = query.where("category", "==", null)
     } else if (status === "voted") {
-      query = query.where("category", "!=", null)
+      query = query.where("votedTimestamp", "!=", null)
     }
 
     const totalCount = (await query.count().get()).data().count
@@ -56,7 +56,11 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
 
     const querySnap = await query.get()
     if (querySnap.empty) {
-      return res.status(200).send([])
+      return res.status(200).send({
+        votes: [],
+        lastPath: null,
+        totalPages: 1,
+      })
     }
     const promises = querySnap.docs.map(async (doc) => {
       try {
@@ -120,7 +124,11 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
     ) as VoteSummary[]
 
     if (votes.length === 0) {
-      return res.status(200).send([])
+      return res.status(200).send({
+        votes: [],
+        lastPath: null,
+        totalPages: 1,
+      })
     }
 
     if (votes === null) {
@@ -141,7 +149,6 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
       lastPath: lastVotePath,
       totalPages,
     }
-
     return res.status(200).send(response)
   } catch (error) {
     logger.error("Error fetching documents: ", error)
