@@ -30,9 +30,13 @@ bot.onText(/\/start/, async (msg) => {
   if (msg.from) {
     const userId = msg.from.id.toString()
     const chatId = msg.chat.id.toString()
-    const userSnap = db.collection("factCheckers").doc(userId).get()
+    const userQuerySnap = await db
+      .collection("checkers")
+      .where("telegramId", "==", userId)
+      .get()
+
     //check if user exists in database
-    if ((await userSnap).exists) {
+    if (userQuerySnap.size > 0) {
       bot.sendMessage(
         chatId,
         `Welcome to the checker bot! Press the CheckMate's Portal button to access our dashboard. You'll also get notified when there are new messages to check.`
