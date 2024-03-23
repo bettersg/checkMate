@@ -20,14 +20,12 @@ import { useState, useEffect, FC } from "react";
 import { useUser } from "../../providers/UserContext";
 import Loading from "../common/Loading";
 import MessageCard from "./MessageCard";
-import { useNavigate } from "react-router-dom";
 import { Typography } from "@material-tailwind/react";
 import { getCheckerVotes } from "../../services/api";
 import { VoteSummary, VoteSummaryApiResponse } from "../../types";
 import Pagination from "./Pagination"; // Make sure to create this component
 
 const MessagesDisplay: FC = () => {
-  const navigate = useNavigate();
   const { checkerId } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [votes, setVotes] = useState<VoteSummary[]>([]);
