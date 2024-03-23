@@ -1,12 +1,10 @@
 import { Typography } from "@material-tailwind/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
-import { LightBulbIcon } from "@heroicons/react/24/solid";
 import { FaceFrownIcon } from "@heroicons/react/24/solid";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
-import { BugAntIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
 import { FaceSmileIcon } from "@heroicons/react/20/solid";
 

@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUser } from "../providers/UserContext";
-import { useLocation } from "react-router-dom";
 import { router } from "../App";
 import { useUpdateFactChecker } from "../services/mutations";
 import { sendOTP, checkOTP } from "../services/api";
 import { signInWithToken, signOut } from "../utils/authManagement";
 import PhoneInput from "react-phone-number-input";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 const NameForm = ({
   name,
@@ -126,7 +124,7 @@ const Onboarding = () => {
   const [whatsappId, setWhatsappId] = useState("");
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [isOTPValidated, setIsOTPValidated] = useState(false);
-  const [singpassOpenId, setSingpassOpenId] = useState(null);
+  const [singpassOpenId, _] = useState(null);
   const [otp, setOtp] = useState("");
   const { mutate: updateFactChecker } = useUpdateFactChecker();
   const [customAuthToken, setCustomAuthToken] = useState(

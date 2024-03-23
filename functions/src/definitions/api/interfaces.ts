@@ -121,7 +121,7 @@ interface AssessedInfo {
   rationalisation: string | null
 }
 
-export {
+export type {
   createVoteRequest,
   updateVoteRequest,
   createChecker,

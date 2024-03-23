@@ -1,6 +1,5 @@
 import { VoteSummary } from "../../types";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { PencilIcon } from "@heroicons/react/20/solid";
 import "./MessageCard.css";
 
@@ -76,13 +75,13 @@ function dateToDateString(date: Date | null): string {
 
 export default function MessageCard(props: MessageCardProps) {
   const {
-    category,
-    truthScore,
+    //category,
+    //truthScore,
     type,
     createdTimestamp,
-    votedTimestamp,
+    //votedTimestamp,
     text,
-    caption,
+    //caption,
     needsReview,
     isAssessed,
     firestorePath,
@@ -91,7 +90,6 @@ export default function MessageCard(props: MessageCardProps) {
   //   const colour: string = colours[category];
   const navigate = useNavigate();
   const dateString = dateToDateString(new Date(createdTimestamp));
-  const [openMsgInfo, setOpenMsgInfo] = useState<boolean>(false);
 
   // If the message is PENDING, clicking the button should go to the voting page
   const viewVote = (firestorePath: string) => {
