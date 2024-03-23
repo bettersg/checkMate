@@ -5,11 +5,16 @@ function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
 ) {
+  const isLegacy = voteRequestSnap.get("truthScore") === undefined
   const isParentMessageAssessed = parentMessageSnap.get("isAssessed") ?? false
   const parentMessageCategory = parentMessageSnap.get("primaryCategory") ?? null
-  const parentMessageTruthScore = parentMessageSnap.get("truthScore") ?? null
+  const parentMessageTruthScore = isLegacy
+    ? parentMessageSnap.get("legacyTruthScore") ?? null
+    : parentMessageSnap.get("truthScore") ?? null
   const voteRequestCategory = voteRequestSnap.get("category") ?? null
-  const voteRequestTruthScore = voteRequestSnap.get("truthScore") ?? null
+  const voteRequestTruthScore = isLegacy
+    ? voteRequestSnap.get("vote") ?? null
+    : voteRequestSnap.get("truthScore") ?? null
   if (!isParentMessageAssessed) {
     return null
   }
