@@ -25,7 +25,8 @@ const NameForm = ({
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="border mt-2 p-3 rounded"
-        placeholder="CheckMate"
+        placeholder="Your Name"
+        style={{ color: "black" }}
       />
     </div>
   );
