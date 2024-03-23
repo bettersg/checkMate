@@ -8,6 +8,7 @@ on:
       - develop
     paths:
       - "functions/**"
+      - "checkers-app/**"
 
 jobs:
   build_and_deploy:
