@@ -27,11 +27,11 @@ bot.on("message", (msg) => {
 
 bot.onText(/\/start/, async (msg) => {
   if (msg.from) {
-    const userId = msg.from.id.toString()
-    const chatId = msg.chat.id.toString()
+    const checkerId = msg.from.id
+    const chatId = msg.chat.id
     const userQuerySnap = await db
       .collection("checkers")
-      .where("telegramId", "==", userId)
+      .where("telegramId", "==", checkerId)
       .get()
 
     //check if user exists in database
@@ -54,8 +54,8 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.onText(/\/activate/, async (msg) => {
   if (msg.from) {
-    const checkerId = msg.from.id.toString()
-    const chatId = msg.chat.id.toString()
+    const checkerId = msg.from.id
+    const chatId = msg.chat.id
     const checkerQuerySnap = await db
       .collection("checkers")
       .where("telegramId", "==", checkerId)
@@ -82,8 +82,8 @@ bot.onText(/\/activate/, async (msg) => {
 
 bot.onText(/\/deactivate/, async (msg) => {
   if (msg.from) {
-    const checkerId = msg.from.id.toString()
-    const chatId = msg.chat.id.toString()
+    const checkerId = msg.from.id
+    const chatId = msg.chat.id
     const checkerQuerySnap = await db
       .collection("checkers")
       .where("telegramId", "==", checkerId)
