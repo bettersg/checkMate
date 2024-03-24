@@ -76,7 +76,7 @@ bot.onText(/\/activate/, async (msg) => {
     } else {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
-    bot.sendMessage(chatId, "An error happeend, please try again later")
+    bot.sendMessage(chatId, "An error happened, please try again later")
   } else {
     functions.logger.log("No user id found")
   }
@@ -106,7 +106,7 @@ bot.onText(/\/deactivate/, async (msg) => {
     } else {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
-    bot.sendMessage(chatId, "An error happeend, please try again later")
+    bot.sendMessage(chatId, "An error happened, please try again later")
   } else {
     functions.logger.log("No user id found")
   }
