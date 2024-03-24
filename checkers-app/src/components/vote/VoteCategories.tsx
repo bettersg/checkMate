@@ -103,26 +103,30 @@ export default function VoteCategories(Prop: PropType) {
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
       {CATEGORIES.map((cat, index) => (
-        <Button
-          className={`flex flex-row items-center justify-start gap-2 max-w-md space-x-3 text-sm
-          ${category === cat.name ? "bg-primary-color3" : "bg-primary-color"}`}
-          key={index}
-          onClick={() => handleVote(cat.name)}
-        >
-          {cat.icon}
-          {cat.display}
-        </Button>
-      ))}
-
-      {category ? (
-        <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
-          {category == "info" ? (
+        <>
+          <Button
+            className={`flex flex-row items-center justify-start gap-2 max-w-md space-x-3 text-sm
+            ${
+              category === cat.name ? "bg-primary-color3" : "bg-primary-color"
+            }`}
+            key={index}
+            onClick={() => handleVote(cat.name)}
+          >
+            {cat.icon}
+            {cat.display}
+          </Button>
+          {/* Conditionally render InfoOptions right after the "info" button if it has been selected */}
+          {category === "info" && cat.name === "info" && (
             <InfoOptions
               selectedTruthScore={truthScore}
               handleTruthScoreChange={handleTruthScoreChange}
             />
-          ) : null}
+          )}
+        </>
+      ))}
 
+      {category ? (
+        <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
           <Button
             className="bg-highlight-color w-fit place-self-center"
             onClick={() => handleSubmitVote(category, truthScore)}

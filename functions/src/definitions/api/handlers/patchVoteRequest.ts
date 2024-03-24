@@ -49,6 +49,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
       "legitimate",
       "irrelevant",
       "unsure",
+      "error",
     ].includes(category)
   ) {
     return res.status(400).send(`${category} is not a valid category`)

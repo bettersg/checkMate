@@ -123,7 +123,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
       category: voteRequestSnap.get("category"),
-      truthScore: voteRequestSnap.get("truthScore"),
+      truthScore: isLegacy
+        ? voteRequestSnap.get("vote")
+        : voteRequestSnap.get("truthScore"),
       isAssessed: isAssessed,
       finalStats: isAssessed
         ? {
@@ -147,7 +149,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
             irrelevantCount: irrelevantCount,
             legitimateCount: legitimateCount,
             unsureCount: unsureCount,
-            truthScore: messageSnap.get("truthScore"),
+            truthScore: isLegacy
+              ? messageSnap.get("legacyTruthScore")
+              : messageSnap.get("truthScore"),
             primaryCategory: messageSnap.get("primaryCategory"),
             rationalisation: messageSnap.get("rationalisation"),
           }
