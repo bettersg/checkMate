@@ -123,7 +123,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
       category: voteRequestSnap.get("category"),
-      truthScore: voteRequestSnap.get("truthScore"),
+      truthScore: isLegacy
+        ? voteRequestSnap.get("vote")
+        : voteRequestSnap.get("truthScore"),
       isAssessed: isAssessed,
       finalStats: isAssessed
         ? {
