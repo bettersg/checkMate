@@ -149,7 +149,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
             irrelevantCount: irrelevantCount,
             legitimateCount: legitimateCount,
             unsureCount: unsureCount,
-            truthScore: messageSnap.get("truthScore"),
+            truthScore: isLegacy
+              ? messageSnap.get("legacyTruthScore")
+              : messageSnap.get("truthScore"),
             primaryCategory: messageSnap.get("primaryCategory"),
             rationalisation: messageSnap.get("rationalisation"),
           }
