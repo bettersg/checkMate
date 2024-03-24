@@ -58,11 +58,15 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         postChangeData.vote !== undefined
       await updateCounts(messageRef, preChangeData, postChangeData, isLegacy)
       await updateCheckerVoteCount(preChangeData, postChangeData)
-      const voteRequestQuerySnapshot = await messageRef
+      const voteRequestCountSnapshot = await messageRef
         .collection("voteRequests")
+        .where("category", "!=", "error")
+        .count()
         .get()
-      const numFactCheckers = voteRequestQuerySnapshot.size
-      const responseCount = await getCount(messageRef, "responses")
+      const numFactCheckers = voteRequestCountSnapshot.data().count ?? 0
+      const responseCount =
+        (await getCount(messageRef, "responses")) -
+        (await getCount(messageRef, "error"))
       const irrelevantCount = await getCount(messageRef, "irrelevant")
       const scamCount = await getCount(messageRef, "scam")
       const illicitCount = await getCount(messageRef, "illicit")

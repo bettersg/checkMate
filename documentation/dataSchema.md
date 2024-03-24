@@ -85,7 +85,7 @@ erDiagram
         boolean triggerL2Others "whether or not L2 scam message should be triggered"
         string sentMessageId "message id of the forwarded dubious message to checkers"
         number truthScore "number between 1 and 5. Legacy implementations before release 2.10.0 have the field vote instead (on a 0-5 scale), which truthScore replaces"
-        sting category "scam, irrelevant, or number"
+        string category "scam, illicit, info, satire, legitimate, spam, irrelevant, unsure, error"
         timestamp createdTimestamp "time when vote request is sent to user"
         timestamp acceptedTimestamp "time when user first viewed the message"
         timestamp votedTimestamp "time when user has voted"

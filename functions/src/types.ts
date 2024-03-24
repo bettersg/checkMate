@@ -75,6 +75,7 @@ export type VoteRequest = {
     | "legitimate"
     | "irrelevant"
     | "unsure"
+    | "error"
     | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
