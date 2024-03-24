@@ -69,12 +69,14 @@ bot.onText(/\/activate/, async (msg) => {
         chatId,
         `You've been reactivated! Go to the CheckMate's Portal to start voting on messages`
       )
+      return
       //add function to start receiving messsages
     } else if (checkerQuerySnap.size === 0) {
       logger.error(`Checker with TelegramID ${checkerId} not found`)
     } else {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
+    bot.sendMessage(chatId, "An error happeend, please try again later")
   } else {
     functions.logger.log("No user id found")
   }
@@ -97,12 +99,14 @@ bot.onText(/\/deactivate/, async (msg) => {
         chatId,
         `Sorry to see you go! CheckMate will no longer send you messages to review. When you're ready to return, type /activate to start voting on messages again.`
       )
+      return
       //add function to start receiving messsages
     } else if (checkerQuerySnap.size === 0) {
       logger.error(`Checker with TelegramID ${checkerId} not found`)
     } else {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
+    bot.sendMessage(chatId, "An error happeend, please try again later")
   } else {
     functions.logger.log("No user id found")
   }
