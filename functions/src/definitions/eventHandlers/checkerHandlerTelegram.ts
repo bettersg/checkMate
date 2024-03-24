@@ -16,12 +16,15 @@ const db = admin.firestore()
 // More bot handlers can go here...
 
 // General message handler
-bot.on("message", (msg) => {
+bot.on("message", async (msg) => {
   if (msg.text && !msg.text.startsWith("/") && !msg.reply_to_message) {
     // Ignore commands as they are handled separately
     const chatId = msg.chat.id
     // Echo the message text back to the same chat
-    bot.sendMessage(chatId, "Don't talk to me, instead use the dashboard =)")
+    await bot.sendMessage(
+      chatId,
+      "Don't talk to me, instead use the dashboard =)"
+    )
   }
 })
 
@@ -36,13 +39,13 @@ bot.onText(/\/start/, async (msg) => {
 
     //check if user exists in database
     if (userQuerySnap.size > 0) {
-      bot.sendMessage(
+      await bot.sendMessage(
         chatId,
         `Welcome to the checker bot! Press the CheckMate's Portal button to access our dashboard. You'll also get notified when there are new messages to check.`
       )
       //add function to start receiving messsages
     } else {
-      bot.sendMessage(
+      await bot.sendMessage(
         chatId,
         `Welcome to the checker bot! Press the CheckMate's Portal button to onboard and access our dashboard. Once onboarded, you'll get notified when there are new messages to check.`
       )
@@ -64,8 +67,8 @@ bot.onText(/\/activate/, async (msg) => {
     //check if user exists in database
     if (checkerQuerySnap.size > 0) {
       const checkerSnap = checkerQuerySnap.docs[0]
-      checkerSnap.ref.update({ isActive: true })
-      bot.sendMessage(
+      await checkerSnap.ref.update({ isActive: true })
+      await bot.sendMessage(
         chatId,
         `You've been reactivated! Go to the CheckMate's Portal to start voting on messages`
       )
@@ -76,7 +79,7 @@ bot.onText(/\/activate/, async (msg) => {
     } else {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
-    bot.sendMessage(chatId, "An error happened, please try again later")
+    await bot.sendMessage(chatId, "An error happened, please try again later")
   } else {
     functions.logger.log("No user id found")
   }
@@ -94,8 +97,8 @@ bot.onText(/\/deactivate/, async (msg) => {
     //check if user exists in database
     if (checkerQuerySnap.size > 0) {
       const checkerSnap = checkerQuerySnap.docs[0]
-      checkerSnap.ref.update({ isActive: false })
-      bot.sendMessage(
+      await checkerSnap.ref.update({ isActive: false })
+      await bot.sendMessage(
         chatId,
         `Sorry to see you go! CheckMate will no longer send you messages to review. When you're ready to return, type /activate to start voting on messages again.`
       )
@@ -106,7 +109,7 @@ bot.onText(/\/deactivate/, async (msg) => {
     } else {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
-    bot.sendMessage(chatId, "An error happened, please try again later")
+    await bot.sendMessage(chatId, "An error happened, please try again later")
   } else {
     functions.logger.log("No user id found")
   }
