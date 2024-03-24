@@ -59,7 +59,7 @@ export default function InfoOptions(Prop: InfoOptionsProps) {
         <>
           <Typography className="text-primary-color text-justify my-3">
             Please assess the veracity of the claim(s) in the message on a scale
-            from 0 (entirely false) to 5 (entirely true).
+            from 1 (entirely false) to 5 (entirely true).
           </Typography>
           <TruthScoreOptions
             selectedTruthScore={Prop.selectedTruthScore}
