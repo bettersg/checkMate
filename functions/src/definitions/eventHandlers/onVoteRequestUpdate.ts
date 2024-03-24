@@ -56,29 +56,69 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       const isLegacy =
         postChangeData.truthScore === undefined &&
         postChangeData.vote !== undefined
-      await updateCounts(messageRef, preChangeData, postChangeData, isLegacy)
-      await updateCheckerVoteCount(preChangeData, postChangeData)
-      const voteRequestCountSnapshot = await messageRef
+      const voteRequestNotErrorCountQuery = messageRef //does not match category == null as per https://firebase.google.com/docs/firestore/query-data/queries#not_equal
         .collection("voteRequests")
         .where("category", "!=", "error")
         .count()
         .get()
-      const numFactCheckers = voteRequestCountSnapshot.data().count ?? 0
-      const responseCount =
-        (await getCount(messageRef, "responses")) -
-        (await getCount(messageRef, "error"))
-      const irrelevantCount = await getCount(messageRef, "irrelevant")
-      const scamCount = await getCount(messageRef, "scam")
-      const illicitCount = await getCount(messageRef, "illicit")
-      const infoCount = await getCount(messageRef, "info")
-      const spamCount = await getCount(messageRef, "spam")
-      const legitimateCount = await getCount(messageRef, "legitimate")
-      const unsureCount = await getCount(messageRef, "unsure")
-      const satireCount = await getCount(messageRef, "satire")
+      const voteRequestNullCountQuery = messageRef
+        .collection("voteRequests")
+        .where("category", "==", null)
+        .count()
+        .get()
+      const [
+        voteRequestNotErrorCountSnapshot,
+        voteRequestNullCountSnapshot,
+        ,
+        ,
+      ] = await Promise.all([
+        voteRequestNotErrorCountQuery,
+        voteRequestNullCountQuery,
+        updateCounts(messageRef, preChangeData, postChangeData),
+        updateCheckerVoteCount(preChangeData, postChangeData),
+      ])
+
+      const nonErrorCount = voteRequestNotErrorCountSnapshot.data().count ?? 0
+      const nullCount = voteRequestNullCountSnapshot.data().count ?? 0
+      const numFactCheckers = nonErrorCount + nullCount
+
+      const [
+        responsesCount,
+        errorCount,
+        irrelevantCount,
+        scamCount,
+        illicitCount,
+        infoCount,
+        spamCount,
+        legitimateCount,
+        unsureCount,
+        satireCount,
+        voteTotal,
+        thresholds,
+      ] = await Promise.all([
+        getCount(messageRef, "responses"),
+        getCount(messageRef, "error"),
+        getCount(messageRef, "irrelevant"),
+        getCount(messageRef, "scam"),
+        getCount(messageRef, "illicit"),
+        getCount(messageRef, "info"),
+        getCount(messageRef, "spam"),
+        getCount(messageRef, "legitimate"),
+        getCount(messageRef, "unsure"),
+        getCount(messageRef, "satire"),
+        getCount(messageRef, "totalVoteScore"),
+        getThresholds(),
+      ])
+
+      const responseCount = responsesCount - errorCount //can remove in future and replace with nonErrorCount
       const susCount = scamCount + illicitCount
-      const voteTotal = await getCount(messageRef, "totalVoteScore")
+
+      if (responseCount != nonErrorCount) {
+        functions.logger.error(
+          `Response count ${responseCount} does not match nonErrorCount ${nonErrorCount}, using response count`
+        )
+      }
       const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
-      const thresholds = await getThresholds()
       const isSus = susCount > thresholds.isSus * responseCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
