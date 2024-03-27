@@ -190,7 +190,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       if (postChangeData.category !== null) {
         //vote has ended
         if (
-          postChangeData.platform !== "agent" &&
+          postChangeData.platform === "whatsapp" &&
           !!postChangeData.platformId
         ) {
           await sendRemainingReminder(
