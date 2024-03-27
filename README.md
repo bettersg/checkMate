@@ -12,6 +12,16 @@
 ## Each Time Developing
 
 1. Open 3 shells from in root directory
+2. [Shell 1] `make firebase`
+3. [Shell 2] `make functions` [hot reload for functions]
+4. [Shell 3] `make checkers-app` [hot reload for webapp]
+5. Can start on development
+
+---
+
+In the event the Makefile doesn't work,
+
+1. Open 3 shells from in root directory
 2. [Shell 1] `cd functions`
 3. [Shell 1] `npm run build:watch` [hot reload for functions]
 4. [Shell 2] `cd checkers-app` [hot reload for webapp]

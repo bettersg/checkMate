@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { createChecker } from "../interfaces"
 import { Checker } from "../../../types"
 import * as admin from "firebase-admin"
+import { logger } from "firebase-functions/v2"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -27,6 +28,8 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     preferredPlatform,
     lastVotedTimestamp,
   } = req.body as createChecker
+  logger.info("ENTERED")
+
   if (!name || !type || (!telegramId && telegramId !== null)) {
     return res.status(400).send("Name, type, and telegramId are required")
   }
@@ -59,6 +62,9 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     lastVotedTimestamp: lastVotedTimestamp || null,
     getNameMessageId: null,
   }
+
+  logger.info("Creating new checker", newChecker)
+
   //create new factChecker in message
   const ref = await db.collection("checkers").add(newChecker)
   return res.status(200).send({

@@ -8,6 +8,7 @@ on:
       - develop
     paths:
       - "functions/**"
+      - "checkers-app/**"
 
 jobs:
   build_and_deploy:
@@ -34,6 +35,9 @@ jobs:
       - name: Build Cloud Functions
         run: npm ci
         working-directory: functions
+      - name: Build checkers-app
+        run: npm ci
+        working-directory: checkers-app
       - name: Create SA key
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
@@ -47,8 +51,7 @@ jobs:
         run: |
           export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            npm run deploy -- --project checkmate-373101
+            npm run deploy:prod
           else
-            npm run deploy -- --project checkmate-uat
+            npm run deploy:uat
           fi
-        working-directory: functions

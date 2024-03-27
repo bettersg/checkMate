@@ -63,9 +63,18 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env*
+.secret*
 
 local_batch_jobs
 
 # local firebase emulator data
 local-data
+
+# testing data
+testing-data/**
+
+# Others
+.idea
+.DS_Store
+.vscode

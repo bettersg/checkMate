@@ -45,16 +45,16 @@ async function callChatCompletion(
   })
   messages.push({ role: "user", content: user })
   const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming =
-    {
-      messages: messages,
-      model: model,
-      temperature: temperature,
-    }
+  {
+    messages: messages,
+    model: model,
+    temperature: temperature,
+  }
   if (seed) {
-    params.seed = seed
+    // params.seed = seed
   }
   if (returnJSON) {
-    params.response_format = { type: "json_object" }
+    // params.response_format = { type: "json_object" }
   }
 
   const chatCompletion = await openai.chat.completions.create(params)
