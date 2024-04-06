@@ -41,9 +41,10 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
-const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
+const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -233,7 +234,7 @@ async function newTextInstanceHandler({
   let textHash = hashMessage(text)
   // 1 - check if the exact same message exists in database
   try {
-    ; ({ embedding, similarity } = await calculateSimilarity(
+    ;({ embedding, similarity } = await calculateSimilarity(
       text,
       textHash,
       null
@@ -496,11 +497,11 @@ async function newImageInstanceHandler({
   if (ocrSuccess && !!extractedMessage && !hasMatch) {
     try {
       textHash = hashMessage(extractedMessage)
-        ; ({ embedding, similarity } = await calculateSimilarity(
-          extractedMessage,
-          textHash,
-          captionHash
-        ))
+      ;({ embedding, similarity } = await calculateSimilarity(
+        extractedMessage,
+        textHash,
+        captionHash
+      ))
     } catch (error) {
       functions.logger.error("Error in calculateSimilarity:", error)
       embedding = null
@@ -681,7 +682,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       break
     case "votingResults":
       let scamShield
-        ;[instancePath, ...scamShield] = rest
+      ;[instancePath, ...scamShield] = rest
       const triggerScamShieldConsent =
         scamShield.length > 0 && scamShield[0] === "scamshield"
       //await sendVotingStats(instancePath, triggerScamShieldConsent)

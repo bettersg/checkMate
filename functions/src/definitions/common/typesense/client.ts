@@ -1,9 +1,10 @@
 import Typesense from "typesense"
 import { defineString } from "firebase-functions/params"
+import { AppEnv } from "../../../appEnv"
 
-const typesenseHost = defineString("TYPESENSE_HOST")
-const typesensePort = defineString("TYPESENSE_PORT")
-const typesenseProtocol = defineString("TYPESENSE_PROTOCOL")
+const typesenseHost = defineString(AppEnv.TYPESENSE_HOST)
+const typesensePort = defineString(AppEnv.TYPESENSE_PORT)
+const typesenseProtocol = defineString(AppEnv.TYPESENSE_PROTOCOL)
 
 function getClient() {
   return new Typesense.Client({

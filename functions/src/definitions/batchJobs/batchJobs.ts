@@ -11,8 +11,9 @@ import { defineString } from "firebase-functions/params"
 import { onSchedule } from "firebase-functions/v2/scheduler"
 import { logger } from "firebase-functions/v2"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 if (!admin.apps.length) {
   admin.initializeApp()

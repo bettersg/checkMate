@@ -9,10 +9,11 @@ import thresholds from "../common/parameters/thresholds.json"
 import { interimPromptHandler } from "../batchJobs/batchJobs"
 import { sendBlast } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
-const checker1PhoneNumber = defineString("CHECKER1_PHONE_NUMBER")
-const checker1TelegramId = defineString("CHECKER1_TELEGRAM_ID")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
+const checker1PhoneNumber = defineString(AppEnv.CHECKER1_PHONE_NUMBER)
+const checker1TelegramId = defineString(AppEnv.CHECKER1_TELEGRAM_ID)
 
 const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
   const command = messageObj.text.body.toLowerCase()
