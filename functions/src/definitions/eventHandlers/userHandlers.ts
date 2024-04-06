@@ -92,16 +92,9 @@ const userHandlerWhatsapp = async function (message: Message) {
       }
       const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
-        textNormalised.startsWith(
-          responses?.REFERRAL_PREPOPULATED_PREFIX.split(
-            "{{code}}"
-          )[0].toLowerCase()
-        ) &&
-        textNormalised.endsWith(
-          responses?.REFERRAL_PREPOPULATED_PREFIX.split("{{code}}")
-            .slice(-1)[0]
-            .toLowerCase()
-        )
+        textNormalised.startsWith("referral code") &&
+        textNormalised.endsWith("click the send button to get started!👉") &&
+        textNormalised.includes(":")
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
@@ -233,7 +226,7 @@ async function newTextInstanceHandler({
   let textHash = hashMessage(text)
   // 1 - check if the exact same message exists in database
   try {
-    ; ({ embedding, similarity } = await calculateSimilarity(
+    ;({ embedding, similarity } = await calculateSimilarity(
       text,
       textHash,
       null
@@ -496,11 +489,11 @@ async function newImageInstanceHandler({
   if (ocrSuccess && !!extractedMessage && !hasMatch) {
     try {
       textHash = hashMessage(extractedMessage)
-        ; ({ embedding, similarity } = await calculateSimilarity(
-          extractedMessage,
-          textHash,
-          captionHash
-        ))
+      ;({ embedding, similarity } = await calculateSimilarity(
+        extractedMessage,
+        textHash,
+        captionHash
+      ))
     } catch (error) {
       functions.logger.error("Error in calculateSimilarity:", error)
       embedding = null
@@ -681,7 +674,7 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
       break
     case "votingResults":
       let scamShield
-        ;[instancePath, ...scamShield] = rest
+      ;[instancePath, ...scamShield] = rest
       const triggerScamShieldConsent =
         scamShield.length > 0 && scamShield[0] === "scamshield"
       //await sendVotingStats(instancePath, triggerScamShieldConsent)
@@ -858,7 +851,7 @@ async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
 }
 
 async function referralHandler(message: string, from: string) {
-  const code = message.split("\n")[0].split(": ")[1]
+  const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
   const userRef = db.collection("users").doc(from)
   let tryGeneric = true
   if (code.length > 0) {
