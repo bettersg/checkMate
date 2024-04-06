@@ -4,10 +4,11 @@ import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
 import { imageHash } from "image-hash"
+import { AppEnv } from "../../appEnv"
 
-const graphApiVersion = defineString("GRAPH_API_VERSION")
-const runtimeEnvironment = defineString("ENVIRONMENT")
-const testImageUrl = defineString("TEST_IMAGE_URL")
+const graphApiVersion = defineString(AppEnv.GRAPH_API_VERSION)
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
+const testImageUrl = defineString(AppEnv.TEST_IMAGE_URL)
 
 const graphApiUrl = process.env["GRAPH_API_URL"] || "https://graph.facebook.com"
 const imageHashSync = util.promisify(imageHash)

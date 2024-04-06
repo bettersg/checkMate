@@ -9,9 +9,10 @@ import {
 } from "./sendTelegramMessage"
 import { checkUrl } from "./utils"
 import { defineString } from "firebase-functions/params"
+import { AppEnv } from "../../appEnv"
 
-const reportChannelId = defineString("TELEGRAM_REPORT_CHANNEL_ID")
-const runtimeEnvironment = defineString("ENVIRONMENT")
+const reportChannelId = defineString(AppEnv.TELEGRAM_REPORT_CHANNEL_ID)
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 const sendTextMessage = async function (
   bot: string,

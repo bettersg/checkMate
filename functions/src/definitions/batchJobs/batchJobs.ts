@@ -10,8 +10,9 @@ import { getCount } from "../common/counters"
 import { getThresholds } from "../common/utils"
 import { defineString } from "firebase-functions/params"
 import { onSchedule } from "firebase-functions/v2/scheduler"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 if (!admin.apps.length) {
   admin.initializeApp()

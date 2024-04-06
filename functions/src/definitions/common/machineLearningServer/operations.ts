@@ -2,8 +2,9 @@ import { defineString } from "firebase-functions/params"
 import axios, { AxiosError } from "axios"
 import * as functions from "firebase-functions"
 import { GoogleAuth } from "google-auth-library"
+import { AppEnv } from "../../../appEnv"
 
-const embedderHost = defineString("EMBEDDER_HOST")
+const embedderHost = defineString(AppEnv.EMBEDDER_HOST)
 const env = process.env.ENVIRONMENT
 
 interface EmbedResponse {

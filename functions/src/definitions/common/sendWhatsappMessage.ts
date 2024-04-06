@@ -2,8 +2,9 @@ import axios from "axios"
 import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
 import { WhatsappButton } from "../../types"
+import { AppEnv } from "../../appEnv"
 
-const graphApiVersion = defineString("GRAPH_API_VERSION")
+const graphApiVersion = defineString(AppEnv.GRAPH_API_VERSION)
 const graphApiUrl =
   process.env["TEST_SERVER_URL"] || "https://graph.facebook.com" //only exists in integration test environment
 

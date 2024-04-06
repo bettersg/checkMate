@@ -41,9 +41,10 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
-const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
+const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
 if (!admin.apps.length) {
   admin.initializeApp()
