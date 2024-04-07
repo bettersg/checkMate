@@ -12,7 +12,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const { checkerId, pendingCount, setPendingCount } = useUser();
   const [totalVotes, setTotalVotes] = useState<number>(0);
-  const [accuracyRate, setAccuracyRate] = useState<number>(0);
+  const [accuracyRate, setAccuracyRate] = useState<number | null>(0);
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
   const [peopleHelped, setPeopleHelped] = useState<number>(0);
 
@@ -61,12 +61,14 @@ export default function Dashboard() {
         <StatCard
           name="average accuracy rate"
           img_src="/accuracy.png"
-          stat={`${(accuracyRate * 100).toFixed(2)}%`}
+          stat={
+            accuracyRate === null ? "NA" : `${(accuracyRate * 100).toFixed(1)}%`
+          }
         />
         <StatCard
           name="average response time"
           img_src="/response.png"
-          stat={`${avgResponseTime.toFixed(2)} mins`}
+          stat={`${avgResponseTime.toFixed(0)} mins`}
         />
         <StatCard
           name="people helped"

@@ -86,7 +86,7 @@ interface Vote {
 
 interface last30DaysStats {
   totalVoted: number
-  accuracyRate: number
+  accuracyRate: number | null
   averageResponseTime: number
   peopleHelped: number
 }
