@@ -1,6 +1,6 @@
 import { VoteSummary } from "../../types";
 import { useNavigate } from "react-router-dom";
-import { PencilIcon } from "@heroicons/react/20/solid";
+import { PencilIcon, QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import "./MessageCard.css";
 
 interface MessageCardProps {
@@ -20,23 +20,6 @@ const colours: ColourMap = {
   DEFAULT: "primary-color",
   WAITING: "waiting-color",
 };
-
-// function getCategory(msg: Message): string {
-//     if (msg.voteRequests.category == null) {
-//         return "PENDING";
-//     }
-//     else if (!msg.isAssessed && msg.voteRequests.category != null) {
-//         return "WAITING";
-//     }
-//     else {
-//         if (msg.isMatch) {
-//             return "CORRECT"
-//         }
-//         else {
-//             return "INCORRECT"
-//         }
-//     }
-// }
 
 function dateToDateString(date: Date | null): string {
   // Parse the ISO string into a Date object
@@ -84,6 +67,7 @@ export default function MessageCard(props: MessageCardProps) {
     //caption,
     needsReview,
     isAssessed,
+    isUnsure,
     firestorePath,
   } = props.voteSummary;
   const status = props.status;
@@ -98,6 +82,49 @@ export default function MessageCard(props: MessageCardProps) {
 
   const textStyle = "font-normal"; //add bold in future
 
+  function renderStatusDot() {
+    // Checking if the status is 'voted'
+    if (status === "voted") {
+      if (isAssessed) {
+        if (isUnsure) {
+          // Is unsure
+          return (
+            <div className="w-1/12 flex items-center justify-center">
+              <QuestionMarkCircleIcon className="h-4 w-4" />
+            </div>
+          );
+        } else {
+          if (needsReview) {
+            return (
+              <div className="w-1/12 flex items-center justify-center">
+                <div
+                  className={`w-4 h-4 rounded-full bg-${colours.INCORRECT}`}
+                ></div>
+              </div>
+            );
+          } else {
+            return (
+              <div className="w-1/12 flex items-center justify-center">
+                <div
+                  className={`w-4 h-4 rounded-full bg-${colours.CORRECT}`}
+                ></div>
+              </div>
+            );
+          }
+        }
+      } else {
+        // Not assessed
+        return (
+          <div className="w-1/12 flex items-center justify-center">
+            <PencilIcon className="h-4 w-4" />
+          </div>
+        );
+      }
+    }
+    // If none of the conditions match, return null
+    return null;
+  }
+
   return (
     <div
       className="flex border-b border-gray-500 h-16 hover-shadow dark:bg-dark-background-color"
@@ -105,23 +132,7 @@ export default function MessageCard(props: MessageCardProps) {
     >
       {/* Coloured dot if needs review*/}
 
-      {isAssessed && needsReview && status === "voted" && (
-        <div className="w-1/12 flex items-center justify-center">
-          <div className={`w-4 h-4 rounded-full bg-${colours.INCORRECT}`}></div>
-        </div>
-      )}
-
-      {isAssessed && !needsReview && status === "voted" && (
-        <div className="w-1/12 flex items-center justify-center">
-          <div className={`w-4 h-4 rounded-full bg-${colours.CORRECT}`}></div>
-        </div>
-      )}
-
-      {!isAssessed && status === "voted" && (
-        <div className="w-1/12 flex items-center justify-center">
-          <PencilIcon className="h-4 w-4" />
-        </div>
-      )}
+      {renderStatusDot()}
 
       {/* Message content */}
       <div className="w-11/12 p-2">

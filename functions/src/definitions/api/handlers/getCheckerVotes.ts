@@ -97,8 +97,9 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
         const caption = latestInstanceSnap.get("caption") ?? null
         const isAssessed = parentMessageSnap.get("isAssessed") ?? false
         const firestorePath = doc.ref.path
-        const needsReview =
-          isAssessed && checkAccuracy(parentMessageSnap, doc) === false
+        const isCorrect = checkAccuracy(parentMessageSnap, doc)
+        const needsReview = isAssessed && isCorrect === false
+        const isUnsure = isCorrect === null //either unsure or some other type of error
 
         const returnObject: VoteSummary = {
           category,
@@ -110,6 +111,7 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
           caption,
           needsReview,
           isAssessed,
+          isUnsure,
           firestorePath,
         }
         return returnObject

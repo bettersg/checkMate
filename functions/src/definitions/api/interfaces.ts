@@ -64,6 +64,7 @@ interface VoteSummary {
   caption: string | null //only for type image
   needsReview: boolean //if the vote differs from the majority
   isAssessed: boolean //if the message is assessed
+  isUnsure: boolean //if the final assessed category ended as unsure
   firestorePath: string
 }
 
