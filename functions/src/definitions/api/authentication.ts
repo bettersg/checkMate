@@ -6,6 +6,7 @@ import { onRequest } from "firebase-functions/v2/https"
 import { logger } from "firebase-functions"
 import { Checker } from "../../types"
 import { defineString } from "firebase-functions/params"
+import { AppEnv } from "../../appEnv"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -14,7 +15,7 @@ const app = express()
 const db = admin.firestore()
 
 const env = process.env.ENVIRONMENT
-const devTeleId = defineString("CHECKER1_TELEGRAM_ID")
+const devTeleId = defineString(AppEnv.CHECKER1_TELEGRAM_ID)
 
 app.post("/", async (req, res) => {
   const initData = req.body // Assuming you send initData in the body of your requests

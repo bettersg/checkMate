@@ -7,8 +7,9 @@ import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
 import { Request, Response } from "express"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
 const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
