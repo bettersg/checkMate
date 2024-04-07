@@ -77,6 +77,7 @@ interface VoteSummaryApiResponse {
 interface Vote {
   type: "image" | "text"
   text: string | null //only for type text
+  sender: string
   caption: string | null //only for type image
   signedImageUrl: string | null //only for type image
   category: string | null
