@@ -45,6 +45,13 @@ const getVoteHandler = async (req: Request, res: Response) => {
 
     const latestType = latestInstanceSnap.get("type") ?? "text"
 
+    const sender = latestInstanceSnap.get("from") ?? "Unknown"
+
+    //mask all but last 4 characters of sender
+
+    const maskedSender =
+      sender != "Unknown" ? sender.replace(/.(?=.{4})/g, "*") : sender
+
     const storageBucketUrl = latestInstanceSnap.get("storageUrl")
     const signedUrl =
       latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
@@ -123,6 +130,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
       category: voteRequestSnap.get("category"),
+      sender: maskedSender,
       truthScore: isLegacy
         ? voteRequestSnap.get("vote")
         : voteRequestSnap.get("truthScore"),

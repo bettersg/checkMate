@@ -102,8 +102,8 @@ const getCheckerHandler = async (req: Request, res: Response) => {
     const accurateCount = results.filter(
       (d) => d !== null && d.isAccurate
     ).length
-    const totalAssessedCount = results.filter(
-      (d) => d !== null && d.isAssessed
+    const totalAssessedAndNonUnsureCount = results.filter(
+      (d) => d !== null && d.isAssessed && d.isAccurate !== null
     ).length
     const totalCount = results.filter((d) => d !== null).length
     //calculate people helped
@@ -126,7 +126,9 @@ const getCheckerHandler = async (req: Request, res: Response) => {
     const averageResponseTime = totalResponseTime / (totalCount || 1)
 
     const accuracyRate =
-      totalAssessedCount === 0 ? 1 : accurateCount / totalAssessedCount
+      totalAssessedAndNonUnsureCount === 0
+        ? null
+        : accurateCount / totalAssessedAndNonUnsureCount
     const returnData: Checker = {
       name: checkerData.name,
       type: checkerData.type,

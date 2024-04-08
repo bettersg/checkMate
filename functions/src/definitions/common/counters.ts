@@ -28,4 +28,58 @@ const getCount = async function (docRef: DocumentReference, type: string) {
   return count
 }
 
-export { getCount, incrementCounter }
+const getVoteCounts = async function (messageRef: DocumentReference) {
+  const totalVoteRequestQuery = messageRef
+    .collection("voteRequests")
+    .count()
+    .get()
+  const [
+    responsesCount,
+    errorCount,
+    irrelevantCount,
+    scamCount,
+    illicitCount,
+    infoCount,
+    spamCount,
+    legitimateCount,
+    unsureCount,
+    satireCount,
+    voteTotal,
+    voteRequestCountSnapshot,
+  ] = await Promise.all([
+    getCount(messageRef, "responses"),
+    getCount(messageRef, "error"),
+    getCount(messageRef, "irrelevant"),
+    getCount(messageRef, "scam"),
+    getCount(messageRef, "illicit"),
+    getCount(messageRef, "info"),
+    getCount(messageRef, "spam"),
+    getCount(messageRef, "legitimate"),
+    getCount(messageRef, "unsure"),
+    getCount(messageRef, "satire"),
+    getCount(messageRef, "totalVoteScore"),
+    totalVoteRequestQuery,
+  ])
+  const totalVoteRequestsCount = voteRequestCountSnapshot.data().count ?? 0
+  const factCheckerCount = totalVoteRequestsCount - errorCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
+  const validResponsesCount = responsesCount - errorCount //can remove in future and replace with nonErrorCount
+  const susCount = scamCount + illicitCount
+  return {
+    responsesCount,
+    errorCount,
+    irrelevantCount,
+    scamCount,
+    illicitCount,
+    infoCount,
+    spamCount,
+    legitimateCount,
+    unsureCount,
+    satireCount,
+    voteTotal,
+    validResponsesCount,
+    susCount,
+    factCheckerCount,
+  }
+}
+
+export { getCount, incrementCounter, getVoteCounts }

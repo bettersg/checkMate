@@ -64,6 +64,7 @@ interface VoteSummary {
   caption: string | null //only for type image
   needsReview: boolean //if the vote differs from the majority
   isAssessed: boolean //if the message is assessed
+  isUnsure: boolean //if the final assessed category ended as unsure
   firestorePath: string
 }
 
@@ -76,6 +77,7 @@ interface VoteSummaryApiResponse {
 interface Vote {
   type: "image" | "text"
   text: string | null //only for type text
+  sender: string
   caption: string | null //only for type image
   signedImageUrl: string | null //only for type image
   category: string | null
@@ -86,7 +88,7 @@ interface Vote {
 
 interface last30DaysStats {
   totalVoted: number
-  accuracyRate: number
+  accuracyRate: number | null
   averageResponseTime: number
   peopleHelped: number
 }

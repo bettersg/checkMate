@@ -6,7 +6,7 @@ import {
   sendL2OthersCategorisationMessage,
   sendRemainingReminder,
 } from "../common/sendFactCheckerMessages"
-import { incrementCounter, getCount } from "../common/counters"
+import { incrementCounter, getVoteCounts } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
@@ -56,35 +56,14 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       const isLegacy =
         postChangeData.truthScore === undefined &&
         postChangeData.vote !== undefined
-      const voteRequestNotErrorCountQuery = messageRef //does not match category == null as per https://firebase.google.com/docs/firestore/query-data/queries#not_equal
-        .collection("voteRequests")
-        .where("category", "!=", "error")
-        .count()
-        .get()
-      const voteRequestNullCountQuery = messageRef
-        .collection("voteRequests")
-        .where("category", "==", null)
-        .count()
-        .get()
-      const [
-        voteRequestNotErrorCountSnapshot,
-        voteRequestNullCountSnapshot,
-        ,
-        ,
-      ] = await Promise.all([
-        voteRequestNotErrorCountQuery,
-        voteRequestNullCountQuery,
+      await Promise.all([
         updateCounts(messageRef, preChangeData, postChangeData),
         updateCheckerVoteCount(preChangeData, postChangeData),
       ])
 
-      const nonErrorCount = voteRequestNotErrorCountSnapshot.data().count ?? 0
-      const nullCount = voteRequestNullCountSnapshot.data().count ?? 0
-      const numFactCheckers = nonErrorCount + nullCount
+      const thresholds = await getThresholds()
 
-      const [
-        responsesCount,
-        errorCount,
+      const {
         irrelevantCount,
         scamCount,
         illicitCount,
@@ -94,41 +73,22 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         unsureCount,
         satireCount,
         voteTotal,
-        thresholds,
-      ] = await Promise.all([
-        getCount(messageRef, "responses"),
-        getCount(messageRef, "error"),
-        getCount(messageRef, "irrelevant"),
-        getCount(messageRef, "scam"),
-        getCount(messageRef, "illicit"),
-        getCount(messageRef, "info"),
-        getCount(messageRef, "spam"),
-        getCount(messageRef, "legitimate"),
-        getCount(messageRef, "unsure"),
-        getCount(messageRef, "satire"),
-        getCount(messageRef, "totalVoteScore"),
-        getThresholds(),
-      ])
+        validResponsesCount,
+        susCount,
+        factCheckerCount,
+      } = await getVoteCounts(messageRef)
 
-      const responseCount = responsesCount - errorCount //can remove in future and replace with nonErrorCount
-      const susCount = scamCount + illicitCount
-
-      if (responseCount != nonErrorCount) {
-        functions.logger.error(
-          `Response count ${responseCount} does not match nonErrorCount ${nonErrorCount}, using response count`
-        )
-      }
       const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
-      const isSus = susCount > thresholds.isSus * responseCount
+      const isSus = susCount > thresholds.isSus * validResponsesCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
-      const isInfo = infoCount > thresholds.isInfo * responseCount
-      const isSatire = satireCount > thresholds.isSatire * responseCount
-      const isSpam = spamCount > thresholds.isSpam * responseCount
+      const isInfo = infoCount > thresholds.isInfo * validResponsesCount
+      const isSatire = satireCount > thresholds.isSatire * validResponsesCount
+      const isSpam = spamCount > thresholds.isSpam * validResponsesCount
       const isLegitimate =
-        legitimateCount > thresholds.isLegitimate * responseCount
+        legitimateCount > thresholds.isLegitimate * validResponsesCount
       const isIrrelevant =
-        irrelevantCount > thresholds.isIrrelevant * responseCount
+        irrelevantCount > thresholds.isIrrelevant * validResponsesCount
       const isUnsure =
         (!isSus &&
           !isInfo &&
@@ -136,12 +96,14 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
           !isLegitimate &&
           !isIrrelevant &&
           !isSatire) ||
-        unsureCount > thresholds.isUnsure * responseCount
+        unsureCount > thresholds.isUnsure * validResponsesCount
       const isAssessed =
         (isUnsure &&
-          responseCount > thresholds.endVoteUnsure * numFactCheckers) ||
-        (!isUnsure && responseCount > thresholds.endVote * numFactCheckers) ||
-        (isSus && responseCount > thresholds.endVoteSus * numFactCheckers)
+          validResponsesCount > thresholds.endVoteUnsure * factCheckerCount) ||
+        (!isUnsure &&
+          validResponsesCount > thresholds.endVote * factCheckerCount) ||
+        (isSus &&
+          validResponsesCount > thresholds.endVoteSus * factCheckerCount)
 
       //set primaryCategory
       let primaryCategory
