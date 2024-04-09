@@ -12,7 +12,7 @@ import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
-import { getCount } from "./counters"
+import { getVoteCounts } from "./counters"
 
 const db = admin.firestore()
 
@@ -74,7 +74,7 @@ async function getResponsesObj(
 function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
   return infoPlaceholder.replace(
     "{{score}}",
-    typeof truthScore === "number" ? truthScore.toFixed(2) : "NA"
+    typeof truthScore === "number" ? truthScore.toFixed(1) : "NA"
   )
 }
 
@@ -299,23 +299,26 @@ async function sendVotingStats(instancePath: string) {
   }
   const messageSnap = await messageRef.get()
   const instanceSnap = await db.doc(instancePath).get()
-  const responseCount = await getCount(messageRef, "responses")
-  const irrelevantCount = await getCount(messageRef, "irrelevant")
-  const scamCount = await getCount(messageRef, "scam")
-  const illicitCount = await getCount(messageRef, "illicit")
-  const infoCount = await getCount(messageRef, "info")
-  const satireCount = await getCount(messageRef, "satire")
-  const spamCount = await getCount(messageRef, "spam")
-  const legitimateCount = await getCount(messageRef, "legitimate")
-  const unsureCount = await getCount(messageRef, "unsure")
-  const susCount = scamCount + illicitCount
+  const {
+    irrelevantCount,
+    scamCount,
+    illicitCount,
+    infoCount,
+    spamCount,
+    legitimateCount,
+    unsureCount,
+    satireCount,
+    validResponsesCount,
+    susCount,
+    factCheckerCount,
+  } = await getVoteCounts(messageRef)
   const truthScore = messageSnap.get("truthScore")
   const thresholds = await getThresholds()
   const from = instanceSnap.get("from")
   const responses = await getResponsesObj("user", from)
   let truthCategory
 
-  if (responseCount <= 0) {
+  if (validResponsesCount <= 0) {
     functions.logger.error(
       `Stats requested for instance ${instancePath} with 0 votes`
     )
@@ -366,61 +369,28 @@ async function sendVotingStats(instancePath: string) {
   categories.sort((a, b) => b.count - a.count) // sort in descending order
   const highestCategory = categories[0].name
   const secondCategory = categories[1].name
-  const highestPercentage = (categories[0].count / responseCount) * 100
-  const secondPercentage = (categories[1].count / responseCount) * 100
+  const highestPercentage = (categories[0].count / validResponsesCount) * 100
+  const secondPercentage = (categories[1].count / validResponsesCount) * 100
   const isHighestInfo = categories[0].isInfo
   const isSecondInfo = categories[1].isInfo
 
   const infoLiner = getInfoLiner(truthScore, responses.INFO_PLACEHOLDER)
   let response = responses.STATS_TEMPLATE_1.replace(
     "{{top}}",
-    `${highestPercentage.toFixed(2)}`
+    `${highestPercentage.toFixed(1)}`
   )
     .replace("{{category}}", highestCategory)
     .replace("{{info_placeholder}}", isHighestInfo ? infoLiner : "")
-  // let response = `${highestPercentage.toFixed(2)}% of our CheckMates ${
-  //   isHighestInfo ? "collectively " : ""
-  // }thought this was *${highestCategory}*${isHighestInfo ? infoLiner : ""}.`
   if (secondPercentage > 0) {
     response += responses.STATS_TEMPLATE_2.replace(
       "{{second}}",
-      `${secondPercentage.toFixed(2)}`
+      `${secondPercentage.toFixed(1)}`
     )
       .replace("{{category}}", secondCategory)
       .replace("{{info_placeholder}}", isSecondInfo ? infoLiner : "")
-    // response += ` ${secondPercentage.toFixed(2)}% ${
-    //   isSecondInfo ? "collectively " : ""
-    // } thought this was *${secondCategory}*${isSecondInfo ? infoLiner : ""}.`
   }
 
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
-
-  // if (triggerScamShieldConsent) {
-  //   await sleep(2000)
-  //   const buttons = [
-  //     {
-  //       type: "reply",
-  //       reply: {
-  //         id: `scamshieldConsent_${instancePath}_consent`,
-  //         title: "Yes",
-  //       },
-  //     },
-  //     {
-  //       type: "reply",
-  //       reply: {
-  //         id: `scamshieldConsent_${instancePath}_decline`,
-  //         title: "No",
-  //       },
-  //     },
-  //   ]
-  //   await sendWhatsappButtonMessage(
-  //     "user",
-  //     from,
-  //     responses.SCAMSHIELD_SEEK_CONSENT,
-  //     buttons,
-  //     instanceSnap.get("id")
-  //   )
-  // }
 }
 
 async function sendRationalisation(instancePath: string) {
@@ -515,12 +485,13 @@ async function sendInterimUpdate(instancePath: string) {
   const parentMessageSnap = await parentMessageRef.get()
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const truthScore = parentMessageSnap.get("truthScore")
-  const voteRequestQuerySnapshot = await parentMessageRef
-    .collection("voteRequests")
-    .get()
-  const numFactCheckers = voteRequestQuerySnapshot.size
-  const voteCount = await getCount(parentMessageRef, "responses")
-  const percentageVoted = ((voteCount / numFactCheckers) * 100).toFixed(2)
+  const { validResponsesCount, factCheckerCount } = await getVoteCounts(
+    parentMessageRef
+  )
+  const percentageVoted = (
+    (validResponsesCount / factCheckerCount) *
+    100
+  ).toFixed(1)
   let prelimAssessment
   let infoPlaceholder = ""
   const infoLiner = getInfoLiner(truthScore, responses.INFO_PLACEHOLDER)
@@ -651,7 +622,7 @@ async function respondToInstance(
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
-  const responseCount = await getCount(parentMessageRef, "responses")
+  const { validResponsesCount } = await getVoteCounts(parentMessageRef)
   const isImage = data?.type === "image"
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
@@ -774,7 +745,7 @@ async function respondToInstance(
         responses[category.toUpperCase() as keyof typeof responses]
       )
 
-      if (!(isMachineCategorised || responseCount <= 0)) {
+      if (!(isMachineCategorised || validResponsesCount <= 0)) {
         buttons.push(votingResultsButton)
       }
 

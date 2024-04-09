@@ -6,7 +6,7 @@ import {
   sendL2OthersCategorisationMessage,
   sendRemainingReminder,
 } from "../common/sendFactCheckerMessages"
-import { incrementCounter, getCount } from "../common/counters"
+import { incrementCounter, getVoteCounts } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
@@ -56,35 +56,39 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       const isLegacy =
         postChangeData.truthScore === undefined &&
         postChangeData.vote !== undefined
-      await updateCounts(messageRef, preChangeData, postChangeData, isLegacy)
-      await updateCheckerVoteCount(preChangeData, postChangeData)
-      const voteRequestQuerySnapshot = await messageRef
-        .collection("voteRequests")
-        .get()
-      const numFactCheckers = voteRequestQuerySnapshot.size
-      const responseCount = await getCount(messageRef, "responses")
-      const irrelevantCount = await getCount(messageRef, "irrelevant")
-      const scamCount = await getCount(messageRef, "scam")
-      const illicitCount = await getCount(messageRef, "illicit")
-      const infoCount = await getCount(messageRef, "info")
-      const spamCount = await getCount(messageRef, "spam")
-      const legitimateCount = await getCount(messageRef, "legitimate")
-      const unsureCount = await getCount(messageRef, "unsure")
-      const satireCount = await getCount(messageRef, "satire")
-      const susCount = scamCount + illicitCount
-      const voteTotal = await getCount(messageRef, "totalVoteScore")
-      const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
+      await Promise.all([
+        updateCounts(messageRef, preChangeData, postChangeData),
+        updateCheckerVoteCount(preChangeData, postChangeData),
+      ])
+
       const thresholds = await getThresholds()
-      const isSus = susCount > thresholds.isSus * responseCount
+
+      const {
+        irrelevantCount,
+        scamCount,
+        illicitCount,
+        infoCount,
+        spamCount,
+        legitimateCount,
+        unsureCount,
+        satireCount,
+        voteTotal,
+        validResponsesCount,
+        susCount,
+        factCheckerCount,
+      } = await getVoteCounts(messageRef)
+
+      const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
+      const isSus = susCount > thresholds.isSus * validResponsesCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
-      const isInfo = infoCount > thresholds.isInfo * responseCount
-      const isSatire = satireCount > thresholds.isSatire * responseCount
-      const isSpam = spamCount > thresholds.isSpam * responseCount
+      const isInfo = infoCount > thresholds.isInfo * validResponsesCount
+      const isSatire = satireCount > thresholds.isSatire * validResponsesCount
+      const isSpam = spamCount > thresholds.isSpam * validResponsesCount
       const isLegitimate =
-        legitimateCount > thresholds.isLegitimate * responseCount
+        legitimateCount > thresholds.isLegitimate * validResponsesCount
       const isIrrelevant =
-        irrelevantCount > thresholds.isIrrelevant * responseCount
+        irrelevantCount > thresholds.isIrrelevant * validResponsesCount
       const isUnsure =
         (!isSus &&
           !isInfo &&
@@ -92,12 +96,14 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
           !isLegitimate &&
           !isIrrelevant &&
           !isSatire) ||
-        unsureCount > thresholds.isUnsure * responseCount
+        unsureCount > thresholds.isUnsure * validResponsesCount
       const isAssessed =
         (isUnsure &&
-          responseCount > thresholds.endVoteUnsure * numFactCheckers) ||
-        (!isUnsure && responseCount > thresholds.endVote * numFactCheckers) ||
-        (isSus && responseCount > thresholds.endVoteSus * numFactCheckers)
+          validResponsesCount > thresholds.endVoteUnsure * factCheckerCount) ||
+        (!isUnsure &&
+          validResponsesCount > thresholds.endVote * factCheckerCount) ||
+        (isSus &&
+          validResponsesCount > thresholds.endVoteSus * factCheckerCount)
 
       //set primaryCategory
       let primaryCategory
@@ -146,7 +152,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       if (postChangeData.category !== null) {
         //vote has ended
         if (
-          postChangeData.platform !== "agent" &&
+          postChangeData.platform === "whatsapp" &&
           !!postChangeData.platformId
         ) {
           await sendRemainingReminder(

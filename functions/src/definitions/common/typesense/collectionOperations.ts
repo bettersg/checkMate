@@ -1,8 +1,9 @@
 // collectionOperations.ts
+import { AppEnv } from "../../../appEnv"
 import { getClient } from "./client"
 import { defineString } from "firebase-functions/params"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 enum CollectionTypes {
   Instances = "instances",

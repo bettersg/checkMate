@@ -3009,7 +3009,7 @@
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\");\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -3046,7 +3046,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -3055,7 +3056,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -3154,7 +3156,7 @@
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",\"\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -3191,7 +3193,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -3200,7 +3203,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -3863,7 +3867,7 @@
 											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE.en\");\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"66.67\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"66.7\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
@@ -3900,7 +3904,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -3909,7 +3914,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -5083,7 +5089,7 @@
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"66.67% of our CheckMates felt this was *spam🚧*. 33.33% felt this was *legitimate✅*.\",\r",
+											"                \"body\": \"66.7% of our CheckMates felt this was *spam🚧*. 33.3% felt this was *legitimate✅*.\",\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -5098,7 +5104,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -5107,7 +5114,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -5762,6 +5770,7 @@
 											"        },\r",
 											"        \"method\": \"POST\"\r",
 											"    }\r",
+											"    console.log(JSON.stringify(expected, null, 2))\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
@@ -6225,7 +6234,7 @@
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"infoInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"untrue❌\").replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"1.00\"))\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"untrue❌\").replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"1.0\"))\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -6264,7 +6273,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -6273,7 +6283,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -7191,7 +7202,7 @@
 											"    const STATS_TEMPLATE_1 = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.STATS_TEMPLATE_1.en\")\r",
 											"    const PLACEHOLDER_MISLEADING = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_MISLEADING.en\")\r",
 											"    const INFO_PLACEHOLDER = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INFO_PLACEHOLDER.en\")\r",
-											"    const expectedBody = STATS_TEMPLATE_1.replace(\"{{top}}\", \"100.00\").replace(\"{{category}}\",PLACEHOLDER_MISLEADING).replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"2.33\"))\r",
+											"    const expectedBody = STATS_TEMPLATE_1.replace(\"{{top}}\", \"100.0\").replace(\"{{category}}\",PLACEHOLDER_MISLEADING).replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"2.3\"))\r",
 											"    //we not using the template for this, its hardcoded.\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
@@ -7213,7 +7224,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -7222,7 +7234,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -8557,7 +8570,7 @@
 											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE.en\");\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"33.33\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"33.3\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -8594,7 +8607,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -8603,7 +8617,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -8873,7 +8888,7 @@
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.33\").replace(\"{{prelim_assessment}}\",\"legitimate✅\").replace(\"{{info_placeholder}}\",\"\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"legitimate✅\").replace(\"{{info_placeholder}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -8910,7 +8925,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -8919,7 +8935,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -9573,7 +9590,7 @@
 											"    const INTERIM_TEMPLATE_UNSURE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE_UNSURE.en\");\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\");\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"66.67\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE_UNSURE.replace(\"{{%voted}}\", \"66.7\")\r",
 											"\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
@@ -9611,7 +9628,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -9621,7 +9639,8 @@
 											"// Allow time for firestore onUpdate event to complete\r",
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -10395,7 +10414,7 @@
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"33.33% of our CheckMates felt this was *spam🚧*. 33.33% felt this was *misleading⚠️*, with an average score of 3.00 on a scale of 1-5 (5 = completely true).\",\r",
+											"                \"body\": \"33.3% of our CheckMates felt this was *spam🚧*. 33.3% felt this was *misleading⚠️*, with an average score of 3.0 on a scale of 1-5 (5 = completely true).\",\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -10410,7 +10429,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -10419,7 +10439,8 @@
 										"exec": [
 											"setTimeout(() => {}, 3000);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],

@@ -1,31 +1,55 @@
-import { useState, useEffect } from "react";
-import {
-  getAuth,
-  signInWithCustomToken,
-  connectAuthEmulator,
-} from "firebase/auth";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
 import "./App.css";
-import app from "./firebase";
+import { signInWithToken, signOut } from "./utils/authManagement";
+import {
+  AchievementPage,
+  DashboardPage,
+  ViewVotePage,
+  MyVotesPage,
+} from "./pages";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useUser } from "./providers/UserContext";
+import Onboarding from "./pages/Onboarding";
+import Loading from "./components/common/Loading";
 
-const auth = getAuth(app);
-if (import.meta.env.MODE === "dev") {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099"); //TODO: FOR DEV ONLY, need to change env variables later.
-}
+export const router = createBrowserRouter([
+  { path: "/", element: <DashboardPage /> },
+  { path: "/votes", element: <MyVotesPage /> },
+  { path: "/achievements", element: <AchievementPage /> },
+  {
+    path: "/messages/:messageId/voteRequests/:voteRequestId",
+    element: <ViewVotePage />,
+  },
+  {
+    path: "/onboarding",
+    element: <Onboarding />,
+  },
+]);
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [telegramApp, setTelegramApp] = useState(null);
+  const { setCheckerId, setCheckerName, setAuthScopes } = useUser();
+  const [isLoading, setIsLoading] = useState(true);
+  //for global states: userID, name and messages
+
   useEffect(() => {
+    if (import.meta.env.MODE === "dev") {
+      signOut().then(() => {
+        console.log("Signed out");
+      });
+    }
     if (
       typeof window !== "undefined" &&
       window.Telegram &&
       window.Telegram.WebApp
     ) {
-      setTelegramApp(window.Telegram.WebApp);
-      const initData = window.Telegram.WebApp.initData;
-      if (true || initData) {
+      if (window.Telegram.WebApp.colorScheme === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+      let initData = window.Telegram.WebApp.initData;
+      if (!initData && import.meta.env.MODE === "dev") {
+        initData = "devdummy";
+      }
+      if (initData) {
         // Call your Firebase function to validate the receivedData and get custom token
         fetch("/telegramAuth/", {
           method: "POST",
@@ -45,71 +69,70 @@ function App() {
             return response.json();
           })
           .then((data) => {
-            if (data.customToken) {
-              alert(data.customToken);
-              signInWithCustomToken(auth, data.customToken).catch((error) => {
-                console.error(
-                  "Error during Firebase signInWithCustomToken",
-                  error
-                );
-              });
+            if (!data.customToken) {
+              throw new Error("Custom token not found in response");
+            }
+            if (data.isNewUser || data.isOnboardingComplete === false) {
+              // TODO BRENNAN: Redirect to onboarding page
+              signInWithToken(
+                data.customToken,
+                setCheckerId,
+                setCheckerName,
+                data.checkerId,
+                data.name
+              )
+                .then(() => {
+                  // Handle post-signIn success actions here, if any
+                  console.log("Sign-in successful");
+                  setAuthScopes(data);
+                  router.navigate("/onboarding");
+                })
+                .catch((err) => {
+                  console.error(
+                    "Error during Firebase signInWithCustomToken:",
+                    err
+                  );
+                  // Handle sign-in error here, if necessary
+                });
+              setAuthScopes(data);
+            } else {
+              //if existing user
+              signInWithToken(
+                data.customToken,
+                setCheckerId,
+                setCheckerName,
+                data.checkerId,
+                data.name
+              )
+                .then(() => {
+                  // Handle post-signIn success actions here, if any
+                  console.log("Sign-in successful");
+                })
+                .catch((err) => {
+                  console.error(
+                    "Error during Firebase signInWithCustomToken:",
+                    err
+                  );
+                  // Handle sign-in error here, if necessary
+                });
             }
           })
           .catch((err) => {
-            alert(err);
             console.error("Error fetching custom token:", err);
+          })
+          .finally(() => {
+            console.log("Sign-in complete");
+            setIsLoading(false);
           });
       }
     }
-  }, []);
+  }, [setCheckerId, setCheckerName]);
 
-  const testAPI = async () => {
-    try {
-      const user = auth.currentUser;
-      let token;
-      if (user) {
-        token = await user.getIdToken();
-      }
+  if (isLoading) {
+    return <Loading />;
+  }
 
-      const response = await fetch("/api/helloworld", {
-        method: "GET", // or POST, PUT, etc. depending on your needs
-        headers: {
-          Authorization: `Bearer ${token}`, // Set the ID token here
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-
-      // Do something with the data
-      alert(JSON.stringify(data));
-    } catch (error) {
-      console.error("Error fetching data from API:", error);
-      alert("Error fetching data");
-    }
-  };
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={testAPI}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

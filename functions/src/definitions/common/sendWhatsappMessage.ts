@@ -2,8 +2,9 @@ import axios from "axios"
 import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
 import { WhatsappButton } from "../../types"
+import { AppEnv } from "../../appEnv"
 
-const graphApiVersion = defineString("GRAPH_API_VERSION")
+const graphApiVersion = defineString(AppEnv.GRAPH_API_VERSION)
 const graphApiUrl =
   process.env["TEST_SERVER_URL"] || "https://graph.facebook.com" //only exists in integration test environment
 
@@ -153,6 +154,65 @@ async function sendWhatsappTemplateMessage(
     data.context = {
       message_id: replyMessageId,
     }
+  }
+  const response = await callWhatsappSendMessageApi(data, bot)
+  return response
+}
+
+async function sendWhatsappOTP(bot: string, to: string, otp: string) {
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    template: {
+      name: string
+      language: {
+        code: string
+      }
+      components: {
+        type: string
+        sub_type?: string
+        index?: string
+        parameters: {
+          type: string
+          text: string
+        }[]
+      }[]
+    }
+  } = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: to,
+    type: "template",
+    template: {
+      name: "whatsapp_otp",
+      language: {
+        code: "en",
+      },
+      components: [
+        {
+          type: "body",
+          parameters: [
+            {
+              type: "text",
+              text: otp,
+            },
+          ],
+        },
+        {
+          type: "button",
+          sub_type: "url",
+          index: "0",
+          parameters: [
+            {
+              type: "text",
+              text: otp,
+            },
+          ],
+        },
+      ],
+    },
   }
   const response = await callWhatsappSendMessageApi(data, bot)
   return response
@@ -351,4 +411,5 @@ export {
   sendWhatsappButtonMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
+  sendWhatsappOTP,
 }

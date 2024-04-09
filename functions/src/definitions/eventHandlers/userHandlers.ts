@@ -41,9 +41,10 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { Message } from "../../types"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
-const similarityThreshold = defineString("SIMILARITY_THRESHOLD")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
+const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -92,16 +93,9 @@ const userHandlerWhatsapp = async function (message: Message) {
       }
       const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
-        textNormalised.startsWith(
-          responses?.REFERRAL_PREPOPULATED_PREFIX.split(
-            "{{code}}"
-          )[0].toLowerCase()
-        ) &&
-        textNormalised.endsWith(
-          responses?.REFERRAL_PREPOPULATED_PREFIX.split("{{code}}")
-            .slice(-1)[0]
-            .toLowerCase()
-        )
+        textNormalised.startsWith("referral code") &&
+        textNormalised.endsWith("click the send button to get started!👉") &&
+        textNormalised.includes(":")
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
@@ -858,7 +852,7 @@ async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
 }
 
 async function referralHandler(message: string, from: string) {
-  const code = message.split("\n")[0].split(": ")[1]
+  const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
   const userRef = db.collection("users").doc(from)
   let tryGeneric = true
   if (code.length > 0) {
@@ -954,7 +948,6 @@ const onUserPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "ML_SERVER_TOKEN",
       "TELEGRAM_REPORT_BOT_TOKEN",
       "OPENAI_API_KEY",
     ],

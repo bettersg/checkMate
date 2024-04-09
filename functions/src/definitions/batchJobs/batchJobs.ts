@@ -1,17 +1,19 @@
 import * as admin from "firebase-admin"
-import * as functions from "firebase-functions"
 import { sendWhatsappTemplateMessage } from "../common/sendWhatsappMessage"
 import {
   respondToInstance,
   sendInterimPrompt as sendInterimPromptImported,
 } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { getCount } from "../common/counters"
+import { getVoteCounts } from "../common/counters"
 import { getThresholds } from "../common/utils"
 import { defineString } from "firebase-functions/params"
 import { onSchedule } from "firebase-functions/v2/scheduler"
+import { logger } from "firebase-functions/v2"
+import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
+import { AppEnv } from "../../appEnv"
 
-const runtimeEnvironment = defineString("ENVIRONMENT")
+const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -23,40 +25,71 @@ async function deactivateAndRemind() {
     const cutoffHours = 72
     const activeCheckMatesSnap = await db
       .collection("checkers")
+      .where("type", "==", "human")
       .where("isActive", "==", true)
       .get()
     const promisesArr = activeCheckMatesSnap.docs.map(async (doc) => {
       const lastVotedTimestamp =
         doc.get("lastVotedTimestamp") ?? Timestamp.fromDate(new Date(0))
-      const factCheckerId = doc.get("whatsappId")
+      const factCheckerDocRef = doc.ref
+      const whatsappId = doc.get("whatsappId")
+      const telegramId = doc.get("telegramId")
+      const preferredPlatform = doc.get("preferredPlatform") ?? "whatsapp"
       const lastVotedDate = lastVotedTimestamp.toDate()
       //set cutoff to 72 hours ago
       const cutoffDate = new Date(Date.now() - cutoffHours * 60 * 60 * 1000)
       const cutoffTimestamp = Timestamp.fromDate(cutoffDate)
       const voteRequestsQuerySnap = await db
         .collectionGroup("voteRequests")
-        .where("platformId", "==", factCheckerId)
+        .where("factCheckerDocRef", "==", factCheckerDocRef)
         .where("createdTimestamp", "<", cutoffTimestamp)
         .where("category", "==", null)
         .get()
       if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
-        functions.logger.log(
-          `${factCheckerId}, ${doc.get("name")} set to inactive`
-        )
+        logger.log(`Checker ${doc.id}, ${doc.get("name")} set to inactive`)
         await doc.ref.update({ isActive: false })
-        return sendWhatsappTemplateMessage(
-          "factChecker",
-          factCheckerId,
-          "deactivation_notification",
-          "en",
-          [doc.get("name") || "CheckMate", `${cutoffHours}`],
-          [`${factCheckerId}`]
-        )
+        if (preferredPlatform === "whatsapp") {
+          if (!whatsappId) {
+            logger.error(
+              `No whatsappId for ${doc.id}, ${doc.get(
+                "name"
+              )} despite preferred platform being whatsapp`
+            )
+            return Promise.resolve()
+          }
+          return sendWhatsappTemplateMessage(
+            "factChecker",
+            whatsappId,
+            "deactivation_notification",
+            "en",
+            [doc.get("name") || "CheckMate", `${cutoffHours}`],
+            [`${whatsappId}`]
+          )
+        } else if (preferredPlatform === "telegram") {
+          if (!telegramId) {
+            logger.error(
+              `No telegramId for ${doc.id}, ${doc.get(
+                "name"
+              )} despite preferred platform being telegram`
+            )
+            return Promise.resolve()
+          }
+          const reactivationMessage = `Hello ${doc.get("name")},
+
+          Just a reminder - you've not completed a check within the last ${cutoffHours} hours! No worries, we know everyone's busy! But because the replies to our users are contingent on a large enough proportion of CheckMates voting, not doing so adds to the denominator and slows down the response to our users. Thus, we've temporarily removed you from the active CheckMates pool so you can take a break without worries!
+          
+          Anytime you wish to continue checking, just vist the portal below to reactivate yourself and you'll be immediately added back into the pool! (You can do so right now too!)`
+          return sendTelegramTextMessage(
+            "factChecker",
+            telegramId,
+            reactivationMessage
+          )
+        }
       }
     })
     await Promise.all(promisesArr)
   } catch (error) {
-    functions.logger.error("Error in deactivateAndRemind:", error)
+    logger.error("Error in deactivateAndRemind:", error)
   }
 }
 
@@ -81,7 +114,7 @@ async function checkConversationSessionExpiring() {
     })
     await Promise.all(promisesArr)
   } catch (error) {
-    functions.logger.error("Error in checkConversationSessionExpiring:", error)
+    logger.error("Error in checkConversationSessionExpiring:", error)
   }
 }
 
@@ -108,9 +141,9 @@ async function interimPromptHandler() {
       if (!parentMessageRef) {
         throw new Error("parentMessageRef was null in interimPromptHandler ")
       }
-      const voteCount = await getCount(parentMessageRef, "responses")
+      const { validResponsesCount } = await getVoteCounts(parentMessageRef)
       if (
-        voteCount >=
+        validResponsesCount >=
         (runtimeEnvironment.value() === "PROD"
           ? thresholds.sendInterimMinVotes
           : 1)
@@ -122,7 +155,7 @@ async function interimPromptHandler() {
     })
     await Promise.all(promisesArr)
   } catch (error) {
-    functions.logger.error("Error in interimPromptHandler:", error)
+    logger.error("Error in interimPromptHandler:", error)
   }
 }
 
@@ -140,7 +173,11 @@ const scheduledDeactivation = onSchedule(
   {
     schedule: "11 20 * * *",
     timeZone: "Asia/Singapore",
-    secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+    secrets: [
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_TOKEN",
+      "TELEGRAM_CHECKER_BOT_TOKEN",
+    ],
     region: "asia-southeast1",
   },
   deactivateAndRemind
