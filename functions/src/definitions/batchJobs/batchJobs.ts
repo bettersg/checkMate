@@ -5,7 +5,7 @@ import {
   sendInterimPrompt as sendInterimPromptImported,
 } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { getCount } from "../common/counters"
+import { getVoteCounts } from "../common/counters"
 import { getThresholds } from "../common/utils"
 import { defineString } from "firebase-functions/params"
 import { onSchedule } from "firebase-functions/v2/scheduler"
@@ -141,9 +141,9 @@ async function interimPromptHandler() {
       if (!parentMessageRef) {
         throw new Error("parentMessageRef was null in interimPromptHandler ")
       }
-      const voteCount = await getCount(parentMessageRef, "responses")
+      const { validResponsesCount } = await getVoteCounts(parentMessageRef)
       if (
-        voteCount >=
+        validResponsesCount >=
         (runtimeEnvironment.value() === "PROD"
           ? thresholds.sendInterimMinVotes
           : 1)

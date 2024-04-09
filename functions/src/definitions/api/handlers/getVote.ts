@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { Vote } from "../interfaces"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
-import { getCount } from "../../common/counters"
+import { getVoteCounts } from "../../common/counters"
 import { getSignedUrl } from "../../common/mediaUtils"
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -61,7 +61,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       voteRequestSnap.get("truthScore") === undefined &&
       voteRequestSnap.get("vote") !== undefined
 
-    const [
+    const {
       irrelevantCount,
       scamCount,
       illicitCount,
@@ -70,18 +70,8 @@ const getVoteHandler = async (req: Request, res: Response) => {
       legitimateCount,
       unsureCount,
       satireCount,
-      responseCount,
-    ] = await Promise.all([
-      getCount(messageRef, "irrelevant"),
-      getCount(messageRef, "scam"),
-      getCount(messageRef, "illicit"),
-      getCount(messageRef, "info"),
-      getCount(messageRef, "spam"),
-      getCount(messageRef, "legitimate"),
-      getCount(messageRef, "unsure"),
-      getCount(messageRef, "satire"),
-      getCount(messageRef, "responses"),
-    ])
+      validResponsesCount,
+    } = await getVoteCounts(messageRef)
 
     //get counts from each truthScore
 
@@ -137,7 +127,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       isAssessed: isAssessed,
       finalStats: isAssessed
         ? {
-            responseCount: responseCount,
+            responseCount: validResponsesCount,
             scamCount: scamCount,
             illicitCount: illicitCount,
             infoCount:
