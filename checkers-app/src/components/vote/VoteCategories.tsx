@@ -89,7 +89,7 @@ export default function VoteCategories(Prop: PropType) {
   const handleSubmitVote = (category: string, truthScore: number | null) => {
     if (messageId && voteRequestId) {
       //call api to update vote
-      patchVote(messageId, voteRequestId, category, truthScore)
+      patchVote(messageId, voteRequestId, category, category === "info" ? truthScore : null)
         .then(() => {
           incrementSessionVotedCount();
           navigate("/votes");
@@ -106,9 +106,8 @@ export default function VoteCategories(Prop: PropType) {
         <>
           <Button
             className={`flex flex-row items-center justify-start gap-2 max-w-md space-x-3 text-sm
-            ${
-              category === cat.name ? "bg-primary-color3" : "bg-primary-color"
-            }`}
+            ${category === cat.name ? "bg-primary-color3" : "bg-primary-color"
+              }`}
             key={index}
             onClick={() => handleVote(cat.name)}
           >
