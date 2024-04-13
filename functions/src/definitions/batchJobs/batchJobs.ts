@@ -12,6 +12,7 @@ import { onSchedule } from "firebase-functions/v2/scheduler"
 import { logger } from "firebase-functions/v2"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { AppEnv } from "../../appEnv"
+import { TIME } from "../../utils/time"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -37,7 +38,7 @@ async function deactivateAndRemind() {
       const preferredPlatform = doc.get("preferredPlatform") ?? "whatsapp"
       const lastVotedDate = lastVotedTimestamp.toDate()
       //set cutoff to 72 hours ago
-      const cutoffDate = new Date(Date.now() - cutoffHours * 60 * 60 * 1000)
+      const cutoffDate = new Date(Date.now() - cutoffHours * TIME.ONE_HOUR)
       const cutoffTimestamp = Timestamp.fromDate(cutoffDate)
       const voteRequestsQuerySnap = await db
         .collectionGroup("voteRequests")
@@ -98,10 +99,10 @@ async function checkConversationSessionExpiring() {
     const db = admin.firestore()
     const hoursAgo = 23
     const windowStart = Timestamp.fromDate(
-      new Date(Date.now() - hoursAgo * 60 * 60 * 1000)
+      new Date(Date.now() - hoursAgo * TIME.ONE_HOUR)
     )
     const windowEnd = Timestamp.fromDate(
-      new Date(Date.now() - (hoursAgo + 1) * 60 * 60 * 1000)
+      new Date(Date.now() - (hoursAgo + 1) * TIME.ONE_HOUR)
     )
     const unrepliedInstances = await db
       .collectionGroup("instances")
@@ -121,9 +122,7 @@ async function checkConversationSessionExpiring() {
 async function interimPromptHandler() {
   try {
     const db = admin.firestore()
-    const dayAgo = Timestamp.fromDate(
-      new Date(Date.now() - 24 * 60 * 60 * 1000)
-    )
+    const dayAgo = Timestamp.fromDate(new Date(Date.now() - TIME.ONE_DAY))
     const halfHourAgo =
       runtimeEnvironment.value() === "PROD"
         ? Timestamp.fromDate(new Date(Date.now() - 30 * 60 * 1000))

@@ -5,6 +5,7 @@ import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
 import { imageHash } from "image-hash"
 import { AppEnv } from "../../appEnv"
+import { TIME } from "../../utils/time"
 
 const graphApiVersion = defineString(AppEnv.GRAPH_API_VERSION)
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -74,7 +75,7 @@ async function getSignedUrl(storageUrl: string) {
       .file(storageUrl)
       .getSignedUrl({
         action: "read",
-        expires: Date.now() + 60 * 60 * 1000,
+        expires: Date.now() + TIME.ONE_HOUR,
       })
     return temporaryUrl
   } catch (error) {
