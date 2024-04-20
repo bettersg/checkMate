@@ -4,6 +4,7 @@ import * as admin from "firebase-admin"
 import { Timestamp } from "firebase-admin/firestore"
 import { logger } from "firebase-functions/v2"
 import { checkAccuracy } from "../../common/statistics"
+import { TIME } from "../../../utils/time"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -38,7 +39,7 @@ const getCheckerHandler = async (req: Request, res: Response) => {
     const pendingVoteCount = pendingVoteSnap.data().count
 
     const cutoffTimestamp = Timestamp.fromDate(
-      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      new Date(Date.now() - TIME.THIRTY_DAYS)
     )
 
     const last30DaysQuery = db
