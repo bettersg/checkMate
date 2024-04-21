@@ -14,6 +14,7 @@ import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
 import postOTPHandler from "./handlers/postOTP"
 import checkOTPHandler from "./handlers/checkOTP"
 import deleteCheckerHandler from "./handlers/deleteChecker"
+import postCustomReplyHandler from "./handlers/postCustomReply"
 import { validateFirebaseIdToken } from "./middleware/validator"
 
 config()
@@ -80,6 +81,12 @@ messagesRouter.patch(
   "/messages/:messageId/voteRequests/:voteRequestId",
   validateFirebaseIdToken,
   patchVoteRequestHandler
+)
+
+messagesRouter.post(
+  "/messages/:messageId/customReply",
+  validateFirebaseIdToken,
+  postCustomReplyHandler
 )
 
 app.use("/api", [checkersRouter, messagesRouter])

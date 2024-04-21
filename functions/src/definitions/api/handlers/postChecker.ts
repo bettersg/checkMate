@@ -55,6 +55,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     voteWeight: 1,
     level: level || 0,
     experience: experience || 0,
+    tier: "beginner",
     numVoted: numVoted || 0,
     numCorrectVotes: numCorrectVotes || 0,
     numVerifiedLinks: numVerifiedLinks || 0,

@@ -3,6 +3,12 @@ interface createVoteRequest {
   factCheckerName?: string
 }
 
+interface upsertCustomReply {
+  factCheckerId?: string
+  factCheckerName?: string
+  customReply: string
+}
+
 interface updateVoteRequest {
   category: string
   truthScore?: number //between 1 and 5
@@ -134,4 +140,5 @@ export type {
   PendingCountApiResponse,
   AssessedInfo,
   updateChecker,
+  upsertCustomReply,
 }

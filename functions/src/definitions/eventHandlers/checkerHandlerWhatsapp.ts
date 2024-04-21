@@ -123,6 +123,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     voteWeight: 1,
     level: 1,
     experience: 0,
+    tier: "beginner",
     numVoted: 0,
     numCorrectVotes: 0,
     numVerifiedLinks: 0,

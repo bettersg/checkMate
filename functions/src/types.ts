@@ -48,6 +48,7 @@ export type Checker = {
   whatsappId?: string | null
   level: number
   experience: number
+  tier: "beginner" | "intermediate" | "expert"
   numVoted: number
   voteWeight: number
   numCorrectVotes: number
@@ -80,6 +81,14 @@ export type VoteRequest = {
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
+}
+
+export type CustomReply = {
+  type: "text" | "image"
+  text: string | null
+  caption: string | null
+  lastUpdatedBy: DocumentReference
+  lastUpdatedTimestamp: Timestamp
 }
 
 export type TeleMessage = {
