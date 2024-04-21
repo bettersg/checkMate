@@ -121,6 +121,7 @@ app.post("/", async (req, res) => {
       voteWeight: 1,
       level: 0,
       experience: 0,
+      tier: "beginner",
       numVoted: 0,
       numCorrectVotes: 0,
       numVerifiedLinks: 0,
