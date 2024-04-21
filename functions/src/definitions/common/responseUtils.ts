@@ -622,6 +622,7 @@ async function respondToInstance(
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
+  const customReply = parentMessageSnap.get("customReply")
   const { validResponsesCount } = await getVoteCounts(parentMessageRef)
   const isImage = data?.type === "image"
   const isMatched = data?.isMatched ?? false
@@ -648,6 +649,11 @@ async function respondToInstance(
           : responses.METHODOLOGY_HUMAN
       )
       .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
+  }
+
+  if (customReply) {
+    //if there's a custom reply
+    await sendTextMessage("user", from, customReply, data.id)
   }
 
   if (!isAssessed && !forceReply) {
