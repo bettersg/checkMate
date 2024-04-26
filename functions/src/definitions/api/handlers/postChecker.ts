@@ -49,6 +49,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     type,
     isActive: isActive || false,
     isOnboardingComplete: isOnboardingComplete || false,
+    isAdmin: false,
     singpassOpenId: singpassOpenId || null,
     telegramId,
     whatsappId: whatsappId || null,

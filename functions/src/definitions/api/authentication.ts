@@ -116,6 +116,7 @@ app.post("/", async (req, res) => {
       isActive: false,
       isOnboardingComplete: false,
       singpassOpenId: null,
+      isAdmin: false,
       whatsappId: null,
       telegramId: parseInt(userId),
       voteWeight: 1,

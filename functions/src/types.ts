@@ -43,6 +43,7 @@ export type Checker = {
   type: "human" | "ai"
   isActive: boolean | null
   isOnboardingComplete: boolean | null
+  isAdmin: boolean
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null

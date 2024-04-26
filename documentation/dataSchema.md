@@ -107,6 +107,7 @@ erDiagram
         string name
         boolean isActive
         boolean isOnboardingComplete
+        boolean isAdmin
         string singpassOpenId "Singpass Open ID"
         string telegramId "telegram ID"
         string whatsappId "whatsapp phone number"
