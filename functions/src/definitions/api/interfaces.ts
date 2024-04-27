@@ -12,6 +12,7 @@ interface upsertCustomReply {
 interface updateVoteRequest {
   category: string
   truthScore?: number //between 1 and 5
+  reasoning?: string
 }
 
 interface createChecker {

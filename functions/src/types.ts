@@ -79,6 +79,7 @@ export type VoteRequest = {
     | "unsure"
     | "error"
     | null
+  reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
