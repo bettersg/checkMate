@@ -93,7 +93,13 @@ app.post("/", async (req, res) => {
   if (!checkerSnap.empty) {
     try {
       const userDoc = checkerSnap.docs[0]
-      const customToken = await admin.auth().createCustomToken(userDoc.id)
+      const claims = {
+        isAdmin: userDoc.data()?.isAdmin,
+        tier: userDoc.data()?.tier,
+      }
+      const customToken = await admin
+        .auth()
+        .createCustomToken(userDoc.id, claims)
       const checkerName = userDoc.data()?.name
       return res.status(200).json({
         customToken: customToken,
@@ -102,6 +108,8 @@ app.post("/", async (req, res) => {
         isNewUser: false,
         isOnboardingComplete: userDoc.data()?.isOnboardingComplete,
         isActive: userDoc.data()?.isActive,
+        isAdmin: userDoc.data()?.isAdmin,
+        tier: userDoc.data()?.tier,
       })
     } catch (error) {
       functions.logger.error("Error creating custom token:", error)
@@ -110,6 +118,7 @@ app.post("/", async (req, res) => {
   } else {
     //from telegram but not yet a user in database
     functions.logger.info("Creating new user")
+
     const checkerObject: Checker = {
       name: "",
       type: "human",
@@ -133,7 +142,12 @@ app.post("/", async (req, res) => {
 
     try {
       const newCheckerRef = await db.collection("checkers").add(checkerObject)
-      const customToken = await admin.auth().createCustomToken(newCheckerRef.id)
+      const customToken = await admin
+        .auth()
+        .createCustomToken(newCheckerRef.id, {
+          isAdmin: false,
+          tier: "beginner",
+        })
       return res.status(200).json({
         customToken: customToken,
         checkerId: newCheckerRef.id,
@@ -141,6 +155,8 @@ app.post("/", async (req, res) => {
         isNewUser: true,
         isOnboardingComplete: false,
         isActive: false,
+        isAdmin: false,
+        tier: "beginner",
       })
     } catch (error) {
       functions.logger.error("Error creating new user:", error)

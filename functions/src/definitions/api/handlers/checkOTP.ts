@@ -64,6 +64,7 @@ const checkOTPHandler = async (req: Request, res: Response) => {
 
     if (checkerQuery.docs.length === 1) {
       const telegramId = checkerSnap.data()?.telegramId
+      const existingChecker = checkerQuery.docs[0].data()
       const existingCheckerRef = checkerQuery.docs[0].ref
       const existingCheckerId = existingCheckerRef.id
       if (!telegramId) {
@@ -79,9 +80,13 @@ const checkOTPHandler = async (req: Request, res: Response) => {
           .status(500)
           .send("Error updating existing whatsapp checker with telegramId")
       }
+      const claims = {
+        isAdmin: existingChecker?.isAdmin,
+        tier: existingChecker?.tier,
+      }
       const customToken = await admin
         .auth()
-        .createCustomToken(existingCheckerId)
+        .createCustomToken(existingCheckerId, claims)
       await otpRef.delete()
       return res.status(202).send({
         existing: true,

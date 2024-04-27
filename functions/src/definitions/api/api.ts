@@ -1,8 +1,6 @@
 import * as admin from "firebase-admin"
-import express, { RequestHandler } from "express"
-import * as functions from "firebase-functions"
+import express from "express"
 import { onRequest } from "firebase-functions/v2/https"
-import { Timestamp } from "firebase-admin/firestore"
 import { config } from "dotenv"
 import getCheckerHandler from "./handlers/getChecker"
 import getCheckerVotesHandler from "./handlers/getCheckerVotes"
@@ -15,6 +13,7 @@ import postOTPHandler from "./handlers/postOTP"
 import checkOTPHandler from "./handlers/checkOTP"
 import deleteCheckerHandler from "./handlers/deleteChecker"
 import postCustomReplyHandler from "./handlers/postCustomReply"
+import postWhatsappTestMessageHandler from "./handlers/postWhatsappTestMessage"
 import { validateFirebaseIdToken } from "./middleware/validator"
 
 config()
@@ -69,6 +68,12 @@ checkersRouter.get(
   "/checkers/:checkerId/votes",
   validateFirebaseIdToken,
   getCheckerVotesHandler
+)
+
+checkersRouter.post(
+  "/checkers/:checkerId/whatsappTestMessage",
+  validateFirebaseIdToken,
+  postWhatsappTestMessageHandler
 )
 
 messagesRouter.get(

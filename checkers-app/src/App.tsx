@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
 ]);
 
 function App() {
-  const { setCheckerId, setCheckerName, setAuthScopes } = useUser();
+  const { setCheckerDetails, setAuthScopes } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   //for global states: userID, name and messages
 
@@ -76,8 +76,7 @@ function App() {
               // TODO BRENNAN: Redirect to onboarding page
               signInWithToken(
                 data.customToken,
-                setCheckerId,
-                setCheckerName,
+                setCheckerDetails,
                 data.checkerId,
                 data.name
               )
@@ -99,8 +98,7 @@ function App() {
               //if existing user
               signInWithToken(
                 data.customToken,
-                setCheckerId,
-                setCheckerName,
+                setCheckerDetails,
                 data.checkerId,
                 data.name
               )
@@ -126,7 +124,7 @@ function App() {
           });
       }
     }
-  }, [setCheckerId, setCheckerName]);
+  }, [setCheckerDetails]);
 
   if (isLoading) {
     return <Loading />;

@@ -4,8 +4,7 @@ import app from "../firebase";
 
 export const signInWithToken = async (
   customToken: string,
-  setCheckerId: (checkerId: string) => void,
-  setCheckerName: (checkerName: string) => void,
+  setCheckerDetails: (checker: any) => void,
   checkerId: string,
   checkerName: string
 ) => {
@@ -14,8 +13,11 @@ export const signInWithToken = async (
     // Wait for the signInWithCustomToken to resolve
     await signInWithCustomToken(auth, customToken);
     // If successful, set the checker ID and name
-    setCheckerId(checkerId);
-    setCheckerName(checkerName);
+    setCheckerDetails((checker: any) => ({
+      ...checker,
+      checkerId,
+      checkerName,
+    }));
   } catch (error) {
     alert(`Error signing in with custom token ${error}`);
     console.error("Error during Firebase signInWithCustomToken", error);

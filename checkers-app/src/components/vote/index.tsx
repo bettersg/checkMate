@@ -13,7 +13,7 @@ import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 
 export default function VotePage() {
-  const { checkerId } = useUser();
+  const { checkerDetails } = useUser();
   const { messageId, voteRequestId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [vote, setVote] = useState<Vote | null>(null);
@@ -28,10 +28,10 @@ export default function VotePage() {
       setIsLoading(false);
     };
 
-    if (messageId && voteRequestId && checkerId) {
+    if (messageId && voteRequestId && checkerDetails.checkerId) {
       fetchVote();
     }
-  }, [checkerId]);
+  }, [checkerDetails.checkerId]);
 
   if (isLoading) {
     return <Loading />;

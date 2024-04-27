@@ -120,8 +120,7 @@ const steps: { [key: number]: JSX.Element } = {
 const numberOfSteps = Object.keys(steps).length;
 
 const Onboarding = () => {
-  const { authScopes } = useUser();
-  const { setCheckerId, setCheckerName } = useUser();
+  const { setCheckerDetails, authScopes } = useUser();
   const [whatsappId, setWhatsappId] = useState("");
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [isOTPValidated, setIsOTPValidated] = useState(false);
@@ -160,18 +159,16 @@ const Onboarding = () => {
           if (!customToken || !updatedCheckerId) {
             throw new Error("Custom token or checkerId not found in response");
           }
-          console.log("202");
           updateCheckerId(updatedCheckerId);
           setCustomAuthToken(customToken);
           signOut().then(() => {
             signInWithToken(
               customToken,
-              setCheckerId,
-              setCheckerName,
+              setCheckerDetails,
               updatedCheckerId,
               name
             ).then(() => {
-              console.log("Sign-in successful");
+              handleOnCompleteOnboarding(updatedCheckerId); //immediately complete onboarding
             });
           });
         }
@@ -183,7 +180,7 @@ const Onboarding = () => {
       });
   };
 
-  const handleOnCompleteOnboarding = () => {
+  const handleOnCompleteOnboarding = (checkerId: string) => {
     if (!checkerId) {
       throw new Error("Checker ID not found");
     }
@@ -214,13 +211,12 @@ const Onboarding = () => {
               signOut().then(() => {
                 signInWithToken(
                   customAuthToken,
-                  setCheckerId,
-                  setCheckerName,
+                  setCheckerDetails,
                   checkerId,
                   name
                 ).then(() => {
-                  console.log("Sign-in successful");
                   router.navigate("/");
+                  router.navigate(0);
                 });
               });
             }
@@ -298,7 +294,7 @@ const Onboarding = () => {
           : isOTPValidated && (
               <button
                 className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
-                onClick={() => handleOnCompleteOnboarding()}
+                onClick={() => handleOnCompleteOnboarding(checkerId)}
               >
                 Complete Onboarding
               </button>

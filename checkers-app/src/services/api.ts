@@ -9,6 +9,8 @@ import app from "../firebase";
 import {
   createChecker,
   updateChecker,
+  postWhatsappTestMessage,
+  upsertCustomReply,
 } from "../../../functions/src/definitions/api/interfaces";
 
 const auth = getAuth(app);
@@ -22,6 +24,7 @@ axiosInstance.interceptors.request.use(
   async (config) => {
     const auth = getAuth();
     const user = auth.currentUser;
+    console.log(user);
     if (user) {
       const token = await user.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;
@@ -155,5 +158,44 @@ export const patchVote = async (
         truthScore,
       }
     )
+  ).data;
+};
+
+export const postCustomReply = async (
+  messageId: string,
+  checkerId: string,
+  customReply: string
+) => {
+  if (!messageId) {
+    throw new Error("Message Id missing.");
+  }
+  if (!checkerId) {
+    throw new Error("Checker Id missing.");
+  }
+  if (!customReply) {
+    throw new Error("Custom reply missing.");
+  }
+  return (
+    await axiosInstance.post(`/api/messages/${messageId}/customReply`, {
+      factCheckerId: checkerId,
+      customReply,
+    } as upsertCustomReply)
+  ).data;
+};
+
+export const sendWhatsappTestMessage = async (
+  checkerId: string,
+  message: string
+) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing.");
+  }
+  if (!message) {
+    throw new Error("A message is required");
+  }
+  return (
+    await axiosInstance.post(`/api/checkers/${checkerId}/whatsappTestMessage`, {
+      message,
+    } as postWhatsappTestMessage)
   ).data;
 };

@@ -9,9 +9,9 @@ import {
 
 export default function NavbarDefault() {
   const navigate = useNavigate();
-  const { pendingCount } = useUser();
+  const { checkerDetails } = useUser();
   // Helper function to decide if the badge is invisible
-  const isBadgeInvisible = pendingCount === 0;
+  const isBadgeInvisible = checkerDetails.pendingCount === 0;
 
   return (
     <Navbar className="fixed bottom-0 left-0 z-50 w-full h-16 bg-primary-color2 dark:bg-dark-highlight-color border-0">
@@ -34,7 +34,7 @@ export default function NavbarDefault() {
           <Badge
             invisible={isBadgeInvisible}
             color="teal"
-            content={pendingCount}
+            content={checkerDetails.pendingCount}
             placement="top-end"
           >
             <CheckBadgeIcon className="h-7 w-7 text-white" />

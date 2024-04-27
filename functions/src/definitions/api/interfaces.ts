@@ -9,6 +9,10 @@ interface upsertCustomReply {
   customReply: string
 }
 
+interface postWhatsappTestMessage {
+  message: string
+}
+
 interface updateVoteRequest {
   category: string
   truthScore?: number //between 1 and 5
@@ -54,6 +58,8 @@ interface Checker {
   type: "human" | "ai"
   isActive: boolean | null
   isOnboardingComplete: boolean | null
+  tier: "beginner" | "intermediate" | "expert"
+  isAdmin: boolean
   pendingVoteCount: number
   last30days: last30DaysStats
   achievements: Achievements | null
@@ -142,4 +148,5 @@ export type {
   AssessedInfo,
   updateChecker,
   upsertCustomReply,
+  postWhatsappTestMessage,
 }
