@@ -19,7 +19,7 @@ export type WhatsappButton = {
   }
 }
 
-export type Message = {
+export type WhatsappMessageObject = {
   from: string
   type: string
   button: {

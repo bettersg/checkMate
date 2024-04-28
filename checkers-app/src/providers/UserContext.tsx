@@ -21,7 +21,11 @@ interface UserContextProps {
     isOnboardingComplete?: boolean;
     isActive?: boolean;
   };
-  setCheckerDetails: (checker: CheckerDetails) => void;
+  setCheckerDetails: (
+    checker:
+      | CheckerDetails
+      | ((currentChecker: CheckerDetails) => CheckerDetails)
+  ) => void;
   incrementSessionVotedCount: () => void;
   setAuthScopes: (authScopes: AuthScopes) => void;
 }

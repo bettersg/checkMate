@@ -4,7 +4,7 @@ import { vectorSearch, CollectionTypes } from "./typesense/collectionOperations"
 import * as functions from "firebase-functions"
 import { getEmbedding } from "./machineLearningServer/operations"
 import { stripUrl, stripPhone } from "./utils"
-import { Message } from "../../types"
+import { WhatsappMessageObject } from "../../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -20,7 +20,7 @@ async function calculateSimilarity(
   //embed message to compare
   let similarity: {
     ref?: admin.firestore.DocumentReference<admin.firestore.DocumentData>
-    message?: Message
+    message?: WhatsappMessageObject
     captionHash?: string | null
     score?: number
     parent?: admin.firestore.DocumentReference<admin.firestore.DocumentData> | null

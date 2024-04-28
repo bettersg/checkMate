@@ -15,6 +15,7 @@ import deleteCheckerHandler from "./handlers/deleteChecker"
 import postCustomReplyHandler from "./handlers/postCustomReply"
 import postWhatsappTestMessageHandler from "./handlers/postWhatsappTestMessage"
 import { validateFirebaseIdToken } from "./middleware/validator"
+import getMessageHandler from "./handlers/getMessage"
 
 config()
 
@@ -92,6 +93,12 @@ messagesRouter.post(
   "/messages/:messageId/customReply",
   validateFirebaseIdToken,
   postCustomReplyHandler
+)
+
+messagesRouter.get(
+  "/messages/:messageId",
+  validateFirebaseIdToken,
+  getMessageHandler
 )
 
 app.use("/api", [checkersRouter, messagesRouter])

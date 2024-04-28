@@ -24,7 +24,6 @@ axiosInstance.interceptors.request.use(
   async (config) => {
     const auth = getAuth();
     const user = auth.currentUser;
-    console.log(user);
     if (user) {
       const token = await user.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;
@@ -181,6 +180,13 @@ export const postCustomReply = async (
       customReply,
     } as upsertCustomReply)
   ).data;
+};
+
+export const getMessage = async (messageId: string) => {
+  if (!messageId) {
+    throw new Error("Message Id missing.");
+  }
+  return (await axiosInstance.get(`/api/messages/${messageId}`)).data;
 };
 
 export const sendWhatsappTestMessage = async (

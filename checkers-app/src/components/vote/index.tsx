@@ -11,6 +11,7 @@ import { getVote } from "../../services/api";
 import CategoryRationalisation from "./Rationalisation";
 import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
+import CustomReply from "./CustomReply";
 
 export default function VotePage() {
   const { checkerDetails } = useUser();
@@ -106,6 +107,9 @@ export default function VotePage() {
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />
           </>
+        )}
+        {checkerDetails.tier === "expert" && (
+          <CustomReply messageId={messageId} />
         )}
       </div>
     </>

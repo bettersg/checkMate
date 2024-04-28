@@ -1,3 +1,5 @@
+import { CustomReply } from "../../types"
+
 interface createVoteRequest {
   factCheckerId?: string
   factCheckerName?: string
@@ -81,6 +83,16 @@ interface VoteSummary {
   firestorePath: string
 }
 
+interface MessageSummary {
+  primaryCategory: string | null
+  machineCategory: string | null
+  truthScore: number | null
+  instanceCount: number
+  text: string | null //only for type text
+  caption: string | null //only for type image
+  customReply: CustomReply | null
+}
+
 interface VoteSummaryApiResponse {
   votes: VoteSummary[]
   lastPath: string | null
@@ -149,4 +161,5 @@ export type {
   updateChecker,
   upsertCustomReply,
   postWhatsappTestMessage,
+  MessageSummary,
 }

@@ -4,6 +4,7 @@ import { router } from "../App";
 import { useUpdateFactChecker } from "../services/mutations";
 import { sendOTP, checkOTP } from "../services/api";
 import { signInWithToken, signOut } from "../utils/authManagement";
+import { Alert } from "@material-tailwind/react";
 import PhoneInput from "react-phone-number-input";
 
 const NameForm = ({
@@ -133,6 +134,7 @@ const Onboarding = () => {
   const [checkerId, updateCheckerId] = useState(authScopes?.checkerId ?? "");
   const [name, setName] = useState(authScopes?.name ?? "");
   const [currentStep, setCurrentStep] = useState(1);
+  const [showAlerts, setShowAlerts] = useState(false);
 
   const sendWhatsappOTP = () => {
     // Here you would add the logic to actually verify the phone number, probably by sending an API request
@@ -156,27 +158,33 @@ const Onboarding = () => {
           //only for existing checkers
           const customToken = data?.customToken;
           const updatedCheckerId = data?.checkerId;
+          const isAdmin = data?.isAdmin;
+          const tier = data?.tier;
           if (!customToken || !updatedCheckerId) {
             throw new Error("Custom token or checkerId not found in response");
           }
           updateCheckerId(updatedCheckerId);
           setCustomAuthToken(customToken);
           signOut().then(() => {
-            signInWithToken(
-              customToken,
-              setCheckerDetails,
-              updatedCheckerId,
-              name
-            ).then(() => {
+            signInWithToken(customToken).then(() => {
+              setCheckerDetails((currentChecker) => ({
+                ...currentChecker,
+                checkerId: updatedCheckerId,
+                checkerName: name,
+                isAdmin: isAdmin ?? false,
+                tier: tier ?? "beginner",
+              }));
               handleOnCompleteOnboarding(updatedCheckerId); //immediately complete onboarding
             });
           });
         }
         setIsOTPValidated(true);
+        setShowAlerts(false);
         console.log("OTP checked");
       })
       .catch((error) => {
         console.error("Error checking OTP", error);
+        setShowAlerts(true);
       });
   };
 
@@ -209,12 +217,12 @@ const Onboarding = () => {
           try {
             if (customAuthToken) {
               signOut().then(() => {
-                signInWithToken(
-                  customAuthToken,
-                  setCheckerDetails,
-                  checkerId,
-                  name
-                ).then(() => {
+                signInWithToken(customAuthToken).then(() => {
+                  setCheckerDetails((currentChecker) => ({
+                    ...currentChecker,
+                    checkerId: checkerId,
+                    checkerName: name,
+                  }));
                   router.navigate("/");
                   router.navigate(0);
                 });
@@ -279,6 +287,11 @@ const Onboarding = () => {
             >
               Submit
             </button>
+            {showAlerts && (
+              <Alert color="amber">
+                An error occurred. You might have entered the wrong OTP
+              </Alert>
+            )}
           </div>
         )}
 

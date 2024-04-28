@@ -24,6 +24,7 @@ const deleteCheckerHandler = async (req: Request, res: Response) => {
     }
 
     await checkerRef.delete()
+    await admin.auth().deleteUser(checkerId)
 
     res.status(200).send()
   } catch (error) {

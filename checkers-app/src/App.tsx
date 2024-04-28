@@ -74,15 +74,16 @@ function App() {
             }
             if (data.isNewUser || data.isOnboardingComplete === false) {
               // TODO BRENNAN: Redirect to onboarding page
-              signInWithToken(
-                data.customToken,
-                setCheckerDetails,
-                data.checkerId,
-                data.name
-              )
+              signInWithToken(data.customToken)
                 .then(() => {
                   // Handle post-signIn success actions here, if any
-                  console.log("Sign-in successful");
+                  setCheckerDetails((currentChecker) => ({
+                    ...currentChecker,
+                    checkerId: data.checkerId,
+                    checkerName: data.name,
+                    isAdmin: data.isAdmin,
+                    tier: data.tier,
+                  }));
                   setAuthScopes(data);
                   router.navigate("/onboarding");
                 })
@@ -96,15 +97,15 @@ function App() {
               setAuthScopes(data);
             } else {
               //if existing user
-              signInWithToken(
-                data.customToken,
-                setCheckerDetails,
-                data.checkerId,
-                data.name
-              )
+              signInWithToken(data.customToken)
                 .then(() => {
-                  // Handle post-signIn success actions here, if any
-                  console.log("Sign-in successful");
+                  setCheckerDetails((currentChecker) => ({
+                    ...currentChecker,
+                    checkerId: data.checkerId,
+                    checkerName: data.name,
+                    isAdmin: data.isAdmin,
+                    tier: data.tier,
+                  }));
                 })
                 .catch((err) => {
                   console.error(
@@ -119,7 +120,6 @@ function App() {
             console.error("Error fetching custom token:", err);
           })
           .finally(() => {
-            console.log("Sign-in complete");
             setIsLoading(false);
           });
       }

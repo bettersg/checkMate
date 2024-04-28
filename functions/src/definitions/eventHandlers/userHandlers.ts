@@ -40,7 +40,7 @@ import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
-import { Message } from "../../types"
+import { WhatsappMessageObject } from "../../types"
 import { AppEnv } from "../../appEnv"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -55,7 +55,7 @@ const hashids = new Hashids(salt)
 
 const db = admin.firestore()
 
-const userHandlerWhatsapp = async function (message: Message) {
+const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
   if (!message?.id) {
     functions.logger.error("No message id")
     return
@@ -653,7 +653,10 @@ async function newUserHandler(from: string) {
   await sendLanguageSelection(from, true)
 }
 
-async function onButtonReply(messageObj: Message, platform = "whatsapp") {
+async function onButtonReply(
+  messageObj: WhatsappMessageObject,
+  platform = "whatsapp"
+) {
   const buttonId = messageObj.interactive.button_reply.id
   const from = messageObj.from
   const responses = await getResponsesObj("user", from)
@@ -706,7 +709,10 @@ async function onButtonReply(messageObj: Message, platform = "whatsapp") {
   return Promise.resolve(step)
 }
 
-async function onTextListReceipt(messageObj: Message, platform = "whatsapp") {
+async function onTextListReceipt(
+  messageObj: WhatsappMessageObject,
+  platform = "whatsapp"
+) {
   const listId = messageObj.interactive.list_reply.id
   const from = messageObj.from
   const responses = await getResponsesObj("user", from)
