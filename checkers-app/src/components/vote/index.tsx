@@ -1,6 +1,6 @@
 import VoteCategories from "./VoteCategories";
 import MessageCard from "./MessageCard";
-import { Typography } from "@material-tailwind/react";
+import { Typography, Alert } from "@material-tailwind/react";
 import { BackButton } from "../common/BackButton";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -59,6 +59,7 @@ export default function VotePage() {
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
         />
+        <Alert variant="ghost">Sender: {vote.sender}</Alert>
         {vote.category === null || !vote.isAssessed ? (
           <>
             <Typography
