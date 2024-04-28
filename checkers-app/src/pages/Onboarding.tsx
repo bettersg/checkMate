@@ -4,7 +4,7 @@ import { router } from "../App";
 import { useUpdateFactChecker } from "../services/mutations";
 import { sendOTP, checkOTP } from "../services/api";
 import { signInWithToken, signOut } from "../utils/authManagement";
-import { Alert } from "@material-tailwind/react";
+import { Alert, Button } from "@material-tailwind/react";
 import PhoneInput from "react-phone-number-input";
 
 const NameForm = ({
@@ -297,20 +297,22 @@ const Onboarding = () => {
 
         {currentStep !== numberOfSteps
           ? isOTPValidated && (
-              <button
-                className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
+              <Button
+                className="bg-checkPrimary600 text-white"
+                ripple={true}
                 onClick={() => setCurrentStep(currentStep + 1)}
               >
-                Next step
-              </button>
+                Next Step
+              </Button>
             )
           : isOTPValidated && (
-              <button
-                className="p-2 font-medium rounded-xl bg-checkPrimary600 border"
+              <Button
+                className="bg-checkPrimary600 text-white"
+                ripple={true}
                 onClick={() => handleOnCompleteOnboarding(checkerId)}
               >
                 Complete Onboarding
-              </button>
+              </Button>
             )}
       </div>
     </div>
