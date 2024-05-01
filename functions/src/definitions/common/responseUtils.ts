@@ -311,7 +311,6 @@ async function sendVotingStats(instancePath: string) {
     satireCount,
     validResponsesCount,
     susCount,
-    factCheckerCount,
   } = await getVoteCounts(messageRef)
   const truthScore = messageSnap.get("truthScore")
   const thresholds = await getThresholds()
