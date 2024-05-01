@@ -73,13 +73,13 @@ const CATEGORIES = [
     name: "unsure",
     icon: <QuestionMarkCircleIcon className="h-7 w-7" />,
     display: "Unsure",
-    description: "Insufficient information to determine",
+    description: "Insufficient information to decide",
   },
   {
     name: "pass",
     icon: <PaperAirplaneIcon className="h-7 w-7" />,
     display: "Pass",
-    description: "Skip assessing this message, if you must",
+    description: "Skip this message if you're really unable to assess it",
   },
 ];
 

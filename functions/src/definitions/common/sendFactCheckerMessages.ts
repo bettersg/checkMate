@@ -113,7 +113,7 @@ const sendL2OthersCategorisationMessage = async function (
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_pass`,
           title: "I'm Passing",
-          description: "Skip assessing this message, if you must",
+          description: "Skip this message if you're really unable to assess it",
         },
       ]
       const sections = [
