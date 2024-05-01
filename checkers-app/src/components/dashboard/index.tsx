@@ -10,7 +10,7 @@ import Loading from "../common/Loading";
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
-  const { checkerDetails, setCheckerDetails } = useUser();
+  const { checkerDetails } = useUser();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [accuracyRate, setAccuracyRate] = useState<number | null>(0);
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
