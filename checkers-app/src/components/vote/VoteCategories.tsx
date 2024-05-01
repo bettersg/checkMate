@@ -14,7 +14,7 @@ import { patchVote } from "../../services/api";
 import { useUser } from "../../providers/UserContext";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
 
-import InfoOptions from "./Tier2";
+import InfoOptions from "./InfoOptions";
 
 interface PropType {
   messageId: string | null;
