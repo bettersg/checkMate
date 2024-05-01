@@ -10,7 +10,7 @@ import Loading from "../common/Loading";
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
-  const { checkerId, pendingCount, setPendingCount } = useUser();
+  const { checkerDetails, setCheckerDetails } = useUser();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [accuracyRate, setAccuracyRate] = useState<number | null>(0);
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
@@ -19,23 +19,23 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchChecker = async () => {
       setIsLoading(true);
-      if (!checkerId) {
+      if (!checkerDetails.checkerId) {
         return;
       }
-      const checker: Checker = await getChecker(checkerId);
+      const checker: Checker = await getChecker(checkerDetails.checkerId);
       if (checker) {
         setTotalVotes(checker.last30days.totalVoted);
         setAccuracyRate(checker.last30days.accuracyRate);
         setAvgResponseTime(checker.last30days.averageResponseTime);
         setPeopleHelped(checker.last30days.peopleHelped);
-        setPendingCount(checker.pendingVoteCount);
+        //setPendingCount(checker.pendingVoteCount);
         setIsLoading(false);
       }
     };
-    if (checkerId) {
+    if (checkerDetails.checkerId) {
       fetchChecker();
     }
-  }, [checkerId]);
+  }, [checkerDetails.checkerId]);
 
   if (isLoading) {
     return <Loading />;
@@ -43,8 +43,11 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-y-4 left-right-padding">
-      {pendingCount > 0 && (
-        <PendingMessageAlert hasPending={true} pendingCount={pendingCount} />
+      {checkerDetails.pendingCount > 0 && (
+        <PendingMessageAlert
+          hasPending={true}
+          pendingCount={checkerDetails.pendingCount}
+        />
       )}
       {/* {reviewCount > 0 && (
         <PendingMessageAlert hasPending={false} pendingCount={pendingCount} />

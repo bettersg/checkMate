@@ -13,6 +13,7 @@ import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
+import { CustomReply } from "../../types"
 
 const db = admin.firestore()
 
@@ -622,6 +623,7 @@ async function respondToInstance(
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const instanceCount = parentMessageSnap.get("instanceCount")
+  const customReply: CustomReply = parentMessageSnap.get("customReply")
   const { validResponsesCount } = await getVoteCounts(parentMessageRef)
   const isImage = data?.type === "image"
   const isMatched = data?.isMatched ?? false
@@ -648,6 +650,14 @@ async function respondToInstance(
           : responses.METHODOLOGY_HUMAN
       )
       .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
+  }
+
+  if (customReply) {
+    if (customReply.type === "text" && customReply.text) {
+      await sendTextMessage("user", from, customReply.text, data.id)
+    } else if (customReply.type === "image") {
+      //TODO: implement later
+    }
   }
 
   if (!isAssessed && !forceReply) {

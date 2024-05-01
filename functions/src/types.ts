@@ -19,7 +19,7 @@ export type WhatsappButton = {
   }
 }
 
-export type Message = {
+export type WhatsappMessageObject = {
   from: string
   type: string
   button: {
@@ -43,11 +43,13 @@ export type Checker = {
   type: "human" | "ai"
   isActive: boolean | null
   isOnboardingComplete: boolean | null
+  isAdmin: boolean
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null
   level: number
   experience: number
+  tier: "beginner" | "intermediate" | "expert"
   numVoted: number
   voteWeight: number
   numCorrectVotes: number
@@ -77,9 +79,18 @@ export type VoteRequest = {
     | "unsure"
     | "error"
     | null
+  reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
+}
+
+export type CustomReply = {
+  type: "text" | "image"
+  text: string | null
+  caption: string | null
+  lastUpdatedBy: DocumentReference
+  lastUpdatedTimestamp: Timestamp
 }
 
 export type TeleMessage = {
