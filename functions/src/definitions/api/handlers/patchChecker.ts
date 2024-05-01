@@ -42,6 +42,14 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
       return res.status(400).send("telegramId cannot be updated")
     }
 
+    if (keys.includes("isAdmin")) {
+      return res.status(400).send("isAdmin cannot be updated")
+    }
+
+    if (keys.includes("tier")) {
+      return res.status(400).send("tier cannot be updated")
+    }
+
     //update checker
     await checkerRef.update(body)
 
