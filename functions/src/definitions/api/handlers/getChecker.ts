@@ -51,7 +51,7 @@ const getCheckerHandler = async (req: Request, res: Response) => {
 
     //filter client side for category != null, since firestore doesn't support inequality on 2 fields
     const last30DaysData = last30DaysSnap.docs.filter(
-      (doc) => doc.get("category") !== null
+      (doc) => doc.get("category") !== null && doc.get("category") !== "pass"
     )
 
     const totalVoted = last30DaysData.length

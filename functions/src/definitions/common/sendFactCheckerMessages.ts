@@ -108,8 +108,12 @@ const sendL2OthersCategorisationMessage = async function (
         {
           id: `${type}_${messageRef.id}_${voteRequestSnap.id}_unsure`,
           title: "I'm Unsure",
-          description:
-            "Do try your best to categorize! But if really unsure, select this",
+          description: "Insufficient information to determine",
+        },
+        {
+          id: `${type}_${messageRef.id}_${voteRequestSnap.id}_pass`,
+          title: "I'm Passing",
+          description: "Skip assessing this message, if you must",
         },
       ]
       const sections = [

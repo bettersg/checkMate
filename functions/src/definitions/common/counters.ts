@@ -35,7 +35,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     .get()
   const [
     responsesCount,
-    errorCount,
+    passCount,
     irrelevantCount,
     scamCount,
     illicitCount,
@@ -48,7 +48,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     voteRequestCountSnapshot,
   ] = await Promise.all([
     getCount(messageRef, "responses"),
-    getCount(messageRef, "error"),
+    getCount(messageRef, "pass"),
     getCount(messageRef, "irrelevant"),
     getCount(messageRef, "scam"),
     getCount(messageRef, "illicit"),
@@ -61,12 +61,12 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     totalVoteRequestQuery,
   ])
   const totalVoteRequestsCount = voteRequestCountSnapshot.data().count ?? 0
-  const factCheckerCount = totalVoteRequestsCount - errorCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
-  const validResponsesCount = responsesCount - errorCount //can remove in future and replace with nonErrorCount
+  const factCheckerCount = totalVoteRequestsCount - passCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
+  const validResponsesCount = responsesCount - passCount //can remove in future and replace with nonErrorCount
   const susCount = scamCount + illicitCount
   return {
     responsesCount,
-    errorCount,
+    passCount,
     irrelevantCount,
     scamCount,
     illicitCount,
