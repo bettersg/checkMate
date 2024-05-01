@@ -48,7 +48,6 @@ async function deactivateAndRemind() {
         .get()
       if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
         logger.log(`Checker ${doc.id}, ${doc.get("name")} set to inactive`)
-        await doc.ref.update({ isActive: false })
         if (preferredPlatform === "whatsapp") {
           if (!whatsappId) {
             logger.error(
@@ -58,6 +57,7 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
+          await doc.ref.update({ isActive: false })
           return sendWhatsappTemplateMessage(
             "factChecker",
             whatsappId,
