@@ -2510,7 +2510,12 @@
 											"                                {\r",
 											"                                    \"id\": `others_${messageId}_${voteRequestId}_unsure`,\r",
 											"                                    \"title\": \"I'm Unsure\",\r",
-											"                                    \"description\": \"Do try your best to categorize! But if really unsure, select this\"\r",
+											"                                    \"description\": \"Insufficient information to determine\"\r",
+											"                                },\r",
+											"                                {\r",
+											"                                    \"id\": `others_${messageId}_${voteRequestId}_pass`,\r",
+											"                                    \"title\": \"I'm Passing\",\r",
+											"                                    \"description\": \"Skip this message if you're really unable to assess it\"\r",
 											"                                }\r",
 											"                            ]\r",
 											"                        }\r",
@@ -2527,7 +2532,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -2536,7 +2542,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -3574,7 +3581,12 @@
 											"                                {\r",
 											"                                    \"id\": `others_${messageId}_${voteRequestId}_unsure`,\r",
 											"                                    \"title\": \"I'm Unsure\",\r",
-											"                                    \"description\": \"Do try your best to categorize! But if really unsure, select this\"\r",
+											"                                    \"description\": \"Insufficient information to determine\"\r",
+											"                                },\r",
+											"                                {\r",
+											"                                    \"id\": `others_${messageId}_${voteRequestId}_pass`,\r",
+											"                                    \"title\": \"I'm Passing\",\r",
+											"                                    \"description\": \"Skip this message if you're really unable to assess it\"\r",
 											"                                }\r",
 											"                            ]\r",
 											"                        }\r",
@@ -3591,7 +3603,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -3600,7 +3613,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -4285,7 +4299,12 @@
 											"                                {\r",
 											"                                    \"id\": `others_${messageId}_${voteRequestId}_unsure`,\r",
 											"                                    \"title\": \"I'm Unsure\",\r",
-											"                                    \"description\": \"Do try your best to categorize! But if really unsure, select this\"\r",
+											"                                    \"description\": \"Insufficient information to determine\"\r",
+											"                                },\r",
+											"                                {\r",
+											"                                    \"id\": `others_${messageId}_${voteRequestId}_pass`,\r",
+											"                                    \"title\": \"I'm Passing\",\r",
+											"                                    \"description\": \"Skip this message if you're really unable to assess it\"\r",
 											"                                }\r",
 											"                            ]\r",
 											"                        }\r",
@@ -4302,7 +4321,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -4311,7 +4331,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -8075,7 +8096,12 @@
 											"                                {\r",
 											"                                    \"id\": `others_${messageId}_${voteRequestId}_unsure`,\r",
 											"                                    \"title\": \"I'm Unsure\",\r",
-											"                                    \"description\": \"Do try your best to categorize! But if really unsure, select this\"\r",
+											"                                    \"description\": \"Insufficient information to determine\"\r",
+											"                                },\r",
+											"                                {\r",
+											"                                    \"id\": `others_${messageId}_${voteRequestId}_pass`,\r",
+											"                                    \"title\": \"I'm Passing\",\r",
+											"                                    \"description\": \"Skip this message if you're really unable to assess it\"\r",
 											"                                }\r",
 											"                            ]\r",
 											"                        }\r",
@@ -8092,7 +8118,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -8101,7 +8128,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -10008,7 +10036,12 @@
 											"                                {\r",
 											"                                    \"id\": `others_${messageId}_${voteRequestId}_unsure`,\r",
 											"                                    \"title\": \"I'm Unsure\",\r",
-											"                                    \"description\": \"Do try your best to categorize! But if really unsure, select this\"\r",
+											"                                    \"description\": \"Insufficient information to determine\"\r",
+											"                                },\r",
+											"                                {\r",
+											"                                    \"id\": `others_${messageId}_${voteRequestId}_pass`,\r",
+											"                                    \"title\": \"I'm Passing\",\r",
+											"                                    \"description\": \"Skip this message if you're really unable to assess it\"\r",
 											"                                }\r",
 											"                            ]\r",
 											"                        }\r",
@@ -10025,7 +10058,8 @@
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -10034,7 +10068,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
