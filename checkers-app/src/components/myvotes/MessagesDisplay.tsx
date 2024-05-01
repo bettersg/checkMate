@@ -26,7 +26,7 @@ import { VoteSummary, VoteSummaryApiResponse } from "../../types";
 import Pagination from "./Pagination"; // Make sure to create this component
 
 const MessagesDisplay: FC = () => {
-  const { checkerId } = useUser();
+  const { checkerDetails } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [votes, setVotes] = useState<VoteSummary[]>([]);
   const [lastPath, setLastPath] = useState<string | null>(null);
@@ -39,11 +39,11 @@ const MessagesDisplay: FC = () => {
     const fetchMessages = async () => {
       setIsLoading(true);
       try {
-        if (!checkerId) {
+        if (!checkerDetails.checkerId) {
           throw new Error("Checker Id missing.");
         }
         const response: VoteSummaryApiResponse = await getCheckerVotes(
-          checkerId,
+          checkerDetails.checkerId,
           activeTab.toLowerCase(),
           5,
           lastPath
@@ -60,10 +60,10 @@ const MessagesDisplay: FC = () => {
         setIsLoading(false);
       }
     };
-    if (checkerId) {
+    if (checkerDetails.checkerId) {
       fetchMessages();
     }
-  }, [checkerId, activeTab, currentPage]);
+  }, [checkerDetails.checkerId, activeTab, currentPage]);
 
   const handleTabChange = (tab: "pending" | "voted") => {
     setActiveTab(tab);

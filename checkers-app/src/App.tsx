@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
 ]);
 
 function App() {
-  const { setCheckerId, setCheckerName, setAuthScopes } = useUser();
+  const { setCheckerDetails, setAuthScopes } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   //for global states: userID, name and messages
 
@@ -74,16 +74,16 @@ function App() {
             }
             if (data.isNewUser || data.isOnboardingComplete === false) {
               // TODO BRENNAN: Redirect to onboarding page
-              signInWithToken(
-                data.customToken,
-                setCheckerId,
-                setCheckerName,
-                data.checkerId,
-                data.name
-              )
+              signInWithToken(data.customToken)
                 .then(() => {
                   // Handle post-signIn success actions here, if any
-                  console.log("Sign-in successful");
+                  setCheckerDetails((currentChecker) => ({
+                    ...currentChecker,
+                    checkerId: data.checkerId,
+                    checkerName: data.name,
+                    isAdmin: data.isAdmin,
+                    tier: data.tier,
+                  }));
                   setAuthScopes(data);
                   router.navigate("/onboarding");
                 })
@@ -97,16 +97,15 @@ function App() {
               setAuthScopes(data);
             } else {
               //if existing user
-              signInWithToken(
-                data.customToken,
-                setCheckerId,
-                setCheckerName,
-                data.checkerId,
-                data.name
-              )
+              signInWithToken(data.customToken)
                 .then(() => {
-                  // Handle post-signIn success actions here, if any
-                  console.log("Sign-in successful");
+                  setCheckerDetails((currentChecker) => ({
+                    ...currentChecker,
+                    checkerId: data.checkerId,
+                    checkerName: data.name,
+                    isAdmin: data.isAdmin,
+                    tier: data.tier,
+                  }));
                 })
                 .catch((err) => {
                   console.error(
@@ -121,12 +120,11 @@ function App() {
             console.error("Error fetching custom token:", err);
           })
           .finally(() => {
-            console.log("Sign-in complete");
             setIsLoading(false);
           });
       }
     }
-  }, [setCheckerId, setCheckerName]);
+  }, [setCheckerDetails]);
 
   if (isLoading) {
     return <Loading />;

@@ -26,11 +26,19 @@ erDiagram
         boolean isIrrelevant "Should message be considered assessed and ready for reply"
         number truthScore
         string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or error"
-        string customReply "Not used for now"
+        map customReply
         number instanceCount
         collection instances
         collection voteRequests
         string imageUrl "url of where the image is stored"
+    }
+
+    customReply {
+      string type: "text or image"
+      string text
+      string caption
+      reference lastUpdatedBy
+      timestamp lastUpdatedTimestamp
     }
 
     instance {
@@ -93,15 +101,17 @@ erDiagram
         boolean isView "true if user has voted/viewed vote result"
     }
 
-    factChecker {
+    checker {
         string id PK "unique ID, assigned by firestore"
         string type "human or ai"
         string name
         boolean isActive
         boolean isOnboardingComplete
+        boolean isAdmin
         string singpassOpenId "Singpass Open ID"
         string telegramId "telegram ID"
         string whatsappId "whatsapp phone number"
+        string tier "tier of checker, either beginner, intermediate, or expert"
         number level "Not used for now"
         number experience "Not used for now"
         number numVoted

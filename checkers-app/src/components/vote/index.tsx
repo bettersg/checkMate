@@ -1,6 +1,6 @@
 import VoteCategories from "./VoteCategories";
 import MessageCard from "./MessageCard";
-import { Typography } from "@material-tailwind/react";
+import { Typography, Alert } from "@material-tailwind/react";
 import { BackButton } from "../common/BackButton";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -11,9 +11,10 @@ import { getVote } from "../../services/api";
 import CategoryRationalisation from "./Rationalisation";
 import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
+import CustomReply from "./CustomReply";
 
 export default function VotePage() {
-  const { checkerId } = useUser();
+  const { checkerDetails } = useUser();
   const { messageId, voteRequestId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [vote, setVote] = useState<Vote | null>(null);
@@ -28,10 +29,10 @@ export default function VotePage() {
       setIsLoading(false);
     };
 
-    if (messageId && voteRequestId && checkerId) {
+    if (messageId && voteRequestId && checkerDetails.checkerId) {
       fetchVote();
     }
-  }, [checkerId]);
+  }, [checkerDetails.checkerId]);
 
   if (isLoading) {
     return <Loading />;
@@ -58,6 +59,7 @@ export default function VotePage() {
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
         />
+        <Alert variant="ghost">Sender: {vote.sender}</Alert>
         {vote.category === null || !vote.isAssessed ? (
           <>
             <Typography
@@ -106,6 +108,9 @@ export default function VotePage() {
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />
           </>
+        )}
+        {checkerDetails.tier === "expert" && (
+          <CustomReply messageId={messageId} />
         )}
       </div>
     </>

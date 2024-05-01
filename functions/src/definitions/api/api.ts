@@ -1,8 +1,6 @@
 import * as admin from "firebase-admin"
-import express, { RequestHandler } from "express"
-import * as functions from "firebase-functions"
+import express from "express"
 import { onRequest } from "firebase-functions/v2/https"
-import { Timestamp } from "firebase-admin/firestore"
 import { config } from "dotenv"
 import getCheckerHandler from "./handlers/getChecker"
 import getCheckerVotesHandler from "./handlers/getCheckerVotes"
@@ -14,10 +12,10 @@ import getCheckerPendingCount from "./handlers/getCheckerPendingCount"
 import postOTPHandler from "./handlers/postOTP"
 import checkOTPHandler from "./handlers/checkOTP"
 import deleteCheckerHandler from "./handlers/deleteChecker"
+import postCustomReplyHandler from "./handlers/postCustomReply"
+import postWhatsappTestMessageHandler from "./handlers/postWhatsappTestMessage"
 import { validateFirebaseIdToken } from "./middleware/validator"
-
-// Type for supported HTTP methods
-type HttpMethod = "get" | "post" | "put" | "delete" | "patch"
+import getMessageHandler from "./handlers/getMessage"
 
 config()
 
@@ -25,40 +23,85 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-// Usage
-
 const app = express()
+const checkersRouter = express.Router()
+const messagesRouter = express.Router()
 
-// Route Registration Helper
-function secureRoute(
-  path: string,
-  handler: RequestHandler,
-  method: HttpMethod = "get"
-) {
-  app[method](path, validateFirebaseIdToken, handler)
-}
+checkersRouter.post("/checkers", validateFirebaseIdToken, postCheckerHandler)
 
-secureRoute("/checkers/:checkerId", getCheckerHandler, "get")
-secureRoute("/checkers/:checkerId", patchCheckerHandler, "patch")
-secureRoute("/checkers/:checkerId", deleteCheckerHandler, "delete")
-secureRoute("/checkers/:checkerId/pendingCount", getCheckerPendingCount)
-secureRoute("/checkers", postCheckerHandler, "post")
-secureRoute("/checkers/:checkerId/otp/check", checkOTPHandler, "post")
-secureRoute("/checkers/:checkerId/otp", postOTPHandler, "post")
-secureRoute("/checkers/:checkerId/votes", getCheckerVotesHandler, "get")
-secureRoute(
-  "/messages/:messageId/voteRequests/:voteRequestId",
-  getVoteHandler,
-  "get"
-)
-secureRoute(
-  "/messages/:messageId/voteRequests/:voteRequestId",
-  patchVoteRequestHandler,
-  "patch"
+checkersRouter.get(
+  "/checkers/:checkerId",
+  validateFirebaseIdToken,
+  getCheckerHandler
 )
 
-const main = express()
-main.use("/api", app)
+checkersRouter.patch(
+  "/checkers/:checkerId",
+  validateFirebaseIdToken,
+  patchCheckerHandler
+)
+
+checkersRouter.delete(
+  "/checkers/:checkerId",
+  validateFirebaseIdToken,
+  deleteCheckerHandler
+)
+
+checkersRouter.get(
+  "/checkers/:checkerId/pendingCount",
+  validateFirebaseIdToken,
+  getCheckerPendingCount
+)
+
+checkersRouter.post(
+  "/checkers/:checkerId/otp/check",
+  validateFirebaseIdToken,
+  checkOTPHandler
+)
+
+checkersRouter.post(
+  "/checkers/:checkerId/otp",
+  validateFirebaseIdToken,
+  postOTPHandler
+)
+
+checkersRouter.get(
+  "/checkers/:checkerId/votes",
+  validateFirebaseIdToken,
+  getCheckerVotesHandler
+)
+
+checkersRouter.post(
+  "/checkers/:checkerId/whatsappTestMessage",
+  validateFirebaseIdToken,
+  postWhatsappTestMessageHandler
+)
+
+messagesRouter.get(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  validateFirebaseIdToken,
+  getVoteHandler
+)
+
+messagesRouter.patch(
+  "/messages/:messageId/voteRequests/:voteRequestId",
+  validateFirebaseIdToken,
+  patchVoteRequestHandler
+)
+
+messagesRouter.post(
+  "/messages/:messageId/customReply",
+  validateFirebaseIdToken,
+  postCustomReplyHandler
+)
+
+messagesRouter.get(
+  "/messages/:messageId",
+  validateFirebaseIdToken,
+  getMessageHandler
+)
+
+app.use("/api", [checkersRouter, messagesRouter])
 
 const apiHandler = onRequest(
   {
@@ -68,7 +111,7 @@ const apiHandler = onRequest(
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
     ],
   },
-  main
+  app
 )
 
 export { apiHandler }

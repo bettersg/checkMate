@@ -40,7 +40,10 @@ async function validateFirebaseIdToken(
 
   try {
     const decodedIdToken = await admin.auth().verifyIdToken(idToken)
+    const isAdmin = decodedIdToken.isAdmin
+    const tier = decodedIdToken.tier
     const checkerID = decodedIdToken.uid
+    console.log("checkerID: ", checkerID)
     if (!checkerID) {
       functions.logger.warn("Error while verifying Firebase ID token")
       return res.status(403).send("Unauthorized")
@@ -73,6 +76,11 @@ async function validateFirebaseIdToken(
     } else if (req.params.checkerId && req.params.checkerId !== checkerID) {
       functions.logger.warn("Unauthorized, checker ID does not match")
       return res.status(403).send("Unauthorized, checker ID does not match")
+    }
+    res.locals.checker = {
+      id: checkerID,
+      isAdmin: isAdmin,
+      tier: tier,
     }
     next()
   } catch (error) {

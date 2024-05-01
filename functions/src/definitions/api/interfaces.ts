@@ -1,11 +1,24 @@
+import { CustomReply } from "../../types"
+
 interface createVoteRequest {
   factCheckerId?: string
   factCheckerName?: string
 }
 
+interface upsertCustomReply {
+  factCheckerId?: string
+  factCheckerName?: string
+  customReply: string
+}
+
+interface postWhatsappTestMessage {
+  message: string
+}
+
 interface updateVoteRequest {
   category: string
   truthScore?: number //between 1 and 5
+  reasoning?: string
 }
 
 interface createChecker {
@@ -47,6 +60,8 @@ interface Checker {
   type: "human" | "ai"
   isActive: boolean | null
   isOnboardingComplete: boolean | null
+  tier: "beginner" | "intermediate" | "expert"
+  isAdmin: boolean
   pendingVoteCount: number
   last30days: last30DaysStats
   achievements: Achievements | null
@@ -66,6 +81,16 @@ interface VoteSummary {
   isAssessed: boolean //if the message is assessed
   isUnsure: boolean //if the final assessed category ended as unsure
   firestorePath: string
+}
+
+interface MessageSummary {
+  primaryCategory: string | null
+  machineCategory: string | null
+  truthScore: number | null
+  instanceCount: number
+  text: string | null //only for type text
+  caption: string | null //only for type image
+  customReply: CustomReply | null
 }
 
 interface VoteSummaryApiResponse {
@@ -134,4 +159,7 @@ export type {
   PendingCountApiResponse,
   AssessedInfo,
   updateChecker,
+  upsertCustomReply,
+  postWhatsappTestMessage,
+  MessageSummary,
 }

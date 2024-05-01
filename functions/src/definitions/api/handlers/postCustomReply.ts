@@ -1,11 +1,11 @@
 import { Request, Response } from "express"
-import { createVoteRequest } from "../interfaces"
+import { upsertCustomReply } from "../interfaces"
 import {
   Timestamp,
   DocumentReference,
   DocumentSnapshot,
 } from "firebase-admin/firestore"
-import { VoteRequest } from "../../../types"
+import { CustomReply } from "../../../types"
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 
@@ -15,15 +15,20 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
-const postVoteRequestHandler = async (req: Request, res: Response) => {
+const postCustomReplyHandler = async (req: Request, res: Response) => {
   //get messageId
   const messageId = req.params.messageId
   if (!messageId) {
     res.status(400).send("MessageId is required")
     return
   }
+  //confirm customReply in body
+  const { customReply } = req.body as upsertCustomReply
+  if (!customReply) {
+    return res.status(400).send("customReply is required in body")
+  }
   //confirm factCheckerId in body
-  const { factCheckerId, factCheckerName } = req.body as createVoteRequest
+  const { factCheckerId, factCheckerName } = req.body as upsertCustomReply
   if (!factCheckerId && !factCheckerName) {
     return res
       .status(400)
@@ -71,31 +76,27 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     factCheckerRef = factCheckerQuerySnap.docs[0].ref
     factCheckerSnap = factCheckerQuerySnap.docs[0]
   }
-  const newVoteRequest: VoteRequest = {
-    factCheckerDocRef: factCheckerRef,
-    platformId: factCheckerSnap.get("whatsappId") ?? null,
-    hasAgreed: null,
-    triggerL2Vote: null,
-    triggerL2Others: null,
-    platform: "agent",
-    sentMessageId: null,
-    category: null,
-    truthScore: null,
-    reasoning: null,
-    createdTimestamp: Timestamp.fromDate(new Date()),
-    acceptedTimestamp: Timestamp.fromDate(new Date()),
-    votedTimestamp: null,
+  if (factCheckerSnap.get("tier") !== "expert") {
+    return res
+      .status(400)
+      .send("factChecker must be at expert tier to post custom replies")
   }
-
-  //create new voteRequest in message
-  const ref = await messageRef.collection("voteRequests").add(newVoteRequest)
+  const customReplyObject: CustomReply = {
+    type: "text",
+    text: customReply,
+    caption: null,
+    lastUpdatedBy: factCheckerRef,
+    lastUpdatedTimestamp: Timestamp.now(),
+  }
+  messageRef.update({
+    customReply: customReplyObject,
+  })
 
   //create return object
   const returnObj = {
     success: true,
-    voteRequestPath: ref.path,
   }
   return res.status(200).send(returnObj)
 }
 
-export default postVoteRequestHandler
+export default postCustomReplyHandler
