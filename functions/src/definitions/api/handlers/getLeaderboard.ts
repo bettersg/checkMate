@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { getFullLeaderboard } from "../../common/statistics"
 import { LeaderboardEntry } from "../interfaces"
+import { logger } from "firebase-functions/v2"
 import * as admin from "firebase-admin"
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -18,7 +19,10 @@ const getLeaderboardHandler = async (req: Request, res: Response) => {
     const leaderboardData = await getFullLeaderboard()
     try {
       displayedRows = getDisplayedRows(checkerId, leaderboardData)
-    } catch {
+    } catch (error) {
+      logger.error(
+        `Error fetching leaderboard, likely due to checker not found in leaderboard data: ${error}`
+      )
       return res
         .status(500)
         .send(
@@ -26,7 +30,8 @@ const getLeaderboardHandler = async (req: Request, res: Response) => {
         )
     }
     res.status(200).json(displayedRows)
-  } catch {
+  } catch (error) {
+    logger.error(`Error fetching leaderboard: ${error}`)
     return res.status(500).send("Error fetching leaderboard")
   }
 }

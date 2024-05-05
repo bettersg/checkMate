@@ -152,7 +152,7 @@ export function LeaderboardTable() {
                         color="blue-gray"
                         className="font-normal"
                       >
-                        {name}
+                        {name.length > 10 ? `${name.slice(0, 10)}..` : name}
                       </Typography>
                     </td>
                     <td className={classes}>
