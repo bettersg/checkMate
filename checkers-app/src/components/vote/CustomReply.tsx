@@ -56,7 +56,7 @@ export default function CustomReply(Prop: PropType) {
   const handleWhatsappTest = () => {
     if (checkerDetails.checkerId && customReplyText) {
       sendWhatsappTestMessage(checkerDetails.checkerId, customReplyText)
-        .then((data) => {
+        .then(() => {
           setShowAlerts(false);
         })
         .catch((error) => {
