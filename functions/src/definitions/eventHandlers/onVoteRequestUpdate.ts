@@ -197,10 +197,10 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       const previousDuration = preChangeData.duration
       const currentDuration = postChangeData.duration
       let durationDelta = 0
-      if (previousDuration !== null && previousCorrect !== null) {
+      if (previousDuration != null && previousCorrect != null) {
         durationDelta -= previousDuration
       }
-      if (currentDuration !== null && currentCorrect !== null) {
+      if (currentDuration != null && currentCorrect != null) {
         durationDelta += currentDuration
       }
       if (durationDelta !== 0) {
@@ -212,7 +212,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         //means now its not correct
         checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
           FieldValue.increment(-1)
-        if (previousScore !== null) {
+        if (previousScore != null) {
           checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
             -previousScore
           )
@@ -230,7 +230,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         checkerUpdateObj["leaderboardStats.score"] =
           FieldValue.increment(currentScore)
       }
-      if (previousCorrect === null) {
+      if (previousCorrect == null) {
         checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
       }
       await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
