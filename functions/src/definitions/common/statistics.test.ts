@@ -33,8 +33,7 @@ describe("computeGamificationScore Tests", () => {
 
     // Act
     const score = computeGamificationScore(mockDocSnap, true)
-
     // Assert
-    expect(score).toBeGreaterThan(0) // Expect some positive score for correct and timely response
+    expect(score).toBeCloseTo(0.97916667) // Expect some positive score for correct and timely response
   })
 })
