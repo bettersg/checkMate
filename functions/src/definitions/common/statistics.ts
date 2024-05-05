@@ -78,6 +78,7 @@ async function getFullLeaderboard(): Promise<LeaderboardEntry[]> {
   const db = admin.firestore()
   const leaderboardQuery = db
     .collection("checkers")
+    .where("isActive", "==", true)
     .orderBy("leaderboardStats.score", "desc")
   const leaderboardSnap = await leaderboardQuery.get()
   const leaderboardData = leaderboardSnap.docs.map((doc, index) => {
