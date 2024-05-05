@@ -13,16 +13,17 @@ import { logger } from "firebase-functions/v2"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { AppEnv } from "../../appEnv"
 import { TIME } from "../../utils/time"
+import { getFullLeaderboard } from "../common/statistics"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+const db = admin.firestore()
 
 async function deactivateAndRemind() {
   try {
-    const db = admin.firestore()
     const cutoffHours = 72
     const activeCheckMatesSnap = await db
       .collection("checkers")
@@ -96,7 +97,6 @@ async function deactivateAndRemind() {
 
 async function checkConversationSessionExpiring() {
   try {
-    const db = admin.firestore()
     const hoursAgo = 23
     const windowStart = Timestamp.fromDate(
       new Date(Date.now() - hoursAgo * TIME.ONE_HOUR)
@@ -121,7 +121,6 @@ async function checkConversationSessionExpiring() {
 
 async function interimPromptHandler() {
   try {
-    const db = admin.firestore()
     const dayAgo = Timestamp.fromDate(new Date(Date.now() - TIME.ONE_DAY))
     const halfHourAgo =
       runtimeEnvironment.value() === "PROD"
@@ -155,6 +154,42 @@ async function interimPromptHandler() {
     await Promise.all(promisesArr)
   } catch (error) {
     logger.error("Error in interimPromptHandler:", error)
+  }
+}
+
+async function resetLeaderboardHandler() {
+  await saveLeaderboard()
+  try {
+    // reset leaderboard stats for all checkers
+    const checkersQuerySnap = await db.collection("checkers").get()
+    const promisesArr = checkersQuerySnap.docs.map(async (doc) => {
+      return doc.ref.update({
+        leaderboardStats: {
+          numVoted: 0,
+          numCorrectVotes: 0,
+          totalTimeTaken: 0,
+          score: 0,
+        },
+      })
+    })
+    await Promise.all(promisesArr)
+  } catch (error) {
+    logger.error("Error in resetLeaderboard:", error)
+  }
+}
+
+async function saveLeaderboard() {
+  try {
+    const leaderboardData = await getFullLeaderboard()
+    const storageBucket = admin.storage().bucket()
+    const leaderboardFile = storageBucket.file("leaderboard.json")
+
+    await leaderboardFile.save(JSON.stringify(leaderboardData), {
+      contentType: "application/json",
+    })
+    logger.log("Leaderboard saved successfully")
+  } catch (error) {
+    logger.error("Failed to save leaderboard:", error)
   }
 }
 
@@ -192,9 +227,19 @@ const sendInterimPrompt = onSchedule(
   interimPromptHandler
 )
 
+const resetLeaderboard = onSchedule(
+  {
+    schedule: "0 0 1 * *",
+    timeZone: "Asia/Singapore",
+    region: "asia-southeast1",
+  },
+  resetLeaderboardHandler
+)
+
 export {
   checkSessionExpiring,
   scheduledDeactivation,
   sendInterimPrompt,
+  resetLeaderboard,
   interimPromptHandler,
 }

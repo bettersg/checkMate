@@ -85,6 +85,9 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: Timestamp.fromDate(new Date()),
     votedTimestamp: null,
+    isCorrect: null,
+    score: null,
+    duration: null,
   }
 
   //create new voteRequest in message

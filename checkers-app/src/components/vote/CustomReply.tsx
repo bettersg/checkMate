@@ -48,7 +48,6 @@ export default function CustomReply(Prop: PropType) {
         checkerDetails.checkerId,
         customReplyText
       ).then(() => {
-        console.log("Custom reply posted successfully");
         navigate("/votes");
       });
     }
@@ -58,8 +57,6 @@ export default function CustomReply(Prop: PropType) {
     if (checkerDetails.checkerId && customReplyText) {
       sendWhatsappTestMessage(checkerDetails.checkerId, customReplyText)
         .then((data) => {
-          console.log(data);
-          console.log("Test is successfull");
           setShowAlerts(false);
         })
         .catch((error) => {

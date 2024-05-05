@@ -182,23 +182,27 @@ async function sendTemplateMessageAndCreateVoteRequest(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const factChecker = factCheckerDocSnap.data()
+  const newVoteRequest: VoteRequest = {
+    factCheckerDocRef: factCheckerDocSnap.ref,
+    platformId: factChecker.whatsappId,
+    hasAgreed: false,
+    triggerL2Vote: null,
+    triggerL2Others: null,
+    platform: "telegram",
+    sentMessageId: null,
+    category: null,
+    truthScore: null,
+    reasoning: null,
+    createdTimestamp: Timestamp.fromDate(new Date()),
+    acceptedTimestamp: null,
+    votedTimestamp: null,
+    isCorrect: null,
+    score: null,
+    duration: null,
+  }
   if (factChecker?.preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
-    const newVoteRequest: VoteRequest = {
-      factCheckerDocRef: factCheckerDocSnap.ref,
-      platformId: factChecker.whatsappId,
-      hasAgreed: false,
-      triggerL2Vote: null,
-      triggerL2Others: null,
-      platform: "whatsapp",
-      sentMessageId: null,
-      category: null,
-      truthScore: null,
-      reasoning: null,
-      createdTimestamp: Timestamp.fromDate(new Date()),
-      acceptedTimestamp: null,
-      votedTimestamp: null,
-    }
+    newVoteRequest.platform = "whatsapp"
     return messageRef
       .collection("voteRequests")
       .add(newVoteRequest)
@@ -219,20 +223,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
     // First, add the voteRequest object to the "voteRequests" sub-collection
     return messageRef
       .collection("voteRequests")
-      .add({
-        factCheckerDocRef: factCheckerDocSnap.ref,
-        platformId: factChecker.telegramId,
-        hasAgreed: false,
-        triggerL2Vote: null,
-        triggerL2Others: null,
-        platform: "telegram",
-        sentMessageId: null,
-        category: null,
-        vote: null,
-        createdTimestamp: Timestamp.fromDate(new Date()),
-        acceptedTimestamp: null,
-        votedTimestamp: null,
-      })
+      .add(newVoteRequest)
       .then((voteRequestRef) => {
         const voteRequestPath = voteRequestRef.path
         const voteRequestUrl = `${checkerAppHost}/${voteRequestPath}`

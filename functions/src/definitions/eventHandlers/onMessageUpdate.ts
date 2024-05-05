@@ -3,6 +3,7 @@ import { respondToInstance } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
+import { tabulateVoteStats } from "../common/statistics"
 
 const onMessageUpdateV2 = onDocumentUpdated(
   {
@@ -71,6 +72,25 @@ const onMessageUpdateV2 = onDocumentUpdated(
         text: anonymisedText,
       })
     }
+    if (shouldRecalculateAccuracy(preChangeSnap, postChangeSnap)) {
+      //get all voteRequests
+      const voteRequestsQuerySnap = await postChangeSnap.ref
+        .collection("voteRequests")
+        .where("category", "!=", null)
+        .get()
+      const promiseArr = voteRequestsQuerySnap.docs.map((voteRequestSnap) => {
+        const { isCorrect, score, duration } = tabulateVoteStats(
+          postChangeSnap,
+          voteRequestSnap
+        )
+        return voteRequestSnap.ref.update({
+          isCorrect: isCorrect,
+          score: score,
+          duration: duration,
+        })
+      })
+      await Promise.all(promiseArr)
+    }
     return Promise.resolve()
   }
 )
@@ -85,6 +105,25 @@ async function replyPendingInstances(
   pendingSnapshot.forEach(async (instanceSnap) => {
     await respondToInstance(instanceSnap)
   })
+}
+
+function shouldRecalculateAccuracy(
+  preChangeSnap: functions.firestore.DocumentSnapshot,
+  postChangeSnap: functions.firestore.DocumentSnapshot
+) {
+  if (postChangeSnap.get("isAssessed") !== true) {
+    return false
+  }
+  if (
+    preChangeSnap.get("primaryCategory") !==
+    postChangeSnap.get("primaryCategory")
+  ) {
+    return true
+  }
+  if (preChangeSnap.get("truthScore") !== postChangeSnap.get("truthScore")) {
+    return true
+  }
+  return false
 }
 
 export { onMessageUpdateV2 }

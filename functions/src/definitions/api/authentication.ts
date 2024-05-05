@@ -138,6 +138,12 @@ app.post("/", async (req, res) => {
       preferredPlatform: "telegram",
       lastVotedTimestamp: null,
       getNameMessageId: null,
+      leaderboardStats: {
+        numVoted: 0,
+        numCorrectVotes: 0,
+        totalTimeTaken: 0,
+        score: 0,
+      },
     }
 
     try {

@@ -180,7 +180,6 @@ const Onboarding = () => {
         }
         setIsOTPValidated(true);
         setShowAlerts(false);
-        console.log("OTP checked");
       })
       .catch((error) => {
         console.error("Error checking OTP", error);

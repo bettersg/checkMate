@@ -1,4 +1,4 @@
-import { CustomReply } from "../../types"
+import { CustomReply, LeaderboardEntry } from "../../types"
 
 interface createVoteRequest {
   factCheckerId?: string
@@ -162,4 +162,5 @@ export type {
   upsertCustomReply,
   postWhatsappTestMessage,
   MessageSummary,
+  LeaderboardEntry,
 }
