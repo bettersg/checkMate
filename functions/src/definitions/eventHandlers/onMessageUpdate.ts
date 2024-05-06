@@ -111,7 +111,7 @@ function shouldRecalculateAccuracy(
   preChangeSnap: functions.firestore.DocumentSnapshot,
   postChangeSnap: functions.firestore.DocumentSnapshot
 ) {
-  if (postChangeSnap.get("isAssessed") !== true) {
+  if (preChangeSnap.get("isAssessed") !== true) {
     return false
   }
   if (
