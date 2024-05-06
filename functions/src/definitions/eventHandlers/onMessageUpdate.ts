@@ -73,6 +73,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
     }
     if (shouldRecalculateAccuracy(preChangeSnap, postChangeSnap)) {
+      console.log()
       //get all voteRequests
       const voteRequestsQuerySnap = await postChangeSnap.ref
         .collection("voteRequests")
@@ -111,8 +112,11 @@ function shouldRecalculateAccuracy(
   preChangeSnap: functions.firestore.DocumentSnapshot,
   postChangeSnap: functions.firestore.DocumentSnapshot
 ) {
-  if (preChangeSnap.get("isAssessed") !== true) {
+  if (postChangeSnap.get("isAssessed") !== true) {
     return false
+  }
+  if (preChangeSnap.get("isAssessed") !== postChangeSnap.get("isAssessed")) {
+    return true
   }
   if (
     preChangeSnap.get("primaryCategory") !==
