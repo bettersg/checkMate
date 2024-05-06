@@ -182,13 +182,17 @@ async function sendTemplateMessageAndCreateVoteRequest(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const factChecker = factCheckerDocSnap.data()
+  const preferredPlatform = factChecker?.preferredPlatform
   const newVoteRequest: VoteRequest = {
     factCheckerDocRef: factCheckerDocSnap.ref,
-    platformId: factChecker.telegramId,
+    platformId:
+      preferredPlatform === "whatsapp"
+        ? factChecker.whatsappId
+        : factChecker.telegramId,
     hasAgreed: false,
     triggerL2Vote: null,
     triggerL2Others: null,
-    platform: "telegram",
+    platform: preferredPlatform,
     sentMessageId: null,
     category: null,
     truthScore: null,
@@ -200,10 +204,8 @@ async function sendTemplateMessageAndCreateVoteRequest(
     score: null,
     duration: null,
   }
-  if (factChecker?.preferredPlatform === "whatsapp") {
+  if (preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
-    newVoteRequest.platform = "whatsapp"
-    newVoteRequest.platformId = factChecker.whatsappId
     return messageRef
       .collection("voteRequests")
       .add(newVoteRequest)
@@ -219,7 +221,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
           "factChecker"
         )
       })
-  } else if (factChecker?.preferredPlatform === "telegram") {
+  } else if (preferredPlatform === "telegram") {
     //not yet implemented
     // First, add the voteRequest object to the "voteRequests" sub-collection
     return messageRef
