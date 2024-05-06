@@ -184,7 +184,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
   const factChecker = factCheckerDocSnap.data()
   const newVoteRequest: VoteRequest = {
     factCheckerDocRef: factCheckerDocSnap.ref,
-    platformId: factChecker.whatsappId,
+    platformId: factChecker.telegramId,
     hasAgreed: false,
     triggerL2Vote: null,
     triggerL2Others: null,
@@ -203,6 +203,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
   if (factChecker?.preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
     newVoteRequest.platform = "whatsapp"
+    newVoteRequest.platformId = factChecker.whatsappId
     return messageRef
       .collection("voteRequests")
       .add(newVoteRequest)
