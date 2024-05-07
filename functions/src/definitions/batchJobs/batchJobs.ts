@@ -182,7 +182,10 @@ async function saveLeaderboard() {
   try {
     const leaderboardData = await getFullLeaderboard()
     const storageBucket = admin.storage().bucket()
-    const leaderboardFile = storageBucket.file("leaderboard.json")
+    //get date string
+    const date = new Date();
+    const dateString = date.toISOString().split('T')[0];
+    const leaderboardFile = storageBucket.file(`leaderboard_${dateString}.json`)
 
     await leaderboardFile.save(JSON.stringify(leaderboardData), {
       contentType: "application/json",
