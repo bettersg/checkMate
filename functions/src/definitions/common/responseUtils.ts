@@ -352,7 +352,7 @@ async function sendVotingStats(instancePath: string) {
       name:
         scamCount >= illicitCount
           ? responses.PLACEHOLDER_SCAM
-          : responses.PLACEHOLDER_ILLICIT,
+          : responses.PLACEHOLDER_SUSPICIOUS,
       count: susCount,
       isInfo: false,
     },
