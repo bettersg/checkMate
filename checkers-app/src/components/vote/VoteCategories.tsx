@@ -6,14 +6,15 @@ import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
 import { FaceSmileIcon } from "@heroicons/react/20/solid";
-
+import { PaperAirplaneIcon } from "@heroicons/react/20/solid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
 import { patchVote } from "../../services/api";
 import { useUser } from "../../providers/UserContext";
+import { TooltipWithHelperIcon } from "../common/ToolTip";
 
-import InfoOptions from "./Tier2";
+import InfoOptions from "./InfoOptions";
 
 interface PropType {
   messageId: string | null;
@@ -23,41 +24,62 @@ interface PropType {
 }
 
 const CATEGORIES = [
-  { name: "scam", icon: <XMarkIcon className="h-7 w-7" />, display: "Scam" },
+  {
+    name: "scam",
+    icon: <XMarkIcon className="h-7 w-7" />,
+    display: "Scam",
+    description: "Intended to obtain money/personal information via deception",
+  },
   {
     name: "illicit",
     icon: <ShieldExclamationIcon className="h-7 w-7" />,
     display: "Illicit",
+    description:
+      "Other potential illicit activity, e.g. moneylending/prostitution",
   },
   {
     name: "info",
     icon: <NewspaperIcon className="h-7 w-7" />,
     display: "News/Info/Opinion",
+    description:
+      "Messages intended to inform/convince/mislead a broad base of people",
   },
   {
     name: "satire",
     icon: <FaceSmileIcon className="h-7 w-7" />,
     display: "Satire",
+    description: "Content clearly satirical in nature",
   },
   {
     name: "spam",
     icon: <FaceFrownIcon className="h-7 w-7" />,
     display: "Spam",
-  },
-  {
-    name: "irrelevant",
-    icon: <CheckCircleIcon className="h-7 w-7" />,
-    display: "Trivial",
-  },
-  {
-    name: "unsure",
-    icon: <QuestionMarkCircleIcon className="h-7 w-7" />,
-    display: "Unsure",
+    description: "Unsolicited spam, such as marketing messages",
   },
   {
     name: "legitimate",
     icon: <HandThumbUpIcon className="h-7 w-7" />,
     display: "Legitimate",
+    description:
+      "Legitimate source but can't be assessed, e.g. transactional messages",
+  },
+  {
+    name: "irrelevant",
+    icon: <CheckCircleIcon className="h-7 w-7" />,
+    display: "Trivial",
+    description: "Trivial/banal messages with nothing to assess",
+  },
+  {
+    name: "unsure",
+    icon: <QuestionMarkCircleIcon className="h-7 w-7" />,
+    display: "Unsure",
+    description: "Insufficient information to decide",
+  },
+  {
+    name: "pass",
+    icon: <PaperAirplaneIcon className="h-7 w-7" />,
+    display: "Pass",
+    description: "Skip this message if you're really unable to assess it",
   },
 ];
 
@@ -89,7 +111,12 @@ export default function VoteCategories(Prop: PropType) {
   const handleSubmitVote = (category: string, truthScore: number | null) => {
     if (messageId && voteRequestId) {
       //call api to update vote
-      patchVote(messageId, voteRequestId, category, category === "info" ? truthScore : null)
+      patchVote(
+        messageId,
+        voteRequestId,
+        category,
+        category === "info" ? truthScore : null
+      )
         .then(() => {
           incrementSessionVotedCount();
           navigate("/votes");
@@ -106,13 +133,18 @@ export default function VoteCategories(Prop: PropType) {
         <>
           <Button
             className={`flex flex-row items-center justify-start gap-2 max-w-md space-x-3 text-sm
-            ${category === cat.name ? "bg-primary-color3" : "bg-primary-color"
-              }`}
+            ${
+              category === cat.name ? "bg-primary-color3" : "bg-primary-color"
+            }`}
             key={index}
             onClick={() => handleVote(cat.name)}
           >
             {cat.icon}
             {cat.display}
+            <TooltipWithHelperIcon
+              header={cat.display}
+              text={cat.description}
+            />
           </Button>
           {/* Conditionally render InfoOptions right after the "info" button if it has been selected */}
           {category === "info" && cat.name === "info" && (

@@ -30,6 +30,10 @@ function checkAccuracy(
     logger.warn("Vote request has no category")
     return null
   }
+  if (voteRequestCategory === "pass") {
+    logger.info("Checker has passed")
+    return null
+  }
   if (voteRequestCategory === "info") {
     //check the truth scores and return true if they are within 1 of each other
     if (!["misleading", "untrue", "accurate"].includes(parentMessageCategory)) {

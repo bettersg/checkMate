@@ -48,7 +48,6 @@ async function deactivateAndRemind() {
         .get()
       if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
         logger.log(`Checker ${doc.id}, ${doc.get("name")} set to inactive`)
-        await doc.ref.update({ isActive: false })
         if (preferredPlatform === "whatsapp") {
           if (!whatsappId) {
             logger.error(
@@ -58,6 +57,7 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
+          await doc.ref.update({ isActive: false })
           return sendWhatsappTemplateMessage(
             "factChecker",
             whatsappId,
@@ -75,11 +75,11 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
-          const reactivationMessage = `Hello ${doc.get("name")},
-
-          Just a reminder - you've not completed a check within the last ${cutoffHours} hours! No worries, we know everyone's busy! But because the replies to our users are contingent on a large enough proportion of CheckMates voting, not doing so adds to the denominator and slows down the response to our users. Thus, we've temporarily removed you from the active CheckMates pool so you can take a break without worries!
-          
-          Anytime you wish to continue checking, just vist the portal below to reactivate yourself and you'll be immediately added back into the pool! (You can do so right now too!)`
+          const reactivationMessage = `Hello ${doc.get(
+            "name"
+          )}! Thanks for all your contributions so far🙏. We noticed that you have an outstanding message that hasn't been checked, and thought to remind you on it!
+You can go to the CheckMates' Portal and find your outstanding votes there. You can opt to pass the vote there, but we hope you'll at least give it a try 💪.
+If you'd like take a break, just type /deactivate. We'll stop sending you messages to vote on. Once you're ready to get back, you can type /activate to start receiving messages again.`
           return sendTelegramTextMessage(
             "factChecker",
             telegramId,
