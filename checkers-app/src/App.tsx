@@ -6,6 +6,7 @@ import {
   DashboardPage,
   ViewVotePage,
   MyVotesPage,
+  LeaderboardPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useUser } from "./providers/UserContext";
@@ -16,6 +17,7 @@ export const router = createBrowserRouter([
   { path: "/", element: <DashboardPage /> },
   { path: "/votes", element: <MyVotesPage /> },
   { path: "/achievements", element: <AchievementPage /> },
+  { path: "/leaderboard", element: <LeaderboardPage /> },
   {
     path: "/messages/:messageId/voteRequests/:voteRequestId",
     element: <ViewVotePage />,

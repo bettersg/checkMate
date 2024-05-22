@@ -60,7 +60,9 @@ export default function VotePage() {
           caption={vote.caption}
         />
         <Alert variant="ghost">Sender: {vote.sender}</Alert>
-        {vote.category === null || !vote.isAssessed ? (
+        {vote.category === null ||
+        vote.category === "pass" ||
+        !vote.isAssessed ? (
           <>
             <Typography
               variant="h4"

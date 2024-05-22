@@ -14,6 +14,7 @@ import checkOTPHandler from "./handlers/checkOTP"
 import deleteCheckerHandler from "./handlers/deleteChecker"
 import postCustomReplyHandler from "./handlers/postCustomReply"
 import postWhatsappTestMessageHandler from "./handlers/postWhatsappTestMessage"
+import getLeaderboardHandler from "./handlers/getLeaderboard"
 import { validateFirebaseIdToken } from "./middleware/validator"
 import getMessageHandler from "./handlers/getMessage"
 
@@ -75,6 +76,12 @@ checkersRouter.post(
   "/checkers/:checkerId/whatsappTestMessage",
   validateFirebaseIdToken,
   postWhatsappTestMessageHandler
+)
+
+checkersRouter.get(
+  "/checkers/:checkerId/leaderboard",
+  validateFirebaseIdToken,
+  getLeaderboardHandler
 )
 
 messagesRouter.get(

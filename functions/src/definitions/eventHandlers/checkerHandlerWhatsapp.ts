@@ -131,6 +131,12 @@ async function onSignUp(from: string, platform = "whatsapp") {
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
     lastVotedTimestamp: null,
+    leaderboardStats: {
+      numVoted: 0,
+      numCorrectVotes: 0,
+      totalTimeTaken: 0,
+      score: 0,
+    },
   }
   await db.collection("checkers").add(checkerObj)
 }

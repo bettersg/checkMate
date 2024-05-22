@@ -13,16 +13,17 @@ import { logger } from "firebase-functions/v2"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { AppEnv } from "../../appEnv"
 import { TIME } from "../../utils/time"
+import { getFullLeaderboard } from "../common/statistics"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+const db = admin.firestore()
 
 async function deactivateAndRemind() {
   try {
-    const db = admin.firestore()
     const cutoffHours = 72
     const activeCheckMatesSnap = await db
       .collection("checkers")
@@ -48,7 +49,6 @@ async function deactivateAndRemind() {
         .get()
       if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
         logger.log(`Checker ${doc.id}, ${doc.get("name")} set to inactive`)
-        await doc.ref.update({ isActive: false })
         if (preferredPlatform === "whatsapp") {
           if (!whatsappId) {
             logger.error(
@@ -58,6 +58,7 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
+          await doc.ref.update({ isActive: false })
           return sendWhatsappTemplateMessage(
             "factChecker",
             whatsappId,
@@ -75,11 +76,11 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
-          const reactivationMessage = `Hello ${doc.get("name")},
-
-          Just a reminder - you've not completed a check within the last ${cutoffHours} hours! No worries, we know everyone's busy! But because the replies to our users are contingent on a large enough proportion of CheckMates voting, not doing so adds to the denominator and slows down the response to our users. Thus, we've temporarily removed you from the active CheckMates pool so you can take a break without worries!
-          
-          Anytime you wish to continue checking, just vist the portal below to reactivate yourself and you'll be immediately added back into the pool! (You can do so right now too!)`
+          const reactivationMessage = `Hello ${doc.get(
+            "name"
+          )}! Thanks for all your contributions so far🙏. We noticed that you have an outstanding message that hasn't been checked, and thought to remind you on it!
+You can go to the CheckMates' Portal and find your outstanding votes there. You can opt to pass the vote there, but we hope you'll at least give it a try 💪.
+If you'd like take a break, just type /deactivate. We'll stop sending you messages to vote on. Once you're ready to get back, you can type /activate to start receiving messages again.`
           return sendTelegramTextMessage(
             "factChecker",
             telegramId,
@@ -96,7 +97,6 @@ async function deactivateAndRemind() {
 
 async function checkConversationSessionExpiring() {
   try {
-    const db = admin.firestore()
     const hoursAgo = 23
     const windowStart = Timestamp.fromDate(
       new Date(Date.now() - hoursAgo * TIME.ONE_HOUR)
@@ -121,7 +121,6 @@ async function checkConversationSessionExpiring() {
 
 async function interimPromptHandler() {
   try {
-    const db = admin.firestore()
     const dayAgo = Timestamp.fromDate(new Date(Date.now() - TIME.ONE_DAY))
     const halfHourAgo =
       runtimeEnvironment.value() === "PROD"
@@ -155,6 +154,45 @@ async function interimPromptHandler() {
     await Promise.all(promisesArr)
   } catch (error) {
     logger.error("Error in interimPromptHandler:", error)
+  }
+}
+
+async function resetLeaderboardHandler() {
+  await saveLeaderboard()
+  try {
+    // reset leaderboard stats for all checkers
+    const checkersQuerySnap = await db.collection("checkers").get()
+    const promisesArr = checkersQuerySnap.docs.map(async (doc) => {
+      return doc.ref.update({
+        leaderboardStats: {
+          numVoted: 0,
+          numCorrectVotes: 0,
+          totalTimeTaken: 0,
+          score: 0,
+        },
+      })
+    })
+    await Promise.all(promisesArr)
+  } catch (error) {
+    logger.error("Error in resetLeaderboard:", error)
+  }
+}
+
+async function saveLeaderboard() {
+  try {
+    const leaderboardData = await getFullLeaderboard()
+    const storageBucket = admin.storage().bucket()
+    //get date string
+    const date = new Date();
+    const dateString = date.toISOString().split('T')[0];
+    const leaderboardFile = storageBucket.file(`leaderboard_${dateString}.json`)
+
+    await leaderboardFile.save(JSON.stringify(leaderboardData), {
+      contentType: "application/json",
+    })
+    logger.log("Leaderboard saved successfully")
+  } catch (error) {
+    logger.error("Failed to save leaderboard:", error)
   }
 }
 
@@ -192,9 +230,19 @@ const sendInterimPrompt = onSchedule(
   interimPromptHandler
 )
 
+const resetLeaderboard = onSchedule(
+  {
+    schedule: "0 0 1 * *",
+    timeZone: "Asia/Singapore",
+    region: "asia-southeast1",
+  },
+  resetLeaderboardHandler
+)
+
 export {
   checkSessionExpiring,
   scheduledDeactivation,
   sendInterimPrompt,
+  resetLeaderboard,
   interimPromptHandler,
 }

@@ -102,6 +102,12 @@ const mockDb = async function () {
     preferredPlatform: "whatsapp",
     lastVotedTimestamp: null,
     getNameMessageId: null,
+    leaderboardStats: {
+      numVoted: 0,
+      numCorrectVotes: 0,
+      totalTimeTaken: 0,
+      score: 0,
+    },
   }
   if (querySnap.empty) {
     await checkersCollectionRef.add(checkerObj)

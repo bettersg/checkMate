@@ -57,6 +57,24 @@ export type Checker = {
   preferredPlatform: string | null
   lastVotedTimestamp: Timestamp | null
   getNameMessageId: string | null
+  leaderboardStats: LeaderBoardStats
+}
+
+type LeaderBoardStats = {
+  numVoted: number // number of votes cast where the parent message category is not unsure
+  numCorrectVotes: number // number of correct votes cast where the parent message category is not unsure
+  totalTimeTaken: number // total time taken to vote where the parent message category is not unsure
+  score: number // total score
+}
+
+export type LeaderboardEntry = {
+  id: string
+  position: number
+  name: string
+  numVoted: number
+  accuracy: number
+  averageTimeTaken: number
+  score: number
 }
 
 export type VoteRequest = {
@@ -77,12 +95,15 @@ export type VoteRequest = {
     | "legitimate"
     | "irrelevant"
     | "unsure"
-    | "error"
+    | "pass"
     | null
   reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
+  isCorrect: boolean | null
+  score: number | null
+  duration: number | null //duration in minutes
 }
 
 export type CustomReply = {

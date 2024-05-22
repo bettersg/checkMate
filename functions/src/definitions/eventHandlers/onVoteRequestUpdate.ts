@@ -10,6 +10,7 @@ import { incrementCounter, getVoteCounts } from "../common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
+import { tabulateVoteStats } from "../common/statistics"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -38,6 +39,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
       return
     }
+    const messageSnap = await messageRef.get()
     if (
       preChangeData.triggerL2Vote !== true &&
       postChangeData.triggerL2Vote === true
@@ -149,6 +151,17 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         isAssessed: isAssessed,
         primaryCategory: primaryCategory,
       })
+      if (messageSnap.get("isAssessed") === true) {
+        const { isCorrect, score, duration } = tabulateVoteStats(
+          messageSnap,
+          docSnap
+        )
+        await docSnap.ref.update({
+          isCorrect: isCorrect,
+          score: score,
+          duration: duration,
+        })
+      }
       if (postChangeData.category !== null) {
         //vote has ended
         if (
@@ -173,6 +186,54 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             ))
         }
       }
+    }
+    //update leaderboard stats
+    if (preChangeData.isCorrect !== postChangeData.isCorrect) {
+      const checkerUpdateObj = {} as Record<string, any>
+      const previousCorrect = preChangeData.isCorrect
+      const currentCorrect = postChangeData.isCorrect
+      const previousScore = preChangeData.score
+      const currentScore = postChangeData.score
+      const previousDuration = preChangeData.duration
+      const currentDuration = postChangeData.duration
+      let durationDelta = 0
+      if (previousDuration != null && previousCorrect != null) {
+        durationDelta -= previousDuration
+      }
+      if (currentDuration != null && currentCorrect != null) {
+        durationDelta += currentDuration
+      }
+      if (durationDelta !== 0) {
+        checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
+          FieldValue.increment(durationDelta)
+      }
+
+      if (previousCorrect === true) {
+        //means now its not correct
+        checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+          FieldValue.increment(-1)
+        if (previousScore != null) {
+          checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
+            -previousScore
+          )
+        }
+      }
+      if (currentCorrect === null) {
+        //means now it's unsure and should not be added to denominator
+        checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(-1)
+      }
+
+      if (currentCorrect === true) {
+        await docSnap.ref.update({ score: currentScore })
+        checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+          FieldValue.increment(1)
+        checkerUpdateObj["leaderboardStats.score"] =
+          FieldValue.increment(currentScore)
+      }
+      if (previousCorrect == null) {
+        checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
+      }
+      await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
     }
     return Promise.resolve()
   }
