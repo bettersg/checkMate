@@ -7,6 +7,7 @@ import {
   PendingCountApiResponse,
   AssessedInfo,
   updateChecker,
+  LeaderboardEntry,
 } from "../../functions/src/definitions/api/interfaces";
 
 interface CheckerDetails {
@@ -34,4 +35,5 @@ export type {
   updateChecker,
   CheckerDetails,
   Window,
+  LeaderboardEntry,
 };

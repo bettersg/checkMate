@@ -182,23 +182,30 @@ async function sendTemplateMessageAndCreateVoteRequest(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const factChecker = factCheckerDocSnap.data()
-  if (factChecker?.preferredPlatform === "whatsapp") {
+  const preferredPlatform = factChecker?.preferredPlatform
+  const newVoteRequest: VoteRequest = {
+    factCheckerDocRef: factCheckerDocSnap.ref,
+    platformId:
+      preferredPlatform === "whatsapp"
+        ? factChecker.whatsappId
+        : factChecker.telegramId,
+    hasAgreed: false,
+    triggerL2Vote: null,
+    triggerL2Others: null,
+    platform: preferredPlatform,
+    sentMessageId: null,
+    category: null,
+    truthScore: null,
+    reasoning: null,
+    createdTimestamp: Timestamp.fromDate(new Date()),
+    acceptedTimestamp: null,
+    votedTimestamp: null,
+    isCorrect: null,
+    score: null,
+    duration: null,
+  }
+  if (preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
-    const newVoteRequest: VoteRequest = {
-      factCheckerDocRef: factCheckerDocSnap.ref,
-      platformId: factChecker.whatsappId,
-      hasAgreed: false,
-      triggerL2Vote: null,
-      triggerL2Others: null,
-      platform: "whatsapp",
-      sentMessageId: null,
-      category: null,
-      truthScore: null,
-      reasoning: null,
-      createdTimestamp: Timestamp.fromDate(new Date()),
-      acceptedTimestamp: null,
-      votedTimestamp: null,
-    }
     return messageRef
       .collection("voteRequests")
       .add(newVoteRequest)
@@ -214,25 +221,12 @@ async function sendTemplateMessageAndCreateVoteRequest(
           "factChecker"
         )
       })
-  } else if (factChecker?.preferredPlatform === "telegram") {
+  } else if (preferredPlatform === "telegram") {
     //not yet implemented
     // First, add the voteRequest object to the "voteRequests" sub-collection
     return messageRef
       .collection("voteRequests")
-      .add({
-        factCheckerDocRef: factCheckerDocSnap.ref,
-        platformId: factChecker.telegramId,
-        hasAgreed: false,
-        triggerL2Vote: null,
-        triggerL2Others: null,
-        platform: "telegram",
-        sentMessageId: null,
-        category: null,
-        vote: null,
-        createdTimestamp: Timestamp.fromDate(new Date()),
-        acceptedTimestamp: null,
-        votedTimestamp: null,
-      })
+      .add(newVoteRequest)
       .then((voteRequestRef) => {
         const voteRequestPath = voteRequestRef.path
         const voteRequestUrl = `${checkerAppHost}/${voteRequestPath}`

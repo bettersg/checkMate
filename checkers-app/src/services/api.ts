@@ -3,6 +3,7 @@ import {
   Vote,
   VoteSummaryApiResponse,
   PendingCountApiResponse,
+  LeaderboardEntry,
 } from "../types";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import app from "../firebase";
@@ -187,6 +188,16 @@ export const getMessage = async (messageId: string) => {
     throw new Error("Message Id missing.");
   }
   return (await axiosInstance.get(`/api/messages/${messageId}`)).data;
+};
+
+export const getLeaderboard = async (
+  checkerId: string
+): Promise<LeaderboardEntry[]> => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing.");
+  }
+  return (await axiosInstance.get(`/api/checkers/${checkerId}/leaderboard`))
+    .data;
 };
 
 export const sendWhatsappTestMessage = async (

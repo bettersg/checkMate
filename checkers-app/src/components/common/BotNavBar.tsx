@@ -45,7 +45,7 @@ export default function NavbarDefault() {
           variant="text"
           className="rounded-full"
           onClick={() => {
-            navigate("/achievements");
+            navigate("/leaderboard");
           }}
           ripple
         >

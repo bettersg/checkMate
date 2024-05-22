@@ -63,6 +63,12 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     preferredPlatform: preferredPlatform || type === "ai" ? null : "telegram",
     lastVotedTimestamp: lastVotedTimestamp || null,
     getNameMessageId: null,
+    leaderboardStats: {
+      numVoted: 0,
+      numCorrectVotes: 0,
+      totalTimeTaken: 0,
+      score: 0,
+    },
   }
 
   logger.info("Creating new checker", newChecker)

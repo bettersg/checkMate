@@ -43,7 +43,6 @@ async function validateFirebaseIdToken(
     const isAdmin = decodedIdToken.isAdmin
     const tier = decodedIdToken.tier
     const checkerID = decodedIdToken.uid
-    console.log("checkerID: ", checkerID)
     if (!checkerID) {
       functions.logger.warn("Error while verifying Firebase ID token")
       return res.status(403).send("Unauthorized")
