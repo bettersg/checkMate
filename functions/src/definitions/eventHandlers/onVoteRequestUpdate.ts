@@ -302,11 +302,13 @@ async function updateCheckerVoteCount(
     functions.logger.error("Checker not found")
     return
   }
-  if (before.category === null && after.category !== null) {
+  const isBeforeNoCount = before.category === null || before.category === "pass"
+  const isAferNoCount = after.category === null || after.category === "pass"
+  if (isBeforeNoCount && !isAferNoCount) {
     factCheckerRef.update({
       numVoted: FieldValue.increment(1),
     })
-  } else if (before.category !== null && after.category === null) {
+  } else if (!isBeforeNoCount && isAferNoCount) {
     factCheckerRef.update({
       numVoted: FieldValue.increment(-1),
     })
