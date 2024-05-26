@@ -70,6 +70,7 @@ interface Checker {
   tier: "beginner" | "intermediate" | "expert"
   isAdmin: boolean
   isOnProgram: boolean
+  hasCompletedProgram: boolean
   pendingVoteCount: number
   last30days?: Last30DaysStats
   programStats?: ProgramStats
