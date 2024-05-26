@@ -5,8 +5,6 @@ import { Timestamp } from "firebase-admin/firestore"
 import { TIME } from "../../utils/time"
 import { CheckerData } from "../../types"
 
-const db = admin.firestore()
-
 function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
@@ -84,6 +82,7 @@ function computeGamificationScore(
 }
 
 async function getFullLeaderboard(): Promise<LeaderboardEntry[]> {
+  const db = admin.firestore()
   const leaderboardQuery = db
     .collection("checkers")
     .where("isActive", "==", true)
@@ -266,6 +265,7 @@ async function computeProgramStats(
 async function computeLast30DaysStats(
   checkerSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
 ) {
+  const db = admin.firestore()
   const cutoffTimestamp = Timestamp.fromDate(
     new Date(Date.now() - TIME.THIRTY_DAYS)
   )
