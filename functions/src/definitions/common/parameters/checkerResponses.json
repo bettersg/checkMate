@@ -12,5 +12,6 @@
   "ONBOARDING_4": "Awesome! Now that you know how to identify misinformation and scams, you are ready to help us combat them! 🙌🏻 If you haven't already, do join this WhatsApp group (https://bit.ly/checkmates-groupchat) that brings together all the other CheckMates and the core product team for updates and feedback. If you're looking for resources, you can visit our wiki page (https://bit.ly/checkmates-wiki). Thanks again for joining our community of CheckMates. Enjoy! 👋🏻🤖",
   "NOT_A_REPLY": "Sorry, did you forget to reply to a message? You need to swipe right on the message to reply to it.",
   "OUTSTANDING_REMINDER": "You have *{{num_outstanding}} remaining messages* to assess. Would you like to be sent the next one in line?",
-  "NO_OUTSTANDING": "Great, you have no further messages to assess. Keep it up!💪"
+  "NO_OUTSTANDING": "Great, you have no further messages to assess. Keep it up!💪",
+  "PROGRAM_COMPLETED": "Congratulations! You have completed our CheckMate volunteers program with the following stats:\n\nNo. of messages voted on: {{num_messages}}\nAccuracy: {{accuracy}}\nNo. of new users referred: {{num_referred}}\nNo. of non-trivial messages reported: {{num_reported}}\n\nand are now a certified CheckMate!! 🎉🥳"
 }

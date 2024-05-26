@@ -4,9 +4,11 @@ import express from "express"
 import * as crypto from "crypto"
 import { onRequest } from "firebase-functions/v2/https"
 import { logger } from "firebase-functions"
-import { Checker } from "../../types"
+import { CheckerData } from "../../types"
 import { defineString } from "firebase-functions/params"
 import { AppEnv } from "../../appEnv"
+import { getThresholds } from "../common/utils"
+import { Timestamp } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -119,7 +121,9 @@ app.post("/", async (req, res) => {
     //from telegram but not yet a user in database
     functions.logger.info("Creating new user")
 
-    const checkerObject: Checker = {
+    const thresholds = await getThresholds()
+
+    const checkerObject: CheckerData = {
       name: "",
       type: "human",
       isActive: false,
@@ -133,7 +137,10 @@ app.post("/", async (req, res) => {
       experience: 0,
       tier: "beginner",
       numVoted: 0,
+      numReferred: 0,
+      numReported: 0,
       numCorrectVotes: 0,
+      numNonUnsureVotes: 0,
       numVerifiedLinks: 0,
       preferredPlatform: "telegram",
       lastVotedTimestamp: null,
@@ -143,6 +150,20 @@ app.post("/", async (req, res) => {
         numCorrectVotes: 0,
         totalTimeTaken: 0,
         score: 0,
+      },
+      programData: {
+        isOnProgram: true,
+        programStart: Timestamp.fromDate(new Date()),
+        programEnd: null,
+        numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+        numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+        numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+        accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+        numVotesAtProgramStart: 0,
+        numReferralsAtProgramStart: 0,
+        numReportsAtProgramStart: 0,
+        numCorrectVotesAtProgramStart: 0,
+        numNonUnsureVotesAtProgramStart: 0,
       },
     }
 

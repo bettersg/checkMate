@@ -1,7 +1,9 @@
 import { Request, Response } from "express"
-import { Checker } from "../../../types"
+import { CheckerData } from "../../../types"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
+import { Timestamp } from "firebase-admin/firestore"
+import { getThresholds } from "../../common/utils"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -26,7 +28,7 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
     //check keys in request body, make sure they are defined in checker type
     const body = req.body
     const keys = Object.keys(body)
-    const checker = checkerSnap.data() as Checker
+    const checker = checkerSnap.data() as CheckerData
     const checkerKeys = Object.keys(checker)
     const validKeys = keys.every((key) => checkerKeys.includes(key))
 
@@ -50,11 +52,39 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
       return res.status(400).send("tier cannot be updated")
     }
 
+    if (keys.includes("programData")) {
+      if (
+        typeof body.programData !== "string" ||
+        body.programData !== "reset"
+      ) {
+        return res
+          .status(400)
+          .send("programData will only work with the value 'reset'")
+      } else {
+        const thresholds = await getThresholds()
+        body.programData = {
+          isOnProgram: true,
+          programStart: Timestamp.fromDate(new Date()),
+          programEnd: null,
+          numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+          numReferralTarget:
+            thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+          numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+          accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+          numVotesAtProgramStart: checker.numVoted ?? 0,
+          numReferralsAtProgramStart: checker.numReferred ?? 0,
+          numReportsAtProgramStart: checker.numReported ?? 0,
+          numCorrectVotesAtProgramStart: checker.numCorrectVotes ?? 0,
+          numNonUnsureVotesAtProgramStart: checker.numNonUnsureVotes ?? 0,
+        }
+      }
+    }
+
     //update checker
     await checkerRef.update(body)
 
     const updatedCheckerSnap = await checkerRef.get()
-    const updatedChecker = updatedCheckerSnap.data() as Checker
+    const updatedChecker = updatedCheckerSnap.data() as CheckerData
 
     res.status(200).send(updatedChecker)
   } catch (error) {

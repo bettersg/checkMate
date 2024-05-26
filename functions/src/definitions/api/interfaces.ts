@@ -1,4 +1,4 @@
-import { CustomReply, LeaderboardEntry } from "../../types"
+import { CustomReply, LeaderboardEntry, ProgramData } from "../../types"
 
 interface createVoteRequest {
   factCheckerId?: string
@@ -32,7 +32,10 @@ interface createChecker {
   level?: number
   experience?: number
   numVoted?: number
+  numReferred?: number
+  numReported?: number
   numCorrectVotes?: number
+  numNonUnsureVotes?: number
   numVerifiedLinks?: number
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
@@ -49,10 +52,14 @@ interface updateChecker {
   level?: number
   experience?: number
   numVoted?: number
+  numReferred?: number
+  numReported?: number
   numCorrectVotes?: number
+  numNonUnsureVotes?: number
   numVerifiedLinks?: number
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
+  programData?: "reset"
 }
 
 interface Checker {
@@ -62,11 +69,28 @@ interface Checker {
   isOnboardingComplete: boolean | null
   tier: "beginner" | "intermediate" | "expert"
   isAdmin: boolean
+  isOnProgram: boolean
   pendingVoteCount: number
-  last30days: last30DaysStats
+  last30days?: Last30DaysStats
+  programStats?: ProgramStats
   achievements: Achievements | null
   level: number
   experience: number
+}
+
+interface ProgramStats
+  extends Pick<
+    ProgramData,
+    | "numVotesTarget"
+    | "numReferralTarget"
+    | "numReportTarget"
+    | "accuracyTarget"
+  > {
+  accuracy: number | null
+  numVotes: number
+  numReferrals: number
+  numReports: number
+  isProgramCompleted: boolean
 }
 
 interface VoteSummary {
@@ -111,7 +135,7 @@ interface Vote {
   finalStats: AssessedInfo | null
 }
 
-interface last30DaysStats {
+interface Last30DaysStats {
   totalVoted: number
   accuracyRate: number | null
   averageResponseTime: number

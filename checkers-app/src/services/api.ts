@@ -216,3 +216,15 @@ export const sendWhatsappTestMessage = async (
     } as postWhatsappTestMessage)
   ).data;
 };
+
+export const resetCheckerProgram = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing.");
+  }
+  const checkerUpdateData: updateChecker = {
+    programData: "reset",
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
+  ).data;
+};

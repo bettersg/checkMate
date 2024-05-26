@@ -38,7 +38,7 @@ export type WhatsappMessageObject = {
   image?: { caption: string; id: string; mime_type: string }
 }
 
-export type Checker = {
+export type CheckerData = {
   name: string
   type: "human" | "ai"
   isActive: boolean | null
@@ -51,13 +51,17 @@ export type Checker = {
   experience: number
   tier: "beginner" | "intermediate" | "expert"
   numVoted: number
+  numReferred: number
+  numReported: number
   voteWeight: number
   numCorrectVotes: number
+  numNonUnsureVotes: number
   numVerifiedLinks: number
   preferredPlatform: string | null
   lastVotedTimestamp: Timestamp | null
   getNameMessageId: string | null
   leaderboardStats: LeaderBoardStats
+  programData: ProgramData
 }
 
 type LeaderBoardStats = {
@@ -65,6 +69,21 @@ type LeaderBoardStats = {
   numCorrectVotes: number // number of correct votes cast where the parent message category is not unsure
   totalTimeTaken: number // total time taken to vote where the parent message category is not unsure
   score: number // total score
+}
+
+export type ProgramData = {
+  isOnProgram: boolean
+  programStart: Timestamp | null
+  programEnd: Timestamp | null
+  numVotesTarget: number //target number of messages voted on to complete program
+  numReferralTarget: number //target number of referrals made to complete program
+  numReportTarget: number //number of non-trivial messages sent in to complete program
+  accuracyTarget: number //target accuracy of non-unsure votes
+  numVotesAtProgramStart: number
+  numReferralsAtProgramStart: number
+  numReportsAtProgramStart: number
+  numCorrectVotesAtProgramStart: number
+  numNonUnsureVotesAtProgramStart: number
 }
 
 export type LeaderboardEntry = {

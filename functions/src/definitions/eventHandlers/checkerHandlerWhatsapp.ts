@@ -8,7 +8,7 @@ import {
   sendWhatsappButtonMessage,
 } from "../common/sendWhatsappMessage"
 import { getResponsesObj } from "../common/responseUtils"
-import { sleep } from "../common/utils"
+import { sleep, getThresholds } from "../common/utils"
 import {
   sendL1CategorisationMessage,
   sendRemainingReminder,
@@ -16,7 +16,7 @@ import {
 import { getSignedUrl } from "../common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { resetL2Status } from "../common/voteUtils"
-import { WhatsappMessageObject, Checker } from "../../types"
+import { WhatsappMessageObject, CheckerData } from "../../types"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -112,7 +112,8 @@ async function onSignUp(from: string, platform = "whatsapp") {
     )
     return
   }
-  const checkerObj: Checker = {
+  const thresholds = await getThresholds()
+  const checkerObj: CheckerData = {
     name: "",
     type: "human",
     isActive: true,
@@ -126,7 +127,10 @@ async function onSignUp(from: string, platform = "whatsapp") {
     experience: 0,
     tier: "beginner",
     numVoted: 0,
+    numReferred: 0,
+    numReported: 0,
     numCorrectVotes: 0,
+    numNonUnsureVotes: 0,
     numVerifiedLinks: 0,
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
@@ -136,6 +140,20 @@ async function onSignUp(from: string, platform = "whatsapp") {
       numCorrectVotes: 0,
       totalTimeTaken: 0,
       score: 0,
+    },
+    programData: {
+      isOnProgram: true,
+      programStart: Timestamp.fromDate(new Date()),
+      programEnd: null,
+      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+      numVotesAtProgramStart: 0,
+      numReferralsAtProgramStart: 0,
+      numReportsAtProgramStart: 0,
+      numCorrectVotesAtProgramStart: 0,
+      numNonUnsureVotesAtProgramStart: 0,
     },
   }
   await db.collection("checkers").add(checkerObj)

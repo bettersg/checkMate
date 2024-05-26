@@ -31,9 +31,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     if (!event?.data?.before || !event?.data?.after) {
       return Promise.resolve()
     }
-    const preChangeData = event.data.before.data()
-    const postChangeData = event.data.after.data()
-    const docSnap = event.data.after
+    const before = event.data.before
+    const after = event.data.after
+    const preChangeData = before.data()
+    const postChangeData = after.data()
+    const docSnap = after
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
@@ -189,51 +191,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     }
     //update leaderboard stats
     if (preChangeData.isCorrect !== postChangeData.isCorrect) {
-      const checkerUpdateObj = {} as Record<string, any>
-      const previousCorrect = preChangeData.isCorrect
-      const currentCorrect = postChangeData.isCorrect
-      const previousScore = preChangeData.score
-      const currentScore = postChangeData.score
-      const previousDuration = preChangeData.duration
-      const currentDuration = postChangeData.duration
-      let durationDelta = 0
-      if (previousDuration != null && previousCorrect != null) {
-        durationDelta -= previousDuration
-      }
-      if (currentDuration != null && currentCorrect != null) {
-        durationDelta += currentDuration
-      }
-      if (durationDelta !== 0) {
-        checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
-          FieldValue.increment(durationDelta)
-      }
-
-      if (previousCorrect === true) {
-        //means now its not correct
-        checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
-          FieldValue.increment(-1)
-        if (previousScore != null) {
-          checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
-            -previousScore
-          )
-        }
-      }
-      if (currentCorrect === null) {
-        //means now it's unsure and should not be added to denominator
-        checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(-1)
-      }
-
-      if (currentCorrect === true) {
-        await docSnap.ref.update({ score: currentScore })
-        checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
-          FieldValue.increment(1)
-        checkerUpdateObj["leaderboardStats.score"] =
-          FieldValue.increment(currentScore)
-      }
-      if (previousCorrect == null) {
-        checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
-      }
-      await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
+      await updateCheckerCorrectCounts(preChangeData, postChangeData)
     }
     return Promise.resolve()
   }
@@ -312,6 +270,67 @@ async function updateCheckerVoteCount(
     factCheckerRef.update({
       numVoted: FieldValue.increment(-1),
     })
+  }
+}
+
+async function updateCheckerCorrectCounts(
+  before: admin.firestore.DocumentData,
+  after: admin.firestore.DocumentData
+) {
+  const checkerUpdateObj = {} as Record<string, any>
+  const preChangeData = before.data()
+  const postChangeData = after.data()
+  if (preChangeData.isCorrect !== postChangeData.isCorrect) {
+    const previousCorrect = preChangeData.isCorrect
+    const currentCorrect = postChangeData.isCorrect
+    const previousScore = preChangeData.score
+    const currentScore = postChangeData.score
+    const previousDuration = preChangeData.duration
+    const currentDuration = postChangeData.duration
+    let durationDelta = 0
+    if (previousDuration != null && previousCorrect != null) {
+      durationDelta -= previousDuration
+    }
+    if (currentDuration != null && currentCorrect != null) {
+      durationDelta += currentDuration
+    }
+    if (durationDelta !== 0) {
+      checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
+        FieldValue.increment(durationDelta)
+    }
+
+    if (previousCorrect === true) {
+      //means now its not correct
+      checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+        FieldValue.increment(-1)
+      checkerUpdateObj["numCorrectVotes"] = FieldValue.increment(-1)
+      if (previousScore != null) {
+        checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
+          -previousScore
+        )
+      }
+    }
+    if (currentCorrect === null) {
+      //means now it's unsure and should not be added to denominator
+      checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(-1)
+      checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(-1)
+    }
+
+    if (currentCorrect === true) {
+      await after.ref.update({ score: currentScore })
+      checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+        FieldValue.increment(1)
+      checkerUpdateObj["numCorrectVotes"] = FieldValue.increment(1)
+      checkerUpdateObj["leaderboardStats.score"] =
+        FieldValue.increment(currentScore)
+    }
+    if (previousCorrect == null) {
+      checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
+      checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(1)
+    }
+    await after.factCheckerDocRef.update(checkerUpdateObj)
+  } else {
+    functions.logger.warn("Correct status did not change")
   }
 }
 

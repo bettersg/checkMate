@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
-import { WhatsappMessage, Checker } from "../../types"
+import { WhatsappMessage, CheckerData } from "../../types"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
@@ -83,7 +83,7 @@ const mockDb = async function () {
     .where("whatsappId", "==", checker1PhoneNumber.value())
     .limit(1)
     .get()
-  const checkerObj: Checker = {
+  const checkerObj: CheckerData = {
     name: "CHECKER1",
     type: "human",
     isActive: true,
@@ -97,7 +97,10 @@ const mockDb = async function () {
     experience: 0,
     tier: "expert",
     numVoted: 0,
+    numReferred: 0,
+    numReported: 0,
     numCorrectVotes: 0,
+    numNonUnsureVotes: 0,
     numVerifiedLinks: 0,
     preferredPlatform: "whatsapp",
     lastVotedTimestamp: null,
@@ -107,6 +110,20 @@ const mockDb = async function () {
       numCorrectVotes: 0,
       totalTimeTaken: 0,
       score: 0,
+    },
+    programData: {
+      isOnProgram: true,
+      programStart: Timestamp.fromDate(new Date()),
+      programEnd: null,
+      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+      numVotesAtProgramStart: 0,
+      numReferralsAtProgramStart: 0,
+      numReportsAtProgramStart: 0,
+      numCorrectVotesAtProgramStart: 0,
+      numNonUnsureVotesAtProgramStart: 0,
     },
   }
   if (querySnap.empty) {
