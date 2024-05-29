@@ -56,6 +56,39 @@ const sendTelegramTextMessage = async function (
   return response
 }
 
+const updateTelegramReplyMarkup = async function (
+  bot: string,
+  chat_id: string | number,
+  message_id: number,
+  reply_markup: InlineKeyboardMarkup | ForceReply | null
+) {
+  let token
+  if (bot == "factChecker") {
+    token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
+  } else if (bot === "report") {
+    token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else {
+    token = process.env.TELEGRAM_USER_BOT_TOKEN
+  }
+  const data = {
+    chat_id: chat_id,
+    message_id: message_id,
+    reply_markup: reply_markup,
+  }
+  const response = await axios({
+    method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+    url: `${telegramHost}/bot${token}/editMessageReplyMarkup`,
+    data: data,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).catch((error) => {
+    functions.logger.log(error.response)
+    throw "error with updating telegram reply markup"
+  })
+  return response
+}
+
 const sendTelegramImageMessage = async function (
   bot: string,
   to: string,
@@ -137,4 +170,5 @@ export {
   sendTelegramImageMessageImageStream,
   sendTelegramTextMessage,
   sendTelegramImageMessage,
+  updateTelegramReplyMarkup,
 }

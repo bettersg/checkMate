@@ -11,9 +11,11 @@ import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
+import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
+const checkerAppHost = process.env.CHECKER_APP_HOST
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -173,6 +175,28 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
           await sendRemainingReminder(
             postChangeData.platformId,
             postChangeData.platform
+          )
+        } else if (
+          postChangeData.platform === "telegram" &&
+          !!postChangeData.platformId &&
+          postChangeData.sentMessageId
+        ) {
+          const voteRequestUrl = `${checkerAppHost}/${docSnap.ref.path}`
+          const replyMarkup = {
+            inline_keyboard: [
+              [
+                {
+                  text: "Edit/View Vote 👀!",
+                  web_app: { url: voteRequestUrl },
+                },
+              ],
+            ],
+          }
+          await updateTelegramReplyMarkup(
+            "factChecker",
+            postChangeData.platformId,
+            postChangeData.sentMessageId,
+            replyMarkup
           )
         }
         if (postChangeData.votedTimestamp !== preChangeData.votedTimestamp) {
