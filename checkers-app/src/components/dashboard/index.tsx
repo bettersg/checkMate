@@ -23,7 +23,7 @@ export default function Dashboard() {
         return;
       }
       const checker: Checker = await getChecker(checkerDetails.checkerId);
-      if (checker) {
+      if (checker && checker.last30days) {
         setTotalVotes(checker.last30days.totalVoted);
         setAccuracyRate(checker.last30days.accuracyRate);
         setAvgResponseTime(checker.last30days.averageResponseTime);
