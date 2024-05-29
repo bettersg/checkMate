@@ -102,7 +102,7 @@ const mockDb = async function () {
     numCorrectVotes: 0,
     numNonUnsureVotes: 0,
     numVerifiedLinks: 0,
-    preferredPlatform: "whatsapp",
+    preferredPlatform: "telegram",
     lastVotedTimestamp: null,
     getNameMessageId: null,
     leaderboardStats: {
@@ -115,10 +115,10 @@ const mockDb = async function () {
       isOnProgram: true,
       programStart: Timestamp.fromDate(new Date()),
       programEnd: null,
-      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
-      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
-      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
-      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+      numVotesTarget: 1, //target number of messages voted on to complete program
+      numReferralTarget: 0, //target number of referrals made to complete program
+      numReportTarget: 0, //number of non-trivial messages sent in to complete program
+      accuracyTarget: 0.6, //target accuracy of non-unsure votes
       numVotesAtProgramStart: 0,
       numReferralsAtProgramStart: 0,
       numReportsAtProgramStart: 0,
@@ -127,7 +127,7 @@ const mockDb = async function () {
     },
   }
   if (querySnap.empty) {
-    await checkersCollectionRef.add(checkerObj)
+    await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj)
   } else {
     await querySnap.docs[0].ref.set(checkerObj, { merge: true })
   }

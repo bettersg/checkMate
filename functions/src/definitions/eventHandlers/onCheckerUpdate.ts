@@ -31,7 +31,7 @@ const onCheckerUpdateV2 = onDocumentUpdated(
 
     if (
       !postChangeData.programData.isOnProgram ||
-      !postChangeData.programData.programEnd != null
+      postChangeData.programData.programEnd != null
     ) {
       return Promise.resolve()
     }

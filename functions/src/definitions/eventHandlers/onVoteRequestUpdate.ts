@@ -191,7 +191,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     }
     //update leaderboard stats
     if (preChangeData.isCorrect !== postChangeData.isCorrect) {
-      await updateCheckerCorrectCounts(preChangeData, postChangeData)
+      await updateCheckerCorrectCounts(before, after)
     }
     return Promise.resolve()
   }
@@ -274,12 +274,16 @@ async function updateCheckerVoteCount(
 }
 
 async function updateCheckerCorrectCounts(
-  before: admin.firestore.DocumentData,
-  after: admin.firestore.DocumentData
+  before: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
+  after: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
 ) {
   const checkerUpdateObj = {} as Record<string, any>
   const preChangeData = before.data()
   const postChangeData = after.data()
+  if (!preChangeData || !postChangeData) {
+    functions.logger.error("Data not found")
+    return
+  }
   if (preChangeData.isCorrect !== postChangeData.isCorrect) {
     const previousCorrect = preChangeData.isCorrect
     const currentCorrect = postChangeData.isCorrect
@@ -328,7 +332,7 @@ async function updateCheckerCorrectCounts(
       checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
       checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(1)
     }
-    await after.factCheckerDocRef.update(checkerUpdateObj)
+    await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
   } else {
     functions.logger.warn("Correct status did not change")
   }

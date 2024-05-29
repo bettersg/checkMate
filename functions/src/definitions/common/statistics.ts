@@ -5,6 +5,8 @@ import { Timestamp } from "firebase-admin/firestore"
 import { TIME } from "../../utils/time"
 import { CheckerData } from "../../types"
 
+const db = admin.firestore()
+
 function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
