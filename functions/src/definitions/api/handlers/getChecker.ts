@@ -10,6 +10,9 @@ import {
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+import Hashids from "hashids"
+const salt = process.env.HASHIDS_SALT
+const hashids = new Hashids(salt)
 
 const db = admin.firestore()
 
@@ -40,6 +43,15 @@ const getCheckerHandler = async (req: Request, res: Response) => {
     const pendingVoteSnap = await pendingVoteQuery.count().get()
     const pendingVoteCount = pendingVoteSnap.data().count
 
+    let referralCode = null
+    if (checkerData.whatsappId) {
+      try {
+        referralCode = hashids.encode(checkerData.whatsappId)
+      } catch (error) {
+        logger.error("Error encoding referral code", error)
+      }
+    }
+
     const returnData: Checker = {
       name: checkerData.name,
       type: checkerData.type,
@@ -49,6 +61,7 @@ const getCheckerHandler = async (req: Request, res: Response) => {
       isAdmin: checkerData.isAdmin,
       isOnboardingComplete: checkerData.isOnboardingComplete,
       isOnProgram: checkerData.programData.isOnProgram ?? false,
+      referralCode: referralCode,
       pendingVoteCount: pendingVoteCount,
       achievements: null,
       level: 0, //TODO,check

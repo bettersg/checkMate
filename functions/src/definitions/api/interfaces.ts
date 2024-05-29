@@ -70,6 +70,7 @@ interface Checker {
   tier: "beginner" | "intermediate" | "expert"
   isAdmin: boolean
   isOnProgram: boolean
+  referralCode: string | null
   hasCompletedProgram: boolean
   pendingVoteCount: number
   last30days?: Last30DaysStats
@@ -188,4 +189,5 @@ export type {
   postWhatsappTestMessage,
   MessageSummary,
   LeaderboardEntry,
+  ProgramStats,
 }

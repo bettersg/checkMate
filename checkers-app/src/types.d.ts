@@ -8,6 +8,7 @@ import {
   AssessedInfo,
   updateChecker,
   LeaderboardEntry,
+  ProgramStats,
 } from "../../functions/src/definitions/api/interfaces";
 
 interface CheckerDetails {
@@ -36,4 +37,5 @@ export type {
   CheckerDetails,
   Window,
   LeaderboardEntry,
+  ProgramStats,
 };
