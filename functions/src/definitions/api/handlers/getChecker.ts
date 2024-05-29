@@ -82,16 +82,15 @@ const getCheckerHandler = async (req: Request, res: Response) => {
         return res.status(500).send("Error fetching program stats")
       }
       //calculate and send back program statistics
-    } else {
-      //calculate and send back last 30 day statistics
-      const { totalVoted, accuracyRate, averageResponseTime, peopleHelped } =
-        await computeLast30DaysStats(checkerSnap)
-      returnData.last30days = {
-        totalVoted: totalVoted,
-        accuracyRate: accuracyRate,
-        averageResponseTime: averageResponseTime,
-        peopleHelped: peopleHelped,
-      }
+    }
+    //calculate and send back last 30 day statistics
+    const { totalVoted, accuracyRate, averageResponseTime, peopleHelped } =
+      await computeLast30DaysStats(checkerSnap)
+    returnData.last30days = {
+      totalVoted: totalVoted,
+      accuracyRate: accuracyRate,
+      averageResponseTime: averageResponseTime,
+      peopleHelped: peopleHelped,
     }
     res.status(200).send(returnData)
   } catch (error) {
