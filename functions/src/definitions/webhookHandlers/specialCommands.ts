@@ -102,7 +102,7 @@ const mockDb = async function () {
     numCorrectVotes: 0,
     numNonUnsureVotes: 0,
     numVerifiedLinks: 0,
-    preferredPlatform: "telegram",
+    preferredPlatform: "whatsapp",
     lastVotedTimestamp: null,
     getNameMessageId: null,
     leaderboardStats: {
