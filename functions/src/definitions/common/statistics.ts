@@ -5,12 +5,11 @@ import { Timestamp } from "firebase-admin/firestore"
 import { TIME } from "../../utils/time"
 import { CheckerData } from "../../types"
 
-const db = admin.firestore()
-
 function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
 ) {
+  const db = admin.firestore()
   const isLegacy = voteRequestSnap.get("truthScore") === undefined
   const isParentMessageAssessed = parentMessageSnap.get("isAssessed") ?? false
   const parentMessageCategory = parentMessageSnap.get("primaryCategory") ?? null
