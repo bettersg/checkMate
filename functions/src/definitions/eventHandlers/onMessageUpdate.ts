@@ -22,12 +22,12 @@ const onMessageUpdateV2 = onDocumentUpdated(
       return Promise.resolve()
     }
     const messageData = postChangeSnap.data()
+    const preChangeData = preChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
     if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
       //TODO: rationalisation here
       let rationalisation: null | string = null
-      let primaryCategory = messageData.primaryCategory
       if (
         primaryCategory &&
         primaryCategory !== "irrelevant" &&
@@ -45,8 +45,9 @@ const onMessageUpdateV2 = onDocumentUpdated(
     }
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
     else if (
-      preChangeSnap.data().text !== text ||
-      preChangeSnap.data().primaryCategory !== primaryCategory
+      messageData.isAssessed &&
+      (preChangeData.text !== text ||
+        preChangeData.primaryCategory !== primaryCategory)
     ) {
       let rationalisation: null | string = null
       if (
@@ -73,7 +74,6 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
     }
     if (shouldRecalculateAccuracy(preChangeSnap, postChangeSnap)) {
-      console.log()
       //get all voteRequests
       const voteRequestsQuerySnap = await postChangeSnap.ref
         .collection("voteRequests")

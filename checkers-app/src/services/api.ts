@@ -73,9 +73,9 @@ export const checkOTP = async (checkerId: string, otp: string) => {
     if (!customToken || !updatedCheckerId) {
       throw new Error("Custom token or checkerId not found in response");
     }
-    if (checkerId === updatedCheckerId) {
-      throw new Error(`Unexpected - checkerId ${checkerId} not updated`);
-    }
+    // if (checkerId === updatedCheckerId) {
+    //   throw new Error(`Unexpected - checkerId ${checkerId} not updated`);
+    // } //this could occur if the user has some issue after requesting OTP and then comes in again
     await axiosInstance.delete(`/api/checkers/${checkerId}`);
   }
   return response.data;
@@ -170,7 +170,7 @@ export const postCustomReply = async (
     throw new Error("Message Id missing.");
   }
   if (!checkerId) {
-    throw new Error("Checker Id missing.");
+    throw new Error("Checker Id missing in postCustomReply.");
   }
   if (!customReply) {
     throw new Error("Custom reply missing.");
@@ -194,7 +194,7 @@ export const getLeaderboard = async (
   checkerId: string
 ): Promise<LeaderboardEntry[]> => {
   if (!checkerId) {
-    throw new Error("Checker ID missing.");
+    throw new Error("Checker ID missing in getLeaderboard.");
   }
   return (await axiosInstance.get(`/api/checkers/${checkerId}/leaderboard`))
     .data;
@@ -205,7 +205,7 @@ export const sendWhatsappTestMessage = async (
   message: string
 ) => {
   if (!checkerId) {
-    throw new Error("Checker ID missing.");
+    throw new Error("Checker ID missing in sendWhatsappTestMessage.");
   }
   if (!message) {
     throw new Error("A message is required");
@@ -214,5 +214,53 @@ export const sendWhatsappTestMessage = async (
     await axiosInstance.post(`/api/checkers/${checkerId}/whatsappTestMessage`, {
       message,
     } as postWhatsappTestMessage)
+  ).data;
+};
+
+export const resetCheckerProgram = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing in resetCheckerProgram.");
+  }
+  const checkerUpdateData: updateChecker = {
+    programData: "reset",
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
+  ).data;
+};
+
+export const activateChecker = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing in activateChecker.");
+  }
+  const checkerUpdateData: updateChecker = {
+    isActive: true,
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
+  ).data;
+};
+
+export const deactivateChecker = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing in deactivateChecker.");
+  }
+  const checkerUpdateData: updateChecker = {
+    isActive: false,
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
+  ).data;
+};
+
+export const completeProgram = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing in deactivateChecker.");
+  }
+  const checkerUpdateData: updateChecker = {
+    programData: "complete",
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
   ).data;
 };

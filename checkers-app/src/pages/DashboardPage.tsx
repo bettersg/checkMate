@@ -3,7 +3,7 @@ import Layout from "../components/common/Layout";
 
 export default function DashboardPage() {
   return (
-    <Layout pageName="DASHBOARD">
+    <Layout pageName="DASHBOARD" showMenu={true}>
       <Dashboard />
     </Layout>
   );

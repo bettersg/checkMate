@@ -11,9 +11,11 @@ import { FieldValue } from "@google-cloud/firestore"
 import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
+import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
+const checkerAppHost = process.env.CHECKER_APP_HOST
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -31,9 +33,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     if (!event?.data?.before || !event?.data?.after) {
       return Promise.resolve()
     }
-    const preChangeData = event.data.before.data()
-    const postChangeData = event.data.after.data()
-    const docSnap = event.data.after
+    const before = event.data.before
+    const after = event.data.after
+    const preChangeData = before.data()
+    const postChangeData = after.data()
+    const docSnap = after
     const messageRef = docSnap.ref.parent.parent
     if (!messageRef) {
       functions.logger.error(`Vote request ${docSnap.ref.path} has no parent`)
@@ -172,6 +176,28 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             postChangeData.platformId,
             postChangeData.platform
           )
+        } else if (
+          postChangeData.platform === "telegram" &&
+          !!postChangeData.platformId &&
+          postChangeData.sentMessageId
+        ) {
+          const voteRequestUrl = `${checkerAppHost}/${docSnap.ref.path}`
+          const replyMarkup = {
+            inline_keyboard: [
+              [
+                {
+                  text: "Edit/View Vote 👀!",
+                  web_app: { url: voteRequestUrl },
+                },
+              ],
+            ],
+          }
+          await updateTelegramReplyMarkup(
+            "factChecker",
+            postChangeData.platformId,
+            postChangeData.sentMessageId,
+            replyMarkup
+          )
         }
         if (postChangeData.votedTimestamp !== preChangeData.votedTimestamp) {
           const factCheckerDocRef = await switchLegacyCheckerRef(
@@ -189,51 +215,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     }
     //update leaderboard stats
     if (preChangeData.isCorrect !== postChangeData.isCorrect) {
-      const checkerUpdateObj = {} as Record<string, any>
-      const previousCorrect = preChangeData.isCorrect
-      const currentCorrect = postChangeData.isCorrect
-      const previousScore = preChangeData.score
-      const currentScore = postChangeData.score
-      const previousDuration = preChangeData.duration
-      const currentDuration = postChangeData.duration
-      let durationDelta = 0
-      if (previousDuration != null && previousCorrect != null) {
-        durationDelta -= previousDuration
-      }
-      if (currentDuration != null && currentCorrect != null) {
-        durationDelta += currentDuration
-      }
-      if (durationDelta !== 0) {
-        checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
-          FieldValue.increment(durationDelta)
-      }
-
-      if (previousCorrect === true) {
-        //means now its not correct
-        checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
-          FieldValue.increment(-1)
-        if (previousScore != null) {
-          checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
-            -previousScore
-          )
-        }
-      }
-      if (currentCorrect === null) {
-        //means now it's unsure and should not be added to denominator
-        checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(-1)
-      }
-
-      if (currentCorrect === true) {
-        await docSnap.ref.update({ score: currentScore })
-        checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
-          FieldValue.increment(1)
-        checkerUpdateObj["leaderboardStats.score"] =
-          FieldValue.increment(currentScore)
-      }
-      if (previousCorrect == null) {
-        checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
-      }
-      await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
+      await updateCheckerCorrectCounts(before, after)
     }
     return Promise.resolve()
   }
@@ -302,14 +284,81 @@ async function updateCheckerVoteCount(
     functions.logger.error("Checker not found")
     return
   }
-  if (before.category === null && after.category !== null) {
+  const isBeforeNoCount = before.category === null || before.category === "pass"
+  const isAferNoCount = after.category === null || after.category === "pass"
+  if (isBeforeNoCount && !isAferNoCount) {
     factCheckerRef.update({
       numVoted: FieldValue.increment(1),
     })
-  } else if (before.category !== null && after.category === null) {
+  } else if (!isBeforeNoCount && isAferNoCount) {
     factCheckerRef.update({
       numVoted: FieldValue.increment(-1),
     })
+  }
+}
+
+async function updateCheckerCorrectCounts(
+  before: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
+  after: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
+) {
+  const checkerUpdateObj = {} as Record<string, any>
+  const preChangeData = before.data()
+  const postChangeData = after.data()
+  if (!preChangeData || !postChangeData) {
+    functions.logger.error("Data not found")
+    return
+  }
+  if (preChangeData.isCorrect !== postChangeData.isCorrect) {
+    const previousCorrect = preChangeData.isCorrect
+    const currentCorrect = postChangeData.isCorrect
+    const previousScore = preChangeData.score
+    const currentScore = postChangeData.score
+    const previousDuration = preChangeData.duration
+    const currentDuration = postChangeData.duration
+    let durationDelta = 0
+    if (previousDuration != null && previousCorrect != null) {
+      durationDelta -= previousDuration
+    }
+    if (currentDuration != null && currentCorrect != null) {
+      durationDelta += currentDuration
+    }
+    if (durationDelta !== 0) {
+      checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
+        FieldValue.increment(durationDelta)
+    }
+
+    if (previousCorrect === true) {
+      //means now its not correct
+      checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+        FieldValue.increment(-1)
+      checkerUpdateObj["numCorrectVotes"] = FieldValue.increment(-1)
+      if (previousScore != null) {
+        checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
+          -previousScore
+        )
+      }
+    }
+    if (currentCorrect === null) {
+      //means now it's unsure and should not be added to denominator
+      checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(-1)
+      checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(-1)
+    }
+
+    if (currentCorrect === true) {
+      await after.ref.update({ score: currentScore })
+      checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+        FieldValue.increment(1)
+      checkerUpdateObj["numCorrectVotes"] = FieldValue.increment(1)
+      checkerUpdateObj["leaderboardStats.score"] =
+        FieldValue.increment(currentScore)
+    }
+    if (previousCorrect == null) {
+      checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
+      checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(1)
+    }
+    await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
+  } else {
+    functions.logger.warn("Correct status did not change")
   }
 }
 

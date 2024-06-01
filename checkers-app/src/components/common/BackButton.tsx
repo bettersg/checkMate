@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 export function BackButton() {
   const navigate = useNavigate();
   return (
-    <div className="flex items-center gap-4">
+    <div className="fixed top-16 left-4 z-50 bg-gray-800 bg-opacity-75 p-2 rounded-full">
       <Button
         variant="text"
-        className="rounded-full absolute left-1 top-0"
+        className="rounded-full"
         style={{ color: "#ff8932" }}
         onClick={() => {
           navigate(`/votes`);

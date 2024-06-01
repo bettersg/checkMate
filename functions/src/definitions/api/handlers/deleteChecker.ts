@@ -1,5 +1,4 @@
 import { Request, Response } from "express"
-import { Checker } from "../../../types"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
 if (!admin.apps.length) {

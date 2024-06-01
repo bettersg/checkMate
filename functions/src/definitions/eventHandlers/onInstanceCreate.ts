@@ -14,6 +14,7 @@ import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { publishToTopic } from "../common/pubsub"
 import { VoteRequest } from "../../types"
 import { onDocumentCreated } from "firebase-functions/v2/firestore"
+import { logger } from "firebase-functions/v2"
 
 interface MessageUpdate {
   [x: string]: any
@@ -40,17 +41,17 @@ const onInstanceCreateV2 = onDocumentCreated(
   async (event) => {
     const snap = event.data
     if (!snap) {
-      functions.logger.log("No data associated with the event")
+      logger.log("No data associated with the event")
       return Promise.resolve()
     }
     const data = snap.data()
     if (!data.from) {
-      functions.logger.log("Missing 'from' field in instance data")
+      logger.log("Missing 'from' field in instance data")
       return Promise.resolve()
     }
     const parentMessageRef = snap.ref.parent.parent
     if (!parentMessageRef) {
-      functions.logger.error(`Instance ${snap.ref.path} has no parent message`)
+      logger.error(`Instance ${snap.ref.path} has no parent message`)
       return
     }
     const instancesQuerySnap = await parentMessageRef
@@ -93,7 +94,7 @@ const onInstanceCreateV2 = onDocumentCreated(
         }
       }
     } catch (e) {
-      functions.logger.error("Error refreshing message: ", e)
+      logger.error("Error refreshing message: ", e)
     }
 
     await parentMessageRef.update(messageUpdateObj)
@@ -110,7 +111,7 @@ const onInstanceCreateV2 = onDocumentCreated(
       try {
         await insertOne(updateObj, CollectionTypes.Instances)
       } catch (error) {
-        functions.logger.error(
+        logger.error(
           `Error inserting instance ${snap.ref.path} into typesense: `,
           error
         )
@@ -168,10 +169,39 @@ async function despatchPoll(
     .where("type", "==", "human")
     .where("isActive", "==", true)
     .get()
+  const messageSnap = await messageRef.get()
+  const latestInstanceRef = messageSnap.get("latestInstance")
+  let previewText = ""
+  if (!latestInstanceRef) {
+    logger.error(`Parent message ${messageSnap.id} has no latest instance`)
+  } else {
+    const latestInstanceSnap = await latestInstanceRef.get()
+    const type = latestInstanceSnap.get("type") ?? null
+    if (type === "text") {
+      const text = latestInstanceSnap.get("text")
+      if (text) {
+        if (text.length > 50) {
+          previewText = text.substring(0, 50) + "..."
+        } else {
+          previewText = text
+        }
+      } else {
+        logger.error(`Latest instance ${latestInstanceRef.id} has no text`)
+      }
+    } else if (type === "image") {
+      previewText = "<Image 🖼️>"
+    }
+  }
+
+  // get preview text if message exists, else get image
   if (!factCheckersSnapshot.empty) {
     const despatchPromises = factCheckersSnapshot.docs.map(
       (factCheckerDocSnap) =>
-        sendTemplateMessageAndCreateVoteRequest(factCheckerDocSnap, messageRef)
+        sendTemplateMessageAndCreateVoteRequest(
+          factCheckerDocSnap,
+          messageRef,
+          previewText
+        )
     )
     await Promise.all(despatchPromises)
   }
@@ -179,7 +209,8 @@ async function despatchPoll(
 
 async function sendTemplateMessageAndCreateVoteRequest(
   factCheckerDocSnap: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
-  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
+  previewText: string | null
 ) {
   const factChecker = factCheckerDocSnap.data()
   const preferredPlatform = factChecker?.preferredPlatform
@@ -234,14 +265,21 @@ async function sendTemplateMessageAndCreateVoteRequest(
         return sendTelegramTextMessage(
           "factChecker",
           factChecker.telegramId,
-          "New message received! Would you like to help assess it?",
+          `New message received! 📩\n\n${previewText}`,
           null,
           {
             inline_keyboard: [
-              [{ text: "Yes!", web_app: { url: voteRequestUrl } }],
+              [{ text: "Vote 🗳️!", web_app: { url: voteRequestUrl } }],
             ],
           }
-        )
+          //if it's telegram, add the message_id so we can change the replymarkup later
+        ).then((response) => {
+          if (response.data.result.message_id) {
+            return voteRequestRef.update({
+              sentMessageId: response.data.result.message_id,
+            })
+          }
+        })
       })
   } else {
     return Promise.reject(

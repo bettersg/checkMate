@@ -7,6 +7,7 @@ export { onInstanceCreateV2 } from "./definitions/eventHandlers/onInstanceCreate
 export { onInstanceDeleteV2 } from "./definitions/eventHandlers/onInstanceDelete"
 export { onInstanceUpdateV2 } from "./definitions/eventHandlers/onInstanceUpdate"
 export { onMessageUpdateV2 } from "./definitions/eventHandlers/onMessageUpdate"
+export { onCheckerUpdateV2 } from "./definitions/eventHandlers/onCheckerUpdate"
 export { webhookHandlerV2 } from "./definitions/webhookHandlers/handler"
 export { onVoteRequestUpdateV2 } from "./definitions/eventHandlers/onVoteRequestUpdate"
 export { healthcheckV2 } from "./definitions/healthcheck"

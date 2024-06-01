@@ -8,6 +8,7 @@ import {
   AssessedInfo,
   updateChecker,
   LeaderboardEntry,
+  ProgramStats,
 } from "../../functions/src/definitions/api/interfaces";
 
 interface CheckerDetails {
@@ -16,6 +17,7 @@ interface CheckerDetails {
   pendingCount: number;
   isAdmin: boolean;
   tier: string;
+  isActive: boolean;
 }
 
 interface Window {
@@ -36,4 +38,5 @@ export type {
   CheckerDetails,
   Window,
   LeaderboardEntry,
+  ProgramStats,
 };

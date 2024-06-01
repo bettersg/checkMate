@@ -14,6 +14,7 @@ import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
 import { CustomReply } from "../../types"
+import { incrementCheckerCounts } from "./counters"
 
 const db = admin.firestore()
 
@@ -651,8 +652,11 @@ async function respondToInstance(
       .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
   }
 
+  let category = primaryCategory
+
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
+      category = "custom"
       await sendTextMessage("user", from, customReply.text, data.id)
     } else if (customReply.type === "image") {
       //TODO: implement later
@@ -706,10 +710,9 @@ async function respondToInstance(
     },
   }
 
-  let category = primaryCategory
-
   if (
     category !== "irrelevant" &&
+    category !== "custom" &&
     !Object.keys(responses).includes(category.toUpperCase())
   ) {
     functions.logger.error("Unknown category assigned, error response sent")
@@ -744,6 +747,8 @@ async function respondToInstance(
     case "error":
       responseText = getFinalResponseText(responses.ERROR)
       await sendTextMessage("user", from, responseText, data.id)
+      break
+    case "custom":
       break
     default:
       if (!(category.toUpperCase() in responses)) {
@@ -788,6 +793,22 @@ async function respondToInstance(
   updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)
+
+  //check if category does not contain irrelevant, then updated reported number by 1
+  if (category !== "irrelevant" && category !== "irrelevant_auto") {
+    //count number of instances from this sender
+    const countOfInstancesFromSender = (
+      await parentMessageRef
+        .collection("instances")
+        .where("from", "==", from)
+        .count()
+        .get()
+    ).data().count
+    if (countOfInstancesFromSender == 1) {
+      await incrementCheckerCounts(from, "numReported", 1)
+    }
+  }
+
   if (
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"

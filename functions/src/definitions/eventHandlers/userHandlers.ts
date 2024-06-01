@@ -33,6 +33,7 @@ import {
   getSignedUrl,
   getCloudStorageUrl,
 } from "../common/mediaUtils"
+import { incrementCheckerCounts } from "../common/counters"
 import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
 import { performOCR } from "../common/machineLearningServer/operations"
@@ -881,6 +882,8 @@ async function referralHandler(message: string, from: string) {
           await referralSourceSnap.ref.update({
             referralCount: FieldValue.increment(1),
           })
+          //check if referrer is a checker
+          await incrementCheckerCounts(referrer, "numReferred", 1)
           await userRef.update({
             firstMessageType: "prepopulated",
             utm: {
