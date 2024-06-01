@@ -79,16 +79,16 @@ export type ProgramData = {
   numReferralTarget: number //target number of referrals made to complete program
   numReportTarget: number //number of non-trivial messages sent in to complete program
   accuracyTarget: number //target accuracy of non-unsure votes
-  numVotesAtProgramStart: number
-  numReferralsAtProgramStart: number
-  numReportsAtProgramStart: number
-  numCorrectVotesAtProgramStart: number
-  numNonUnsureVotesAtProgramStart: number
-  numVotesAtProgramEnd: number | null
-  numReferralsAtProgramEnd: number | null
-  numReportsAtProgramEnd: number | null
-  numCorrectVotesAtProgramEnd: number | null
-  numNonUnsureVotesAtProgramEnd: number | null
+  numVotesAtProgramStart: number //number of votes checker has made at program start
+  numReferralsAtProgramStart: number //number of referrals checker has made at program start
+  numReportsAtProgramStart: number //number of non-trivial messages reports checker has made at program start
+  numCorrectVotesAtProgramStart: number //number of non-unsure correct votes checker has made at program start
+  numNonUnsureVotesAtProgramStart: number //number of non-unsure votes checker has made at program start
+  numVotesAtProgramEnd: number | null //number of votes checker has made at program end
+  numReferralsAtProgramEnd: number | null //number of referrals checker has made at program end
+  numReportsAtProgramEnd: number | null //number of non-trivial messages reports checker has made at program end
+  numCorrectVotesAtProgramEnd: number | null //number of non-unsure correct votes checker has made at program end
+  numNonUnsureVotesAtProgramEnd: number | null //number of non-unsure votes checker has made at program end
 }
 
 export type LeaderboardEntry = {
