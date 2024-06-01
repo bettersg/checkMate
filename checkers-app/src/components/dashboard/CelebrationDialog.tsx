@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Dialog,
-  DialogHeader,
   DialogBody,
   DialogFooter,
   Typography,
