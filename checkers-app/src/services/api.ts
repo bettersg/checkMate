@@ -73,9 +73,9 @@ export const checkOTP = async (checkerId: string, otp: string) => {
     if (!customToken || !updatedCheckerId) {
       throw new Error("Custom token or checkerId not found in response");
     }
-    if (checkerId === updatedCheckerId) {
-      throw new Error(`Unexpected - checkerId ${checkerId} not updated`);
-    }
+    // if (checkerId === updatedCheckerId) {
+    //   throw new Error(`Unexpected - checkerId ${checkerId} not updated`);
+    // } //this could occur if the user has some issue after requesting OTP and then comes in again
     await axiosInstance.delete(`/api/checkers/${checkerId}`);
   }
   return response.data;
