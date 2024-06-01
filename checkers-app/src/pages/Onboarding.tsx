@@ -179,6 +179,7 @@ const Onboarding = () => {
           });
         }
         setIsOTPValidated(true);
+        setCurrentStep(currentStep + 1);
         setShowAlerts(false);
       })
       .catch((error) => {
