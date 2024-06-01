@@ -1,5 +1,8 @@
 import { FieldValue } from "@google-cloud/firestore"
 import { DocumentReference } from "firebase-admin/firestore"
+import * as admin from "firebase-admin"
+
+const db = admin.firestore()
 
 const incrementCounter = async function (
   docRef: DocumentReference,
@@ -82,4 +85,23 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
   }
 }
 
-export { getCount, incrementCounter, getVoteCounts }
+const incrementCheckerCounts = async function (
+  whatsappId: string,
+  field: string,
+  increment = 1
+) {
+  const factCheckerQuery = db
+    .collection("checkers")
+    .where("whatsappId", "==", whatsappId)
+    .limit(1)
+  const factCheckerQuerySnapshot = await factCheckerQuery.get()
+  if (factCheckerQuerySnapshot.empty) {
+    return
+  } else {
+    const factCheckerDoc = factCheckerQuerySnapshot.docs[0]
+    const factCheckerRef = factCheckerDoc.ref
+    return factCheckerRef.update({ [field]: FieldValue.increment(increment) })
+  }
+}
+
+export { getCount, incrementCounter, getVoteCounts, incrementCheckerCounts }

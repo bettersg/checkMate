@@ -2,7 +2,7 @@ import { Tooltip, Typography } from "@material-tailwind/react";
 
 interface TooltipProps {
   header: string;
-  text: string;
+  text: string | React.ReactNode;
 }
 
 export function TooltipWithHelperIcon({ header, text }: TooltipProps) {

@@ -38,10 +38,10 @@ export type WhatsappMessageObject = {
   image?: { caption: string; id: string; mime_type: string }
 }
 
-export type Checker = {
+export type CheckerData = {
   name: string
   type: "human" | "ai"
-  isActive: boolean | null
+  isActive: boolean
   isOnboardingComplete: boolean | null
   isAdmin: boolean
   singpassOpenId: string | null
@@ -51,13 +51,17 @@ export type Checker = {
   experience: number
   tier: "beginner" | "intermediate" | "expert"
   numVoted: number
+  numReferred: number
+  numReported: number
   voteWeight: number
   numCorrectVotes: number
+  numNonUnsureVotes: number
   numVerifiedLinks: number
   preferredPlatform: string | null
   lastVotedTimestamp: Timestamp | null
   getNameMessageId: string | null
   leaderboardStats: LeaderBoardStats
+  programData: ProgramData
 }
 
 type LeaderBoardStats = {
@@ -65,6 +69,26 @@ type LeaderBoardStats = {
   numCorrectVotes: number // number of correct votes cast where the parent message category is not unsure
   totalTimeTaken: number // total time taken to vote where the parent message category is not unsure
   score: number // total score
+}
+
+export type ProgramData = {
+  isOnProgram: boolean
+  programStart: Timestamp | null
+  programEnd: Timestamp | null
+  numVotesTarget: number //target number of messages voted on to complete program
+  numReferralTarget: number //target number of referrals made to complete program
+  numReportTarget: number //number of non-trivial messages sent in to complete program
+  accuracyTarget: number //target accuracy of non-unsure votes
+  numVotesAtProgramStart: number //number of votes checker has made at program start
+  numReferralsAtProgramStart: number //number of referrals checker has made at program start
+  numReportsAtProgramStart: number //number of non-trivial messages reports checker has made at program start
+  numCorrectVotesAtProgramStart: number //number of non-unsure correct votes checker has made at program start
+  numNonUnsureVotesAtProgramStart: number //number of non-unsure votes checker has made at program start
+  numVotesAtProgramEnd: number | null //number of votes checker has made at program end
+  numReferralsAtProgramEnd: number | null //number of referrals checker has made at program end
+  numReportsAtProgramEnd: number | null //number of non-trivial messages reports checker has made at program end
+  numCorrectVotesAtProgramEnd: number | null //number of non-unsure correct votes checker has made at program end
+  numNonUnsureVotesAtProgramEnd: number | null //number of non-unsure votes checker has made at program end
 }
 
 export type LeaderboardEntry = {

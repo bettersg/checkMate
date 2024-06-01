@@ -14,5 +14,9 @@
   "misleadingUpperBound": 4,
   "sendInterimMinVotes": 1,
   "surveyLikelihood": 1,
-  "satisfactionSurveyCooldownDays": 30
+  "satisfactionSurveyCooldownDays": 30,
+  "volunteerProgramVotesRequirement": 50,
+  "volunteerProgramReferralRequirement": 0,
+  "volunteerProgramReportRequirement": 10,
+  "volunteerProgramAccuracyRequirement": 0.6
 }

@@ -1,8 +1,10 @@
 import { Request, Response } from "express"
 import { createChecker } from "../interfaces"
-import { Checker } from "../../../types"
+import { CheckerData } from "../../../types"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
+import { Timestamp } from "firebase-admin/firestore"
+import { getThresholds } from "../../common/utils"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -23,7 +25,10 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     level,
     experience,
     numVoted,
+    numReferred,
+    numReported,
     numCorrectVotes,
+    numNonUnsureVotes,
     numVerifiedLinks,
     preferredPlatform,
     lastVotedTimestamp,
@@ -44,7 +49,10 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       return res.status(409).send("Checker agent name already exists")
     }
   }
-  const newChecker: Checker = {
+
+  const thresholds = await getThresholds()
+
+  const newChecker: CheckerData = {
     name,
     type,
     isActive: isActive || false,
@@ -58,7 +66,10 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     experience: experience || 0,
     tier: "beginner",
     numVoted: numVoted || 0,
+    numReferred: numReferred || 0,
+    numReported: numReported || 0,
     numCorrectVotes: numCorrectVotes || 0,
+    numNonUnsureVotes: numNonUnsureVotes || 0,
     numVerifiedLinks: numVerifiedLinks || 0,
     preferredPlatform: preferredPlatform || type === "ai" ? null : "telegram",
     lastVotedTimestamp: lastVotedTimestamp || null,
@@ -68,6 +79,25 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       numCorrectVotes: 0,
       totalTimeTaken: 0,
       score: 0,
+    },
+    programData: {
+      isOnProgram: type === "human" ? true : false,
+      programStart: type === "human" ? Timestamp.fromDate(new Date()) : null,
+      programEnd: null,
+      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+      numVotesAtProgramStart: 0,
+      numReferralsAtProgramStart: 0,
+      numReportsAtProgramStart: 0,
+      numCorrectVotesAtProgramStart: 0,
+      numNonUnsureVotesAtProgramStart: 0,
+      numVotesAtProgramEnd: null,
+      numReferralsAtProgramEnd: null,
+      numReportsAtProgramEnd: null,
+      numCorrectVotesAtProgramEnd: null,
+      numNonUnsureVotesAtProgramEnd: null,
     },
   }
 

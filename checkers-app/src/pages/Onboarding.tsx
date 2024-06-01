@@ -103,11 +103,43 @@ const StepThree = () => {
 
 const StepFour = () => {
   return (
-    <p>
-      Awesome! Now that you know how to identify misinformation and scams, you
-      are ready to help us combat them! Thanks again for joining our community
-      of CheckMates!
-    </p>
+    <>
+      <p>
+        A few last things! Firstly, you should join our WhatsApp group at the
+        following link, where all our checkers share relevant links from
+        reputable news sources to aid fact checking. (But are not allowed to
+        discuss what categories/scores to assign)
+      </p>
+      <br />
+      <p>
+        <a
+          className="underline text-checkLink"
+          href="https://bit.ly/checkmates-groupchat)"
+        >
+          https://bit.ly/checkmates-groupchat
+        </a>
+      </p>
+      <br />
+      <p>
+        Next, for more details on the checking thought process and the
+        definitions of our categories, you can always head over to:.
+      </p>
+      <br />
+      <p>
+        <a
+          className="underline text-checkLink"
+          href="https://bit.ly/checkmates-wiki)"
+        >
+          https://bit.ly/checkmates-wiki
+        </a>
+      </p>
+      <br />
+      <p>
+        Awesome! Now that you know how to identify misinformation and scams, you
+        are ready to help us combat them! Thanks again for joining our community
+        of CheckMates!
+      </p>
+    </>
   );
 };
 
@@ -179,6 +211,7 @@ const Onboarding = () => {
           });
         }
         setIsOTPValidated(true);
+        setCurrentStep(currentStep + 1);
         setShowAlerts(false);
       })
       .catch((error) => {
