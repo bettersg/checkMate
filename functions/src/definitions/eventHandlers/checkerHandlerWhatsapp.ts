@@ -154,6 +154,11 @@ async function onSignUp(from: string, platform = "whatsapp") {
       numReportsAtProgramStart: 0,
       numCorrectVotesAtProgramStart: 0,
       numNonUnsureVotesAtProgramStart: 0,
+      numVotesAtProgramEnd: null,
+      numReferralsAtProgramEnd: null,
+      numReportsAtProgramEnd: null,
+      numCorrectVotesAtProgramEnd: null,
+      numNonUnsureVotesAtProgramEnd: null,
     },
   }
   await db.collection("checkers").add(checkerObj)

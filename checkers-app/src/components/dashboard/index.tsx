@@ -7,6 +7,7 @@ import ProgressCard from "./ProgressCard";
 import { Checker, ProgramStats } from "../../types";
 import { getChecker } from "../../services/api";
 import Loading from "../common/Loading";
+import { CelebrationDialog } from "./CelebrationDialog";
 //TODO: link to firebase
 
 export default function Dashboard() {
@@ -66,6 +67,9 @@ export default function Dashboard() {
           pendingCount={checkerDetails.pendingCount}
         />
       )}
+      <CelebrationDialog
+        display={hasCompletedProgram && isOnProgram}
+      ></CelebrationDialog>
       {/* {reviewCount > 0 && (
         <PendingMessageAlert hasPending={false} pendingCount={pendingCount} />
       )} */}

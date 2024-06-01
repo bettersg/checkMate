@@ -124,6 +124,11 @@ const mockDb = async function () {
       numReportsAtProgramStart: 0,
       numCorrectVotesAtProgramStart: 0,
       numNonUnsureVotesAtProgramStart: 0,
+      numVotesAtProgramEnd: null,
+      numReferralsAtProgramEnd: null,
+      numReportsAtProgramEnd: null,
+      numCorrectVotesAtProgramEnd: null,
+      numNonUnsureVotesAtProgramEnd: null,
     },
   }
   if (querySnap.empty) {

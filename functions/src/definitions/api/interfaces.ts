@@ -59,7 +59,7 @@ interface updateChecker {
   numVerifiedLinks?: number
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
-  programData?: "reset"
+  programData?: "reset" | "complete"
 }
 
 interface Checker {

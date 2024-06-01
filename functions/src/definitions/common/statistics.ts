@@ -244,6 +244,12 @@ async function computeProgramStats(
     if (isProgramCompleted && checkerData.programData.programEnd == null) {
       await checkerSnap.ref.update({
         "programData.programEnd": Timestamp.fromDate(new Date()),
+        "programData.numVotesAtProgramEnd": checkerData.numVoted,
+        "programData.numReferralsAtProgramEnd": checkerData.numReferred,
+        "programData.numReportsAtProgramEnd": checkerData.numReported,
+        "programData.numCorrectVotesAtProgramEnd": checkerData.numCorrectVotes,
+        "programData.numNonUnsureVotesAtProgramEnd":
+          checkerData.numNonUnsureVotes,
       })
       isNewlyCompleted = true
     }

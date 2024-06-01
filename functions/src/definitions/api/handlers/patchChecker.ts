@@ -54,29 +54,42 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
 
     if (keys.includes("programData")) {
       if (
-        typeof body.programData !== "string" ||
-        body.programData !== "reset"
+        typeof body.programData === "string" &&
+        (body.programData === "reset" || body.programData === "complete")
       ) {
+        if (body.programData === "reset") {
+          const thresholds = await getThresholds()
+          body.programData = {
+            isOnProgram: true,
+            programStart: Timestamp.fromDate(new Date()),
+            programEnd: null,
+            numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+            numReferralTarget:
+              thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+            numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+            accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+            numVotesAtProgramStart: checker.numVoted ?? 0,
+            numReferralsAtProgramStart: checker.numReferred ?? 0,
+            numReportsAtProgramStart: checker.numReported ?? 0,
+            numCorrectVotesAtProgramStart: checker.numCorrectVotes ?? 0,
+            numNonUnsureVotesAtProgramStart: checker.numNonUnsureVotes ?? 0,
+            numVotesAtProgramEnd: null,
+            numReferralsAtProgramEnd: null,
+            numReportsAtProgramEnd: null,
+            numCorrectVotesAtProgramEnd: null,
+            numNonUnsureVotesAtProgramEnd: null,
+          }
+        } else if (body.programData === "complete") {
+          //delete programdata from body
+          delete body.programData
+          body["programData.isOnProgram"] = false
+        }
+      } else {
         return res
           .status(400)
-          .send("programData will only work with the value 'reset'")
-      } else {
-        const thresholds = await getThresholds()
-        body.programData = {
-          isOnProgram: true,
-          programStart: Timestamp.fromDate(new Date()),
-          programEnd: null,
-          numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
-          numReferralTarget:
-            thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
-          numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
-          accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
-          numVotesAtProgramStart: checker.numVoted ?? 0,
-          numReferralsAtProgramStart: checker.numReferred ?? 0,
-          numReportsAtProgramStart: checker.numReported ?? 0,
-          numCorrectVotesAtProgramStart: checker.numCorrectVotes ?? 0,
-          numNonUnsureVotesAtProgramStart: checker.numNonUnsureVotes ?? 0,
-        }
+          .send(
+            "programData will only work with the value 'reset' or 'complete'"
+          )
       }
     }
 

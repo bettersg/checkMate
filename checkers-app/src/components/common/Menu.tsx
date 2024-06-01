@@ -3,7 +3,6 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
-  IconButton,
   Dialog,
   DialogHeader,
   DialogBody,
@@ -25,8 +24,6 @@ import {
   activateChecker,
 } from "../../services/api";
 
-type UpdateCheckerFunction = (checkerId: string) => Promise<any>;
-
 interface PropType {
   isActive: boolean;
 }
@@ -35,18 +32,14 @@ const menuOptions = {
   activate: {
     header: "Ready to Resume",
     body: "Welcome back! Click if you're ready to resume receiving messages to vote on from CheckMate.",
-    checkerUpdateFunction: (checkerId: string) => activateChecker(checkerId),
   },
   deactivate: {
     header: "Take a Break",
     body: "Are you sure you want to deactivate your account? You will no longer receive messages to vote on from CheckMate. You can come back here again anytime to reactivate your account.",
-    checkerUpdateFunction: (checkerId: string) => deactivateChecker(checkerId),
   },
   resetProgram: {
     header: "Restart Program",
     body: "Are you sure you want to restart your program? You will lose all your progress and start from the beginning.",
-    checkerUpdateFunction: (checkerId: string) =>
-      resetCheckerProgram(checkerId),
   },
 };
 

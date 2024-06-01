@@ -84,6 +84,11 @@ export type ProgramData = {
   numReportsAtProgramStart: number
   numCorrectVotesAtProgramStart: number
   numNonUnsureVotesAtProgramStart: number
+  numVotesAtProgramEnd: number | null
+  numReferralsAtProgramEnd: number | null
+  numReportsAtProgramEnd: number | null
+  numCorrectVotesAtProgramEnd: number | null
+  numNonUnsureVotesAtProgramEnd: number | null
 }
 
 export type LeaderboardEntry = {

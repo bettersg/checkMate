@@ -252,3 +252,15 @@ export const deactivateChecker = async (checkerId: string) => {
     await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
   ).data;
 };
+
+export const completeProgram = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing in deactivateChecker.");
+  }
+  const checkerUpdateData: updateChecker = {
+    programData: "complete",
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
+  ).data;
+};

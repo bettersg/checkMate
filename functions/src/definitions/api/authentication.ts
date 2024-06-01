@@ -164,6 +164,11 @@ app.post("/", async (req, res) => {
         numReportsAtProgramStart: 0,
         numCorrectVotesAtProgramStart: 0,
         numNonUnsureVotesAtProgramStart: 0,
+        numVotesAtProgramEnd: null,
+        numReferralsAtProgramEnd: null,
+        numReportsAtProgramEnd: null,
+        numCorrectVotesAtProgramEnd: null,
+        numNonUnsureVotesAtProgramEnd: null,
       },
     }
 
