@@ -65,7 +65,7 @@ interface updateChecker {
 interface Checker {
   name: string
   type: "human" | "ai"
-  isActive: boolean | null
+  isActive: boolean
   isOnboardingComplete: boolean | null
   tier: "beginner" | "intermediate" | "expert"
   isAdmin: boolean

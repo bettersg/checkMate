@@ -41,7 +41,7 @@ export type WhatsappMessageObject = {
 export type CheckerData = {
   name: string
   type: "human" | "ai"
-  isActive: boolean | null
+  isActive: boolean
   isOnboardingComplete: boolean | null
   isAdmin: boolean
   singpassOpenId: string | null

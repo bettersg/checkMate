@@ -32,6 +32,8 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
     const checkerKeys = Object.keys(checker)
     const validKeys = keys.every((key) => checkerKeys.includes(key))
 
+    console.log(body)
+
     if (!validKeys) {
       return res.status(400).send("Invalid keys in request body")
     }

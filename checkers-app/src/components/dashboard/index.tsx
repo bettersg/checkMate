@@ -11,7 +11,7 @@ import Loading from "../common/Loading";
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
-  const { checkerDetails } = useUser();
+  const { checkerDetails, setCheckerDetails } = useUser();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [accuracyRate, setAccuracyRate] = useState<number | null>(0);
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
@@ -30,21 +30,23 @@ export default function Dashboard() {
         return;
       }
       const checker: Checker = await getChecker(checkerDetails.checkerId);
-      if (checker && checker.last30days) {
-        setTotalVotes(checker.last30days.totalVoted);
-        setAccuracyRate(checker.last30days.accuracyRate);
-        setAvgResponseTime(checker.last30days.averageResponseTime);
-        setPeopleHelped(checker.last30days.peopleHelped);
-        //setPendingCount(checker.pendingVoteCount);
-        setIsLoading(false);
-      }
-      if (checker && checker.isOnProgram && checker.programStats) {
-        setIsOnProgram(checker.isOnProgram);
-        setHasCompletedProgram(checker.hasCompletedProgram);
-        setProgramStats(checker.programStats);
-      }
-      if (checker && checker.referralCode) {
-        setReferralCode(checker.referralCode);
+      if (checker) {
+        setCheckerDetails((prev) => ({ ...prev, isActive: checker.isActive }));
+        if (checker.last30days) {
+          setTotalVotes(checker.last30days.totalVoted);
+          setAccuracyRate(checker.last30days.accuracyRate);
+          setAvgResponseTime(checker.last30days.averageResponseTime);
+          setPeopleHelped(checker.last30days.peopleHelped);
+          setIsLoading(false);
+        }
+        if (checker.isOnProgram && checker.programStats) {
+          setIsOnProgram(checker.isOnProgram);
+          setHasCompletedProgram(checker.hasCompletedProgram);
+          setProgramStats(checker.programStats);
+        }
+        if (checker.referralCode) {
+          setReferralCode(checker.referralCode);
+        }
       }
     };
     if (checkerDetails.checkerId) {

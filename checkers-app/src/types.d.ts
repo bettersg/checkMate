@@ -17,6 +17,7 @@ interface CheckerDetails {
   pendingCount: number;
   isAdmin: boolean;
   tier: string;
+  isActive: boolean;
 }
 
 interface Window {
