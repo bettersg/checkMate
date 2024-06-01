@@ -70,7 +70,6 @@ export default function MenuComponent(Props: PropType) {
     if (!checkerDetails.checkerId) {
       return;
     }
-    console.log("checkerDetails.checkerId", checkerDetails.checkerId);
     if (intent === "activate") {
       await activateChecker(checkerDetails.checkerId);
     } else if (intent === "deactivate") {
