@@ -110,6 +110,7 @@ const StepFour = () => {
         reputable news sources to aid fact checking. (But are not allowed to
         discuss what categories/scores to assign)
       </p>
+      <br />
       <p>
         <a
           className="underline text-checkLink"
