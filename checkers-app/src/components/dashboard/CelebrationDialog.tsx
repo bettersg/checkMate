@@ -50,8 +50,9 @@ export function CelebrationDialog(props: PropType) {
             Congratulations!!!
           </Typography>
           <Typography className="text-center font-normal">
-            Hooray! You've completed the CheckMate program!! Would you like to
-            continue with us as a checker?
+            Hooray! You've completed the CheckMate program!! We'd love for you
+            to stay on as a checker and help us in our fight against
+            misinformation and scams. Would you like to stay on?
           </Typography>
         </DialogBody>
         <DialogFooter className="space-x-2">
