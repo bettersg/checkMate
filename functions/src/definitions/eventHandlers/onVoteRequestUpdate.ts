@@ -26,7 +26,11 @@ const db = admin.firestore()
 const onVoteRequestUpdateV2 = onDocumentUpdated(
   {
     document: "messages/{messageId}/voteRequests/{voteRequestId}",
-    secrets: ["WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID", "WHATSAPP_TOKEN"],
+    secrets: [
+      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
+      "WHATSAPP_TOKEN",
+      "TELEGRAM_CHECKER_BOT_TOKEN",
+    ],
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
