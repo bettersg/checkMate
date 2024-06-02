@@ -11,13 +11,13 @@ interface HeaderProps {
 export default function Header({ pageName, showMenu = false }: HeaderProps) {
   const { checkerDetails } = useUser();
   return (
-    <div className="relative flex items-center fixed top-0 left-0 right-0 z-30 bg-white dark:bg-dark-background-color">
+    <div className="relative flex items-center fixed top-0 left-0 right-0 z-30 px-[3vw] pt-[3vh] bg-white dark:bg-dark-background-color">
       <div className="flex justify-start items-center flex-grow-0">
         <BackButton />
       </div>
 
       <div className="absolute left-1/2 transform -translate-x-1/2">
-        <Typography variant="h3" className="text-primary-color2">
+        <Typography variant="h4" className="text-primary-color2">
           {pageName}
         </Typography>
       </div>
