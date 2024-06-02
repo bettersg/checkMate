@@ -1,21 +1,22 @@
-import { Button } from "@material-tailwind/react";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function BackButton() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const regex = /^\/messages\/[^/]+\/voteRequests\/[^/]+\/?$/;
+  function onClick() {
+    if (regex.test(location.pathname)) {
+      navigate("/votes");
+    } else {
+      navigate(-1);
+    }
+  }
+
   return (
-    <div className="fixed top-16 left-4 z-50 bg-gray-800 bg-opacity-75 p-2 rounded-full">
-      <Button
-        variant="text"
-        className="rounded-full"
-        style={{ color: "#ff8932" }}
-        onClick={() => {
-          navigate(`/votes`);
-        }}
-      >
-        <ArrowLeftIcon className="h-5 w-5" />
-      </Button>
-    </div>
+    <ArrowLeftIcon
+      className="h-6 w-6 text-[#ff8932] cursor-pointer"
+      onClick={onClick}
+    />
   );
 }

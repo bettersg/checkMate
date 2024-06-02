@@ -75,7 +75,7 @@ export default function Dashboard() {
       )} */}
       {isOnProgram && programStats ? (
         <div>
-          <Typography variant="h4" className="text-primary-color">
+          <Typography variant="h5" className="text-primary-color">
             CheckMate Program Progress
           </Typography>
           <div className="my-6 flex flex-col gap-y-4 mx-2">
@@ -139,7 +139,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div>
-          <Typography variant="h4" className="text-primary-color">
+          <Typography variant="h5" className="text-primary-color">
             In the past 30 days
           </Typography>
           <div className="my-6 flex flex-col gap-y-4 mx-2">

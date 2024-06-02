@@ -1,7 +1,6 @@
 import VoteCategories from "./VoteCategories";
 import MessageCard from "./MessageCard";
 import { Typography, Alert } from "@material-tailwind/react";
-import { BackButton } from "../common/BackButton";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
@@ -52,7 +51,6 @@ export default function VotePage() {
             }
           `}
         </style>
-        <BackButton />
         <MessageCard
           type={vote.type}
           text={vote.text}
