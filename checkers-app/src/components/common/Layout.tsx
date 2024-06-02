@@ -26,7 +26,7 @@ export default function Layout({
       <Header pageName={pageName} showMenu={showMenu} />
       {/* <PageHeader>{pageHeader}</PageHeader>
     </div> */}
-      <div className="pb-1 mt-1">{children}</div>
+      <div className="pb-16 mt-1">{children}</div>
       <NavbarDefault />
     </div>
   );
