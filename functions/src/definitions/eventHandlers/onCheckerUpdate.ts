@@ -30,6 +30,7 @@ const onCheckerUpdateV2 = onDocumentUpdated(
     const postChangeData = postChangeSnap.data() as CheckerData
 
     if (
+      postChangeData.type === "ai" ||
       !postChangeData.programData.isOnProgram ||
       postChangeData.programData.programEnd != null
     ) {
