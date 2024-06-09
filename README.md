@@ -390,6 +390,8 @@ erDiagram
 
 The below diagram displays the core flow when users interact with the WhatsApp bot. Each subgraph corresponds to a particular function in functions/src/definitions/, and some nested subgraphs, if there, refer to subfunctions declared within the cloud functions. Some of the functions are also referenced in the above architecture diagram.
 
+Dotted lines refer to asynchronous processes that take longer than the order of seconds. Most of the interfaces between subgraphs/functions are asynchronous in the software engineering sense but they happen near-instantaneously. 
+
 ```mermaid
 flowchart TB
     classDef human fill:#FFA500
