@@ -30,9 +30,9 @@ SaaS Services
 - Typesense
   - Used as vector DB and search engine
 
-See below diagram for how the elements of the cloud architecture work together.
+See below diagram for how the elements of the cloud architecture work together:
 
-```Mermaid
+```mermaid
 flowchart TB
   A[User's WhatsApp]:::touchpoint
   B[Referral Endpoint]:::touchpoint
