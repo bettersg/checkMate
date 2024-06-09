@@ -538,21 +538,23 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 4. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
 
 ### First time testing (once all above steps are done)
+
 1. Go to the chat with the WhatsApp User bot non-prod number and send in /mockup
 2. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
 3. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
 4. Send a message such as "Best Fixed Deposit Rates yield 3.75% if you deposit via Syfe (to get institutional fixed deposit rates) (as of June 2024)" into the bot. You'll notice something onUserPublish might take a while, but this should trigger the asynchronous checking flow
-    - You can expect to see this on your console:
-      ```>  {"severity":"INFO","message":"Processing 5"}
->  {"severity":"INFO","message":"Unable to get Google identity token in lower environments"}
->  {"severity":"INFO","message":"Unable to get Google identity token in lower environments"}
->  {"severity":"WARNING","message":"Path doesn't exist in database"}
-i  functions: Beginning execution of "asia-southeast1-onMessageWriteV2"
->  {"severity":"INFO","message":"Transaction success for messageId wamid.HBgKNjU5MTgwNzYyOBUCABIYEjgwRTVEQ0U0QjZBQkYyNEM5NwA=!"}``` 
-6. You should see a notification in your Telegram Bot. Go through the voting process.
-7. Once done, you should get a reply on the user whatsapp bot.
-8. With that, you've basically gone through the end-to-end flow for one message (albeit with only 1 voter in the pool)
-
+   - You can expect to see this on your console:
+     ````> {"severity":"INFO","message":"Processing 5"}
+     >  {"severity":"INFO","message":"Unable to get Google identity token in lower environments"}
+     >  {"severity":"INFO","message":"Unable to get Google identity token in lower environments"}
+     >  {"severity":"WARNING","message":"Path doesn't exist in database"}
+     i  functions: Beginning execution of "asia-southeast1-onMessageWriteV2"
+     >  {"severity":"INFO","message":"Transaction success for messageId wamid.HBgKNjU5M452y262ya53452U0QjZBQkYyNEM5NwA=!"}```
+     ````
+5. You should see a notification in your Telegram Bot. Go through the voting process.
+6. Once done, you should get a reply on the user whatsapp bot.
+7. With that, you've basically gone through the end-to-end flow for one message (albeit with only 1 voter in the pool)
+   
 ### Each Time Developing
 
 1. Open 3 shells from in root directory
