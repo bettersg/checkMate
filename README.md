@@ -1,6 +1,6 @@
 ## Repository Structure
 
-We have 5 main repositories for all the codes in CheckMate
+We have 5 main repositories for all the codes in CheckMate. In the architecture diagram below, these are at the top, in light grey.
 
 - User and Checkers Product Repository (this one)
   - Handles WhatsApp bot, Telegram bot, and Telegram WebApp interactions for both users and checkers
@@ -23,12 +23,18 @@ Project is deployed on Google Cloud. Cloud Architecture comprises
   - Cloud run is used for services that take too long to cold start
 - Cloud Pub/Sub (Pink Below)
 
-SaaS Services
+These SaaS are also being used in the product.
 
 - OpenAI
   - Used for GenAI features
 - Typesense
   - Used as vector DB and search engine
+
+Finally, there are 3 main user interfaces, these are colored in dark grey.
+
+- WhatsApp number/bot for users
+- Telegram webapp for checkers
+- Web endpoint for referrals
 
 See below diagram for how the elements of the cloud architecture work together:
 
