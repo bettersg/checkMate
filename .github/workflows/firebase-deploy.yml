@@ -9,8 +9,6 @@ on:
     paths:
       - "functions/**"
       - "checkers-app/**"
-    paths-ignore:
-      - "README.md"
 
 jobs:
   build_and_deploy:
