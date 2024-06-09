@@ -20,7 +20,7 @@ async function calculateSimilarity(
   //embed message to compare
   let similarity: {
     ref?: admin.firestore.DocumentReference<admin.firestore.DocumentData>
-    message?: WhatsappMessageObject
+    message?: string
     captionHash?: string | null
     score?: number
     parent?: admin.firestore.DocumentReference<admin.firestore.DocumentData> | null

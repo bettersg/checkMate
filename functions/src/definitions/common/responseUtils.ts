@@ -13,7 +13,7 @@ import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
-import { CustomReply } from "../../types"
+import { CustomReply, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 
 const db = admin.firestore()
@@ -931,16 +931,14 @@ async function sendBlast(user: string) {
       },
     },
   ]
+  const blastStatistics: UserBlast = {
+    feedbackCategory: null,
+    sentTimestamp: Timestamp.fromDate(new Date()),
+  }
   await blastSnap.ref
     .collection("recipients")
     .doc(user)
-    .set(
-      {
-        feedbackCategory: null,
-        sentTimestamp: Timestamp.fromDate(new Date()),
-      },
-      { merge: true }
-    )
+    .set(blastStatistics, { merge: true })
   await sendWhatsappButtonMessage(
     "user",
     user,

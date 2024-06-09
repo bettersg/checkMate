@@ -1,10 +1,14 @@
 name: Run Tests
 on:
   pull_request:
+    paths-ignore:
+      - "README.md"
   push:
     branches:
       - develop
       - main
+    paths-ignore:
+      - "README.md"
 jobs:
   run_tests:
     runs-on: ubuntu-latest

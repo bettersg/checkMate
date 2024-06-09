@@ -38,6 +38,101 @@ export type WhatsappMessageObject = {
   image?: { caption: string; id: string; mime_type: string }
 }
 
+export type MessageData = {
+  machineCategory: string
+  isMachineCategorised: boolean
+  originalText: string | null
+  text: string | null
+  caption: string | null
+  latestInstance: DocumentReference | null
+  firstTimestamp: Timestamp
+  lastTimestamp: Timestamp
+  lastRefreshedTimestamp: Timestamp
+  isPollStarted: boolean
+  isAssessed: boolean
+  assessedTimestamp: Timestamp | null
+  assessmentExpiry: Timestamp | null
+  assessmentExpired: boolean
+  truthScore: number | null
+  isIrrelevant: boolean | null
+  isScam: boolean | null
+  isIllicit: boolean | null
+  isSpam: boolean | null
+  isLegitimate: boolean | null
+  isUnsure: boolean | null
+  isInfo: boolean | null
+  isSatire: boolean | null
+  primaryCategory: string | null
+  customReply: string | null
+  instanceCount: number
+  rationalisation: string | null // Assuming 'rationalisation' is a string; adjust as necessary if it's a different type.
+}
+
+export type InstanceData = {
+  source: string
+  id: string | null
+  timestamp: Timestamp
+  type: "text" | "image"
+  text: string | null
+  textHash: string | null
+  caption: string | null
+  captionHash: string | null
+  sender: string | null
+  imageType: "convo" | "email" | "letter" | "others"
+  ocrVersion: string
+  from: string | null
+  subject: string | null
+  hash: string | null
+  mediaId: string
+  mimeType: string
+  storageUrl: string
+  isForwarded: boolean | null
+  isFrequentlyForwarded: boolean | null
+  isReplied: boolean
+  isInterimPromptSent: boolean | null
+  isInterimReplySent: boolean | null
+  isMeaningfulInterimReplySent: boolean | null
+  isRationalisationSent: boolean | null
+  isRationalisationUseful: boolean | null
+  isReplyForced: boolean | null
+  isMatched: boolean
+  isReplyImmediate: boolean | null
+  replyCategory: string | null
+  replyTimestamp: Timestamp | null
+  matchType: string
+  scamShieldConsent: boolean | null
+  embedding: number[] | null // Specify more precisely based on the actual type used
+  closestMatch: {
+    instanceRef: DocumentReference | null
+    text: string | null
+    score: number | null
+    parentRef: DocumentReference | null
+    algorithm: string
+  }
+  isSatisfactionSurveySent: boolean | null
+  satisfactionScore: number | null
+}
+
+export type UserData = {
+  instanceCount: number
+  firstMessageReceiptTime: Timestamp
+  firstMessageType: "normal" | "irrelevant" | "prepopulated" // Assuming "normal" is one of the possible types
+  lastSent: Timestamp | null
+  satisfactionSurveyLastSent: Timestamp | null //when satisfaction survey was last sent, used to implement cooldown for sending the survey
+  initialJourney: Record<string, string> // Assuming initialJourney is an object with unknown properties
+  referralId: string // Assuming referralId is a string
+  utm: {
+    source: string
+    medium: string
+    content: string
+    campaign: string
+    term: string
+  }
+  referralCount: number
+  language: "en" | "cn"
+  isSubscribedUpdates: boolean
+}
+
 export type CheckerData = {
   name: string
   type: "human" | "ai"
@@ -50,12 +145,12 @@ export type CheckerData = {
   level: number
   experience: number
   tier: "beginner" | "intermediate" | "expert"
-  numVoted: number
-  numReferred: number
-  numReported: number
+  numVoted: number //"Number of messages voted on"
+  numReferred: number //"Number of new users referred"
+  numReported: number //"Number of non-trivial instances sent in sent in"
   voteWeight: number
-  numCorrectVotes: number
-  numNonUnsureVotes: number
+  numCorrectVotes: number //
+  numNonUnsureVotes: number //"Number of votes on messages that didn't end as unsure, for computing accuracy"
   numVerifiedLinks: number
   preferredPlatform: string | null
   lastVotedTimestamp: Timestamp | null
@@ -136,6 +231,20 @@ export type CustomReply = {
   caption: string | null
   lastUpdatedBy: DocumentReference
   lastUpdatedTimestamp: Timestamp
+}
+
+export type BlastData = {
+  type: "text" | "image"
+  text: string | null //blast text, or caption if type is image
+  storageUrl: string | null //image storage URL
+  isActive: boolean //whether or not blast
+  createdDate: Timestamp
+  blastDate: Timestamp
+}
+
+export type UserBlast = {
+  feedbackCategory: "positive" | "negative" | "neutral" | null
+  sentTimestamp: Timestamp
 }
 
 export type TeleMessage = {
