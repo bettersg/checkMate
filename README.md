@@ -523,17 +523,19 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 1. `git clone https://github.com/CheckMateSG/checkMate.git`
 2. `cd checkMate`
 3. `npm install -g firebase-tools`
-4. `npm run postinstall`
-5. run `firebase login --no-localhost` then login with your betterSG email
-6. Contact @sarge1989 to set you up with a cloudflare tunnel, and provide your WhatsApp number so the routing can be done to your setup. _Ngrok will not work for this step_, hence the need for this.
-7. Contact @sarge1989 to obtain .secret.local and .env.local files, which for now will be sent via password-encrypted zip. Place these two files in the `/functions` directory
-8. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
+    - you may have to install/upgrade your java 
+5. `npm run postinstall`
+6. run `firebase login --no-localhost` then login with your betterSG email
+7. Contact @sarge1989 to set you up with a cloudflare tunnel, and provide your WhatsApp number so the routing can be done to your setup. _Ngrok will not work for this step_, hence the need for this.
+8. Contact @sarge1989 to obtain .secret.local and .env.local files, which for now will be sent via password-encrypted zip. Place these two files in the `/functions` directory
+9. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
 
 ### If working on Checkers App
 
 1. Create your own Telegram bot via [botfather](https://t.me/botfather)
-2. Put the token into .secret.local
-3. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
+2. Replace `TELEGRAM_CHECKER_BOT_TOKEN` in `.secret.local` with the bot token. Note, it is `TELEGRAM_CHECKER_BOT_TOKEN` and not `TELEGRAM_BOT_TOKEN` or `TELEGRAM_WEBHOOK_TOKEN`
+3. Go to botfather, navigate to the bot you created, go to "Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000 
+4. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
 
 ### Each Time Developing
 
