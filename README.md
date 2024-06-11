@@ -539,7 +539,8 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 
 ### First time testing (once all above steps are done)
 
-1. Go to the chat with the WhatsApp User bot non-prod number and send in /mockup
+1. Execute the steps in the below section "Each time developing"
+2. Go to the chat with the WhatsApp User bot non-prod number and send in /mockup
 2. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
 3. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
 4. Send a message such as "Best Fixed Deposit Rates yield 3.75% if you deposit via Syfe (to get institutional fixed deposit rates) (as of June 2024)" into the bot. You'll notice something onUserPublish might take a while, but this should trigger the asynchronous checking flow
