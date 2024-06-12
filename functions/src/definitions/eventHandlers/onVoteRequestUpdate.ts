@@ -12,6 +12,7 @@ import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
+import { logger } from "firebase-functions/v2"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -112,7 +113,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
           validResponsesCount >
             Math.min(
               thresholds.endVoteUnsure * factCheckerCount,
-              thresholds.endVoteSusAbsolute //16
+              thresholds.endVoteUnsureAbsolute //16
             )) ||
         (!isUnsure &&
           validResponsesCount >
