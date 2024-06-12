@@ -109,11 +109,23 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         unsureCount > thresholds.isUnsure * validResponsesCount
       const isAssessed =
         (isUnsure &&
-          validResponsesCount > thresholds.endVoteUnsure * factCheckerCount) ||
+          validResponsesCount >
+            Math.min(
+              thresholds.endVoteUnsure * factCheckerCount,
+              thresholds.endVoteSusAbsolute //16
+            )) ||
         (!isUnsure &&
-          validResponsesCount > thresholds.endVote * factCheckerCount) ||
+          validResponsesCount >
+            Math.min(
+              thresholds.endVote * factCheckerCount,
+              thresholds.endVoteAbsolute //10
+            )) ||
         (isSus &&
-          validResponsesCount > thresholds.endVoteSus * factCheckerCount)
+          validResponsesCount >
+            Math.min(
+              thresholds.endVoteSus * factCheckerCount,
+              thresholds.endVoteSusAbsolute //4
+            ))
 
       //set primaryCategory
       let primaryCategory
