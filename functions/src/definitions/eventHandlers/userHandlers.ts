@@ -41,7 +41,12 @@ import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
-import { WhatsappMessageObject } from "../../types"
+import {
+  WhatsappMessageObject,
+  MessageData,
+  InstanceData,
+  UserData,
+} from "../../types"
 import { AppEnv } from "../../appEnv"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -214,7 +219,7 @@ async function newTextInstanceHandler({
 }) {
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
-  let messageUpdateObj: Object | null = null
+  let messageUpdateObj: MessageData | null = null
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
     await db.collection("users").doc(from).update({
@@ -401,7 +406,7 @@ async function newImageInstanceHandler({
 }) {
   let filename
   let messageRef: FirebaseFirestore.DocumentReference | null = null
-  let messageUpdateObj: Object | null = null
+  let messageUpdateObj: MessageData | null = null
   let hasMatch = false
   let matchType = "none" // will be set to either "similarity" or "image" or "none"
   let matchedInstanceSnap
@@ -481,7 +486,7 @@ async function newImageInstanceHandler({
   }
 
   let similarity
-  let embedding
+  let embedding: number[] | null = null
   let bestMatchingDocumentRef
   let bestMatchingText
   let similarityScore = 0
@@ -544,7 +549,7 @@ async function newImageInstanceHandler({
     }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
-      machineCategory: machineCategory, //Can be "fake news" or "scam"
+      machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
       originalText: extractedMessage ?? null,
       text: strippedMessage ?? null, //text
@@ -595,7 +600,7 @@ async function newImageInstanceHandler({
     return
   }
   const instanceRef = messageRef.collection("instances").doc()
-  const instanceUpdateObj = {
+  const instanceUpdateObj: InstanceData = {
     source: "whatsapp",
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
@@ -934,7 +939,7 @@ async function createNewUser(
 ) {
   const id = userRef.id
   const referralId = hashids.encode(id)
-  await userRef.set({
+  const newUserObject: UserData = {
     instanceCount: 0,
     firstMessageReceiptTime: messageTimestamp,
     firstMessageType: "normal",
@@ -942,10 +947,18 @@ async function createNewUser(
     satisfactionSurveyLastSent: null,
     initialJourney: {},
     referralId: referralId,
+    utm: {
+      source: "none",
+      medium: "none",
+      content: "none",
+      campaign: "none",
+      term: "none",
+    },
     referralCount: 0,
     language: "en",
     isSubscribedUpdates: true,
-  })
+  }
+  await userRef.set(newUserObject)
 }
 
 const onUserPublish = onMessagePublished(

@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
-import { WhatsappMessage, CheckerData } from "../../types"
+import { WhatsappMessage, CheckerData, BlastData } from "../../types"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
@@ -136,22 +136,15 @@ const mockDb = async function () {
   } else {
     await querySnap.docs[0].ref.set(checkerObj, { merge: true })
   }
-  {
-    await db
-      .collection("blasts")
-      .doc()
-      .set(
-        {
-          type: "text",
-          text: "This is a test blast",
-          storageUrl: null,
-          isActive: true,
-          createdDate: Timestamp.fromDate(new Date()),
-          blastDate: Timestamp.fromDate(new Date()),
-        },
-        { merge: true }
-      )
+  const blastObject: BlastData = {
+    type: "text",
+    text: "This is a test blast",
+    storageUrl: null,
+    isActive: true,
+    createdDate: Timestamp.fromDate(new Date()),
+    blastDate: Timestamp.fromDate(new Date()),
   }
+  await db.collection("blasts").doc().set(blastObject, { merge: true })
   functions.logger.log("mocked")
 }
 

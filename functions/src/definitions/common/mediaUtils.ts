@@ -53,14 +53,14 @@ async function downloadWhatsappMedia(mediaId: string) {
   return Buffer.from(responseBuffer.data)
 }
 
-async function getHash(buffer: Buffer) {
-  const result = await imageHashSync(
+async function getHash(buffer: Buffer): Promise<string> {
+  const result = (await imageHashSync(
     {
       data: buffer,
     },
     8,
     true
-  )
+  )) as string
   return result
 }
 

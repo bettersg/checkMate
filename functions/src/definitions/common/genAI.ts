@@ -11,7 +11,10 @@ type redaction = {
 
 const env = process.env.ENVIRONMENT
 
-async function anonymiseMessage(message: string, isComplex: boolean = true) {
+async function anonymiseMessage(
+  message: string,
+  isComplex: boolean = true
+): Promise<string> {
   if (env === "SIT") {
     return message
   }
@@ -59,6 +62,9 @@ async function anonymiseMessage(message: string, isComplex: boolean = true) {
             )
             return message
           }
+        } else {
+          functions.logger.error("No response returned from openAI api")
+          return message
         }
       } else {
         functions.logger.error(
@@ -66,6 +72,8 @@ async function anonymiseMessage(message: string, isComplex: boolean = true) {
         )
         return message
       }
+    } else {
+      return message
     }
   } catch (e) {
     functions.logger.error("Anonymisation failed: " + e)
