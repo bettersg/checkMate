@@ -178,7 +178,7 @@ async function despatchPoll(
     const latestInstanceSnap = await latestInstanceRef.get()
     const type = latestInstanceSnap.get("type") ?? null
     if (type === "text") {
-      const text = latestInstanceSnap.get("text")
+      const text = messageSnap.get("text")
       if (text) {
         if (text.length > 50) {
           previewText = text.substring(0, 50) + "..."
