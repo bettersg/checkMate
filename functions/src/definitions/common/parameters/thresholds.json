@@ -13,7 +13,7 @@
   "isUnsure": 0.5,
   "isSus": 0.5,
   "isSatire": 0.5,
-  "falseUpperBound": 2,
+  "falseUpperBound": 2.5,
   "misleadingUpperBound": 4,
   "sendInterimMinVotes": 1,
   "surveyLikelihood": 1,

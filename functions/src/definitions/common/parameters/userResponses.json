@@ -1,19 +1,19 @@
 {
   "UNTRUE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
+    "en": "{{thanks}}{{methodology}}*untrue*.❌{{image_caveat}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!",
+    "cn": "{{thanks}}{{methodology}}不属实。❌{{image_caveat}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！\n"
   },
   "MISLEADING": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}虽然包含一些真实的信息，但它存在误导性或缺乏公正性。⚠️{{image_caveat}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "en": "{{thanks}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!",
+    "cn": "{{thanks}}{{methodology}}虽然包含一些真实的信息，但它存在误导性或缺乏公正性。⚠️{{image_caveat}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "ACCURATE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*accurate*.✅{{image_caveat}}\n\nThank you for keeping Singapore informed!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}是准确的。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "en": "{{thanks}}{{methodology}}*accurate*.✅{{image_caveat}}\n\nThank you for keeping Singapore informed!",
+    "cn": "{{thanks}}{{methodology}}是准确的。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "SATIRE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*satirical in nature. Some elements may be untrue, but it's probably meant to be humourous rather than to deceive*.🙃{{image_caveat}}\n\nThank you for keeping Singapore informed!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}虽然包含一些真实的信息，但它存在误导性或缺乏公正性。🙃{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "en": "{{thanks}}{{methodology}}*satirical in nature. Some elements may be untrue, but it's probably meant to be humourous rather than to deceive*.🙃{{image_caveat}}\n\nThank you for keeping Singapore informed!",
+    "cn": "{{thanks}}{{methodology}}具有讽刺性质。虽然其中一些信息并不属实。不过它们似乎是以幽默的方式呈现，而不是恶意欺骗。🙃{{image_caveat}} \n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "ERROR": {
     "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
@@ -24,20 +24,20 @@
     "cn": "你好！👋 感谢您使用查友！我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
   },
   "SCAM": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*a scam*!🚫{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
-    "cn": "{{thanks}}{{matched}}{{methodology}}是诈骗信息！ 🚫{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
+    "en": "{{thanks}}{{methodology}}*a scam*!🚫{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
+    "cn": "{{thanks}}{{methodology}}是诈骗信息！ 🚫{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
   },
   "ILLICIT": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*suspicious*!🚨{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
-    "cn": "{{thanks}}{{matched}}{{methodology}}很可疑！🚨{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
+    "en": "{{thanks}}{{methodology}}*suspicious*!🚨{{image_caveat}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.",
+    "cn": "{{thanks}}{{methodology}}很可疑！🚨{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
   },
   "SPAM": {
-    "en": "{{thanks}}{{matched}}{{methodology}}spam!🚧{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}是垃圾信息！🚧{{image_caveat}}\n\n虽然它看似无害，但请仍然保持警惕 🧐\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "en": "{{thanks}}{{methodology}}spam!🚧{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!",
+    "cn": "{{thanks}}{{methodology}}是垃圾信息！🚧{{image_caveat}}\n\n虽然它看似无害，但请仍然保持警惕 🧐\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "LEGITIMATE": {
-    "en": "{{thanks}}{{matched}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}\n\nThank you for keeping Singapore safe!",
-    "cn": "{{thanks}}{{matched}}{{methodology}}的来源是可靠的。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
+    "en": "{{thanks}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}\n\nThank you for keeping Singapore safe!",
+    "cn": "{{thanks}}{{methodology}}的来源是可靠的。✅{{image_caveat}}\n\n感谢您对新加坡网络安全的支持和贡献！"
   },
   "UNSURE": {
     "en": "{{thanks}}\n\nUnfortunately, our CheckMates are *unsure about this message*🤷🏻‍♂️🤷🏻‍♀️. Sorry, we're human too!😞\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.\n\nThank you for keeping Singapore safe!",
