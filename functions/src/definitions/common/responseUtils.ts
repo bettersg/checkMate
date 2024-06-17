@@ -626,6 +626,7 @@ async function respondToInstance(
   const customReply: CustomReply = parentMessageSnap.get("customReply")
   const { validResponsesCount } = await getVoteCounts(parentMessageRef)
   const isImage = data?.type === "image"
+  const hasCaption = data?.caption != null
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
 
@@ -649,7 +650,10 @@ async function respondToInstance(
           ? responses.METHODOLOGY_HUMAN_PREVIOUS
           : responses.METHODOLOGY_HUMAN
       )
-      .replace("{{image_caveat}}", isImage ? responses.IMAGE_CAVEAT : "")
+      .replace(
+        "{{image_caveat}}",
+        isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
+      )
   }
 
   let category = primaryCategory

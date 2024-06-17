@@ -52,8 +52,8 @@
     "cn": "感谢您的耐心等待！"
   },
   "IMAGE_CAVEAT": {
-    "en": "This assessment refers to any claims made within the captions. If there are no claims/captions, it refers to the image itself.",
-    "cn": "我们的评估基于图片标题中的内容。如果您提交的短信里没有文字标题，我们对图片本身的内容进行了评估。"
+    "en": "This assessment refers to the claims made within the captions, if any.",
+    "cn": "我们的评估基于图片标题中的内容。"
   },
   "METHODOLOGY_HUMAN": {
     "en": "Our CheckMates have reviewed this message and think it's ",
