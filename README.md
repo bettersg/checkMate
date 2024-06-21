@@ -356,6 +356,7 @@ erDiagram
         string utm "map containing utm parameters, source, medium, content, campaign, term"
         string language "en or cn, users preferred language"
         boolean isSubscribedUpdates "whether to blast msgs to this user"
+        boolean isIgnored "whether the user should be ignored, i.e. blocked, in which case they get no responses"
     }
 
     blasts {
@@ -390,7 +391,7 @@ erDiagram
 
 The below diagram displays the core flow when users interact with the WhatsApp bot. Each subgraph corresponds to a particular function in functions/src/definitions/, and some nested subgraphs, if there, refer to subfunctions declared within the cloud functions. Some of the functions are also referenced in the above architecture diagram.
 
-Dotted lines refer to asynchronous processes that take longer than the order of seconds. Most of the interfaces between subgraphs/functions are asynchronous in the software engineering sense but they happen near-instantaneously. 
+Dotted lines refer to asynchronous processes that take longer than the order of seconds. Most of the interfaces between subgraphs/functions are asynchronous in the software engineering sense but they happen near-instantaneously.
 
 ```mermaid
 flowchart TB
@@ -523,27 +524,27 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 1. `git clone https://github.com/CheckMateSG/checkMate.git`
 2. `cd checkMate`
 3. `npm install -g firebase-tools`
-    - you may have to install/upgrade your java 
-5. `npm run postinstall`
-6. run `firebase login --no-localhost` then login with your betterSG email
-7. Contact @sarge1989 to set you up with a cloudflare tunnel, and provide your WhatsApp number so the routing can be done to your setup. _Ngrok will not work for this step_, hence the need for this.
-8. Contact @sarge1989 to obtain .secret.local and .env.local files, which for now will be sent via password-encrypted zip. Place these two files in the `/functions` directory
-9. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
+   - you may have to install/upgrade your java
+4. `npm run postinstall`
+5. run `firebase login --no-localhost` then login with your betterSG email
+6. Contact @sarge1989 to set you up with a cloudflare tunnel, and provide your WhatsApp number so the routing can be done to your setup. _Ngrok will not work for this step_, hence the need for this.
+7. Contact @sarge1989 to obtain .secret.local and .env.local files, which for now will be sent via password-encrypted zip. Place these two files in the `/functions` directory
+8. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
 
 ### If working on Checkers App
 
 1. Create your own Telegram bot via [botfather](https://t.me/botfather)
 2. Replace `TELEGRAM_CHECKER_BOT_TOKEN` in `.secret.local` with the bot token. Note, it is `TELEGRAM_CHECKER_BOT_TOKEN` and not `TELEGRAM_BOT_TOKEN` or `TELEGRAM_WEBHOOK_TOKEN`
-3. Go to botfather, navigate to the bot you created, go to "Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000 
+3. Go to botfather, navigate to the bot you created, go to "Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000
 4. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
 
 ### First time testing (once all above steps are done)
 
 1. Execute the steps in the below section "Each time developing"
 2. Go to the chat with the WhatsApp User bot non-prod number and send in /mockup
-2. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
-3. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
-4. Send a message such as "Best Fixed Deposit Rates yield 3.75% if you deposit via Syfe (to get institutional fixed deposit rates) (as of June 2024)" into the bot. You'll notice something onUserPublish might take a while, but this should trigger the asynchronous checking flow
+3. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
+4. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
+5. Send a message such as "Best Fixed Deposit Rates yield 3.75% if you deposit via Syfe (to get institutional fixed deposit rates) (as of June 2024)" into the bot. You'll notice something onUserPublish might take a while, but this should trigger the asynchronous checking flow
    - You can expect to see this on your console:
      ````> {"severity":"INFO","message":"Processing 5"}
      >  {"severity":"INFO","message":"Unable to get Google identity token in lower environments"}
@@ -552,10 +553,10 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
      i  functions: Beginning execution of "asia-southeast1-onMessageWriteV2"
      >  {"severity":"INFO","message":"Transaction success for messageId wamid.HBgKNjU5M452y262ya53452U0QjZBQkYyNEM5NwA=!"}```
      ````
-5. You should see a notification in your Telegram Bot. Go through the voting process.
-6. Once done, you should get a reply on the user whatsapp bot.
-7. With that, you've basically gone through the end-to-end flow for one message (albeit with only 1 voter in the pool)
-   
+6. You should see a notification in your Telegram Bot. Go through the voting process.
+7. Once done, you should get a reply on the user whatsapp bot.
+8. With that, you've basically gone through the end-to-end flow for one message (albeit with only 1 voter in the pool)
+
 ### Each Time Developing
 
 1. Open 3 shells from in root directory
@@ -567,9 +568,11 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 7. Can start on development. There should be live refreshing on the changes you make
 
 #### Note:
+
 - When shutting down the emulator, proceed in this order.
-    - Control-C in Shell 3. Enter "Y" if prompted. Otherwise, pre-existing data may not be saved to local.
-    - Close the windows running the Java applications. Otherwise, the port will be used up. 
+  - Control-C in Shell 3. Enter "Y" if prompted. Otherwise, pre-existing data may not be saved to local.
+  - Close the windows running the Java applications. Otherwise, the port will be used up.
+
 ---
 
 In the event the Makefile doesn't work,
