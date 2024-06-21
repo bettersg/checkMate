@@ -91,8 +91,8 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
   const isNewlyJoined =
     messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
 
-  const isBanned = userSnap.get("isBanned")
-  if (isBanned) {
+  const isIgnored = userSnap.get("isIgnored")
+  if (isIgnored) {
     functions.logger.warn(
       `Message from banned user ${from}!, text: ${message?.text?.body}`
     )
@@ -965,6 +965,7 @@ async function createNewUser(
     referralCount: 0,
     language: "en",
     isSubscribedUpdates: true,
+    isIgnored: false,
   }
   await userRef.set(newUserObject)
 }
