@@ -325,6 +325,24 @@ async function updateCheckerCorrectCounts(
     functions.logger.error("Data not found")
     return
   }
+  let updateLeaderboard = true
+  //check if createdTimestamp is later than the start of this current month
+  try {
+    if (postChangeData.createdTimestamp) {
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+      if (postChangeData.createdTimestamp.toDate() < startOfMonth) {
+        updateLeaderboard = false
+      }
+    }
+  } catch (e) {
+    functions.logger.error(
+      "Error checking createdTimestamp against the start of the month",
+      e
+    )
+  }
+
   if (preChangeData.isCorrect !== postChangeData.isCorrect) {
     const previousCorrect = preChangeData.isCorrect
     const currentCorrect = postChangeData.isCorrect
@@ -340,37 +358,45 @@ async function updateCheckerCorrectCounts(
       durationDelta += currentDuration
     }
     if (durationDelta !== 0) {
-      checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
-        FieldValue.increment(durationDelta)
+      updateLeaderboard &&
+        (checkerUpdateObj["leaderboardStats.totalTimeTaken"] =
+          FieldValue.increment(durationDelta))
     }
 
     if (previousCorrect === true) {
       //means now its not correct
-      checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
-        FieldValue.increment(-1)
+      updateLeaderboard &&
+        (checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+          FieldValue.increment(-1))
       checkerUpdateObj["numCorrectVotes"] = FieldValue.increment(-1)
       if (previousScore != null) {
-        checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
-          -previousScore
-        )
+        updateLeaderboard &&
+          (checkerUpdateObj["leaderboardStats.score"] = FieldValue.increment(
+            -previousScore
+          ))
       }
     }
     if (currentCorrect === null) {
       //means now it's unsure and should not be added to denominator
-      checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(-1)
+      updateLeaderboard &&
+        (checkerUpdateObj["leaderboardStats.numVoted"] =
+          FieldValue.increment(-1))
       checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(-1)
     }
 
     if (currentCorrect === true) {
-      await after.ref.update({ score: currentScore })
-      checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
-        FieldValue.increment(1)
+      updateLeaderboard &&
+        (checkerUpdateObj["leaderboardStats.numCorrectVotes"] =
+          FieldValue.increment(1))
       checkerUpdateObj["numCorrectVotes"] = FieldValue.increment(1)
-      checkerUpdateObj["leaderboardStats.score"] =
-        FieldValue.increment(currentScore)
+      updateLeaderboard &&
+        (checkerUpdateObj["leaderboardStats.score"] =
+          FieldValue.increment(currentScore))
     }
     if (previousCorrect == null) {
-      checkerUpdateObj["leaderboardStats.numVoted"] = FieldValue.increment(1)
+      updateLeaderboard &&
+        (checkerUpdateObj["leaderboardStats.numVoted"] =
+          FieldValue.increment(1))
       checkerUpdateObj["numNonUnsureVotes"] = FieldValue.increment(1)
     }
     await postChangeData.factCheckerDocRef.update(checkerUpdateObj)
