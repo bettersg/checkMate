@@ -91,6 +91,14 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
   const isNewlyJoined =
     messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
 
+  const isIgnored = userSnap.get("isIgnored")
+  if (isIgnored) {
+    functions.logger.warn(
+      `Message from banned user ${from}!, text: ${message?.text?.body}`
+    )
+    return
+  }
+
   switch (type) {
     case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
@@ -957,6 +965,7 @@ async function createNewUser(
     referralCount: 0,
     language: "en",
     isSubscribedUpdates: true,
+    isIgnored: false,
   }
   await userRef.set(newUserObject)
 }

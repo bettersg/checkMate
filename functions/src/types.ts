@@ -131,6 +131,7 @@ export type UserData = {
   referralCount: number
   language: "en" | "cn"
   isSubscribedUpdates: boolean
+  isIgnored: boolean
 }
 
 export type CheckerData = {
