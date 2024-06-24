@@ -102,7 +102,8 @@ const mockDb = async function () {
     numCorrectVotes: 0,
     numNonUnsureVotes: 0,
     numVerifiedLinks: 0,
-    preferredPlatform: "whatsapp",
+    preferredPlatform:
+      runtimeEnvironment.value() === "SIT" ? "whatsapp" : "telegram",
     lastVotedTimestamp: null,
     getNameMessageId: null,
     leaderboardStats: {

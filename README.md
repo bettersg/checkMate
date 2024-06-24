@@ -530,21 +530,18 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 6. Contact @sarge1989 to set you up with a cloudflare tunnel, and provide your WhatsApp number so the routing can be done to your setup. _Ngrok will not work for this step_, hence the need for this.
 7. Contact @sarge1989 to obtain .secret.local and .env.local files, which for now will be sent via password-encrypted zip. Place these two files in the `/functions` directory
 8. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
-
-### If working on Checkers App
-
-1. Create your own Telegram bot via [botfather](https://t.me/botfather)
-2. Replace `TELEGRAM_CHECKER_BOT_TOKEN` in `.secret.local` with the bot token. Note, it is `TELEGRAM_CHECKER_BOT_TOKEN` and not `TELEGRAM_BOT_TOKEN` or `TELEGRAM_WEBHOOK_TOKEN`
-3. Go to botfather, navigate to the bot you created, go to "Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000
-4. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
+9. Create your own Telegram bot via [botfather](https://t.me/botfather)
+10. Replace `TELEGRAM_CHECKER_BOT_TOKEN` in `.secret.local` with the bot token. Note, it is `TELEGRAM_CHECKER_BOT_TOKEN` and not `TELEGRAM_BOT_TOKEN` or `TELEGRAM_WEBHOOK_TOKEN`
+11. Go to botfather, navigate to the bot you created, go to "Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000
+12. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
 
 ### First time testing (once all above steps are done)
 
 1. Execute the steps in the below section "Each time developing"
-2. Go to the chat with the WhatsApp User bot non-prod number and send in /mockup
+2. Go to the chat with the WhatsApp User bot non-prod number and send in `/mockdb`
 3. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
 4. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
-5. Send a message such as "Best Fixed Deposit Rates yield 3.75% if you deposit via Syfe (to get institutional fixed deposit rates) (as of June 2024)" into the bot. You'll notice something onUserPublish might take a while, but this should trigger the asynchronous checking flow
+5. Send a message such as `Best Fixed Deposit Rates yield 3.75% if you deposit via Syfe (to get institutional fixed deposit rates) (as of June 2024)` into the bot. You'll notice something onUserPublish might take a while, but this should trigger the asynchronous checking flow
    - You can expect to see this on your console:
      ````> {"severity":"INFO","message":"Processing 5"}
      >  {"severity":"INFO","message":"Unable to get Google identity token in lower environments"}
