@@ -129,8 +129,17 @@ const onInstanceCreateV2 = onDocumentCreated(
         !parentMessageSnap.get("isPollStarted")
       ) {
         await triggerAgents(snap)
-        await despatchPoll(parentMessageRef)
-        return parentMessageRef.update({ isPollStarted: true })
+        await parentMessageRef.update({ isPollStarted: true })
+        try {
+          await despatchPoll(parentMessageRef)
+        } catch (error) {
+          logger.error(
+            `Error despatching poll for message ${parentMessageRef.id}: `,
+            error
+          )
+          await parentMessageRef.update({ isPollStarted: false })
+        }
+        return Promise.resolve()
       }
       return Promise.resolve()
     }
@@ -212,6 +221,16 @@ async function sendTemplateMessageAndCreateVoteRequest(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   previewText: string | null
 ) {
+  const voteAlreadyExistsQuery = await messageRef
+    .collection("voteRequests")
+    .where("factCheckerDocRef", "==", factCheckerDocSnap.ref)
+    .get()
+  if (!voteAlreadyExistsQuery.empty) {
+    logger.log(
+      `Vote request already exists for factChecker ${factCheckerDocSnap.id} for message ${messageRef.id}`
+    )
+    return Promise.resolve()
+  }
   const factChecker = factCheckerDocSnap.data()
   const preferredPlatform = factChecker?.preferredPlatform
   const newVoteRequest: VoteRequest = {
