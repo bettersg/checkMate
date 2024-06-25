@@ -4,6 +4,7 @@ import FormData from "form-data"
 import {
   Update,
   InlineKeyboardMarkup,
+  ReplyKeyboardMarkup,
   ForceReply,
   Message,
 } from "node-telegram-bot-api"
@@ -16,14 +17,14 @@ const sendTelegramTextMessage = async function (
   to: string | number,
   text: string,
   replyId: string | null = null,
-  reply_markup: InlineKeyboardMarkup | null = null
+  reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | null = null
 ) {
   let token
   let data: {
     chat_id: string | number
     text: string
     reply_to_message_id?: string
-    reply_markup?: InlineKeyboardMarkup
+    reply_markup?: InlineKeyboardMarkup | ReplyKeyboardMarkup
   }
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
