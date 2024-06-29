@@ -121,10 +121,11 @@
 								"exec": [
 									"pm.test(\"Check number of collections /mockdb command creates in Firestore\", function () {\r",
 									"    const jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData?.collectionIds?.length).to.eql(3);\r",
+									"    pm.expect(jsonData?.collectionIds?.length).to.eql(4);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -133,7 +134,8 @@
 								"exec": [
 									"setTimeout(() => {}, 2000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],

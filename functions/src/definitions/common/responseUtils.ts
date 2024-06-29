@@ -316,7 +316,7 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(instancePath: string) {
+async function sendVotingStats(instancePath: string, addThanks = false) {
   //get statistics
   const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
@@ -413,7 +413,9 @@ async function sendVotingStats(instancePath: string) {
       .replace("{{category}}", secondCategory)
       .replace("{{info_placeholder}}", isSecondInfo ? infoLiner : "")
   }
-
+  if (addThanks) {
+    response = `${responses.THANKS_DELAYED}\n\n${response}`
+  }
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
 }
 
