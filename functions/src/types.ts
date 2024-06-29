@@ -129,6 +129,8 @@ export type UserData = {
     term: string
   }
   referralCount: number
+  isReferralMessageSent: boolean
+  isReminderMessageSent: boolean //whether the response
   language: "en" | "cn"
   isSubscribedUpdates: boolean
   isIgnored: boolean

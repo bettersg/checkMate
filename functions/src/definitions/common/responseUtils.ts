@@ -28,15 +28,40 @@ type ResponseObject = {
   [key: string]: string
 }
 
-async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
-async function getResponsesObj(botType: "user"): Promise<ResponseObject>
-async function getResponsesObj(
+async function getUserResponsesObject(
+  botType: "factChecker"
+): Promise<ResponseObject>
+async function getUserResponsesObject(
   botType: "user",
   user: string
 ): Promise<ResponseObject>
+async function getUserResponsesObject(
+  botType: "user" | "factChecker" = "user",
+  user?: string
+) {
+  if (botType === "factChecker") {
+    const returnObj = await getResponsesObj("factChecker")
+    return returnObj
+  } else {
+    if (typeof user !== "string") {
+      functions.logger.error("user not provided to getUserResponseObject")
+      return "error"
+    }
+    const userSnap = await db.collection("users").doc(user).get()
+    const language = userSnap.get("language") ?? "en"
+    const returnObj = await getResponsesObj("user", language)
+    return returnObj
+  }
+}
+
+async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
+async function getResponsesObj(
+  botType: "user",
+  language: "en" | "cn"
+): Promise<ResponseObject>
 async function getResponsesObj(
   botType: "user" | "factChecker" = "user",
-  user: string | null = null
+  language: "en" | "cn" = "en"
 ) {
   let path
   if (botType === "factChecker") {
@@ -44,15 +69,13 @@ async function getResponsesObj(
     const checkerResponseSnap = await db.doc(path).get()
     return checkerResponseSnap.data() ?? CHECKER_BOT_RESPONSES
   } else {
-    if (typeof user !== "string") {
-      functions.logger.error("user not provided to getResponsesObj")
+    if (typeof language !== "string") {
+      functions.logger.error("language not provided to getResponsesObj")
       return "error"
     }
     path = "systemParameters/userBotResponses"
     const userResponseSnap = await db.doc(path).get()
     const userResponseObject = userResponseSnap.data() ?? USER_BOT_RESPONSES
-    const userSnap = await db.collection("users").doc(user).get()
-    const language = userSnap.get("language") ?? "en"
     const responseProxy = new Proxy(userResponseObject as BotResponses, {
       get(target, prop: string) {
         if (prop === "then") {
@@ -114,7 +137,7 @@ async function respondToBlastFeedback(
   from: string
 ) {
   const blastFeedbackRef = db.doc(blastPath).collection("recipients").doc(from)
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   blastFeedbackRef.update({
     feebackCategory: feedbackCategory,
   })
@@ -131,7 +154,7 @@ async function sendMenuMessage(
 ) {
   const userSnap = await db.collection("users").doc(to).get()
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
-  const responses = await getResponsesObj("user", to)
+  const responses = await getUserResponsesObject("user", to)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
@@ -618,7 +641,11 @@ async function respondToInstance(
     return Promise.resolve()
   }
   const from = data.from
-  const responses = await getResponsesObj("user", from)
+
+  const userRef = db.collection("users").doc(from)
+  const userSnap = await userRef.get()
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
@@ -654,6 +681,7 @@ async function respondToInstance(
         "{{image_caveat}}",
         isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
       )
+      .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
   }
 
   let category = primaryCategory
@@ -676,6 +704,7 @@ async function respondToInstance(
     )
     return
   }
+
   const updateObj: {
     isReplied: boolean
     isReplyForced: boolean
@@ -813,6 +842,30 @@ async function respondToInstance(
     }
   }
 
+  const isReminderMessageSent = userSnap.get("isReminderMessageSent") ?? false
+  const isReferralMessageSent = userSnap.get("isReferralMessageSent") ?? false
+
+  let followUpWithReminder = !isReminderMessageSent
+  let followUpWithReferral =
+    !isReferralMessageSent &&
+    category !== "irrelevant" &&
+    category !== "irrelevant_auto"
+
+  if (followUpWithReminder) {
+    await sleep(3000)
+    await sendTextMessage("user", from, responses.NEXT_TIME)
+    await userRef.update({
+      isReminderMessageSent: true,
+    })
+  }
+
+  if (followUpWithReferral) {
+    await sendReferralMessage(from)
+    await userRef.update({
+      isReferralMessageSent: true,
+    })
+  }
+
   if (
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"
@@ -825,7 +878,7 @@ async function respondToInstance(
 async function sendReferralMessage(user: string) {
   let referralResponse
   const code = (await db.collection("users").doc(user).get()).get("referralId")
-  const responses = await getResponsesObj("user", user)
+  const responses = await getUserResponsesObject("user", user)
   if (code) {
     referralResponse = responses.REFERRAL.replace(
       "{{link}}",
@@ -839,7 +892,7 @@ async function sendReferralMessage(user: string) {
 }
 
 async function sendLanguageSelection(user: string, newUser: boolean) {
-  const responses = await getResponsesObj("user", user)
+  const responses = await getUserResponsesObject("user", user)
   const response = responses.LANGUAGE_SELECTION.replace(
     "{{new_user_en}}",
     newUser ? responses.NEW_USER_PREFIX_EN : ""
@@ -870,7 +923,7 @@ async function sendBlast(user: string) {
     .orderBy("createdDate", "desc") // Order by createdDate in descending order
     .limit(1) // Limit to 1 document
     .get()
-  const responses = await getResponsesObj("user", user)
+  const responses = await getUserResponsesObject("user", user)
   if (blastQuerySnap.empty) {
     functions.logger.warn(
       `No active blast found when attempting to send blast to user ${user}`
@@ -952,6 +1005,7 @@ async function sendBlast(user: string) {
 }
 
 export {
+  getUserResponsesObject,
   getResponsesObj,
   respondToInstance,
   sendMenuMessage,

@@ -15,7 +15,7 @@ import {
   checkMessageId,
 } from "../common/utils"
 import {
-  getResponsesObj,
+  getUserResponsesObject,
   sendMenuMessage,
   sendInterimUpdate,
   sendVotingStats,
@@ -73,7 +73,7 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
 
   let from = message.from // extract the phone number from the webhook payload
   let type = message.type
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
 
   //check whether new user
   const userRef = db.collection("users").doc(from)
@@ -673,7 +673,7 @@ async function onButtonReply(
 ) {
   const buttonId = messageObj.interactive.button_reply.id
   const from = messageObj.from
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   const [type, ...rest] = buttonId.split("_")
   let instancePath, selection, instanceRef, blastPath
   switch (type) {
@@ -729,7 +729,7 @@ async function onTextListReceipt(
 ) {
   const listId = messageObj.interactive.list_reply.id
   const from = messageObj.from
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   const [type, selection, ...rest] = listId.split("_")
   let response, instancePath
   const step = `${type}_${selection}`
@@ -964,6 +964,8 @@ async function createNewUser(
     },
     referralCount: 0,
     language: "en",
+    isReferralMessageSent: false,
+    isReminderMessageSent: false,
     isSubscribedUpdates: true,
     isIgnored: false,
   }
