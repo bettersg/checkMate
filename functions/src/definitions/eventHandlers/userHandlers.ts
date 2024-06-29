@@ -13,6 +13,7 @@ import {
   hashMessage,
   normalizeSpaces,
   checkMessageId,
+  checkTemplate,
 } from "../common/utils"
 import {
   getUserResponsesObject,
@@ -107,9 +108,14 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
       }
       const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
-        textNormalised.startsWith("referral code") &&
-        textNormalised.endsWith("click the send button to get started!👉") &&
-        textNormalised.includes(":")
+        checkTemplate(
+          textNormalised,
+          responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase()
+        ) ||
+        checkTemplate(
+          textNormalised,
+          responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
+        )
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
@@ -874,68 +880,66 @@ async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
 async function referralHandler(message: string, from: string) {
   const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
   const userRef = db.collection("users").doc(from)
-  let tryGeneric = true
   if (code.length > 0) {
-    let referrer
-    try {
-      referrer = String(hashids.decode(code)[0])
-    } catch (error) {
-      functions.logger.error(
-        `Error decoding referral code ${code}, sent by ${from}: ${error}`
-      )
-    }
-    try {
-      if (referrer) {
-        const referralSourceSnap = await db
-          .collection("users")
-          .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
-          .get()
-        if (referralSourceSnap.exists) {
-          tryGeneric = false
-          await referralSourceSnap.ref.update({
-            referralCount: FieldValue.increment(1),
-          })
-          //check if referrer is a checker
-          await incrementCheckerCounts(referrer, "numReferred", 1)
-          await userRef.update({
-            firstMessageType: "prepopulated",
-            utm: {
-              source: referrer,
-              medium: "uniqueLink",
-              content: "none",
-              campaign: "none",
-              term: "none",
-            },
-          })
-          return
-        }
-      }
-
-      if (tryGeneric) {
-        const referralClickSnap = await db
-          .collection("referralClicks")
-          .doc(code)
-          .get()
-        if (referralClickSnap.exists) {
-          await userRef.update({
-            firstMessageType: "prepopulated",
-            utm: {
-              source: referralClickSnap.get("utmSource") ?? "none",
-              medium: referralClickSnap.get("utmMedium") ?? "none",
-              content: referralClickSnap.get("utmContent") ?? "none",
-              campaign: referralClickSnap.get("utmCampaign") ?? "none",
-              term: referralClickSnap.get("utmTerm") ?? "none",
-            },
-          })
-        } else {
-          functions.logger.warn(
-            "Referral code not found in either users or referralClicks collection"
+    const referralClickRef = db.collection("referralClicks").doc(code)
+    const referralClickSnap = await referralClickRef.get()
+    if (referralClickSnap.exists) {
+      const referralId = referralClickSnap.get("referralId")
+      if (referralId === "add") {
+        await userRef.update({
+          firstMessageType: "prepopulated",
+          utm: {
+            source: referralClickSnap.get("utmSource") ?? "none",
+            medium: referralClickSnap.get("utmMedium") ?? "none",
+            content: referralClickSnap.get("utmContent") ?? "none",
+            campaign: referralClickSnap.get("utmCampaign") ?? "none",
+            term: referralClickSnap.get("utmTerm") ?? "none",
+          },
+        })
+      } else {
+        //try to get the userId from the referralId
+        let referrer
+        try {
+          referrer = String(hashids.decode(referralId)[0])
+        } catch (error) {
+          functions.logger.error(
+            `Error decoding referral code ${code}, sent by ${from}: ${error}`
           )
         }
+        if (referrer) {
+          const referralSourceSnap = await db
+            .collection("users")
+            .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
+            .get()
+          if (referralSourceSnap.exists) {
+            await referralSourceSnap.ref.update({
+              referralCount: FieldValue.increment(1),
+            })
+            //check if referrer is a checker
+            await incrementCheckerCounts(referrer, "numReferred", 1)
+            await userRef.update({
+              firstMessageType: "prepopulated",
+              utm: {
+                source: referrer,
+                medium: "uniqueLink",
+                content: "none",
+                campaign: "none",
+                term: "none",
+              },
+            })
+          } else {
+            functions.logger.error(
+              `Referrer ${referrer} not found in users collection`
+            )
+          }
+        }
       }
-    } catch (error) {
+      await referralClickRef.update({
+        isConverted: true,
+      })
+    } else {
       functions.logger.error(
-        `Error processing referral code ${code}, sent by ${from}: ${error}`
+        "Referral code not found in referralClicks collection"
       )
     }
   }
