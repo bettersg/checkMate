@@ -12846,6 +12846,64 @@
 			"name": "012_New_User_Referral",
 			"item": [
 				{
+					"name": "[DB CALL] Add referral click",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer owner",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fields\": {\r\n    \"referralId\": { \"stringValue\": {{referralId_USER1}} },\r\n    \"utmSource\": { \"stringValue\": \"source\" },\r\n    \"utmMedium\": { \"stringValue\": \"medium\" },\r\n    \"utmCampaign\": { \"stringValue\": \"campaign\" },\r\n    \"utmContent\": { \"stringValue\": \"content\" },\r\n    \"utmTerm\": { \"stringValue\": \"term\" },\r\n    \"isConverted\": { \"booleanValue\": false },\r\n    \"variant\": { \"stringValue\": \"variant_0\" },\r\n    \"timestamp\": { \"timestampValue\":  \"2014-10-02T15:01:23Z\"}\r\n  },\r\n  \"createTime\": \"2014-10-02T15:01:23Z\",\r\n  \"updateTime\": \"2014-10-02T15:01:23Z\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/referralClicks?documentId=abc1234",
+							"host": [
+								"{{FIRESTORE_URL}}"
+							],
+							"path": [
+								"v1",
+								"projects",
+								"{{PROJECT_ID}}",
+								"databases",
+								"(default)",
+								"documents",
+								"referralClicks"
+							],
+							"query": [
+								{
+									"key": "documentId",
+									"value": "abc1234"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Send WhatsApp message",
 					"event": [
 						{
@@ -12856,7 +12914,8 @@
 									"    pm.response.to.have.status(200);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -12879,10 +12938,11 @@
 									"let responseBody = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REFERRAL_PREPOPULATED_PREFIX.en\");\r",
 									"let referralId = pm.variables.get(\"referralId_USER1\")\r",
 									"// Escape new lines and set it to a new variable\r",
-									"pm.variables.set(\"escapedPrepopulatedPrefix\", responseBody.replace(/(\\r\\n|\\n|\\r)/gm, \"\\\\n\").replace(\"{{code}}\",referralId));\r",
+									"pm.variables.set(\"escapedPrepopulatedPrefix\", responseBody.replace(/(\\r\\n|\\n|\\r)/gm, \"\\\\n\").replace(\"{{code}}\",\"abc1234\"));\r",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
