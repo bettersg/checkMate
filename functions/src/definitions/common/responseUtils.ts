@@ -867,6 +867,8 @@ async function respondToInstance(
   }
 
   if (
+    !followUpWithReferral &&
+    !followUpWithReminder && // No follow-up messages
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"
   ) {
