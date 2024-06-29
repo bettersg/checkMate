@@ -1,7 +1,12 @@
 import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
-import { WhatsappMessage, CheckerData, BlastData } from "../../types"
+import {
+  WhatsappMessage,
+  CheckerData,
+  BlastData,
+  ReferralClicksData,
+} from "../../types"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
@@ -79,6 +84,7 @@ const mockDb = async function () {
   })
   await systemParametersRef.doc("thresholds").set(thresholds)
   const checkersCollectionRef = db.collection("checkers")
+  const referralClicksRef = db.collection("referralClicks")
   const querySnap = await checkersCollectionRef
     .where("whatsappId", "==", checker1PhoneNumber.value())
     .limit(1)
@@ -146,6 +152,18 @@ const mockDb = async function () {
     blastDate: Timestamp.fromDate(new Date()),
   }
   await db.collection("blasts").doc().set(blastObject, { merge: true })
+  const referralClicksObj: ReferralClicksData = {
+    referralId: "add",
+    utmSource: "source",
+    utmMedium: "medium",
+    utmCampaign: "campaign",
+    utmContent: "content",
+    utmTerm: "term",
+    isConverted: false,
+    variant: "variant_0",
+    timestamp: Timestamp.fromDate(new Date()),
+  }
+  await db.collection("referralClicks").doc("aBc123").set(referralClicksObj)
   functions.logger.log("mocked")
 }
 
