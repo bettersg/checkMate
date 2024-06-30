@@ -1,6 +1,7 @@
 import { FieldValue } from "@google-cloud/firestore"
 import { DocumentReference } from "firebase-admin/firestore"
 import * as admin from "firebase-admin"
+import { getThresholds } from "./utils"
 
 const db = admin.firestore()
 
@@ -31,7 +32,10 @@ const getCount = async function (docRef: DocumentReference, type: string) {
   return count
 }
 
-const getVoteCounts = async function (messageRef: DocumentReference) {
+const getVoteCounts = async function (
+  messageRef: DocumentReference,
+  isLegacy = false
+) {
   const totalVoteRequestQuery = messageRef
     .collection("voteRequests")
     .count()
@@ -49,6 +53,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     satireCount,
     voteTotal,
     voteRequestCountSnapshot,
+    thresholds,
   ] = await Promise.all([
     getCount(messageRef, "responses"),
     getCount(messageRef, "pass"),
@@ -62,11 +67,24 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     getCount(messageRef, "satire"),
     getCount(messageRef, "totalVoteScore"),
     totalVoteRequestQuery,
+    getThresholds(),
   ])
   const totalVoteRequestsCount = voteRequestCountSnapshot.data().count ?? 0
   const factCheckerCount = totalVoteRequestsCount - passCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
   const validResponsesCount = responsesCount - passCount //can remove in future and replace with nonErrorCount
   const susCount = scamCount + illicitCount
+  const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
+  let harmfulCount = scamCount + illicitCount
+  let harmlessCount = legitimateCount + spamCount
+  if (truthScore !== null) {
+    if (truthScore < (thresholds.falseUpperBound || 2.5)) {
+      harmfulCount += infoCount
+    } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
+      //pass
+    } else {
+      harmlessCount += infoCount
+    }
+  }
   return {
     responsesCount,
     passCount,
@@ -81,6 +99,9 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     voteTotal,
     validResponsesCount,
     susCount,
+    truthScore,
+    harmfulCount,
+    harmlessCount,
     factCheckerCount,
   }
 }
@@ -101,6 +122,22 @@ const incrementCheckerCounts = async function (
     const factCheckerDoc = factCheckerQuerySnapshot.docs[0]
     const factCheckerRef = factCheckerDoc.ref
     return factCheckerRef.update({ [field]: FieldValue.increment(increment) })
+  }
+}
+
+function computeTruthScore(
+  infoCount: number,
+  voteTotal: number,
+  isLegacy: boolean
+) {
+  if (infoCount === 0) {
+    return null
+  }
+  const truthScore = voteTotal / infoCount
+  if (isLegacy) {
+    return (truthScore / 5) * 4 + 1
+  } else {
+    return truthScore
   }
 }
 

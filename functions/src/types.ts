@@ -62,6 +62,8 @@ export type MessageData = {
   isUnsure: boolean | null
   isInfo: boolean | null
   isSatire: boolean | null
+  isHarmful: boolean | null // whether the sum of scam + illicit + untrue votes > harmful threshold
+  isHarmless: boolean | null // whether the sum of legitimate + accurate + spam votes > harmless threshold
   primaryCategory: string | null
   customReply: string | null
   instanceCount: number
