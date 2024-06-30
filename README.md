@@ -215,11 +215,13 @@ erDiagram
         boolean isUnsure
         boolean isInfo
         boolean isSatire
-        boolean isIrrelevant "Should message be considered assessed and ready for reply"
+        boolean isHarmful "whether sum of scam + illicit + info if truth score < 2.5 > threshold"
+        boolean isHarmless "whether sum of legitimate + spam + info if truth score >4 > threshold"
+        boolean isIrrelevant
         number truthScore "mean vote score for info votes"
         string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or pass"
         number instanceCount "number of instances"
-        string rationalisation "genAI created rationalisation of why the message might have ben categorised as such"
+        string rationalisation "genAI created rationalisation of why the message might have been categorised as such"
     }
 
     customReply {
@@ -356,6 +358,8 @@ erDiagram
         string utm "map containing utm parameters, source, medium, content, campaign, term"
         string language "en or cn, users preferred language"
         boolean isSubscribedUpdates "whether to blast msgs to this user"
+        boolean isReferralMessageSent "whether the referral message has been sent to the user, this should happen when the first non-irrelevant message is replied to"
+        boolean isReminderMessageSent "whether the reminder message has been sent to the user, this should happen when the first message is replied to"
         boolean isIgnored "whether the user should be ignored, i.e. blocked, in which case they get no responses"
     }
 
