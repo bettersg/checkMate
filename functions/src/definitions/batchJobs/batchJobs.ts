@@ -76,6 +76,17 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
+          const replyMarkup = {
+            keyboard: [
+              [
+                {
+                  text: "/deactivate",
+                },
+              ],
+            ],
+            resize_keyboard: true,
+            one_time_keyboard: true,
+          }
           const reactivationMessage = `Hello ${doc.get(
             "name"
           )}! Thanks for all your contributions so far🙏. We noticed that you have an outstanding message that hasn't been checked, and thought to remind you on it!
@@ -84,7 +95,9 @@ If you'd like take a break, just type /deactivate. We'll stop sending you messag
           return sendTelegramTextMessage(
             "factChecker",
             telegramId,
-            reactivationMessage
+            reactivationMessage,
+            null,
+            replyMarkup
           )
         }
       }
@@ -183,8 +196,8 @@ async function saveLeaderboard() {
     const leaderboardData = await getFullLeaderboard()
     const storageBucket = admin.storage().bucket()
     //get date string
-    const date = new Date();
-    const dateString = date.toISOString().split('T')[0];
+    const date = new Date()
+    const dateString = date.toISOString().split("T")[0]
     const leaderboardFile = storageBucket.file(`leaderboard_${dateString}.json`)
 
     await leaderboardFile.save(JSON.stringify(leaderboardData), {
