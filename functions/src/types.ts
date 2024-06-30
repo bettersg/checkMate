@@ -113,6 +113,18 @@ export type InstanceData = {
   satisfactionScore: number | null
 }
 
+export type ReferralClicksData = {
+  referralId: string
+  utmSource: string
+  utmMedium: string
+  utmCampaign: string
+  utmContent: string
+  utmTerm: string
+  isConverted: boolean
+  variant: string
+  timestamp: Timestamp
+}
+
 export type UserData = {
   instanceCount: number
   firstMessageReceiptTime: Timestamp
@@ -129,6 +141,8 @@ export type UserData = {
     term: string
   }
   referralCount: number
+  isReferralMessageSent: boolean
+  isReminderMessageSent: boolean //whether the response
   language: "en" | "cn"
   isSubscribedUpdates: boolean
   isIgnored: boolean

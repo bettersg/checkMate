@@ -356,6 +356,8 @@ erDiagram
         string utm "map containing utm parameters, source, medium, content, campaign, term"
         string language "en or cn, users preferred language"
         boolean isSubscribedUpdates "whether to blast msgs to this user"
+        boolean isReferralMessageSent "whether the referral message has been sent to the user, this should happen when the first non-irrelevant message is replied to"
+        boolean isReminderMessageSent "whether the reminder message has been sent to the user, this should happen when the first message is replied to"
         boolean isIgnored "whether the user should be ignored, i.e. blocked, in which case they get no responses"
     }
 
