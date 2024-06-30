@@ -316,7 +316,7 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(instancePath: string, addThanks = false) {
+async function sendVotingStats(instancePath: string, isUnsureReply = false) {
   //get statistics
   const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
@@ -413,8 +413,11 @@ async function sendVotingStats(instancePath: string, addThanks = false) {
       .replace("{{category}}", secondCategory)
       .replace("{{info_placeholder}}", isSecondInfo ? infoLiner : "")
   }
-  if (addThanks) {
-    response = `${responses.THANKS_DELAYED}\n\n${response}`
+  if (isUnsureReply) {
+    response = responses.UNSURE.replace("{{voting_stats}}", response).replace(
+      "{{thanks}}",
+      responses.THANKS_DELAYED
+    )
   }
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
 }
@@ -786,6 +789,18 @@ async function respondToInstance(
     case "custom":
       break
     default:
+      if (category === "unsure") {
+        const isHarmful = parentMessageSnap.get("isHarmful") ?? false
+        const isHarmless = parentMessageSnap.get("isHarmless") ?? false
+        if (isHarmful) {
+          category = "harmful"
+        } else if (isHarmless) {
+          category = "harmless"
+        } else {
+          sendVotingStats(instanceSnap.ref.path, true)
+          break
+        }
+      }
       if (!(category.toUpperCase() in responses)) {
         functions.logger.error(`category ${category} not found in responses`)
         return

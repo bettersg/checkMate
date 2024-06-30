@@ -87,9 +87,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         validResponsesCount,
         susCount,
         factCheckerCount,
+        truthScore,
+        harmfulCount,
+        harmlessCount,
       } = await getVoteCounts(messageRef)
 
-      const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
       const isSus = susCount > thresholds.isSus * validResponsesCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
@@ -100,6 +102,10 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         legitimateCount > thresholds.isLegitimate * validResponsesCount
       const isIrrelevant =
         irrelevantCount > thresholds.isIrrelevant * validResponsesCount
+      const isHarmless =
+        harmlessCount > thresholds.isHarmless * validResponsesCount
+      const isHarmful =
+        harmfulCount > thresholds.isHarmful * validResponsesCount
       const isUnsure =
         (!isSus &&
           !isInfo &&
@@ -126,6 +132,18 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             Math.min(
               thresholds.endVoteSus * factCheckerCount,
               thresholds.endVoteSusAbsolute //4
+            )) ||
+        (isHarmful &&
+          validResponsesCount >
+            Math.min(
+              thresholds.endVote * factCheckerCount,
+              thresholds.endVoteAbsolute //10
+            )) ||
+        (isHarmless &&
+          validResponsesCount >
+            Math.min(
+              thresholds.endVote * factCheckerCount,
+              thresholds.endVoteAbsolute //10
             ))
 
       //set primaryCategory
@@ -140,7 +158,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         if (truthScore === null) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
-        } else if (truthScore < (thresholds.falseUpperBound || 2)) {
+        } else if (truthScore < (thresholds.falseUpperBound || 2.5)) {
           primaryCategory = "untrue"
         } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
           primaryCategory = "misleading"
@@ -170,6 +188,8 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         isIrrelevant: isIrrelevant,
         isUnsure: isUnsure,
         isAssessed: isAssessed,
+        isHarmful: isHarmful,
+        isHarmless: isHarmless,
         primaryCategory: primaryCategory,
       })
       if (messageSnap.get("isAssessed") === true) {
@@ -427,22 +447,6 @@ async function switchLegacyCheckerRef(
   } else {
     functions.logger.error("Invalid factCheckerDocRef path")
     return null
-  }
-}
-
-function computeTruthScore(
-  infoCount: number,
-  voteTotal: number,
-  isLegacy: boolean
-) {
-  if (infoCount === 0) {
-    return null
-  }
-  const truthScore = voteTotal / infoCount
-  if (isLegacy) {
-    return (truthScore / 5) * 4 + 1
-  } else {
-    return truthScore
   }
 }
 
