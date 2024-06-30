@@ -215,11 +215,13 @@ erDiagram
         boolean isUnsure
         boolean isInfo
         boolean isSatire
-        boolean isIrrelevant "Should message be considered assessed and ready for reply"
+        boolean isHarmful "whether sum of scam + illicit + info if truth score < 2.5 > threshold"
+        boolean isHarmless "whether sum of legitimate + spam + info if truth score >4 > threshold"
+        boolean isIrrelevant
         number truthScore "mean vote score for info votes"
         string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or pass"
         number instanceCount "number of instances"
-        string rationalisation "genAI created rationalisation of why the message might have ben categorised as such"
+        string rationalisation "genAI created rationalisation of why the message might have been categorised as such"
     }
 
     customReply {
