@@ -13,6 +13,7 @@ const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
 const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
+const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
 const ingressSetting =
   process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
 
@@ -167,11 +168,40 @@ const postHandlerTelegram = async (req: Request, res: Response) => {
   res.sendStatus(200)
 }
 
+const postHandlerTypeform = async (req: Request, res: Response) => {
+  const db = admin.firestore()
+
+  try {
+    console.log(req.body);
+    if (req?.body?.form_response?.answers?.[1]?.phone_number) {
+      let whatsappId = req.body.form_response.answers[1].phone_number
+      const checkerDocRef = db.collection("checkers").doc(whatsappId)
+      await checkerDocRef.update({
+        onboardingStatus : "waGroup"
+      })
+      functions.logger.log(
+        `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
+      )
+    } else {
+      functions.logger.warn(
+        "User did not answer Whatsapp phone number question in the Typeform"
+      )
+    }
+    res.sendStatus(200)
+  } catch (error) {
+    functions.logger.error("Error in postHandlerTypeform", error)
+    functions.logger.error(JSON.stringify(req.body, null, 2))
+    res.sendStatus(200)
+  }
+}
+
 // Accepts POST requests at /{webhookPath} endpoint
 app.post(`/${webhookPathWhatsapp}`, postHandlerWhatsapp)
 app.get(`/${webhookPathWhatsapp}`, getHandlerWhatsapp)
 
 app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
+
+app.post(`/${webhookPathTypeform}`, postHandlerTypeform)
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
