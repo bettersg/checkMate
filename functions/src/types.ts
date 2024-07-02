@@ -155,6 +155,14 @@ export type CheckerData = {
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null
+  onboardingStatus:
+    | "name"
+    | "number"
+    | "otp"
+    | "quiz"
+    | "waGroup"
+    | "tgGroup"
+    | "completed"
   isAdmin: boolean
   singpassOpenId: string | null
   telegramId: number | null

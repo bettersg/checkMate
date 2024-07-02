@@ -57,6 +57,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     type,
     isActive: isActive || false,
     isOnboardingComplete: isOnboardingComplete || false,
+    onboardingStatus: "name",
     isAdmin: false,
     singpassOpenId: singpassOpenId || null,
     telegramId,

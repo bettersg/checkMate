@@ -128,6 +128,7 @@ app.post("/", async (req, res) => {
       type: "human",
       isActive: false,
       isOnboardingComplete: false,
+      onboardingStatus: "name",
       singpassOpenId: null,
       isAdmin: false,
       whatsappId: null,

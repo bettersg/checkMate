@@ -172,13 +172,13 @@ const postHandlerTypeform = async (req: Request, res: Response) => {
   const db = admin.firestore()
 
   try {
-    console.log(req.body);
+    console.log(req.body)
     if (req?.body?.form_response?.answers?.[1]?.phone_number) {
       let whatsappId = req.body.form_response.answers[1].phone_number
       const checkerDocRef = db.collection("checkers").doc(whatsappId)
-      await checkerDocRef.update({
-        onboardingStatus : "waGroup"
-      })
+      // await checkerDocRef.update({
+      //   onboardingStatus : "waGroup"
+      // })
       functions.logger.log(
         `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
       )
@@ -201,7 +201,7 @@ app.get(`/${webhookPathWhatsapp}`, getHandlerWhatsapp)
 
 app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
 
-app.post(`/${webhookPathTypeform}`, postHandlerTypeform)
+app.post(`/typeformtest`, postHandlerTypeform)
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
