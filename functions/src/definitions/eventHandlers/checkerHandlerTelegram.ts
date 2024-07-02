@@ -5,6 +5,7 @@ import TelegramBot, { Update } from "node-telegram-bot-api"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { logger } from "firebase-functions/v2"
 import { postOTPHandler, checkOTPHandler } from "../common/otpWhatsapp"
+import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const bot = new TelegramBot(TOKEN)
@@ -39,18 +40,17 @@ bot.onText(/\/start/, async (msg) => {
       .get()
 
     //check if user exists in database
-    if (userQuerySnap?.data()?.isOnboardingComplete) {
+    if (userQuerySnap?.docs[0].data()?.isOnboardingComplete) {
       await bot.sendMessage(
         chatId,
         `Welcome to the checker bot! Press the CheckMate's Portal button to access our dashboard. You'll also get notified when there are new messages to check.`
       )
       //add function to start receiving messsages
-    } 
-    else {
+    } else {
       await bot.sendMessage(
         chatId,
         `Welcome to the checker bot! Press the CheckMate's Portal button to onboard and access our dashboard. Once onboarded, you'll get notified when there are new messages to check.`
-      )   
+      )
     }
   } else {
     logger.log("No user id found")
@@ -58,48 +58,48 @@ bot.onText(/\/start/, async (msg) => {
 })
 
 bot.onText(/\/onboard/, async (msg) => {
-  const chatId = msg.chat.id;
-  const telegramId = msg.from.id;
-  let currentStep = "name";
+  const chatId = msg.chat.id
+  const telegramId = msg.from?.id || ""
+  let currentStep = "name"
 
   // Check user onboarding state
-  const checkerDocRef = db.collection("checkers").doc(telegramId);
-  const checkerDocSnap = await checkerDocRef.get();
+  const checkerDocRef = db.collection("checkers").doc(telegramId.toString())
+  const checkerDocSnap = await checkerDocRef.get()
 
   if (checkerDocSnap.exists) {
-    const checkerData = checkerDocSnap.data();
-    if (checkerData.isOnboarding) {
-      currentStep = checkerData.onboardingStatus;
+    const checkerData = checkerDocSnap.data()
+    if (checkerData?.isOnboarding) {
+      currentStep = checkerData.onboardingStatus
     }
   }
 
   switch (currentStep) {
     case "name":
-      await sendNamePrompt(chatId, checkerDocRef, checkerDocSnap);
-      break;
+      await sendNamePrompt(chatId, checkerDocRef, checkerDocSnap)
+      break
     case "number":
-      await sendNumberPrompt(chatId, checkerDocRef, checkerDocSnap);
-      break;
+      await sendNumberPrompt(chatId, checkerDocRef, checkerDocSnap)
+      break
     case "otp":
-      await sendOTPPrompt(chatId, checkerDocRef, checkerDocSnap);
-      break;
+      await sendOTPPrompt(chatId, checkerDocRef, checkerDocSnap)
+      break
     case "quiz":
-      await sendQuizPrompt(chatId, checkerDocRef, checkerDocSnap);
-      break;
+      await sendQuizPrompt(chatId, checkerDocRef, checkerDocSnap)
+      break
     case "waGroup":
-      await sendWAGroupPrompt(chatId, checkerDocRef, checkerDocSnap);
-      break;
+      await sendWAGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
+      break
     case "tgGroup":
-      await sendTGGroupPrompt(chatId, checkerDocRef, checkerDocSnap);
-      break;
+      await sendTGGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
+      break
     case "completed":
       await bot.sendMessage(
         chatId,
         `You have successfully onboarded as a CheckMate Checker!`
-      );
-      break;
+      )
+      break
   }
-});
+})
 
 bot.onText(/\/activate/, async (msg) => {
   if (msg.from) {
@@ -192,7 +192,11 @@ const onCheckerPublishTelegram = onMessagePublished(
   }
 )
 
-const sendNamePrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
+const sendNamePrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
   const namePrompt = await bot.sendMessage(
     chatId,
     "Hi, what's your full name?",
@@ -201,30 +205,35 @@ const sendNamePrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
         force_reply: true,
       },
     }
-  );
+  )
 
   bot.onReplyToMessage(chatId, namePrompt.message_id, async (nameMsg) => {
-    const name = nameMsg.text;
+    const name = nameMsg.text
+    const telegramId = nameMsg.from?.id || ""
 
     //create checker entry in DB
     // await bot.sendMessage(chatId, "Create checker")
     const checkerQuerySnap = await db
       .collection("checkers")
       .where("telegramId", "==", telegramId)
-      .get();
+      .get()
     if (checkerQuerySnap.size === 0) {
       // postCheckerHandler({ name, type: "human", telegramId, "number" });  //create this as separate function
-      sendNumberPrompt(chatId, checkerDocRef);
+      sendNumberPrompt(chatId, checkerDocRef, checkerDocSnap)
     } else if (checkerQuerySnap.size > 0) {
-      const checkerSnap = checkerQuerySnap.docs[0];
-      console.log(checkerSnap);
+      const checkerSnap = checkerQuerySnap.docs[0]
+      console.log(checkerSnap)
     } else {
-      logger.error(`Multiple checkers with TelegramID ${telegramId} found`);
+      logger.error(`Multiple checkers with TelegramID ${telegramId} found`)
     }
-  });
-};
+  })
+}
 
-const sendNumberPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
+const sendNumberPrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
   const numberPrompt = await bot.sendMessage(
     chatId,
     `What is your HP no. in +(country code) (HP no.) format e.g +65 12341234`,
@@ -233,55 +242,63 @@ const sendNumberPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
         force_reply: true,
       },
     }
-  );
+  )
 
   bot.onReplyToMessage(chatId, numberPrompt.message_id, async (numberMsg) => {
-    const whatsappId = numberMsg.text;
+    const whatsappId = numberMsg.text
     await checkerDocRef.update({
       whatsappId,
       onboardingStatus: "otp",
-    });
-  });
+    })
+  })
 
-  sendOTPPrompt(chatId, checkerDocRef, checkerDocSnap);
-};
+  sendOTPPrompt(chatId, checkerDocRef, checkerDocSnap)
+}
 
-const sendOTPPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
-  const whatsappId = checkerDocSnap.data().whatsappId;
-  const telegramId = checkerDocSnap.data().telegramId;
+const sendOTPPrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
+  const whatsappId = checkerDocSnap.data()?.whatsappId
+  const telegramId = checkerDocSnap.data()?.telegramId
 
-  await postOTPHandler({ checkerId: telegramId, whatsappId });
+  await postOTPHandler(telegramId, whatsappId)
   await bot.sendMessage(
     chatId,
     `We have sent a 6-digit OTP to ${whatsappId}. Please check your Whatsapp for the OTP.`
-  );
+  )
   const otpPrompt = await bot.sendMessage(chatId, `Verify your OTP:`, {
     reply_markup: {
       force_reply: true,
     },
-  });
+  })
   bot.onReplyToMessage(chatId, otpPrompt.message_id, async (otpMsg) => {
-    const otp = otpMsg.text;
-    await bot.sendMessage(chatId, "Verified OTP");
+    const otp = otpMsg?.text || ""
+    await bot.sendMessage(chatId, "Verified OTP")
 
     // handle different check cases
-    await checkOTPHandler({ checkerId: telegramId, otp });
+    await checkOTPHandler(telegramId, otp)
 
     await checkerDocRef.update({
       whatsappId,
       onboardingStatus: "quiz",
-    });
+    })
 
-    sendQuizPrompt(chatId, checkerDocRef, checkerDocSnap);
-  });
-};
+    sendQuizPrompt(chatId, checkerDocRef, checkerDocSnap)
+  })
+}
 
-const sendQuizPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
+const sendQuizPrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
   await bot.sendMessage(
     chatId,
     `Thank you for verifying your Whatsapp number. Please proceed to complete the onboarding quiz: https://better-sg.typeform.com/to/MlihTUDx`,
     {
-      reply_markup: JSON.stringify({
+      reply_markup: {
         inline_keyboard: [
           [
             {
@@ -296,28 +313,32 @@ const sendQuizPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
             },
           ],
         ],
-      }),
+      },
     }
-  );
+  )
 
   bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
-    const action = callbackQuery.data;
-    const msg = callbackQuery.message;
+    const action = callbackQuery.data
+    const msg = callbackQuery.message
 
     if (action === "1") {
-      if (checkerDocSnap.data().onboardingStatus === "waGroup") {
-        sendWAGroupPrompt(chatId, checkerDocRef, checkerDocSnap);
+      if (checkerDocSnap.data()?.onboardingStatus === "waGroup") {
+        sendWAGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
       }
     }
-  });
-};
+  })
+}
 
-const sendWAGroupPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
+const sendWAGroupPrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
   await bot.sendMessage(
     chatId,
     "Thank you for completing the quiz. Please add the CheckMate Whatsapp bot: https://wa.me/6580432188.",
     {
-      reply_markup: JSON.stringify({
+      reply_markup: {
         inline_keyboard: [
           [
             {
@@ -332,32 +353,36 @@ const sendWAGroupPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
             },
           ],
         ],
-      }),
+      },
     }
-  );
+  )
 
   bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
-    const action = callbackQuery.data;
-    const msg = callbackQuery.message;
+    const action = callbackQuery.data
+    const msg = callbackQuery.message
 
     if (action === "1") {
       // check WA bot completion
 
       await checkerDocRef.update({
         onboardingStatus: "tgGroup",
-      });
+      })
 
-      sendTGGroupPrompt(chatId, checkerDocRef, checkerDocSnap);
+      sendTGGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
     }
-  });
-};
+  })
+}
 
-const sendTGGroupPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
+const sendTGGroupPrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
   await bot.sendMessage(
     chatId,
     "Thank you for adding the WA bot. Please add the CheckMate Checker's telegram bot: https://t.me/CheckMate_Checker_Bot.",
     {
-      reply_markup: JSON.stringify({
+      reply_markup: {
         inline_keyboard: [
           [
             {
@@ -372,36 +397,40 @@ const sendTGGroupPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
             },
           ],
         ],
-      }),
+      },
     }
-  );
+  )
 
   bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
-    const action = callbackQuery.data;
-    const msg = callbackQuery.message;
+    const action = callbackQuery.data
+    const msg = callbackQuery.message
 
     if (action === "1") {
       // check tele bot completion
-      sendCompletionPrompt(chatId, checkerDocRef, checkerDocSnap);
+      sendCompletionPrompt(chatId, checkerDocRef, checkerDocSnap)
     }
-  });
-};
+  })
+}
 
-const sendCompletionPrompt = async (chatId, checkerDocRef, checkerDocSnap) => {
+const sendCompletionPrompt = async (
+  chatId: number,
+  checkerDocRef: DocumentReference,
+  checkerDocSnap: DocumentSnapshot
+) => {
   await bot.sendMessage(
     chatId,
     "Thank you for adding the telegram bot. Please refer to CheckMate wiki for more information: https://checkmate.sg/."
-  );
+  )
 
   await checkerDocRef.update({
     onboardingStatus: "completed",
     isOnboarding: true,
-  });
+  })
 
   await bot.sendMessage(
     chatId,
     `You have successfully onboarded as a CheckMate Checker!`
-  );
-};
+  )
+}
 
 export { onCheckerPublishTelegram }
