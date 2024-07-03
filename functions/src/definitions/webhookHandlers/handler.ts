@@ -172,16 +172,26 @@ const postHandlerTypeform = async (req: Request, res: Response) => {
   const db = admin.firestore()
 
   try {
-    console.log(req.body)
     if (req?.body?.form_response?.answers?.[1]?.phone_number) {
       let whatsappId = req.body.form_response.answers[1].phone_number
-      const checkerDocRef = db.collection("checkers").doc(whatsappId)
-      // await checkerDocRef.update({
-      //   onboardingStatus : "waGroup"
-      // })
-      functions.logger.log(
-        `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
-      )
+      whatsappId = whatsappId.substring(1)
+
+      const checkerQuery = await db
+        .collection("checkers")
+        .where("whatsappId", "==", whatsappId)
+        .get()
+
+      if (!checkerQuery.empty) {
+        const checkerSnap = checkerQuery.docs[0]
+        await checkerSnap.ref.update({
+          onboardingStatus: "waGroup",
+        })
+        functions.logger.log(
+          `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
+        )
+      } else {
+        functions.logger.warn("User did not onboard from telegram bot.")
+      }
     } else {
       functions.logger.warn(
         "User did not answer Whatsapp phone number question in the Typeform"

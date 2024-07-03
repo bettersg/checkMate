@@ -5,7 +5,13 @@ import TelegramBot, { Update } from "node-telegram-bot-api"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { logger } from "firebase-functions/v2"
 import { postOTPHandler, checkOTPHandler } from "../common/otpWhatsapp"
-import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore"
+import {
+  DocumentReference,
+  DocumentSnapshot,
+  Query,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+} from "firebase-admin/firestore"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const bot = new TelegramBot(TOKEN)
@@ -63,34 +69,36 @@ bot.onText(/\/onboard/, async (msg) => {
   let currentStep = "name"
 
   // Check user onboarding state
-  const checkerDocRef = db.collection("checkers").doc(telegramId.toString())
-  const checkerDocSnap = await checkerDocRef.get()
+  const checkerDocQuery = db
+    .collection("checkers")
+    .where("telegramId", "==", telegramId)
+  const checkerQuerySnap = await checkerDocQuery.get()
 
-  if (checkerDocSnap.exists) {
-    const checkerData = checkerDocSnap.data()
-    if (checkerData?.isOnboarding) {
-      currentStep = checkerData.onboardingStatus
-    }
+  if (!checkerQuerySnap.empty) {
+    const checkerData = checkerQuerySnap.docs[0]
+    currentStep = checkerData.data().onboardingStatus
   }
+
+  console.log(currentStep)
 
   switch (currentStep) {
     case "name":
-      await sendNamePrompt(chatId, checkerDocRef, checkerDocSnap)
+      await sendNamePrompt(chatId, checkerQuerySnap)
       break
     case "number":
-      await sendNumberPrompt(chatId, checkerDocRef, checkerDocSnap)
+      await sendNumberPrompt(chatId, checkerQuerySnap)
       break
     case "otp":
-      await sendOTPPrompt(chatId, checkerDocRef, checkerDocSnap)
+      await sendOTPPrompt(chatId, checkerQuerySnap)
       break
     case "quiz":
-      await sendQuizPrompt(chatId, checkerDocRef, checkerDocSnap)
+      await sendQuizPrompt(chatId, checkerQuerySnap)
       break
     case "waGroup":
-      await sendWAGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
+      await sendWAGroupPrompt(chatId, checkerQuerySnap)
       break
     case "tgGroup":
-      await sendTGGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
+      await sendTGGroupPrompt(chatId, checkerQuerySnap)
       break
     case "completed":
       await bot.sendMessage(
@@ -194,8 +202,7 @@ const onCheckerPublishTelegram = onMessagePublished(
 
 const sendNamePrompt = async (
   chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
+  checkerQuerySnap: QuerySnapshot
 ) => {
   const namePrompt = await bot.sendMessage(
     chatId,
@@ -209,30 +216,31 @@ const sendNamePrompt = async (
 
   bot.onReplyToMessage(chatId, namePrompt.message_id, async (nameMsg) => {
     const name = nameMsg.text
-    const telegramId = nameMsg.from?.id || ""
 
     //create checker entry in DB
-    // await bot.sendMessage(chatId, "Create checker")
-    const checkerQuerySnap = await db
-      .collection("checkers")
-      .where("telegramId", "==", telegramId)
-      .get()
-    if (checkerQuerySnap.size === 0) {
+    if (checkerQuerySnap.empty) {
       // postCheckerHandler({ name, type: "human", telegramId, "number" });  //create this as separate function
-      sendNumberPrompt(chatId, checkerDocRef, checkerDocSnap)
+      sendNumberPrompt(chatId, checkerQuerySnap)
     } else if (checkerQuerySnap.size > 0) {
-      const checkerSnap = checkerQuerySnap.docs[0]
-      console.log(checkerSnap)
-    } else {
-      logger.error(`Multiple checkers with TelegramID ${telegramId} found`)
+      await checkerQuerySnap.docs[0].ref.update({
+        name,
+        onboardingStatus: "number",
+      })
+      sendNumberPrompt(chatId, checkerQuerySnap)
     }
+    // else {
+    //   logger.error(
+    //     `Multiple checkers with TelegramID ${
+    //       checkerQuerySnap.docs[0].data().telegramId
+    //     } found`
+    //   )
+    // }
   })
 }
 
 const sendNumberPrompt = async (
   chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
+  checkerQuerySnap: QuerySnapshot
 ) => {
   const numberPrompt = await bot.sendMessage(
     chatId,
@@ -246,22 +254,21 @@ const sendNumberPrompt = async (
 
   bot.onReplyToMessage(chatId, numberPrompt.message_id, async (numberMsg) => {
     const whatsappId = numberMsg.text
-    await checkerDocRef.update({
+    await checkerQuerySnap.docs[0].ref.update({
       whatsappId,
       onboardingStatus: "otp",
     })
-  })
 
-  sendOTPPrompt(chatId, checkerDocRef, checkerDocSnap)
+    sendOTPPrompt(chatId, checkerQuerySnap)
+  })
 }
 
 const sendOTPPrompt = async (
   chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
+  checkerQuerySnap: QuerySnapshot
 ) => {
-  const whatsappId = checkerDocSnap.data()?.whatsappId
-  const telegramId = checkerDocSnap.data()?.telegramId
+  const whatsappId = checkerQuerySnap.docs[0].data()?.whatsappId
+  const telegramId = checkerQuerySnap.docs[0].data()?.telegramId
 
   await postOTPHandler(telegramId, whatsappId)
   await bot.sendMessage(
@@ -273,6 +280,7 @@ const sendOTPPrompt = async (
       force_reply: true,
     },
   })
+
   bot.onReplyToMessage(chatId, otpPrompt.message_id, async (otpMsg) => {
     const otp = otpMsg?.text || ""
     await bot.sendMessage(chatId, "Verified OTP")
@@ -280,19 +288,18 @@ const sendOTPPrompt = async (
     // handle different check cases
     await checkOTPHandler(telegramId, otp)
 
-    await checkerDocRef.update({
+    await checkerQuerySnap.docs[0].ref.update({
       whatsappId,
       onboardingStatus: "quiz",
     })
 
-    sendQuizPrompt(chatId, checkerDocRef, checkerDocSnap)
+    sendQuizPrompt(chatId, checkerQuerySnap)
   })
 }
 
 const sendQuizPrompt = async (
   chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
+  checkerQuerySnap: QuerySnapshot
 ) => {
   await bot.sendMessage(
     chatId,
@@ -321,9 +328,14 @@ const sendQuizPrompt = async (
     const action = callbackQuery.data
     const msg = callbackQuery.message
 
+    console.log(checkerQuerySnap.docs[0].data()?.onboardingStatus === "quiz")
+    console.log(checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup")
+
     if (action === "1") {
-      if (checkerDocSnap.data()?.onboardingStatus === "waGroup") {
-        sendWAGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
+      if (checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup") {
+        sendWAGroupPrompt(chatId, checkerQuerySnap)
+      } else {
+        await bot.sendMessage(chatId, `Please complete the Onboarding quiz.`)
       }
     }
   })
@@ -331,8 +343,7 @@ const sendQuizPrompt = async (
 
 const sendWAGroupPrompt = async (
   chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
+  checkerQuerySnap: QuerySnapshot
 ) => {
   await bot.sendMessage(
     chatId,
@@ -364,19 +375,18 @@ const sendWAGroupPrompt = async (
     if (action === "1") {
       // check WA bot completion
 
-      await checkerDocRef.update({
+      await checkerQuerySnap.docs[0].ref.update({
         onboardingStatus: "tgGroup",
       })
 
-      sendTGGroupPrompt(chatId, checkerDocRef, checkerDocSnap)
+      sendTGGroupPrompt(chatId, checkerQuerySnap)
     }
   })
 }
 
 const sendTGGroupPrompt = async (
   chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
+  checkerQuerySnap: QuerySnapshot
 ) => {
   await bot.sendMessage(
     chatId,
@@ -407,25 +417,21 @@ const sendTGGroupPrompt = async (
 
     if (action === "1") {
       // check tele bot completion
-      sendCompletionPrompt(chatId, checkerDocRef, checkerDocSnap)
+      await checkerQuerySnap.docs[0].ref.update({
+        onboardingStatus: "completed",
+        isOnboarding: true,
+      })
+
+      sendCompletionPrompt(chatId)
     }
   })
 }
 
-const sendCompletionPrompt = async (
-  chatId: number,
-  checkerDocRef: DocumentReference,
-  checkerDocSnap: DocumentSnapshot
-) => {
+const sendCompletionPrompt = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     "Thank you for adding the telegram bot. Please refer to CheckMate wiki for more information: https://checkmate.sg/."
   )
-
-  await checkerDocRef.update({
-    onboardingStatus: "completed",
-    isOnboarding: true,
-  })
 
   await bot.sendMessage(
     chatId,

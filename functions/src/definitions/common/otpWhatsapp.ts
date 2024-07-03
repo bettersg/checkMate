@@ -20,19 +20,26 @@ function generateOTP() {
 
 const postOTPHandler = async (checkerId: string, whatsappId: string) => {
   try {
-    const checkerDocRef = db.collection("checkers").doc(checkerId)
-    const checkerDocSnap = await checkerDocRef.get()
-    if (!checkerDocSnap.exists) {
+    const checkerQuerySnap = await db
+      .collection("checkers")
+      .where("telegramId", "==", checkerId)
+      .get()
+
+    if (checkerQuerySnap.empty) {
       logger.error(`Checker with TelegramID ${checkerId} not found`)
       return
     }
 
-    const otpRef = db.collection("otps").doc(checkerId)
-    const otpSnap = await otpRef.get()
+    const otpSnap = await db
+      .collection("otps")
+      .where("telegramId", "==", checkerId)
+      .get()
 
-    if (otpSnap.exists) {
-      const lastRequestedAt = otpSnap?.data()?.lastRequestedAt ?? null
-      const requestCount = otpSnap?.data()?.requestCount ?? 0
+    console.log(!otpSnap.empty)
+
+    if (!otpSnap.empty) {
+      const lastRequestedAt = otpSnap?.docs[0].data()?.lastRequestedAt ?? null
+      const requestCount = otpSnap?.docs[0].data()?.requestCount ?? 0
 
       if (lastRequestedAt === null || requestCount === null) {
         logger.error("Invalid OTP data")
@@ -56,7 +63,7 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
 
       const { otp, expiresAt } = generateOTP()
 
-      await otpRef.update({
+      await otpSnap?.docs[0].ref.update({
         whatsappId,
         otp,
         expiresAt: Timestamp.fromMillis(expiresAt),
@@ -71,7 +78,7 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
     } else {
       // If no OTP record exists, create a new one
       const { otp, expiresAt } = generateOTP()
-      await otpRef.set({
+      await db.collection("otps").add({
         whatsappId,
         otp,
         expiresAt: Timestamp.fromMillis(expiresAt),
