@@ -964,7 +964,7 @@ async function createNewUser(
     initialJourney: {},
     referralId: referralId,
     utm: {
-      source: "none",
+      source: "direct",
       medium: "none",
       content: "none",
       campaign: "none",
