@@ -30,6 +30,8 @@ const sendTelegramTextMessage = async function (
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else if (bot === "report") {
     token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else if (bot === "repost") {
+    token = process.env.TELEGRAM_REPOST_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -54,6 +56,7 @@ const sendTelegramTextMessage = async function (
     functions.logger.log(error.response)
     throw "error with sending telegram message"
   })
+  console.log(response)
   return response
 }
 
