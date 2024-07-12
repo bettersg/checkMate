@@ -92,13 +92,13 @@ bot.onText(/\/onboard/, async (msg) => {
       await sendOTPPrompt(chatId, checkerQuerySnap)
       break
     case "quiz":
-      await sendQuizPrompt(chatId, checkerQuerySnap)
+      await sendQuizPrompt(chatId)
       break
     case "waGroup":
-      await sendWAGroupPrompt(chatId, checkerQuerySnap)
+      await sendWAGroupPrompt(chatId)
       break
     case "tgGroup":
-      await sendTGGroupPrompt(chatId, checkerQuerySnap)
+      await sendTGGroupPrompt(chatId)
       break
     case "completed":
       await bot.sendMessage(
@@ -293,14 +293,11 @@ const sendOTPPrompt = async (
       onboardingStatus: "quiz",
     })
 
-    sendQuizPrompt(chatId, checkerQuerySnap)
+    sendQuizPrompt(chatId)
   })
 }
 
-const sendQuizPrompt = async (
-  chatId: number,
-  checkerQuerySnap: QuerySnapshot
-) => {
+const sendQuizPrompt = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     `Thank you for verifying your Whatsapp number. Please proceed to complete the onboarding quiz: https://better-sg.typeform.com/to/MlihTUDx`,
@@ -310,41 +307,16 @@ const sendQuizPrompt = async (
           [
             {
               text: "Yes, I have finished the onboarding quiz",
-              callback_data: "1",
+              callback_data: "QUIZ_COMPLETED",
             },
-          ],
-          [
-            {
-              text: "No, I will get to it",
-              callback_data: "2",
-            },
-          ],
+          ]
         ],
       },
     }
   )
-
-  bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
-    const action = callbackQuery.data
-    const msg = callbackQuery.message
-
-    console.log(checkerQuerySnap.docs[0].data()?.onboardingStatus === "quiz")
-    console.log(checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup")
-
-    if (action === "1") {
-      if (checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup") {
-        sendWAGroupPrompt(chatId, checkerQuerySnap)
-      } else {
-        await bot.sendMessage(chatId, `Please complete the Onboarding quiz.`)
-      }
-    }
-  })
 }
 
-const sendWAGroupPrompt = async (
-  chatId: number,
-  checkerQuerySnap: QuerySnapshot
-) => {
+const sendWAGroupPrompt = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     "Thank you for completing the quiz. Please add the CheckMate Whatsapp bot: https://wa.me/6580432188.",
@@ -354,40 +326,16 @@ const sendWAGroupPrompt = async (
           [
             {
               text: "Yes, I have added the WA bot",
-              callback_data: "1",
+              callback_data: "WA_COMPLETED",
             },
-          ],
-          [
-            {
-              text: "No, I will get to it",
-              callback_data: "2",
-            },
-          ],
+          ]
         ],
       },
     }
   )
-
-  bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
-    const action = callbackQuery.data
-    const msg = callbackQuery.message
-
-    if (action === "1") {
-      // check WA bot completion
-
-      await checkerQuerySnap.docs[0].ref.update({
-        onboardingStatus: "tgGroup",
-      })
-
-      sendTGGroupPrompt(chatId, checkerQuerySnap)
-    }
-  })
 }
 
-const sendTGGroupPrompt = async (
-  chatId: number,
-  checkerQuerySnap: QuerySnapshot
-) => {
+const sendTGGroupPrompt = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     "Thank you for adding the WA bot. Please add the CheckMate Checker's telegram bot: https://t.me/CheckMate_Checker_Bot.",
@@ -397,34 +345,13 @@ const sendTGGroupPrompt = async (
           [
             {
               text: "Yes, I have added the telegram bot",
-              callback_data: "1",
+              callback_data: "TG_COMPLETED",
             },
-          ],
-          [
-            {
-              text: "No, I will get to it",
-              callback_data: "2",
-            },
-          ],
+          ]
         ],
       },
     }
   )
-
-  bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
-    const action = callbackQuery.data
-    const msg = callbackQuery.message
-
-    if (action === "1") {
-      // check tele bot completion
-      await checkerQuerySnap.docs[0].ref.update({
-        onboardingStatus: "completed",
-        isOnboarding: true,
-      })
-
-      sendCompletionPrompt(chatId)
-    }
-  })
 }
 
 const sendCompletionPrompt = async (chatId: number) => {
@@ -438,5 +365,61 @@ const sendCompletionPrompt = async (chatId: number) => {
     `You have successfully onboarded as a CheckMate Checker!`
   )
 }
+
+bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
+  const action = callbackQuery.data
+  const chatId = callbackQuery.message.chat.id
+
+  const checkerDocQuery = db
+    .collection("checkers")
+    .where("telegramId", "==", callbackQuery.from.id)
+  const checkerQuerySnap = await checkerDocQuery.get()
+
+  switch (action) {
+    case "QUIZ_COMPLETED":
+      console.log(checkerQuerySnap.docs[0].data()?.onboardingStatus === "quiz")
+      console.log(
+        checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup"
+      )
+
+      if (checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup") {
+        sendWAGroupPrompt(chatId)
+      } else {
+        await bot.sendMessage(chatId, `Please complete the Onboarding quiz.`)
+      }
+      break
+    case "WA_COMPLETED":
+      // check WA bot completion
+      const whatsappId = checkerQuerySnap.docs[0].data()?.whatsappId
+      const userSnap = db.collection("users").doc(whatsappId).get()
+
+      if (userSnap.exists) {
+        await checkerQuerySnap.docs[0].ref.update({
+          onboardingStatus: "tgGroup",
+        })
+  
+        sendTGGroupPrompt(chatId)
+      } else {
+        await bot.sendMessage(chatId, `Please add the CheckMate Whatsapp bot: https://wa.me/6580432188.`)
+      }
+      break
+    case "TG_COMPLETED":
+      // check tele bot completion
+      const member = await bot.getChatMember(process.env.CHECKERS_CHAT_ID, callbackQuery.from.id);
+      if (member.status == 'member') {
+        await checkerQuerySnap.docs[0].ref.update({
+          onboardingStatus: "completed",
+          isOnboarding: true,
+        })
+  
+        sendCompletionPrompt(chatId)
+      } else {
+        await bot.sendMessage(chatId, `Please add the CheckMate Checker's telegram bot: https://t.me/CheckMate_Checker_Bot.`)
+      }
+      break
+    default:
+      console.log("Unhandled callback data:", action)
+  }
+})
 
 export { onCheckerPublishTelegram }

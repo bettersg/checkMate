@@ -133,14 +133,14 @@ const checkOTPHandler = async (checkerId: string, otp: string) => {
 
     if (verificationAttempts >= 5) {
       logger.warn("Maximum OTP verification attempts reached")
-      return
+      return "OTP max attempts"
     }
 
     if (otp !== savedOtp) {
       await otpRef.update({
         verificationAttempts: verificationAttempts + 1,
       })
-      return
+      return "OTP mismatch"
     }
 
     //check if existing checker
