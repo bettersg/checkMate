@@ -9,7 +9,7 @@ import PhoneInput from "react-phone-number-input";
 
 function openLink(url: string) {
   if (window.Telegram.WebApp) {
-    Telegram.WebApp.openLink(url);
+    window.Telegram.WebApp.openLink(url);
   } else {
     window.open(url, "_blank");
   }
