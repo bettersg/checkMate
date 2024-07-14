@@ -67,6 +67,7 @@ const StepTwo = () => {
       <br />
       <a
         className="underline text-checkLink"
+        target="_blank"
         href="https://bit.ly/checkmate-privacy"
       >
         https://bit.ly/checkmate-privacy
@@ -87,6 +88,7 @@ const StepThree = () => {
       <p>
         <a
           className="underline text-checkLink"
+          target="_blank"
           href="https://bit.ly/checkmates-quiz)"
         >
           https://bit.ly/checkmates-quiz
@@ -114,6 +116,7 @@ const StepFour = () => {
       <p>
         <a
           className="underline text-checkLink"
+          target="_blank"
           href="https://bit.ly/checkmates-groupchat)"
         >
           https://bit.ly/checkmates-groupchat
@@ -128,6 +131,7 @@ const StepFour = () => {
       <p>
         <a
           className="underline text-checkLink"
+          target="_blank"
           href="https://bit.ly/checkmates-wiki)"
         >
           https://bit.ly/checkmates-wiki
