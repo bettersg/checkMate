@@ -7,6 +7,14 @@ import { signInWithToken, signOut } from "../utils/authManagement";
 import { Alert, Button } from "@material-tailwind/react";
 import PhoneInput from "react-phone-number-input";
 
+function openLink(url: string) {
+  if (window.Telegram.WebApp) {
+    Telegram.WebApp.openLink(url);
+  } else {
+    window.open(url, "_blank");
+  }
+}
+
 const NameForm = ({
   name,
   setName,
@@ -67,8 +75,8 @@ const StepTwo = () => {
       <br />
       <a
         className="underline text-checkLink"
-        target="_blank"
-        href="https://bit.ly/checkmate-privacy"
+        onClick={() => openLink("https://bit.ly/checkmate-privacy")}
+        href="#"
       >
         https://bit.ly/checkmate-privacy
       </a>
@@ -88,8 +96,8 @@ const StepThree = () => {
       <p>
         <a
           className="underline text-checkLink"
-          target="_blank"
-          href="https://bit.ly/checkmates-quiz)"
+          onClick={() => openLink("https://bit.ly/checkmates-quiz")}
+          href="#"
         >
           https://bit.ly/checkmates-quiz
         </a>
@@ -116,8 +124,8 @@ const StepFour = () => {
       <p>
         <a
           className="underline text-checkLink"
-          target="_blank"
-          href="https://bit.ly/checkmates-groupchat)"
+          onClick={() => openLink("https://bit.ly/checkmates-groupchat")}
+          href="#"
         >
           https://bit.ly/checkmates-groupchat
         </a>
@@ -131,8 +139,8 @@ const StepFour = () => {
       <p>
         <a
           className="underline text-checkLink"
-          target="_blank"
-          href="https://bit.ly/checkmates-wiki)"
+          onClick={() => openLink("https://bit.ly/checkmates-wiki")}
+          href="#"
         >
           https://bit.ly/checkmates-wiki
         </a>
