@@ -205,6 +205,7 @@ const postHandlerTypeform = async (req: CustomRequest, res: Response) => {
 
     if (verifySignature(signature as string, req.rawBody?.toString() || "")) {
       if (req?.body?.form_response?.answers?.[1]?.phone_number) {
+        //EDIT HERE if form structure changes
         let whatsappId = req.body.form_response.answers[1].phone_number
         whatsappId = whatsappId.substring(1)
 

@@ -368,7 +368,7 @@ const sendWAGroupPrompt = async (chatId: number) => {
 const sendTGGroupPrompt = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
-    "Thank you for adding the WA bot. Please add the CheckMate Checker's telegram bot: https://t.me/CheckMate_Checker_Bot.",
+    "Thank you for adding the WA bot. Please join the CheckMate Checker's groupchat: https://t.me/CheckMate_Checker_Bot.", //UPDATE the groupchat link here
     {
       reply_markup: {
         inline_keyboard: [
@@ -396,6 +396,7 @@ const sendCompletionPrompt = async (chatId: number) => {
   )
 }
 
+//checks for sendWAGroupPrompt / sendTGGroupPrompt / sendCompletionPrompt responses + FUA
 bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
   const action = callbackQuery.data
   const chatId = callbackQuery.message?.chat.id
