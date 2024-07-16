@@ -32,10 +32,8 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
 
     const otpSnap = await db
       .collection("otps")
-      .where("telegramId", "==", checkerId)
+      .where("whatsappId", "==", whatsappId)
       .get()
-
-    console.log(!otpSnap.empty)
 
     if (!otpSnap.empty) {
       const lastRequestedAt = otpSnap?.docs[0].data()?.lastRequestedAt ?? null
@@ -55,7 +53,7 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
         requestCount >= requestLimit
       ) {
         logger.warn("OTP request limit exceeded")
-        return
+        return "OTP request limit exceeded"
       }
 
       const newRequestCount =
@@ -98,24 +96,34 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
   }
 }
 
-const checkOTPHandler = async (checkerId: string, otp: string) => {
+const checkOTPHandler = async (
+  telegramId: string,
+  otp: string,
+  whatsappNum: string
+) => {
   logger.info("Checking OTP...")
+
   try {
-    const checkerRef = db.collection("checkers").doc(checkerId)
-    const checkerSnap = await checkerRef.get()
-    if (!checkerSnap.exists) {
-      logger.error(`Checker with TelegramID ${checkerId} not found`)
+    const checkerDocQuery = db
+      .collection("checkers")
+      .where("telegramId", "==", telegramId)
+    const checkerQuerySnap = await checkerDocQuery.get()
+    if (checkerQuerySnap.empty) {
+      logger.error(`Checker with TelegramID ${telegramId} not found`)
       return
     }
 
-    const otpRef = db.collection("otps").doc(checkerId)
-    const otpSnap = await otpRef.get()
-    if (!otpSnap.exists) {
-      logger.error(`OTP not found for checker ${checkerId}`)
+    const otpDocQuery = db
+      .collection("otps")
+      .where("whatsappId", "==", whatsappNum)
+    const otpDocSnap = await otpDocQuery.get()
+
+    if (otpDocSnap.empty) {
+      logger.error(`OTP not found for checker ${telegramId}`)
       return
     }
 
-    const otpData = otpSnap.data()
+    const otpData = otpDocSnap.docs[0].data()
     const whatsappId = otpData?.whatsappId ?? null
     const savedOtp = otpData?.otp ?? null
     const expiresAt = otpData?.expiresAt ?? null
@@ -137,49 +145,16 @@ const checkOTPHandler = async (checkerId: string, otp: string) => {
     }
 
     if (otp !== savedOtp) {
-      await otpRef.update({
+      await otpDocSnap.docs[0].ref.update({
         verificationAttempts: verificationAttempts + 1,
       })
+      logger.warn("OTP mismatch")
       return "OTP mismatch"
     }
 
-    //check if existing checker
-    const checkerQuery = await db
-      .collection("checkers")
-      .where("whatsappId", "==", whatsappId)
-      .get()
-
-    if (checkerQuery.docs.length === 1) {
-      const telegramId = checkerSnap.data()?.telegramId
-      const existingCheckerRef = checkerQuery.docs[0].ref
-      if (!telegramId) {
-        logger.error(
-          "New checker record for existing checker has no TelegramId"
-        )
-        return
-      }
-
-      try {
-        await existingCheckerRef.update({ telegramId: telegramId })
-      } catch (error) {
-        logger.error("Error updating checker with telegramId", error)
-      }
-
-      await otpRef.delete()
-      logger.log("Existing checker found")
-    } else if (checkerQuery.docs.length > 1) {
-      logger.error("Multiple checkers found with same whatsappID")
-    } else if (checkerQuery.empty) {
-      try {
-        const checkerRef = db.collection("checkers").doc(checkerId)
-        await checkerRef.update({ whatsappId: whatsappId })
-      } catch (error) {
-        logger.error("Error updating checker with whatsappId", error)
-        return
-      }
-      await otpRef.delete()
-      logger.log("OTP verified successfully")
-    }
+    await otpDocSnap.docs[0].ref.delete()
+    logger.log("OTP verified successfully")
+    return "OTP verified"
   } catch (error) {
     logger.error(error)
   }

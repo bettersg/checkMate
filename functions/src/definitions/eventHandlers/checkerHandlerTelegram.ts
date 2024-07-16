@@ -6,16 +6,9 @@ import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { logger } from "firebase-functions/v2"
 import { Timestamp } from "firebase-admin/firestore"
 import { postOTPHandler, checkOTPHandler } from "../common/otpWhatsapp"
-import {
-  DocumentReference,
-  DocumentSnapshot,
-  Query,
-  QueryDocumentSnapshot,
-  QuerySnapshot,
-} from "firebase-admin/firestore"
+import { QuerySnapshot } from "firebase-admin/firestore"
 import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
-import { createChecker } from "../api/interfaces"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
@@ -226,8 +219,8 @@ const sendNamePrompt = async (
     const name = nameMsg.text
     const telegramId = nameMsg.from?.id
 
-    //create checker entry in DB
     if (checkerQuerySnap.empty) {
+      //create checker entry in DB
       if (name && telegramId) {
         await postCheckerHandler(name, telegramId)
         const checkerDocQuery = db
@@ -253,7 +246,7 @@ const sendNumberPrompt = async (
 ) => {
   const numberPrompt = await bot.sendMessage(
     chatId,
-    `What is your HP no. in +(country code) (HP no.) format e.g +65 12341234`,
+    `What is your HP no. in (country code)(HP no.) format e.g 6512341234`,
     {
       reply_markup: {
         force_reply: true,
@@ -275,36 +268,62 @@ const sendNumberPrompt = async (
 
 const sendOTPPrompt = async (
   chatId: number,
-  checkerQuerySnap: QuerySnapshot
+  checkerQuerySnap: QuerySnapshot,
+  otpSent: boolean = false
 ) => {
   const snapshot = await checkerQuerySnap.docs[0].ref.get()
   const whatsappId = snapshot.data()?.whatsappId
   const telegramId = snapshot.data()?.telegramId
 
-  await postOTPHandler(telegramId, whatsappId)
-  await bot.sendMessage(
+  if (!otpSent) {
+    const postOTPHandlerRes = await postOTPHandler(telegramId, whatsappId)
+
+    if (postOTPHandlerRes) {
+      await bot.sendMessage(
+        chatId,
+        `OTP request limit exceeded. Please try again in 24 hours.`
+      )
+      return
+    }
+    await bot.sendMessage(
+      chatId,
+      `We have sent a 6-digit OTP to ${whatsappId}. Please check your Whatsapp for the OTP.`
+    )
+  }
+  const otpPrompt = await bot.sendMessage(
     chatId,
-    `We have sent a 6-digit OTP to ${whatsappId}. Please check your Whatsapp for the OTP.`
+    !otpSent ? `Verify your OTP:` : `OTP Mismatch. Please reverify your OTP:`,
+    {
+      reply_markup: {
+        force_reply: true,
+      },
+    }
   )
-  const otpPrompt = await bot.sendMessage(chatId, `Verify your OTP:`, {
-    reply_markup: {
-      force_reply: true,
-    },
-  })
 
   bot.onReplyToMessage(chatId, otpPrompt.message_id, async (otpMsg) => {
-    const otp = otpMsg?.text || ""
-    await bot.sendMessage(chatId, "Verified OTP")
+    const otpAttempt = otpMsg?.text || ""
 
-    // handle different check cases
-    await checkOTPHandler(telegramId, otp)
+    const result = await checkOTPHandler(telegramId, otpAttempt, whatsappId)
 
-    await checkerQuerySnap.docs[0].ref.update({
-      whatsappId,
-      onboardingStatus: "quiz",
-    })
-
-    sendQuizPrompt(chatId)
+    try {
+      if (result === "OTP verified") {
+        await checkerQuerySnap.docs[0].ref.update({
+          whatsappId,
+          onboardingStatus: "quiz",
+        })
+        sendQuizPrompt(chatId)
+      } else if (result === "OTP mismatch") {
+        sendOTPPrompt(chatId, checkerQuerySnap, true)
+      } else if (result === "OTP max attempts") {
+        await bot.sendMessage(
+          chatId,
+          `Maximum OTP attempts reached. We will send a new OTP.`
+        )
+        sendOTPPrompt(chatId, checkerQuerySnap)
+      }
+    } catch (error) {
+      console.log("OTP error: " + error)
+    }
   })
 }
 
@@ -388,13 +407,6 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
 
     switch (action) {
       case "QUIZ_COMPLETED":
-        // console.log(
-        //   checkerQuerySnap.docs[0].data()?.onboardingStatus === "quiz"
-        // )
-        // console.log(
-        //   checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup"
-        // )
-
         if (checkerQuerySnap.docs[0].data()?.onboardingStatus === "waGroup") {
           sendWAGroupPrompt(chatId)
         } else {
@@ -530,7 +542,6 @@ const postCheckerHandler = async (name: string, telegramId: number) => {
 
   logger.info("Creating new checker", newChecker)
 
-  //create new factChecker in message
   await db.collection("checkers").add(newChecker)
 }
 
