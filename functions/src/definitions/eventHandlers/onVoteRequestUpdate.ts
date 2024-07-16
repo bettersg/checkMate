@@ -244,6 +244,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             (await factCheckerDocRef.set(
               {
                 lastVotedTimestamp: postChangeData.votedTimestamp,
+                isActive: true,
               },
               { merge: true }
             ))
