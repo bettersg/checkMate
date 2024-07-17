@@ -536,7 +536,7 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 8. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
 9. Create your own Telegram bot via [botfather](https://t.me/botfather)
 10. Replace `TELEGRAM_CHECKER_BOT_TOKEN` in `.secret.local` with the bot token. Note, it is `TELEGRAM_CHECKER_BOT_TOKEN` and not `TELEGRAM_BOT_TOKEN` or `TELEGRAM_WEBHOOK_TOKEN`
-11. Go to botfather, navigate to the bot you created, go to "Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000
+11. Go to botfather, type /mybots, select to the bot you created, go to > Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000
 12. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
 
 ### First time testing (once all above steps are done)
