@@ -648,9 +648,6 @@ async function respondToInstance(
   }
   const from = data.from
 
-  console.log("DATA=====================================")
-  console.log(data)
-
   const userRef = db.collection("users").doc(from)
   const userSnap = await userRef.get()
   const language = userSnap.get("language") ?? "en"
@@ -843,12 +840,11 @@ async function respondToInstance(
       } else {
         await sendTextMessage("user", from, responseText, data.id)
       }
-
-      // Update repost channel
-      console.log("Primary Category===============================")
-      console.log(primaryCategory)
-      await repostUpdate(data.text, primaryCategory)
   }
+
+  // Update repost channel
+  await repostUpdate(data.id, data.text, category)
+
   updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)

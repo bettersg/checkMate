@@ -855,12 +855,13 @@ async function addInstanceToDb(
   console.log("REPOSTING==================")
 
   // Repost instance to admin channel
+  // @ts-ignore
   if (instanceUpdateObj.text) {
-    await repostText(instanceUpdateObj)
+    await repostText(id, instanceUpdateObj)
   }
-
-  if (instanceUpdateObj.caption) {
-    await repostImage(instanceUpdateObj)
+  // @ts-ignore
+  if (instanceUpdateObj.type === "image") {
+    await repostImage(id, instanceUpdateObj)
   }
 
   const messageIdRef = db.collection("messageIds").doc(id)
