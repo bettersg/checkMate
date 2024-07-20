@@ -63,21 +63,22 @@ interface updateChecker {
 }
 
 interface Checker {
-  name: string
-  type: "human" | "ai"
-  isActive: boolean
-  isOnboardingComplete: boolean | null
-  tier: "beginner" | "intermediate" | "expert"
-  isAdmin: boolean
-  isOnProgram: boolean
-  referralCode: string | null
-  hasCompletedProgram: boolean
-  pendingVoteCount: number
-  last30days?: Last30DaysStats
-  programStats?: ProgramStats
-  achievements: Achievements | null
-  level: number
-  experience: number
+  name: string;
+  type: "human" | "ai";
+  isActive: boolean;
+  isOnboardingComplete: boolean | null;
+  tier: "beginner" | "intermediate" | "expert";
+  isAdmin: boolean;
+  isOnProgram: boolean;
+  referralCode: string | null;
+  hasCompletedProgram: boolean;
+  pendingVoteCount: number;
+  last30days?: Last30DaysStats;
+  programStats?: ProgramStats;
+  achievements: Achievements | null;
+  level: number;
+  experience: number;
+  certificateUrl?: string | null;
 }
 
 interface ProgramStats

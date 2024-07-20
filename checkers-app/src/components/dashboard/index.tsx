@@ -8,7 +8,6 @@ import { Checker, ProgramStats } from "../../types";
 import { getChecker } from "../../services/api";
 import Loading from "../common/Loading";
 import { CelebrationDialog } from "./CelebrationDialog";
-//TODO: link to firebase
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +17,10 @@ export default function Dashboard() {
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
   const [peopleHelped, setPeopleHelped] = useState<number>(0);
   const [isOnProgram, setIsOnProgram] = useState<boolean>(false);
-  const [hasCompletedProgram, setHasCompletedProgram] =
-    useState<boolean>(false);
+  const [hasCompletedProgram, setHasCompletedProgram] = useState<boolean>(false);
   const [programStats, setProgramStats] = useState<null | ProgramStats>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
   const isProd = import.meta.env.MODE === "production";
 
   useEffect(() => {
@@ -31,6 +30,7 @@ export default function Dashboard() {
         return;
       }
       const checker: Checker = await getChecker(checkerDetails.checkerId);
+      console.log("Checker details fetched:", checker); // Log the entire checker object
       if (checker) {
         setCheckerDetails((prev) => ({ ...prev, isActive: checker.isActive }));
         if (checker.last30days) {
@@ -44,10 +44,14 @@ export default function Dashboard() {
           setIsOnProgram(checker.isOnProgram);
           setHasCompletedProgram(checker.hasCompletedProgram);
           setProgramStats(checker.programStats);
+          setCertificateUrl(checker.certificateUrl || null);
+          console.log("Certificate URL fetched:", checker.certificateUrl);
         }
         if (checker.referralCode) {
           setReferralCode(checker.referralCode);
         }
+      } else {
+        console.log("Checker data not found");
       }
     };
     if (checkerDetails.checkerId) {
@@ -69,10 +73,8 @@ export default function Dashboard() {
       )}
       <CelebrationDialog
         display={hasCompletedProgram && isOnProgram}
+        certificateUrl={certificateUrl}
       ></CelebrationDialog>
-      {/* {reviewCount > 0 && (
-        <PendingMessageAlert hasPending={false} pendingCount={pendingCount} />
-      )} */}
       {isOnProgram && programStats ? (
         <div>
           <Typography variant="h5" className="text-primary-color">

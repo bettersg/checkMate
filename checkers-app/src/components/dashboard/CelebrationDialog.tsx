@@ -12,10 +12,11 @@ import { useNavigate } from "react-router-dom";
 
 interface PropType {
   display: boolean;
+  certificateUrl: string | null;
 }
 
-export function CelebrationDialog(props: PropType) {
-  const [open, setOpen] = React.useState(props.display);
+export function CelebrationDialog({ display, certificateUrl }: PropType) {
+  const [open, setOpen] = React.useState(display);
   const { checkerDetails } = useUser();
   const navigate = useNavigate();
   const handleOpen = () => setOpen(!open);
@@ -36,6 +37,10 @@ export function CelebrationDialog(props: PropType) {
       navigate(0);
     }
   };
+
+  React.useEffect(() => {
+    console.log("Certificate URL in CelebrationDialog:", certificateUrl);
+  }, [certificateUrl]);
 
   return (
     <>
@@ -66,6 +71,15 @@ export function CelebrationDialog(props: PropType) {
           >
             Yes!
           </Button>
+          {certificateUrl && (
+            <Button
+              variant="gradient"
+              color="green"
+              onClick={() => window.open(certificateUrl, "_blank")}
+            >
+              View Certificate
+            </Button>
+          )}
         </DialogFooter>
       </Dialog>
     </>
