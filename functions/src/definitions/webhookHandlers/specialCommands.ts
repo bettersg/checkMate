@@ -95,6 +95,7 @@ const mockDb = async function () {
     isActive: true,
     isOnboardingComplete: true,
     onboardingStatus: "completed",
+    lastTrackedMessageId: null,
     isAdmin: true,
     singpassOpenId: null,
     telegramId: parseInt(checker1TelegramId.value()),

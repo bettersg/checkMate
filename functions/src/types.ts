@@ -151,7 +151,7 @@ export type UserData = {
 }
 
 export type CheckerData = {
-  name: string
+  name: string | null
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null
@@ -163,6 +163,7 @@ export type CheckerData = {
     | "waGroup"
     | "tgGroup"
     | "completed"
+  lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
   singpassOpenId: string | null
   telegramId: number | null
