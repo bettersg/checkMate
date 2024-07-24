@@ -97,7 +97,7 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
 }
 
 const checkOTPHandler = async (
-  telegramId: string,
+  telegramId: number,
   otp: string,
   whatsappNum: string
 ) => {

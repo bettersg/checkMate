@@ -22,7 +22,7 @@ interface updateVoteRequest {
 }
 
 interface createChecker {
-  name: string
+  name: string | null
   type: "human" | "ai"
   isActive?: boolean
   isOnboardingComplete?: boolean
@@ -63,7 +63,7 @@ interface updateChecker {
 }
 
 interface Checker {
-  name: string
+  name: string | null
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null

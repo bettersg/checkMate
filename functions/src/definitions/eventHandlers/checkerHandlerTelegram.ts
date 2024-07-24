@@ -32,7 +32,7 @@ bot.on("message", async (msg) => {
       "Don't talk to me, instead use the dashboard =)"
     )
   } else if (msg.text && msg.reply_to_message) {
-    const checkerId = msg.from.id
+    const checkerId = msg.from?.id
     const chatId = msg.chat.id
 
     const userQuerySnap = await db
@@ -40,39 +40,25 @@ bot.on("message", async (msg) => {
       .where("telegramId", "==", checkerId)
       .get()
 
-    // check if replied message hits onboarding case
+    // check if replied message hits either onboarding case 1) name 2) HP number 3) otp
     if (
       userQuerySnap.docs[0].data().lastTrackedMessageId ==
       msg.reply_to_message.message_id
     ) {
       let currentStep = userQuerySnap.docs[0].data().onboardingStatus
+      let whatsappId = ""
 
       switch (currentStep) {
         case "name":
           const name = msg.text
-          // const telegramId = msg.from?.id
-
-          // if (userQuerySnap.empty) {
-          //   //create checker entry in DB
-          //   if (name && telegramId) {
-          //     await postCheckerHandler(name, telegramId)
-          //     const checkerDocQuery = db
-          //       .collection("checkers")
-          //       .where("telegramId", "==", telegramId)
-          //     const newCheckerQuerySnap = await checkerDocQuery.get()
-
-          //     sendNumberPrompt(chatId, newCheckerQuerySnap)
-          //   }
-          // } else if (userQuerySnap.size > 0) {
           await userQuerySnap.docs[0].ref.update({
             name,
             onboardingStatus: "number",
           })
           sendNumberPrompt(chatId, userQuerySnap)
-          // }
           break
         case "number":
-          const whatsappId = msg.text
+          whatsappId = msg.text
 
           await userQuerySnap.docs[0].ref.update({
             whatsappId,
@@ -83,7 +69,8 @@ bot.on("message", async (msg) => {
           break
         case "otp":
           const otpAttempt = msg?.text || ""
-          const telegramId = msg.from?.id
+          const telegramId = msg.from?.id || 0
+          whatsappId = userQuerySnap.docs[0].data().whatsappId
 
           const result = await checkOTPHandler(
             telegramId,
@@ -155,7 +142,7 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.onText(/\/onboard/, async (msg) => {
   const chatId = msg.chat.id
-  const telegramId = msg.from?.id || ""
+  const telegramId = msg.from?.id
   let currentStep = "name"
 
   // Check user onboarding state
@@ -164,8 +151,8 @@ bot.onText(/\/onboard/, async (msg) => {
     .where("telegramId", "==", telegramId)
   let checkerQuerySnap = await checkerDocQuery.get()
 
-  if (checkerQuerySnap.empty) {
-    //maybe create checker here instead of name prompt?
+  if (checkerQuerySnap.empty && telegramId) {
+    //create checker here
     await postCheckerHandler(telegramId)
     checkerQuerySnap = await checkerDocQuery.get()
   } else {
@@ -309,30 +296,6 @@ const sendNamePrompt = async (
   await checkerQuerySnap.docs[0].ref.update({
     lastTrackedMessageId: namePrompt.message_id,
   })
-
-  // bot.onReplyToMessage(chatId, namePrompt.message_id, async (nameMsg) => {
-  //   const name = nameMsg.text
-  //   const telegramId = nameMsg.from?.id
-
-  //   if (checkerQuerySnap.empty) {
-  //     //create checker entry in DB
-  //     if (name && telegramId) {
-  //       await postCheckerHandler(name, telegramId)
-  //       const checkerDocQuery = db
-  //         .collection("checkers")
-  //         .where("telegramId", "==", telegramId)
-  //       const newCheckerQuerySnap = await checkerDocQuery.get()
-
-  //       sendNumberPrompt(chatId, newCheckerQuerySnap)
-  //     }
-  //   } else if (checkerQuerySnap.size > 0) {
-  //     await checkerQuerySnap.docs[0].ref.update({
-  //       name,
-  //       onboardingStatus: "number",
-  //     })
-  //     sendNumberPrompt(chatId, checkerQuerySnap)
-  //   }
-  // })
 }
 
 const sendNumberPrompt = async (
@@ -352,17 +315,6 @@ const sendNumberPrompt = async (
   await checkerQuerySnap.docs[0].ref.update({
     lastTrackedMessageId: numberPrompt.message_id,
   })
-
-  // bot.onReplyToMessage(chatId, numberPrompt.message_id, async (numberMsg) => {
-  //   const whatsappId = numberMsg.text
-
-  //   await checkerQuerySnap.docs[0].ref.update({
-  //     whatsappId,
-  //     onboardingStatus: "otp",
-  //   })
-
-  //   sendOTPPrompt(chatId, checkerQuerySnap)
-  // })
 }
 
 const sendOTPPrompt = async (
@@ -402,32 +354,6 @@ const sendOTPPrompt = async (
   await checkerQuerySnap.docs[0].ref.update({
     lastTrackedMessageId: otpPrompt.message_id,
   })
-
-  // bot.onReplyToMessage(chatId, otpPrompt.message_id, async (otpMsg) => {
-  //   const otpAttempt = otpMsg?.text || ""
-
-  //   const result = await checkOTPHandler(telegramId, otpAttempt, whatsappId)
-
-  //   try {
-  //     if (result === "OTP verified") {
-  //       await checkerQuerySnap.docs[0].ref.update({
-  //         whatsappId,
-  //         onboardingStatus: "quiz",
-  //       })
-  //       sendQuizPrompt(chatId, true)
-  //     } else if (result === "OTP mismatch") {
-  //       sendOTPPrompt(chatId, checkerQuerySnap, true)
-  //     } else if (result === "OTP max attempts") {
-  //       await bot.sendMessage(
-  //         chatId,
-  //         `Maximum OTP attempts reached. We will send a new OTP.`
-  //       )
-  //       sendOTPPrompt(chatId, checkerQuerySnap)
-  //     }
-  //   } catch (error) {
-  //     console.log("OTP error: " + error)
-  //   }
-  // })
 }
 
 const sendQuizPrompt = async (chatId: number, isFirstPrompt: boolean) => {
@@ -581,7 +507,7 @@ const postCheckerHandler = async (telegramId: number) => {
     type: "human",
     isActive: false,
     isOnboardingComplete: false,
-    onboardingStatus: "number",
+    onboardingStatus: "name",
     lastTrackedMessageId: null,
     isAdmin: false,
     singpassOpenId: null,
