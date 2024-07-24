@@ -1,5 +1,6 @@
-// Imports and setup (unchanged)
-import { defineString } from "firebase-functions/params"
+/*
+Stores a collection of functions for reposting messages to a admin channel
+*/
 import { AppEnv } from "../../appEnv"
 import {
   sendTelegramImageMessage,
@@ -13,7 +14,7 @@ import { getSignedUrl } from "./mediaUtils"
 const db = admin.firestore()
 const repostChannelId = process.env[AppEnv.TELEGRAM_REPOST_CHANNEL_ID] || ""
 
-// Modified createMessageId function to store replyId and instanceText
+// Stores the replyId and instanceText whenever we repost a message
 export async function createMessageId(
   messageId: string,
   replyId: string,
@@ -29,7 +30,7 @@ export async function createMessageId(
   return true
 }
 
-// Modified getReplyId function to also retrieve instanceText
+// Retrieves the replyId and instanceText for a given messageId to reply/update message
 export async function getReplyId(messageId: string) {
   try {
     const repostIdRef = db.collection("repostIds").doc(messageId)
@@ -50,7 +51,7 @@ export async function getReplyId(messageId: string) {
   }
 }
 
-// Modified repostText function to include instanceText in createMessageId call
+// Creates a new text message in the repost channel
 export async function repostText(messageId: string, instance: any) {
   const instanceText =
     "< New Text Message > \n\n ID: " +
@@ -69,7 +70,7 @@ export async function repostText(messageId: string, instance: any) {
   await createMessageId(messageId, replyId, instanceText)
 }
 
-// Modified repostImage function to include instanceText in createMessageId call
+// Creates a new image message in the repost channel
 export async function repostImage(messageId: string, instance: any) {
   const instanceText =
     "< New Image Message > \n\n ID: " +
@@ -99,7 +100,7 @@ export async function repostImage(messageId: string, instance: any) {
   }
 }
 
-// Repost update function (unchanged for now)
+// Updates a existing repost message with a new category
 export async function repostUpdate(id: string, responseText: string) {
   const { replyId, instanceText } = await getReplyId(id)
 
@@ -111,6 +112,7 @@ export async function repostUpdate(id: string, responseText: string) {
 
   let res
   if (instanceText.startsWith("< New Text Message >")) {
+    // For Text messages
     res = await updateTelegramTextMessage(
       "repost",
       repostChannelId,
@@ -118,6 +120,7 @@ export async function repostUpdate(id: string, responseText: string) {
       replyId
     )
   } else {
+    // For Image messages
     res = await updateTelegramImageMessage(
       "repost",
       repostChannelId,
