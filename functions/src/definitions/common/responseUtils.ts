@@ -843,7 +843,7 @@ async function respondToInstance(
   }
 
   // Update repost channel
-  await repostUpdate(data.id, data.text, category)
+  await repostUpdate(data.id, category)
 
   updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())

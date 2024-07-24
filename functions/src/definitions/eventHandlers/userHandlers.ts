@@ -852,8 +852,6 @@ async function addInstanceToDb(
   instanceRef: FirebaseFirestore.DocumentReference,
   instanceUpdateObj: Object
 ) {
-  console.log("REPOSTING==================")
-
   // Repost instance to admin channel
   // @ts-ignore
   if (instanceUpdateObj.text) {
