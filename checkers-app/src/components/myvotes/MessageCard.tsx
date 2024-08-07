@@ -76,8 +76,8 @@ export default function MessageCard(props: MessageCardProps) {
   const dateString = dateToDateString(new Date(createdTimestamp));
 
   // If the message is PENDING, clicking the button should go to the voting page
-  const viewVote = (firestorePath: string) => {
-    navigate(`/${firestorePath}`);
+  const viewVote = (firestorePath: string, status: string) => {
+    navigate(`/${firestorePath}`, {state: {status: status}});
   };
 
   const textStyle = "font-normal"; //add bold in future
@@ -128,7 +128,7 @@ export default function MessageCard(props: MessageCardProps) {
   return (
     <div
       className="flex border-b border-gray-500 h-16 hover-shadow dark:bg-dark-background-color"
-      onClick={() => viewVote(firestorePath)}
+      onClick={() => viewVote(firestorePath, status )}
     >
       {/* Coloured dot if needs review*/}
 

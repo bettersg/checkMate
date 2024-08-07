@@ -16,16 +16,16 @@ Idea:
 - Have a nested component for each button
 */
 
-import { useState, useEffect, FC } from "react";
+import { useState, useEffect, FC, useCallback, useRef } from "react";
 import { useUser } from "../../providers/UserContext";
-import Loading from "../common/Loading";
+// import Loading from "../common/Loading";
 import MessageCard from "./MessageCard";
 import { Typography } from "@material-tailwind/react";
 import { getCheckerVotes } from "../../services/api";
 import { VoteSummary, VoteSummaryApiResponse } from "../../types";
-import Pagination from "./Pagination"; // Make sure to create this component
+//import Pagination from "./Pagination"; // Make sure to create this component
 
-const MessagesDisplay: FC = () => {
+const MessagesDisplayTest: FC = () => {
   const { checkerDetails } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [votes, setVotes] = useState<VoteSummary[]>([]);
@@ -34,41 +34,59 @@ const MessagesDisplay: FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [error, setError] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      setIsLoading(true);
-      try {
+  const fetchMessages = async () => {
+    setIsLoading(true);
+    try {
         if (!checkerDetails.checkerId) {
-          throw new Error("Checker Id missing.");
+            throw new Error("Checker Id missing.");
         }
         const response: VoteSummaryApiResponse = await getCheckerVotes(
-          checkerDetails.checkerId,
-          activeTab.toLowerCase(),
-          5,
-          lastPath
+            checkerDetails.checkerId,
+            activeTab.toLowerCase(),
+            5,
+            lastPath
         );
-        // Assuming your API correctly maps to the ApiResponse interface
         if (response.votes) {
-          setVotes(response.votes);
+            setVotes((prevVotes) => [...prevVotes, ...response.votes])
         }
         setTotalPages(response.totalPages);
         setLastPath(response.lastPath);
         setIsLoading(false);
-      } catch (err) {
+    } catch(err) {
         setError("Failed to fetch messages");
         setIsLoading(false);
-      }
-    };
+    }
+  } 
+
+  useEffect(() => {
     if (checkerDetails.checkerId) {
       fetchMessages();
     }
-  }, [checkerDetails.checkerId, activeTab, currentPage]);
+  }, [checkerDetails.checkerId, activeTab, currentPage, page]);
+
 
   const handleTabChange = (tab: "pending" | "voted") => {
+    setVotes([]);
     setActiveTab(tab);
+    setPage(1);
     handlePageChange(1); // Reset to the first page whenever the tab changes
   };
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  // Function to use the Intersection Observer API
+  const lastMessageElementRef = useCallback((node: any) => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && page !== totalPages) {
+            setPage((prevPage) => prevPage + 1);
+        }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading])
 
   // Function to handle page change from the Pagination component
   const handlePageChange = (page: number) => {
@@ -78,13 +96,15 @@ const MessagesDisplay: FC = () => {
     }
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
+
+  // if (isLoading) {
+  //   return <Loading />;
+  // }
 
   return (
     <div>
-      <div className="flex justify-around relative shadow-md shadow-primary-color2/50">
+      <div className = "sticky top-0 bg-white z-10">
+      <div className="flex justify-around relative shadow-md shadow-primary-color2/5">
         <button
           className={`w-1/2 text-center py-2 ${
             activeTab === "pending"
@@ -106,9 +126,9 @@ const MessagesDisplay: FC = () => {
           VOTED
         </button>
       </div>
+      </div>
       <div
-        className="overflow-auto min-h-full"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="flex-grow overflow-scroll"
       >
         {error && <div>{error}</div>}
         {!error && votes.length === 0 && (
@@ -118,20 +138,22 @@ const MessagesDisplay: FC = () => {
         )}
         {!error &&
           votes.map((voteSummary, index) => (
-            <div key={index}>
-              <MessageCard voteSummary={voteSummary} status={activeTab} />
+            <div key={index}
+            ref = {votes.length === index + 1 ? lastMessageElementRef : null}
+            >
+              <MessageCard voteSummary={voteSummary} status={activeTab}/>
             </div>
           ))}
       </div>
-      {!error && votes.length > 0 && (
+      {/* {!error && votes.length > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-      )}
+      )} */}
     </div>
   );
 };
 
-export default MessagesDisplay;
+export default MessagesDisplayTest;

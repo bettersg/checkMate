@@ -7,7 +7,13 @@ export function BackButton() {
   const regex = /^\/messages\/[^/]+\/voteRequests\/[^/]+\/?$/;
   function onClick() {
     if (regex.test(location.pathname)) {
-      navigate("/votes");
+      const path = location.pathname
+      console.log(location)
+      console.log(location.state.status)
+      const segments = path.split('/');
+      const messageId = segments[2];
+      console.log(messageId);
+      navigate("/votes", {state: location.state});
     } else {
       navigate(-1);
     }

@@ -14,7 +14,7 @@ export default function Layout({
   showMenu = false,
 }: LayoutProps) {
   return (
-    <div className="dark:bg-dark-background-color min-h-screen overflow-x-hidden">
+    <div className="dark:bg-dark-background-color h-screen">
       <style>
         {`
             ::-webkit-scrollbar {
@@ -24,9 +24,10 @@ export default function Layout({
       </style>
       {/* <div className='layout-padding'> */}
       <Header pageName={pageName} showMenu={showMenu} />
+      
       {/* <PageHeader>{pageHeader}</PageHeader>
     </div> */}
-      <div className="pb-16 mt-1">{children}</div>
+      <div className=" pb-16 mt-1">{children}</div>
       <NavbarDefault />
     </div>
   );

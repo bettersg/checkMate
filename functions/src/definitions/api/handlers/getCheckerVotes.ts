@@ -151,6 +151,7 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
       lastPath: lastVotePath,
       totalPages,
     }
+
     return res.status(200).send(response)
   } catch (error) {
     logger.error("Error fetching documents: ", error)
