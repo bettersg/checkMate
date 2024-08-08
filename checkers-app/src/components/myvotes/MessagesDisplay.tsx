@@ -16,6 +16,11 @@ Idea:
 - Have a nested component for each button
 */
 
+interface MessagesDisplayTestProps {
+  status: "pending" | "voted",
+  scrollPosition: number
+}
+
 import { useState, useEffect, FC, useCallback, useRef } from "react";
 import { useUser } from "../../providers/UserContext";
 // import Loading from "../common/Loading";
@@ -25,16 +30,36 @@ import { getCheckerVotes } from "../../services/api";
 import { VoteSummary, VoteSummaryApiResponse } from "../../types";
 //import Pagination from "./Pagination"; // Make sure to create this component
 
-const MessagesDisplayTest: FC = () => {
+const MessagesDisplayTest: FC<MessagesDisplayTestProps> = ({status, scrollPosition}) => {
   const { checkerDetails } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [votes, setVotes] = useState<VoteSummary[]>([]);
   const [lastPath, setLastPath] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"pending" | "voted">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "voted">(status);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [error, setError] = useState<string>("");
   const [page, setPage] = useState<number>(1);
+  const [scrollY, setScrollY] = useState<number>(0);
+
+  // Scroll Functions
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    console.log(scrollY)
+    setScrollY(scrollY);
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo(0, scrollPosition);
+    }, 200)
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const fetchMessages = async () => {
     setIsLoading(true);
@@ -65,7 +90,6 @@ const MessagesDisplayTest: FC = () => {
       fetchMessages();
     }
   }, [checkerDetails.checkerId, activeTab, currentPage, page]);
-
 
   const handleTabChange = (tab: "pending" | "voted") => {
     setVotes([]);
@@ -129,6 +153,7 @@ const MessagesDisplayTest: FC = () => {
       </div>
       <div
         className="flex-grow overflow-scroll"
+        ref = {scrollRef}
       >
         {error && <div>{error}</div>}
         {!error && votes.length === 0 && (
@@ -141,7 +166,7 @@ const MessagesDisplayTest: FC = () => {
             <div key={index}
             ref = {votes.length === index + 1 ? lastMessageElementRef : null}
             >
-              <MessageCard voteSummary={voteSummary} status={activeTab}/>
+              <MessageCard voteSummary={voteSummary} status={activeTab} scrollPosition={scrollY}/>
             </div>
           ))}
       </div>
