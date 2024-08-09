@@ -4,9 +4,28 @@ import * as functions from "firebase-functions"
 import TelegramBot, { Update } from "node-telegram-bot-api"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { logger } from "firebase-functions/v2"
+import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
+import { postOTPHandler, checkOTPHandler } from "../common/otpWhatsapp"
+import { getThresholds } from "../common/utils"
+import { CheckerData } from "../../types"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
+const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
+const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
 const bot = new TelegramBot(TOKEN)
+const adminBot = new TelegramBot(ADMIN_BOT_TOKEN)
+const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
+const USERS_WHATSAPP_NUMBER = String(process.env.USERS_WHATSAPP_NUMBER)
+const CHECKER_APP_HOST = process.env.CHECKER_APP_HOST
+const TYPEFORM_URL = process.env.TYPEFORM_URL
+const WHATSAPP_BOT_LINK =
+  process.env.ENVRIONMENT === "PROD"
+    ? "https://ref.checkmate.sg/add"
+    : `https://wa.me/${USERS_WHATSAPP_NUMBER}`
+const resources = `Here are some useful resources 📚:
+1) <a href="https://checkmate.sg">Our official CheckMate website</a>
+2) <a href="https://bit.ly/checkmates-wiki">Our fact-checking wiki</a>
+3) <a href="https://bit.ly/checkmates-quiz">The Typeform quiz you just took</a>`
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -25,10 +44,88 @@ bot.on("message", async (msg) => {
       chatId,
       "Don't talk to me, instead use the dashboard =)"
     )
+  } else if (msg.text && msg.reply_to_message) {
+    const checkerId = msg.from?.id
+    const chatId = msg.chat.id
+
+    const userQuerySnap = await db
+      .collection("checkers")
+      .where("telegramId", "==", checkerId)
+      .get()
+
+    const userSnap = userQuerySnap.docs[0]
+
+    // check if replied message hits either onboarding case 1) name 2) HP number 3) otp
+    if (
+      userSnap.data().lastTrackedMessageId == msg.reply_to_message.message_id
+    ) {
+      let currentStep = userSnap.data().onboardingStatus
+      let whatsappId = ""
+
+      switch (currentStep) {
+        case "name":
+          const name = msg.text
+          await userSnap.ref.update({
+            name,
+          })
+          await sendNumberPrompt(chatId, userSnap)
+          break
+        case "number":
+          whatsappId = msg.text
+
+          await userSnap.ref.update({
+            whatsappId,
+          })
+
+          await sendOTPPrompt(chatId, userSnap, whatsappId)
+          break
+        case "verify":
+          const otpAttempt = msg?.text || ""
+          whatsappId = userSnap.data().whatsappId
+
+          const result = await checkOTPHandler(otpAttempt, whatsappId)
+
+          const status = result.status
+          const message = result.message
+          try {
+            if (status === "success") {
+              await userSnap.ref.update({
+                whatsappId,
+                onboardingStatus: "quiz",
+                lastTrackedMessageId: null,
+              })
+              await sendQuizPrompt(chatId, userSnap, true)
+            } else {
+              if (message === "OTP mismatch") {
+                await sendVerificationPrompt(chatId, userSnap, true)
+              } else if (message === "OTP max attempts") {
+                await bot.sendMessage(
+                  chatId,
+                  `Maximum OTP attempts reached. We will send a new OTP.`
+                )
+                await sendOTPPrompt(chatId, userSnap, whatsappId)
+              } else {
+                console.error(`OTP error with ${chatId}: ${message}`)
+                await bot.sendMessage(
+                  chatId,
+                  "Apologies - an error occured, please try again later."
+                )
+              }
+            }
+            break
+          } catch (error) {
+            logger.log("Error in OTP verification", error)
+          }
+        default:
+          logger.log("Unhandled onboarding stage: ", currentStep)
+      }
+    } else {
+      await bot.sendMessage(chatId, "Please reply to the right message :-)")
+    }
   }
 })
 
-bot.onText(/\/start/, async (msg) => {
+bot.onText(/\/start$/, async (msg) => {
   if (msg.from) {
     const checkerId = msg.from.id
     const chatId = msg.chat.id
@@ -38,7 +135,12 @@ bot.onText(/\/start/, async (msg) => {
       .get()
 
     //check if user exists in database
-    if (userQuerySnap.size > 0) {
+    if (!userQuerySnap.docs[0]) {
+      await bot.sendMessage(
+        chatId,
+        `Welcome to the checker bot! Type /onboard to begin your CheckMate Checker's journey.`
+      )
+    } else if (userQuerySnap.docs[0].data().isOnboardingComplete) {
       await bot.sendMessage(
         chatId,
         `Welcome to the checker bot! Press the CheckMate's Portal button to access our dashboard. You'll also get notified when there are new messages to check.`
@@ -47,7 +149,7 @@ bot.onText(/\/start/, async (msg) => {
     } else {
       await bot.sendMessage(
         chatId,
-        `Welcome to the checker bot! Press the CheckMate's Portal button to onboard and access our dashboard. Once onboarded, you'll get notified when there are new messages to check.`
+        `Welcome back to the checker bot! Type /onboard to begin your CheckMate Checker's journey.`
       )
     }
   } else {
@@ -55,7 +157,79 @@ bot.onText(/\/start/, async (msg) => {
   }
 })
 
-bot.onText(/\/activate/, async (msg) => {
+bot.onText(/\/onboard$/, async (msg) => {
+  const chatId = msg.chat.id
+  const telegramId = msg.from?.id
+  let currentStep = "name"
+
+  // Check user onboarding state
+  const checkerDocQuery = db
+    .collection("checkers")
+    .where("telegramId", "==", telegramId)
+  let checkerQuerySnap = await checkerDocQuery.get()
+  let checkerSnap: DocumentSnapshot
+
+  if (checkerQuerySnap.empty) {
+    //create checker here
+    if (telegramId) {
+      const checkerRef = await createChecker(telegramId)
+      checkerSnap = await checkerRef.get()
+    } else {
+      logger.log("No user id found")
+      await bot.sendMessage(chatId, "An error happened, please try again later")
+      return
+    }
+  } else {
+    checkerSnap = checkerQuerySnap.docs[0]
+    currentStep = checkerSnap.data()?.onboardingStatus
+  }
+
+  const whatsappId = checkerSnap.data()?.whatsappId
+
+  switch (currentStep) {
+    case "name":
+      await sendNamePrompt(chatId, checkerSnap)
+      break
+    case "number":
+      await sendNumberPrompt(chatId, checkerSnap)
+      break
+    case "otpSent":
+      await sendOTPPrompt(chatId, checkerSnap, whatsappId)
+      break
+    case "verify":
+      await sendOTPPrompt(chatId, checkerSnap, whatsappId)
+      break
+    case "quiz":
+      await sendQuizPrompt(chatId, checkerSnap, true)
+      break
+    case "onboardWhatsapp":
+      await sendWAGroupPrompt(chatId, true)
+      break
+    case "joinGroupChat":
+      await sendTGGroupPrompt(chatId, true)
+      break
+    case "completed":
+      await bot.sendMessage(
+        chatId,
+        `Hi there! You have already onboarded as a CheckMate Checker. Do explore the CheckMates' Portal below, or by pressing the button at the bottom left of the screen.`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "CheckMates' Portal",
+                  web_app: { url: `${CHECKER_APP_HOST}/` },
+                },
+              ],
+            ],
+          },
+        }
+      )
+      break
+  }
+})
+
+bot.onText(/\/activate$/, async (msg) => {
   if (msg.from) {
     const checkerId = msg.from.id
     const chatId = msg.chat.id
@@ -85,7 +259,7 @@ bot.onText(/\/activate/, async (msg) => {
   }
 })
 
-bot.onText(/\/deactivate/, async (msg) => {
+bot.onText(/\/deactivate$/, async (msg) => {
   if (msg.from) {
     const checkerId = msg.from.id
     const chatId = msg.chat.id
@@ -110,6 +284,15 @@ bot.onText(/\/deactivate/, async (msg) => {
       logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
     }
     await bot.sendMessage(chatId, "An error happened, please try again later")
+  } else {
+    functions.logger.log("No user id found")
+  }
+})
+
+bot.onText(/\/resources$/, async (msg) => {
+  if (msg.from) {
+    const checkerId = msg.from.id
+    await bot.sendMessage(checkerId, resources, { parse_mode: "HTML" })
   } else {
     functions.logger.log("No user id found")
   }
@@ -145,5 +328,393 @@ const onCheckerPublishTelegram = onMessagePublished(
     }
   }
 )
+
+const sendNamePrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot
+) => {
+  const namePrompt = await bot.sendMessage(
+    chatId,
+    "Welcome to CheckMate! How shall we address you?",
+    {
+      reply_markup: {
+        force_reply: true,
+      },
+    }
+  )
+
+  await checkerSnap.ref.update({
+    lastTrackedMessageId: namePrompt.message_id,
+  })
+}
+
+const sendNumberPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot
+) => {
+  const numberPrompt = await bot.sendMessage(
+    chatId,
+    `What is your WhatsApp phone number? Please include the country code, but omit the "+", e.g 6591234567`,
+    {
+      reply_markup: {
+        force_reply: true,
+      },
+    }
+  )
+  await checkerSnap.ref.update({
+    onboardingStatus: "number",
+    lastTrackedMessageId: numberPrompt.message_id,
+  })
+}
+
+const sendOTPPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot,
+  whatsappId: string
+) => {
+  const inlineButtons = {
+    rekey: {
+      text: "Re-enter phone number",
+      callback_data: "REQUEST_NUMBER",
+    },
+    resendOTP: {
+      text: "Get a new OTP",
+      callback_data: "SEND_OTP",
+    },
+    verifyOTP: {
+      text: "Verify OTP",
+      callback_data: "VERIFY_OTP",
+    },
+  }
+
+  logger.log(`sending OTP to ${whatsappId}`)
+  const postOTPHandlerRes = await postOTPHandler(whatsappId)
+  if (postOTPHandlerRes.status === "success") {
+    await bot.sendMessage(
+      chatId,
+      `We have sent a 6-digit OTP to your WhatsApp at ${whatsappId}. Please check your WhatsApp for the OTP, and hit the button to verify it.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              inlineButtons.verifyOTP,
+              inlineButtons.resendOTP,
+              inlineButtons.rekey,
+            ],
+          ],
+        },
+      }
+    )
+    await checkerSnap.ref.update({
+      onboardingStatus: "otpSent",
+    })
+  } else {
+    switch (postOTPHandlerRes.message) {
+      case "OTP request limit exceeded":
+        await bot.sendMessage(
+          chatId,
+          `An error occured, likely because too many OTPs were requested. Please try again in 10 minutes.`,
+          {
+            reply_markup: {
+              inline_keyboard: [[inlineButtons.resendOTP, inlineButtons.rekey]],
+            },
+          }
+        )
+        break
+      default:
+        await bot.sendMessage(
+          chatId,
+          `An error occured, likely because the phone number was keyed in wrongly.`,
+          {
+            reply_markup: {
+              inline_keyboard: [[inlineButtons.rekey]],
+            },
+          }
+        )
+        break
+    }
+    return
+  }
+}
+
+const sendVerificationPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot,
+  rePrompt: boolean = true
+) => {
+  const otpPrompt = await bot.sendMessage(
+    chatId,
+    !rePrompt
+      ? `Verify your OTP:`
+      : `The OTP is invalid. Please key it in again:`,
+    {
+      reply_markup: {
+        force_reply: true,
+      },
+    }
+  )
+
+  await checkerSnap.ref.update({
+    lastTrackedMessageId: otpPrompt.message_id,
+    onboardingStatus: "verify",
+  })
+}
+
+const sendQuizPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot,
+  isFirstPrompt: boolean
+) => {
+  const whatsappId = checkerSnap.data()?.whatsappId
+  const name = checkerSnap.data()?.name
+  await bot.sendMessage(
+    chatId,
+    `${
+      isFirstPrompt
+        ? "Thank you for verifying your WhatsApp number"
+        : "We noticed you have not completed the quiz yet"
+    }. Please proceed to complete the onboarding quiz <a href="${TYPEFORM_URL}#name=${name}&phone=${whatsappId}">here</a>. This will equip you with the skills and knowledge to be a better checker!`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yes, I have finished the onboarding quiz",
+              callback_data: "QUIZ_COMPLETED",
+            },
+          ],
+        ],
+      },
+      parse_mode: "HTML",
+    }
+  )
+}
+
+const sendWAGroupPrompt = async (chatId: number, isFirstPrompt: boolean) => {
+  await bot.sendMessage(
+    chatId,
+    `${
+      isFirstPrompt
+        ? "Thank you for completing the quiz! We hope you found it useful"
+        : "We noticed you have not added the WhatApp service yet"
+    }. Next, if you've not already done so, please onboard to our CheckMate WhatsApp service <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, by sending in the pre-populated message to our WhatsApp number. This is where you can report messages to CheckMate, and is where the messages you vote on are sent in from!`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yes, I have added the WA service",
+              callback_data: "WA_COMPLETED",
+            },
+          ],
+        ],
+      },
+      parse_mode: "HTML",
+    }
+  )
+}
+
+const sendTGGroupPrompt = async (chatId: number, isFirstPrompt: boolean) => {
+  await bot.sendMessage(
+    chatId,
+    `${
+      isFirstPrompt
+        ? "Thank you for onboarding to the WhatsApp service. Next, p"
+        : "We noticed you have not joined the groupchat yet. P"
+    }lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
+
+1) Inform CheckMates of any downtime in the system, updates/improvements being deployed to the bots
+
+2) Share relevant links from reputable news sources to aid fact-checking. Do note that beyond this, CheckMates should not discuss what to vote, as this may make the collective outcome of CheckMates' votes biased.`, //UPDATE the groupchat link here
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yes, I have joined the Telegram Chat Group",
+              callback_data: "TG_COMPLETED",
+            },
+          ],
+        ],
+      },
+      parse_mode: "HTML",
+    }
+  )
+}
+
+const sendCompletionPrompt = async (chatId: number) => {
+  await bot.sendMessage(
+    chatId,
+    `You have now successfully onboarded as a CheckMate Checker! You will now receive notifications when there are new messages to check.
+
+${resources}
+
+You may view these resources with the command /resources.
+    
+Do explore the CheckMates' Portal below, or by pressing the button at the bottom left of the screen.`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "CheckMates' Portal",
+              web_app: { url: `${CHECKER_APP_HOST}/` },
+            },
+          ],
+        ],
+      },
+      parse_mode: "HTML",
+    }
+  )
+}
+
+//checks for sendWAGroupPrompt / sendTGGroupPrompt / sendCompletionPrompt responses + FUA
+bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
+  const action = callbackQuery.data
+  const chatId = callbackQuery.message?.chat.id
+  if (chatId != undefined) {
+    const checkerDocQuery = db
+      .collection("checkers")
+      .where("telegramId", "==", callbackQuery.from.id)
+    const checkerQuerySnap = await checkerDocQuery.get()
+    const checkerDocSnap = checkerQuerySnap.docs[0]
+    const whatsappId = checkerDocSnap.data()?.whatsappId
+    switch (action) {
+      case "QUIZ_COMPLETED":
+        if (checkerDocSnap.data()?.isQuizComplete) {
+          await checkerDocSnap.ref.update({
+            onboardingStatus: "onboardWhatsapp",
+          })
+          sendWAGroupPrompt(chatId, true)
+        } else {
+          sendQuizPrompt(chatId, checkerDocSnap, false)
+        }
+        break
+      case "WA_COMPLETED":
+        // check WA bot completion
+        const userSnap = await db.collection("users").doc(whatsappId).get()
+
+        if (userSnap.exists) {
+          await checkerDocSnap.ref.update({
+            onboardingStatus: "joinGroupChat",
+          })
+
+          sendTGGroupPrompt(chatId, true)
+        } else {
+          sendWAGroupPrompt(chatId, false)
+        }
+        break
+      case "TG_COMPLETED":
+        // check tele bot completion
+        try {
+          const member = await adminBot.getChatMember(
+            CHECKERS_CHAT_ID,
+            callbackQuery.from.id
+          )
+          if (member.status) {
+            await checkerDocSnap.ref.update({
+              onboardingStatus: "completed",
+              isOnboardingComplete: true,
+              isActive: true,
+            })
+
+            sendCompletionPrompt(chatId)
+          } else {
+            sendTGGroupPrompt(chatId, false)
+          }
+        } catch (error) {
+          logger.log(error)
+          sendTGGroupPrompt(chatId, false)
+        }
+        break
+      case "REQUEST_NUMBER":
+        await sendNumberPrompt(chatId, checkerDocSnap)
+        break
+      case "SEND_OTP":
+        await sendOTPPrompt(chatId, checkerDocSnap, whatsappId)
+        break
+      case "VERIFY_OTP":
+        await sendVerificationPrompt(chatId, checkerDocSnap, false)
+        break
+      default:
+        logger.log("Unhandled callback data: ", action)
+    }
+  }
+})
+
+const createChecker = async (telegramId: number) => {
+  const thresholds = await getThresholds()
+  const checkerRef = await db.runTransaction(async (transaction) => {
+    //transaction so wont have race conditions assuming the user might hit /onboard twice
+    const checkerDocQuery = db
+      .collection("checkers")
+      .where("telegramId", "==", telegramId)
+    const checkerQuerySnap = await transaction.get(checkerDocQuery)
+
+    if (checkerQuerySnap.empty) {
+      // Create a new checker only if it doesn't exist
+      const newCheckerRef = db.collection("checkers").doc()
+      const newChecker: CheckerData = {
+        name: null,
+        type: "human",
+        isActive: false,
+        isOnboardingComplete: false,
+        isQuizComplete: false,
+        onboardingStatus: "name",
+        lastTrackedMessageId: null,
+        isAdmin: false,
+        singpassOpenId: null,
+        telegramId,
+        whatsappId: null,
+        voteWeight: 1,
+        level: 0,
+        experience: 0,
+        tier: "beginner",
+        numVoted: 0,
+        numReferred: 0,
+        numReported: 0,
+        numCorrectVotes: 0,
+        numNonUnsureVotes: 0,
+        numVerifiedLinks: 0,
+        preferredPlatform: "telegram",
+        lastVotedTimestamp: null,
+        getNameMessageId: null,
+        leaderboardStats: {
+          numVoted: 0,
+          numCorrectVotes: 0,
+          totalTimeTaken: 0,
+          score: 0,
+        },
+        programData: {
+          isOnProgram: true,
+          programStart: Timestamp.fromDate(new Date()),
+          programEnd: null,
+          numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
+          numReferralTarget:
+            thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
+          numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
+          accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+          numVotesAtProgramStart: 0,
+          numReferralsAtProgramStart: 0,
+          numReportsAtProgramStart: 0,
+          numCorrectVotesAtProgramStart: 0,
+          numNonUnsureVotesAtProgramStart: 0,
+          numVotesAtProgramEnd: null,
+          numReferralsAtProgramEnd: null,
+          numReportsAtProgramEnd: null,
+          numCorrectVotesAtProgramEnd: null,
+          numNonUnsureVotesAtProgramEnd: null,
+        },
+      }
+      transaction.set(newCheckerRef, newChecker)
+      return newCheckerRef
+    } else {
+      // Checker already exists
+      throw new Error("Checker already exists")
+    }
+  })
+  //return checker document reference
+  return checkerRef
+}
 
 export { onCheckerPublishTelegram }
