@@ -2,8 +2,6 @@ import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import express from "express"
 import crypto from "crypto"
-// const bodyParser = require("body-parser");
-import bodyParser from "body-parser"
 import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
@@ -29,27 +27,6 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 const app = express()
-const rawBodySaver = (
-  req: CustomRequest,
-  res: Response,
-  buf: Buffer,
-  encoding: BufferEncoding
-) => {
-  if (
-    req.headers["user-agent"] === "Typeform Webhooks" &&
-    req.headers["typeform-signature"] &&
-    buf &&
-    buf.length
-  ) {
-    req.rawBody = buf.toString(encoding || "utf8")
-  }
-}
-
-const options = {
-  verify: rawBodySaver,
-}
-
-app.use(bodyParser.json(options))
 
 const getHandlerWhatsapp = async (req: Request, res: Response) => {
   /**
@@ -198,36 +175,63 @@ const postHandlerTelegram = async (req: Request, res: Response) => {
 }
 
 const postHandlerTypeform = async (req: CustomRequest, res: Response) => {
+  interface Answer {
+    type: string
+    phone_number?: string
+    text?: string
+    choices?: {
+      ids: string[]
+      labels: string[]
+      refs: string[]
+    }
+    field: {
+      id: string
+      type: string
+      ref: string
+    }
+  }
   const db = admin.firestore()
 
   try {
     const signature = req.headers["typeform-signature"]
 
     if (verifySignature(signature as string, req.rawBody?.toString() || "")) {
-      if (req?.body?.form_response?.answers?.[1]?.phone_number) {
+      let whatsappId = ""
+      const answers: Answer[] = req?.body?.form_response?.answers ?? []
+      if (req?.body?.form_response?.hidden?.phone) {
+        whatsappId = req.body.form_response.hidden.phone
+      } else if (answers && answers.length > 0) {
         //EDIT HERE if form structure changes
-        let whatsappId = req.body.form_response.answers[1].phone_number
-        whatsappId = whatsappId.substring(1)
-
-        const checkerQuery = await db
-          .collection("checkers")
-          .where("whatsappId", "==", whatsappId)
-          .get()
-
-        if (!checkerQuery.empty) {
-          const checkerSnap = checkerQuery.docs[0]
-          await checkerSnap.ref.update({
-            onboardingStatus: "waGroup",
-          })
-          functions.logger.log(
-            `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
-          )
-        } else {
-          functions.logger.warn("User did not onboard from telegram bot.")
+        const phoneAnswer = answers.find(
+          (answer: any) => answer.type === "phone_number"
+        )
+        if (phoneAnswer && "phone_number" in phoneAnswer) {
+          whatsappId = phoneAnswer.phone_number?.substring(1) || ""
         }
+      }
+
+      if (!whatsappId) {
+        functions.logger.warn(
+          "No whatsapp Id obtained in the typeform response"
+        )
+        return res.sendStatus(200)
+      }
+      const checkerQuery = await db
+        .collection("checkers")
+        .where("whatsappId", "==", `${whatsappId}`)
+        .get()
+
+      if (!checkerQuery.empty) {
+        const checkerSnap = checkerQuery.docs[0]
+        await checkerSnap.ref.update({
+          isQuizComplete: true,
+        })
+        functions.logger.log(
+          `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
+        )
       } else {
         functions.logger.warn(
-          "User did not answer Whatsapp phone number question in the Typeform"
+          `User ${whatsappId} did not onboard from telegram bot.`
         )
       }
     } else {
@@ -272,6 +276,7 @@ const webhookHandlerV2 = onRequest(
       "WHATSAPP_CHECKERS_WABA_ID",
       "WHATSAPP_USERS_WABA_ID",
       "TELEGRAM_WEBHOOK_TOKEN",
+      "TYPEFORM_SECRET_TOKEN",
     ],
   },
   app

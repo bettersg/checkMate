@@ -155,13 +155,15 @@ export type CheckerData = {
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null
+  isQuizComplete: boolean
   onboardingStatus:
     | "name"
     | "number"
-    | "otp"
+    | "otpSent"
+    | "verify"
     | "quiz"
-    | "waGroup"
-    | "tgGroup"
+    | "onboardWhatsapp"
+    | "joinGroupChat"
     | "completed"
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean

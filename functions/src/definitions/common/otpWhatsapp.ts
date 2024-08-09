@@ -1,4 +1,3 @@
-//TODO TONGYING: Implement webhook here!
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { logger } from "firebase-functions/v2"
@@ -11,71 +10,79 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
+interface OTPData {
+  whatsappId: string
+  otp: string
+  expiresAt: Timestamp
+  requestCount: number
+  lastRequestedAt: Timestamp
+  verificationAttempts: number
+}
+
+const REQUEST_LIMIT = parseInt(process.env.REQUEST_LIMIT || "3")
+const REQUEST_TIMEOUT =
+  parseInt(process.env.REQUEST_TIMEOUT || "600000") || 10 * 60 * 1000
+const OTP_EXPIRATION_TIME = parseInt(
+  process.env.OTP_EXPIRATION_TIME || "300000"
+)
+
 function generateOTP() {
   const otp = String(Math.floor(100000 + Math.random() * 900000)) // 6-digit OTP
-  const expiresIn = 600000 // OTP expiration time in milliseconds (5 minutes)
-  const expiresAt = Date.now() + expiresIn // Calculate the exact expiry time
+  const expiresAt = Date.now() + OTP_EXPIRATION_TIME // Calculate the exact expiry time
   return { otp, expiresAt }
 }
 
-const postOTPHandler = async (checkerId: string, whatsappId: string) => {
+async function getCheckerDoc(checkerId: string) {
+  const checkerQuerySnap = await db
+    .collection("checkers")
+    .where("telegramId", "==", parseInt(checkerId))
+    .get()
+
+  if (checkerQuerySnap.empty) {
+    throw new Error(`Checker with TelegramID ${checkerId} not found`)
+  }
+
+  return checkerQuerySnap.docs[0]
+}
+
+async function getOTPSnap(whatsappId: string) {
+  const otpSnap = await db
+    .collection("otps")
+    .where("whatsappId", "==", whatsappId)
+    .get()
+
+  return otpSnap.empty ? null : otpSnap.docs[0]
+}
+
+const postOTPHandler = async (whatsappId: string) => {
   try {
-    const checkerQuerySnap = await db
-      .collection("checkers")
-      .where("telegramId", "==", checkerId)
-      .get()
+    const otpDoc = await getOTPSnap(whatsappId)
+    const { otp, expiresAt } = generateOTP()
 
-    if (checkerQuerySnap.empty) {
-      logger.error(`Checker with TelegramID ${checkerId} not found`)
-      return
-    }
-
-    const otpSnap = await db
-      .collection("otps")
-      .where("whatsappId", "==", whatsappId)
-      .get()
-
-    if (!otpSnap.empty) {
-      const lastRequestedAt = otpSnap?.docs[0].data()?.lastRequestedAt ?? null
-      const requestCount = otpSnap?.docs[0].data()?.requestCount ?? 0
-
-      if (lastRequestedAt === null || requestCount === null) {
-        logger.error("Invalid OTP data")
-        return
-      }
-
+    if (otpDoc) {
+      const otpData = otpDoc.data() as OTPData
       const timeSinceLastRequest =
-        Date.now() - lastRequestedAt.toDate().getTime()
-      const requestLimit = 3 // Maximum allowed OTP requests
-      const requestTimeout = 10 * 60 * 1000 // Timeout period (e.g., 24 hours in milliseconds)
+        Date.now() - otpData.lastRequestedAt.toDate().getTime()
+
       if (
-        timeSinceLastRequest < requestTimeout &&
-        requestCount >= requestLimit
+        timeSinceLastRequest < REQUEST_TIMEOUT &&
+        otpData.requestCount >= REQUEST_LIMIT
       ) {
         logger.warn("OTP request limit exceeded")
-        return "OTP request limit exceeded"
+        return { status: "error", message: "OTP request limit exceeded" }
       }
 
       const newRequestCount =
-        timeSinceLastRequest < requestTimeout ? requestCount + 1 : 1
+        timeSinceLastRequest < REQUEST_TIMEOUT ? otpData.requestCount + 1 : 1
 
-      const { otp, expiresAt } = generateOTP()
-
-      await otpSnap?.docs[0].ref.update({
-        whatsappId,
+      await otpDoc.ref.update({
         otp,
         expiresAt: Timestamp.fromMillis(expiresAt),
         requestCount: newRequestCount,
         lastRequestedAt: Timestamp.fromDate(new Date()),
-        verificationAttempts: 0, // Reset verification attempts for the new OTP
+        verificationAttempts: 0,
       })
-      logger.log(
-        `OTP generated for ${checkerId} with whatsappId ${whatsappId} successfully`
-      )
-      await sendWhatsappOTP("factChecker", whatsappId, otp)
     } else {
-      // If no OTP record exists, create a new one
-      const { otp, expiresAt } = generateOTP()
       await db.collection("otps").add({
         whatsappId,
         otp,
@@ -84,79 +91,50 @@ const postOTPHandler = async (checkerId: string, whatsappId: string) => {
         lastRequestedAt: Timestamp.fromDate(new Date()),
         verificationAttempts: 0,
       })
-      logger.log(
-        `OTP generated for ${checkerId} with whatsappId ${whatsappId} successfully`
-      )
-      await sendWhatsappOTP("factChecker", whatsappId, otp)
     }
+    logger.log(`OTP for ${whatsappId} generated successfully`)
+    await sendWhatsappOTP("factChecker", whatsappId, otp)
+    logger.log(`OTP sent successfully to ${whatsappId}`)
 
-    logger.log("OTP sent successfully")
+    return { status: "success", message: "OTP sent successfully" }
   } catch (error) {
     logger.error(error)
+    return { status: "error", message: error }
   }
 }
 
-const checkOTPHandler = async (
-  telegramId: number,
-  otp: string,
-  whatsappNum: string
-) => {
+const checkOTPHandler = async (otp: string, whatsappNum: string) => {
   logger.info("Checking OTP...")
 
   try {
-    const checkerDocQuery = db
-      .collection("checkers")
-      .where("telegramId", "==", telegramId)
-    const checkerQuerySnap = await checkerDocQuery.get()
-    if (checkerQuerySnap.empty) {
-      logger.error(`Checker with TelegramID ${telegramId} not found`)
-      return
+    const otpDoc = await getOTPSnap(whatsappNum)
+
+    if (!otpDoc) {
+      logger.error(`OTP not found for WhatsApp number ${whatsappNum}`)
+      return { status: "error", message: "OTP not found" }
     }
 
-    const otpDocQuery = db
-      .collection("otps")
-      .where("whatsappId", "==", whatsappNum)
-    const otpDocSnap = await otpDocQuery.get()
+    const otpData = otpDoc.data() as OTPData
 
-    if (otpDocSnap.empty) {
-      logger.error(`OTP not found for checker ${telegramId}`)
-      return
-    }
-
-    const otpData = otpDocSnap.docs[0].data()
-    const whatsappId = otpData?.whatsappId ?? null
-    const savedOtp = otpData?.otp ?? null
-    const expiresAt = otpData?.expiresAt ?? null
-    const verificationAttempts = otpData?.verificationAttempts ?? null
-
-    if (
-      savedOtp === null ||
-      expiresAt === null ||
-      verificationAttempts === null ||
-      whatsappId === null
-    ) {
-      logger.error("Missing OTP data at backend")
-      return
-    }
-
-    if (verificationAttempts >= 5) {
+    if (otpData.verificationAttempts >= 5) {
       logger.warn("Maximum OTP verification attempts reached")
-      return "OTP max attempts"
+      return { status: "error", message: "OTP max attempts" }
     }
 
-    if (otp !== savedOtp) {
-      await otpDocSnap.docs[0].ref.update({
-        verificationAttempts: verificationAttempts + 1,
+    if (otp !== otpData.otp) {
+      await otpDoc.ref.update({
+        verificationAttempts: otpData.verificationAttempts + 1,
       })
       logger.warn("OTP mismatch")
-      return "OTP mismatch"
+      return { status: "error", message: "OTP mismatch" }
     }
 
-    await otpDocSnap.docs[0].ref.delete()
+    await otpDoc.ref.delete()
     logger.log("OTP verified successfully")
-    return "OTP verified"
+    return { status: "success", message: "OTP verified" }
   } catch (error) {
     logger.error(error)
+    return { status: "error", message: error }
   }
 }
 

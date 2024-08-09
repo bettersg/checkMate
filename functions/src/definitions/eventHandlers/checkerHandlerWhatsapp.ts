@@ -118,6 +118,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     type: "human",
     isActive: true,
     isOnboardingComplete: false,
+    isQuizComplete: false,
     onboardingStatus: "name",
     lastTrackedMessageId: null,
     isAdmin: false,

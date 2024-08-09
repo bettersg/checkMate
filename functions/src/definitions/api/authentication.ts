@@ -128,6 +128,7 @@ app.post("/", async (req, res) => {
       type: "human",
       isActive: false,
       isOnboardingComplete: false,
+      isQuizComplete: false,
       onboardingStatus: "name",
       lastTrackedMessageId: null,
       singpassOpenId: null,

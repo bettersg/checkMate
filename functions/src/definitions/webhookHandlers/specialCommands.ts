@@ -94,6 +94,7 @@ const mockDb = async function () {
     type: "human",
     isActive: true,
     isOnboardingComplete: true,
+    isQuizComplete: true,
     onboardingStatus: "completed",
     lastTrackedMessageId: null,
     isAdmin: true,
