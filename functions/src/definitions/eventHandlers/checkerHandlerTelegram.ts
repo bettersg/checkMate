@@ -329,9 +329,9 @@ bot.onText(/\/resources$/, async (msg) => {
 })
 
 const checkerHandlerTelegram = async function (body: Update) {
-  logger.log("Processing checker event")
+  logger.log(`Processing checker event at ${new Date().toISOString()}`)
   bot.processUpdate(body)
-  logger.log("Processed checker event")
+  logger.log(`Processed checker event at ${new Date().toISOString()}`)
   return
 }
 
