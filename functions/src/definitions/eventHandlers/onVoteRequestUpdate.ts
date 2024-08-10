@@ -93,7 +93,8 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       } = await getVoteCounts(messageRef)
 
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
-      const isSus = susCount > thresholds.isSus * validResponsesCount
+      const isSus =
+        isBigSus || susCount > thresholds.isSus * validResponsesCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
       const isInfo = infoCount > thresholds.isInfo * validResponsesCount
