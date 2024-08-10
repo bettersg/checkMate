@@ -27,6 +27,7 @@ interface createChecker {
   isActive?: boolean
   isOnboardingComplete?: boolean
   isQuizComplete?: boolean
+  quizScore?: number | null
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null

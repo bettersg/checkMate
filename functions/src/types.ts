@@ -156,6 +156,7 @@ export type CheckerData = {
   isActive: boolean
   isOnboardingComplete: boolean | null
   isQuizComplete: boolean
+  quizScore: number | null
   onboardingStatus:
     | "name"
     | "number"
