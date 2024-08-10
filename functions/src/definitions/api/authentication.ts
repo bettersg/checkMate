@@ -92,6 +92,9 @@ app.post("/", async (req, res) => {
   if (!checkerSnap.empty) {
     try {
       const userDoc = checkerSnap.docs[0]
+      if (userDoc.get("isOnboardingComplete") === false) {
+        return res.status(404).send("User not onboarded yet")
+      }
       const claims = {
         isAdmin: userDoc.data()?.isAdmin,
         tier: userDoc.data()?.tier,
@@ -116,7 +119,7 @@ app.post("/", async (req, res) => {
     }
   } else {
     //from telegram but not yet a user in database
-    return res.status(404).send("User not found")
+    return res.status(404).send("User not onboarded yet")
   }
 })
 

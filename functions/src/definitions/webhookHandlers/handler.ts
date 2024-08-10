@@ -16,6 +16,7 @@ const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
 const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
 const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
 const typeformSecretToken = process.env.TYPEFORM_SECRET_TOKEN
+const typeformURL = process.env.TYPEFORM_URL
 const ingressSetting =
   process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
 
@@ -197,11 +198,17 @@ const postHandlerTypeform = async (req: CustomRequest, res: Response) => {
 
     if (verifySignature(signature as string, req.rawBody?.toString() || "")) {
       let whatsappId = ""
+      const formId = req?.body?.form_response?.form_id ?? ""
+      if (formId !== typeformURL?.split("/").pop()) {
+        functions.logger.warn(
+          `Typeform response from unexpected form: ${formId}`
+        )
+        return res.sendStatus(200)
+      }
       const answers: Answer[] = req?.body?.form_response?.answers ?? []
       if (req?.body?.form_response?.hidden?.phone) {
         whatsappId = req.body.form_response.hidden.phone
       } else if (answers && answers.length > 0) {
-        //EDIT HERE if form structure changes
         const phoneAnswer = answers.find(
           (answer: any) => answer.type === "phone_number"
         )

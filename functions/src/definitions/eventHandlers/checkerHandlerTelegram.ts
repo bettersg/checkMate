@@ -22,7 +22,9 @@ const WHATSAPP_BOT_LINK =
   process.env.ENVRIONMENT === "PROD"
     ? "https://ref.checkmate.sg/add"
     : `https://wa.me/${USERS_WHATSAPP_NUMBER}`
-const resources = `Here are some useful resources 📚:
+const NLB_SURE_IMAGE =
+  "AgACAgUAAxkBAAMGZrcIvuTv2tYdacTaByMTdwGvhswAArm-MRsZZrlVOQUHfLk2PKkBAAMCAANzAAM1BA"
+const resources = `Here are some resources 📚 you might find useful:
 1) <a href="https://checkmate.sg">Our official CheckMate website</a>
 2) <a href="https://bit.ly/checkmates-wiki">Our fact-checking wiki</a>
 3) <a href="https://bit.ly/checkmates-quiz">The Typeform quiz you just took</a>`
@@ -42,7 +44,7 @@ bot.on("message", async (msg) => {
     // Echo the message text back to the same chat
     await bot.sendMessage(
       chatId,
-      "Don't talk to me, instead use the dashboard =)"
+      "Don't send me messages freely, use the options provided or interact with the dashboard instead"
     )
   } else if (msg.text && msg.reply_to_message) {
     const checkerId = msg.from?.id
@@ -71,7 +73,15 @@ bot.on("message", async (msg) => {
           await sendNumberPrompt(chatId, userSnap)
           break
         case "number":
-          whatsappId = msg.text
+          whatsappId = msg.text.replace("+", "").replace(" ", "")
+
+          //check if its a number with 8 digits and starts with 9 or 8
+          if (
+            whatsappId.length === 8 &&
+            (whatsappId.startsWith("9") || whatsappId.startsWith("8"))
+          ) {
+            whatsappId = `65${whatsappId}`
+          }
 
           await userSnap.ref.update({
             whatsappId,
@@ -206,15 +216,15 @@ bot.onText(/\/onboard$/, async (msg) => {
       await sendQuizPrompt(chatId, checkerSnap, true)
       break
     case "onboardWhatsapp":
-      await sendWAGroupPrompt(chatId, true)
+      await sendWAGroupPrompt(chatId, checkerSnap, true)
       break
     case "joinGroupChat":
-      await sendTGGroupPrompt(chatId, true)
+      await sendTGGroupPrompt(chatId, checkerSnap, true)
       break
     case "completed":
       await bot.sendMessage(
         chatId,
-        `Hi there! You have already onboarded as a CheckMate Checker. Do explore the CheckMates' Portal below, or by pressing the button at the bottom left of the screen.`,
+        `Hi there! You have already onboarded as a CheckMate Checker. Do explore the CheckMates' Portal to check out what you can do. Otherwise if you would like to go through onboarding again, click on the respective button below.`,
         {
           reply_markup: {
             inline_keyboard: [
@@ -222,6 +232,10 @@ bot.onText(/\/onboard$/, async (msg) => {
                 {
                   text: "CheckMates' Portal",
                   web_app: { url: `${CHECKER_APP_HOST}/` },
+                },
+                {
+                  text: "Go through onboarding again",
+                  callback_data: "ONBOARD_AGAIN",
                 },
               ],
             ],
@@ -395,7 +409,7 @@ const sendOTPPrompt = async (
   if (postOTPHandlerRes.status === "success") {
     await bot.sendMessage(
       chatId,
-      `We have sent a 6-digit OTP to your WhatsApp at ${whatsappId}. Please check your WhatsApp for the OTP, and hit the button to verify it.`,
+      `We have sent a 6-digit OTP to your WhatsApp at +${whatsappId}. Please check your WhatsApp for the OTP, and hit "Verify OTP" below.`,
       {
         reply_markup: {
           inline_keyboard: [
@@ -493,14 +507,23 @@ const sendQuizPrompt = async (
   )
 }
 
-const sendWAGroupPrompt = async (chatId: number, isFirstPrompt: boolean) => {
+const sendWAGroupPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot,
+  isFirstPrompt: boolean
+) => {
+  if (isFirstPrompt) {
+    await checkerSnap.ref.update({
+      onboardingStatus: "onboardWhatsapp",
+    })
+  }
   await bot.sendMessage(
     chatId,
     `${
       isFirstPrompt
-        ? "Thank you for completing the quiz! We hope you found it useful"
-        : "We noticed you have not added the WhatApp service yet"
-    }. Next, if you've not already done so, please onboard to our CheckMate WhatsApp service <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, by sending in the pre-populated message to our WhatsApp number. This is where you can report messages to CheckMate, and is where the messages you vote on are sent in from!`,
+        ? "Thank you for completing the quiz! We hope you found it useful. Next, if you've not already done so, p"
+        : "We noticed you have not added the WhatApp service yet. P"
+    }lease onboard to our CheckMate WhatsApp service <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, by sending in the pre-populated message to our WhatsApp number. This is where you can report messages to CheckMate, and is where the messages you vote on are sent in from!`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -517,7 +540,16 @@ const sendWAGroupPrompt = async (chatId: number, isFirstPrompt: boolean) => {
   )
 }
 
-const sendTGGroupPrompt = async (chatId: number, isFirstPrompt: boolean) => {
+const sendTGGroupPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot,
+  isFirstPrompt: boolean
+) => {
+  if (isFirstPrompt) {
+    await checkerSnap.ref.update({
+      onboardingStatus: "joinGroupChat",
+    })
+  }
   await bot.sendMessage(
     chatId,
     `${
@@ -545,7 +577,37 @@ const sendTGGroupPrompt = async (chatId: number, isFirstPrompt: boolean) => {
   )
 }
 
-const sendCompletionPrompt = async (chatId: number) => {
+const sendNLBPrompt = async (chatId: number, checkerSnap: DocumentSnapshot) => {
+  await checkerSnap.ref.update({
+    onboardingStatus: "nlb",
+  })
+  await bot.sendPhoto(chatId, NLB_SURE_IMAGE, {
+    caption: `One last thing - CheckMate is partnering with the National Library Board to grow a vibrant learning community aimed at safeguarding the community from scams and misinformation.
+
+If you'd like to get better at fact-checking, or if you're keen to meet fellow CheckMates' in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!`,
+    parse_mode: "HTML",
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Complete Onboarding",
+            callback_data: "COMPLETED",
+          },
+        ],
+      ],
+    },
+  })
+}
+
+const sendCompletionPrompt = async (
+  chatId: number,
+  checkerSnap: DocumentSnapshot
+) => {
+  await checkerSnap.ref.update({
+    onboardingStatus: "nlb",
+    isOnboardingComplete: true,
+    isActive: true,
+  })
   await bot.sendMessage(
     chatId,
     `You have now successfully onboarded as a CheckMate Checker! You will now receive notifications when there are new messages to check.
@@ -585,10 +647,7 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
     switch (action) {
       case "QUIZ_COMPLETED":
         if (checkerDocSnap.data()?.isQuizComplete) {
-          await checkerDocSnap.ref.update({
-            onboardingStatus: "onboardWhatsapp",
-          })
-          sendWAGroupPrompt(chatId, true)
+          sendWAGroupPrompt(chatId, checkerDocSnap, true)
         } else {
           sendQuizPrompt(chatId, checkerDocSnap, false)
         }
@@ -596,15 +655,10 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
       case "WA_COMPLETED":
         // check WA bot completion
         const userSnap = await db.collection("users").doc(whatsappId).get()
-
         if (userSnap.exists) {
-          await checkerDocSnap.ref.update({
-            onboardingStatus: "joinGroupChat",
-          })
-
-          sendTGGroupPrompt(chatId, true)
+          sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
-          sendWAGroupPrompt(chatId, false)
+          sendWAGroupPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "TG_COMPLETED":
@@ -615,20 +669,17 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
             callbackQuery.from.id
           )
           if (member.status) {
-            await checkerDocSnap.ref.update({
-              onboardingStatus: "completed",
-              isOnboardingComplete: true,
-              isActive: true,
-            })
-
-            sendCompletionPrompt(chatId)
+            sendNLBPrompt(chatId, checkerDocSnap)
           } else {
-            sendTGGroupPrompt(chatId, false)
+            sendTGGroupPrompt(chatId, checkerDocSnap, false)
           }
         } catch (error) {
           logger.log(error)
-          sendTGGroupPrompt(chatId, false)
+          sendTGGroupPrompt(chatId, checkerDocSnap, false)
         }
+        break
+      case "COMPLETED":
+        sendCompletionPrompt(chatId, checkerDocSnap)
         break
       case "REQUEST_NUMBER":
         await sendNumberPrompt(chatId, checkerDocSnap)
@@ -638,6 +689,13 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
         break
       case "VERIFY_OTP":
         await sendVerificationPrompt(chatId, checkerDocSnap, false)
+        break
+      case "ONBOARD_AGAIN":
+        await checkerDocSnap.ref.update({
+          onboardingStatus: "name",
+          lastTrackedMessageId: null,
+        })
+        await sendNamePrompt(chatId, checkerDocSnap)
         break
       default:
         logger.log("Unhandled callback data: ", action)

@@ -164,6 +164,7 @@ export type CheckerData = {
     | "quiz"
     | "onboardWhatsapp"
     | "joinGroupChat"
+    | "nlb"
     | "completed"
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
