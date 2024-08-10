@@ -17,7 +17,7 @@ jobs:
       - name: Build
         run: docker compose -f docker-compose-base.yml build --no-cache
       - name: Run unit tests
-        run: docker run checkmate_emulator:latest npm test
+        run: docker run checkmate-emulator:latest npm test
       - name: Start docker compose for testing
         run: docker compose -f docker-compose-base.yml up -d
       - name: Wait for emulator to start
