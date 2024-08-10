@@ -232,6 +232,7 @@ const postHandlerTypeform = async (req: CustomRequest, res: Response) => {
         const checkerSnap = checkerQuery.docs[0]
         await checkerSnap.ref.update({
           isQuizComplete: true,
+          quizScore: req?.body?.form_response?.calculated?.score ?? null,
         })
         functions.logger.log(
           `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
