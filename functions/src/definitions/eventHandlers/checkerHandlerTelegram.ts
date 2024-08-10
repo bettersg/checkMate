@@ -23,7 +23,7 @@ const WHATSAPP_BOT_LINK =
     ? "https://ref.checkmate.sg/add"
     : `https://wa.me/${USERS_WHATSAPP_NUMBER}`
 const NLB_SURE_IMAGE =
-  "AgACAgUAAxkBAAMGZrcIvuTv2tYdacTaByMTdwGvhswAArm-MRsZZrlVOQUHfLk2PKkBAAMCAANzAAM1BA"
+  "https://storage.googleapis.com/checkmate-static-assets/SURE%20Learning%20Community%20Logo%202024.png"
 const resources = `Here are some resources 📚 you might find useful:
 1) <a href="https://checkmate.sg">Our official CheckMate website</a>
 2) <a href="https://bit.ly/checkmates-wiki">Our fact-checking wiki</a>
@@ -307,16 +307,20 @@ bot.onText(/\/deactivate$/, async (msg) => {
 })
 
 bot.onText(/\/resources$/, async (msg) => {
+  logger.log("Sending resources")
   if (msg.from) {
     const checkerId = msg.from.id
     await bot.sendMessage(checkerId, resources, { parse_mode: "HTML" })
   } else {
     functions.logger.log("No user id found")
   }
+  logger.log("Resources sent")
 })
 
 const checkerHandlerTelegram = async function (body: Update) {
+  logger.log("Processing checker event")
   bot.processUpdate(body)
+  logger.log("Processed checker event")
   return
 }
 
@@ -656,18 +660,18 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
     switch (action) {
       case "QUIZ_COMPLETED":
         if (checkerDocSnap.data()?.isQuizComplete) {
-          sendWAGroupPrompt(chatId, checkerDocSnap, true)
+          await sendWAGroupPrompt(chatId, checkerDocSnap, true)
         } else {
-          sendQuizPrompt(chatId, checkerDocSnap, false)
+          await sendQuizPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "WA_COMPLETED":
         // check WA bot completion
         const userSnap = await db.collection("users").doc(whatsappId).get()
         if (userSnap.exists) {
-          sendTGGroupPrompt(chatId, checkerDocSnap, true)
+          await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
-          sendWAGroupPrompt(chatId, checkerDocSnap, false)
+          await sendWAGroupPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "TG_COMPLETED":
@@ -678,9 +682,9 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
             callbackQuery.from.id
           )
           if (member.status) {
-            sendNLBPrompt(chatId, checkerDocSnap)
+            await sendNLBPrompt(chatId, checkerDocSnap)
           } else {
-            sendTGGroupPrompt(chatId, checkerDocSnap, false)
+            await sendTGGroupPrompt(chatId, checkerDocSnap, false)
           }
         } catch (error) {
           logger.log(error)
@@ -688,7 +692,7 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
         }
         break
       case "COMPLETED":
-        sendCompletionPrompt(chatId, checkerDocSnap)
+        await sendCompletionPrompt(chatId, checkerDocSnap)
         break
       case "REQUEST_NUMBER":
         await sendNumberPrompt(chatId, checkerDocSnap)
