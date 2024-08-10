@@ -168,6 +168,8 @@ bot.onText(/\/start$/, async (msg) => {
 })
 
 bot.onText(/\/onboard$/, async (msg) => {
+  //log time
+  logger.log(`Onboarding started at ${new Date().toISOString()}`)
   const chatId = msg.chat.id
   const telegramId = msg.from?.id
   let currentStep = "name"
@@ -177,13 +179,16 @@ bot.onText(/\/onboard$/, async (msg) => {
     .collection("checkers")
     .where("telegramId", "==", telegramId)
   let checkerQuerySnap = await checkerDocQuery.get()
+  logger.log(`DB query completed at ${new Date().toISOString()}`)
   let checkerSnap: DocumentSnapshot
 
   if (checkerQuerySnap.empty) {
     //create checker here
     if (telegramId) {
+      logger.log(`Checker creation started at ${new Date().toISOString()}`)
       const checkerRef = await createChecker(telegramId)
       checkerSnap = await checkerRef.get()
+      logger.log(`Checker creation completed at ${new Date().toISOString()}`)
     } else {
       logger.log("No user id found")
       await bot.sendMessage(chatId, "An error happened, please try again later")
@@ -198,6 +203,8 @@ bot.onText(/\/onboard$/, async (msg) => {
   }
 
   const whatsappId = checkerSnap.data()?.whatsappId
+
+  logger.log(`Prompt triggered at ${new Date().toISOString()}`)
 
   switch (currentStep) {
     case "name":
@@ -247,6 +254,7 @@ bot.onText(/\/onboard$/, async (msg) => {
       )
       break
   }
+  logger.log(`Prompt completed at ${new Date().toISOString()}`)
 })
 
 bot.onText(/\/activate$/, async (msg) => {
@@ -321,9 +329,9 @@ bot.onText(/\/resources$/, async (msg) => {
 })
 
 const checkerHandlerTelegram = async function (body: Update) {
-  logger.log("Processing checker event")
+  logger.log(`Processing checker event at ${new Date().toISOString()}`)
   bot.processUpdate(body)
-  logger.log("Processed checker event")
+  logger.log(`Processed checker event at ${new Date().toISOString()}`)
   return
 }
 
