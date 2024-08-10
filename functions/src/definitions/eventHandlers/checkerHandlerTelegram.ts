@@ -745,6 +745,7 @@ const createChecker = async (telegramId: number) => {
         isActive: false,
         isOnboardingComplete: false,
         isQuizComplete: false,
+        quizScore: null,
         onboardingStatus: "name",
         lastTrackedMessageId: null,
         isAdmin: false,
