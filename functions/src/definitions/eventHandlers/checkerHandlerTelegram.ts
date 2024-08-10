@@ -5,7 +5,7 @@ import TelegramBot, { Update } from "node-telegram-bot-api"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { logger } from "firebase-functions/v2"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
-import { postOTPHandler, checkOTPHandler } from "../common/otpWhatsapp"
+import { sendOTP, checkOTP } from "../common/otp"
 import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 
@@ -83,7 +83,7 @@ bot.on("message", async (msg) => {
           const otpAttempt = msg?.text || ""
           whatsappId = userSnap.data().whatsappId
 
-          const result = await checkOTPHandler(otpAttempt, whatsappId)
+          const result = await checkOTP(otpAttempt, whatsappId, userSnap.id)
 
           const status = result.status
           const message = result.message
@@ -182,6 +182,9 @@ bot.onText(/\/onboard$/, async (msg) => {
   } else {
     checkerSnap = checkerQuerySnap.docs[0]
     currentStep = checkerSnap.data()?.onboardingStatus
+    if (checkerQuerySnap.size > 1) {
+      logger.error(`Multiple checkers with TelegramID ${telegramId} found`)
+    }
   }
 
   const whatsappId = checkerSnap.data()?.whatsappId
@@ -388,7 +391,7 @@ const sendOTPPrompt = async (
   }
 
   logger.log(`sending OTP to ${whatsappId}`)
-  const postOTPHandlerRes = await postOTPHandler(whatsappId)
+  const postOTPHandlerRes = await sendOTP(whatsappId, checkerSnap.id)
   if (postOTPHandlerRes.status === "success") {
     await bot.sendMessage(
       chatId,
