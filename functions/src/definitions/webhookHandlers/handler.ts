@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import express from "express"
+import crypto from "crypto"
 import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
@@ -13,8 +14,15 @@ const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
 const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
+const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
+const typeformSecretToken = process.env.TYPEFORM_SECRET_TOKEN
+const typeformURL = process.env.TYPEFORM_URL
 const ingressSetting =
   process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
+
+interface CustomRequest extends Request {
+  rawBody?: string // Define your custom property here
+}
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -167,11 +175,100 @@ const postHandlerTelegram = async (req: Request, res: Response) => {
   res.sendStatus(200)
 }
 
+const postHandlerTypeform = async (req: CustomRequest, res: Response) => {
+  interface Answer {
+    type: string
+    phone_number?: string
+    text?: string
+    choices?: {
+      ids: string[]
+      labels: string[]
+      refs: string[]
+    }
+    field: {
+      id: string
+      type: string
+      ref: string
+    }
+  }
+  const db = admin.firestore()
+
+  try {
+    const signature = req.headers["typeform-signature"]
+
+    if (verifySignature(signature as string, req.rawBody?.toString() || "")) {
+      let whatsappId = ""
+      const formId = req?.body?.form_response?.form_id ?? ""
+      if (formId !== typeformURL?.split("/").pop()) {
+        functions.logger.warn(
+          `Typeform response from unexpected form: ${formId}`
+        )
+        return res.sendStatus(200)
+      }
+      const answers: Answer[] = req?.body?.form_response?.answers ?? []
+      if (req?.body?.form_response?.hidden?.phone) {
+        whatsappId = req.body.form_response.hidden.phone
+      } else if (answers && answers.length > 0) {
+        const phoneAnswer = answers.find(
+          (answer: any) => answer.type === "phone_number"
+        )
+        if (phoneAnswer && "phone_number" in phoneAnswer) {
+          whatsappId = phoneAnswer.phone_number?.substring(1) || ""
+        }
+      }
+
+      if (!whatsappId) {
+        functions.logger.warn(
+          "No whatsapp Id obtained in the typeform response"
+        )
+        return res.sendStatus(200)
+      }
+      const checkerQuery = await db
+        .collection("checkers")
+        .where("whatsappId", "==", `${whatsappId}`)
+        .get()
+
+      if (!checkerQuery.empty) {
+        const checkerSnap = checkerQuery.docs[0]
+        await checkerSnap.ref.update({
+          isQuizComplete: true,
+        })
+        functions.logger.log(
+          `Checker document with whatsappId ${whatsappId} successfully updated! : quiz -> whatsappGroup`
+        )
+      } else {
+        functions.logger.warn(
+          `User ${whatsappId} did not onboard from telegram bot.`
+        )
+      }
+    } else {
+      functions.logger.warn("Typeform signature mismatch.")
+    }
+
+    res.sendStatus(200)
+  } catch (error) {
+    functions.logger.error("Error in postHandlerTypeform", error)
+    functions.logger.error(JSON.stringify(req.body, null, 2))
+    res.sendStatus(200)
+  }
+}
+
+const verifySignature = function (receivedSignature: string, payload: string) {
+  const hash = crypto
+    .createHmac("sha256", typeformSecretToken as string)
+    .update(payload)
+    .digest("base64")
+
+  return receivedSignature === `sha256=${hash}`
+}
+
 // Accepts POST requests at /{webhookPath} endpoint
 app.post(`/${webhookPathWhatsapp}`, postHandlerWhatsapp)
 app.get(`/${webhookPathWhatsapp}`, getHandlerWhatsapp)
 
 app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
+
+app.post(`/${webhookPathTypeform}`, postHandlerTypeform)
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
@@ -186,6 +283,7 @@ const webhookHandlerV2 = onRequest(
       "WHATSAPP_CHECKERS_WABA_ID",
       "WHATSAPP_USERS_WABA_ID",
       "TELEGRAM_WEBHOOK_TOKEN",
+      "TYPEFORM_SECRET_TOKEN",
     ],
   },
   app
