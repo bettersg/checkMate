@@ -111,7 +111,7 @@ async function respondToRationalisationFeedback(
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
   const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   if (!data) {
     functions.logger.log("Missing data in respondToRationalisationFeedback")
     return
@@ -269,12 +269,13 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
     return
   }
   const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
   const userRef = db.collection("users").doc(from)
   const thresholds = await getThresholds()
   const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
   const userSnap = await userRef.get()
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   const lastSent = userSnap.get("satisfactionSurveyLastSent")
   //check lastSent is more than cooldown days ago
   let cooldownDate = new Date()
@@ -339,7 +340,7 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
   const truthScore = messageSnap.get("truthScore")
   const thresholds = await getThresholds()
   const from = instanceSnap.get("from")
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   let truthCategory
 
   if (validResponsesCount <= 0) {
@@ -427,7 +428,7 @@ async function sendRationalisation(instancePath: string) {
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
   const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   try {
     const messageRef = instanceRef.parent.parent
     if (!data) {
@@ -497,7 +498,7 @@ async function sendInterimUpdate(instancePath: string) {
     return
   }
   const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   if (instanceSnap.get("isReplied")) {
     await sendTextMessage(
       "user",
@@ -609,7 +610,7 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
     return
   }
   const from = data?.from ?? null
-  const responses = await getResponsesObj("user", from)
+  const responses = await getUserResponsesObject("user", from)
   const buttons = [
     {
       type: "reply",

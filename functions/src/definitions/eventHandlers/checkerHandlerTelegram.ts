@@ -433,7 +433,13 @@ const sendOTPPrompt = async (
           `An error occured, likely because too many OTPs were requested. Please try again in 10 minutes.`,
           {
             reply_markup: {
-              inline_keyboard: [[inlineButtons.resendOTP, inlineButtons.rekey]],
+              inline_keyboard: [
+                [
+                  inlineButtons.verifyOTP,
+                  inlineButtons.resendOTP,
+                  inlineButtons.rekey,
+                ],
+              ],
             },
           }
         )
@@ -463,7 +469,7 @@ const sendVerificationPrompt = async (
     chatId,
     !rePrompt
       ? `Verify your OTP:`
-      : `The OTP is invalid. Please key it in again:`,
+      : `The OTP you provided doesn't match that in our records. Please key it in again:`,
     {
       reply_markup: {
         force_reply: true,
