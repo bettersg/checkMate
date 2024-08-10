@@ -221,6 +221,9 @@ bot.onText(/\/onboard$/, async (msg) => {
     case "joinGroupChat":
       await sendTGGroupPrompt(chatId, checkerSnap, true)
       break
+    case "nlb":
+      await sendNLBPrompt(chatId, checkerSnap)
+      break
     case "completed":
       await bot.sendMessage(
         chatId,
