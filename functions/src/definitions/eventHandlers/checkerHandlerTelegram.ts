@@ -110,7 +110,7 @@ bot.command("onboard", async (ctx) => {
       await sendQuizPrompt(chatId!, checkerSnap, true)
       break
     case "onboardWhatsapp":
-      await sendWAGroupPrompt(chatId!, checkerSnap, true)
+      await sendWABotPrompt(chatId!, checkerSnap, true)
       break
     case "joinGroupChat":
       await sendTGGroupPrompt(chatId!, checkerSnap, true)
@@ -352,7 +352,7 @@ bot.on(callbackQuery("data"), async (ctx) => {
           if (isUser) {
             await sendTGGroupPrompt(chatId, checkerDocSnap, true)
           } else {
-            await sendWAGroupPrompt(chatId, checkerDocSnap, true)
+            await sendWABotPrompt(chatId, checkerDocSnap, true)
           }
         } else {
           await sendQuizPrompt(chatId, checkerDocSnap, false)
@@ -364,7 +364,7 @@ bot.on(callbackQuery("data"), async (ctx) => {
           ctx.reply("Thank you for onboarding to the WhatsApp service!")
           await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
-          await sendWAGroupPrompt(chatId, checkerDocSnap, false)
+          await sendWABotPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "TG_COMPLETED":
@@ -560,7 +560,7 @@ const sendQuizPrompt = async (
   )
 }
 
-const sendWAGroupPrompt = async (
+const sendWABotPrompt = async (
   chatId: number,
   checkerSnap: DocumentSnapshot,
   isFirstPrompt: boolean
@@ -572,9 +572,9 @@ const sendWAGroupPrompt = async (
     chatId,
     `${
       isFirstPrompt
-        ? "If you haven't already, please try out our CheckMate WhatsApp service as a user"
+        ? "Please try out our CheckMate WhatsApp service as a user"
         : "We noticed you haven't started using the WhatsApp service yet. Please onboard to our CheckMate WhatsApp service"
-    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, This is where you can report messages to CheckMate, and is where others send in the messages that you'll get to vote on.`,
+    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>. This is where you can report messages to CheckMate, and is where others send in the messages that you'll get to vote on.`,
     {
       reply_markup: {
         inline_keyboard: [
