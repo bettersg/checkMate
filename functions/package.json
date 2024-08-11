@@ -32,9 +32,9 @@
     "hashids": "^2.3.0",
     "image-hash": "^5.3.1",
     "libphonenumber-js": "^1.10.21",
-    "node-telegram-bot-api": "^0.63.0",
     "openai": "^4.10.0",
     "re2": "^1.20.3",
+    "telegraf": "^4.16.3",
     "typesense": "^1.5.3"
   },
   "devDependencies": {
@@ -50,7 +50,6 @@
     "@types/mdurl": "^2.0.0",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^22.2.0",
-    "@types/node-telegram-bot-api": "^0.61.8",
     "@types/rimraf": "^4.0.5",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
