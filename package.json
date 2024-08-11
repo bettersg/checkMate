@@ -17,5 +17,8 @@
     "predeploy:prod": "cd checkers-app && npm run build && cd ../functions && npm run build",
     "deploy:uat": "firebase deploy --project=uat --only functions,hosting --force",
     "deploy:prod": "firebase deploy --project=prod --only functions,hosting --force"
+  },
+  "devDependencies": {
+    "@telegraf/types": "^7.1.0"
   }
 }

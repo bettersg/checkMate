@@ -15,6 +15,10 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+function isNumeric(str: string) {
+  return !isNaN(Number(str))
+}
+
 const getThresholds = async function () {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
@@ -141,4 +145,5 @@ export {
   checkMessageId,
   checkUrlPresence,
   checkTemplate,
+  isNumeric,
 }
