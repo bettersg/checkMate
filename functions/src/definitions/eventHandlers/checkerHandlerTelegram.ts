@@ -48,15 +48,15 @@ bot.command("start", async (ctx) => {
 
     if (!userQuerySnap.docs[0]) {
       await ctx.reply(
-        `Welcome to the checker bot! Type /onboard to begin your CheckMate Checker's journey.`
+        `Welcome to your personal CheckMate Checker's bot! This is where you'll review messages, view your statistics etc. Type /onboard to begin your journey as a CheckMate Checker.`
       )
     } else if (userQuerySnap.docs[0].data().isOnboardingComplete) {
       await ctx.reply(
-        `Welcome to the checker bot! Press the CheckMate's Portal button to access our dashboard. You'll also get notified when there are new messages to check.`
+        `Welcome to your personal CheckMate Checker's bot! Click "Checker's Portal" to access the dashboard. Here, you'll review messages, view your statistics etc.`
       )
     } else {
       await ctx.reply(
-        `Welcome back to the checker bot! Type /onboard to begin your CheckMate Checker's journey.`
+        `Welcome back to your personal CheckMate Checker's bot! Type /onboard to continue your journey as a CheckMate Checker.`
       )
     }
   } else {
@@ -120,13 +120,13 @@ bot.command("onboard", async (ctx) => {
       break
     case "completed":
       await ctx.reply(
-        `Hi there! You have already onboarded as a CheckMate Checker. Do explore the CheckMates' Portal to check out what you can do. Otherwise if you would like to go through onboarding again, click on the respective button below.`,
+        `Hi there! You have already onboarded as a CheckMate Checker. Do explore the Checker's Portal to check out what you can do. Otherwise if you would like to go through onboarding again, click on the respective button below.`,
         {
           reply_markup: {
             inline_keyboard: [
               [
                 {
-                  text: "CheckMates' Portal",
+                  text: "Checker's Portal",
                   web_app: { url: `${CHECKER_APP_HOST}/` },
                 },
                 {
@@ -332,6 +332,7 @@ bot.on(callbackQuery("data"), async (ctx) => {
   const callbackQuery = ctx.callbackQuery
   const action = callbackQuery?.data
   const chatId = callbackQuery?.message?.chat.id
+  let isUser = false
 
   if (chatId != undefined) {
     const checkerDocQuery = db
@@ -344,14 +345,23 @@ bot.on(callbackQuery("data"), async (ctx) => {
     switch (action) {
       case "QUIZ_COMPLETED":
         if (checkerDocSnap.data()?.isQuizComplete) {
-          await sendWAGroupPrompt(chatId, checkerDocSnap, true)
+          isUser = await checkCheckerIsUser(whatsappId)
+          ctx.reply(
+            "Thank you for completing the quiz! We hope you found it useful."
+          )
+          if (isUser) {
+            await sendTGGroupPrompt(chatId, checkerDocSnap, true)
+          } else {
+            await sendWAGroupPrompt(chatId, checkerDocSnap, true)
+          }
         } else {
           await sendQuizPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "WA_COMPLETED":
-        const userSnap = await db.collection("users").doc(whatsappId).get()
-        if (userSnap.exists) {
+        isUser = await checkCheckerIsUser(whatsappId)
+        if (isUser) {
+          ctx.reply("Thank you for onboarding to the WhatsApp service!")
           await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
           await sendWAGroupPrompt(chatId, checkerDocSnap, false)
@@ -406,7 +416,7 @@ const sendNamePrompt = async (
 ) => {
   const namePrompt = await bot.telegram.sendMessage(
     chatId,
-    "Welcome to CheckMate! How shall we address you?",
+    "First up, how shall we address you?",
     {
       reply_markup: { force_reply: true },
     }
@@ -562,9 +572,9 @@ const sendWAGroupPrompt = async (
     chatId,
     `${
       isFirstPrompt
-        ? "Thank you for completing the quiz! We hope you found it useful. Next, if you've not already done so, p"
-        : "We noticed you have not added the WhatApp service yet. P"
-    }lease onboard to our CheckMate WhatsApp service <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, by sending in the pre-populated message to our WhatsApp number. This is where you can report messages to CheckMate, and is where the messages you vote on are sent in from!`,
+        ? "If you haven't already, please try out our CheckMate WhatsApp service as a user"
+        : "We noticed you haven't started using the WhatsApp service yet. Please onboard to our CheckMate WhatsApp service"
+    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, This is where you can report messages to CheckMate, and is where others send in the messages that you'll get to vote on.`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -593,13 +603,13 @@ const sendTGGroupPrompt = async (
     chatId,
     `${
       isFirstPrompt
-        ? "Thank you for onboarding to the WhatsApp service. Next, p"
+        ? "Next, p"
         : "We noticed you have not joined the groupchat yet. P"
     }lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
 
-1) Inform CheckMates of any downtime in the system, updates/improvements being deployed to the bots
+1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
 
-2) Share relevant links from reputable news sources to aid fact-checking. Do note that beyond this, CheckMates should not discuss what to vote, as this may make the collective outcome of CheckMates' votes biased.`,
+2) Share relevant links from reputable news sources to aid fact-checking. Do note that beyond this, checkers should not discuss what to vote, as this may make the collective outcome biased.`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -621,7 +631,7 @@ const sendNLBPrompt = async (chatId: number, checkerSnap: DocumentSnapshot) => {
   await bot.telegram.sendPhoto(chatId, NLB_SURE_IMAGE, {
     caption: `One last thing - CheckMate is partnering with the National Library Board to grow a vibrant learning community aimed at safeguarding the community from scams and misinformation.
 
-If you'd like to get better at fact-checking, or if you're keen to meet fellow CheckMates' in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!`,
+If you'd like to get better at fact-checking, or if you're keen to meet fellow checkers in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!`,
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
@@ -636,25 +646,27 @@ const sendCompletionPrompt = async (
   checkerSnap: DocumentSnapshot
 ) => {
   await checkerSnap.ref.update({
-    onboardingStatus: "nlb",
+    onboardingStatus: "completed",
     isOnboardingComplete: true,
     isActive: true,
   })
   await bot.telegram.sendMessage(
     chatId,
-    `You have now successfully onboarded as a CheckMate Checker! You will now receive notifications when there are new messages to check.
+    `You have now successfully onboarded as a checker! You will now receive notifications when there are messages that need checking.
+
+Feel free to explore the Checker's Portal below, or by pressing the button at the bottom left of the screen. Here, you can view the leaderboard, your accuracy, and more.
 
 ${resources}
 
 You may view these resources with the command /resources.
     
-Do explore the CheckMates' Portal below, or by pressing the button at the bottom left of the screen.`,
+`,
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "CheckMates' Portal",
+              text: "Checker's Portal",
               web_app: { url: `${CHECKER_APP_HOST}/` },
             },
           ],
@@ -663,6 +675,11 @@ Do explore the CheckMates' Portal below, or by pressing the button at the bottom
       parse_mode: "HTML",
     }
   )
+}
+
+const checkCheckerIsUser = async (whatsappId: string) => {
+  const userSnap = await db.collection("users").doc(whatsappId).get()
+  return userSnap.exists
 }
 
 const createChecker = async (telegramId: number) => {
