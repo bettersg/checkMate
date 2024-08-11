@@ -580,9 +580,13 @@ const sendWABotPrompt = async (
     chatId,
     `${
       isFirstPrompt
-        ? "Next, please add our CheckMate WhatsApp service as a user"
-        : "We noticed you haven't started using the WhatsApp service yet. Please onboard to our CheckMate WhatsApp service"
-    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>. You'll need this to report messages to CheckMate, which is an important part of your role as a checker. It is also where others send in the messages that you'll get to vote on.`,
+        ? "Next, try out our CheckMate WhatsApp service"
+        : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
+    } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a> by sending in the first message that has been pre-populated for you.
+    
+This Whatsapp service is where people send in the messages that you'll be checking. Part of your role will also be to report suspicious messages here!
+
+Once you're done, come back to continue the onboarding.`,
     {
       reply_markup: {
         inline_keyboard: [
