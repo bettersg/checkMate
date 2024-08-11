@@ -8,6 +8,7 @@ import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 import { message, callbackQuery } from "telegraf/filters"
 import { isNumeric } from "../common/utils"
+import { send } from "process"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
@@ -228,7 +229,7 @@ bot.on(message("text"), async (ctx) => {
     if (!msg.reply_to_message) {
       // Ignore commands as they are handled separately
       await ctx.reply(
-        "Sorry, this bot is unable to respond to free-form messages. Please either reply to the bot's messages or use the commands."
+        "Sorry, this bot is unable to respond to free-form messages. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
       )
     } else if (msg.text && msg.reply_to_message) {
       const checkerId = msg.from?.id
@@ -250,6 +251,13 @@ bot.on(message("text"), async (ctx) => {
         switch (currentStep) {
           case "name":
             const name = msg.text
+            if (name.replace(/\s+/g, "").length === 0) {
+              await ctx.reply(
+                "Name cannot be just spaces. Please enter a valid name."
+              )
+              await sendNamePrompt(chatId, userSnap)
+              return
+            }
             await userSnap.ref.update({
               name,
             })
@@ -318,7 +326,7 @@ bot.on(message("text"), async (ctx) => {
         }
       } else {
         await ctx.reply(
-          "Sorry, we don't support replies to messages in general. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
+          "Sorry, we don't support replies to messages except in certain cases. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
         )
       }
     }
@@ -572,9 +580,13 @@ const sendWABotPrompt = async (
     chatId,
     `${
       isFirstPrompt
-        ? "Please try out our CheckMate WhatsApp service as a user"
-        : "We noticed you haven't started using the WhatsApp service yet. Please onboard to our CheckMate WhatsApp service"
-    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>. This is where you can report messages to CheckMate, and is where others send in the messages that you'll get to vote on.`,
+        ? "Next, try out our CheckMate WhatsApp service"
+        : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
+    } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, and send in the pre-populated message.
+    
+This Whatsapp service is where people send in the messages that you'll be checking. Part of your role will also be to report suspicious messages here!
+
+Once you're done, come back to continue the onboarding.`,
     {
       reply_markup: {
         inline_keyboard: [
