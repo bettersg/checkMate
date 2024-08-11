@@ -38,7 +38,6 @@ const db = admin.firestore()
 // COMMAND HANDLERS
 
 bot.command("start", async (ctx) => {
-  console.log(`${ctx.from?.id} started the bot`)
   const msg = ctx.message
   if (msg.from) {
     const checkerId = msg.from.id
