@@ -228,7 +228,7 @@ bot.on(message("text"), async (ctx) => {
     if (!msg.reply_to_message) {
       // Ignore commands as they are handled separately
       await ctx.reply(
-        "Sorry, this bot is unable to respond to free-form messages. Please either reply to the bot's messages or use the commands."
+        "Sorry, this bot is unable to respond to free-form messages. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
       )
     } else if (msg.text && msg.reply_to_message) {
       const checkerId = msg.from?.id
@@ -318,7 +318,7 @@ bot.on(message("text"), async (ctx) => {
         }
       } else {
         await ctx.reply(
-          "Sorry, we don't support replies to messages in general. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
+          "Sorry, we don't support replies to messages except in certain cases. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
         )
       }
     }
@@ -572,9 +572,9 @@ const sendWABotPrompt = async (
     chatId,
     `${
       isFirstPrompt
-        ? "Please try out our CheckMate WhatsApp service as a user"
+        ? "Next, please add our CheckMate WhatsApp service as a user"
         : "We noticed you haven't started using the WhatsApp service yet. Please onboard to our CheckMate WhatsApp service"
-    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>. This is where you can report messages to CheckMate, and is where others send in the messages that you'll get to vote on.`,
+    } <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>. You'll need this to report messages to CheckMate, which is an important part of your role as a checker. It is also where others send in the messages that you'll get to vote on.`,
     {
       reply_markup: {
         inline_keyboard: [

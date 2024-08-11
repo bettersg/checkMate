@@ -2,6 +2,7 @@ import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
 import { sendWhatsappOTP } from "./sendWhatsappMessage"
 import { Timestamp } from "firebase-admin/firestore"
+import { DocumentSnapshot } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -155,13 +156,51 @@ const checkOTP = async (
       .where("whatsappId", "==", whatsappNum)
       .get()
 
-    //loop through and delete their old entries
-    checkerQuerySnap.forEach((doc) => {
-      if (doc.id !== checkerId) {
-        batch.delete(doc.ref)
-      }
-    })
-
+    switch (checkerQuerySnap.size) {
+      case 0:
+        logger.error(`No checkers found with whatsappID ${whatsappNum}`)
+        break
+      case 1:
+        break
+      case 2: //handle existing checkers
+        const [doc1, doc2] = checkerQuerySnap.docs
+        const newCheckerSnap = doc1.id === checkerId ? doc1 : doc2
+        const existingCheckerSnap = doc1.id === checkerId ? doc2 : doc1
+        const name = newCheckerSnap.get("name")
+        const telegramId = newCheckerSnap.get("telegramId")
+        if (telegramId && name) {
+          try {
+            const batch = db.batch()
+            batch.update(existingCheckerSnap.ref, {
+              name: name,
+              whatsappId: whatsappId,
+              preferredPlatform: "telegram",
+              isActive: false,
+              isOnboardingComplete: false,
+              isQuizComplete: false,
+              quizScore: null,
+              onboardingStatus: "verify",
+              telegramId: telegramId,
+            })
+            batch.delete(newCheckerSnap.ref)
+            await batch.commit()
+            break
+          } catch (error) {
+            logger.error(error)
+          }
+        } else {
+          logger.error(
+            `Missing telegramId or name for checker ${newCheckerSnap.id}`
+          )
+        }
+      default:
+        logger.info(`Deleting existing checkers for ${whatsappNum}`)
+        checkerQuerySnap.forEach((doc) => {
+          if (doc.id !== checkerId) {
+            batch.delete(doc.ref)
+          }
+        })
+    }
     batch.delete(otpSnap.ref)
     await batch.commit()
     logger.log(`OTP for ${checkerId} verified successfully`)
