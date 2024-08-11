@@ -8,6 +8,7 @@ import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 import { message, callbackQuery } from "telegraf/filters"
 import { isNumeric } from "../common/utils"
+import { send } from "process"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
@@ -250,6 +251,13 @@ bot.on(message("text"), async (ctx) => {
         switch (currentStep) {
           case "name":
             const name = msg.text
+            if (name.replace(/\s+/g, "").length === 0) {
+              await ctx.reply(
+                "Name cannot be just spaces. Please enter a valid name."
+              )
+              await sendNamePrompt(chatId, userSnap)
+              return
+            }
             await userSnap.ref.update({
               name,
             })
