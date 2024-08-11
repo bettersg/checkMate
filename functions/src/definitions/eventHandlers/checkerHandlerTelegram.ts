@@ -582,7 +582,7 @@ const sendWABotPrompt = async (
       isFirstPrompt
         ? "Next, try out our CheckMate WhatsApp service"
         : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
-    } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a> by sending in the first message that has been pre-populated for you.
+    } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, and send in the pre-populated message.
     
 This Whatsapp service is where people send in the messages that you'll be checking. Part of your role will also be to report suspicious messages here!
 
