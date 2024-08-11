@@ -69,7 +69,6 @@ bot.command("onboard", async (ctx) => {
   const chatId = ctx.chat?.id
   const telegramId = ctx.from?.id
   let currentStep = "name"
-
   const checkerDocQuery = db
     .collection("checkers")
     .where("telegramId", "==", telegramId)
@@ -116,6 +115,9 @@ bot.command("onboard", async (ctx) => {
       break
     case "joinGroupChat":
       await sendTGGroupPrompt(chatId!, checkerSnap, true)
+      break
+    case "nlb":
+      await sendNLBPrompt(chatId!, checkerSnap)
       break
     case "completed":
       await ctx.reply(
@@ -343,17 +345,17 @@ bot.on(callbackQuery("data"), async (ctx) => {
     switch (action) {
       case "QUIZ_COMPLETED":
         if (checkerDocSnap.data()?.isQuizComplete) {
-          sendWAGroupPrompt(chatId, checkerDocSnap, true)
+          await sendWAGroupPrompt(chatId, checkerDocSnap, true)
         } else {
-          sendQuizPrompt(chatId, checkerDocSnap, false)
+          await sendQuizPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "WA_COMPLETED":
         const userSnap = await db.collection("users").doc(whatsappId).get()
         if (userSnap.exists) {
-          sendTGGroupPrompt(chatId, checkerDocSnap, true)
+          await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
-          sendWAGroupPrompt(chatId, checkerDocSnap, false)
+          await sendWAGroupPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "TG_COMPLETED":
@@ -363,17 +365,17 @@ bot.on(callbackQuery("data"), async (ctx) => {
             callbackQuery.from.id
           )
           if (member.status) {
-            sendNLBPrompt(chatId, checkerDocSnap)
+            await sendNLBPrompt(chatId, checkerDocSnap)
           } else {
-            sendTGGroupPrompt(chatId, checkerDocSnap, false)
+            await sendTGGroupPrompt(chatId, checkerDocSnap, false)
           }
         } catch (error) {
           logger.log(error)
-          sendTGGroupPrompt(chatId, checkerDocSnap, false)
+          await sendTGGroupPrompt(chatId, checkerDocSnap, false)
         }
         break
       case "COMPLETED":
-        sendCompletionPrompt(chatId, checkerDocSnap)
+        await sendCompletionPrompt(chatId, checkerDocSnap)
         break
       case "REQUEST_NUMBER":
         await sendNumberPrompt(chatId, checkerDocSnap)
