@@ -18,7 +18,7 @@ Idea:
 
 interface MessagesDisplayTestProps {
   status: "pending" | "voted",
-  scrollPosition: number
+  scrollPosition: number,
 }
 
 import { useState, useEffect, FC, useCallback, useRef } from "react";
@@ -42,24 +42,37 @@ const MessagesDisplayTest: FC<MessagesDisplayTestProps> = ({status, scrollPositi
   const [page, setPage] = useState<number>(1);
   const [scrollY, setScrollY] = useState<number>(0);
 
-  // Scroll Functions
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll Functions
   const handleScroll = () => {
     const scrollY = window.scrollY;
-    console.log(scrollY)
-    setScrollY(scrollY);
+    console.log('Scroll Y: ',scrollY)
+    setScrollY(scrollY)
   }
 
   useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo(0, scrollPosition);
-    }, 200)
-    
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
     }
   }, []);
+
+  useEffect(() => {
+    if (scrollY >= scrollPosition) {
+      return;
+    }
+    else if (scrollPosition !== 0) {
+      console.log("Changing scroll");
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth'
+        })
+      }, 200);
+
+    }
+  },[votes])
 
   const fetchMessages = async () => {
     setIsLoading(true);

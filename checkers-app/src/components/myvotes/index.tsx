@@ -12,7 +12,6 @@ export default function MyVotes() {
     if (location.state) {
       if (location.state.status) {
         setActiveTab(location.state.status)
-        console.log(location.state.scrollPosition)
       }
     }
   }, [location, activeTab])
@@ -20,7 +19,7 @@ export default function MyVotes() {
   return (
     <div>
       <div>
-        <MessagesDisplay status = {location.state ? location.state.status : "pending"} scrollPosition = {location.state ? location.state.scrollPosition : 0}/>
+        <MessagesDisplay status = {location.state ? location.state.status : "pending"} scrollPosition = {location.state ? location.state.scrollPosition : 0} />
         {/* <MessagesDisplayTest /> */}
       </div>
     </div>
