@@ -2,12 +2,10 @@ import axios from "axios"
 import * as functions from "firebase-functions"
 import FormData from "form-data"
 import {
-  Update,
   InlineKeyboardMarkup,
   ReplyKeyboardMarkup,
   ForceReply,
-  Message,
-} from "node-telegram-bot-api"
+} from "@telegraf/types"
 
 const telegramHost =
   process.env["TEST_SERVER_URL"] || "https://api.telegram.org" //only exists in integration test environment

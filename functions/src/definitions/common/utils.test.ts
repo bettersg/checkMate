@@ -3,6 +3,7 @@ import {
   stripUrl,
   stripPhone,
   checkTemplate,
+  isNumeric,
 } from "./utils"
 import { Timestamp } from "firebase-admin/firestore"
 
@@ -114,6 +115,31 @@ describe("stripPhone function", () => {
         })
       })
     })
+})
+
+describe("isNumeric should work correctly", () => {
+  test("should return true for numeric strings", () => {
+    const numericStrings = ["123", "0", "0.123", "-123", "123.456", "-0.123"]
+
+    for (const str of numericStrings) {
+      expect(isNumeric(str)).toBe(true)
+    }
+  })
+
+  test("should return false for non-numeric strings", () => {
+    const nonNumericStrings = [
+      "abc",
+      "123abc",
+      "123.abc",
+      "123.456.789",
+      "123-456",
+      "123,456",
+    ]
+
+    for (const str of nonNumericStrings) {
+      expect(isNumeric(str)).toBe(false)
+    }
+  })
 })
 
 describe("stripUrl should strip URLs correctly", () => {

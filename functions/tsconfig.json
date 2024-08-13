@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["jest", "markdown-it", "node"],
     "allowJs": true,
     "outDir": "./lib",
     "moduleResolution": "node",

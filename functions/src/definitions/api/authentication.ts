@@ -4,11 +4,8 @@ import express from "express"
 import * as crypto from "crypto"
 import { onRequest } from "firebase-functions/v2/https"
 import { logger } from "firebase-functions"
-import { CheckerData } from "../../types"
 import { defineString } from "firebase-functions/params"
 import { AppEnv } from "../../appEnv"
-import { getThresholds } from "../common/utils"
-import { Timestamp } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -95,6 +92,9 @@ app.post("/", async (req, res) => {
   if (!checkerSnap.empty) {
     try {
       const userDoc = checkerSnap.docs[0]
+      if (userDoc.get("isOnboardingComplete") === false) {
+        return res.status(404).send("User not onboarded yet")
+      }
       const claims = {
         isAdmin: userDoc.data()?.isAdmin,
         tier: userDoc.data()?.tier,
@@ -119,81 +119,7 @@ app.post("/", async (req, res) => {
     }
   } else {
     //from telegram but not yet a user in database
-    functions.logger.info("Creating new user")
-
-    const thresholds = await getThresholds()
-
-    const checkerObject: CheckerData = {
-      name: "",
-      type: "human",
-      isActive: false,
-      isOnboardingComplete: false,
-      singpassOpenId: null,
-      isAdmin: false,
-      whatsappId: null,
-      telegramId: parseInt(userId),
-      voteWeight: 1,
-      level: 0,
-      experience: 0,
-      tier: "beginner",
-      numVoted: 0,
-      numReferred: 0,
-      numReported: 0,
-      numCorrectVotes: 0,
-      numNonUnsureVotes: 0,
-      numVerifiedLinks: 0,
-      preferredPlatform: "telegram",
-      lastVotedTimestamp: null,
-      getNameMessageId: null,
-      leaderboardStats: {
-        numVoted: 0,
-        numCorrectVotes: 0,
-        totalTimeTaken: 0,
-        score: 0,
-      },
-      programData: {
-        isOnProgram: true,
-        programStart: Timestamp.fromDate(new Date()),
-        programEnd: null,
-        numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
-        numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
-        numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
-        accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
-        numVotesAtProgramStart: 0,
-        numReferralsAtProgramStart: 0,
-        numReportsAtProgramStart: 0,
-        numCorrectVotesAtProgramStart: 0,
-        numNonUnsureVotesAtProgramStart: 0,
-        numVotesAtProgramEnd: null,
-        numReferralsAtProgramEnd: null,
-        numReportsAtProgramEnd: null,
-        numCorrectVotesAtProgramEnd: null,
-        numNonUnsureVotesAtProgramEnd: null,
-      },
-    }
-
-    try {
-      const newCheckerRef = await db.collection("checkers").add(checkerObject)
-      const customToken = await admin
-        .auth()
-        .createCustomToken(newCheckerRef.id, {
-          isAdmin: false,
-          tier: "beginner",
-        })
-      return res.status(200).json({
-        customToken: customToken,
-        checkerId: newCheckerRef.id,
-        name: "",
-        isNewUser: true,
-        isOnboardingComplete: false,
-        isActive: false,
-        isAdmin: false,
-        tier: "beginner",
-      })
-    } catch (error) {
-      functions.logger.error("Error creating new user:", error)
-      return res.status(500).send("Error creating new user")
-    }
+    return res.status(404).send("User not onboarded yet")
   }
 })
 
