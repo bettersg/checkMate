@@ -545,13 +545,14 @@ const sendQuizPrompt = async (
 ) => {
   const whatsappId = checkerSnap.data()?.whatsappId
   const name = checkerSnap.data()?.name
+  const linkURL = `${TYPEFORM_URL}#name=${name}&phone=${whatsappId}`
   await bot.telegram.sendMessage(
     chatId,
     `${
       isFirstPrompt
         ? "Thank you for verifying your WhatsApp number"
         : "We noticed you have not completed the quiz yet"
-    }. Please proceed to complete the onboarding quiz <a href="${TYPEFORM_URL}#name=${name}&phone=${whatsappId}">here</a>. This will equip you with the skills and knowledge to be a better checker!`,
+    }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -564,6 +565,10 @@ const sendQuizPrompt = async (
         ],
       },
       parse_mode: "HTML",
+      link_preview_options: {
+        is_disabled: true, //preview link doesn't show hashes, so we just disable it entirely
+        url: linkURL,
+      },
     }
   )
 }
