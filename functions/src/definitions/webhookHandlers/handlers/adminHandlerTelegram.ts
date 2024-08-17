@@ -43,11 +43,18 @@ This channel will be used to:
 
 3. Share relevant links from reputable news sources to aid fact checking. Note: Beyond this, CheckMates should not discuss what scores to assign, as this may make the collective outcome of CheckMates' votes biased.
 
-4. You can refer to bit.ly/checkmates-wiki for more tips on safe checking 😊
+4. You can refer to <a href="https://bit.ly/checkmates-wiki">our fact-checking wiki</a> for more tips on safe checking 😊
+
+5. To explore more resources, head to <a href="https://t.me/CheckMate_Checker_Bot">your personal Checker's bot</a> and type / resources
 
 If you've any feedback or queries, you can share them in the chat too 🤗`
 
-      return ctx.reply(message)
+      return ctx.reply(message, {
+        link_preview_options: {
+          is_disabled: true,
+        },
+        parse_mode: "HTML",
+      })
     })
     await Promise.all(messagePromises)
   }
