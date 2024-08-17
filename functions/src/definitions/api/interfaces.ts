@@ -22,10 +22,12 @@ interface updateVoteRequest {
 }
 
 interface createChecker {
-  name: string
+  name: string | null
   type: "human" | "ai"
   isActive?: boolean
   isOnboardingComplete?: boolean
+  isQuizComplete?: boolean
+  quizScore?: number | null
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null
@@ -63,7 +65,7 @@ interface updateChecker {
 }
 
 interface Checker {
-  name: string
+  name: string | null
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null
