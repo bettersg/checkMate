@@ -23,12 +23,10 @@ interface MessagesDisplayProps {
 
 import { useState, useEffect, FC, useCallback, useRef } from "react";
 import { useUser } from "../../providers/UserContext";
-// import Loading from "../common/Loading";
 import MessageCard from "./MessageCard";
 import { Typography } from "@material-tailwind/react";
 import { getCheckerVotes } from "../../services/api";
 import { VoteSummary, VoteSummaryApiResponse } from "../../types";
-//import Pagination from "./Pagination"; // Make sure to create this component
 
 const MessagesDisplay: FC<MessagesDisplayProps> = ({
   status,
