@@ -8,6 +8,7 @@ import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
 import { Request, Response } from "express"
+import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { AppEnv } from "../../appEnv"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -15,6 +16,7 @@ const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
 const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
 const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
+const webhookPathTelegramAdmin = process.env.WEBHOOK_PATH_TELEGRAM_ADMIN
 const typeformSecretToken = process.env.TYPEFORM_SECRET_TOKEN
 const typeformURL = process.env.TYPEFORM_URL
 const ingressSetting =
@@ -254,6 +256,20 @@ const postHandlerTypeform = async (req: CustomRequest, res: Response) => {
   }
 }
 
+const postHandlerTelegramAdmin = async (req: Request, res: Response) => {
+  if (
+    req.header("x-telegram-bot-api-secret-token") ===
+    process.env.TELEGRAM_WEBHOOK_TOKEN
+  ) {
+    await adminBotHandlerTelegram(req.body)
+  } else {
+    functions.logger.warn(
+      "Telegram handler endpoint was called from unexpected source"
+    )
+  }
+  res.sendStatus(200)
+}
+
 const verifySignature = function (receivedSignature: string, payload: string) {
   const hash = crypto
     .createHmac("sha256", typeformSecretToken as string)
@@ -268,7 +284,7 @@ app.post(`/${webhookPathWhatsapp}`, postHandlerWhatsapp)
 app.get(`/${webhookPathWhatsapp}`, getHandlerWhatsapp)
 
 app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
-
+app.post(`/${webhookPathTelegramAdmin}`, postHandlerTelegramAdmin)
 app.post(`/${webhookPathTypeform}`, postHandlerTypeform)
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
@@ -285,6 +301,7 @@ const webhookHandlerV2 = onRequest(
       "WHATSAPP_USERS_WABA_ID",
       "TELEGRAM_WEBHOOK_TOKEN",
       "TYPEFORM_SECRET_TOKEN",
+      "TELEGRAM_ADMIN_BOT_TOKEN",
     ],
   },
   app
