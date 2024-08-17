@@ -485,9 +485,6 @@ const sendOTPPrompt = async (
         },
       }
     )
-    await checkerSnap.ref.update({
-      onboardingStatus: "verify",
-    })
     sendVerificationPrompt(chatId, checkerSnap, false)
   } else {
     switch (postOTPHandlerRes.message) {
