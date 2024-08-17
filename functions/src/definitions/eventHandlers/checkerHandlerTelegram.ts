@@ -38,7 +38,7 @@ const db = admin.firestore()
 
 function progressBars(currentStep: number) {
   const totalSteps = 6
-  let progress = ""
+  let progress = "Onboarding Progress: "
   for (let i = 0; i < totalSteps; i++) {
     if (i < currentStep) {
       progress += "🟩"
@@ -361,7 +361,7 @@ bot.on(callbackQuery("data"), async (ctx) => {
           ctx.reply(
             `Thank you for completing the quiz!💪🎉 We hope you found it useful.
 
-Progress: ${progressBars(3)}`
+${progressBars(3)}`
           )
           if (isUser) {
             await sendTGGroupPrompt(chatId, checkerDocSnap, true)
@@ -377,7 +377,7 @@ Progress: ${progressBars(3)}`
         if (isUser) {
           ctx.reply(`Thank you for onboarding to the WhatsApp service! 🙌
             
-Progress: ${progressBars(4)}`)
+${progressBars(4)}`)
           await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
           await sendWABotPrompt(chatId, checkerDocSnap, false)
@@ -451,7 +451,7 @@ const sendNumberPrompt = async (
     chatId,
     `What is your WhatsApp phone number? Please include the country code, but omit the "+", e.g 6591234567
     
-Progress: ${progressBars(1)}`,
+${progressBars(1)}`,
     {
       reply_markup: { force_reply: true },
     }
@@ -556,7 +556,7 @@ const sendQuizPrompt = async (
         : "We noticed you have not completed the quiz yet"
     }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!
     
-Progress: ${progressBars(2)}`,
+${progressBars(2)}`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -654,7 +654,7 @@ const sendNLBPrompt = async (chatId: number, checkerSnap: DocumentSnapshot) => {
 
 If you'd like to get better at fact-checking, or if you're keen to meet fellow checkers in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!
 
-Progress: ${progressBars(5)}`,
+${progressBars(5)}`,
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
