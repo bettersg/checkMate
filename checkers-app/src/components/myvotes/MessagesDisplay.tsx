@@ -133,7 +133,7 @@ const MessagesDisplay: FC<MessagesDisplayProps> = ({
 
   return (
     <div>
-      <div className="sticky top-0 bg-white z-10">
+      <div className="sticky top-0 dark:bg-dark-background-color z-10">
         <div className="flex justify-around relative shadow-md shadow-primary-color2/5">
           <button
             className={`w-1/2 text-center py-2 ${
