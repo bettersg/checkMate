@@ -27,13 +27,27 @@ const NLB_SURE_IMAGE =
 const resources = `Here are some resources 📚 you might find useful:
 1) <a href="https://checkmate.sg">Our official CheckMate website</a>
 2) <a href="https://bit.ly/checkmates-wiki">Our fact-checking wiki</a>
-3) <a href="https://bit.ly/checkmates-quiz">The Typeform quiz you just took</a>`
+3) <a href="https://bit.ly/checkmates-quiz">The Typeform quiz you just took</a>
+4) <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">The S.U.R.E Learning Community</a> that we're partnering the National Library Board on`
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 
 const db = admin.firestore()
+
+function progressBars(currentStep: number) {
+  const totalSteps = 6
+  let progress = "Onboarding Progress: "
+  for (let i = 0; i < totalSteps; i++) {
+    if (i < currentStep) {
+      progress += "🟩"
+    } else {
+      progress += "⬜"
+    }
+  }
+  return progress
+}
 
 // COMMAND HANDLERS
 
@@ -225,108 +239,99 @@ bot.on(message("text"), async (ctx) => {
       await ctx.reply("Sorry, this command is not supported.")
       return
     }
-    if (!msg.reply_to_message) {
-      // Ignore commands as they are handled separately
+    const checkerId = msg.from?.id
+    const chatId = msg.chat.id
+
+    const userQuerySnap = await db
+      .collection("checkers")
+      .where("telegramId", "==", checkerId)
+      .get()
+
+    const userSnap = userQuerySnap.docs[0]
+    let currentStep = userSnap.data().onboardingStatus
+    const expectingRepliesTo = ["name", "number", "verify"]
+    if (!expectingRepliesTo.includes(currentStep)) {
       await ctx.reply(
-        "Sorry, this bot is unable to respond to free-form messages. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
+        "Sorry, this bot is unable to respond to free-form messages."
       )
-    } else if (msg.text && msg.reply_to_message) {
-      const checkerId = msg.from?.id
-      const chatId = msg.chat.id
+    } else if (msg.text) {
+      let whatsappId = ""
 
-      const userQuerySnap = await db
-        .collection("checkers")
-        .where("telegramId", "==", checkerId)
-        .get()
+      switch (currentStep) {
+        case "name":
+          const name = msg.text
+          if (name.replace(/\s+/g, "").length === 0) {
+            await ctx.reply(
+              "Name cannot be just spaces. Please enter a valid name."
+            )
+            await sendNamePrompt(chatId, userSnap)
+            return
+          }
+          await userSnap.ref.update({
+            name,
+          })
+          await sendNumberPrompt(chatId, userSnap)
+          break
+        case "number":
+          whatsappId = msg.text.replace("+", "").replace(" ", "")
 
-      const userSnap = userQuerySnap.docs[0]
+          if (
+            whatsappId.length === 8 &&
+            (whatsappId.startsWith("9") || whatsappId.startsWith("8"))
+          ) {
+            whatsappId = `65${whatsappId}`
+          }
+          //check if whatsappId is numeric
+          if (!isNumeric(whatsappId)) {
+            await ctx.reply(
+              `The phone number you entered is invalid. Please enter a valid phone number.`
+            )
+            return
+          }
 
-      if (
-        userSnap.data().lastTrackedMessageId == msg.reply_to_message.message_id
-      ) {
-        let currentStep = userSnap.data().onboardingStatus
-        let whatsappId = ""
+          await userSnap.ref.update({
+            whatsappId,
+          })
 
-        switch (currentStep) {
-          case "name":
-            const name = msg.text
-            if (name.replace(/\s+/g, "").length === 0) {
-              await ctx.reply(
-                "Name cannot be just spaces. Please enter a valid name."
-              )
-              await sendNamePrompt(chatId, userSnap)
-              return
-            }
-            await userSnap.ref.update({
-              name,
-            })
-            await sendNumberPrompt(chatId, userSnap)
-            break
-          case "number":
-            whatsappId = msg.text.replace("+", "").replace(" ", "")
+          await sendOTPPrompt(chatId, userSnap, whatsappId)
+          break
+        case "verify":
+          const otpAttempt = msg?.text || ""
+          whatsappId = userSnap.data().whatsappId
 
-            if (
-              whatsappId.length === 8 &&
-              (whatsappId.startsWith("9") || whatsappId.startsWith("8"))
-            ) {
-              whatsappId = `65${whatsappId}`
-            }
-            //check if whatsappId is numeric
-            if (!isNumeric(whatsappId)) {
-              await ctx.reply(
-                `The phone number you entered is invalid. Please enter a valid phone number.`
-              )
-              return
-            }
+          const result = await checkOTP(otpAttempt, whatsappId, userSnap.id)
 
-            await userSnap.ref.update({
-              whatsappId,
-            })
-
-            await sendOTPPrompt(chatId, userSnap, whatsappId)
-            break
-          case "verify":
-            const otpAttempt = msg?.text || ""
-            whatsappId = userSnap.data().whatsappId
-
-            const result = await checkOTP(otpAttempt, whatsappId, userSnap.id)
-
-            const status = result.status
-            const message = result.message
-            try {
-              if (status === "success") {
-                await userSnap.ref.update({
-                  whatsappId,
-                  onboardingStatus: "quiz",
-                  lastTrackedMessageId: null,
-                })
-                await sendQuizPrompt(chatId, userSnap, true)
+          const status = result.status
+          const message = result.message
+          try {
+            if (status === "success") {
+              await userSnap.ref.update({
+                whatsappId,
+                onboardingStatus: "quiz",
+                lastTrackedMessageId: null,
+              })
+              await sendQuizPrompt(chatId, userSnap, true)
+            } else {
+              if (message === "OTP mismatch") {
+                await sendVerificationPrompt(chatId, userSnap, true)
+              } else if (message === "OTP max attempts") {
+                await ctx.reply(
+                  `Maximum OTP attempts reached. We will send a new OTP.`
+                )
+                await sendOTPPrompt(chatId, userSnap, whatsappId)
               } else {
-                if (message === "OTP mismatch") {
-                  await sendVerificationPrompt(chatId, userSnap, true)
-                } else if (message === "OTP max attempts") {
-                  await ctx.reply(
-                    `Maximum OTP attempts reached. We will send a new OTP.`
-                  )
-                  await sendOTPPrompt(chatId, userSnap, whatsappId)
-                } else {
-                  console.error(`OTP error with ${chatId}: ${message}`)
-                  await ctx.reply(
-                    "Apologies - an error occurred, please try again later."
-                  )
-                }
+                console.error(`OTP error with ${chatId}: ${message}`)
+                await ctx.reply(
+                  "Apologies - an error occurred, please try again later."
+                )
               }
-              break
-            } catch (error) {
-              logger.log("Error in OTP verification", error)
             }
-          default:
-            logger.log("Unhandled onboarding stage: ", currentStep)
-        }
-      } else {
-        await ctx.reply(
-          "Sorry, we don't support replies to messages except in certain cases. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
-        )
+            break
+          } catch (error) {
+            logger.log("Error in OTP verification", error)
+          }
+        default:
+          logger.log("Unhandled onboarding stage: ", currentStep)
       }
     }
   } catch (error) {
@@ -354,7 +359,9 @@ bot.on(callbackQuery("data"), async (ctx) => {
         if (checkerDocSnap.data()?.isQuizComplete) {
           isUser = await checkCheckerIsUser(whatsappId)
           ctx.reply(
-            "Thank you for completing the quiz! We hope you found it useful."
+            `Thank you for completing the quiz!💪🎉 We hope you found it useful.
+
+${progressBars(3)}`
           )
           if (isUser) {
             await sendTGGroupPrompt(chatId, checkerDocSnap, true)
@@ -368,7 +375,9 @@ bot.on(callbackQuery("data"), async (ctx) => {
       case "WA_COMPLETED":
         isUser = await checkCheckerIsUser(whatsappId)
         if (isUser) {
-          ctx.reply("Thank you for onboarding to the WhatsApp service!")
+          ctx.reply(`Thank you for onboarding to the WhatsApp service! 🙌
+            
+${progressBars(4)}`)
           await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
           await sendWABotPrompt(chatId, checkerDocSnap, false)
@@ -399,9 +408,9 @@ bot.on(callbackQuery("data"), async (ctx) => {
       case "SEND_OTP":
         await sendOTPPrompt(chatId, checkerDocSnap, whatsappId)
         break
-      case "VERIFY_OTP":
-        await sendVerificationPrompt(chatId, checkerDocSnap, false)
-        break
+      // case "VERIFY_OTP":
+      //   await sendVerificationPrompt(chatId, checkerDocSnap, false)
+      //   break
       case "ONBOARD_AGAIN":
         await checkerDocSnap.ref.update({
           onboardingStatus: "name",
@@ -423,7 +432,7 @@ const sendNamePrompt = async (
 ) => {
   const namePrompt = await bot.telegram.sendMessage(
     chatId,
-    "First up, how shall we address you?",
+    `First up, how shall we address you?`,
     {
       reply_markup: { force_reply: true },
     }
@@ -440,7 +449,9 @@ const sendNumberPrompt = async (
 ) => {
   const numberPrompt = await bot.telegram.sendMessage(
     chatId,
-    `What is your WhatsApp phone number? Please include the country code, but omit the "+", e.g 6591234567`,
+    `What is your WhatsApp phone number? Please include the country code, but omit the "+", e.g 6591234567
+    
+${progressBars(1)}`,
     {
       reply_markup: { force_reply: true },
     }
@@ -467,22 +478,14 @@ const sendOTPPrompt = async (
   if (postOTPHandlerRes.status === "success") {
     await bot.telegram.sendMessage(
       chatId,
-      `We have sent a 6-digit OTP to your WhatsApp at +${whatsappId}. Please check your WhatsApp for the OTP, and hit "Verify OTP" below.`,
+      `We have sent a 6-digit OTP to your WhatsApp at +${whatsappId}. Please check your WhatsApp for the OTP.`,
       {
         reply_markup: {
-          inline_keyboard: [
-            [
-              inlineButtons.verifyOTP,
-              inlineButtons.resendOTP,
-              inlineButtons.rekey,
-            ],
-          ],
+          inline_keyboard: [[inlineButtons.resendOTP, inlineButtons.rekey]],
         },
       }
     )
-    await checkerSnap.ref.update({
-      onboardingStatus: "otpSent",
-    })
+    sendVerificationPrompt(chatId, checkerSnap, false)
   } else {
     switch (postOTPHandlerRes.message) {
       case "OTP request limit exceeded":
@@ -551,7 +554,9 @@ const sendQuizPrompt = async (
       isFirstPrompt
         ? "Thank you for verifying your WhatsApp number"
         : "We noticed you have not completed the quiz yet"
-    }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!`,
+    }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!
+    
+${progressBars(2)}`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -647,7 +652,9 @@ const sendNLBPrompt = async (chatId: number, checkerSnap: DocumentSnapshot) => {
   await bot.telegram.sendPhoto(chatId, NLB_SURE_IMAGE, {
     caption: `One last thing - CheckMate is partnering with the National Library Board to grow a vibrant learning community aimed at safeguarding the community from scams and misinformation.
 
-If you'd like to get better at fact-checking, or if you're keen to meet fellow checkers in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!`,
+If you'd like to get better at fact-checking, or if you're keen to meet fellow checkers in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!
+
+${progressBars(5)}`,
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
@@ -689,7 +696,7 @@ You may view these resources with the command /resources.`,
   )
   await bot.telegram.sendMessage(
     chatId,
-    `You've now successfully onboarded as a Checker. Stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
+    `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
 
