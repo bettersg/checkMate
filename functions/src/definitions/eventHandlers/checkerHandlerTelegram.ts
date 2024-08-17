@@ -35,6 +35,19 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
+function progressBars(currentStep: number) {
+  const totalSteps = 6
+  let progress = ""
+  for (let i = 0; i < totalSteps; i++) {
+    if (i < currentStep) {
+      progress += "🟩"
+    } else {
+      progress += "⬜"
+    }
+  }
+  return progress
+}
+
 // COMMAND HANDLERS
 
 bot.command("start", async (ctx) => {
@@ -354,7 +367,9 @@ bot.on(callbackQuery("data"), async (ctx) => {
         if (checkerDocSnap.data()?.isQuizComplete) {
           isUser = await checkCheckerIsUser(whatsappId)
           ctx.reply(
-            "Thank you for completing the quiz! We hope you found it useful."
+            `Thank you for completing the quiz!💪🎉 We hope you found it useful.
+
+Progress: ${progressBars(3)}`
           )
           if (isUser) {
             await sendTGGroupPrompt(chatId, checkerDocSnap, true)
@@ -368,7 +383,9 @@ bot.on(callbackQuery("data"), async (ctx) => {
       case "WA_COMPLETED":
         isUser = await checkCheckerIsUser(whatsappId)
         if (isUser) {
-          ctx.reply("Thank you for onboarding to the WhatsApp service!")
+          ctx.reply(`Thank you for onboarding to the WhatsApp service! 🙌
+            
+Progress: ${progressBars(4)}`)
           await sendTGGroupPrompt(chatId, checkerDocSnap, true)
         } else {
           await sendWABotPrompt(chatId, checkerDocSnap, false)
@@ -423,7 +440,7 @@ const sendNamePrompt = async (
 ) => {
   const namePrompt = await bot.telegram.sendMessage(
     chatId,
-    "First up, how shall we address you?",
+    `First up, how shall we address you?`,
     {
       reply_markup: { force_reply: true },
     }
@@ -440,7 +457,9 @@ const sendNumberPrompt = async (
 ) => {
   const numberPrompt = await bot.telegram.sendMessage(
     chatId,
-    `What is your WhatsApp phone number? Please include the country code, but omit the "+", e.g 6591234567`,
+    `What is your WhatsApp phone number? Please include the country code, but omit the "+", e.g 6591234567
+    
+Progress: ${progressBars(1)}`,
     {
       reply_markup: { force_reply: true },
     }
@@ -551,7 +570,9 @@ const sendQuizPrompt = async (
       isFirstPrompt
         ? "Thank you for verifying your WhatsApp number"
         : "We noticed you have not completed the quiz yet"
-    }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!`,
+    }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!
+    
+Progress: ${progressBars(2)}`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -647,7 +668,9 @@ const sendNLBPrompt = async (chatId: number, checkerSnap: DocumentSnapshot) => {
   await bot.telegram.sendPhoto(chatId, NLB_SURE_IMAGE, {
     caption: `One last thing - CheckMate is partnering with the National Library Board to grow a vibrant learning community aimed at safeguarding the community from scams and misinformation.
 
-If you'd like to get better at fact-checking, or if you're keen to meet fellow checkers in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!`,
+If you'd like to get better at fact-checking, or if you're keen to meet fellow checkers in person, do check out and join the <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">SURE Learning Community</a>. It'll be fun!
+
+Progress: ${progressBars(5)}`,
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
@@ -689,7 +712,7 @@ You may view these resources with the command /resources.`,
   )
   await bot.telegram.sendMessage(
     chatId,
-    `You've now successfully onboarded as a Checker. Stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
+    `Hooray! You've now successfully onboarded as a Checker! 🥳 Stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
 
