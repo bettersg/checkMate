@@ -669,15 +669,11 @@ const sendCompletionPrompt = async (
   })
   await bot.telegram.sendMessage(
     chatId,
-    `You have now successfully onboarded as a checker! You will now receive notifications when there are messages that need checking.
-
-Feel free to explore the Checker's Portal below, or by pressing the button at the bottom left of the screen. Here, you can view the leaderboard, your accuracy, and more.
+    `Finally, check out the Checker's Portal below, which is where you will vote on messages, and see the leaderboard and your statistics.
 
 ${resources}
 
-You may view these resources with the command /resources.
-    
-`,
+You may view these resources with the command /resources.`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -691,6 +687,10 @@ You may view these resources with the command /resources.
       },
       parse_mode: "HTML",
     }
+  )
+  await bot.telegram.sendMessage(
+    chatId,
+    `You've now successfully onboarded as a Checker. Stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
 
