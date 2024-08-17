@@ -238,108 +238,99 @@ bot.on(message("text"), async (ctx) => {
       await ctx.reply("Sorry, this command is not supported.")
       return
     }
-    if (!msg.reply_to_message) {
-      // Ignore commands as they are handled separately
+    const checkerId = msg.from?.id
+    const chatId = msg.chat.id
+
+    const userQuerySnap = await db
+      .collection("checkers")
+      .where("telegramId", "==", checkerId)
+      .get()
+
+    const userSnap = userQuerySnap.docs[0]
+    let currentStep = userSnap.data().onboardingStatus
+    const expectingRepliesTo = ["name", "number", "verify"]
+    if (!expectingRepliesTo.includes(currentStep)) {
       await ctx.reply(
-        "Sorry, this bot is unable to respond to free-form messages. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
+        "Sorry, this bot is unable to respond to free-form messages."
       )
-    } else if (msg.text && msg.reply_to_message) {
-      const checkerId = msg.from?.id
-      const chatId = msg.chat.id
+    } else if (msg.text) {
+      let whatsappId = ""
 
-      const userQuerySnap = await db
-        .collection("checkers")
-        .where("telegramId", "==", checkerId)
-        .get()
+      switch (currentStep) {
+        case "name":
+          const name = msg.text
+          if (name.replace(/\s+/g, "").length === 0) {
+            await ctx.reply(
+              "Name cannot be just spaces. Please enter a valid name."
+            )
+            await sendNamePrompt(chatId, userSnap)
+            return
+          }
+          await userSnap.ref.update({
+            name,
+          })
+          await sendNumberPrompt(chatId, userSnap)
+          break
+        case "number":
+          whatsappId = msg.text.replace("+", "").replace(" ", "")
 
-      const userSnap = userQuerySnap.docs[0]
+          if (
+            whatsappId.length === 8 &&
+            (whatsappId.startsWith("9") || whatsappId.startsWith("8"))
+          ) {
+            whatsappId = `65${whatsappId}`
+          }
+          //check if whatsappId is numeric
+          if (!isNumeric(whatsappId)) {
+            await ctx.reply(
+              `The phone number you entered is invalid. Please enter a valid phone number.`
+            )
+            return
+          }
 
-      if (
-        userSnap.data().lastTrackedMessageId == msg.reply_to_message.message_id
-      ) {
-        let currentStep = userSnap.data().onboardingStatus
-        let whatsappId = ""
+          await userSnap.ref.update({
+            whatsappId,
+          })
 
-        switch (currentStep) {
-          case "name":
-            const name = msg.text
-            if (name.replace(/\s+/g, "").length === 0) {
-              await ctx.reply(
-                "Name cannot be just spaces. Please enter a valid name."
-              )
-              await sendNamePrompt(chatId, userSnap)
-              return
-            }
-            await userSnap.ref.update({
-              name,
-            })
-            await sendNumberPrompt(chatId, userSnap)
-            break
-          case "number":
-            whatsappId = msg.text.replace("+", "").replace(" ", "")
+          await sendOTPPrompt(chatId, userSnap, whatsappId)
+          break
+        case "verify":
+          const otpAttempt = msg?.text || ""
+          whatsappId = userSnap.data().whatsappId
 
-            if (
-              whatsappId.length === 8 &&
-              (whatsappId.startsWith("9") || whatsappId.startsWith("8"))
-            ) {
-              whatsappId = `65${whatsappId}`
-            }
-            //check if whatsappId is numeric
-            if (!isNumeric(whatsappId)) {
-              await ctx.reply(
-                `The phone number you entered is invalid. Please enter a valid phone number.`
-              )
-              return
-            }
+          const result = await checkOTP(otpAttempt, whatsappId, userSnap.id)
 
-            await userSnap.ref.update({
-              whatsappId,
-            })
-
-            await sendOTPPrompt(chatId, userSnap, whatsappId)
-            break
-          case "verify":
-            const otpAttempt = msg?.text || ""
-            whatsappId = userSnap.data().whatsappId
-
-            const result = await checkOTP(otpAttempt, whatsappId, userSnap.id)
-
-            const status = result.status
-            const message = result.message
-            try {
-              if (status === "success") {
-                await userSnap.ref.update({
-                  whatsappId,
-                  onboardingStatus: "quiz",
-                  lastTrackedMessageId: null,
-                })
-                await sendQuizPrompt(chatId, userSnap, true)
+          const status = result.status
+          const message = result.message
+          try {
+            if (status === "success") {
+              await userSnap.ref.update({
+                whatsappId,
+                onboardingStatus: "quiz",
+                lastTrackedMessageId: null,
+              })
+              await sendQuizPrompt(chatId, userSnap, true)
+            } else {
+              if (message === "OTP mismatch") {
+                await sendVerificationPrompt(chatId, userSnap, true)
+              } else if (message === "OTP max attempts") {
+                await ctx.reply(
+                  `Maximum OTP attempts reached. We will send a new OTP.`
+                )
+                await sendOTPPrompt(chatId, userSnap, whatsappId)
               } else {
-                if (message === "OTP mismatch") {
-                  await sendVerificationPrompt(chatId, userSnap, true)
-                } else if (message === "OTP max attempts") {
-                  await ctx.reply(
-                    `Maximum OTP attempts reached. We will send a new OTP.`
-                  )
-                  await sendOTPPrompt(chatId, userSnap, whatsappId)
-                } else {
-                  console.error(`OTP error with ${chatId}: ${message}`)
-                  await ctx.reply(
-                    "Apologies - an error occurred, please try again later."
-                  )
-                }
+                console.error(`OTP error with ${chatId}: ${message}`)
+                await ctx.reply(
+                  "Apologies - an error occurred, please try again later."
+                )
               }
-              break
-            } catch (error) {
-              logger.log("Error in OTP verification", error)
             }
-          default:
-            logger.log("Unhandled onboarding stage: ", currentStep)
-        }
-      } else {
-        await ctx.reply(
-          "Sorry, we don't support replies to messages except in certain cases. Please reply to the last message asking for either your name, phone number, or OTP to continue the onboarding flow."
-        )
+            break
+          } catch (error) {
+            logger.log("Error in OTP verification", error)
+          }
+        default:
+          logger.log("Unhandled onboarding stage: ", currentStep)
       }
     }
   } catch (error) {
@@ -416,9 +407,9 @@ Progress: ${progressBars(4)}`)
       case "SEND_OTP":
         await sendOTPPrompt(chatId, checkerDocSnap, whatsappId)
         break
-      case "VERIFY_OTP":
-        await sendVerificationPrompt(chatId, checkerDocSnap, false)
-        break
+      // case "VERIFY_OTP":
+      //   await sendVerificationPrompt(chatId, checkerDocSnap, false)
+      //   break
       case "ONBOARD_AGAIN":
         await checkerDocSnap.ref.update({
           onboardingStatus: "name",
@@ -486,22 +477,17 @@ const sendOTPPrompt = async (
   if (postOTPHandlerRes.status === "success") {
     await bot.telegram.sendMessage(
       chatId,
-      `We have sent a 6-digit OTP to your WhatsApp at +${whatsappId}. Please check your WhatsApp for the OTP, and hit "Verify OTP" below.`,
+      `We have sent a 6-digit OTP to your WhatsApp at +${whatsappId}. Please check your WhatsApp for the OTP.`,
       {
         reply_markup: {
-          inline_keyboard: [
-            [
-              inlineButtons.verifyOTP,
-              inlineButtons.resendOTP,
-              inlineButtons.rekey,
-            ],
-          ],
+          inline_keyboard: [[inlineButtons.resendOTP, inlineButtons.rekey]],
         },
       }
     )
     await checkerSnap.ref.update({
-      onboardingStatus: "otpSent",
+      onboardingStatus: "verify",
     })
+    sendVerificationPrompt(chatId, checkerSnap, false)
   } else {
     switch (postOTPHandlerRes.message) {
       case "OTP request limit exceeded":
@@ -712,7 +698,7 @@ You may view these resources with the command /resources.`,
   )
   await bot.telegram.sendMessage(
     chatId,
-    `Hooray! You've now successfully onboarded as a Checker! 🥳 Stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
+    `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
 
