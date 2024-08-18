@@ -144,8 +144,8 @@ export default function Dashboard() {
                     >
                       WhatsApp Bot
                     </a>
-                    You need to submit at least ${programStats.numReportTarget}{" "}
-                    messages
+                    . You need to submit at least $
+                    {programStats.numReportTarget} messages
                   </>
                 }
               />
@@ -157,7 +157,7 @@ export default function Dashboard() {
                 current={programStats.numReferrals}
                 target={programStats.numReferralTarget}
                 tooltip_header="Number of Referrals"
-                tooltip_description="Your accuracy for votes that did not end up as the unsure category"
+                tooltip_description="Number of people you have referred to join CheckMate"
                 referral_code={referralCode}
               />
             )}
@@ -171,14 +171,14 @@ export default function Dashboard() {
             >
               Withdraw
             </a>{" "}
-            to just perform the regular checking.
+            to participate in just the regular checking.
           </Typography>
           <Dialog open={dialogOpen} handler={handleOpen}>
-            <DialogHeader>Confirmation</DialogHeader>
+            <DialogHeader>Withdrawal Confirmation</DialogHeader>
             <DialogBody>
               Please confirm that you would like to withdraw from the program.
-              If you are keen to restart the program in the future, you can do
-              so at the menu bar accessible from the top right.
+              If you are keen to restart the program in future, you can do so at
+              the menu bar accessible from the top right.
             </DialogBody>
             <DialogFooter>
               <Button
