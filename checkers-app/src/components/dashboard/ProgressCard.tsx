@@ -8,12 +8,26 @@ interface PropType {
   img_src: string;
   current: number;
   target: number;
+  isPercentageTarget?: boolean;
   tooltip_header: string;
   tooltip_description: string | React.ReactNode;
   referral_code?: string | null;
 }
 
 export default function ProgressCard(Prop: PropType) {
+  const progressValue = Prop.isPercentageTarget
+    ? Math.min(Prop.current, 100)
+    : Math.min((Prop.current / Prop.target) * 100, 100);
+  const targetPosition = Math.min((Prop.target / 100) * 100, 100);
+
+  const targetString = `${Prop.current} / ${Prop.target}`;
+
+  const barColor = Prop.isPercentageTarget
+    ? Prop.current < Prop.target
+      ? "red"
+      : "green"
+    : "orange";
+
   return (
     <Card className="dark:bg-dark-component-color dark:shadow-dark-component-color/20">
       <CardBody className="flex flex-col place-items-center">
@@ -38,22 +52,51 @@ export default function ProgressCard(Prop: PropType) {
             )}
           </div>
 
-          <div className="mb-2 flex items-center justify-between gap-4">
-            <Typography className="text-primary-color" variant="h6">
-              {Prop.current / Prop.target < 0.75
-                ? "Some way to go..."
-                : Prop.current / Prop.target < 1
-                ? "Almost there..."
-                : "Completed ✅"}
-            </Typography>
-            <Typography className="text-primary-color" variant="h6">
-              {Prop.current} / {Prop.target}
-            </Typography>
+          {Prop.isPercentageTarget && (
+            <div className="mb-2 flex items-center justify-between gap-4">
+              <div className="relative w-full pb-5">
+                <Typography
+                  className="absolute transform -translate-x-1/2 text-primary-color"
+                  style={{ left: `${targetPosition}%` }}
+                  variant="h6"
+                >
+                  {`${Prop.target}%`}
+                </Typography>
+              </div>
+            </div>
+          )}
+
+          {!Prop.isPercentageTarget && (
+            <div className="mb-2 flex items-center justify-between gap-4">
+              <Typography className="text-primary-color" variant="h6">
+                {Prop.current / Prop.target < 0.75
+                  ? "Some way to go..."
+                  : Prop.current / Prop.target < 1
+                  ? "Almost there..."
+                  : "Completed ✅"}
+              </Typography>
+              <Typography className="text-primary-color" variant="h6">
+                {targetString}
+              </Typography>
+            </div>
+          )}
+
+          <div className="relative w-full">
+            <Progress
+              value={progressValue}
+              color={barColor}
+              className="relative z-10"
+              size="lg"
+              label={Prop.isPercentageTarget}
+            />
+            {/* Vertical Line */}
+            {Prop.isPercentageTarget && (
+              <div
+                className="absolute top-0 left-0 h-full border-l-4 border-primary-color z-20"
+                style={{ left: `${targetPosition - 1}%` }}
+              ></div>
+            )}
           </div>
-          <Progress
-            value={Math.min((Prop.current / Prop.target) * 100, 100)}
-            color="orange"
-          />
         </div>
       </CardBody>
     </Card>
