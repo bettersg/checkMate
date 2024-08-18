@@ -100,6 +100,7 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
     return
   }
 
+  functions.logger.info(`Message type is ${type}`)
   switch (type) {
     case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
