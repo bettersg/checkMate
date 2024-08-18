@@ -95,8 +95,8 @@ export default function Dashboard() {
       {isOnProgram && programStats ? (
         <div>
           <Typography variant="h6" className="text-primary-color">
-            Up for a challenge? Attain these 3 milestones to finish our checker
-            program and get certified.
+            Up for a challenge? Attain these 3 milestones to finish the
+            CheckMate Checker's Program and get certified.
           </Typography>
           <div className="my-6 flex flex-col gap-y-4 mx-2">
             <ProgressCard
