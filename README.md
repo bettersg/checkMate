@@ -523,6 +523,11 @@ We aim to document all these flows eventually, but for now do look at the code t
 
 We currently have 3 environments, prod, uat, and local. The `/integration-tests` folder contains a 4th mocked environment, SIT, which is run in the CI pipeline. Generally, you'd do most of your feature development on the local dev environment, and in a feature branch. Once the feature branch is ready, make a PR to the `develop` branch. Successful merge into the `develop` branch will trigger a UAT deployment. Successful merge from `develop` into `main` will in turn trigger a prod deployment. All these happen through Github Actions.
 
+## Software Requirements
+1. `npm`
+2. `git`
+3. `node >= 18 && <= 20`
+
 ### First Time Setup
 
 1. `git clone https://github.com/CheckMateSG/checkMate.git`
@@ -542,7 +547,7 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 
 ### First time testing (once all above steps are done)
 
-1. Execute the steps in the below section "Each time developing"
+1. Execute the steps in the below section [Each Time Developing](#each-time-developing)
 2. Go to the chat with the WhatsApp User bot non-prod number and send in `/mockdb`
 3. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
 4. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
@@ -591,7 +596,7 @@ In the event the Makefile doesn't work,
 
 - Firebase Console - https://console.firebase.google.com/, login with your bettersg email. Go here to manage the product resources
 - Adding subcollections - https://stackoverflow.com/questions/47514419/how-to-add-subcollection-to-a-document-in-firebase-cloud-firestore
-- Getting started with firestore and firebasehttps://firebase.google.com/docs/functions/get-started
+- Getting started with firestore and firebase https://firebase.google.com/docs/functions/get-started
 - WhatsApp send message API documentation - https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages
 - WhatsApp webhook object documentation - https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components
 - Telegram Bot API documentation - https://core.telegram.org/bots/api
