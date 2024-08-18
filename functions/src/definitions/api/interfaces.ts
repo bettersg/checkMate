@@ -61,7 +61,7 @@ interface updateChecker {
   numVerifiedLinks?: number
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
-  programData?: "reset" | "complete"
+  programData?: "reset" | "complete" | "withdraw"
 }
 
 interface Checker {
