@@ -229,6 +229,18 @@ export const resetCheckerProgram = async (checkerId: string) => {
   ).data;
 };
 
+export const withdrawCheckerProgram = async (checkerId: string) => {
+  if (!checkerId) {
+    throw new Error("Checker ID missing in resetCheckerProgram.");
+  }
+  const checkerUpdateData: updateChecker = {
+    programData: "withdraw",
+  };
+  return (
+    await axiosInstance.patch(`/api/checkers/${checkerId}`, checkerUpdateData)
+  ).data;
+};
+
 export const activateChecker = async (checkerId: string) => {
   if (!checkerId) {
     throw new Error("Checker ID missing in activateChecker.");
