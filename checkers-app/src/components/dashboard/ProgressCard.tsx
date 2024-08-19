@@ -16,8 +16,8 @@ interface PropType {
 
 export default function ProgressCard(Prop: PropType) {
   const progressValue = Prop.isPercentageTarget
-    ? Math.min(Prop.current, 100)
-    : Math.min((Prop.current / Prop.target) * 100, 100);
+    ? parseFloat(Math.min(Prop.current, 100).toFixed(2))
+    : parseFloat(Math.min((Prop.current / Prop.target) * 100, 100).toFixed(2));
   const targetPosition = Math.min((Prop.target / 100) * 100, 100);
 
   const targetString = `${Prop.current} / ${Prop.target}`;

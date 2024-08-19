@@ -202,6 +202,11 @@ export default function Dashboard() {
           </Typography>
           <div className="my-6 flex flex-col gap-y-4 mx-2">
             <StatCard
+              name="people helped"
+              img_src="/users_helped.png"
+              stat={`${peopleHelped}`}
+            />
+            <StatCard
               name="messages voted on"
               img_src="/votes.png"
               stat={`${totalVotes}`}
@@ -219,11 +224,6 @@ export default function Dashboard() {
               name="average response time"
               img_src="/response.png"
               stat={`${avgResponseTime.toFixed(0)} mins`}
-            />
-            <StatCard
-              name="people helped"
-              img_src="/users_helped.png"
-              stat={`${peopleHelped}`}
             />
           </div>
         </div>
