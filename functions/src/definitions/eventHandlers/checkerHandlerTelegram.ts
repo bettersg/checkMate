@@ -247,6 +247,13 @@ bot.on(message("text"), async (ctx) => {
       .where("telegramId", "==", checkerId)
       .get()
 
+    if (userQuerySnap.empty) {
+      await ctx.reply(
+        `You have not onboarded as a CheckMate Checker yet. Type /onboard to begin your journey.`
+      )
+      return
+    }
+
     const userSnap = userQuerySnap.docs[0]
     let currentStep = userSnap.data().onboardingStatus
     const expectingRepliesTo = ["name", "number", "verify"]
@@ -550,10 +557,9 @@ const sendQuizPrompt = async (
   const linkURL = `${TYPEFORM_URL}#name=${name}&phone=${whatsappId}`
   await bot.telegram.sendMessage(
     chatId,
-    `${
-      isFirstPrompt
-        ? "Thank you for verifying your WhatsApp number"
-        : "We noticed you have not completed the quiz yet"
+    `${isFirstPrompt
+      ? "Thank you for verifying your WhatsApp number"
+      : "We noticed you have not completed the quiz yet"
     }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!
     
 ${progressBars(2)}`,
@@ -587,10 +593,9 @@ const sendWABotPrompt = async (
   }
   await bot.telegram.sendMessage(
     chatId,
-    `${
-      isFirstPrompt
-        ? "Next, try out our CheckMate WhatsApp service"
-        : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
+    `${isFirstPrompt
+      ? "Next, try out our CheckMate WhatsApp service"
+      : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
     } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, and send in the pre-populated message.
     
 This Whatsapp service is where people send in the messages that you'll be checking. Part of your role will also be to report suspicious messages here!
@@ -622,10 +627,9 @@ const sendTGGroupPrompt = async (
   }
   await bot.telegram.sendMessage(
     chatId,
-    `${
-      isFirstPrompt
-        ? "Next, p"
-        : "We noticed you have not joined the groupchat yet. P"
+    `${isFirstPrompt
+      ? "Next, p"
+      : "We noticed you have not joined the groupchat yet. P"
     }lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
 
 1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
