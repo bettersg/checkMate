@@ -49,9 +49,8 @@ async function anonymiseMessage(
             const responseObj = JSON.parse(response)
             const redactions: redaction[] = responseObj.redacted
             redactions.forEach((redaction) => {
-              let regex = new RegExp(redaction.text, "g")
-              returnMessage = returnMessage.replace(
-                regex,
+              returnMessage = returnMessage.replaceAll(
+                redaction.text,
                 redaction.replaceWith
               )
             })
