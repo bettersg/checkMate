@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
+import { validateURLS } from '../../utils/utils';
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { Timestamp } from "firebase-admin/firestore"
 import {
@@ -100,12 +101,14 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
     return
   }
 
+  console.log(`Message is of type "${type}"`)
   switch (type) {
     case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
       if (!message.text || !message.text.body) {
         break
       }
+      console.log(`Text message is "${message.text.body}"`)
       const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
         checkTemplate(
@@ -116,6 +119,7 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
           textNormalised,
           responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
         )
+
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
@@ -123,11 +127,13 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
         } else {
           await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         }
+        console.log(`step ${step}`)
         break
       }
       if (checkMenu(message.text.body)) {
         step = "text_menu"
         await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
+        console.log(`step ${step}`)
         break
       }
       step = await newTextInstanceHandler({
@@ -301,6 +307,10 @@ async function newTextInstanceHandler({
       rationalisation = await rationaliseMessage(text, machineCategory)
     }
     messageRef = db.collection("messages").doc()
+
+    const validatedURLS: any = validateURLS(text)
+    console.log(`Validated URLs are ${validatedURLS}`)
+
     messageUpdateObj = {
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: isMachineAssessed,
