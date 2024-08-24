@@ -8,7 +8,25 @@ interface URLValidationResult {
     error?: any;
 }
 
-export function validateURLS(text: string): Promise<URLValidationResult[]> {
+function addHttpsIfMissing(url: string) {
+    // Create a URL object to easily parse the URL
+    try {
+        const parsedUrl = new URL(url);
+
+        // If URL already has a scheme, return it as is
+        if (parsedUrl.protocol) {
+            return url;
+        }
+    } catch (e) {
+        // If URL parsing fails, it means it's a relative or invalid URL
+        // We need to handle this case
+    }
+
+    // Add https:// if the URL is missing a scheme
+    return `https://${url}`;
+}
+
+export function validateURLs(text: string): Promise<URLValidationResult[]> {
     const urlRegex = /https?:\/\/[^\s/$.?#].[^\s]*/g;
     const urls = text.match(urlRegex);
     const results: URLValidationResult[] = [];
@@ -16,6 +34,7 @@ export function validateURLS(text: string): Promise<URLValidationResult[]> {
     if (urls) {
         // Create an array of promises for each URL request
         const requests = urls.map((url, index) => {
+            url = addHttpsIfMissing(url)
             console.log(`URL ${index + 1} is: "${url}"`);
 
             const base64URL: string = Buffer.from(url).toString('base64');
@@ -36,22 +55,24 @@ export function validateURLS(text: string): Promise<URLValidationResult[]> {
                 .request(options)
                 .then((response: { data: any; }) => {
                     console.log(`Success calling ${virusTotalURL}`);
-                    console.log(response.data);
+                    let data = JSON.stringify(response.data.data.attributes.total_votes)
+                    console.error(data);
                     results.push({
                         url,
                         success: true,
-                        data: JSON.stringify(response.data),
+                        data: data,
                         error: null,
                     });
                 })
                 .catch((error: { response: { data: any; }; }) => {
                     console.log(`Error calling ${virusTotalURL}`);
-                    console.error(error.response.data);
+                    let data = JSON.stringify(error.response.data)
+                    console.error(data);
                     results.push({
                         url,
                         success: false,
                         data: null,
-                        error: JSON.stringify(error.response.data),
+                        error: data,
                     });
                 });
         });

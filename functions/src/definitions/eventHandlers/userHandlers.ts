@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { validateURLS } from '../../utils/utils';
+import { validateURLs } from '../../utils/utils';
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { Timestamp } from "firebase-admin/firestore"
 import {
@@ -308,46 +308,53 @@ async function newTextInstanceHandler({
     }
     messageRef = db.collection("messages").doc()
 
-    const validatedURLS: any = validateURLS(text)
-    console.log(`Validated URLs are ${validatedURLS}`)
+    let validatedURLS: any;
+    try {
+        const validatedURLS: any = await validateURLs(text)
+        console.log('Validated URLs:', validatedURLS)
 
-    messageUpdateObj = {
-      machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: isMachineAssessed,
-      originalText: text,
-      text: strippedMessage, //text
-      caption: null,
-      latestInstance: null,
-      firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
-      lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
-      lastRefreshedTimestamp: timestamp,
-      isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
-      assessedTimestamp: null,
-      assessmentExpiry: null,
-      assessmentExpired: false,
-      truthScore: null, //float, the mean truth score
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
-      isLegitimate: null,
-      isUnsure: null,
-      isInfo: machineCategory === "info" ? true : null,
-      isSatire: null,
-      isHarmful: null,
-      isHarmless: null,
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
-      customReply: null, //string
-      instanceCount: 0,
-      rationalisation: rationalisation,
-    }
+        messageUpdateObj = {
+          machineCategory: machineCategory, //Can be "fake news" or "scam"
+          isMachineCategorised: isMachineAssessed,
+          originalText: text,
+          text: strippedMessage, //text
+          caption: null,
+          latestInstance: null,
+          firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+          lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+          lastRefreshedTimestamp: timestamp,
+          isPollStarted: false, //boolean, whether or not polling has started
+          isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+          assessedTimestamp: null,
+          assessmentExpiry: null,
+          assessmentExpired: false,
+          truthScore: null, //float, the mean truth score
+          isIrrelevant:
+            isMachineAssessed && machineCategory.includes("irrelevant")
+              ? true
+              : null, //bool, if majority voted irrelevant then update this
+          isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+          isIllicit:
+            isMachineAssessed && machineCategory === "illicit" ? true : null,
+          isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+          isLegitimate: null,
+          isUnsure: null,
+          isInfo: machineCategory === "info" ? true : null,
+          isSatire: null,
+          isHarmful: null,
+          isHarmless: null,
+          primaryCategory: isMachineAssessed
+            ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+            : null,
+          customReply: null, //string
+          instanceCount: 0,
+          rationalisation: rationalisation,
+        }
+      } catch (error) {
+        console.error('Error validating URLs:', error)
+        // You might want to handle the error, such as setting a default value
+        validatedURLS = null
+      }
   } else {
     messageRef = matchedParentMessageRef
   }
