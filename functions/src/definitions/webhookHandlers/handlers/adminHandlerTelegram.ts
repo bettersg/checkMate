@@ -37,11 +37,11 @@ adminBot.on(message("new_chat_members"), async (ctx) => {
 Welcome to the CheckMate comms channel 👋
 
 This channel will be used to:
-1. Inform CheckMates when updates/improvements are deployed to the bots
+1. Inform Checkers of updates/improvements
 
-2. Inform CheckMates of any downtime in the system
+2. Inform Checkers of any downtime
 
-3. Share relevant links from reputable news sources to aid fact checking. Note: Beyond this, CheckMates should not discuss what scores to assign, as this may make the collective outcome of CheckMates' votes biased.
+3. Share relevant links from reputable sources to aid fact checking. Note: Beyond this, Checkers should not discuss the voting, as this may make the collective outcome biased.
 
 4. You can refer to <a href="https://bit.ly/checkmates-wiki">our fact-checking wiki</a> for more tips on safe checking 😊
 
