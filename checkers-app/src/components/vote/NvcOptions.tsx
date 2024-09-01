@@ -27,8 +27,7 @@ export default function nvcOptions(Prop: nvcOptionsProps) {
   return (
     <div>
       <Typography className="text-primary-color text-justify my-3">
-        Please assess the veracity of the claim(s) in the message on a scale
-        from 1 (entirely false) to 5 (entirely true).
+        Is this from a credible source?
       </Typography>
       <Card className="w-full max-w-[24rem] my-3 dark:bg-dark-component-color">
         <List className="flex-row">
