@@ -1,4 +1,5 @@
 import thresholds from "./parameters/thresholds.json"
+import others from "./parameters/others.json"
 import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
@@ -19,7 +20,7 @@ function isNumeric(str: string) {
   return !isNaN(Number(str))
 }
 
-const getThresholds = async function () {
+async function getThresholds() {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
@@ -29,6 +30,15 @@ const getThresholds = async function () {
     returnThresholds.surveyLikelihood = 1
   }
   return returnThresholds
+}
+
+async function getTags() {
+  const db = admin.firestore()
+  const tagsRef = db.doc("systemParameters/tags")
+  const tagsSnap = await tagsRef.get()
+  const returnTags = tagsSnap.get("tags") ?? others.tags
+  //return array of keys
+  return returnTags
 }
 
 function normalizeSpaces(str: string) {
@@ -146,4 +156,5 @@ export {
   checkUrlPresence,
   checkTemplate,
   isNumeric,
+  getTags,
 }

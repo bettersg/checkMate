@@ -1,7 +1,7 @@
 import { FieldValue } from "@google-cloud/firestore"
 import { DocumentReference } from "firebase-admin/firestore"
 import * as admin from "firebase-admin"
-import { getThresholds } from "./utils"
+import { getThresholds, getTags } from "./utils"
 
 const db = admin.firestore()
 
@@ -36,10 +36,35 @@ const getVoteCounts = async function (
   messageRef: DocumentReference,
   isLegacy = false
 ) {
+  const tags = (await getTags()) as string[]
   const totalVoteRequestQuery = messageRef
     .collection("voteRequests")
     .count()
     .get()
+  // Create an array of promises for the tags
+  const tagPromises = tags.map((tag) => getCount(messageRef, tag))
+  const otherPromises = [
+    getCount(messageRef, "responses"),
+    getCount(messageRef, "pass"),
+    getCount(messageRef, "irrelevant"),
+    getCount(messageRef, "scam"),
+    getCount(messageRef, "illicit"),
+    getCount(messageRef, "info"),
+    getCount(messageRef, "spam"),
+    getCount(messageRef, "legitimate"),
+    getCount(messageRef, "unsure"),
+    getCount(messageRef, "satire"),
+    getCount(messageRef, "totalVoteScore"),
+    totalVoteRequestQuery,
+    getThresholds(),
+  ]
+  const allPromises = [
+    ...otherPromises, // spread the other fixed promises
+    ...tagPromises, // spread the tag promises
+  ]
+  const results = await Promise.all(allPromises)
+  // Extract the tag counts first
+  const tagCounts = results.slice(otherPromises.length) as number[]
   const [
     responsesCount,
     passCount,
@@ -54,21 +79,28 @@ const getVoteCounts = async function (
     voteTotal,
     voteRequestCountSnapshot,
     thresholds,
-  ] = await Promise.all([
-    getCount(messageRef, "responses"),
-    getCount(messageRef, "pass"),
-    getCount(messageRef, "irrelevant"),
-    getCount(messageRef, "scam"),
-    getCount(messageRef, "illicit"),
-    getCount(messageRef, "info"),
-    getCount(messageRef, "spam"),
-    getCount(messageRef, "legitimate"),
-    getCount(messageRef, "unsure"),
-    getCount(messageRef, "satire"),
-    getCount(messageRef, "totalVoteScore"),
-    totalVoteRequestQuery,
-    getThresholds(),
-  ])
+  ] = results.slice(0, otherPromises.length) as [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    admin.firestore.AggregateQuerySnapshot<
+      {
+        count: admin.firestore.AggregateField<number>
+      },
+      admin.firestore.DocumentData,
+      admin.firestore.DocumentData
+    >,
+    any
+  ] // slice the results to get the fixed promises
+
   const totalVoteRequestsCount = voteRequestCountSnapshot.data().count ?? 0
   const factCheckerCount = totalVoteRequestsCount - passCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
   const validResponsesCount = responsesCount - passCount //can remove in future and replace with nonErrorCount
@@ -85,6 +117,10 @@ const getVoteCounts = async function (
       harmlessCount += infoCount
     }
   }
+  const tagCountMap = tags.reduce((acc, tag, index) => {
+    acc[tag] = tagCounts[index]
+    return acc
+  }, {} as { [key: string]: number })
   return {
     responsesCount,
     passCount,
@@ -103,6 +139,7 @@ const getVoteCounts = async function (
     harmfulCount,
     harmlessCount,
     factCheckerCount,
+    tagCounts: tagCountMap,
   }
 }
 

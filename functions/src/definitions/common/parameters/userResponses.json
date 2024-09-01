@@ -32,8 +32,8 @@
     "cn": "{{thanks}}{{methodology}}很可疑！🚨{{image_caveat}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。"
   },
   "SPAM": {
-    "en": "{{thanks}}{{methodology}}*spam*!🚧{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\n{{reporting_nudge}}Thank you for keeping Singapore safe!",
-    "cn": "{{thanks}}{{methodology}}是垃圾信息！🚧{{image_caveat}}\n\n虽然它看似无害，但请仍然保持警惕 🧐\n\n{{reporting_nudge}}感谢您对新加坡网络安全的支持和贡献！"
+    "en": "{{thanks}}{{methodology}}*marketing/viral content*!📣{{image_caveat}}\n\nIt's likely harmless, but you should always make sure 🧐\n\n{{reporting_nudge}}Thank you for keeping Singapore safe!",
+    "cn": "{{thanks}}{{methodology}}是营销/病毒式信息！📣{{image_caveat}}\n\n虽然它看似无害，但请仍然保持警惕 🧐\n\n{{reporting_nudge}}感谢您对新加坡网络安全的支持和贡献！"
   },
   "LEGITIMATE": {
     "en": "{{thanks}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}\n\n{{reporting_nudge}}Thank you for keeping Singapore safe!",
@@ -60,7 +60,7 @@
     "cn": "感谢您的耐心等待！"
   },
   "IMAGE_CAVEAT": {
-    "en": "This assessment refers to the claims made within the captions, if any.",
+    "en": "This assessment refers to the claims made within the accompanying message.",
     "cn": "我们的评估基于图片标题中的内容。"
   },
   "METHODOLOGY_HUMAN": {
@@ -124,7 +124,7 @@
     "cn": "我们不会将您的短信发送给ScamShield。感谢您与我们分享这条短信，也感谢您对新加坡网络安全的支持和贡献。"
   },
   "MENU": {
-    "en": "{{prefix}}\n\nSelect \"Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *is designed to check dubious messages you send in. It cannot converse freely with you*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
+    "en": "{{prefix}}\n\nSelect \"Menu\" below to see what CheckMate can do! 👈\n\nDo note that CheckMate *checks dubious messages and tells you whether you can trust them. It cannot converse with you or answer questions*.\n\nAnytime you need a refresher on what CheckMate can do, type \"menu\" to get here again! 😊",
     "cn": "{{prefix}}\n\n请点击“菜单\"查看查友的功能！👈\n\n请注意，查友只评估您发送的短信，它无法与您进行对话。\n\n您只需输入\"菜单\"即可随时返回这里，查看查友的功能！😊"
   },
   "NEW_USER_PREFIX_EN": {
@@ -140,12 +140,16 @@
     "cn": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。"
   },
   "IRRELEVANT_MENU_PREFIX": {
-    "en": "Thanks for waiting!🙏🏻 Our CheckMates didn't find anything to assess in this message.😕",
+    "en": "Thanks for waiting!🙏🏻 Our volunteer checkers were unable to assess this message.😕\n\nSorry about that!",
     "cn": "感谢您的耐心等待！🙏🏻 我们的查哥查妹没有在这条短信中找到可以评估的内容。😕"
   },
   "IRRELEVANT_AUTO_MENU_PREFIX": {
-    "en": "Hmm...There doesn't seem to be anything to assess in this message.😕",
+    "en": "Hmm...we couldn't assess this message.😕\n\nSorry about that!",
     "cn": "嗯...这条短信似乎没有可以评估的内容。😕"
+  },
+  "INCORRECT": {
+    "en": "At this point, CheckMate is unable to answer questions directly, or converse freely with you. 😕\n\nTo use CheckMate, simply send us messages that you require checking. We will let you know whether the message can be trusted. There is no need to specially ask about it.\n\nWe apologise for the misunderstanding.",
+    "cn": "此时，查友无法直接回答问题或与您自由交谈。😕\n\n使用查友，只需发送您希望检查的消息，无需特别询问。我们会告诉您该消息是否可信。\n\n对因此造成的误解，我们深表歉意。"
   },
   "MENU_PREFIX": {
     "en": "Hi! Thanks for using CheckMate. 🙏🏻",
@@ -388,8 +392,8 @@
     "cn": "是准确的✅"
   },
   "PLACEHOLDER_SPAM": {
-    "en": "spam🚧",
-    "cn": "是垃圾信息🚧"
+    "en": "marketing/viral content📣",
+    "cn": "是营销/病毒式信息📣"
   },
   "PLACEHOLDER_LEGITIMATE": {
     "en": "legitimate✅",

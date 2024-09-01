@@ -9,10 +9,12 @@ function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
 ) {
-  const db = admin.firestore()
   const isLegacy = voteRequestSnap.get("truthScore") === undefined
   const isParentMessageAssessed = parentMessageSnap.get("isAssessed") ?? false
   const parentMessageCategory = parentMessageSnap.get("primaryCategory") ?? null
+  //INCORRECT USAGE
+  const parentMessageTags = parentMessageSnap.get("tags") ?? {}
+  const voteRequestTags = voteRequestSnap.get("tags") ?? {}
   const parentMessageTruthScore = isLegacy
     ? parentMessageSnap.get("legacyTruthScore") ?? null
     : parentMessageSnap.get("truthScore") ?? null
@@ -49,6 +51,15 @@ function checkAccuracy(
       return null
     }
     return Math.abs(parentMessageTruthScore - voteRequestTruthScore) <= 1
+  } else if (voteRequestCategory === "irrelevant") {
+    //INCORRECT USAGE
+    const isParentMessageIncorrectUsage = parentMessageTags.incorrect ?? false
+    const isVoteRequestIncorrectUsage = voteRequestTags.incorrect ?? false
+    if (parentMessageCategory === "irrelevant") {
+      return isParentMessageIncorrectUsage === isVoteRequestIncorrectUsage
+    } else {
+      return false
+    } //END INCORRECT USAGE
   } else {
     return parentMessageCategory === voteRequestCategory
   }
