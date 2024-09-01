@@ -146,6 +146,7 @@ export default function VoteCategories(Prop: PropType) {
 
     switch (categoryName) {
       case "nvc":
+        setVoteCategory(null);
         break;
       case "incorrect":
         handleVoteCategoryChange("incorrect");
@@ -162,6 +163,9 @@ export default function VoteCategories(Prop: PropType) {
     truthScore: number | null,
     tags: string[] | null
   ) => {
+    if (category === null) {
+      return;
+    }
     if (messageId && voteRequestId) {
       //call api to update vote
       patchVote(

@@ -148,6 +148,9 @@ export const patchVote = async (
   if (!messageId || !voteRequestId) {
     throw new Error("Message Id or Vote Request Id missing.");
   }
+  if (category === null) {
+    throw new Error("Category missing");
+  }
   if (category === "info" && truthScore == null) {
     throw new Error("Truth score required for info vote.");
   }
