@@ -114,7 +114,25 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
               }
               if (phoneNumberId === userPhoneNumberId) {
                 //put into user queue
-                await publishToTopic("userEvents", message, "whatsapp")
+                //convert message to general Message object for processing
+                let generalMessage = {
+                  source: "whatsapp",
+                  id: message.id,
+                  userId: message.from,
+                  type: message.type,
+                  text: message.text?.body,
+                  media: {
+                      file_id: message.image?.id, //to download the media
+                      caption: message.image?.caption,
+                      mime_type: message.image?.mime_type //determines if it is an image or video
+                  },
+                  timestamp: message.timestamp,
+                  isForwarded: message.context.forwarded,
+                  frequently_forwarded: message.context.frequently_forwarded,
+                  button: message.button,
+                  interactive: message.interactive
+              }
+                await publishToTopic("userEvents", generalMessage, "whatsapp")
               }
             }
             res.sendStatus(200)
@@ -161,6 +179,59 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
     functions.logger.error(JSON.stringify(req.body, null, 2))
     res.sendStatus(200)
   }
+}
+//for tele users
+const postUserHandlerTelegram = async (req: Request, res: Response) => {
+  if (
+    req.header("x-telegram-bot-api-secret-token") ===
+    process.env.TELEGRAM_WEBHOOK_TOKEN
+  ) {
+    let message = req.body.message
+        let type
+        if (message.photo || message.video) {
+            type = "image"
+        } else {
+            type = "text"
+        }
+        let media
+        //if type is image
+        if (message.photo && message.photo.length > 0) {
+            const photo = message.photo[message.photo.length - 1]
+            media = {
+                file_id: photo.file_id,
+                caption: message.caption,
+                mime_type: "image/jpeg"
+            }
+        } else if (message.video) {
+            media = {
+                file_id: message.video.file_id,
+                caption: message.caption,
+                mime_type: message.video.mime_type
+            }
+        } else {
+            media = null
+        }
+        let generalMessage = {
+            source: "telegram",
+            id: String(message?.message_id),
+            userId: String(message?.from?.id),
+            type: type,
+            text: message?.text,
+            media: media,
+            timestamp: message?.date,
+            isForwarded: null,
+            frequently_forwarded: null,
+            button: null,
+            interactive:null
+
+        }
+        await publishToTopic("userEvents", generalMessage, "telegram")
+  } else {
+    functions.logger.warn(
+      "Telegram handler endpoint was called from unexpected source"
+    )
+  }
+  res.sendStatus(200)
 }
 
 const postHandlerTelegram = async (req: Request, res: Response) => {

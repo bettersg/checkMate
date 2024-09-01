@@ -43,6 +43,7 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import {
+  Message,
   WhatsappMessageObject,
   MessageData,
   InstanceData,
@@ -62,7 +63,7 @@ const hashids = new Hashids(salt)
 
 const db = admin.firestore()
 
-const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
+const userHandlerWhatsapp = async function (message: Message) {
   if (!message?.id) {
     functions.logger.error("No message id")
     return
@@ -72,30 +73,48 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
     return
   }
 
-  let from = message.from // extract the phone number from the webhook payload
-  let type = message.type
-  const responses = await getUserResponsesObject("user", from)
+  let from = message.userId // extract the userid (wa phone no./tele userid etc.)
+  let type = message.type // image/text
+
+  let idField
+  switch (message.source) {
+      case 'telegram':
+          idField = 'telegramId';
+          break;
+      case 'email':
+          idField = 'emailId';
+          break;
+      case 'whatsapp':
+          idField = 'whatsappId';
+          break;
+      default:
+          console.error('Unknown source!');
+          return;
+  }
+
+  const responses = await getUserResponsesObject("user", from, idField) // change this to search for userID acc to fieldId
 
   //check whether new user
-  const userRef = db.collection("users").doc(from)
-  const userSnap = await userRef.get()
+  const userRef = db.collection("users").where(idField, '==', from)
+  const userSnapshot = await userRef.get()
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  const isFirstTimeUser = !userSnap.exists
+  const isFirstTimeUser = !userSnapshot.empty
+  const userDoc = userSnapshot.docs[0]
   let triggerOnboarding = isFirstTimeUser
   let step
   if (isFirstTimeUser) {
-    await createNewUser(userRef, messageTimestamp)
+    await createNewUser(from, idField, messageTimestamp) //edit this to fill the correct idField
   }
   const firstMessageReceiptTime = isFirstTimeUser
     ? messageTimestamp
-    : userSnap.get("firstMessageReceiptTime")
+    : userDoc.data()?.firstMessageReceiptTime
   const isNewlyJoined =
     messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
 
-  const isIgnored = userSnap.get("isIgnored")
+  const isIgnored = userDoc.get("isIgnored")
   if (isIgnored) {
     functions.logger.warn(
-      `Message from banned user ${from}!, text: ${message?.text?.body}`
+      `Message from banned user ${from}!, text: ${message?.text}`
     )
     return
   }
@@ -103,10 +122,10 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
   switch (type) {
     case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-      if (!message.text || !message.text.body) {
+      if (!message.text) {
         break
       }
-      const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
+      const textNormalised = normalizeSpaces(message.text).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
         checkTemplate(
           textNormalised,
@@ -119,66 +138,77 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
-          await referralHandler(message.text.body, from)
+          await referralHandler(message.text, from, idField)
         } else {
           await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         }
         break
       }
-      if (checkMenu(message.text.body)) {
+      if (checkMenu(message.text)) {
         step = "text_menu"
         await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
         break
       }
       step = await newTextInstanceHandler({
-        text: message.text.body,
+        source: message.source,
+        text: message.text,
         timestamp: messageTimestamp,
         id: message.id,
-        from: from || null,
-        isForwarded: message?.context?.forwarded || null,
-        isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
+        from: from,
+        isForwarded: message?.isForwarded || null,
+        isFrequentlyForwarded: message?.frequently_forwarded || null,
         isFirstTimeUser,
       })
       break
 
     case "image":
       step = await newImageInstanceHandler({
-        caption: message?.image?.caption || null,
+        source: message.source,
+        caption: message?.media?.caption || null,
         timestamp: messageTimestamp,
         id: message.id,
-        mediaId: message?.image?.id || null,
-        mimeType: message?.image?.mime_type || null,
-        from: from || null,
-        isForwarded: message?.context?.forwarded || null,
-        isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
+        mediaId: message?.media?.file_id || null,
+        mimeType: message?.media?.mime_type || null,
+        from: from,
+        isForwarded: message?.isForwarded || null,
+        isFrequentlyForwarded: message?.frequently_forwarded || null,
         isFirstTimeUser,
       })
       break
 
+    //only for whatsapp
     case "interactive":
       // handle consent here
       const interactive = message.interactive
+      if (!interactive) {
+        functions.logger.error("Message has no interactive object")
+        break
+      }
       switch (interactive.type) {
         case "button_reply":
-          step = await onButtonReply(message)
+          step = await onButtonReply(message, idField)
           break
         case "list_reply":
-          step = await onTextListReceipt(message)
+          step = await onTextListReceipt(message, idField)
           break
       }
       break
 
     case "button":
       const button = message.button
+      if (!button) {
+        functions.logger.error("Message has no button object")
+        break
+      }
       switch (button.text) {
         case "Get Latest Update":
-          await sendBlast(from)
+          await sendBlast(from, idField)
           break
         case "Unsubscribe":
-          await toggleUserSubscription(from, false)
+          await toggleUserSubscription(from, false, idField)
           break
         case "Get Referral Message":
-          await sendReferralMessage(from)
+          await sendReferralMessage(from, idField)
           break
         default:
           functions.logger.error("Unsupported button type:", button.text)
@@ -202,12 +232,12 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
       break
   }
   if (triggerOnboarding) {
-    await newUserHandler(from)
+    await newUserHandler(from, idField)
   }
   if (isNewlyJoined && step) {
     const timestampKey =
       messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
-    await userRef.update({
+    await userSnapshot.docs[0].ref.update({
       [`initialJourney.${timestampKey}`]: step,
     })
   }
@@ -215,6 +245,7 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
 }
 
 async function newTextInstanceHandler({
+  source,
   text,
   timestamp,
   id,
@@ -223,10 +254,11 @@ async function newTextInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
+  source: string,
   text: string
   timestamp: Timestamp
-  id: string
-  from: string | null
+  id: string 
+  from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
@@ -349,7 +381,7 @@ async function newTextInstanceHandler({
   }
   const instanceRef = messageRef.collection("instances").doc()
   const instanceUpdateObj = {
-    source: "whatsapp",
+    source: source,
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
@@ -400,6 +432,7 @@ async function newTextInstanceHandler({
 }
 
 async function newImageInstanceHandler({
+  source,
   caption,
   timestamp,
   id,
@@ -410,12 +443,13 @@ async function newImageInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
+  source: string,
   caption: string | null
   mediaId: string | null
   mimeType: string | null
   timestamp: Timestamp
   id: string
-  from: string | null
+  from: string 
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
@@ -619,7 +653,7 @@ async function newImageInstanceHandler({
   }
   const instanceRef = messageRef.collection("instances").doc()
   const instanceUpdateObj: InstanceData = {
-    source: "whatsapp",
+    source: source,
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
@@ -630,7 +664,7 @@ async function newImageInstanceHandler({
     sender: sender ?? null, //sender name or number extracted from OCR
     imageType: imageType, //either "convo", "email", "letter" or "others"
     ocrVersion: "2",
-    from: from, //sender phone number, taken from webhook object
+    from: from, //sender id, taken from webhook object
     subject: subject,
     hash: hash,
     mediaId: mediaId,
@@ -673,17 +707,22 @@ async function newImageInstanceHandler({
   return Promise.resolve("image")
 }
 
-async function newUserHandler(from: string) {
-  await sendLanguageSelection(from, true)
+async function newUserHandler(from: string, idField: string) {
+  await sendLanguageSelection(from, true, idField)
 }
 
 async function onButtonReply(
-  messageObj: WhatsappMessageObject,
+  messageObj: Message,
+  idField = "whatsappId",
   platform = "whatsapp"
 ) {
-  const buttonId = messageObj.interactive.button_reply.id
-  const from = messageObj.from
-  const responses = await getUserResponsesObject("user", from)
+  const buttonId = messageObj.interactive?.button_reply.id
+  if (!buttonId) {
+    functions.logger.error("No buttonId in interactive object")
+    return
+  }
+  const from = messageObj.userId
+  const responses = await getUserResponsesObject("user", from, idField)
   const [type, ...rest] = buttonId.split("_")
   let instancePath, selection, instanceRef, blastPath
   switch (type) {
@@ -722,11 +761,11 @@ async function onButtonReply(
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest
-      await respondToBlastFeedback(blastPath, selection, from)
+      await respondToBlastFeedback(blastPath, selection, from, idField)
       break
     case "languageSelection":
       ;[selection] = rest
-      await updateLanguageAndSendMenu(from, selection)
+      await updateLanguageAndSendMenu(from, selection, idField)
       break
   }
   const step = type + (selection ? `_${selection}` : "")
@@ -734,12 +773,17 @@ async function onButtonReply(
 }
 
 async function onTextListReceipt(
-  messageObj: WhatsappMessageObject,
+  messageObj: Message,
+  idField = "whatsappId",
   platform = "whatsapp"
 ) {
-  const listId = messageObj.interactive.list_reply.id
-  const from = messageObj.from
-  const responses = await getUserResponsesObject("user", from)
+  const listId = messageObj.interactive?.list_reply.id
+  if (!listId) {
+    functions.logger.error("No listId in interactive object")
+    return
+  }
+  const from = messageObj.userId
+  const responses = await getUserResponsesObject("user", from, idField)
   const [type, selection, ...rest] = listId.split("_")
   let response, instancePath
   const step = `${type}_${selection}`
@@ -763,7 +807,7 @@ async function onTextListReceipt(
           break
 
         case "language":
-          await sendLanguageSelection(from, false)
+          await sendLanguageSelection(from, false, idField)
           hasReplied = true
           break
 
@@ -783,7 +827,7 @@ async function onTextListReceipt(
           break
 
         case "referral":
-          await sendReferralMessage(from)
+          await sendReferralMessage(from, idField)
           hasReplied = true
           break
 
@@ -811,11 +855,11 @@ async function onTextListReceipt(
           response = responses.DISPUTE
           break
         case "unsubscribeUpdates":
-          await toggleUserSubscription(from, false)
+          await toggleUserSubscription(from, false, idField)
           response = responses.UNSUBSCRIBE
           break
         case "subscribeUpdates":
-          await toggleUserSubscription(from, true)
+          await toggleUserSubscription(from, true, idField)
           response = responses.SUBSCRIBE
           break
       }
@@ -875,15 +919,17 @@ function checkMenu(text: string) {
   return menuKeywords.includes(text.toLowerCase())
 }
 
-async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
-  db.collection("users").doc(userId).update({
+async function toggleUserSubscription(userId: string, toSubscribe: boolean, idField: string) {
+  const userSnapshot = await db.collection("users").where(idField, '==', userId).get()
+  userSnapshot.docs[0].ref.update({
     isSubscribedUpdates: toSubscribe,
   })
 }
 
-async function referralHandler(message: string, from: string) {
+async function referralHandler(message: string, from: string, idField: string) {
   const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
-  const userRef = db.collection("users").doc(from)
+  const userSnap = await db.collection("users").where(idField, '==', from).get()
+  const userRef = userSnap.docs[0].ref
   if (code.length > 0) {
     const referralClickRef = db.collection("referralClicks").doc(code)
     const referralClickSnap = await referralClickRef.get()
@@ -950,12 +996,44 @@ async function referralHandler(message: string, from: string) {
 }
 
 async function createNewUser(
-  userRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
+  userId: string,
+  idField: string,
   messageTimestamp: Timestamp
 ) {
-  const id = userRef.id
+  // const id = userRef.id
+  const id = userId
   const referralId = hashids.encode(id)
+  let ids
+  switch (idField) {
+    case 'telegramId':
+        ids = {
+            telegramId: userId,
+            whatsappId: null,
+            emailId: null,
+        }
+        break;
+    case 'emailId':
+        ids = {
+            emailId: userId,
+            telegramId: null,
+            whatsappId: null,
+        }
+        break;
+    case 'whatsappId':
+        ids = {
+          whatsappId: userId,
+          telegramId: null,
+          emailId: null,
+        }
+        break;
+
+    default:
+        console.error('Unknown source!');
+        return;
+  }
+
   const newUserObject: UserData = {
+    ...ids,
     instanceCount: 0,
     firstMessageReceiptTime: messageTimestamp,
     firstMessageType: "normal",
@@ -977,7 +1055,14 @@ async function createNewUser(
     isSubscribedUpdates: true,
     isIgnored: false,
   }
-  await userRef.set(newUserObject)
+  db.collection('users').add(newUserObject)
+    .then(() => {
+        console.log('New user added successfully!');
+    })
+    .catch((error) => {
+        console.error('Error adding new user: ', error);
+    });
+  // await userRef.set(newUserObject)
 }
 
 const onUserPublish = onMessagePublished(

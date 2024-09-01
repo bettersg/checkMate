@@ -703,7 +703,7 @@ You may view these resources with the command /resources.`,
     `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
-
+//TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
   const userSnap = await db.collection("users").doc(whatsappId).get()
   return userSnap.exists
