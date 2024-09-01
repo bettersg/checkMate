@@ -81,13 +81,15 @@ const CATEGORIES = [
     name: "incorrect",
     icon: <CheckCircleIcon className="h-7 w-7" />,
     display: "Incorrect Usage",
-    description: "User trying to chat or send in queries",
+    description:
+      "User trying to chat, addressing CheckMate, or sending in queries",
   },
   {
     name: "unsure",
     icon: <QuestionMarkCircleIcon className="h-7 w-7" />,
     display: "Unsure",
-    description: "Insufficient information to assess",
+    description:
+      "Either (i) Needs more information from sender to assess, or (ii) a search of publicly available information yields no useful results",
   },
   {
     name: "pass",
