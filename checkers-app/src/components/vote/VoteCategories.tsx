@@ -15,7 +15,7 @@ import { useUser } from "../../providers/UserContext";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
 
 import InfoOptions from "./InfoOptions";
-import NVCOptions from "./nvcOptions";
+import NVCOptions from "./NvcOptions";
 
 interface PropType {
   messageId: string | null;
@@ -129,7 +129,6 @@ export default function VoteCategories(Prop: PropType) {
   };
 
   const handleVoteCategoryChange = (category: string) => {
-    console.log("current tags:" + currentTags);
     switch (category) {
       case "incorrect":
         setVoteCategory("irrelevant");
