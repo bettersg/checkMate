@@ -53,16 +53,16 @@ export default function VotingChart(Props: VotingChartProps) {
       count: assessedInfo.satireCount,
     },
     {
-      name: "Marketing/Spam",
+      name: "Mktg",
       count: assessedInfo.spamCount,
     },
     {
-      name: "No Verifiable Content",
+      name: "NVC",
       credible: assessedInfo.legitimateCount,
       notsure: irrelevantCount - incorrectCount,
     },
     {
-      name: "Incorrect Usage",
+      name: "Incorrect",
       count: incorrectCount,
     },
     {
