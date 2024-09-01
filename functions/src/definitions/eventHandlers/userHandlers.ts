@@ -331,6 +331,7 @@ async function newTextInstanceHandler({
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
+      tags: {},
       primaryCategory: isMachineAssessed
         ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
         : null,
@@ -594,6 +595,7 @@ async function newImageInstanceHandler({
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
+      tags: {},
       primaryCategory: isMachineAssessed
         ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
         : null,

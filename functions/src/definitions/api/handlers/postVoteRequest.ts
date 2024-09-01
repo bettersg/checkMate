@@ -82,6 +82,7 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     category: null,
     truthScore: null,
     reasoning: null,
+    tags: {},
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: Timestamp.fromDate(new Date()),
     votedTimestamp: null,

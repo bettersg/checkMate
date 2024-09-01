@@ -82,7 +82,7 @@ const updateTelegramReplyMarkup = async function (
       "Content-Type": "application/json",
     },
   }).catch((error) => {
-    functions.logger.log(error.response)
+    functions.logger.log(error.response?.data)
     throw "error with updating telegram reply markup"
   })
   return response
