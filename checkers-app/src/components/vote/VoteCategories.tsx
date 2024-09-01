@@ -146,7 +146,7 @@ export default function VoteCategories(Prop: PropType) {
 
     switch (categoryName) {
       case "nvc":
-        setVoteCategory(null);
+        setVoteCategory("nvc");
         break;
       case "incorrect":
         handleVoteCategoryChange("incorrect");
@@ -163,7 +163,7 @@ export default function VoteCategories(Prop: PropType) {
     truthScore: number | null,
     tags: string[] | null
   ) => {
-    if (category === null) {
+    if (category === "nvc") {
       return;
     }
     if (messageId && voteRequestId) {
