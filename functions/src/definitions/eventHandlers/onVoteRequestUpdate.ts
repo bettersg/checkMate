@@ -171,9 +171,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         if (truthScore === null) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
-        } else if (truthScore < (thresholds.falseUpperBound || 2.5)) {
+        } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
           primaryCategory = "untrue"
-        } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
+        } else if (truthScore <= (thresholds.misleadingUpperBound || 3.5)) {
           primaryCategory = "misleading"
         } else {
           primaryCategory = "accurate"

@@ -104,8 +104,8 @@
     "cn": "目前，{{%voted}}%的查哥查妹已经对这条短信进行投票评估。大多数人认为这条短信{{prelim_assessment}}{{info_placeholder}}。\n\n注意：这只是初步结果。我们将在更多的查哥查妹投票后，或在您提交短信的24小时内，为您提供最终的结果。"
   },
   "INFO_PLACEHOLDER": {
-    "en": ", with an average score of {{score}} on a scale of 1-5 (5 = completely true)",
-    "cn": "在1 - 5的评分内，平均投票分数为{{score}}（5 = 完全正确）"
+    "en": ", with an average score of {{score}} on a scale of 0-5 (5 = completely true)",
+    "cn": "在0 - 5的评分内，平均投票分数为{{score}}（5 = 完全正确）"
   },
   "INTERIM_TEMPLATE_UNSURE": {
     "en": "At this time, {{%voted}}% of our CheckMates have assessed and voted on this message. Unfortunately, our CheckMates either have not reached any clear consensus, or are still unsure how to assess the message at this time.\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.",

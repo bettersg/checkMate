@@ -58,6 +58,7 @@ export type MessageData = {
   assessmentExpiry: Timestamp | null
   assessmentExpired: boolean
   truthScore: number | null
+  numberPointScale: 5 | 6
   isIrrelevant: boolean | null
   isScam: boolean | null
   isIllicit: boolean | null
@@ -239,7 +240,8 @@ export type VoteRequest = {
   triggerL2Vote: boolean | null
   triggerL2Others: boolean | null
   sentMessageId: string | null
-  truthScore: 1 | 2 | 3 | 4 | 5 | null
+  truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null
+  numberPointScale: 5 | 6
   category:
     | "scam"
     | "illicit"

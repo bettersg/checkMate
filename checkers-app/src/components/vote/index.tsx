@@ -74,6 +74,7 @@ export default function VotePage() {
               currentCategory={vote.category}
               currentTruthScore={vote.truthScore}
               currentTags={vote.tags}
+              numberPointScale={vote.numberPointScale}
             />
           </>
         ) : (

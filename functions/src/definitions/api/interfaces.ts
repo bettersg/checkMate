@@ -139,6 +139,7 @@ interface Vote {
   isAssessed: boolean //if the message is assessed
   finalStats: AssessedInfo | null
   tags: string[]
+  numberPointScale: 5 | 6
 }
 
 interface Last30DaysStats {
@@ -162,6 +163,7 @@ interface AssessedInfo {
   illicitCount: number
   infoCount: {
     total?: number
+    0?: number | null
     1?: number | null
     2?: number | null
     3?: number | null

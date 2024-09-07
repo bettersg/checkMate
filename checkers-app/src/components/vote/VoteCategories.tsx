@@ -23,6 +23,7 @@ interface PropType {
   currentCategory: string | null;
   currentTruthScore: number | null;
   currentTags: string[] | null;
+  numberPointScale: number;
 }
 
 function getSelectedCategory(primaryCategory: string | null, tags: string[]) {
@@ -210,6 +211,7 @@ export default function VoteCategories(Prop: PropType) {
           {selectedCategory === "info" && cat.name === "info" && (
             <InfoOptions
               selectedTruthScore={truthScore}
+              numberPointScale={Prop.numberPointScale}
               handleTruthScoreChange={handleTruthScoreChange}
             />
           )}
