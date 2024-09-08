@@ -1,6 +1,11 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore"
 import { logger } from "firebase-functions/v2"
-import { enqueueTask } from "../common/cloudtasks"
+import { enqueueTask } from "../common/cloudTasks"
+import * as admin from "firebase-admin"
+
+if (!admin.apps.length) {
+  admin.initializeApp()
+}
 
 const env = process.env.ENVIRONMENT
 const delaySeconds =

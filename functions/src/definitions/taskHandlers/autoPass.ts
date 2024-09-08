@@ -1,10 +1,12 @@
 import { onTaskDispatched } from "firebase-functions/v2/tasks"
-import { onRequest, HttpsError } from "firebase-functions/v2/https"
-import { getFunctions } from "firebase-admin/functions"
 import { getFirestore } from "firebase-admin/firestore"
 import { logger } from "firebase-functions/v2"
 import { VoteRequestUpdateObject } from "../../types"
+import * as admin from "firebase-admin"
 
+if (!admin.apps.length) {
+  admin.initializeApp()
+}
 const db = getFirestore()
 
 const passVoteRequest = onTaskDispatched(

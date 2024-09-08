@@ -15,7 +15,11 @@ async function enqueueTask(
       uri: targetUri,
     })
   } catch (e) {
-    logger.error(`Error enqueuing task for function ${functionName}: ${e}`)
+    if (process.env.ENVIRONMENT === "DEV") {
+      logger.log("Unable to enqueue task")
+    } else {
+      logger.error(`Error enqueuing task for function ${functionName}: ${e}`)
+    }
   }
 }
 
@@ -23,9 +27,10 @@ async function getFunctionUrl(
   name: string,
   location: string = "asia-southeast1"
 ) {
-  const auth = new GoogleAuth({
-    scopes: "https://www.googleapis.com/auth/cloud-platform",
-  })
+  if (process.env.ENVIRONMENT === "DEV") {
+    return `http://localhost:5001/checkmate-uat/${location}/${name}`
+  }
+  const auth = new GoogleAuth()
   const projectId = await auth.getProjectId()
   const url =
     "https://cloudfunctions.googleapis.com/v2/" +
