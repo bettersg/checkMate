@@ -28,6 +28,8 @@ const sendTelegramTextMessage = async function (
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else if (bot === "report") {
     token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else if (bot === "repost") {
+    token = process.env.TELEGRAM_REPOST_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -104,6 +106,8 @@ const sendTelegramImageMessage = async function (
   }
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
+  } else if (bot == "repost") {
+    token = process.env.TELEGRAM_REPOST_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -119,7 +123,7 @@ const sendTelegramImageMessage = async function (
   }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-    url: `https://api.telegram.org/bot${token}/sendMessage`,
+    url: `https://api.telegram.org/bot${token}/sendPhoto`,
     data: data,
     headers: {
       "Content-Type": "application/json",
@@ -165,9 +169,83 @@ const sendTelegramImageMessageImageStream = async function (
   return response
 }
 
+const updateTelegramTextMessage = async function (
+  bot: string,
+  to: string | number,
+  text: string,
+  messageId: string
+) {
+  let token
+  let data: {
+    chat_id: string | number
+    text: string
+    message_id: string
+  }
+  if (bot === "repost") {
+    token = process.env.TELEGRAM_REPOST_BOT_TOKEN
+  } else {
+    token = process.env.TELEGRAM_USER_BOT_TOKEN
+  }
+  data = {
+    chat_id: to,
+    text: text,
+    message_id: messageId,
+  }
+  const response = await axios({
+    method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+    url: `${telegramHost}/bot${token}/editMessageText`,
+    data: data,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).catch((error) => {
+    functions.logger.log(error.response)
+    throw "error with sending telegram message"
+  })
+  return response
+}
+
+const updateTelegramImageMessage = async function (
+  bot: string,
+  to: string | number,
+  caption: string,
+  messageId: string
+) {
+  let token
+  let data: {
+    chat_id: string | number
+    caption: string
+    message_id: string
+  }
+  if (bot === "repost") {
+    token = process.env.TELEGRAM_REPOST_BOT_TOKEN
+  } else {
+    token = process.env.TELEGRAM_USER_BOT_TOKEN
+  }
+  data = {
+    chat_id: to,
+    caption: caption,
+    message_id: messageId,
+  }
+  const response = await axios({
+    method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+    url: `${telegramHost}/bot${token}/editMessageCaption`,
+    data: data,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).catch((error) => {
+    functions.logger.log(error.response)
+    throw "error with sending telegram message"
+  })
+  return response
+}
+
 export {
   sendTelegramImageMessageImageStream,
   sendTelegramTextMessage,
   sendTelegramImageMessage,
   updateTelegramReplyMarkup,
+  updateTelegramTextMessage,
+  updateTelegramImageMessage,
 }

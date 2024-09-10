@@ -49,6 +49,7 @@ import {
   UserData,
 } from "../../types"
 import { AppEnv } from "../../appEnv"
+import { repostImage, repostText } from "../common/repostUtils"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
@@ -853,6 +854,16 @@ async function addInstanceToDb(
   instanceRef: FirebaseFirestore.DocumentReference,
   instanceUpdateObj: Object
 ) {
+  // Repost instance to admin channel
+  // @ts-ignore
+  if (instanceUpdateObj.text) {
+    await repostText(id, instanceUpdateObj)
+  }
+  // @ts-ignore
+  if (instanceUpdateObj.type === "image") {
+    await repostImage(id, instanceUpdateObj)
+  }
+
   const messageIdRef = db.collection("messageIds").doc(id)
   try {
     await db.runTransaction(async (t) => {

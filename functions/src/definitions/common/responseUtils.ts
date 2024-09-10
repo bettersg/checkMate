@@ -15,6 +15,7 @@ import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
 import { CustomReply, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
+import { repostUpdate } from "./repostUtils"
 
 const db = admin.firestore()
 
@@ -852,6 +853,10 @@ async function respondToInstance(
         await sendTextMessage("user", from, responseText, data.id)
       }
   }
+
+  // Update repost channel
+  await repostUpdate(data.id, category)
+
   updateObj.replyCategory = category
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)
