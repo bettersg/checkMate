@@ -17,7 +17,6 @@ import { Typography } from "@material-tailwind/react";
 import VoteTags from "./VoteTags";
 import InfoOptions from "./InfoOptions";
 import NVCOptions from "./NvcOptions";
-import { useEffect } from "react";
 
 interface PropType {
   messageId: string | null;
@@ -166,13 +165,6 @@ export default function VoteCategories(Prop: PropType) {
     truthScore: number | null,
     tags: string[] | null
   ) => {
-    console.log("Category")
-    console.log(category) 
-    console.log("TruthScore")
-    console.log(truthScore)
-    console.log("Tags")
-    console.log(tags)
-
     if (category === "nvc") {
       return;
     }
