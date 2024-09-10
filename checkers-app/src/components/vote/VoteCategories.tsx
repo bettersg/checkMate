@@ -13,9 +13,11 @@ import { Button } from "@material-tailwind/react";
 import { patchVote } from "../../services/api";
 import { useUser } from "../../providers/UserContext";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
-
+import { Typography } from "@material-tailwind/react";
+import VoteTags from "./VoteTags";
 import InfoOptions from "./InfoOptions";
 import NVCOptions from "./NvcOptions";
+import { useEffect } from "react";
 
 interface PropType {
   messageId: string | null;
@@ -118,7 +120,7 @@ export default function VoteCategories(Prop: PropType) {
   const [truthScore, setTruthScore] = useState<number | null>(
     currentTruthScore
   );
-  const [tags, setTags] = useState<string[] | null>(currentTags);
+  const [tags, setTags] = useState<string[]>(currentTags);
 
   const handleTruthScoreChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -134,11 +136,10 @@ export default function VoteCategories(Prop: PropType) {
     switch (category) {
       case "incorrect":
         setVoteCategory("irrelevant");
-        setTags(["incorrect"]);
+        setTags((prevTags)=>[...prevTags, "incorrect"]);
         break;
       default:
         setVoteCategory(category);
-        setTags([]);
         break;
     }
   };
@@ -165,6 +166,13 @@ export default function VoteCategories(Prop: PropType) {
     truthScore: number | null,
     tags: string[] | null
   ) => {
+    console.log("Category")
+    console.log(category) 
+    console.log("TruthScore")
+    console.log(truthScore)
+    console.log("Tags")
+    console.log(tags)
+
     if (category === "nvc") {
       return;
     }
@@ -187,8 +195,23 @@ export default function VoteCategories(Prop: PropType) {
     }
   };
 
+  const onSelectTagOption = (tagName: string) => {
+    setTags((prevTags) => [...prevTags, tagName])
+  }
+
+  const onRemoveTagOption = (tagName: string) => {
+    setTags((prevTags) => prevTags.filter((tag) => tag !== tagName))
+  }
+
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
+      <VoteTags tags = {tags} onSelectTag={onSelectTagOption} onRemoveTag={onRemoveTagOption}/>
+      <Typography
+          variant="h4"
+          className="text-primary-color3 dark:text-white"
+        >
+              Select category:
+      </Typography>
       {CATEGORIES.map((cat, index) => (
         <>
           <Button

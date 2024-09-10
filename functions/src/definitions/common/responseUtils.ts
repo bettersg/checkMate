@@ -663,9 +663,12 @@ async function respondToInstance(
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
+  const isGenerated = parentMessageSnap.get("tags.generated") ?? false
+  console.log("Get tags from responseUtils")
+  console.log(isGenerated)
 
   function getFinalResponseText(responseText: string) {
-    return responseText
+    let finalResponse = responseText
       .replace(
         "{{thanks}}",
         isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
@@ -689,6 +692,11 @@ async function respondToInstance(
         isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
       )
       .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
+
+      if (isGenerated) {
+        finalResponse = finalResponse.concat("\n\nThis is a generated information.\n") // Add the one-liner generated message if tag == generated
+      }
+      return finalResponse
   }
 
   let category = primaryCategory
