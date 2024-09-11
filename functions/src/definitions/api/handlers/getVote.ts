@@ -61,6 +61,14 @@ const getVoteHandler = async (req: Request, res: Response) => {
       voteRequestSnap.get("truthScore") === undefined &&
       voteRequestSnap.get("vote") !== undefined
 
+    const tags = voteRequestSnap.get("tags") ?? {}
+    const parentTags = messageSnap.get("tags") ?? {}
+
+    //loop through tags, check that value is true, if so add to array
+    const tagArray = Object.keys(tags).filter((tag) => tags[tag])
+    const parentTagArray = Object.keys(parentTags).filter(
+      (tag) => parentTags[tag]
+    )
     const {
       irrelevantCount,
       scamCount,
@@ -71,6 +79,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       unsureCount,
       satireCount,
       validResponsesCount,
+      tagCounts,
     } = await getVoteCounts(messageRef)
 
     //get counts from each truthScore
@@ -147,13 +156,16 @@ const getVoteHandler = async (req: Request, res: Response) => {
             irrelevantCount: irrelevantCount,
             legitimateCount: legitimateCount,
             unsureCount: unsureCount,
+            tagCounts: tagCounts,
             truthScore: isLegacy
               ? messageSnap.get("legacyTruthScore")
               : messageSnap.get("truthScore"),
+            tags: parentTagArray,
             primaryCategory: messageSnap.get("primaryCategory"),
             rationalisation: messageSnap.get("rationalisation"),
           }
         : null,
+      tags: tagArray,
     }
     return res.status(200).send(returnData)
   } catch {

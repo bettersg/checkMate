@@ -19,6 +19,7 @@ interface updateVoteRequest {
   category: string
   truthScore?: number //between 1 and 5
   reasoning?: string
+  tags?: string[]
 }
 
 interface createChecker {
@@ -137,6 +138,7 @@ interface Vote {
   truthScore: number | null
   isAssessed: boolean //if the message is assessed
   finalStats: AssessedInfo | null
+  tags: string[]
 }
 
 interface Last30DaysStats {
@@ -166,6 +168,7 @@ interface AssessedInfo {
     4?: number | null
     5?: number | null
   }
+  tagCounts: { [key: string]: number }
   satireCount: number
   spamCount: number
   irrelevantCount: number
@@ -173,6 +176,7 @@ interface AssessedInfo {
   unsureCount: number
   truthScore: number
   primaryCategory: string
+  tags: string[]
   rationalisation: string | null
 }
 

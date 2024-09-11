@@ -38,6 +38,10 @@ export type WhatsappMessageObject = {
   image?: { caption: string; id: string; mime_type: string }
 }
 
+type TagsMap = {
+  [tag: string]: boolean
+}
+
 export type TelegramMessageObject = {
   message_id: number
   from?: {
@@ -144,6 +148,7 @@ export type MessageData = {
   isSatire: boolean | null
   isHarmful: boolean | null // whether the sum of scam + illicit + untrue votes > harmful threshold
   isHarmless: boolean | null // whether the sum of legitimate + accurate + spam votes > harmless threshold
+  tags: TagsMap
   primaryCategory: string | null
   customReply: string | null
   instanceCount: number
@@ -335,6 +340,7 @@ export type VoteRequest = {
   votedTimestamp: Timestamp | null
   isCorrect: boolean | null
   score: number | null
+  tags: TagsMap
   duration: number | null //duration in minutes
 }
 

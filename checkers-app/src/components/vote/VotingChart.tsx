@@ -35,6 +35,9 @@ export default function VotingChart(Props: VotingChartProps) {
           5: assessedInfo.infoCount["5"],
         };
 
+  const irrelevantCount = assessedInfo.irrelevantCount;
+  const incorrectCount = assessedInfo.tagCounts.incorrect ?? 0; //INCORRECT USAGE
+
   const data = [
     {
       name: "Scam",
@@ -50,16 +53,17 @@ export default function VotingChart(Props: VotingChartProps) {
       count: assessedInfo.satireCount,
     },
     {
-      name: "Spam",
+      name: "Mktg",
       count: assessedInfo.spamCount,
     },
     {
-      name: "Trivial",
-      count: assessedInfo.irrelevantCount,
+      name: "NVC",
+      credible: assessedInfo.legitimateCount,
+      notsure: irrelevantCount - incorrectCount,
     },
     {
-      name: "Legit",
-      count: assessedInfo.legitimateCount,
+      name: "Incorrect",
+      count: incorrectCount,
     },
     {
       name: "Unsure",
@@ -90,6 +94,8 @@ export default function VotingChart(Props: VotingChartProps) {
         <Bar dataKey="3" stackId="a" fill="#B4A76C" />
         <Bar dataKey="4" stackId="a" fill="#8B6914" />
         <Bar dataKey="5" stackId="a" fill="#806517" />
+        <Bar dataKey="credible" stackId="a" fill="#82ca9d" />
+        <Bar dataKey="notsure" stackId="a" fill="#808080" />
       </BarChart>
     </ResponsiveContainer>
   );

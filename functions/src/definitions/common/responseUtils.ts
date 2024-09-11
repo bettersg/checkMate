@@ -806,6 +806,7 @@ async function respondToInstance(
   const hasCaption = data?.caption != null
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
+  const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
 
   function getFinalResponseText(responseText: string) {
     return responseText
@@ -910,6 +911,11 @@ async function respondToInstance(
   let responseText
   switch (category) {
     case "irrelevant_auto":
+      if (isIncorrect) {
+        responseText = getFinalResponseText(responses.INCORRECT)
+        await sendTextMessage("user", from, responseText, data.id)
+        break
+      }
       await sendMenuMessage(
         from,
         "IRRELEVANT_AUTO_MENU_PREFIX",
@@ -919,6 +925,11 @@ async function respondToInstance(
       )
       break
     case "irrelevant":
+      if (isIncorrect) {
+        responseText = getFinalResponseText(responses.INCORRECT)
+        await sendTextMessage("user", from, responseText, data.id)
+        break
+      }
       await sendMenuMessage(
         from,
         "IRRELEVANT_MENU_PREFIX",

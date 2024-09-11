@@ -73,6 +73,7 @@ export default function VotePage() {
               voteRequestId={voteRequestId ?? null}
               currentCategory={vote.category}
               currentTruthScore={vote.truthScore}
+              currentTags={vote.tags}
             />
           </>
         ) : (
@@ -88,6 +89,7 @@ export default function VotePage() {
                 <VoteResult
                   category={vote.category}
                   truthScore={vote.truthScore}
+                  tags={vote.tags}
                 />
               </div>
               <div className="flex flex-1 flex-col justify-center">
@@ -100,6 +102,7 @@ export default function VotePage() {
                 <VoteResult
                   category={vote.finalStats?.primaryCategory ?? null}
                   truthScore={vote.finalStats?.truthScore ?? null}
+                  tags={vote.finalStats?.tags ?? []}
                 />
               </div>
             </div>

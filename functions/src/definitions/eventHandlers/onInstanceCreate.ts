@@ -265,6 +265,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
     category: null,
     truthScore: null,
     reasoning: null,
+    tags: {},
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: null,
     votedTimestamp: null,
