@@ -135,4 +135,4 @@ function getCloudStorageUrl(storageUrl: string) {
   return `gs://${bucketName}/${storageUrl}`
 }
 
-export { downloadWhatsappMedia, getHash, getSignedUrl, getCloudStorageUrl }
+export { downloadWhatsappMedia, downloadTelegramMedia, getHash, getSignedUrl, getCloudStorageUrl }

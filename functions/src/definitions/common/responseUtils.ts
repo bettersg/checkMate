@@ -34,12 +34,12 @@ async function getUserResponsesObject(
 async function getUserResponsesObject(
   botType: "user",
   user: string,
-  source: string
+  idField: string
 ): Promise<ResponseObject>
 async function getUserResponsesObject(
   botType: "user" | "factChecker" = "user",
   user?: string,
-  source?: string
+  idField?: string
 ) {
   if (botType === "factChecker") {
     const returnObj = await getResponsesObj("factChecker")
@@ -49,14 +49,20 @@ async function getUserResponsesObject(
       functions.logger.error("user not provided to getUserResponseObject")
       return "error"
     }
-    if (typeof source !== "string") {
-      functions.logger.error("source not provided to getUserResponseObject")
+    if (typeof idField !== "string") {
+      functions.logger.error("idField not provided to getUserResponseObject")
       return "error"
     }
-    const userSnap = await db.collection("users").where(source, '==', user).get()
-    const language = userSnap.docs[0].get("language") ?? "en"
-    const returnObj = await getResponsesObj("user", language)
-    return returnObj
+  
+    let language;
+    const userSnap = await db.collection("users").where(idField, '==', user).get();
+    if (!userSnap.empty) {
+        language = userSnap.docs[0].get("language") ?? "en";
+    } else {
+        language = "en";
+    }
+    const returnObj = await getResponsesObj("user", language);
+    return returnObj;
   }
 }
 
@@ -175,8 +181,6 @@ async function sendMenuMessage(
   disputedInstancePath: string | null = null,
   isTruncated: boolean = false
 ) {
-  const userSnap = await db.collection("users").doc(to).get()
-  const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
   let idField
   switch (platform) {
     case "telegram":
@@ -192,6 +196,9 @@ async function sendMenuMessage(
       functions.logger.error("Unknown platform in sendMenuMessage")
       return
   }
+  const userSnap = await db.collection("users").where(idField, '==', to).get()
+  const userDoc = userSnap.docs[0]
+  const isSubscribedUpdates = userDoc?.get("isSubscribedUpdates") ?? false
   const responses = await getUserResponsesObject("user", to, idField)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
@@ -307,14 +314,33 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
     return
   }
   const from = data?.from ?? null
+  //to get the platform the user sent the message from
+  const source = data?.source ?? null
+  let idField
+  switch (source) {
+    case "telegram":
+      idField = "telegramId"
+      break
+    case "email":
+      idField = "emailId"
+      break
+    case "whatsapp":
+      idField = "whatsappId"
+      break
+    default:
+      functions.logger.error("Unknown source in sendSatisfactionSurvey")
+      return
+  }
+
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
-  const userRef = db.collection("users").doc(from)
+  const userSnap = await db.collection("users").where(idField, '==', from).get()
   const thresholds = await getThresholds()
   const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
-  const userSnap = await userRef.get()
-  const language = userSnap.get("language") ?? "en"
+  const userDoc = userSnap.docs[0]
+  const language = userDoc.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  const lastSent = userSnap.get("satisfactionSurveyLastSent")
+  const lastSent = userDoc.get("satisfactionSurveyLastSent")
+  const userRef = userSnap.docs[0].ref
   //check lastSent is more than cooldown days ago
   let cooldownDate = new Date()
   cooldownDate.setDate(cooldownDate.getDate() - cooldown)
@@ -935,8 +961,8 @@ async function respondToInstance(
       const rationalisation = parentMessageSnap.get("rationalisation")
 
       if ((category === "scam" || category === "illicit") && rationalisation) {
-        const language =
-          (await db.collection("users").doc(from).get()).get("language") ?? "en"
+        // const language =
+        //   userDoc.get("language") ?? "en"
         if (language === "en") {
           buttons.push(viewRationalisationButton)
         }

@@ -705,8 +705,8 @@ You may view these resources with the command /resources.`,
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
-  const userSnap = await db.collection("users").doc(whatsappId).get()
-  return userSnap.exists
+  const userSnap = await db.collection("users").where("whatsappId", '==', whatsappId).get()
+  return !userSnap.empty
 }
 
 const createChecker = async (telegramId: number) => {

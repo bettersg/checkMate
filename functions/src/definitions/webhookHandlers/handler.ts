@@ -127,8 +127,8 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                       mime_type: message.image?.mime_type //determines if it is an image or video
                   },
                   timestamp: message.timestamp,
-                  isForwarded: message.context.forwarded,
-                  frequently_forwarded: message.context.frequently_forwarded,
+                  isForwarded: message.context?.forwarded,
+                  frequently_forwarded: message.context?.frequently_forwarded,
                   button: message.button,
                   interactive: message.interactive
               }

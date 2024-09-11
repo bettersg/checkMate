@@ -91,12 +91,13 @@ export type TelegramMessageObject = {
       url: string
   }[]
 }
-
-export type Message = {
+//General Message object
+export type GeneralMessage = {
   source: string //the source of the message, e.g. whatsapp, telegram
   id: string //the message id received
   userId: string
   type: string
+  subject: string | null //for emails
   text: string | null
   media: {
       file_id: string //to download the media

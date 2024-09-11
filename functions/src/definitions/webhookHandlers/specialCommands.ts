@@ -42,7 +42,7 @@ const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
         await interimPromptHandler()
         return
       case "/blast":
-        await sendBlast(messageObj.from)
+        await sendBlast(messageObj.from, "whatsappId")
         return
     }
   }

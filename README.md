@@ -190,6 +190,7 @@ The primary data store is Firestore, which is a noSQL db. The entity-relationshi
 - closestMatch: Map (a.k.a object) under each instance called `closestMatch`. `DocumentReference` fields `instanceRef` and `parentRef` point to the closest matching instance, and its parent message respectively.
 - leaderboardStats: Map (a.k.a object) under each checker, called `leaderBoardStats`. Exists to facilitate tracking and calculation of the leaderboard.
 - programData: Map (a.k.a object) under each checker, called `programData`. Details related to the volunteer program.
+- generalMessage: General user message type that messages from all platforms (Whatsapp, Telegram etc.) convert to for uniform handling
 
 ```mermaid
 erDiagram
@@ -245,7 +246,7 @@ erDiagram
         string ocrVersion "'1' for paddleOCR or '2' for genAI-vertex"
         string from "Sender ID or phone number"
         string subject "letter or email subject"
-        string hash "Image hash, for image only"
+        string hash "Image hash, for closestMatchimage only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
         string storageUrl "Cloud storage URL of image, if applicable"
@@ -347,6 +348,9 @@ erDiagram
     }
 
     user {
+        string whatsappId "Whatsapp id of user if user sent message from Whatsapp"
+        string telegramId "Telegram id of user if user sent message from Telegram"
+        string emailId "email address of user if user wrote in via email"
         number instanceCount "number of instances sent in"
         timestamp lastSent "the last time the user sent an instance"
         timestamp firstMessageReceiptTime "the first time the user sent something into the bot"
@@ -375,6 +379,21 @@ erDiagram
      userBlast {
         string feedbackCategory "positive, negative or neutral"
         timestamp sentTimestamp "when blast was sent to user"
+     }
+
+     generalMessage {
+        string source "whatsapp, telegram or email"
+        string id "id of the message received"
+        string userId "the id of the user on the respective platform"
+        string type "text, image, button or interactive"
+        string subject "subject of the email only if user emailed in"
+        string text "body text of the message"
+        string media  "map containing media parameters: file_id for downloading, caption and mime_type"
+        timestamp timestamp "when the message was received"
+        boolean isForwared "whether the message was forwarded"
+        boolean frequently_forwarded "whether the message was frequently forwarded"
+        string button "map of parameters if user clicked a button: text, payload"
+        string interactive "map of parameters if user clicked an interactive reply: type, list_reply, button_reply"
      }
 
     message ||--|{ instance: has

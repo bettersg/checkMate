@@ -30,6 +30,7 @@ import {
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
+  downloadTelegramMedia,
   getHash,
   getSignedUrl,
   getCloudStorageUrl,
@@ -43,7 +44,7 @@ import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import {
-  Message,
+  GeneralMessage,
   WhatsappMessageObject,
   MessageData,
   InstanceData,
@@ -63,7 +64,7 @@ const hashids = new Hashids(salt)
 
 const db = admin.firestore()
 
-const userHandlerWhatsapp = async function (message: Message) {
+const userHandlerWhatsapp = async function (message: GeneralMessage) {
   if (!message?.id) {
     functions.logger.error("No message id")
     return
@@ -95,10 +96,9 @@ const userHandlerWhatsapp = async function (message: Message) {
   const responses = await getUserResponsesObject("user", from, idField) // change this to search for userID acc to fieldId
 
   //check whether new user
-  const userRef = db.collection("users").where(idField, '==', from)
-  const userSnapshot = await userRef.get()
+  const userSnapshot = await db.collection("users").where(idField, '==', from).get()
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  const isFirstTimeUser = !userSnapshot.empty
+  const isFirstTimeUser = userSnapshot.empty
   const userDoc = userSnapshot.docs[0]
   let triggerOnboarding = isFirstTimeUser
   let step
@@ -107,11 +107,11 @@ const userHandlerWhatsapp = async function (message: Message) {
   }
   const firstMessageReceiptTime = isFirstTimeUser
     ? messageTimestamp
-    : userDoc.data()?.firstMessageReceiptTime
+    : userDoc?.data()?.firstMessageReceiptTime
   const isNewlyJoined =
     messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
 
-  const isIgnored = userDoc.get("isIgnored")
+  const isIgnored = userDoc?.get("isIgnored")
   if (isIgnored) {
     functions.logger.warn(
       `Message from banned user ${from}!, text: ${message?.text}`
@@ -150,6 +150,7 @@ const userHandlerWhatsapp = async function (message: Message) {
         break
       }
       step = await newTextInstanceHandler({
+        idField: idField,
         source: message.source,
         text: message.text,
         timestamp: messageTimestamp,
@@ -163,6 +164,7 @@ const userHandlerWhatsapp = async function (message: Message) {
 
     case "image":
       step = await newImageInstanceHandler({
+        idField: idField,
         source: message.source,
         caption: message?.media?.caption || null,
         timestamp: messageTimestamp,
@@ -237,7 +239,9 @@ const userHandlerWhatsapp = async function (message: Message) {
   if (isNewlyJoined && step) {
     const timestampKey =
       messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
-    await userSnapshot.docs[0].ref.update({
+    const newUserQuery = db.collection("users").where(idField, '==', from)
+    const newUserSnap = await newUserQuery.get()
+    await newUserSnap.docs[0].ref.update({
       [`initialJourney.${timestampKey}`]: step,
     })
   }
@@ -245,6 +249,7 @@ const userHandlerWhatsapp = async function (message: Message) {
 }
 
 async function newTextInstanceHandler({
+  idField,
   source,
   text,
   timestamp,
@@ -254,6 +259,7 @@ async function newTextInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
+  idField: string, 
   source: string,
   text: string
   timestamp: Timestamp
@@ -268,7 +274,8 @@ async function newTextInstanceHandler({
   let messageUpdateObj: MessageData | null = null
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
-    await db.collection("users").doc(from).update({
+    const userSnap = await db.collection("users").where(idField, '==', from).get()
+    await userSnap.docs[0].ref.update({
       firstMessageType: "irrelevant",
     })
     return Promise.resolve(`text_machine_${machineCategory}`)
@@ -432,6 +439,7 @@ async function newTextInstanceHandler({
 }
 
 async function newImageInstanceHandler({
+  idField,
   source,
   caption,
   timestamp,
@@ -443,6 +451,7 @@ async function newImageInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
+  idField: string,
   source: string,
   caption: string | null
   mediaId: string | null
@@ -469,7 +478,15 @@ async function newImageInstanceHandler({
     throw new Error(`No mimeType for whatsapp message with id ${id}`)
   }
   //get response buffer
-  const buffer = await downloadWhatsappMedia(mediaId)
+  let buffer
+  if (idField === 'whatsappId'){
+    buffer = await downloadWhatsappMedia(mediaId)
+  } else if (idField === 'telegramId'){
+    buffer = await downloadTelegramMedia(mediaId)
+  } else {
+    throw new Error(`Unsupported idField ${idField}`)
+  }
+  // const buffer = await downloadWhatsappMedia(mediaId)
   const hash = await getHash(buffer)
   //check if same image already exists
   let imageMatchSnapshot = await db
@@ -712,7 +729,7 @@ async function newUserHandler(from: string, idField: string) {
 }
 
 async function onButtonReply(
-  messageObj: Message,
+  messageObj: GeneralMessage,
   idField = "whatsappId",
   platform = "whatsapp"
 ) {
@@ -773,7 +790,7 @@ async function onButtonReply(
 }
 
 async function onTextListReceipt(
-  messageObj: Message,
+  messageObj: GeneralMessage,
   idField = "whatsappId",
   platform = "whatsapp"
 ) {
@@ -957,12 +974,14 @@ async function referralHandler(message: string, from: string, idField: string) {
           )
         }
         if (referrer) {
-          const referralSourceSnap = await db
-            .collection("users")
-            .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
-            .get()
-          if (referralSourceSnap.exists) {
-            await referralSourceSnap.ref.update({
+          // const referralSourceSnap = await db
+          //   .collection("users")
+          //   .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
+          //   .get()
+          const referralSourceSnap = await db.collection("users").where(referralId, '==', referralId).get()
+          if (!referralSourceSnap.empty) {
+            const referralDoc = referralSourceSnap.docs[0]
+            await referralDoc.ref.update({
               referralCount: FieldValue.increment(1),
             })
             //check if referrer is a checker
