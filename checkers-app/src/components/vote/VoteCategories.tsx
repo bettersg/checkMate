@@ -187,17 +187,15 @@ export default function VoteCategories(Prop: PropType) {
     }
   };
 
-  const onSelectTagOption = (tagName: string) => {
-    setTags((prevTags) => [...prevTags, tagName])
+  const onSelectTagOption = (tags: string[]) => {
+    setTags(tags)
+    console.log(tags)
   }
 
-  const onRemoveTagOption = (tagName: string) => {
-    setTags((prevTags) => prevTags.filter((tag) => tag !== tagName))
-  }
 
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
-      <VoteTags tags = {tags} onSelectTag={onSelectTagOption} onRemoveTag={onRemoveTagOption}/>
+      <VoteTags tags = {tags} onSelectTag={onSelectTagOption}/>
       <Typography
           variant="h4"
           className="text-primary-color3 dark:text-white"

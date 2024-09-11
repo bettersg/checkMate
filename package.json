@@ -8,7 +8,8 @@
     "firebase": "^9.15.0",
     "firebase-functions": "^4.2.1",
     "googleapis": "^105.0.0",
-    "react-phone-number-input": "^3.3.9"
+    "react-phone-number-input": "^3.3.9",
+    "react-select": "^5.8.0"
   },
   "scripts": {
     "lint": "eslint . --ext js,jsx,ts,tsx --fix",
