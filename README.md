@@ -348,9 +348,9 @@ erDiagram
     }
 
     user {
-        string whatsappId "Whatsapp id of user if user sent message from Whatsapp"
-        string telegramId "Telegram id of user if user sent message from Telegram"
-        string emailId "email address of user if user wrote in via email"
+        string whatsappId "Whatsapp id of user if user sent message from Whatsapp, needed for reply,  null otherwise"
+        string telegramId "Telegram id of user if user sent message from Telegram, needed for reply,  null otherwise"
+        string emailId "email address of user if user wrote in via email, needed for reply, null otherwise"
         number instanceCount "number of instances sent in"
         timestamp lastSent "the last time the user sent an instance"
         timestamp firstMessageReceiptTime "the first time the user sent something into the bot"
@@ -382,9 +382,9 @@ erDiagram
      }
 
      generalMessage {
-        string source "whatsapp, telegram or email"
+        string source "platform the message came in from, eg. whatsapp, telegram or email"
         string id "id of the message received"
-        string userId "the id of the user on the respective platform"
+        string userId "the id of the user on their respective platform"
         string type "text, image, button or interactive"
         string subject "subject of the email only if user emailed in"
         string text "body text of the message"
