@@ -92,7 +92,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         harmlessCount,
       } = await getVoteCounts(messageRef)
 
-      const isSus = susCount > thresholds.isSus * validResponsesCount
+      const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
+      const isSus =
+        isBigSus || susCount > thresholds.isSus * validResponsesCount
       const isScam = isSus && scamCount >= illicitCount
       const isIllicit = isSus && !isScam
       const isInfo = infoCount > thresholds.isInfo * validResponsesCount
@@ -108,6 +110,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         harmfulCount > thresholds.isHarmful * validResponsesCount
       const isUnsure =
         (!isSus &&
+          !isBigSus &&
           !isInfo &&
           !isSpam &&
           !isLegitimate &&
@@ -127,11 +130,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVote * factCheckerCount,
               thresholds.endVoteAbsolute //10
             )) ||
-        (isSus &&
+        (isBigSus &&
           validResponsesCount >
             Math.min(
-              thresholds.endVoteSus * factCheckerCount,
-              thresholds.endVoteSusAbsolute //4
+              thresholds.endVoteBigSus * factCheckerCount,
+              thresholds.endVoteBigSusAbsolute //4
             )) ||
         (isHarmful &&
           validResponsesCount >
@@ -244,6 +247,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             (await factCheckerDocRef.set(
               {
                 lastVotedTimestamp: postChangeData.votedTimestamp,
+                isActive: true,
               },
               { merge: true }
             ))

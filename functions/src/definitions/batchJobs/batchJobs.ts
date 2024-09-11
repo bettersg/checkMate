@@ -16,6 +16,7 @@ import { TIME } from "../../utils/time"
 import { getFullLeaderboard } from "../common/statistics"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
+const checkerAppHost = process.env.CHECKER_APP_HOST
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -76,22 +77,24 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
-          const replyMarkup = {
-            keyboard: [
-              [
-                {
-                  text: "/deactivate",
-                },
-              ],
-            ],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-          }
+          const replyMarkup = checkerAppHost
+            ? {
+                inline_keyboard: [
+                  [
+                    {
+                      text: "CheckMates' Portal↗️",
+                      web_app: { url: checkerAppHost },
+                    },
+                  ],
+                ],
+              }
+            : null
           const reactivationMessage = `Hello ${doc.get(
             "name"
-          )}! Thanks for all your contributions so far🙏. We noticed that you have an outstanding message that hasn't been checked, and thought to remind you on it!
-You can go to the CheckMates' Portal and find your outstanding votes there. You can opt to pass the vote there, but we hope you'll at least give it a try 💪.
-If you'd like take a break, just type /deactivate. We'll stop sending you messages to vote on. Once you're ready to get back, you can type /activate to start receiving messages again.`
+          )}! Thanks for all your contributions so far🙏. We noticed that you haven't voted in 3 days! You're probably busy, and we don't want your votes to pile up, so we're temporarily stopped sending you messages to vote on. 
+
+To resume getting messages, just vote on any of your outstanding messages, which you can find by visiting the CheckMates' Portal. Remember, if you're busy, you can vote "pass" too!`
+          await doc.ref.update({ isActive: false })
           return sendTelegramTextMessage(
             "factChecker",
             telegramId,

@@ -523,6 +523,11 @@ We aim to document all these flows eventually, but for now do look at the code t
 
 We currently have 3 environments, prod, uat, and local. The `/integration-tests` folder contains a 4th mocked environment, SIT, which is run in the CI pipeline. Generally, you'd do most of your feature development on the local dev environment, and in a feature branch. Once the feature branch is ready, make a PR to the `develop` branch. Successful merge into the `develop` branch will trigger a UAT deployment. Successful merge from `develop` into `main` will in turn trigger a prod deployment. All these happen through Github Actions.
 
+## Software Requirements
+1. `npm`
+2. `git`
+3. `node >= 18 && <= 20`
+
 ### First Time Setup
 
 1. `git clone https://github.com/CheckMateSG/checkMate.git`
@@ -536,12 +541,13 @@ We currently have 3 environments, prod, uat, and local. The `/integration-tests`
 8. The phone number to the WhatsApp User bot non-prod number is also in said zip file, in `WhatsApp.txt`. You might want to add it to your contacts for easy access.
 9. Create your own Telegram bot via [botfather](https://t.me/botfather)
 10. Replace `TELEGRAM_CHECKER_BOT_TOKEN` in `.secret.local` with the bot token. Note, it is `TELEGRAM_CHECKER_BOT_TOKEN` and not `TELEGRAM_BOT_TOKEN` or `TELEGRAM_WEBHOOK_TOKEN`
-11. Go to botfather, type /mybots, select to the bot you created, go to > Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 7 above that routes to your localhost:5000
-12. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
+11. Go to botfather, type /mybots, select to the bot you created, go to > Bot Settings" > "Menu Button". Then add the cloudflare tunnel URL provided by @sarge1989 in step 6 above that routes to your localhost:5000.
+12. Replace `CHECKER_APP_HOST` in `.env.local` with the same cloudflare tunnel URL
+13. In .env.local, replace `CHECKER1_TELEGRAM_ID` and `CHECKER1_PHONE_NUMBER` with your own Telegram ID and WhatsApp Phone number respectively. Note that Whatsapp Phone number should include the country code e.g. 6591111111. Telegram ID can be obtained via this [telegram bot](https://t.me/myidbot)
 
 ### First time testing (once all above steps are done)
 
-1. Execute the steps in the below section "Each time developing"
+1. Execute the steps in the below section [Each Time Developing](#each-time-developing)
 2. Go to the chat with the WhatsApp User bot non-prod number and send in `/mockdb`
 3. Ensure that the [Firestore Emulator](http://127.0.0.1:4000/firestore) has been populated with some data
 4. Send "hi" to the WhatsApp User bot non-prod number. This should trigger the first usage onboarding
@@ -590,7 +596,7 @@ In the event the Makefile doesn't work,
 
 - Firebase Console - https://console.firebase.google.com/, login with your bettersg email. Go here to manage the product resources
 - Adding subcollections - https://stackoverflow.com/questions/47514419/how-to-add-subcollection-to-a-document-in-firebase-cloud-firestore
-- Getting started with firestore and firebasehttps://firebase.google.com/docs/functions/get-started
+- Getting started with firestore and firebase https://firebase.google.com/docs/functions/get-started
 - WhatsApp send message API documentation - https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages
 - WhatsApp webhook object documentation - https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components
 - Telegram Bot API documentation - https://core.telegram.org/bots/api

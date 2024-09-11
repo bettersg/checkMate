@@ -7,10 +7,10 @@ import {
   ViewVotePage,
   MyVotesPage,
   LeaderboardPage,
+  NotYetOnboardedPage,
 } from "./pages";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useUser } from "./providers/UserContext";
-import Onboarding from "./pages/Onboarding";
 import Loading from "./components/common/Loading";
 
 export const router = createBrowserRouter([
@@ -24,12 +24,12 @@ export const router = createBrowserRouter([
   },
   {
     path: "/onboarding",
-    element: <Onboarding />,
+    element: <NotYetOnboardedPage />,
   },
 ]);
 
 function App() {
-  const { setCheckerDetails, setAuthScopes } = useUser();
+  const { setCheckerDetails } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   //for global states: userID, name and messages
 
@@ -59,14 +59,25 @@ function App() {
         })
           .then((response) => {
             if (!response.ok) {
-              // Check if the status code is 403
-              if (response.status === 403) {
-                throw new Error(
-                  "Forbidden: You don't have permission to access this site."
-                );
-              } else {
-                throw new Error("HTTP Error: " + response.status);
+              switch (response.status) {
+                case 403:
+                  throw new Error(
+                    "Forbidden: You don't have permission to access this site."
+                  );
+                case 404:
+                  router.navigate("/onboarding");
+                  break;
+                default:
+                  throw new Error("HTTP Error: " + response.status);
               }
+              // Check if the status code is 403
+              // if (response.status === 403) {
+              //   throw new Error(
+              //     "Forbidden: You don't have permission to access this site."
+              //   );
+              // } else {
+              //   throw new Error("HTTP Error: " + response.status);
+              // }
             }
             return response.json();
           })
@@ -74,49 +85,24 @@ function App() {
             if (!data.customToken) {
               throw new Error("Custom token not found in response");
             }
-            if (data.isNewUser || data.isOnboardingComplete === false) {
-              // TODO BRENNAN: Redirect to onboarding page
-              signInWithToken(data.customToken)
-                .then(() => {
-                  // Handle post-signIn success actions here, if any
-                  setCheckerDetails((currentChecker) => ({
-                    ...currentChecker,
-                    checkerId: data.checkerId,
-                    checkerName: data.name,
-                    isAdmin: data.isAdmin,
-                    tier: data.tier,
-                  }));
-                  setAuthScopes(data);
-                  router.navigate("/onboarding");
-                })
-                .catch((err) => {
-                  console.error(
-                    "Error during Firebase signInWithCustomToken:",
-                    err
-                  );
-                  // Handle sign-in error here, if necessary
-                });
-              setAuthScopes(data);
-            } else {
-              //if existing user
-              signInWithToken(data.customToken)
-                .then(() => {
-                  setCheckerDetails((currentChecker) => ({
-                    ...currentChecker,
-                    checkerId: data.checkerId,
-                    checkerName: data.name,
-                    isAdmin: data.isAdmin,
-                    tier: data.tier,
-                  }));
-                })
-                .catch((err) => {
-                  console.error(
-                    "Error during Firebase signInWithCustomToken:",
-                    err
-                  );
-                  // Handle sign-in error here, if necessary
-                });
-            }
+            //if existing user
+            signInWithToken(data.customToken)
+              .then(() => {
+                setCheckerDetails((currentChecker) => ({
+                  ...currentChecker,
+                  checkerId: data.checkerId,
+                  checkerName: data.name,
+                  isAdmin: data.isAdmin,
+                  tier: data.tier,
+                }));
+              })
+              .catch((err) => {
+                console.error(
+                  "Error during Firebase signInWithCustomToken:",
+                  err
+                );
+                // Handle sign-in error here, if necessary
+              });
           })
           .catch((err) => {
             console.error("Error fetching custom token:", err);

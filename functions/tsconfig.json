@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["jest", "markdown-it", "node"],
     "allowJs": true,
     "outDir": "./lib",
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
+    "target": "ES2021",
+    "lib": ["ES2021", "DOM"],
     "noErrorTruncation": true,
     "esModuleInterop": true,
     "resolveJsonModule": true

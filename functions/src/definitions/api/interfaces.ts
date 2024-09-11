@@ -22,10 +22,12 @@ interface updateVoteRequest {
 }
 
 interface createChecker {
-  name: string
+  name: string | null
   type: "human" | "ai"
   isActive?: boolean
   isOnboardingComplete?: boolean
+  isQuizComplete?: boolean
+  quizScore?: number | null
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null
@@ -59,26 +61,25 @@ interface updateChecker {
   numVerifiedLinks?: number
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
-  programData?: "reset" | "complete"
+  programData?: "reset" | "complete" | "withdraw"
 }
 
 interface Checker {
-  name: string;
-  type: "human" | "ai";
-  isActive: boolean;
-  isOnboardingComplete: boolean | null;
-  tier: "beginner" | "intermediate" | "expert";
-  isAdmin: boolean;
-  isOnProgram: boolean;
-  referralCode: string | null;
-  hasCompletedProgram: boolean;
-  pendingVoteCount: number;
-  last30days?: Last30DaysStats;
-  programStats?: ProgramStats;
-  achievements: Achievements | null;
-  level: number;
-  experience: number;
-  certificateUrl?: string | null;
+  name: string | null
+  type: "human" | "ai"
+  isActive: boolean
+  isOnboardingComplete: boolean | null
+  tier: "beginner" | "intermediate" | "expert"
+  isAdmin: boolean
+  isOnProgram: boolean
+  referralCode: string | null
+  hasCompletedProgram: boolean
+  pendingVoteCount: number
+  last30days?: Last30DaysStats
+  programStats?: ProgramStats
+  achievements: Achievements | null
+  level: number
+  experience: number
 }
 
 interface ProgramStats
