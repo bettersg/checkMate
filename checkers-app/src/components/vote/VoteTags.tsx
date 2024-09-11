@@ -48,7 +48,8 @@ const VoteTags: React.FC<VoteTagsProps> = ({tags, onSelectTag}) => {
                         >
                         Select tags:
             </Typography>
-            <Select 
+            <Select
+                className = "mb-3"
                 defaultValue = {selectedOption}
                 onChange = {handleSelectionTag}
                 options = {options}

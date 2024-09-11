@@ -195,7 +195,6 @@ export default function VoteCategories(Prop: PropType) {
 
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
-      <VoteTags tags = {tags} onSelectTag={onSelectTagOption}/>
       <Typography
           variant="h4"
           className="text-primary-color3 dark:text-white"
@@ -238,6 +237,8 @@ export default function VoteCategories(Prop: PropType) {
           )}
         </>
       ))}
+
+      <VoteTags tags = {tags} onSelectTag={onSelectTagOption}/>
 
       {voteCategory ? (
         <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
