@@ -190,7 +190,6 @@ The primary data store is Firestore, which is a noSQL db. The entity-relationshi
 - closestMatch: Map (a.k.a object) under each instance called `closestMatch`. `DocumentReference` fields `instanceRef` and `parentRef` point to the closest matching instance, and its parent message respectively.
 - leaderboardStats: Map (a.k.a object) under each checker, called `leaderBoardStats`. Exists to facilitate tracking and calculation of the leaderboard.
 - programData: Map (a.k.a object) under each checker, called `programData`. Details related to the volunteer program.
-- generalMessage: General user message type that messages from all platforms (Whatsapp, Telegram etc.) convert to for uniform handling
 
 ```mermaid
 erDiagram
@@ -234,7 +233,7 @@ erDiagram
 
     instance {
         string source
-        string id "whatsapp message id needed to reply"
+        string id "message id needed to reply, specific to the source it came from"
         timestamp timestamp "when instance was created"
         string type "text/image"
         string text "text if text message or ocr-extracted text if image message"
@@ -379,21 +378,6 @@ erDiagram
      userBlast {
         string feedbackCategory "positive, negative or neutral"
         timestamp sentTimestamp "when blast was sent to user"
-     }
-
-     generalMessage {
-        string source "platform the message came in from, eg. whatsapp, telegram or email"
-        string id "id of the message received"
-        string userId "the id of the user on their respective platform"
-        string type "text, image, button or interactive"
-        string subject "subject of the email only if user emailed in"
-        string text "body text of the message"
-        string media  "map containing media parameters: file_id for downloading, caption and mime_type"
-        timestamp timestamp "when the message was received"
-        boolean isForwared "whether the message was forwarded"
-        boolean frequently_forwarded "whether the message was frequently forwarded"
-        string button "map of parameters if user clicked a button: text, payload"
-        string interactive "map of parameters if user clicked an interactive reply: type, list_reply, button_reply"
      }
 
     message ||--|{ instance: has

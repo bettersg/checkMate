@@ -111,15 +111,6 @@ export type GeneralMessage = {
   timestamp: number
   isForwarded: boolean | null
   frequently_forwarded: boolean | null
-  button: {
-    text: string
-    payload: string
-  } | null
-  interactive: {
-    type: string
-    list_reply: { id: string }
-    button_reply: { id: string }
-  } | null
 }
 
 export type MessageData = {

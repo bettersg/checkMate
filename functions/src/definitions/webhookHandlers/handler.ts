@@ -112,8 +112,12 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                 //put into checker queue
                 await publishToTopic("checkerEvents", message, "whatsapp")
               }
-              if (phoneNumberId === userPhoneNumberId) {
-                //put into user queue
+              if ((type == "button" || type == "interactive") && phoneNumberId === userPhoneNumberId) {
+                //put into whatsapp user interactive flow
+                await publishToTopic("userInteractiveEvents", message, "whatsapp")
+              }
+              if ((type == "text" || type == "image") && phoneNumberId === userPhoneNumberId) {
+                //put into user queue: only text and image types
                 //convert message to general Message object for processing
                 let generalMessage = {
                   source: "whatsapp",
@@ -129,8 +133,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                   timestamp: message.timestamp,
                   isForwarded: message.context?.forwarded,
                   frequently_forwarded: message.context?.frequently_forwarded,
-                  button: message.button,
-                  interactive: message.interactive
               }
                 await publishToTopic("userEvents", generalMessage, "whatsapp")
               }
