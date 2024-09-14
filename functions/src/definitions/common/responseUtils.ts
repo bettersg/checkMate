@@ -175,7 +175,6 @@ async function sendMenuMessage(
     "irrelevant",
     prefixName
   )
-  console.log(text)
   switch (platform) {
     case "telegram":
       functions.logger.warn("Telegram menu not implemented yet")
@@ -1043,7 +1042,6 @@ function getFinalResponseText(
   primaryCategory: string = "irrelevant",
   prefixName: string | null = null
 ) {
-  console.log(`original: ${responseText}`)
   let finalResponse = responseText
     .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
     .replace(
@@ -1077,7 +1075,6 @@ function getFinalResponseText(
         ? responses.INCORRECT_TRIVIAL
         : ""
     )
-  console.log(`final: ${finalResponse}`)
   return finalResponse
 }
 
