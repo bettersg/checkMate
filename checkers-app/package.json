@@ -26,6 +26,7 @@
     "react-dom": "^18.2.0",
     "react-phone-number-input": "^3.3.9",
     "react-router-dom": "^6.17.0",
+    "react-select": "^5.8.0",
     "recharts": "^2.12.3"
   },
   "devDependencies": {

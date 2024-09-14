@@ -253,6 +253,7 @@ export type VoteRequest = {
     | "unsure"
     | "pass"
     | null
+  isAutoPassed: boolean
   reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
@@ -262,6 +263,8 @@ export type VoteRequest = {
   tags: TagsMap
   duration: number | null //duration in minutes
 }
+
+export type VoteRequestUpdateObject = Partial<VoteRequest>
 
 export type CustomReply = {
   type: "text" | "image"

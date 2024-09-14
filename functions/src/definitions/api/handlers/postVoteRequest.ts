@@ -80,6 +80,7 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     platform: "agent",
     sentMessageId: null,
     category: null,
+    isAutoPassed: false,
     truthScore: null,
     numberPointScale: 6,
     reasoning: null,

@@ -1,7 +1,6 @@
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
 import { FaceFrownIcon } from "@heroicons/react/24/solid";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
@@ -13,7 +12,8 @@ import { Button } from "@material-tailwind/react";
 import { patchVote } from "../../services/api";
 import { useUser } from "../../providers/UserContext";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
-
+import { Typography } from "@material-tailwind/react";
+import VoteTags from "./VoteTags";
 import InfoOptions from "./InfoOptions";
 import NVCOptions from "./NvcOptions";
 
@@ -26,10 +26,10 @@ interface PropType {
   numberPointScale: number;
 }
 
-function getSelectedCategory(primaryCategory: string | null, tags: string[]) {
+function getSelectedCategory(primaryCategory: string | null) {
   switch (primaryCategory) {
-    case "irrelevant": //INCORRECT USAGE
-      return tags.includes("incorrect") ? "incorrect" : "nvc";
+    case "irrelevant":
+      return "nvc";
     case "legitimate":
       return "nvc";
     default:
@@ -79,16 +79,11 @@ const CATEGORIES = [
       "Content that isn't capable of being checked using publicly-available information due to its nature",
   },
   {
-    name: "incorrect",
-    icon: <CheckCircleIcon className="h-7 w-7" />,
-    display: "Incorrect Usage",
-    description: "User trying to chat or send in queries",
-  },
-  {
     name: "unsure",
     icon: <QuestionMarkCircleIcon className="h-7 w-7" />,
     display: "Unsure",
-    description: "Insufficient information to assess",
+    description:
+      "Either (i) Needs more information from sender to assess, or (ii) a search of publicly available information yields no useful results",
   },
   {
     name: "pass",
@@ -108,7 +103,7 @@ export default function VoteCategories(Prop: PropType) {
   const messageId = Prop.messageId;
   const voteRequestId = Prop.voteRequestId;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    getSelectedCategory(currentCategory, currentTags)
+    getSelectedCategory(currentCategory)
   );
   const [voteCategory, setVoteCategory] = useState<string | null>(
     currentCategory
@@ -117,7 +112,7 @@ export default function VoteCategories(Prop: PropType) {
   const [truthScore, setTruthScore] = useState<number | null>(
     currentTruthScore
   );
-  const [tags, setTags] = useState<string[] | null>(currentTags);
+  const [tags, setTags] = useState<string[]>(currentTags);
 
   const handleTruthScoreChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -131,13 +126,8 @@ export default function VoteCategories(Prop: PropType) {
 
   const handleVoteCategoryChange = (category: string) => {
     switch (category) {
-      case "incorrect":
-        setVoteCategory("irrelevant");
-        setTags(["incorrect"]);
-        break;
       default:
         setVoteCategory(category);
-        setTags([]);
         break;
     }
   };
@@ -148,9 +138,6 @@ export default function VoteCategories(Prop: PropType) {
     switch (categoryName) {
       case "nvc":
         setVoteCategory("nvc");
-        break;
-      case "incorrect":
-        handleVoteCategoryChange("incorrect");
         break;
       default:
         handleVoteCategoryChange(categoryName);
@@ -186,8 +173,16 @@ export default function VoteCategories(Prop: PropType) {
     }
   };
 
+  const onSelectTagOption = (tags: string[]) => {
+    setTags(tags);
+    console.log(tags);
+  };
+
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
+      <Typography variant="h4" className="text-primary-color3 dark:text-white">
+        Select category:
+      </Typography>
       {CATEGORIES.map((cat, index) => (
         <>
           <Button
@@ -217,14 +212,14 @@ export default function VoteCategories(Prop: PropType) {
           )}
           {selectedCategory === "nvc" && cat.name === "nvc" && (
             <NVCOptions
-              selectedCategory={
-                (tags ?? []).includes("incorrect") ? null : voteCategory
-              }
+              selectedCategory={voteCategory}
               onChange={handleL2VoteChange}
             />
           )}
         </>
       ))}
+
+      <VoteTags tags={tags} onSelectTag={onSelectTagOption} />
 
       {voteCategory ? (
         <div className="place-self-center grid grid-flow-row gap-y-4 w-full">

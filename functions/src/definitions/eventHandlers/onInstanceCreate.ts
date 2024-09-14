@@ -245,6 +245,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
     platform: preferredPlatform,
     sentMessageId: null,
     category: null,
+    isAutoPassed: false,
     truthScore: null,
     numberPointScale: 6,
     reasoning: null,
