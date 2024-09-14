@@ -150,7 +150,9 @@ async function sendMenuMessage(
   platform = "whatsapp",
   replyMessageId: string | null = null,
   disputedInstancePath: string | null = null,
-  isTruncated: boolean = false
+  isTruncated: boolean = false,
+  isGenerated: boolean = false,
+  isIncorrect: boolean = false
 ) {
   const userSnap = await db.collection("users").doc(to).get()
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
@@ -159,10 +161,21 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const text = responses.MENU.replace(
-    "{{prefix}}",
-    responses[prefixName as keyof typeof responses]
+  const text = getFinalResponseText(
+    responses.MENU,
+    responses,
+    false,
+    1,
+    false,
+    false,
+    false,
+    false,
+    isGenerated,
+    isIncorrect,
+    "irrelevant",
+    prefixName
   )
+  console.log(text)
   switch (platform) {
     case "telegram":
       functions.logger.warn("Telegram menu not implemented yet")
@@ -664,40 +677,6 @@ async function respondToInstance(
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
-  console.log("Get tags from responseUtils")
-  console.log(isGenerated)
-
-  function getFinalResponseText(responseText: string) {
-    let finalResponse = responseText
-      .replace(
-        "{{thanks}}",
-        isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
-      )
-      .replace(
-        "{{matched}}",
-        instanceCount >= 5
-          ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
-          : ""
-      )
-      .replace(
-        "{{methodology}}",
-        isMachineCategorised
-          ? responses.METHODOLOGY_AUTO
-          : isMatched
-          ? responses.METHODOLOGY_HUMAN_PREVIOUS
-          : responses.METHODOLOGY_HUMAN
-      )
-      .replace(
-        "{{image_caveat}}",
-        isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
-      )
-      .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
-
-      if (isGenerated) {
-        finalResponse = finalResponse.concat("\n\nThis is a generated information.\n") // Add the one-liner generated message if tag == generated
-      }
-      return finalResponse
-  }
 
   let category = primaryCategory
 
@@ -775,35 +754,31 @@ async function respondToInstance(
   let responseText
   switch (category) {
     case "irrelevant_auto":
-      if (isIncorrect) {
-        responseText = getFinalResponseText(responses.INCORRECT)
-        await sendTextMessage("user", from, responseText, data.id)
-        break
-      }
       await sendMenuMessage(
         from,
         "IRRELEVANT_AUTO_MENU_PREFIX",
         "whatsapp",
         data.id,
-        instanceSnap.ref.path
+        instanceSnap.ref.path,
+        false,
+        isGenerated,
+        isIncorrect
       )
       break
     case "irrelevant":
-      if (isIncorrect) {
-        responseText = getFinalResponseText(responses.INCORRECT)
-        await sendTextMessage("user", from, responseText, data.id)
-        break
-      }
       await sendMenuMessage(
         from,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
         data.id,
-        instanceSnap.ref.path
+        instanceSnap.ref.path,
+        false,
+        isGenerated,
+        isIncorrect
       )
       break
     case "error":
-      responseText = getFinalResponseText(responses.ERROR)
+      responseText = getFinalResponseText(responses.ERROR, responses)
       await sendTextMessage("user", from, responseText, data.id)
       break
     case "custom":
@@ -826,7 +801,18 @@ async function respondToInstance(
         return
       }
       responseText = getFinalResponseText(
-        responses[category.toUpperCase() as keyof typeof responses]
+        responses[category.toUpperCase() as keyof typeof responses],
+        responses,
+        isImmediate,
+        instanceCount,
+        isMachineCategorised,
+        isMatched,
+        isImage,
+        hasCaption,
+        isGenerated,
+        isIncorrect,
+        category,
+        null
       )
 
       if (!(isMachineCategorised || validResponsesCount <= 0)) {
@@ -1041,6 +1027,58 @@ async function sendBlast(user: string) {
     responses.BLAST_FEEDBACK,
     buttons
   )
+}
+
+function getFinalResponseText(
+  responseText: string,
+  responses: ResponseObject,
+  isImmediate: boolean = false,
+  instanceCount: number = 1,
+  isMachineCategorised: boolean = false,
+  isMatched: boolean = false,
+  isImage: boolean = false,
+  hasCaption: boolean = false,
+  isGenerated: boolean = false,
+  isIncorrect: boolean = false,
+  primaryCategory: string = "irrelevant",
+  prefixName: string | null = null
+) {
+  console.log(`original: ${responseText}`)
+  let finalResponse = responseText
+    .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
+    .replace(
+      "{{thanks}}",
+      isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
+    )
+    .replace(
+      "{{matched}}",
+      instanceCount >= 5
+        ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
+        : ""
+    )
+    .replace(
+      "{{methodology}}",
+      isMachineCategorised
+        ? responses.METHODOLOGY_AUTO
+        : isMatched
+        ? responses.METHODOLOGY_HUMAN_PREVIOUS
+        : responses.METHODOLOGY_HUMAN
+    )
+    .replace(
+      "{{image_caveat}}",
+      isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
+    )
+    .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
+    .replace("{{generated}}", isGenerated ? responses.GENERATED : "")
+    .replace("{{incorrect}}", isIncorrect ? responses.INCORRECT_SUFFIX : "")
+    .replace(
+      "{{incorrect_trivial}}",
+      isIncorrect && primaryCategory.includes("irrelevant")
+        ? responses.INCORRECT_TRIVIAL
+        : ""
+    )
+  console.log(`final: ${finalResponse}`)
+  return finalResponse
 }
 
 export {
