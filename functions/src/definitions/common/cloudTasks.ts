@@ -18,7 +18,10 @@ async function enqueueTask(
       uri: targetUri,
     })
   } catch (e) {
-    if (process.env.ENVIRONMENT === "DEV") {
+    if (
+      process.env.ENVIRONMENT === "DEV" ||
+      process.env.ENVIRONMENT === "SIT"
+    ) {
       // cant seem to test this in local emulator as I get an error Failed to determine service account. Initialize the SDK with service account credentials or set service account ID as an app option.
       logger.log("Unable to enqueue task..")
     } else {

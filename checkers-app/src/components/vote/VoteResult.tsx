@@ -39,14 +39,8 @@ export default function VoteResult(Prop: PropType) {
         catIcon = <MegaphoneIcon className="h-7 w-7" />;
         break;
       case "irrelevant":
-        if (Prop.tags?.includes("incorrect")) {
-          //INCORRECT USAGE
-          catName = "Incorrect Usage";
-          catIcon = <ChatBubbleOvalLeftEllipsisIcon className="h-7 w-7" />;
-        } else {
-          catName = "NVC-Can't Tell";
-          catIcon = <NoSymbolIcon className="h-7 w-7" />;
-        }
+        catName = "NVC-Can't Tell";
+        catIcon = <NoSymbolIcon className="h-7 w-7" />;
         break;
       case "legitimate":
         catName = "NVC-Credible";
