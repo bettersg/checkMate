@@ -5,7 +5,7 @@ import { TooltipWithHelperIcon } from "../common/ToolTip";
 
 const options = [
   { value: "generated", label: "🤖 AI Generated" },
-  { value: "incorrect", label: "❌ Incorrect" },
+  { value: "incorrect", label: "❌ Incorrect Usage" },
 ];
 
 interface VoteTagsProps {
