@@ -37,7 +37,6 @@ RUN npm i -g firebase-tools && \
     firebase setup:emulators:storage && \
     firebase setup:emulators:ui && \
     firebase experiments:enable webframeworks
-#note: Query breaks in firebase-tools@13.3.1 with error 500
 
 
 # Preserve firebase emulators cache
