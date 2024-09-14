@@ -1,11 +1,11 @@
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
-import { FaceFrownIcon } from "@heroicons/react/24/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
-import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
 import { FaceSmileIcon } from "@heroicons/react/20/solid";
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid";
+import { MegaphoneIcon } from "@heroicons/react/24/solid";
+import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
@@ -40,7 +40,7 @@ function getSelectedCategory(primaryCategory: string | null) {
 const CATEGORIES = [
   {
     name: "scam",
-    icon: <XMarkIcon className="h-7 w-7" />,
+    icon: <XCircleIcon className="h-7 w-7" />,
     display: "Scam",
     description: "Intended to obtain money/personal information via deception",
   },
@@ -66,14 +66,14 @@ const CATEGORIES = [
   },
   {
     name: "spam",
-    icon: <FaceFrownIcon className="h-7 w-7" />,
+    icon: <MegaphoneIcon className="h-7 w-7" />,
     display: "Marketing/Spam",
     description:
       "Content intended to (i) promote or publicise a non-malicious product, service or event or (ii) convince recipient to spread non-malicious messages to others",
   },
   {
     name: "nvc",
-    icon: <HandThumbUpIcon className="h-7 w-7" />,
+    icon: <EllipsisHorizontalCircleIcon className="h-7 w-7" />,
     display: "No Verifiable Content",
     description:
       "Content that isn't capable of being checked using publicly-available information due to its nature",

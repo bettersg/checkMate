@@ -1,10 +1,9 @@
 import { Typography } from "@material-tailwind/react";
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
 import { MegaphoneIcon } from "@heroicons/react/24/solid";
 import { HandThumbUpIcon } from "@heroicons/react/20/solid";
-import { NoSymbolIcon } from "@heroicons/react/24/solid";
-import { ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/solid";
+import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
 import { FaceSmileIcon } from "@heroicons/react/20/solid";
@@ -21,7 +20,7 @@ export default function VoteResult(Prop: PropType) {
     switch (Prop.category) {
       case "scam":
         catName = "Scam";
-        catIcon = <XMarkIcon className="h-7 w-7" />;
+        catIcon = <XCircleIcon className="h-7 w-7" />;
         break;
       case "illicit":
         catName = "Illicit";
@@ -40,7 +39,7 @@ export default function VoteResult(Prop: PropType) {
         break;
       case "irrelevant":
         catName = "NVC-Can't Tell";
-        catIcon = <NoSymbolIcon className="h-7 w-7" />;
+        catIcon = <EllipsisHorizontalCircleIcon className="h-7 w-7" />;
         break;
       case "legitimate":
         catName = "NVC-Credible";

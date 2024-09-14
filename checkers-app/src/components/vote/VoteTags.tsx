@@ -1,6 +1,7 @@
 import { Typography } from "@material-tailwind/react";
 import { MultiValue } from "react-select";
 import Select from "react-select";
+import { TooltipWithHelperIcon } from "../common/ToolTip";
 
 const options = [
   { value: "generated", label: "🤖 AI Generated" },
@@ -28,10 +29,19 @@ const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag }) => {
   };
 
   return (
-    <div className="grid grid-flow-row gap-y-4 items-center">
-      <Typography variant="h4" className="text-primary-color3 dark:text-white">
-        Select tags:
-      </Typography>
+    <div className="grid grid-flow-row gap-y-4">
+      <div className="flex items-center space-x-2">
+        <Typography
+          variant="h4"
+          className="text-primary-color3 dark:text-white"
+        >
+          Select tags:
+        </Typography>
+        <TooltipWithHelperIcon
+          header="Tags"
+          text="Select where appropriate. Multiple selections allowed."
+        />
+      </div>
       <Select
         className="mb-3"
         value={selectedOptions}
