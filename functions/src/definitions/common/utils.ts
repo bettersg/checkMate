@@ -20,7 +20,7 @@ function isNumeric(str: string) {
   return !isNaN(Number(str))
 }
 
-async function getThresholds() {
+async function getThresholds(is5point: boolean = false) {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
@@ -28,6 +28,10 @@ async function getThresholds() {
     (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
   if (env !== "PROD") {
     returnThresholds.surveyLikelihood = 1
+  }
+  if (is5point) {
+    returnThresholds.falseUpperBound = 2.5
+    returnThresholds.misleadingUpperBound = 4.0
   }
   return returnThresholds
 }

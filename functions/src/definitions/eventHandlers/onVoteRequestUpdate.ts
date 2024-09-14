@@ -81,7 +81,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         updateCheckerVoteCount(preChangeData, postChangeData),
       ])
 
-      const thresholds = await getThresholds()
+      const numberPointScale = messageSnap.get("numberPointScale") || 6
+
+      const thresholds = await getThresholds(numberPointScale === 5)
 
       const {
         irrelevantCount,

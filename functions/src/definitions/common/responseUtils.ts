@@ -350,7 +350,8 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
     susCount,
   } = await getVoteCounts(messageRef)
   const truthScore = messageSnap.get("truthScore")
-  const thresholds = await getThresholds()
+  const numberPointScale = messageSnap.get("numberPointScale") || 6
+  const thresholds = await getThresholds(numberPointScale === 5)
   const from = instanceSnap.get("from")
   const responses = await getUserResponsesObject("user", from)
   let truthCategory
@@ -664,6 +665,7 @@ async function respondToInstance(
   const userSnap = await userRef.get()
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
+
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
