@@ -12,13 +12,12 @@ import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 import CustomReply from "./CustomReply";
 
-
 export default function VotePage() {
   const { checkerDetails } = useUser();
   const { messageId, voteRequestId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [vote, setVote] = useState<Vote | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string[]>([])
+  const [selectedTag, setSelectedTag] = useState<string[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -26,7 +25,7 @@ export default function VotePage() {
       if (messageId && voteRequestId) {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
-        setSelectedTag(vote.tags)
+        setSelectedTag(vote.tags);
       }
       setIsLoading(false);
     };
@@ -43,8 +42,6 @@ export default function VotePage() {
   if (!vote) {
     return null;
   }
-
-
 
   return (
     <>
@@ -73,6 +70,7 @@ export default function VotePage() {
               currentCategory={vote.category}
               currentTruthScore={vote.truthScore}
               currentTags={selectedTag}
+              numberPointScale={vote.numberPointScale}
             />
           </>
         ) : (

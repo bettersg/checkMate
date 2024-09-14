@@ -423,9 +423,6 @@ async function onTextListReceipt(
     .collection("voteRequests")
     .doc(voteRequestId)
   const voteRequestSnap = await voteRequestRef.get()
-  const isLegacy =
-    voteRequestSnap.get("truthScore") === undefined &&
-    voteRequestSnap.get("vote") !== undefined
   const updateObj: {
     category?: string
     truthScore?: number | null
@@ -500,13 +497,6 @@ async function onTextListReceipt(
       isEnd = true
       break
   }
-  //if isLegacy and updateObject has truthScore, remove truthScore and change it to vote
-  //START REMOVE IN APRIL//
-  if (isLegacy && updateObj.truthScore !== undefined) {
-    updateObj.vote = updateObj.truthScore
-    delete updateObj.truthScore
-  }
-  //END REMOVE IN APRIL//
   if (!response) {
     functions.logger.warn(
       `Response not set for id ${voteRequestId} for message ${messageId}. Unexpected text list selection likely the cause.`

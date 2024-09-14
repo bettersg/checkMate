@@ -8,17 +8,22 @@ import {
 
 interface TruthScoreOptionsProps {
   selectedTruthScore: number | null;
+  numberPointScale: number;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface InfoOptionsProps {
   selectedTruthScore: number | null;
+  numberPointScale: number;
   handleTruthScoreChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-//0-5 truth score radio buttons selection
+//1-5 truth score radio buttons selection
 function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
-  const numberList = Array.from({ length: 5 }, (_, index) => index + 1);
+  const numberList = Array.from(
+    { length: Prop.numberPointScale },
+    (_, index) => index + (Prop.numberPointScale === 5 ? 1 : 0)
+  );
 
   return (
     <Card className="w-full max-w-[24rem] my-3 dark:bg-dark-component-color">
@@ -59,10 +64,11 @@ export default function InfoOptions(Prop: InfoOptionsProps) {
         <>
           <Typography className="text-primary-color text-justify my-3">
             Please assess the veracity of the claim(s) in the message on a scale
-            from 1 (entirely false) to 5 (entirely true).
+            from 0 (entirely false) to 5 (entirely true).
           </Typography>
           <TruthScoreOptions
             selectedTruthScore={Prop.selectedTruthScore}
+            numberPointScale={Prop.numberPointScale}
             onChange={Prop.handleTruthScoreChange}
           />
         </>
