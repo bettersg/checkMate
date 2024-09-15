@@ -372,7 +372,7 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 1.5)) {
       truthCategory = responses.PLACEHOLDER_UNTRUE
-    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+    } else if (truthScore < (thresholds.misleadingUpperBound || 3.75)) {
       truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
       truthCategory = responses.PLACEHOLDER_ACCURATE

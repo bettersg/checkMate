@@ -17,7 +17,7 @@
   "isHarmless": 0.66,
   "isHarmful": 0.66,
   "falseUpperBound": 1.5,
-  "misleadingUpperBound": 3.5,
+  "misleadingUpperBound": 3.75,
   "sendInterimMinVotes": 1,
   "surveyLikelihood": 1,
   "satisfactionSurveyCooldownDays": 30,
