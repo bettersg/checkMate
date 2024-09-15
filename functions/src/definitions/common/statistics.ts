@@ -9,17 +9,15 @@ function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   voteRequestSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
 ) {
-  const db = admin.firestore()
-  const isLegacy = voteRequestSnap.get("truthScore") === undefined
   const isParentMessageAssessed = parentMessageSnap.get("isAssessed") ?? false
   const parentMessageCategory = parentMessageSnap.get("primaryCategory") ?? null
-  const parentMessageTruthScore = isLegacy
-    ? parentMessageSnap.get("legacyTruthScore") ?? null
-    : parentMessageSnap.get("truthScore") ?? null
+  const parentMessageTags = parentMessageSnap.get("tags") ?? {}
+  const voteRequestTags = voteRequestSnap.get("tags") ?? {}
+  //make sure all tags match
+  const isTagsEqual = areTagsEqual(parentMessageTags, voteRequestTags)
+  const parentMessageTruthScore = parentMessageSnap.get("truthScore") ?? null
   const voteRequestCategory = voteRequestSnap.get("category") ?? null
-  const voteRequestTruthScore = isLegacy
-    ? voteRequestSnap.get("vote") ?? null
-    : voteRequestSnap.get("truthScore") ?? null
+  const voteRequestTruthScore = voteRequestSnap.get("truthScore") ?? null
   if (!isParentMessageAssessed) {
     return null
   }
@@ -50,7 +48,8 @@ function checkAccuracy(
     }
     return Math.abs(parentMessageTruthScore - voteRequestTruthScore) <= 1
   } else {
-    return parentMessageCategory === voteRequestCategory
+    return parentMessageCategory === voteRequestCategory //&& isTagsEqual
+    //add next time?
   }
 }
 
@@ -130,78 +129,6 @@ function tabulateVoteStats(
   const duration = computeTimeTakenMinutes(voteRequestSnap)
   return { isCorrect, score, duration }
 }
-
-// async function computeProgramStats(
-//   checkerSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
-// ) {
-//   try {
-//     const checkerData = checkerSnap.data() as CheckerData
-//     const programStart = checkerData.programData?.programStart ?? null
-//     const isOnProgram = checkerData.programData?.isOnProgram ?? false
-
-//     if (!isOnProgram) {
-//       throw new Error(`Checker ${checkerSnap.ref.id} is not on program`)
-//     }
-//     if (!programStart) {
-//       throw new Error(
-//         `Checker ${checkerSnap.ref.id} is on program but has no program start`
-//       )
-//     }
-//     const programDurationQuery = db
-//       .collectionGroup("voteRequests")
-//       .where("factCheckerDocRef", "==", checkerSnap.ref)
-//       .where("createdTimestamp", ">", programStart)
-
-//     const programDurationSnap = await programDurationQuery.get()
-//     const programDurationData = programDurationSnap.docs.filter(
-//       (doc) => doc.get("category") !== null && doc.get("category") !== "pass"
-//     )
-
-//     const numVotes = programDurationData.length
-
-//     const fetchDataPromises = programDurationData.map((doc) => {
-//       const parentMessageRef = doc.ref.parent.parent
-//       if (!parentMessageRef) {
-//         logger.error(`Vote request ${doc.id} has no parent message`)
-//         return null
-//       }
-//       return parentMessageRef.get().then((parentMessageSnap) => {
-//         if (!parentMessageSnap.exists) {
-//           logger.error(`Parent message not found for vote request ${doc.id}`)
-//           return null
-//         }
-//         const isAccurate = checkAccuracy(parentMessageSnap, doc)
-//         const isAssessed = parentMessageSnap.get("isAssessed") ?? false
-//         return {
-//           isAccurate,
-//           isAssessed,
-//         }
-//       })
-//     })
-
-//     const results = await Promise.all(fetchDataPromises)
-//     const accurateCount = results.filter(
-//       (d) => d !== null && d.isAssessed && d.isAccurate
-//     ).length
-//     const totalAssessedAndNonUnsureCount = results.filter(
-//       (d) => d !== null && d.isAssessed && d.isAccurate !== null
-//     ).length
-
-//     const accuracyRate =
-//       totalAssessedAndNonUnsureCount === 0
-//         ? null
-//         : accurateCount / totalAssessedAndNonUnsureCount
-//     return {
-//       numVotes,
-//       accuracyRate,
-//     }
-//   } catch (error) {
-//     logger.error(
-//       `Error computing program stats for checker ${checkerSnap.ref.id}: ${error}`
-//     )
-//     throw error
-//   }
-// }
 
 async function computeProgramStats(
   checkerSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
@@ -372,6 +299,29 @@ async function computeLast30DaysStats(
   }
 }
 
+function areTagsEqual(
+  tags1: { [key: string]: boolean },
+  tags2: { [key: string]: boolean }
+): boolean {
+  const getTrueKeys = (tags: { [key: string]: boolean }) =>
+    new Set(Object.keys(tags).filter((key) => tags[key]))
+
+  const set1 = getTrueKeys(tags1)
+  const set2 = getTrueKeys(tags2)
+
+  if (set1.size !== set2.size) {
+    return false
+  }
+
+  for (const key of set1) {
+    if (!set2.has(key)) {
+      return false
+    }
+  }
+
+  return true
+}
+
 export {
   checkAccuracy,
   computeGamificationScore,
@@ -380,4 +330,5 @@ export {
   tabulateVoteStats,
   computeLast30DaysStats,
   computeProgramStats,
+  areTagsEqual,
 }

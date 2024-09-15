@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { updateVoteRequest } from "../interfaces"
 import { Timestamp } from "firebase-admin/firestore"
-import { VoteRequest } from "../../../types"
+import { getTags } from "../../common/utils"
 import * as admin from "firebase-admin"
 
 if (!admin.apps.length) {
@@ -19,18 +19,19 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(400).send("Message Id or vote request Id missing.")
   }
   //confirm category in body
-  const { category, truthScore, reasoning } = req.body as updateVoteRequest
+  const { category, truthScore, reasoning, tags } =
+    req.body as updateVoteRequest
   if (!category) {
     return res.status(400).send("A category is required in the body")
   }
 
   if (
     category === "info" &&
-    (typeof truthScore !== "number" || truthScore < 1 || truthScore > 5)
+    (typeof truthScore !== "number" || truthScore < 0 || truthScore > 5)
   ) {
     return res
       .status(400)
-      .send("A truthscore between 1 and 5 is required for the info category")
+      .send("A truthscore between 0 and 5 is required for the info category")
   }
 
   if (category !== "info" && truthScore != null) {
@@ -55,6 +56,22 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(400).send(`${category} is not a valid category`)
   }
 
+  const allowedTags = await getTags()
+  if (Array.isArray(tags)) {
+    const allElementsValid = tags.every(
+      (tag) => typeof tag === "string" && allowedTags.includes(tag)
+    )
+    if (!allElementsValid) {
+      //check if tags are valid
+      return res
+        .status(400)
+        .send(
+          `Tags must be an array of strings, and each string must be one of ${allowedTags.join(
+            ", "
+          )}`
+        )
+    }
+  }
   //check if vote request exists in firestore
   const voteRequestRef = db
     .collection("messages")
@@ -65,12 +82,21 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   if (!voteRequestSnap.exists) {
     return res.status(404).send("vote request not found")
   }
-  await voteRequestRef.update({
+  const updateObj = {
     category: category,
     truthScore: truthScore ?? null,
     votedTimestamp: Timestamp.fromDate(new Date()),
     reasoning: reasoning ?? null,
-  })
+    tags: {} as { [key: string]: boolean },
+  }
+
+  // Add tags dynamically to the 'tags' field
+  if (tags) {
+    for (const tag of tags) {
+      updateObj.tags[tag] = true
+    }
+  }
+  await voteRequestRef.update(updateObj)
   return res.status(200).send({
     success: true,
   })

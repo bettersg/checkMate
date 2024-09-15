@@ -28,12 +28,15 @@ export default function VotingChart(Props: VotingChartProps) {
         }
       : {
           name: "Info",
+          0: assessedInfo.infoCount["0"],
           1: assessedInfo.infoCount["1"],
           2: assessedInfo.infoCount["2"],
           3: assessedInfo.infoCount["3"],
           4: assessedInfo.infoCount["4"],
           5: assessedInfo.infoCount["5"],
         };
+
+  const irrelevantCount = assessedInfo.irrelevantCount;
 
   const data = [
     {
@@ -50,16 +53,13 @@ export default function VotingChart(Props: VotingChartProps) {
       count: assessedInfo.satireCount,
     },
     {
-      name: "Spam",
+      name: "Mktg",
       count: assessedInfo.spamCount,
     },
     {
-      name: "Trivial",
-      count: assessedInfo.irrelevantCount,
-    },
-    {
-      name: "Legit",
-      count: assessedInfo.legitimateCount,
+      name: "NVC",
+      credible: assessedInfo.legitimateCount,
+      canttell: irrelevantCount,
     },
     {
       name: "Unsure",
@@ -85,11 +85,14 @@ export default function VotingChart(Props: VotingChartProps) {
         <Tooltip />
         <Legend />
         <Bar dataKey="count" stackId="a" fill="#8884d8" />
-        <Bar dataKey="1" stackId="a" fill="#FFD700" />
-        <Bar dataKey="2" stackId="a" fill="#C9B037" />
-        <Bar dataKey="3" stackId="a" fill="#B4A76C" />
-        <Bar dataKey="4" stackId="a" fill="#8B6914" />
-        <Bar dataKey="5" stackId="a" fill="#806517" />
+        <Bar dataKey="0" stackId="a" fill="#FFE5B4" /> {/* Light Peach */}
+        <Bar dataKey="1" stackId="a" fill="#FFC04C" /> {/* Orange Yellow */}
+        <Bar dataKey="2" stackId="a" fill="#FFB347" /> {/* Orange */}
+        <Bar dataKey="3" stackId="a" fill="#FF8C00" /> {/* Dark Orange */}
+        <Bar dataKey="4" stackId="a" fill="#E67300" /> {/* Pumpkin */}
+        <Bar dataKey="5" stackId="a" fill="#CC5500" /> {/* Burnt Orange */}
+        <Bar dataKey="credible" stackId="a" fill="#82ca9d" />
+        <Bar dataKey="canttell" stackId="a" fill="#808080" />
       </BarChart>
     </ResponsiveContainer>
   );

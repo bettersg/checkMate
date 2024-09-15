@@ -150,7 +150,9 @@ async function sendMenuMessage(
   platform = "whatsapp",
   replyMessageId: string | null = null,
   disputedInstancePath: string | null = null,
-  isTruncated: boolean = false
+  isTruncated: boolean = false,
+  isGenerated: boolean = false,
+  isIncorrect: boolean = false
 ) {
   const userSnap = await db.collection("users").doc(to).get()
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
@@ -159,9 +161,19 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const text = responses.MENU.replace(
-    "{{prefix}}",
-    responses[prefixName as keyof typeof responses]
+  const text = getFinalResponseText(
+    responses.MENU,
+    responses,
+    false,
+    1,
+    false,
+    false,
+    false,
+    false,
+    isGenerated,
+    isIncorrect,
+    "irrelevant",
+    prefixName
   )
   switch (platform) {
     case "telegram":
@@ -338,7 +350,8 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
     susCount,
   } = await getVoteCounts(messageRef)
   const truthScore = messageSnap.get("truthScore")
-  const thresholds = await getThresholds()
+  const numberPointScale = messageSnap.get("numberPointScale") || 6
+  const thresholds = await getThresholds(numberPointScale === 5)
   const from = instanceSnap.get("from")
   const responses = await getUserResponsesObject("user", from)
   let truthCategory
@@ -652,6 +665,7 @@ async function respondToInstance(
   const userSnap = await userRef.get()
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
+
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
@@ -662,33 +676,8 @@ async function respondToInstance(
   const hasCaption = data?.caption != null
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
-
-  function getFinalResponseText(responseText: string) {
-    return responseText
-      .replace(
-        "{{thanks}}",
-        isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
-      )
-      .replace(
-        "{{matched}}",
-        instanceCount >= 5
-          ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
-          : ""
-      )
-      .replace(
-        "{{methodology}}",
-        isMachineCategorised
-          ? responses.METHODOLOGY_AUTO
-          : isMatched
-          ? responses.METHODOLOGY_HUMAN_PREVIOUS
-          : responses.METHODOLOGY_HUMAN
-      )
-      .replace(
-        "{{image_caveat}}",
-        isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
-      )
-      .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
-  }
+  const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
+  const isGenerated = parentMessageSnap.get("tags.generated") ?? false
 
   let category = primaryCategory
 
@@ -771,7 +760,10 @@ async function respondToInstance(
         "IRRELEVANT_AUTO_MENU_PREFIX",
         "whatsapp",
         data.id,
-        instanceSnap.ref.path
+        instanceSnap.ref.path,
+        false,
+        isGenerated,
+        isIncorrect
       )
       break
     case "irrelevant":
@@ -780,11 +772,14 @@ async function respondToInstance(
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
         data.id,
-        instanceSnap.ref.path
+        instanceSnap.ref.path,
+        false,
+        isGenerated,
+        isIncorrect
       )
       break
     case "error":
-      responseText = getFinalResponseText(responses.ERROR)
+      responseText = getFinalResponseText(responses.ERROR, responses)
       await sendTextMessage("user", from, responseText, data.id)
       break
     case "custom":
@@ -807,7 +802,18 @@ async function respondToInstance(
         return
       }
       responseText = getFinalResponseText(
-        responses[category.toUpperCase() as keyof typeof responses]
+        responses[category.toUpperCase() as keyof typeof responses],
+        responses,
+        isImmediate,
+        instanceCount,
+        isMachineCategorised,
+        isMatched,
+        isImage,
+        hasCaption,
+        isGenerated,
+        isIncorrect,
+        category,
+        null
       )
 
       if (!(isMachineCategorised || validResponsesCount <= 0)) {
@@ -1022,6 +1028,56 @@ async function sendBlast(user: string) {
     responses.BLAST_FEEDBACK,
     buttons
   )
+}
+
+function getFinalResponseText(
+  responseText: string,
+  responses: ResponseObject,
+  isImmediate: boolean = false,
+  instanceCount: number = 1,
+  isMachineCategorised: boolean = false,
+  isMatched: boolean = false,
+  isImage: boolean = false,
+  hasCaption: boolean = false,
+  isGenerated: boolean = false,
+  isIncorrect: boolean = false,
+  primaryCategory: string = "irrelevant",
+  prefixName: string | null = null
+) {
+  let finalResponse = responseText
+    .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
+    .replace(
+      "{{thanks}}",
+      isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
+    )
+    .replace(
+      "{{matched}}",
+      instanceCount >= 5
+        ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
+        : ""
+    )
+    .replace(
+      "{{methodology}}",
+      isMachineCategorised
+        ? responses.METHODOLOGY_AUTO
+        : isMatched
+        ? responses.METHODOLOGY_HUMAN_PREVIOUS
+        : responses.METHODOLOGY_HUMAN
+    )
+    .replace(
+      "{{image_caveat}}",
+      isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
+    )
+    .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
+    .replace("{{generated}}", isGenerated ? responses.GENERATED : "")
+    .replace("{{incorrect}}", isIncorrect ? responses.INCORRECT_SUFFIX : "")
+    .replace(
+      "{{incorrect_trivial}}",
+      isIncorrect && primaryCategory.includes("irrelevant")
+        ? responses.INCORRECT_TRIVIAL
+        : ""
+    )
+  return finalResponse
 }
 
 export {

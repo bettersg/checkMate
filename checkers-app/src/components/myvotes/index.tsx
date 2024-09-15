@@ -8,18 +8,20 @@ export default function MyVotes() {
   const location = useLocation();
 
   useEffect(() => {
-    console.log(location)
     if (location.state) {
       if (location.state.status) {
-        setActiveTab(location.state.status)
+        setActiveTab(location.state.status);
       }
     }
-  }, [location, activeTab])
-  
+  }, [location, activeTab]);
+
   return (
     <div>
       <div>
-        <MessagesDisplay status = {location.state ? location.state.status : "pending"} scrollPosition = {location.state ? location.state.scrollPosition : 0} />
+        <MessagesDisplay
+          status={location.state ? location.state.status : "pending"}
+          scrollPosition={location.state ? location.state.scrollPosition : 0}
+        />
         {/* <MessagesDisplayTest /> */}
       </div>
     </div>

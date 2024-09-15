@@ -38,6 +38,10 @@ export type WhatsappMessageObject = {
   image?: { caption: string; id: string; mime_type: string }
 }
 
+type TagsMap = {
+  [tag: string]: boolean
+}
+
 export type MessageData = {
   machineCategory: string
   isMachineCategorised: boolean
@@ -54,6 +58,7 @@ export type MessageData = {
   assessmentExpiry: Timestamp | null
   assessmentExpired: boolean
   truthScore: number | null
+  numberPointScale: 5 | 6
   isIrrelevant: boolean | null
   isScam: boolean | null
   isIllicit: boolean | null
@@ -64,6 +69,7 @@ export type MessageData = {
   isSatire: boolean | null
   isHarmful: boolean | null // whether the sum of scam + illicit + untrue votes > harmful threshold
   isHarmless: boolean | null // whether the sum of legitimate + accurate + spam votes > harmless threshold
+  tags: TagsMap
   primaryCategory: string | null
   customReply: string | null
   instanceCount: number
@@ -234,7 +240,8 @@ export type VoteRequest = {
   triggerL2Vote: boolean | null
   triggerL2Others: boolean | null
   sentMessageId: string | null
-  truthScore: 1 | 2 | 3 | 4 | 5 | null
+  truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null
+  numberPointScale: 5 | 6
   category:
     | "scam"
     | "illicit"
@@ -246,14 +253,18 @@ export type VoteRequest = {
     | "unsure"
     | "pass"
     | null
+  isAutoPassed: boolean
   reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
   isCorrect: boolean | null
   score: number | null
+  tags: TagsMap
   duration: number | null //duration in minutes
 }
+
+export type VoteRequestUpdateObject = Partial<VoteRequest>
 
 export type CustomReply = {
   type: "text" | "image"

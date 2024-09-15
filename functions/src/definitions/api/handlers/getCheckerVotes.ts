@@ -33,7 +33,7 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
     if (status === "pending") {
       query = query.where("category", "==", null)
     } else if (status === "voted") {
-      query = query.where("votedTimestamp", "!=", null)
+      query = query.where("category", "!=", null)
     }
 
     const totalCount = (await query.count().get()).data().count

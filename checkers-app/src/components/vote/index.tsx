@@ -17,6 +17,7 @@ export default function VotePage() {
   const { messageId, voteRequestId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [vote, setVote] = useState<Vote | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -24,6 +25,7 @@ export default function VotePage() {
       if (messageId && voteRequestId) {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
+        setSelectedTag(vote.tags);
       }
       setIsLoading(false);
     };
@@ -62,17 +64,13 @@ export default function VotePage() {
         vote.category === "pass" ||
         !vote.isAssessed ? (
           <>
-            <Typography
-              variant="h4"
-              className="text-primary-color3 dark:text-white"
-            >
-              Select category:
-            </Typography>
             <VoteCategories
               messageId={messageId ?? null}
               voteRequestId={voteRequestId ?? null}
               currentCategory={vote.category}
               currentTruthScore={vote.truthScore}
+              currentTags={selectedTag}
+              numberPointScale={vote.numberPointScale}
             />
           </>
         ) : (
@@ -88,6 +86,7 @@ export default function VotePage() {
                 <VoteResult
                   category={vote.category}
                   truthScore={vote.truthScore}
+                  tags={vote.tags}
                 />
               </div>
               <div className="flex flex-1 flex-col justify-center">
@@ -100,6 +99,7 @@ export default function VotePage() {
                 <VoteResult
                   category={vote.finalStats?.primaryCategory ?? null}
                   truthScore={vote.finalStats?.truthScore ?? null}
+                  tags={vote.finalStats?.tags ?? []}
                 />
               </div>
             </div>

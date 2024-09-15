@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { getThresholds } from "../common/utils"
+import { getThresholds, getTags } from "../common/utils"
 import {
   sendVotingMessage,
   sendL2OthersCategorisationMessage,
@@ -13,6 +13,7 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
 import { logger } from "firebase-functions/v2"
+import { MessageData } from "../../types"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -49,6 +50,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       return
     }
     const messageSnap = await messageRef.get()
+    const beforeTags = preChangeData?.tags ?? {}
+    const afterTags = postChangeData?.tags ?? {}
+    const { addedTags, removedTags } = getChangedTags(beforeTags, afterTags)
     if (
       preChangeData.triggerL2Vote !== true &&
       postChangeData.triggerL2Vote === true
@@ -62,17 +66,24 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     } else if (
       preChangeData.truthScore != postChangeData.truthScore ||
       preChangeData.category != postChangeData.category ||
-      preChangeData.vote != postChangeData.vote
+      preChangeData.vote != postChangeData.vote ||
+      addedTags.length > 0 ||
+      removedTags.length > 0
     ) {
-      const isLegacy =
-        postChangeData.truthScore === undefined &&
-        postChangeData.vote !== undefined
       await Promise.all([
-        updateCounts(messageRef, preChangeData, postChangeData),
+        updateCounts(
+          messageRef,
+          preChangeData,
+          postChangeData,
+          addedTags,
+          removedTags
+        ),
         updateCheckerVoteCount(preChangeData, postChangeData),
       ])
 
-      const thresholds = await getThresholds()
+      const numberPointScale = messageSnap.get("numberPointScale") || 6
+
+      const thresholds = await getThresholds(numberPointScale === 5)
 
       const {
         irrelevantCount,
@@ -90,6 +101,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         truthScore,
         harmfulCount,
         harmlessCount,
+        tagCounts,
       } = await getVoteCounts(messageRef)
 
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
@@ -161,9 +173,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         if (truthScore === null) {
           primaryCategory = "error"
           functions.logger.error("Category is info but truth score is null")
-        } else if (truthScore < (thresholds.falseUpperBound || 2.5)) {
+        } else if (truthScore < (thresholds.falseUpperBound || 1.5)) {
           primaryCategory = "untrue"
-        } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
+        } else if (truthScore <= (thresholds.misleadingUpperBound || 3.5)) {
           primaryCategory = "misleading"
         } else {
           primaryCategory = "accurate"
@@ -180,7 +192,10 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         primaryCategory = "error"
         functions.logger.error("Error in primary category determination")
       }
-      await messageRef.update({
+
+      const updateObj: Partial<MessageData> & {
+        [key: string]: FieldValue | boolean | number | string | null
+      } = {
         truthScore: truthScore,
         isScam: isScam,
         isIllicit: isIllicit,
@@ -194,7 +209,22 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         isHarmful: isHarmful,
         isHarmless: isHarmless,
         primaryCategory: primaryCategory,
-      })
+      }
+
+      // Loop through tagCounts and check if they exceed the threshold
+
+      for (const tag in tagCounts) {
+        if (tagCounts.hasOwnProperty(tag)) {
+          const count = tagCounts[tag]
+          if (count > 0.5 * validResponsesCount) {
+            updateObj[`tags.${tag}`] = true
+          } else {
+            updateObj[`tags.${tag}`] = FieldValue.delete()
+          }
+        }
+      }
+
+      await messageRef.update(updateObj)
       if (messageSnap.get("isAssessed") === true) {
         const { isCorrect, score, duration } = tabulateVoteStats(
           messageSnap,
@@ -232,12 +262,16 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               ],
             ],
           }
-          await updateTelegramReplyMarkup(
-            "factChecker",
-            postChangeData.platformId,
-            postChangeData.sentMessageId,
-            replyMarkup
-          )
+          try {
+            await updateTelegramReplyMarkup(
+              "factChecker",
+              postChangeData.platformId,
+              postChangeData.sentMessageId,
+              replyMarkup
+            )
+          } catch (e) {
+            functions.logger.warn("Error updating telegram reply markup", e)
+          }
         }
         if (postChangeData.votedTimestamp !== preChangeData.votedTimestamp) {
           const factCheckerDocRef = await switchLegacyCheckerRef(
@@ -266,19 +300,22 @@ async function updateCounts(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
   before: admin.firestore.DocumentData,
   after: admin.firestore.DocumentData,
-  isLegacy: boolean = false
+  addedTags: string[],
+  removedTags: string[]
 ) {
   const previousCategory = before.category
   const currentCategory = after.category
-  //START REMOVE IN APRIL//
   let previousScore = before.truthScore
   let currentScore = after.truthScore
 
-  if (isLegacy) {
-    previousScore = before.vote
-    currentScore = after.vote
+  for (const tag of addedTags) {
+    await incrementCounter(messageRef, tag, numVoteShards.value())
   }
-  //END REMOVE IN APRIL//
+
+  for (const tag of removedTags) {
+    await incrementCounter(messageRef, tag, numVoteShards.value(), -1)
+  }
+
   if (previousCategory === null) {
     if (currentCategory !== null) {
       await incrementCounter(messageRef, "responses", numVoteShards.value())
@@ -452,6 +489,30 @@ async function switchLegacyCheckerRef(
     functions.logger.error("Invalid factCheckerDocRef path")
     return null
   }
+}
+
+function getChangedTags(
+  beforeTags: { [key: string]: boolean },
+  afterTags: { [key: string]: boolean }
+) {
+  const addedTags: string[] = []
+  const removedTags: string[] = []
+
+  // Check for added or modified tags
+  for (const tag in afterTags) {
+    if (!beforeTags.hasOwnProperty(tag) || beforeTags[tag] !== afterTags[tag]) {
+      addedTags.push(tag)
+    }
+  }
+
+  // Check for removed tags
+  for (const tag in beforeTags) {
+    if (!afterTags.hasOwnProperty(tag)) {
+      removedTags.push(tag)
+    }
+  }
+
+  return { addedTags, removedTags }
 }
 
 export { onVoteRequestUpdateV2 }
