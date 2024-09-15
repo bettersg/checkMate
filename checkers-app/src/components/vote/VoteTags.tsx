@@ -44,7 +44,7 @@ const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag }) => {
       </div>
       <div>
       <Select
-            className="mb-3"
+            className="mb-3 dark:text-black"
             value={selectedOptions}
             onChange={handleSelectionTag}
             options={options}
