@@ -45,7 +45,8 @@ export default function VotePage() {
 
   return (
     <>
-      <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding">
+      <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding mb-2"
+           style = {{maxHeight: '100vh', overflowY: 'auto'}}>
         <style>
           {`
             ::-webkit-scrollbar {
