@@ -42,13 +42,17 @@ const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag }) => {
           text="Select where appropriate. Multiple selections allowed."
         />
       </div>
+      <div>
       <Select
-        className="mb-3"
-        value={selectedOptions}
-        onChange={handleSelectionTag}
-        options={options}
-        isMulti
+            className="mb-3"
+            value={selectedOptions}
+            onChange={handleSelectionTag}
+            options={options}
+            isMulti
+            isSearchable={false}
       />
+      </div>
+        
     </div>
   );
 };
