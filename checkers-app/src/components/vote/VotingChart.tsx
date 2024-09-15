@@ -92,7 +92,7 @@ export default function VotingChart(Props: VotingChartProps) {
         <Bar dataKey="4" stackId="a" fill="#E67300" /> {/* Pumpkin */}
         <Bar dataKey="5" stackId="a" fill="#CC5500" /> {/* Burnt Orange */}
         <Bar dataKey="credible" stackId="a" fill="#82ca9d" />
-        <Bar dataKey="cant-tell" stackId="a" fill="#808080" />
+        <Bar dataKey="canttell" stackId="a" fill="#808080" />
       </BarChart>
     </ResponsiveContainer>
   );
