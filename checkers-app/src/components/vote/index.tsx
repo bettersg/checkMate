@@ -110,9 +110,9 @@ export default function VotePage() {
             />
           </>
         )}
-        {/* {checkerDetails.tier === "expert" && (
+        {checkerDetails.tier === "expert" && (
           <CustomReply messageId={messageId} />
-        )} */}
+        )}
       </div>
     </>
   );
