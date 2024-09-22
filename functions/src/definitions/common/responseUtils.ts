@@ -179,7 +179,9 @@ async function sendMenuMessage(
   platform = "whatsapp",
   replyMessageId: string | null = null,
   disputedInstancePath: string | null = null,
-  isTruncated: boolean = false
+  isTruncated: boolean = false,
+  isGenerated: boolean = false,
+  isIncorrect: boolean = false
 ) {
   let idField
   switch (platform) {
@@ -204,9 +206,19 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const text = responses.MENU.replace(
-    "{{prefix}}",
-    responses[prefixName as keyof typeof responses]
+  const text = getFinalResponseText(
+    responses.MENU,
+    responses,
+    false,
+    1,
+    false,
+    false,
+    false,
+    false,
+    isGenerated,
+    isIncorrect,
+    "irrelevant",
+    prefixName
   )
   switch (platform) {
     case "telegram":
@@ -402,7 +414,8 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
     susCount,
   } = await getVoteCounts(messageRef)
   const truthScore = messageSnap.get("truthScore")
-  const thresholds = await getThresholds()
+  const numberPointScale = messageSnap.get("numberPointScale") || 6
+  const thresholds = await getThresholds(numberPointScale === 5)
   const from = instanceSnap.get("from")
   const source = instanceSnap.get("source")
   let idField
@@ -439,7 +452,7 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 1.5)) {
       truthCategory = responses.PLACEHOLDER_UNTRUE
-    } else if (truthScore < (thresholds.misleadingUpperBound || 3.5)) {
+    } else if (truthScore < (thresholds.misleadingUpperBound || 3.75)) {
       truthCategory = responses.PLACEHOLDER_MISLEADING
     } else {
       truthCategory = responses.PLACEHOLDER_ACCURATE
@@ -796,6 +809,7 @@ async function respondToInstance(
   const userDoc = userSnap?.docs[0]
   const language = userDoc.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
+
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
@@ -807,33 +821,7 @@ async function respondToInstance(
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
-
-  function getFinalResponseText(responseText: string) {
-    return responseText
-      .replace(
-        "{{thanks}}",
-        isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
-      )
-      .replace(
-        "{{matched}}",
-        instanceCount >= 5
-          ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
-          : ""
-      )
-      .replace(
-        "{{methodology}}",
-        isMachineCategorised
-          ? responses.METHODOLOGY_AUTO
-          : isMatched
-          ? responses.METHODOLOGY_HUMAN_PREVIOUS
-          : responses.METHODOLOGY_HUMAN
-      )
-      .replace(
-        "{{image_caveat}}",
-        isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
-      )
-      .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
-  }
+  const isGenerated = parentMessageSnap.get("tags.generated") ?? false
 
   let category = primaryCategory
 
@@ -911,35 +899,31 @@ async function respondToInstance(
   let responseText
   switch (category) {
     case "irrelevant_auto":
-      if (isIncorrect) {
-        responseText = getFinalResponseText(responses.INCORRECT)
-        await sendTextMessage("user", from, responseText, data.id)
-        break
-      }
       await sendMenuMessage(
         from,
         "IRRELEVANT_AUTO_MENU_PREFIX",
         "whatsapp",
         data.id,
-        instanceSnap.ref.path
+        instanceSnap.ref.path,
+        false,
+        isGenerated,
+        isIncorrect
       )
       break
     case "irrelevant":
-      if (isIncorrect) {
-        responseText = getFinalResponseText(responses.INCORRECT)
-        await sendTextMessage("user", from, responseText, data.id)
-        break
-      }
       await sendMenuMessage(
         from,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
         data.id,
-        instanceSnap.ref.path
+        instanceSnap.ref.path,
+        false,
+        isGenerated,
+        isIncorrect
       )
       break
     case "error":
-      responseText = getFinalResponseText(responses.ERROR)
+      responseText = getFinalResponseText(responses.ERROR, responses)
       await sendTextMessage("user", from, responseText, data.id)
       break
     case "custom":
@@ -962,7 +946,18 @@ async function respondToInstance(
         return
       }
       responseText = getFinalResponseText(
-        responses[category.toUpperCase() as keyof typeof responses]
+        responses[category.toUpperCase() as keyof typeof responses],
+        responses,
+        isImmediate,
+        instanceCount,
+        isMachineCategorised,
+        isMatched,
+        isImage,
+        hasCaption,
+        isGenerated,
+        isIncorrect,
+        category,
+        null
       )
 
       if (!(isMachineCategorised || validResponsesCount <= 0)) {
@@ -1198,6 +1193,56 @@ async function sendBlast(
     responses.BLAST_FEEDBACK,
     buttons
   )
+}
+
+function getFinalResponseText(
+  responseText: string,
+  responses: ResponseObject,
+  isImmediate: boolean = false,
+  instanceCount: number = 1,
+  isMachineCategorised: boolean = false,
+  isMatched: boolean = false,
+  isImage: boolean = false,
+  hasCaption: boolean = false,
+  isGenerated: boolean = false,
+  isIncorrect: boolean = false,
+  primaryCategory: string = "irrelevant",
+  prefixName: string | null = null
+) {
+  let finalResponse = responseText
+    .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
+    .replace(
+      "{{thanks}}",
+      isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
+    )
+    .replace(
+      "{{matched}}",
+      instanceCount >= 5
+        ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
+        : ""
+    )
+    .replace(
+      "{{methodology}}",
+      isMachineCategorised
+        ? responses.METHODOLOGY_AUTO
+        : isMatched
+        ? responses.METHODOLOGY_HUMAN_PREVIOUS
+        : responses.METHODOLOGY_HUMAN
+    )
+    .replace(
+      "{{image_caveat}}",
+      isImage && hasCaption ? responses.IMAGE_CAVEAT : ""
+    )
+    .replace("{{reporting_nudge}}", responses.REPORTING_NUDGE)
+    .replace("{{generated}}", isGenerated ? responses.GENERATED : "")
+    .replace("{{incorrect}}", isIncorrect ? responses.INCORRECT_SUFFIX : "")
+    .replace(
+      "{{incorrect_trivial}}",
+      isIncorrect && primaryCategory.includes("irrelevant")
+        ? responses.INCORRECT_TRIVIAL
+        : ""
+    )
+  return finalResponse
 }
 
 export {

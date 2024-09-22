@@ -9,6 +9,7 @@ export { onInstanceUpdateV2 } from "./definitions/eventHandlers/onInstanceUpdate
 export { onMessageUpdateV2 } from "./definitions/eventHandlers/onMessageUpdate"
 export { onCheckerUpdateV2 } from "./definitions/eventHandlers/onCheckerUpdate"
 export { webhookHandlerV2 } from "./definitions/webhookHandlers/handler"
+export { onVoteRequestCreate } from "./definitions/eventHandlers/onVoteRequestCreate"
 export { onVoteRequestUpdateV2 } from "./definitions/eventHandlers/onVoteRequestUpdate"
 export { healthcheckV2 } from "./definitions/healthcheck"
 export { onMessageWriteV2 } from "./definitions/eventHandlers/updateTypesense"
@@ -19,4 +20,5 @@ export { telegramAuthHandler } from "./definitions/api/authentication"
 export { onCheckerPublishTelegram } from "./definitions/eventHandlers/checkerHandlerTelegram"
 export { apiHandler } from "./definitions/api/api"
 export { internalApiHandler } from "./definitions/api/apiInternal"
+export { passVoteRequest } from "./definitions/taskHandlers/autoPass"
 export { batchJobs }

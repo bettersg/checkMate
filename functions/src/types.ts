@@ -129,6 +129,7 @@ export type MessageData = {
   assessmentExpiry: Timestamp | null
   assessmentExpired: boolean
   truthScore: number | null
+  numberPointScale: 5 | 6
   isIrrelevant: boolean | null
   isScam: boolean | null
   isIllicit: boolean | null
@@ -313,7 +314,8 @@ export type VoteRequest = {
   triggerL2Vote: boolean | null
   triggerL2Others: boolean | null
   sentMessageId: string | null
-  truthScore: 1 | 2 | 3 | 4 | 5 | null
+  truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null
+  numberPointScale: 5 | 6
   category:
     | "scam"
     | "illicit"
@@ -325,6 +327,7 @@ export type VoteRequest = {
     | "unsure"
     | "pass"
     | null
+  isAutoPassed: boolean
   reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
@@ -334,6 +337,8 @@ export type VoteRequest = {
   tags: TagsMap
   duration: number | null //duration in minutes
 }
+
+export type VoteRequestUpdateObject = Partial<VoteRequest>
 
 export type CustomReply = {
   type: "text" | "image"

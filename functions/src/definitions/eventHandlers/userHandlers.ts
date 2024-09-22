@@ -312,6 +312,7 @@ async function newTextInstanceHandler({
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
+      numberPointScale: 6,
       isIrrelevant:
         isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
@@ -588,6 +589,7 @@ async function newImageInstanceHandler({
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
+      numberPointScale: 6,
       isIrrelevant:
         isMachineAssessed && machineCategory.includes("irrelevant")
           ? true

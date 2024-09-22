@@ -222,6 +222,8 @@ erDiagram
         string primaryCategory "either scam, illicit, irrelevant, spam, legitimate, misleading, untrue, accurate, unsure, or pass"
         number instanceCount "number of instances"
         string rationalisation "genAI created rationalisation of why the message might have been categorised as such"
+        map tags "a map of possible tags, currently limited to the keys 'generated' or 'incorrect'. Value will be true if the tag exists"
+        number numberPointScale "either 5 or 6, depending on how many points the truth score scale had for this message"
     }
 
     customReply {
@@ -293,6 +295,9 @@ erDiagram
         boolean isCorrect "whether the vote aligns with majority. Null if majority is unsure or if category is pass"
         number score "score that this vote contributes to the leaderboard"
         number duration "number of minutes taken since start of vote to vote"
+        map tags "a map of possible tags, currently limited to the keys 'generated' or 'incorrect'. Value will be true if the tag exists"
+        number numberPointScale "either 5 or 6, depending on how many points the truth score scale had for this message"
+        boolean isAutoPassed "whether the message was auto-passed"
     }
 
     checker {

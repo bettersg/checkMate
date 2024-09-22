@@ -1,19 +1,19 @@
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
-import { FaceFrownIcon } from "@heroicons/react/24/solid";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
-import { HandThumbUpIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
 import { FaceSmileIcon } from "@heroicons/react/20/solid";
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid";
+import { MegaphoneIcon } from "@heroicons/react/24/solid";
+import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
 import { patchVote } from "../../services/api";
 import { useUser } from "../../providers/UserContext";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
-
+import { Typography } from "@material-tailwind/react";
+import VoteTags from "./VoteTags";
 import InfoOptions from "./InfoOptions";
 import NVCOptions from "./NvcOptions";
 
@@ -23,12 +23,13 @@ interface PropType {
   currentCategory: string | null;
   currentTruthScore: number | null;
   currentTags: string[] | null;
+  numberPointScale: number;
 }
 
-function getSelectedCategory(primaryCategory: string | null, tags: string[]) {
+function getSelectedCategory(primaryCategory: string | null) {
   switch (primaryCategory) {
-    case "irrelevant": //INCORRECT USAGE
-      return tags.includes("incorrect") ? "incorrect" : "nvc";
+    case "irrelevant":
+      return "nvc";
     case "legitimate":
       return "nvc";
     default:
@@ -39,7 +40,7 @@ function getSelectedCategory(primaryCategory: string | null, tags: string[]) {
 const CATEGORIES = [
   {
     name: "scam",
-    icon: <XMarkIcon className="h-7 w-7" />,
+    icon: <XCircleIcon className="h-7 w-7" />,
     display: "Scam",
     description: "Intended to obtain money/personal information via deception",
   },
@@ -65,24 +66,17 @@ const CATEGORIES = [
   },
   {
     name: "spam",
-    icon: <FaceFrownIcon className="h-7 w-7" />,
+    icon: <MegaphoneIcon className="h-7 w-7" />,
     display: "Marketing/Spam",
     description:
       "Content intended to (i) promote or publicise a non-malicious product, service or event or (ii) convince recipient to spread non-malicious messages to others",
   },
   {
     name: "nvc",
-    icon: <HandThumbUpIcon className="h-7 w-7" />,
+    icon: <EllipsisHorizontalCircleIcon className="h-7 w-7" />,
     display: "No Verifiable Content",
     description:
       "Content that isn't capable of being checked using publicly-available information due to its nature",
-  },
-  {
-    name: "incorrect",
-    icon: <CheckCircleIcon className="h-7 w-7" />,
-    display: "Incorrect Usage",
-    description:
-      "User trying to chat, addressing CheckMate, or sending in queries",
   },
   {
     name: "unsure",
@@ -109,7 +103,7 @@ export default function VoteCategories(Prop: PropType) {
   const messageId = Prop.messageId;
   const voteRequestId = Prop.voteRequestId;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    getSelectedCategory(currentCategory, currentTags)
+    getSelectedCategory(currentCategory)
   );
   const [voteCategory, setVoteCategory] = useState<string | null>(
     currentCategory
@@ -118,7 +112,7 @@ export default function VoteCategories(Prop: PropType) {
   const [truthScore, setTruthScore] = useState<number | null>(
     currentTruthScore
   );
-  const [tags, setTags] = useState<string[] | null>(currentTags);
+  const [tags, setTags] = useState<string[]>(currentTags);
 
   const handleTruthScoreChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -132,13 +126,8 @@ export default function VoteCategories(Prop: PropType) {
 
   const handleVoteCategoryChange = (category: string) => {
     switch (category) {
-      case "incorrect":
-        setVoteCategory("irrelevant");
-        setTags(["incorrect"]);
-        break;
       default:
         setVoteCategory(category);
-        setTags([]);
         break;
     }
   };
@@ -149,9 +138,6 @@ export default function VoteCategories(Prop: PropType) {
     switch (categoryName) {
       case "nvc":
         setVoteCategory("nvc");
-        break;
-      case "incorrect":
-        handleVoteCategoryChange("incorrect");
         break;
       default:
         handleVoteCategoryChange(categoryName);
@@ -187,8 +173,16 @@ export default function VoteCategories(Prop: PropType) {
     }
   };
 
+  const onSelectTagOption = (tags: string[]) => {
+    setTags(tags);
+    console.log(tags);
+  };
+
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
+      <Typography variant="h4" className="text-primary-color3 dark:text-white">
+        Select category:
+      </Typography>
       {CATEGORIES.map((cat, index) => (
         <>
           <Button
@@ -212,19 +206,20 @@ export default function VoteCategories(Prop: PropType) {
           {selectedCategory === "info" && cat.name === "info" && (
             <InfoOptions
               selectedTruthScore={truthScore}
+              numberPointScale={Prop.numberPointScale}
               handleTruthScoreChange={handleTruthScoreChange}
             />
           )}
           {selectedCategory === "nvc" && cat.name === "nvc" && (
             <NVCOptions
-              selectedCategory={
-                (tags ?? []).includes("incorrect") ? null : voteCategory
-              }
+              selectedCategory={voteCategory}
               onChange={handleL2VoteChange}
             />
           )}
         </>
       ))}
+
+      <VoteTags tags={tags} onSelectTag={onSelectTagOption} />
 
       {voteCategory ? (
         <div className="place-self-center grid grid-flow-row gap-y-4 w-full">

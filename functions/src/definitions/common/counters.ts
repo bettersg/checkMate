@@ -32,10 +32,7 @@ const getCount = async function (docRef: DocumentReference, type: string) {
   return count
 }
 
-const getVoteCounts = async function (
-  messageRef: DocumentReference,
-  isLegacy = false
-) {
+const getVoteCounts = async function (messageRef: DocumentReference) {
   const tags = (await getTags()) as string[]
   const totalVoteRequestQuery = messageRef
     .collection("voteRequests")
@@ -105,7 +102,7 @@ const getVoteCounts = async function (
   const factCheckerCount = totalVoteRequestsCount - passCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
   const validResponsesCount = responsesCount - passCount //can remove in future and replace with nonErrorCount
   const susCount = scamCount + illicitCount
-  const truthScore = computeTruthScore(infoCount, voteTotal, isLegacy)
+  const truthScore = computeTruthScore(infoCount, voteTotal)
   let harmfulCount = scamCount + illicitCount
   let harmlessCount = legitimateCount + spamCount
   if (truthScore !== null) {
@@ -162,20 +159,11 @@ const incrementCheckerCounts = async function (
   }
 }
 
-function computeTruthScore(
-  infoCount: number,
-  voteTotal: number,
-  isLegacy: boolean
-) {
+function computeTruthScore(infoCount: number, voteTotal: number) {
   if (infoCount === 0) {
     return null
   }
-  const truthScore = voteTotal / infoCount
-  if (isLegacy) {
-    return (truthScore / 5) * 4 + 1
-  } else {
-    return truthScore
-  }
+  return voteTotal / infoCount
 }
 
 export { getCount, incrementCounter, getVoteCounts, incrementCheckerCounts }

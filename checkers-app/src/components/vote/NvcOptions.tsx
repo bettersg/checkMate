@@ -27,7 +27,7 @@ export default function nvcOptions(Prop: nvcOptionsProps) {
   return (
     <div>
       <Typography className="text-primary-color text-justify my-3">
-        Is this from a credible source?
+        Is the source a credible/reputable entity?
       </Typography>
       <Card className="w-full max-w-[24rem] my-3 dark:bg-dark-component-color">
         <List className="flex-row">
