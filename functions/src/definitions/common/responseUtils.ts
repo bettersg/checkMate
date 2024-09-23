@@ -28,43 +28,41 @@ type ResponseObject = {
   [key: string]: string
 }
 
-async function getUserResponsesObject(
-  botType: "factChecker"
-): Promise<ResponseObject>
-async function getUserResponsesObject(
-  botType: "user",
-  user: string,
-  idField: string
-): Promise<ResponseObject>
-async function getUserResponsesObject(
-  botType: "user" | "factChecker" = "user",
-  user?: string,
-  idField?: string
-) {
-  if (botType === "factChecker") {
-    const returnObj = await getResponsesObj("factChecker")
-    return returnObj
-  } else {
-    if (typeof user !== "string") {
-      functions.logger.error("user not provided to getUserResponseObject")
-      return "error"
-    }
-    if (typeof idField !== "string") {
-      functions.logger.error("idField not provided to getUserResponseObject")
-      return "error"
-    }
-  
-    let language;
-    const userSnap = await db.collection("users").where(idField, '==', user).get();
-    if (!userSnap.empty) {
-        language = userSnap.docs[0].get("language") ?? "en";
-    } else {
-        language = "en";
-    }
-    const returnObj = await getResponsesObj("user", language);
-    return returnObj;
-  }
-}
+// async function getUserResponsesObject(
+//   botType: "factChecker"
+// ): Promise<ResponseObject>
+// async function getUserResponsesObject(
+//   botType: "user",
+//   userSnap: DocumentSnapshot
+// ): Promise<ResponseObject>
+// async function getUserResponsesObject(
+//   botType: "user" | "factChecker" = "user",
+//   userSnap?: DocumentSnapshot,
+//   idField?: string
+// ) {
+//   if (botType === "factChecker") {
+//     const returnObj = await getResponsesObj("factChecker")
+//     return returnObj
+//   } else {
+//     if (userSnap == null) {
+//       functions.logger.error("user not provided to getUserResponseObject")
+//       return "error"
+//     }
+//     if (typeof idField !== "string") {
+//       functions.logger.error("idField not provided to getUserResponseObject")
+//       return "error"
+//     }
+
+//     let language
+//     if (userSnap !== null) {
+//       language = userSnap.get("language") ?? "en"
+//     } else {
+//       language = "en"
+//     }
+//     const returnObj = await getResponsesObj("user", language)
+//     return returnObj
+//   }
+// }
 
 async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
 async function getResponsesObj(
@@ -116,30 +114,22 @@ function getInfoLiner(truthScore: null | number, infoPlaceholder: string) {
 }
 
 async function respondToRationalisationFeedback(
+  userSnap: DocumentSnapshot,
   instancePath: string,
-  isUseful: string,
+  isUseful: string
 ) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
   const from = data?.from ?? null
-  const source = data?.source ?? null
-  let idField
-  switch (source) {
-    case "telegramId":
-      idField = "telegramId"
-      break
-    case "emailId":
-      idField = "emailId"
-      break
-    case "whatsappId":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in respondToRationalisationFeedback")
-      return
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
   }
-  const responses = await getUserResponsesObject("user", from, idField)
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   if (!data) {
     functions.logger.log("Missing data in respondToRationalisationFeedback")
     return
@@ -160,13 +150,14 @@ async function respondToRationalisationFeedback(
 }
 
 async function respondToBlastFeedback(
+  userSnap: DocumentSnapshot,
   blastPath: string,
-  feedbackCategory: string,
-  from: string,
-  idField: string
+  feedbackCategory: string
 ) {
+  const from = userSnap.get("whatsappId") //TODO: think about non whatsapp cases
+  const language = userSnap.get("language") ?? "en"
   const blastFeedbackRef = db.doc(blastPath).collection("recipients").doc(from)
-  const responses = await getUserResponsesObject("user", from, idField)
+  const responses = await getResponsesObj("user", language)
   blastFeedbackRef.update({
     feebackCategory: feedbackCategory,
   })
@@ -174,7 +165,7 @@ async function respondToBlastFeedback(
 }
 
 async function sendMenuMessage(
-  to: string,
+  userSnap: DocumentSnapshot,
   prefixName: string,
   platform = "whatsapp",
   replyMessageId: string | null = null,
@@ -183,25 +174,9 @@ async function sendMenuMessage(
   isGenerated: boolean = false,
   isIncorrect: boolean = false
 ) {
-  let idField
-  switch (platform) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown platform in sendMenuMessage")
-      return
-  }
-  const userSnap = await db.collection("users").where(idField, '==', to).get()
-  const userDoc = userSnap.docs[0]
-  const isSubscribedUpdates = userDoc?.get("isSubscribedUpdates") ?? false
-  const responses = await getUserResponsesObject("user", to, idField)
+  const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
@@ -310,7 +285,7 @@ async function sendMenuMessage(
       ]
       await sendWhatsappTextListMessage(
         "user",
-        to,
+        userSnap.get("whatsappId"),
         text,
         responses.MENU_BUTTON,
         sections,
@@ -320,39 +295,29 @@ async function sendMenuMessage(
   }
 }
 
-async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
+async function sendSatisfactionSurvey(
+  userSnap: DocumentSnapshot,
+  instanceSnap: DocumentSnapshot
+) {
   const data = instanceSnap.data()
   if (!data) {
     return
   }
   const from = data?.from ?? null
+  const whatsappId = userSnap.get("whatsappId")
   //to get the platform the user sent the message from
-  const source = data?.source ?? null
-  let idField
-  switch (source) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in sendSatisfactionSurvey")
-      return
-  }
-
   const isSatisfactionSurveySent = instanceSnap.get("isSatisfactionSurveySent")
-  const userSnap = await db.collection("users").where(idField, '==', from).get()
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
   const thresholds = await getThresholds()
   const cooldown = thresholds.satisfactionSurveyCooldownDays ?? 30
-  const userDoc = userSnap.docs[0]
-  const language = userDoc.get("language") ?? "en"
+  const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  const lastSent = userDoc.get("satisfactionSurveyLastSent")
-  const userRef = userSnap.docs[0].ref
+  const lastSent = userSnap.get("satisfactionSurveyLastSent")
+  const userRef = userSnap.ref
   //check lastSent is more than cooldown days ago
   let cooldownDate = new Date()
   cooldownDate.setDate(cooldownDate.getDate() - cooldown)
@@ -393,7 +358,11 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(instancePath: string, isUnsureReply = false) {
+async function sendVotingStats(
+  userSnap: DocumentSnapshot,
+  instancePath: string,
+  isUnsureReply = false
+) {
   //get statistics
   const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
@@ -417,23 +386,14 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
   const numberPointScale = messageSnap.get("numberPointScale") || 6
   const thresholds = await getThresholds(numberPointScale === 5)
   const from = instanceSnap.get("from")
-  const source = instanceSnap.get("source")
-  let idField
-  switch (source) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in sendVotingStats")
-      return
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instancePath} requested by ${from} but accessed by ${whatsappId}`
+    )
   }
-  const responses = await getUserResponsesObject("user", from, idField)
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   let truthCategory
 
   if (validResponsesCount <= 0) {
@@ -516,28 +476,22 @@ async function sendVotingStats(instancePath: string, isUnsureReply = false) {
   await sendTextMessage("user", from, response, instanceSnap.get("id"))
 }
 
-async function sendRationalisation(instancePath: string) {
+async function sendRationalisation(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
   const data = instanceSnap.data()
   const from = data?.from ?? null
-  const source = data?.source ?? null
-  let idField
-  switch (source) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in sendRationalisation")
-      return
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instancePath} requested by ${from} but accessed by ${whatsappId}`
+    )
   }
-  const responses = await getUserResponsesObject("user", from, idField)
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   try {
     const messageRef = instanceRef.parent.parent
     if (!data) {
@@ -590,16 +544,22 @@ async function sendRationalisation(instancePath: string) {
   }
 }
 
-async function updateLanguageAndSendMenu(from: string, language: string, idField:string) {
-  const userSnap = await db.collection("users").where(idField, '==', from).get()
-  const userRef = userSnap.docs[0].ref
+async function updateLanguageAndSendMenu(
+  userSnap: DocumentSnapshot,
+  language: string
+) {
+  const userRef = userSnap.ref
+  const from = userSnap.get("whatsappId")
   await userRef.update({
     language: language,
   })
   await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
 }
 
-async function sendInterimUpdate(instancePath: string) {
+async function sendInterimUpdate(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
   //get statistics
   const instanceRef = db.doc(instancePath)
   const instanceSnap = await instanceRef.get()
@@ -608,23 +568,14 @@ async function sendInterimUpdate(instancePath: string) {
     return
   }
   const from = data?.from ?? null
-  const source = data?.source ?? null
-  let idField
-  switch (source) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in sendInterimUpdate")
-      return
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instancePath} requested by ${from} but accessed by ${whatsappId}`
+    )
   }
-  const responses = await getUserResponsesObject("user", from, idField)
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   if (instanceSnap.get("isReplied")) {
     await sendTextMessage(
       "user",
@@ -730,29 +681,23 @@ async function sendInterimUpdate(instancePath: string) {
   }
 }
 
-async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
+async function sendInterimPrompt(
+  userSnap: DocumentSnapshot,
+  instanceSnap: DocumentSnapshot
+) {
   const data = instanceSnap.data()
   if (!data) {
     return
   }
   const from = data?.from ?? null
-  const source = data?.source ?? null
-  let idField
-  switch (source) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in sendInterimPrompt")
-      return
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
   }
-  const responses = await getUserResponsesObject("user", from, idField)
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
   const buttons = [
     {
       type: "reply",
@@ -774,6 +719,7 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
   })
 }
 async function respondToInstance(
+  userSnap: DocumentSnapshot,
   instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false
@@ -789,25 +735,13 @@ async function respondToInstance(
     return Promise.resolve()
   }
   const from = data.from
-  const source = data.source
-  let idField
-  switch (source) {
-    case "telegram":
-      idField = "telegramId"
-      break
-    case "email":
-      idField = "emailId"
-      break
-    case "whatsapp":
-      idField = "whatsappId"
-      break
-    default:
-      functions.logger.error("Unknown source in respondToInstance")
-      return
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
   }
-  const userSnap = await db.collection("users").where(idField, '==', from).get()
-  const userDoc = userSnap?.docs[0]
-  const language = userDoc.get("language") ?? "en"
+  const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
 
   const thresholds = await getThresholds()
@@ -937,7 +871,7 @@ async function respondToInstance(
         } else if (isHarmless) {
           category = "harmless"
         } else {
-          sendVotingStats(instanceSnap.ref.path, true)
+          sendVotingStats(userSnap, instanceSnap.ref.path, true)
           break
         }
       }
@@ -1010,8 +944,8 @@ async function respondToInstance(
     }
   }
 
-  const isReminderMessageSent = userDoc.get("isReminderMessageSent") ?? false
-  const isReferralMessageSent = userDoc.get("isReferralMessageSent") ?? false
+  const isReminderMessageSent = userSnap.get("isReminderMessageSent") ?? false
+  const isReferralMessageSent = userSnap.get("isReferralMessageSent") ?? false
 
   let followUpWithReminder = !isReminderMessageSent
   let followUpWithReferral =
@@ -1022,14 +956,14 @@ async function respondToInstance(
   if (followUpWithReminder) {
     await sleep(3000)
     await sendTextMessage("user", from, responses.NEXT_TIME)
-    await userDoc.ref.update({
+    await userSnap.ref.update({
       isReminderMessageSent: true,
     })
   }
 
   if (followUpWithReferral) {
-    await sendReferralMessage(from, idField)
-    await userDoc.ref.update({
+    await sendReferralMessage(userSnap)
+    await userSnap.ref.update({
       isReferralMessageSent: true,
     })
   }
@@ -1040,16 +974,17 @@ async function respondToInstance(
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"
   ) {
-    await sendSatisfactionSurvey(instanceSnap)
+    await sendSatisfactionSurvey(userSnap, instanceSnap)
   }
   return
 }
 
-async function sendReferralMessage(user: string, idField: string) {
+async function sendReferralMessage(userSnap: DocumentSnapshot) {
   let referralResponse
-  const userSnap = await db.collection("users").where(idField, '==', user).get()
-  const code = userSnap.docs[0].get("referralId")
-  const responses = await getUserResponsesObject("user", user, idField)
+  const language = userSnap.get("language") ?? "en"
+  const code = userSnap.get("referralId")
+  const whatsappId = userSnap.get("whatappId")
+  const responses = await getResponsesObj("user", language)
   if (code) {
     referralResponse = responses.REFERRAL.replace(
       "{{link}}",
@@ -1057,13 +992,25 @@ async function sendReferralMessage(user: string, idField: string) {
     )
   } else {
     referralResponse = responses.GENERIC_ERROR
-    functions.logger.error(`Referral code not found for ${user}`)
+    functions.logger.error(`Referral code not found for ${whatsappId}`)
   }
-  await sendTextMessage("user", user, referralResponse, null, "whatsapp", true)
+  await sendTextMessage(
+    "user",
+    whatsappId,
+    referralResponse,
+    null,
+    "whatsapp",
+    true
+  )
 }
 
-async function sendLanguageSelection(user: string, newUser: boolean, idField:string) {
-  const responses = await getUserResponsesObject("user", user, idField)
+async function sendLanguageSelection(
+  userSnap: DocumentSnapshot,
+  newUser: boolean
+) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
   const response = responses.LANGUAGE_SELECTION.replace(
     "{{new_user_en}}",
     newUser ? responses.NEW_USER_PREFIX_EN : ""
@@ -1084,40 +1031,30 @@ async function sendLanguageSelection(user: string, newUser: boolean, idField:str
       },
     },
   ]
-  await sendWhatsappButtonMessage("user", user, response, buttons)
+  await sendWhatsappButtonMessage("user", whatsappId, response, buttons)
 }
 
-async function sendBlast(
-  user: string,
-  idField: string
-) {
+async function sendBlast(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
   const blastQuerySnap = await db
     .collection("blasts")
     .where("isActive", "==", true)
     .orderBy("createdDate", "desc") // Order by createdDate in descending order
     .limit(1) // Limit to 1 document
     .get()
-  let source
-  switch (idField) {
-      case 'telegramId':
-          source = 'telegram';
-          break;
-      case 'emailId':
-          source = 'email';
-          break;
-      case 'whatsappId':
-          source = 'whatsapp';
-          break;
-      default:
-          console.error('Unknown source!');
-          return;
-  }
-  const responses = await getUserResponsesObject("user", user, idField)
+  const responses = await getResponsesObj("user", language)
   if (blastQuerySnap.empty) {
     functions.logger.warn(
-      `No active blast found when attempting to send blast to user ${user}`
+      `No active blast found when attempting to send blast to user ${whatsappId}`
     )
-    await sendTextMessage("user", user, responses.GENERIC_ERROR, null, source)
+    await sendTextMessage(
+      "user",
+      whatsappId,
+      responses.GENERIC_ERROR,
+      null,
+      "whatsapp"
+    )
     return
   }
   const blastSnap = blastQuerySnap.docs[0]
@@ -1128,7 +1065,13 @@ async function sendBlast(
         functions.logger.error(
           `No image url found for blast ${blastSnap.ref.path}`
         )
-        await sendTextMessage("user", user, responses.GENERIC_ERROR, null, source)
+        await sendTextMessage(
+          "user",
+          whatsappId,
+          responses.GENERIC_ERROR,
+          null,
+          "whatsapp"
+        )
         return
       } else {
         //send image to user
@@ -1136,7 +1079,7 @@ async function sendBlast(
         //TODO: implement generic version
         await sendWhatsappImageMessage(
           "user",
-          user,
+          whatsappId,
           null,
           signedUrl,
           blastData.text ?? null,
@@ -1147,11 +1090,23 @@ async function sendBlast(
     case "text":
       if (!blastData.text) {
         functions.logger.error(`No text found for blast ${blastSnap.ref.path}`)
-        await sendTextMessage("user", user, responses.GENERIC_ERROR, null, source)
+        await sendTextMessage(
+          "user",
+          whatsappId,
+          responses.GENERIC_ERROR,
+          null,
+          "whatsapp"
+        )
         return
       } else {
         //send text to user
-        await sendTextMessage("user", user, blastData.text, null, source)
+        await sendTextMessage(
+          "user",
+          whatsappId,
+          blastData.text,
+          null,
+          "whatsapp"
+        )
       }
       break
   }
@@ -1185,11 +1140,11 @@ async function sendBlast(
   }
   await blastSnap.ref
     .collection("recipients")
-    .doc(user)
+    .doc(whatsappId)
     .set(blastStatistics, { merge: true })
   await sendWhatsappButtonMessage(
     "user",
-    user,
+    whatsappId,
     responses.BLAST_FEEDBACK,
     buttons
   )
@@ -1246,7 +1201,6 @@ function getFinalResponseText(
 }
 
 export {
-  getUserResponsesObject,
   getResponsesObj,
   respondToInstance,
   sendMenuMessage,

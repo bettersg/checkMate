@@ -45,6 +45,35 @@ async function getTags() {
   return returnTags
 }
 
+async function getUserSnapshot(
+  userId: string,
+  platform: string = ""
+): Promise<admin.firestore.DocumentSnapshot | null> {
+  const db = admin.firestore()
+  const platforms = ["telegram", "whatsapp", "email"]
+  if (platforms.includes(platform)) {
+    const userSnap = await db
+      .collection("users")
+      .where(`${platform}Id`, "==", userId)
+      .get()
+    if (!userSnap.empty) {
+      return userSnap.docs[0]
+    }
+  } else {
+    //loop through platforms, do a search, if found return the user
+    for (let platform of platforms) {
+      const userSnap = await db
+        .collection("users")
+        .where(`${platform}Id`, "==", userId)
+        .get()
+      if (!userSnap.empty) {
+        return userSnap.docs[0]
+      }
+    }
+  }
+  return null
+}
+
 function normalizeSpaces(str: string) {
   return str.replace(/\u00A0/g, " ")
 }
@@ -161,4 +190,5 @@ export {
   checkTemplate,
   isNumeric,
   getTags,
+  getUserSnapshot,
 }

@@ -14,9 +14,9 @@ import {
   normalizeSpaces,
   checkMessageId,
   checkTemplate,
+  getUserSnapshot,
 } from "../common/utils"
 import {
-  getUserResponsesObject,
   sendMenuMessage,
   sendInterimUpdate,
   sendVotingStats,
@@ -27,6 +27,7 @@ import {
   sendLanguageSelection,
   sendBlast,
   respondToBlastFeedback,
+  getResponsesObj,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -65,7 +66,7 @@ const hashids = new Hashids(salt)
 const db = admin.firestore()
 
 //not whatsapp specific anymore
-const userHandlerWhatsapp = async function (message: GeneralMessage) {
+const userMessageHandlerWhatsapp = async function (message: GeneralMessage) {
   if (!message?.id) {
     functions.logger.error("No message id")
     return
@@ -75,44 +76,37 @@ const userHandlerWhatsapp = async function (message: GeneralMessage) {
     return
   }
 
-  let from = message.userId // extract the userid (wa phone no./tele userid etc.)
-  let type = message.type // image/text
-
-  let idField
-  switch (message.source) {
-      case 'telegram':
-          idField = 'telegramId';
-          break;
-      case 'email':
-          idField = 'emailId';
-          break;
-      case 'whatsapp':
-          idField = 'whatsappId';
-          break;
-      default:
-          console.error('Unknown source!');
-          return;
-  }
-
-  const responses = await getUserResponsesObject("user", from, idField) // change this to search for userID acc to fieldId
-
-  //check whether new user
-  const userSnapshot = await db.collection("users").where(idField, '==', from).get()
+  const from = message.userId // extract the userid (wa phone no./tele userid etc.)
+  const type = message.type // image/text
+  const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  const isFirstTimeUser = userSnapshot.empty
-  const userDoc = userSnapshot.docs[0]
+  let isFirstTimeUser = false
+  let userSnap = await getUserSnapshot(from, source)
+  if (userSnap == null) {
+    isFirstTimeUser = true
+    const userRef = await createNewUser(from, source, messageTimestamp)
+    if (userRef == null) {
+      functions.logger.error("Error creating new user")
+      //TODO: send error message
+      return
+    } else {
+      userSnap = await userRef.get()
+    }
+  }
+  const language = userSnap.get("language") ?? "en"
+
+  const responses = await getResponsesObj("user", language)
+
   let triggerOnboarding = isFirstTimeUser
   let step
-  if (isFirstTimeUser) {
-    await createNewUser(from, idField, messageTimestamp) //edit this to fill the correct idField
-  }
+
   const firstMessageReceiptTime = isFirstTimeUser
     ? messageTimestamp
-    : userDoc?.data()?.firstMessageReceiptTime
+    : userSnap.get("firstMessageReceiptTime")
   const isNewlyJoined =
     messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
 
-  const isIgnored = userDoc?.get("isIgnored")
+  const isIgnored = userSnap.get("isIgnored")
   if (isIgnored) {
     functions.logger.warn(
       `Message from banned user ${from}!, text: ${message?.text}`
@@ -140,19 +134,19 @@ const userHandlerWhatsapp = async function (message: GeneralMessage) {
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
-          await referralHandler(message.text, from, idField)
+          await referralHandler(userSnap, message.text, from)
         } else {
-          await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
+          await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         }
         break
       }
       if (checkMenu(message.text)) {
         step = "text_menu"
-        await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
+        await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         break
       }
       step = await newTextInstanceHandler({
-        idField: idField,
+        userSnap,
         source: message.source,
         text: message.text,
         timestamp: messageTimestamp,
@@ -166,7 +160,7 @@ const userHandlerWhatsapp = async function (message: GeneralMessage) {
 
     case "image":
       step = await newImageInstanceHandler({
-        idField: idField,
+        userSnap,
         source: message.source,
         caption: message?.media?.caption || null,
         timestamp: messageTimestamp,
@@ -190,14 +184,12 @@ const userHandlerWhatsapp = async function (message: GeneralMessage) {
       break
   }
   if (triggerOnboarding) {
-    await newUserHandler(from, idField)
+    await newUserHandler(userSnap)
   }
   if (isNewlyJoined && step) {
     const timestampKey =
       messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
-    const newUserQuery = db.collection("users").where(idField, '==', from)
-    const newUserSnap = await newUserQuery.get()
-    await newUserSnap.docs[0].ref.update({
+    userSnap.ref.update({
       [`initialJourney.${timestampKey}`]: step,
     })
   }
@@ -205,7 +197,7 @@ const userHandlerWhatsapp = async function (message: GeneralMessage) {
 }
 
 async function newTextInstanceHandler({
-  idField,
+  userSnap,
   source,
   text,
   timestamp,
@@ -215,11 +207,11 @@ async function newTextInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
-  idField: string, 
-  source: string,
+  userSnap: admin.firestore.DocumentSnapshot
+  source: string
   text: string
   timestamp: Timestamp
-  id: string 
+  id: string
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
@@ -230,8 +222,7 @@ async function newTextInstanceHandler({
   let messageUpdateObj: MessageData | null = null
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
-    const userSnap = await db.collection("users").where(idField, '==', from).get()
-    await userSnap.docs[0].ref.update({
+    await userSnap.ref.update({
       firstMessageType: "irrelevant",
     })
     return Promise.resolve(`text_machine_${machineCategory}`)
@@ -397,7 +388,7 @@ async function newTextInstanceHandler({
 }
 
 async function newImageInstanceHandler({
-  idField,
+  userSnap,
   source,
   caption,
   timestamp,
@@ -409,14 +400,14 @@ async function newImageInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
-  idField: string,
-  source: string,
+  userSnap: admin.firestore.DocumentSnapshot
+  source: string
   caption: string | null
   mediaId: string | null
   mimeType: string | null
   timestamp: Timestamp
   id: string
-  from: string 
+  from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
@@ -437,12 +428,12 @@ async function newImageInstanceHandler({
   }
   //get response buffer
   let buffer
-  if (idField === 'whatsappId'){
+  if (source === "whatsapp") {
     buffer = await downloadWhatsappMedia(mediaId)
-  } else if (idField === 'telegramId'){
+  } else if (source === "telegram") {
     buffer = await downloadTelegramMedia(mediaId)
   } else {
-    throw new Error(`Unsupported idField ${idField}`)
+    throw new Error(`Unsupported platform ${source}`)
   }
   // const buffer = await downloadWhatsappMedia(mediaId)
   const hash = await getHash(buffer)
@@ -684,10 +675,9 @@ async function newImageInstanceHandler({
   return Promise.resolve("image")
 }
 
-async function newUserHandler(from: string, idField: string) {
-  await sendLanguageSelection(from, true, idField)
+async function newUserHandler(userSnap: admin.firestore.DocumentSnapshot) {
+  await sendLanguageSelection(userSnap, true)
 }
-
 
 async function addInstanceToDb(
   id: string,
@@ -721,10 +711,13 @@ function checkMenu(text: string) {
   return menuKeywords.includes(text.toLowerCase())
 }
 
-async function referralHandler(message: string, from: string, idField: string) {
+async function referralHandler(
+  userSnap: admin.firestore.DocumentData,
+  message: string,
+  from: string
+) {
   const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
-  const userSnap = await db.collection("users").where(idField, '==', from).get()
-  const userRef = userSnap.docs[0].ref
+  const userRef = userSnap.ref
   if (code.length > 0) {
     const referralClickRef = db.collection("referralClicks").doc(code)
     const referralClickSnap = await referralClickRef.get()
@@ -756,10 +749,9 @@ async function referralHandler(message: string, from: string, idField: string) {
           //   .collection("users")
           //   .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
           //   .get()
-          const referralSourceSnap = await db.collection("users").where(idField, '==', referralId).get()
-          if (!referralSourceSnap.empty) {
-            const referralDoc = referralSourceSnap.docs[0]
-            await referralDoc.ref.update({
+          const referralSourceSnap = await getUserSnapshot(referrer)
+          if (referralSourceSnap !== null) {
+            await referralSourceSnap.ref.update({
               referralCount: FieldValue.increment(1),
             })
             //check if referrer is a checker
@@ -794,39 +786,39 @@ async function referralHandler(message: string, from: string, idField: string) {
 
 async function createNewUser(
   userId: string,
-  idField: string,
+  source: string,
   messageTimestamp: Timestamp
-) {
+): Promise<admin.firestore.DocumentReference | null> {
   // const id = userRef.id
   const id = userId
   const referralId = hashids.encode(id)
   let ids
-  switch (idField) {
-    case 'telegramId':
-        ids = {
-            telegramId: userId,
-            whatsappId: null,
-            emailId: null,
-        }
-        break;
-    case 'emailId':
-        ids = {
-            emailId: userId,
-            telegramId: null,
-            whatsappId: null,
-        }
-        break;
-    case 'whatsappId':
-        ids = {
-          whatsappId: userId,
-          telegramId: null,
-          emailId: null,
-        }
-        break;
+  switch (source) {
+    case "telegram":
+      ids = {
+        telegramId: userId,
+        whatsappId: null,
+        emailId: null,
+      }
+      break
+    case "email":
+      ids = {
+        emailId: userId,
+        telegramId: null,
+        whatsappId: null,
+      }
+      break
+    case "whatsapp":
+      ids = {
+        whatsappId: userId,
+        telegramId: null,
+        emailId: null,
+      }
+      break
 
     default:
-        console.error('Unknown source!');
-        return;
+      console.error("Unknown source!")
+      return null
   }
 
   const newUserObject: UserData = {
@@ -852,17 +844,20 @@ async function createNewUser(
     isSubscribedUpdates: true,
     isIgnored: false,
   }
-  db.collection('users').add(newUserObject)
-    .then(() => {
-        console.log('New user added successfully!');
+  db.collection("users")
+    .add(newUserObject)
+    .then((res) => {
+      console.log("New user added successfully!")
+      return res
     })
     .catch((error) => {
-        console.error('Error adding new user: ', error);
-    });
-  // await userRef.set(newUserObject)
+      console.error("Error adding new user: ", error)
+      return null
+    })
+  return null
 }
 
-const onUserPublish = onMessagePublished(
+const onUserMessagePublish = onMessagePublished(
   {
     topic: "userEvents",
     secrets: [
@@ -879,7 +874,7 @@ const onUserPublish = onMessagePublished(
   async (event) => {
     if (event.data.message.json) {
       functions.logger.log(`Processing ${event.data.message.messageId}`)
-      await userHandlerWhatsapp(event.data.message.json)
+      await userMessageHandlerWhatsapp(event.data.message.json)
     } else {
       functions.logger.warn(
         `Unknown message type for messageId ${event.data.message.messageId})`
@@ -887,4 +882,4 @@ const onUserPublish = onMessagePublished(
     }
   }
 )
-export { onUserPublish }
+export { onUserMessagePublish }
