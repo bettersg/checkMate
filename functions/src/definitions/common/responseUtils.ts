@@ -9,12 +9,13 @@ import {
   sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
-import { getThresholds, sleep } from "./utils"
+import { getThresholds, sleep, getUserSnapshot } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
 import { CustomReply, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
+import { user } from "firebase-functions/v1/auth"
 
 const db = admin.firestore()
 
@@ -719,11 +720,20 @@ async function sendInterimPrompt(
   })
 }
 async function respondToInstance(
-  userSnap: DocumentSnapshot,
   instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false
 ) {
+  const userSnap = await getUserSnapshot(
+    instanceSnap.get("from"),
+    instanceSnap.get("source")
+  )
+  if (userSnap == null) {
+    functions.logger.error(
+      `User ${instanceSnap.get("from")} not found in database`
+    )
+    return Promise.resolve()
+  }
   const parentMessageRef = instanceSnap.ref.parent.parent
   if (!parentMessageRef) {
     return
@@ -823,6 +833,7 @@ async function respondToInstance(
   ) {
     functions.logger.error("Unknown category assigned, error response sent")
     updateObj.replyCategory = "error"
+    await sendTextMessage("user", from, responses.ERROR, data.id)
     return
   }
 

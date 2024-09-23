@@ -313,7 +313,7 @@ async function toggleUserSubscription(
 
 const onUserInteractivePublish = onMessagePublished(
   {
-    topic: "userInteractiveEvents",
+    topic: "userNavigationEvents",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
