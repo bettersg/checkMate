@@ -235,7 +235,7 @@ erDiagram
 
     instance {
         string source
-        string id "whatsapp message id needed to reply"
+        string id "message id needed to reply, specific to the source it came from"
         timestamp timestamp "when instance was created"
         string type "text/image"
         string text "text if text message or ocr-extracted text if image message"
@@ -247,7 +247,7 @@ erDiagram
         string ocrVersion "'1' for paddleOCR or '2' for genAI-vertex"
         string from "Sender ID or phone number"
         string subject "letter or email subject"
-        string hash "Image hash, for image only"
+        string hash "Image hash, for closestMatchimage only"
         string mediaId "Media ID from whatsApp, for image only"
         string mimeType "For image only"
         string storageUrl "Cloud storage URL of image, if applicable"
@@ -352,6 +352,9 @@ erDiagram
     }
 
     user {
+        string whatsappId "Whatsapp id of user if user sent message from Whatsapp, needed for reply,  null otherwise"
+        string telegramId "Telegram id of user if user sent message from Telegram, needed for reply,  null otherwise"
+        string emailId "email address of user if user wrote in via email, needed for reply, null otherwise"
         number instanceCount "number of instances sent in"
         timestamp lastSent "the last time the user sent an instance"
         timestamp firstMessageReceiptTime "the first time the user sent something into the bot"

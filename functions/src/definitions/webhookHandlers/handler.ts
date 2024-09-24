@@ -10,6 +10,14 @@ import { checkMessageId } from "../common/utils"
 import { Request, Response } from "express"
 import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { AppEnv } from "../../appEnv"
+import { GeneralMessage, WhatsappMessageObject } from "../../types"
+import {
+  createNewUser,
+  getUserSnapshot,
+} from "../../services/common/userManagement"
+import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
+import { Timestamp } from "firebase-admin/firestore"
+import { sendLanguageSelection } from "../common/responseUtils"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -29,6 +37,8 @@ interface CustomRequest extends Request {
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+
+const db = admin.firestore()
 const app = express()
 
 const getHandlerWhatsapp = async (req: Request, res: Response) => {
@@ -81,7 +91,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
           (phoneNumberId === userPhoneNumberId && wabaID === userWabaId)
         ) {
           if (value?.messages?.[0]) {
-            let message = value.messages[0]
+            let message: WhatsappMessageObject = value.messages[0]
             let type = message.type
             if (
               type == "text" &&
@@ -113,8 +123,70 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                 await publishToTopic("checkerEvents", message, "whatsapp")
               }
               if (phoneNumberId === userPhoneNumberId) {
-                //put into user queue
-                await publishToTopic("userEvents", message, "whatsapp")
+                //check for new user
+                let isFirstTimeUser = false
+                const whatsappId = message.from
+                let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
+                if (userSnap === null) {
+                  //new user
+                  isFirstTimeUser = true
+                  const messageTimestamp = new Timestamp(
+                    Number(message.timestamp),
+                    0
+                  )
+                  const userRef = await createNewUser(
+                    whatsappId,
+                    "whatsapp",
+                    messageTimestamp
+                  )
+                  if (userRef === null) {
+                    functions.logger.error(
+                      `Error creating new user with whatsappId ${whatsappId}`
+                    )
+                    return res.sendStatus(400)
+                  }
+                  userSnap = await userRef.get()
+                  await sendLanguageSelection(userSnap, true)
+                } else if (userSnap.get("isIgnored")) {
+                  //handle ban
+                  functions.logger.warn(
+                    `Message from banned user ${message.from}!, text: ${message?.text?.body}`
+                  )
+                  return res.sendStatus(200)
+                }
+                //check whether it's navigational or message
+                const isNavigational = checkNavigational(message)
+                if (isNavigational) {
+                  await publishToTopic(
+                    "userNavigationEvents",
+                    message,
+                    "whatsapp"
+                  )
+                } else {
+                  //convert message to general Message object for processing
+                  let genericMessage: GeneralMessage = {
+                    source: "whatsapp",
+                    id: message.id,
+                    userId: message.from,
+                    type: message.type,
+                    subject: null,
+                    text: message.text?.body ?? null,
+                    media: {
+                      fileId: message.image?.id ?? null, //to download the media
+                      caption: message.image?.caption ?? null,
+                      mimeType: message.image?.mime_type ?? null, //determines if it is an image or video
+                    },
+                    timestamp: message.timestamp,
+                    isForwarded: message.context?.forwarded,
+                    frequently_forwarded: message.context?.frequently_forwarded,
+                    isFirstTimeUser: isFirstTimeUser,
+                  }
+                  await publishToTopic(
+                    "userGenericMessages",
+                    genericMessage,
+                    "whatsapp"
+                  )
+                }
               }
             }
             res.sendStatus(200)
@@ -161,6 +233,58 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
     functions.logger.error(JSON.stringify(req.body, null, 2))
     res.sendStatus(200)
   }
+}
+//TODO: Check and do for tele users, not used now
+const postUserHandlerTelegram = async (req: Request, res: Response) => {
+  if (
+    req.header("x-telegram-bot-api-secret-token") ===
+    process.env.TELEGRAM_WEBHOOK_TOKEN
+  ) {
+    let message = req.body.message
+    let type
+    if (message.photo || message.video) {
+      type = "image"
+    } else {
+      type = "text"
+    }
+    let media
+    //if type is image
+    if (message.photo && message.photo.length > 0) {
+      const photo = message.photo[message.photo.length - 1]
+      media = {
+        file_id: photo.file_id,
+        caption: message.caption,
+        mime_type: "image/jpeg",
+      }
+    } else if (message.video) {
+      media = {
+        file_id: message.video.file_id,
+        caption: message.caption,
+        mime_type: message.video.mime_type,
+      }
+    } else {
+      media = null
+    }
+    let generalMessage = {
+      source: "telegram",
+      id: String(message?.message_id),
+      userId: String(message?.from?.id),
+      type: type,
+      text: message?.text,
+      media: media,
+      timestamp: message?.date,
+      isForwarded: null,
+      frequently_forwarded: null,
+      button: null,
+      interactive: null,
+    }
+    await publishToTopic("userGenericMessages", generalMessage, "telegram")
+  } else {
+    functions.logger.warn(
+      "Telegram handler endpoint was called from unexpected source"
+    )
+  }
+  res.sendStatus(200)
 }
 
 const postHandlerTelegram = async (req: Request, res: Response) => {
@@ -277,6 +401,20 @@ const verifySignature = function (receivedSignature: string, payload: string) {
     .digest("base64")
 
   return receivedSignature === `sha256=${hash}`
+}
+
+const checkNavigational = function (message: WhatsappMessageObject) {
+  //TODO: implement
+  const type = message.type
+  if (type == "button" || type == "interactive") {
+    return true
+  } else if (type == "text") {
+    const text = message.text.body
+    if (checkMenu(text)) {
+      return true
+    }
+  }
+  return false
 }
 
 // Accepts POST requests at /{webhookPath} endpoint
