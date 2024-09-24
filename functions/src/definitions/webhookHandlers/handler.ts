@@ -181,7 +181,11 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     frequently_forwarded: message.context?.frequently_forwarded,
                     isFirstTimeUser: isFirstTimeUser,
                   }
-                  await publishToTopic("userEvents", genericMessage, "whatsapp")
+                  await publishToTopic(
+                    "userGenericMessages",
+                    genericMessage,
+                    "whatsapp"
+                  )
                 }
               }
             }
@@ -230,7 +234,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
     res.sendStatus(200)
   }
 }
-//for tele users
+//TODO: Check and do for tele users, not used now
 const postUserHandlerTelegram = async (req: Request, res: Response) => {
   if (
     req.header("x-telegram-bot-api-secret-token") ===
@@ -274,7 +278,7 @@ const postUserHandlerTelegram = async (req: Request, res: Response) => {
       button: null,
       interactive: null,
     }
-    await publishToTopic("userEvents", generalMessage, "telegram")
+    await publishToTopic("userGenericMessages", generalMessage, "telegram")
   } else {
     functions.logger.warn(
       "Telegram handler endpoint was called from unexpected source"

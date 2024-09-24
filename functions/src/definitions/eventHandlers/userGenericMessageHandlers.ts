@@ -727,7 +727,7 @@ async function referralHandler(
 
 const onUserGenericMessagePublish = onMessagePublished(
   {
-    topic: "userEvents",
+    topic: "userGenericMessages",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
