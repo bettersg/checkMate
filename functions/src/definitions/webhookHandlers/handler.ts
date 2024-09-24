@@ -7,6 +7,7 @@ import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
+import { referralHandler } from "../../services/whatsapp/referrals"
 import { Request, Response } from "express"
 import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { AppEnv } from "../../appEnv"
@@ -17,7 +18,10 @@ import {
 } from "../../services/common/userManagement"
 import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
 import { Timestamp } from "firebase-admin/firestore"
-import { sendLanguageSelection } from "../common/responseUtils"
+import {
+  sendLanguageSelection,
+  sendUnsupportedTypeMessage,
+} from "../common/responseUtils"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -38,7 +42,6 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-const db = admin.firestore()
 const app = express()
 
 const getHandlerWhatsapp = async (req: Request, res: Response) => {
@@ -70,6 +73,7 @@ const getHandlerWhatsapp = async (req: Request, res: Response) => {
 
 const postHandlerWhatsapp = async (req: Request, res: Response) => {
   try {
+    console.log("req.body", req.body)
     if (req.body.object) {
       if (req?.body?.entry?.[0]?.changes?.[0]?.value) {
         let value = req.body.entry[0].changes[0].value
@@ -124,12 +128,14 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
               }
               if (phoneNumberId === userPhoneNumberId) {
                 //check for new user
+
                 let isFirstTimeUser = false
                 const whatsappId = message.from
                 let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
                 if (userSnap === null) {
                   //new user
                   isFirstTimeUser = true
+
                   const messageTimestamp = new Timestamp(
                     Number(message.timestamp),
                     0
@@ -146,7 +152,12 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     return res.sendStatus(400)
                   }
                   userSnap = await userRef.get()
-                  await sendLanguageSelection(userSnap, true)
+                  if (type !== "request_welcome") {
+                    functions.logger.warn(
+                      `New user ${whatsappId}, but not due to request_welcome event`
+                    )
+                    await sendLanguageSelection(userSnap, true)
+                  }
                 } else if (userSnap.get("isIgnored")) {
                   //handle ban
                   functions.logger.warn(
@@ -163,29 +174,48 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     "whatsapp"
                   )
                 } else {
-                  //convert message to general Message object for processing
-                  let genericMessage: GeneralMessage = {
-                    source: "whatsapp",
-                    id: message.id,
-                    userId: message.from,
-                    type: message.type,
-                    subject: null,
-                    text: message.text?.body ?? null,
-                    media: {
-                      fileId: message.image?.id ?? null, //to download the media
-                      caption: message.image?.caption ?? null,
-                      mimeType: message.image?.mime_type ?? null, //determines if it is an image or video
-                    },
-                    timestamp: message.timestamp,
-                    isForwarded: message.context?.forwarded,
-                    frequently_forwarded: message.context?.frequently_forwarded,
-                    isFirstTimeUser: isFirstTimeUser,
+                  switch (type) {
+                    case "text":
+                    case "image":
+                      //convert message to general Message object for processing
+                      let genericMessage: GeneralMessage = {
+                        source: "whatsapp",
+                        id: message.id,
+                        userId: message.from,
+                        type: message.type,
+                        subject: null,
+                        text: message.text?.body ?? null,
+                        media: {
+                          fileId: message.image?.id ?? null, //to download the media
+                          caption: message.image?.caption ?? null,
+                          mimeType: message.image?.mime_type ?? null, //determines if it is an image or video
+                        },
+                        timestamp: message.timestamp,
+                        isForwarded: message.context?.forwarded,
+                        frequently_forwarded:
+                          message.context?.frequently_forwarded,
+                        isFirstTimeUser: isFirstTimeUser,
+                      }
+                      await publishToTopic(
+                        "userGenericMessages",
+                        genericMessage,
+                        "whatsapp"
+                      )
+                      break
+                    case "interactive":
+                    case "button":
+                      functions.logger.warn(
+                        `Message ${message.id} should have been handled by userNavigationEvents`
+                      )
+                      break
+                    case "request_welcome":
+                      console.log("requested welcome")
+                      await sendLanguageSelection(userSnap, true)
+                      break
+                    default:
+                      await sendUnsupportedTypeMessage(userSnap, message.id)
+                      break
                   }
-                  await publishToTopic(
-                    "userGenericMessages",
-                    genericMessage,
-                    "whatsapp"
-                  )
                 }
               }
             }
