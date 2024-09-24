@@ -37,7 +37,6 @@ if (!admin.apps.length) {
 
 const db = admin.firestore()
 
-//not whatsapp specific anymore
 const userWhatsappInteractionHandler = async function (
   message: WhatsappMessageObject
 ) {
@@ -325,7 +324,7 @@ async function toggleUserSubscription(
   })
 }
 
-const onUserInteractivePublish = onMessagePublished(
+const onUserNavigationPublish = onMessagePublished(
   {
     topic: "userNavigationEvents",
     secrets: [
@@ -350,4 +349,4 @@ const onUserInteractivePublish = onMessagePublished(
     }
   }
 )
-export { onUserInteractivePublish }
+export { onUserNavigationPublish }

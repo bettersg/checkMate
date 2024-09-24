@@ -8,10 +8,7 @@ import {
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
 import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
-import {
-  checkMenu,
-  checkTemplate,
-} from "../../validators/whatsapp/checkWhatsappText"
+import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
 import { getUserSnapshot } from "../../services/common/userManagement"
 import { sendMenuMessage, getResponsesObj } from "../common/responseUtils"
 import {
@@ -43,7 +40,9 @@ const hashids = new Hashids(salt)
 const db = admin.firestore()
 
 //not whatsapp specific anymore
-const userMessageHandlerWhatsapp = async function (message: GeneralMessage) {
+const userGenericMessageHandlerWhatsapp = async function (
+  message: GeneralMessage
+) {
   if (!message?.id) {
     functions.logger.error("No message id")
     return
@@ -726,7 +725,7 @@ async function referralHandler(
   }
 }
 
-const onUserMessagePublish = onMessagePublished(
+const onUserGenericMessagePublish = onMessagePublished(
   {
     topic: "userEvents",
     secrets: [
@@ -743,7 +742,7 @@ const onUserMessagePublish = onMessagePublished(
   async (event) => {
     if (event.data.message.json) {
       functions.logger.log(`Processing ${event.data.message.messageId}`)
-      await userMessageHandlerWhatsapp(event.data.message.json)
+      await userGenericMessageHandlerWhatsapp(event.data.message.json)
     } else {
       functions.logger.warn(
         `Unknown message type for messageId ${event.data.message.messageId})`
@@ -751,4 +750,4 @@ const onUserMessagePublish = onMessagePublished(
     }
   }
 )
-export { onUserMessagePublish }
+export { onUserGenericMessagePublish }
