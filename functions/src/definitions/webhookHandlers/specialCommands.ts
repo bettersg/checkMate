@@ -7,6 +7,7 @@ import {
   BlastData,
   ReferralClicksData,
 } from "../../types"
+import { getUserSnapshot } from "../common/utils"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
@@ -42,7 +43,10 @@ const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
         await interimPromptHandler()
         return
       case "/blast":
-        await sendBlast(messageObj.from, "whatsappId")
+        const userSnap = await getUserSnapshot(messageObj.from)
+        if (userSnap !== null) {
+          await sendBlast(userSnap)
+        }
         return
     }
   }

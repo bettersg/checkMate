@@ -296,10 +296,17 @@ async function sendMenuMessage(
   }
 }
 
-async function sendSatisfactionSurvey(
-  userSnap: DocumentSnapshot,
-  instanceSnap: DocumentSnapshot
-) {
+async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
+  const userSnap = await getUserSnapshot(
+    instanceSnap.get("from"),
+    instanceSnap.get("source")
+  )
+  if (userSnap == null) {
+    functions.logger.error(
+      `User ${instanceSnap.get("from")} not found in database`
+    )
+    return Promise.resolve()
+  }
   const data = instanceSnap.data()
   if (!data) {
     return
@@ -682,10 +689,17 @@ async function sendInterimUpdate(
   }
 }
 
-async function sendInterimPrompt(
-  userSnap: DocumentSnapshot,
-  instanceSnap: DocumentSnapshot
-) {
+async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
+  const userSnap = await getUserSnapshot(
+    instanceSnap.get("from"),
+    instanceSnap.get("source")
+  )
+  if (userSnap == null) {
+    functions.logger.error(
+      `User ${instanceSnap.get("from")} not found in database`
+    )
+    return Promise.resolve()
+  }
   const data = instanceSnap.data()
   if (!data) {
     return
@@ -985,7 +999,7 @@ async function respondToInstance(
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"
   ) {
-    await sendSatisfactionSurvey(userSnap, instanceSnap)
+    await sendSatisfactionSurvey(instanceSnap)
   }
   return
 }
