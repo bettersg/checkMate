@@ -1258,27 +1258,30 @@
 					"response": []
 				},
 				{
-					"name": "[DB CALL] Check referral count",
+					"name": "[DB CALL] Get Referral Count",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Check that has is created\", function () {\r",
+									"pm.test(\"Check that referral ID is created\", function () {\r",
 									"\r",
 									"    var jsonData = pm.response.json();\r",
-									"    const referralId = jsonData.fields.referralId.stringValue\r",
+									"    const referralId = jsonData[0].document.fields.referralId.stringValue\r",
+									"    const firestoreId = jsonData[0].document.name.split(\"/\").slice(-1)[0]\r",
 									"    pm.collectionVariables.set(\"referralId_USER1\", referralId);\r",
+									"    pm.collectionVariables.set(\"firestoreId_USER1\",firestoreId)\r",
 									"    pm.collectionVariables.set(\"referralLink_USER1\", `https://ref.checkmate.sg/${referralId}`);\r",
 									"    pm.expect(referralId.length).to.be.above(0);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1286,8 +1289,17 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"structuredQuery\": {\r\n    \"from\": [\r\n      {\r\n        \"collectionId\": \"users\"\r\n      }\r\n    ],\r\n    \"where\": {\r\n      \"fieldFilter\": {\r\n        \"field\": {\r\n          \"fieldPath\": \"whatsappId\"\r\n        },\r\n        \"op\": \"EQUAL\",\r\n        \"value\": {\r\n          \"stringValue\": \"{{USER_1_NUMBER}}\"\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents:runQuery",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -1297,9 +1309,7 @@
 								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
-								"documents",
-								"users",
-								"{{USER_1_NUMBER}}"
+								"documents:runQuery"
 							]
 						}
 					},
@@ -4742,6 +4752,8 @@
 											"        \"method\": \"POST\"\r",
 											"    }\r",
 											"    var jsonData = pm.response.json();\r",
+											"\r",
+											"    console.log(JSON.stringify(expected,null,2))\r",
 											"    \r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
@@ -12118,7 +12130,8 @@
 									"    pm.expect(isSubscribedUpdates).to.be.false;\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12132,7 +12145,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -12144,7 +12157,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -12476,7 +12489,8 @@
 									"    pm.expect(isSubscribedUpdates).to.be.true;\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12490,7 +12504,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -12502,7 +12516,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -12974,7 +12988,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -12986,7 +13000,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -13407,7 +13421,8 @@
 									"    pm.expect(parseInt(referralCount)).to.eql(1);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -13421,7 +13436,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -13433,7 +13448,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -14445,6 +14460,10 @@
 		},
 		{
 			"key": "whatsapp_id_41",
+			"value": ""
+		},
+		{
+			"key": "firestoreId_USER1",
 			"value": ""
 		}
 	]

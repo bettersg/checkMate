@@ -1006,7 +1006,7 @@ async function sendReferralMessage(userSnap: DocumentSnapshot) {
   let referralResponse
   const language = userSnap.get("language") ?? "en"
   const code = userSnap.get("referralId")
-  const whatsappId = userSnap.get("whatappId")
+  const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
   if (code) {
     referralResponse = responses.REFERRAL.replace(
