@@ -13,7 +13,7 @@ export { onVoteRequestCreate } from "./definitions/eventHandlers/onVoteRequestCr
 export { onVoteRequestUpdateV2 } from "./definitions/eventHandlers/onVoteRequestUpdate"
 export { healthcheckV2 } from "./definitions/healthcheck"
 export { onMessageWriteV2 } from "./definitions/eventHandlers/updateTypesense"
-export { onUserGenericMessagePublish } from "./definitions/eventHandlers/userHandlers"
+export { onUserGenericMessagePublish } from "./definitions/eventHandlers/userGenericMessageHandlers"
 export { onCheckerPublish } from "./definitions/eventHandlers/checkerHandlerWhatsapp"
 export { onUserNavigationPublish } from "./definitions/eventHandlers/userNavigationHandlers"
 export { telegramAuthHandler } from "./definitions/api/authentication"
