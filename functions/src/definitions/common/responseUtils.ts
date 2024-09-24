@@ -556,12 +556,10 @@ async function updateLanguageAndSendMenu(
   userSnap: DocumentSnapshot,
   language: string
 ) {
-  const userRef = userSnap.ref
-  const from = userSnap.get("whatsappId")
-  await userRef.update({
+  await userSnap.ref.update({
     language: language,
   })
-  await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
+  await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
 }
 
 async function sendInterimUpdate(
