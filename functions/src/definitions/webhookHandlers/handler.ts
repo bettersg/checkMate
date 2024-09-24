@@ -10,6 +10,14 @@ import { checkMessageId } from "../common/utils"
 import { Request, Response } from "express"
 import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { AppEnv } from "../../appEnv"
+import { GeneralMessage, WhatsappMessageObject } from "../../types"
+import {
+  createNewUser,
+  getUserSnapshot,
+} from "../../services/common/userManagement"
+import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
+import { Timestamp } from "firebase-admin/firestore"
+import { sendLanguageSelection } from "../common/responseUtils"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -29,6 +37,8 @@ interface CustomRequest extends Request {
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+
+const db = admin.firestore()
 const app = express()
 
 const getHandlerWhatsapp = async (req: Request, res: Response) => {
@@ -81,7 +91,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
           (phoneNumberId === userPhoneNumberId && wabaID === userWabaId)
         ) {
           if (value?.messages?.[0]) {
-            let message = value.messages[0]
+            let message: WhatsappMessageObject = value.messages[0]
             let type = message.type
             if (
               type == "text" &&
@@ -114,6 +124,36 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
               }
               if (phoneNumberId === userPhoneNumberId) {
                 //check for new user
+                let isFirstTimeUser = false
+                const whatsappId = message.from
+                let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
+                if (userSnap === null) {
+                  //new user
+                  isFirstTimeUser = true
+                  const messageTimestamp = new Timestamp(
+                    Number(message.timestamp),
+                    0
+                  )
+                  const userRef = await createNewUser(
+                    whatsappId,
+                    "whatsapp",
+                    messageTimestamp
+                  )
+                  if (userRef === null) {
+                    functions.logger.error(
+                      `Error creating new user with whatsappId ${whatsappId}`
+                    )
+                    return res.sendStatus(400)
+                  }
+                  userSnap = await userRef.get()
+                  await sendLanguageSelection(userSnap, true)
+                } else if (userSnap.get("isIgnored")) {
+                  //handle ban
+                  functions.logger.warn(
+                    `Message from banned user ${message.from}!, text: ${message?.text?.body}`
+                  )
+                  return res.sendStatus(200)
+                }
                 //check whether it's navigational or message
                 const isNavigational = checkNavigational(message)
                 if (isNavigational) {
@@ -124,22 +164,24 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                   )
                 } else {
                   //convert message to general Message object for processing
-                  let generalMessage = {
+                  let genericMessage: GeneralMessage = {
                     source: "whatsapp",
                     id: message.id,
                     userId: message.from,
                     type: message.type,
-                    text: message.text?.body,
+                    subject: null,
+                    text: message.text?.body ?? null,
                     media: {
-                      file_id: message.image?.id, //to download the media
-                      caption: message.image?.caption,
-                      mime_type: message.image?.mime_type, //determines if it is an image or video
+                      fileId: message.image?.id ?? null, //to download the media
+                      caption: message.image?.caption ?? null,
+                      mimeType: message.image?.mime_type ?? null, //determines if it is an image or video
                     },
                     timestamp: message.timestamp,
                     isForwarded: message.context?.forwarded,
                     frequently_forwarded: message.context?.frequently_forwarded,
+                    isFirstTimeUser: isFirstTimeUser,
                   }
-                  await publishToTopic("userEvents", generalMessage, "whatsapp")
+                  await publishToTopic("userEvents", genericMessage, "whatsapp")
                 }
               }
             }
@@ -357,14 +399,18 @@ const verifySignature = function (receivedSignature: string, payload: string) {
   return receivedSignature === `sha256=${hash}`
 }
 
-const checkNavigational = function (message: any) {
+const checkNavigational = function (message: WhatsappMessageObject) {
   //TODO: implement
-  return true
-}
-
-const checkNewUser = async function (platform: string, userId: string) {
-  //TODO: implement
-  return true
+  const type = message.type
+  if (type == "button" || type == "interactive") {
+    return true
+  } else if (type == "text") {
+    const text = message.text.body
+    if (checkMenu(text)) {
+      return true
+    }
+  }
+  return false
 }
 
 // Accepts POST requests at /{webhookPath} endpoint

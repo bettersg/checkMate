@@ -9,13 +9,13 @@ import {
   sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
-import { getThresholds, sleep, getUserSnapshot } from "./utils"
+import { getUserSnapshot } from "../../services/common/userManagement"
+import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
 import { CustomReply, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
-import { user } from "firebase-functions/v1/auth"
 
 const db = admin.firestore()
 

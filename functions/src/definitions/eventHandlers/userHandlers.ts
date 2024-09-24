@@ -2,38 +2,22 @@ import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { Timestamp } from "firebase-admin/firestore"
+import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
 import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
-  sendWhatsappContactMessage,
 } from "../common/sendWhatsappMessage"
-import { sendDisputeNotification } from "../common/sendMessage"
+import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
 import {
-  sleep,
-  hashMessage,
-  normalizeSpaces,
-  checkMessageId,
+  checkMenu,
   checkTemplate,
-  getUserSnapshot,
-} from "../common/utils"
-import {
-  sendMenuMessage,
-  sendInterimUpdate,
-  sendVotingStats,
-  sendReferralMessage,
-  sendRationalisation,
-  respondToRationalisationFeedback,
-  updateLanguageAndSendMenu,
-  sendLanguageSelection,
-  sendBlast,
-  respondToBlastFeedback,
-  getResponsesObj,
-} from "../common/responseUtils"
+} from "../../validators/whatsapp/checkWhatsappText"
+import { getUserSnapshot } from "../../services/common/userManagement"
+import { sendMenuMessage, getResponsesObj } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
   downloadTelegramMedia,
   getHash,
-  getSignedUrl,
   getCloudStorageUrl,
 } from "../common/mediaUtils"
 import { incrementCheckerCounts } from "../common/counters"
@@ -44,22 +28,15 @@ import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
-import {
-  GeneralMessage,
-  WhatsappMessageObject,
-  MessageData,
-  InstanceData,
-  UserData,
-} from "../../types"
+import { GeneralMessage, MessageData, InstanceData } from "../../types"
 import { AppEnv } from "../../appEnv"
+import { logger } from "firebase-functions"
 
-const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
-
 const salt = process.env.HASHIDS_SALT
 const hashids = new Hashids(salt)
 
@@ -80,31 +57,19 @@ const userMessageHandlerWhatsapp = async function (message: GeneralMessage) {
   const type = message.type // image/text
   const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  let isFirstTimeUser = false
+  let isFirstTimeUser = message.isFirstTimeUser
   let userSnap = await getUserSnapshot(from, source)
   if (userSnap == null) {
-    isFirstTimeUser = true
-    const userRef = await createNewUser(from, source, messageTimestamp)
-    if (userRef == null) {
-      functions.logger.error("Error creating new user")
-      //TODO: send error message
-      return
-    } else {
-      userSnap = await userRef.get()
-    }
+    logger.error(`User ${from} not found in userHandler`)
+    return
   }
   const language = userSnap.get("language") ?? "en"
 
   const responses = await getResponsesObj("user", language)
 
-  let triggerOnboarding = isFirstTimeUser
   let step
 
-  const firstMessageReceiptTime = isFirstTimeUser
-    ? messageTimestamp
-    : userSnap.get("firstMessageReceiptTime")
-  const isNewlyJoined =
-    messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
+  const isNewlyJoined = checkNewlyJoined(userSnap, messageTimestamp)
 
   const isIgnored = userSnap.get("isIgnored")
   if (isIgnored) {
@@ -165,8 +130,8 @@ const userMessageHandlerWhatsapp = async function (message: GeneralMessage) {
         caption: message?.media?.caption || null,
         timestamp: messageTimestamp,
         id: message.id,
-        mediaId: message?.media?.file_id || null,
-        mimeType: message?.media?.mime_type || null,
+        mediaId: message?.media?.fileId || null,
+        mimeType: message?.media?.mimeType || null,
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
@@ -182,9 +147,6 @@ const userMessageHandlerWhatsapp = async function (message: GeneralMessage) {
         message.id
       )
       break
-  }
-  if (triggerOnboarding) {
-    await newUserHandler(userSnap)
   }
   if (isNewlyJoined && step) {
     const timestampKey =
@@ -675,10 +637,6 @@ async function newImageInstanceHandler({
   return Promise.resolve("image")
 }
 
-async function newUserHandler(userSnap: admin.firestore.DocumentSnapshot) {
-  await sendLanguageSelection(userSnap, true)
-}
-
 async function addInstanceToDb(
   id: string,
   hasMatch: boolean,
@@ -704,11 +662,6 @@ async function addInstanceToDb(
   } catch (e) {
     functions.logger.error(`Transaction failure for messageId ${id}!`, e)
   }
-}
-
-function checkMenu(text: string) {
-  const menuKeywords = ["menu", "菜单", "菜單"]
-  return menuKeywords.includes(text.toLowerCase())
 }
 
 async function referralHandler(
@@ -782,79 +735,6 @@ async function referralHandler(
       )
     }
   }
-}
-
-async function createNewUser(
-  userId: string,
-  source: string,
-  messageTimestamp: Timestamp
-): Promise<admin.firestore.DocumentReference | null> {
-  // const id = userRef.id
-  const id = userId
-  const referralId = hashids.encode(id)
-  let ids
-  switch (source) {
-    case "telegram":
-      ids = {
-        telegramId: userId,
-        whatsappId: null,
-        emailId: null,
-      }
-      break
-    case "email":
-      ids = {
-        emailId: userId,
-        telegramId: null,
-        whatsappId: null,
-      }
-      break
-    case "whatsapp":
-      ids = {
-        whatsappId: userId,
-        telegramId: null,
-        emailId: null,
-      }
-      break
-
-    default:
-      console.error("Unknown source!")
-      return null
-  }
-
-  const newUserObject: UserData = {
-    ...ids,
-    instanceCount: 0,
-    firstMessageReceiptTime: messageTimestamp,
-    firstMessageType: "normal",
-    lastSent: null,
-    satisfactionSurveyLastSent: null,
-    initialJourney: {},
-    referralId: referralId,
-    utm: {
-      source: "direct",
-      medium: "none",
-      content: "none",
-      campaign: "none",
-      term: "none",
-    },
-    referralCount: 0,
-    language: "en",
-    isReferralMessageSent: false,
-    isReminderMessageSent: false,
-    isSubscribedUpdates: true,
-    isIgnored: false,
-  }
-  db.collection("users")
-    .add(newUserObject)
-    .then((res) => {
-      console.log("New user added successfully!")
-      return res
-    })
-    .catch((error) => {
-      console.error("Error adding new user: ", error)
-      return null
-    })
-  return null
 }
 
 const onUserMessagePublish = onMessagePublished(

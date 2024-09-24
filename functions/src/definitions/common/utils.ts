@@ -45,35 +45,6 @@ async function getTags() {
   return returnTags
 }
 
-async function getUserSnapshot(
-  userId: string,
-  platform: string = ""
-): Promise<admin.firestore.DocumentSnapshot | null> {
-  const db = admin.firestore()
-  const platforms = ["telegram", "whatsapp", "email"]
-  if (platforms.includes(platform)) {
-    const userSnap = await db
-      .collection("users")
-      .where(`${platform}Id`, "==", userId)
-      .get()
-    if (!userSnap.empty) {
-      return userSnap.docs[0]
-    }
-  } else {
-    //loop through platforms, do a search, if found return the user
-    for (let platform of platforms) {
-      const userSnap = await db
-        .collection("users")
-        .where(`${platform}Id`, "==", userId)
-        .get()
-      if (!userSnap.empty) {
-        return userSnap.docs[0]
-      }
-    }
-  }
-  return null
-}
-
 function normalizeSpaces(str: string) {
   return str.replace(/\u00A0/g, " ")
 }
@@ -146,32 +117,6 @@ function firestoreTimestampToYYYYMM(timestamp: Timestamp) {
   return `${year}${month}`
 }
 
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
-}
-
-function buildRegexFromTemplate(template: string) {
-  // Escape special regex characters in the template except for placeholders
-  const escapedTemplate = escapeRegExp(template)
-
-  // Replace the placeholder {{code}} with the regex pattern for alphanumeric characters
-  const pattern = escapedTemplate.replace(
-    /\\\{\\\{code\\\}\\\}/g,
-    "[a-zA-Z0-9]+"
-  )
-
-  // Add start (^) and end ($) anchors to match the entire string
-  return new RegExp("^" + pattern + "$")
-}
-
-function checkTemplate(message: string, template: string) {
-  // Build the regex pattern from the template
-  const regex = buildRegexFromTemplate(template)
-
-  // Check if the message matches the pattern
-  return regex.test(message)
-}
-
 function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
@@ -187,8 +132,6 @@ export {
   normalizeSpaces,
   checkMessageId,
   checkUrlPresence,
-  checkTemplate,
   isNumeric,
   getTags,
-  getUserSnapshot,
 }

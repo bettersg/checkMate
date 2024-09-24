@@ -1,13 +1,18 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
+import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
+import { Timestamp } from "firebase-admin/firestore"
 import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
 } from "../common/sendWhatsappMessage"
 import { sendDisputeNotification } from "../common/sendMessage"
-import { sleep, checkMessageId, getUserSnapshot } from "../common/utils"
+import { sleep, checkMessageId } from "../common/utils"
+import { getUserSnapshot } from "../../services/common/userManagement"
+import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
+import { sendMenuMessage } from "../common/responseUtils"
 import {
   getResponsesObj,
   sendInterimUpdate,
@@ -47,6 +52,8 @@ const userWhatsappInteractionHandler = async function (
 
   let from = message.from // extract the wa phone no.
   let type = message.type // image/text
+  let text = message.text.body
+  const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
 
   const userSnap = await getUserSnapshot(from, "whatsapp")
   if (userSnap === null) {
@@ -55,18 +62,17 @@ const userWhatsappInteractionHandler = async function (
   }
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language) // change this to search for userID acc to fieldId
+  const isNewlyJoined = checkNewlyJoined(userSnap, messageTimestamp)
 
-  const isIgnored = userSnap.get("isIgnored") ?? false
-
-  if (isIgnored) {
-    functions.logger.warn(
-      `Message from banned user ${from}!, text: ${message?.text}`
-    )
-    return
-  }
   let step
   switch (type) {
     //only for whatsapp
+    case "text":
+      if (checkMenu(text)) {
+        step = "text_menu"
+        await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
+        break
+      }
     case "interactive":
       // handle consent here
       const interactive = message.interactive
@@ -121,6 +127,14 @@ const userWhatsappInteractionHandler = async function (
       )
       break
   }
+  if (isNewlyJoined && step) {
+    const timestampKey =
+      messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
+    userSnap.ref.update({
+      [`initialJourney.${timestampKey}`]: step,
+    })
+  }
+
   markWhatsappMessageAsRead("user", message.id)
 }
 
