@@ -857,7 +857,7 @@ async function respondToInstance(
   switch (category) {
     case "irrelevant_auto":
       await sendMenuMessage(
-        from,
+        userSnap,
         "IRRELEVANT_AUTO_MENU_PREFIX",
         "whatsapp",
         data.id,
@@ -869,7 +869,7 @@ async function respondToInstance(
       break
     case "irrelevant":
       await sendMenuMessage(
-        from,
+        userSnap,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
         data.id,

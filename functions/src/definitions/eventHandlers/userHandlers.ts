@@ -71,14 +71,6 @@ const userMessageHandlerWhatsapp = async function (message: GeneralMessage) {
 
   const isNewlyJoined = checkNewlyJoined(userSnap, messageTimestamp)
 
-  const isIgnored = userSnap.get("isIgnored")
-  if (isIgnored) {
-    functions.logger.warn(
-      `Message from banned user ${from}!, text: ${message?.text}`
-    )
-    return
-  }
-
   switch (type) {
     //only two types: text or image
     case "text":
