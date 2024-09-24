@@ -52,7 +52,6 @@ const userWhatsappInteractionHandler = async function (
 
   let from = message.from // extract the wa phone no.
   let type = message.type // image/text
-  let text = message.text.body
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
 
   const userSnap = await getUserSnapshot(from, "whatsapp")
@@ -68,6 +67,7 @@ const userWhatsappInteractionHandler = async function (
   switch (type) {
     //only for whatsapp
     case "text":
+      const text = message.text.body
       if (checkMenu(text)) {
         step = "text_menu"
         await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
