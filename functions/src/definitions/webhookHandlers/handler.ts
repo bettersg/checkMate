@@ -73,7 +73,6 @@ const getHandlerWhatsapp = async (req: Request, res: Response) => {
 
 const postHandlerWhatsapp = async (req: Request, res: Response) => {
   try {
-    console.log("req.body", req.body)
     if (req.body.object) {
       if (req?.body?.entry?.[0]?.changes?.[0]?.value) {
         let value = req.body.entry[0].changes[0].value
@@ -209,7 +208,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                       )
                       break
                     case "request_welcome":
-                      console.log("requested welcome")
                       await sendLanguageSelection(userSnap, true)
                       break
                     default:

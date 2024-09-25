@@ -80,7 +80,6 @@ export async function createNewUser(
   }
   try {
     const res = await db.collection("users").add(newUserObject)
-    console.log("New user added successfully!")
     return res
   } catch (error) {
     console.error("Error adding new user: ", error)
