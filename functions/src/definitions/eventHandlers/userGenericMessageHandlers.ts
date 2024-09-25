@@ -686,10 +686,6 @@ async function referralHandler(
           )
         }
         if (referrer) {
-          // const referralSourceSnap = await db
-          //   .collection("users")
-          //   .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
-          //   .get()
           const referralSourceSnap = await getUserSnapshot(referrer)
           if (referralSourceSnap !== null) {
             await referralSourceSnap.ref.update({

@@ -59,7 +59,7 @@ export async function createNewUser(
     ...ids,
     instanceCount: 0,
     firstMessageReceiptTime: creationTimestamp,
-    firstMessageType: "normal",
+    firstMessageType: "normal", //TODO update
     lastSent: null,
     satisfactionSurveyLastSent: null,
     initialJourney: {},
