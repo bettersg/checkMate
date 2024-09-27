@@ -1057,6 +1057,21 @@ async function sendLanguageSelection(
   await sendWhatsappButtonMessage("user", whatsappId, response, buttons)
 }
 
+async function sendUnsupportedTypeMessage(
+  userSnap: DocumentSnapshot,
+  replyMessageId: string | null = null
+) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  await sendWhatsappTextMessage(
+    "user",
+    whatsappId,
+    responses?.UNSUPPORTED_TYPE,
+    replyMessageId
+  )
+}
+
 async function sendBlast(userSnap: DocumentSnapshot) {
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
@@ -1235,6 +1250,7 @@ export {
   respondToRationalisationFeedback,
   updateLanguageAndSendMenu,
   sendLanguageSelection,
+  sendUnsupportedTypeMessage,
   sendBlast,
   respondToBlastFeedback,
 }

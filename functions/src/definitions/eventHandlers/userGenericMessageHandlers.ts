@@ -169,7 +169,6 @@ async function newTextInstanceHandler({
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
-  console.log(`isFirstTimeUser: ${isFirstTimeUser}`)
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
     await userSnap.ref.update({
@@ -686,10 +685,6 @@ async function referralHandler(
           )
         }
         if (referrer) {
-          // const referralSourceSnap = await db
-          //   .collection("users")
-          //   .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
-          //   .get()
           const referralSourceSnap = await getUserSnapshot(referrer)
           if (referralSourceSnap !== null) {
             await referralSourceSnap.ref.update({
