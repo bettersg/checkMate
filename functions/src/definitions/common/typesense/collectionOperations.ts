@@ -2,6 +2,7 @@
 import { AppEnv } from "../../../appEnv"
 import { getClient } from "./client"
 import { defineString } from "firebase-functions/params"
+import { logger } from "firebase-functions/v2"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -59,7 +60,7 @@ async function vectorSearch(
     )
     return response.results
   } catch (error) {
-    console.error("Error in vectorSearch: ", error)
+    logger.error("Error in vectorSearch: ", error)
   }
 }
 
@@ -73,7 +74,7 @@ async function insertOne(
       .documents()
       .create(document)
   } catch (error) {
-    console.error("Error in insertOne: ", error)
+    logger.error("Error in insertOne: ", error)
     throw error
   }
 }
@@ -88,7 +89,7 @@ async function updateOne(
       .documents()
       .update(document, {})
   } catch (error) {
-    console.error("Error in updateOne: ", error)
+    logger.error("Error in updateOne: ", error)
     throw error
   }
 }
@@ -103,7 +104,7 @@ async function deleteOne(
       .documents(id)
       .delete()
   } catch (error) {
-    console.error("Error in deleteOne: ", error)
+    logger.error("Error in deleteOne: ", error)
     throw error
   }
 }
@@ -118,7 +119,7 @@ async function upsertOne(
       .documents()
       .upsert(document)
   } catch (error) {
-    console.error("Error in upsertOne: ", error)
+    logger.error("Error in upsertOne: ", error)
     throw error
   }
 }
