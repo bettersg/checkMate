@@ -18,6 +18,5 @@ export { telegramAuthHandler } from "./definitions/api/authentication"
 export { onCheckerPublishTelegram } from "./definitions/eventHandlers/checkerHandlerTelegram"
 export { apiHandler } from "./definitions/api/api"
 export { internalApiHandler } from "./definitions/api/apiInternal"
-export { createCertificateForUser } from "./generateCertificate"
 export { batchJobs }
 

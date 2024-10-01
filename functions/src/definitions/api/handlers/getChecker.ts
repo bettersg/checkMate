@@ -68,7 +68,7 @@ const getCheckerHandler = async (req: Request, res: Response) => {
       achievements: null,
       level: 0, // TODO: Check
       experience: 0, // TODO: Check
-      certificateUrl: checkerData.certificateUrl || null, // Add this line
+      certificateUrl: checkerData.certificateUrl ?? null, // Include certificateUrl in the response
     };
 
     if (checkerData.programData.isOnProgram) {

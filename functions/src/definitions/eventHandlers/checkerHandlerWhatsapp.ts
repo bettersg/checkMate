@@ -139,6 +139,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
     lastVotedTimestamp: null,
+    certificateUrl: "", // Initialize certificateUrl as an empty string
     leaderboardStats: {
       numVoted: 0,
       numCorrectVotes: 0,
@@ -149,10 +150,10 @@ async function onSignUp(from: string, platform = "whatsapp") {
       isOnProgram: true,
       programStart: Timestamp.fromDate(new Date()),
       programEnd: null,
-      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
-      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
-      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
-      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, // Target number of messages voted on to complete program
+      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, // Target number of referrals made to complete program
+      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, // Number of non-trivial messages sent in to complete program
+      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, // Target accuracy of non-unsure votes
       numVotesAtProgramStart: 0,
       numReferralsAtProgramStart: 0,
       numReportsAtProgramStart: 0,

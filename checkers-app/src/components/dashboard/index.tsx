@@ -16,7 +16,6 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
-//TODO: link to firebase
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -30,6 +29,7 @@ export default function Dashboard() {
   const [hasCompletedProgram, setHasCompletedProgram] = useState<boolean>(false);
   const [programStats, setProgramStats] = useState<null | ProgramStats>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const handleOpen = () => setDialogOpen(!dialogOpen);
   const handleConfirm = async () => {
@@ -93,7 +93,7 @@ export default function Dashboard() {
       <CelebrationDialog
         display={hasCompletedProgram && isOnProgram}
         certificateUrl={certificateUrl}
-      ></CelebrationDialog>
+      />
       {isOnProgram && programStats ? (
         <div>
           <Typography variant="h6" className="text-primary-color">
@@ -101,6 +101,7 @@ export default function Dashboard() {
             CheckMate Checker's Program and get certified.
           </Typography>
           <div className="my-6 flex flex-col gap-y-4 mx-2">
+            {/* Progress Cards for program milestones */}
             <ProgressCard
               name="Messages Voted On"
               img_src="/votes.png"
@@ -123,6 +124,7 @@ export default function Dashboard() {
                 programStats.accuracyTarget * 100
               }% accuracy. Messages where the majority category does not receive 50% of the votes are excluded from this calculation.`}
             />
+            {/* Additional progress cards for reporting and referrals */}
             {programStats.numReportTarget > -1 && (
               <ProgressCard
                 name="Messages Reported"
@@ -146,8 +148,7 @@ export default function Dashboard() {
                     >
                       WhatsApp Bot
                     </a>
-                    . You need to submit at least $
-                    {programStats.numReportTarget} messages
+                    . You need to submit at least ${programStats.numReportTarget} messages
                   </>
                 }
               />
@@ -164,6 +165,7 @@ export default function Dashboard() {
               />
             )}
           </div>
+          {/* Withdrawal option for users */}
           <Typography className="text-primary-color">
             Not keen on the program?{" "}
             <a
@@ -175,6 +177,7 @@ export default function Dashboard() {
             </a>{" "}
             to participate in just the regular checking.
           </Typography>
+          {/* Confirmation dialog for withdrawal */}
           <Dialog open={dialogOpen} handler={handleOpen}>
             <DialogHeader>Withdrawal Confirmation</DialogHeader>
             <DialogBody>
@@ -199,6 +202,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div>
+          {/* Display stats for users not on the program */}
           <Typography variant="h5" className="text-primary-color">
             In the past 30 days
           </Typography>
