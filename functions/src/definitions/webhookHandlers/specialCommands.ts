@@ -76,25 +76,25 @@ const archiveMessages = async function () {
 
 const mockDb = async function () {
   if (runtimeEnvironment.value() === "PROD") {
-    return;
+    return
   }
-  functions.logger.log("mocking...");
-  const db = admin.firestore();
-  const systemParametersRef = db.collection("systemParameters");
-  await systemParametersRef.doc("userBotResponses").set(USER_BOT_RESPONSES);
+  functions.logger.log("mocking...")
+  const db = admin.firestore()
+  const systemParametersRef = db.collection("systemParameters")
+  await systemParametersRef.doc("userBotResponses").set(USER_BOT_RESPONSES)
   await systemParametersRef
     .doc("factCheckerBotResponses")
-    .set(CHECKER_BOT_RESPONSES);
+    .set(CHECKER_BOT_RESPONSES)
   await systemParametersRef.doc("supportedTypes").set({
     whatsapp: ["text", "image"],
-  });
-  await systemParametersRef.doc("thresholds").set(thresholds);
-  const checkersCollectionRef = db.collection("checkers");
-  const referralClicksRef = db.collection("referralClicks");
+  })
+  await systemParametersRef.doc("thresholds").set(thresholds)
+  const checkersCollectionRef = db.collection("checkers")
+  const referralClicksRef = db.collection("referralClicks")
   const querySnap = await checkersCollectionRef
     .where("whatsappId", "==", checker1PhoneNumber.value())
     .limit(1)
-    .get();
+    .get()
   const checkerObj: CheckerData = {
     name: "CHECKER1",
     type: "human",
@@ -148,11 +148,11 @@ const mockDb = async function () {
       numCorrectVotesAtProgramEnd: null,
       numNonUnsureVotesAtProgramEnd: null,
     },
-  };
+  }
   if (querySnap.empty) {
-    await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj);
+    await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj)
   } else {
-    await querySnap.docs[0].ref.set(checkerObj, { merge: true });
+    await querySnap.docs[0].ref.set(checkerObj, { merge: true })
   }
   const blastObject: BlastData = {
     type: "text",
@@ -161,8 +161,8 @@ const mockDb = async function () {
     isActive: true,
     createdDate: Timestamp.fromDate(new Date()),
     blastDate: Timestamp.fromDate(new Date()),
-  };
-  await db.collection("blasts").doc().set(blastObject, { merge: true });
+  }
+  await db.collection("blasts").doc().set(blastObject, { merge: true })
   const referralClicksObj: ReferralClicksData = {
     referralId: "add",
     utmSource: "source",
@@ -173,10 +173,9 @@ const mockDb = async function () {
     isConverted: false,
     variant: "variant_0",
     timestamp: Timestamp.fromDate(new Date()),
-  };
-  await db.collection("referralClicks").doc("aBc123").set(referralClicksObj);
-  functions.logger.log("mocked");
-};
-
+  }
+  await db.collection("referralClicks").doc("aBc123").set(referralClicksObj)
+  functions.logger.log("mocked")
+}
 
 export { handleSpecialCommands }

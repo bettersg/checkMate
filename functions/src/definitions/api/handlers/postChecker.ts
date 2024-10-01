@@ -34,25 +34,25 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     numVerifiedLinks,
     preferredPlatform,
     lastVotedTimestamp,
-  } = req.body as createChecker;
-  logger.info("ENTERED");
+  } = req.body as createChecker
+  logger.info("ENTERED")
 
   if (!name || !type || (!telegramId && telegramId !== null)) {
-    return res.status(400).send("Name, type, and telegramId are required");
+    return res.status(400).send("Name, type, and telegramId are required")
   }
   if (type === "ai") {
     // Check if name already exists
-    const checkersRef = db.collection("checkers");
+    const checkersRef = db.collection("checkers")
     const checkersSnap = await checkersRef
       .where("type", "==", type)
       .where("name", "==", name)
-      .get();
+      .get()
     if (!checkersSnap.empty) {
-      return res.status(409).send("Checker agent name already exists");
+      return res.status(409).send("Checker agent name already exists")
     }
   }
 
-  const thresholds = await getThresholds();
+  const thresholds = await getThresholds()
 
   const newChecker: CheckerData = {
     name,
@@ -106,16 +106,16 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       numCorrectVotesAtProgramEnd: null,
       numNonUnsureVotesAtProgramEnd: null,
     },
-  };
+  }
 
-  logger.info("Creating new checker", newChecker);
+  logger.info("Creating new checker", newChecker)
 
   // Create new factChecker in message
-  const ref = await db.collection("checkers").add(newChecker);
+  const ref = await db.collection("checkers").add(newChecker)
   return res.status(200).send({
     success: true,
     factCheckerPath: ref.path,
-  });
-};
+  })
+}
 
-export default postCheckerHandler;
+export default postCheckerHandler

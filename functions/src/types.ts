@@ -253,7 +253,7 @@ export type CheckerData = {
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null
-  certificateUrl?: string | null;
+  certificateUrl?: string | null
   level: number
   experience: number
   tier: "beginner" | "intermediate" | "expert"

@@ -22,4 +22,3 @@ export { apiHandler } from "./definitions/api/api"
 export { internalApiHandler } from "./definitions/api/apiInternal"
 export { passVoteRequest } from "./definitions/taskHandlers/autoPass"
 export { batchJobs }
-

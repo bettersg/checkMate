@@ -708,20 +708,23 @@ You may view these resources with the command /resources.`,
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
-  const userSnap = await db.collection("users").where("whatsappId", '==', whatsappId).get()
+  const userSnap = await db
+    .collection("users")
+    .where("whatsappId", "==", whatsappId)
+    .get()
   return !userSnap.empty
 }
 
 const createChecker = async (telegramId: number) => {
-  const thresholds = await getThresholds();
+  const thresholds = await getThresholds()
   const checkerRef = await db.runTransaction(async (transaction) => {
     const checkerDocQuery = db
       .collection("checkers")
-      .where("telegramId", "==", telegramId);
-    const checkerQuerySnap = await transaction.get(checkerDocQuery);
+      .where("telegramId", "==", telegramId)
+    const checkerQuerySnap = await transaction.get(checkerDocQuery)
 
     if (checkerQuerySnap.empty) {
-      const newCheckerRef = db.collection("checkers").doc();
+      const newCheckerRef = db.collection("checkers").doc()
       const newChecker: CheckerData = {
         name: null,
         type: "human",
@@ -760,7 +763,8 @@ const createChecker = async (telegramId: number) => {
           programStart: Timestamp.fromDate(new Date()),
           programEnd: null,
           numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0,
-          numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0,
+          numReferralTarget:
+            thresholds.volunteerProgramReferralRequirement ?? 0,
           numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0,
           accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0,
           numVotesAtProgramStart: 0,
@@ -774,17 +778,16 @@ const createChecker = async (telegramId: number) => {
           numCorrectVotesAtProgramEnd: null,
           numNonUnsureVotesAtProgramEnd: null,
         },
-      };
-      transaction.set(newCheckerRef, newChecker);
-      return newCheckerRef;
+      }
+      transaction.set(newCheckerRef, newChecker)
+      return newCheckerRef
     } else {
-      throw new Error("Checker already exists");
+      throw new Error("Checker already exists")
     }
-  });
+  })
 
-  return checkerRef;
-};
-
+  return checkerRef
+}
 
 // FIREBASE FUNCTIONS
 const checkerHandlerTelegram = async function (body: any) {

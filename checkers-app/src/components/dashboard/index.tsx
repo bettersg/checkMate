@@ -26,7 +26,8 @@ export default function Dashboard() {
   const [avgResponseTime, setAvgResponseTime] = useState<number>(0);
   const [peopleHelped, setPeopleHelped] = useState<number>(0);
   const [isOnProgram, setIsOnProgram] = useState<boolean>(false);
-  const [hasCompletedProgram, setHasCompletedProgram] = useState<boolean>(false);
+  const [hasCompletedProgram, setHasCompletedProgram] =
+    useState<boolean>(false);
   const [programStats, setProgramStats] = useState<null | ProgramStats>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
@@ -148,7 +149,8 @@ export default function Dashboard() {
                     >
                       WhatsApp Bot
                     </a>
-                    . You need to submit at least ${programStats.numReportTarget} messages
+                    . You need to submit at least $
+                    {programStats.numReportTarget} messages
                   </>
                 }
               />
