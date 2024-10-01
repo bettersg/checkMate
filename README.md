@@ -418,7 +418,7 @@ flowchart TB
     end
     C3{User/Checker Queue?}
     C4[Deprecated]
-    subgraph eventHandlers/onUserPublish.ts
+    subgraph eventHandlers/userHandlers.ts
         D1{Is it a message <br> to be checked <br> or some other <br> interaction}
         D2[Handle interaction]
         D3{Text or Image}
@@ -494,7 +494,7 @@ flowchart TB
     B --> C1
     C1 --> C2
     C2 --> C3
-    C3 --user--> eventHandlers/onUserPublish.ts
+    C3 --user--> eventHandlers/userHandlers.ts
     C3 --checker--> C4
     D3a5 --> eventHandlers/onInstanceCreate.ts
     D3b8 --> eventHandlers/onInstanceCreate.ts

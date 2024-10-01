@@ -57,10 +57,20 @@ const getVoteHandler = async (req: Request, res: Response) => {
       latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
     const isAssessed = messageSnap.get("isAssessed")
 
-    const isLegacy =
-      voteRequestSnap.get("truthScore") === undefined &&
-      voteRequestSnap.get("vote") !== undefined
+    // const isLegacy =
+    //   voteRequestSnap.get("truthScore") === undefined &&
+    //   voteRequestSnap.get("vote") !== undefined
 
+    const isLegacy = voteRequestSnap.get("numberPointScale") === 5
+
+    const tags = voteRequestSnap.get("tags") ?? {}
+    const parentTags = messageSnap.get("tags") ?? {}
+
+    //loop through tags, check that value is true, if so add to array
+    const tagArray = Object.keys(tags).filter((tag) => tags[tag])
+    const parentTagArray = Object.keys(parentTags).filter(
+      (tag) => parentTags[tag]
+    )
     const {
       irrelevantCount,
       scamCount,
@@ -71,13 +81,14 @@ const getVoteHandler = async (req: Request, res: Response) => {
       unsureCount,
       satireCount,
       validResponsesCount,
+      tagCounts,
     } = await getVoteCounts(messageRef)
 
     //get counts from each truthScore
 
     const truthScoreCountPromiseArr = Array.from(
-      { length: 5 },
-      (_, index) => index + 1
+      { length: 6 },
+      (_, index) => index
     ).map((truthScore) =>
       messageRef
         .collection("voteRequests")
@@ -87,30 +98,28 @@ const getVoteHandler = async (req: Request, res: Response) => {
         .then((snapshot) => snapshot.data().count)
     )
 
-    let oneCount, twoCount, threeCount, fourCount, fiveCount, hasDiscrepancy
+    let zeroCount,
+      oneCount,
+      twoCount,
+      threeCount,
+      fourCount,
+      fiveCount,
+      hasDiscrepancy
 
-    if (isLegacy) {
-      ;[oneCount, twoCount, threeCount, fourCount, fiveCount] = new Array(
-        5
-      ).fill(null)
-    } else {
-      try {
-        ;[oneCount, twoCount, threeCount, fourCount, fiveCount] =
-          await Promise.all(truthScoreCountPromiseArr)
-        //if sum not equals to infoCount, then it is a legacy message
-        if (
-          oneCount + twoCount + threeCount + fourCount + fiveCount !==
-          infoCount
-        ) {
-          logger.warn(
-            "Mismatch in truth score counts for message: " + messageId
-          )
-          hasDiscrepancy = true
-        }
-      } catch (e) {
-        logger.error("Error retrieving truth score counts")
+    try {
+      ;[zeroCount, oneCount, twoCount, threeCount, fourCount, fiveCount] =
+        await Promise.all(truthScoreCountPromiseArr)
+      //if sum not equals to infoCount, then it is a legacy message
+      if (
+        zeroCount + oneCount + twoCount + threeCount + fourCount + fiveCount !==
+        infoCount
+      ) {
+        logger.warn("Mismatch in truth score counts for message: " + messageId)
         hasDiscrepancy = true
       }
+    } catch (e) {
+      logger.error("Error retrieving truth score counts")
+      hasDiscrepancy = true
     }
 
     const returnData: Vote = {
@@ -121,39 +130,39 @@ const getVoteHandler = async (req: Request, res: Response) => {
       signedImageUrl: signedUrl,
       category: voteRequestSnap.get("category"),
       sender: maskedSender,
-      truthScore: isLegacy
-        ? voteRequestSnap.get("vote")
-        : voteRequestSnap.get("truthScore"),
+      truthScore: voteRequestSnap.get("truthScore"),
       isAssessed: isAssessed,
       finalStats: isAssessed
         ? {
             responseCount: validResponsesCount,
             scamCount: scamCount,
             illicitCount: illicitCount,
-            infoCount:
-              isLegacy || hasDiscrepancy
-                ? {
-                    total: infoCount,
-                  }
-                : {
-                    1: oneCount,
-                    2: twoCount,
-                    3: threeCount,
-                    4: fourCount,
-                    5: fiveCount,
-                  },
+            infoCount: hasDiscrepancy
+              ? {
+                  total: infoCount,
+                }
+              : {
+                  0: zeroCount,
+                  1: oneCount,
+                  2: twoCount,
+                  3: threeCount,
+                  4: fourCount,
+                  5: fiveCount,
+                },
             satireCount: satireCount,
             spamCount: spamCount,
             irrelevantCount: irrelevantCount,
             legitimateCount: legitimateCount,
             unsureCount: unsureCount,
-            truthScore: isLegacy
-              ? messageSnap.get("legacyTruthScore")
-              : messageSnap.get("truthScore"),
+            tagCounts: tagCounts,
+            truthScore: messageSnap.get("truthScore"),
+            tags: parentTagArray,
             primaryCategory: messageSnap.get("primaryCategory"),
             rationalisation: messageSnap.get("rationalisation"),
           }
         : null,
+      tags: tagArray,
+      numberPointScale: voteRequestSnap.get("numberPointScale"),
     }
     return res.status(200).send(returnData)
   } catch {

@@ -317,6 +317,7 @@ async function newTextInstanceHandler({
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
+      numberPointScale: 6,
       isIrrelevant:
         isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
@@ -331,6 +332,7 @@ async function newTextInstanceHandler({
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
+      tags: {},
       primaryCategory: isMachineAssessed
         ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
         : null,
@@ -580,6 +582,7 @@ async function newImageInstanceHandler({
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
+      numberPointScale: 6,
       isIrrelevant:
         isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
@@ -594,6 +597,7 @@ async function newImageInstanceHandler({
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
+      tags: {},
       primaryCategory: isMachineAssessed
         ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
         : null,

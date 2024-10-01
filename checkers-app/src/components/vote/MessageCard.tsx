@@ -68,16 +68,11 @@ export default function MessageCard(prop: PropType) {
 
   return (
     <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
-      {type === "image" && imageUrl && (
-        <img
-          src={imageUrl}
-          alt="message-image"
-          className="w-full object-contain rounded-xl"
-        />
-      )}
-
       <CardBody className="-m-3">
         <Typography className="w-full">
+          {type === "image" && displayText.length > 0 && (
+            <span className="font-bold">Caption: </span>
+          )}
           {textParts.map((part, index) => {
             // Split the text part by new lines
             const lines = part.text.split("\n");
@@ -115,6 +110,13 @@ export default function MessageCard(prop: PropType) {
           </Button>
         )}
       </CardBody>
+      {type === "image" && imageUrl && (
+        <img
+          src={imageUrl}
+          alt="message-image"
+          className="w-full object-contain rounded-xl"
+        />
+      )}
     </Card>
   );
 }

@@ -142,13 +142,20 @@ export const patchVote = async (
   messageId: string,
   voteRequestId: string,
   category: string,
-  truthScore: number | null
+  truthScore: number | null,
+  tags: string[] | null
 ) => {
   if (!messageId || !voteRequestId) {
     throw new Error("Message Id or Vote Request Id missing.");
   }
+  if (category === null) {
+    throw new Error("Category missing");
+  }
   if (category === "info" && truthScore == null) {
     throw new Error("Truth score required for info vote.");
+  }
+  if (tags === null) {
+    tags = [];
   }
   return (
     await axiosInstance.patch(
@@ -156,6 +163,7 @@ export const patchVote = async (
       {
         category,
         truthScore,
+        tags,
       }
     )
   ).data;
