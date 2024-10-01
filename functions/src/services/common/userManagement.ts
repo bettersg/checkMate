@@ -52,7 +52,7 @@ export async function createNewUser(
       break
 
     default:
-      console.error("Unknown source!")
+      logger.error("Unknown source!")
       return null
   }
 
@@ -83,7 +83,7 @@ export async function createNewUser(
     const res = await db.collection("users").add(newUserObject)
     return res
   } catch (error) {
-    console.error("Error adding new user: ", error)
+    logger.error("Error adding new user: ", error)
     return null
   }
 }

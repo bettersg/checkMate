@@ -327,7 +327,7 @@ bot.on(message("text"), async (ctx) => {
                 )
                 await sendOTPPrompt(chatId, userSnap, whatsappId)
               } else {
-                console.error(`OTP error with ${chatId}: ${message}`)
+                logger.error(`OTP error with ${chatId}: ${message}`)
                 await ctx.reply(
                   "Apologies - an error occurred, please try again later."
                 )
@@ -708,7 +708,10 @@ You may view these resources with the command /resources.`,
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
-  const userSnap = await db.collection("users").where("whatsappId", '==', whatsappId).get()
+  const userSnap = await db
+    .collection("users")
+    .where("whatsappId", "==", whatsappId)
+    .get()
   return !userSnap.empty
 }
 
