@@ -104,7 +104,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
   const susCount = scamCount + illicitCount
   const truthScore = computeTruthScore(infoCount, voteTotal)
   let harmfulCount = scamCount + illicitCount
-  let harmlessCount = legitimateCount + spamCount
+  let harmlessCount = legitimateCount + spamCount + irrelevantCount
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 2.5)) {
       harmfulCount += infoCount

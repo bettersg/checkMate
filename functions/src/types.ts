@@ -42,6 +42,78 @@ type TagsMap = {
   [tag: string]: boolean
 }
 
+export type TelegramMessageObject = {
+  message_id: number
+  from?: {
+    id: number
+    is_bot: boolean
+    first_name: string
+    language_code: string
+  }
+  chat: {
+    id: number
+    type: string
+  }
+  reply_to_message?: TelegramMessageObject
+  date: number
+  text?: string
+  entities?: {
+    type: string
+    offset: number
+    length: number
+    url: string
+  }[]
+  photo?: {
+    file_id: string
+    file_unique_id: string
+    file_size: number
+    width: number
+    height: number
+  }[] //an array of photo sizes, last one in the array gives the full size
+  video?: {
+    file_id: string
+    file_unique_id: string
+    width: number
+    height: number
+    duration: number
+    thumbnail?: {
+      file_id: string
+      file_unique_id: string
+      file_size: number
+      width: number
+      height: number
+    }
+    file_name?: string
+    mime_type?: string
+    file_size?: number
+  }
+  caption?: string
+  caption_entities?: {
+    type: string
+    offset: number
+    length: number
+    url: string
+  }[]
+}
+//General Message object
+export type GeneralMessage = {
+  source: string //the source of the message, e.g. whatsapp, telegram
+  id: string //the message id received
+  userId: string
+  type: string
+  subject: string | null //for emails
+  text: string | null
+  media?: {
+    fileId: string | null //to download the media
+    caption: string | null
+    mimeType: string | null //determines if it is an image or video
+  } | null
+  timestamp: number
+  isForwarded: boolean | null
+  frequently_forwarded: boolean | null
+  isFirstTimeUser: boolean
+}
+
 export type MessageData = {
   machineCategory: string
   isMachineCategorised: boolean
@@ -134,6 +206,9 @@ export type ReferralClicksData = {
 }
 
 export type UserData = {
+  whatsappId: string | null
+  telegramId: string | null
+  emailId: string | null
   instanceCount: number
   firstMessageReceiptTime: Timestamp
   firstMessageType: "normal" | "irrelevant" | "prepopulated" // Assuming "normal" is one of the possible types

@@ -22,7 +22,7 @@ interface InfoOptionsProps {
 //1-5 truth score radio buttons selection
 function TruthScoreOptions(Prop: TruthScoreOptionsProps) {
   const numberList = Array.from(
-    { length: Prop.numberPointScale },
+    { length: Prop.numberPointScale ?? 6 },
     (_, index) => index + (Prop.numberPointScale === 5 ? 1 : 0)
   );
 
