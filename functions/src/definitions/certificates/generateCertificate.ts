@@ -1,6 +1,6 @@
 // functions/src/definitions/certificates/generateCertificate.ts
 import * as admin from "firebase-admin"
-import * as functions from "firebase-functions"
+import { logger } from "firebase-functions/v2"
 import fs from "fs"
 import * as path from "path" // For file path handling
 
@@ -20,7 +20,10 @@ async function readHtmlTemplate(): Promise<string> {
 async function generateHtml(
   userName: string,
   issuanceDate: string,
-  userId: string
+  userId: string,
+  numVotesTarget: number,
+  numReportTarget: number,
+  accuracyTarget: number
 ): Promise<string> {
   let htmlTemplate = await readHtmlTemplate()
 
@@ -28,7 +31,18 @@ async function generateHtml(
   htmlTemplate = htmlTemplate.replace(/{{userName}}/g, userName) // Global replacement for all userName placeholders
   htmlTemplate = htmlTemplate.replace("{{issuanceDate}}", issuanceDate)
   htmlTemplate = htmlTemplate.replace("{{certificateId}}", userId)
-
+  htmlTemplate = htmlTemplate.replace(
+    "{{numVotesTarget}}",
+    numVotesTarget.toFixed(0)
+  )
+  htmlTemplate = htmlTemplate.replace(
+    "{{numReportTarget}}",
+    numReportTarget.toFixed(0)
+  )
+  htmlTemplate = htmlTemplate.replace(
+    "{{accuracyTarget}}",
+    (accuracyTarget * 100).toFixed(0)
+  )
   return htmlTemplate
 }
 
@@ -56,10 +70,10 @@ async function uploadHtmlFile(htmlContent: string, userId: string) {
     stream.on("finish", async () => {
       try {
         const publicUrl = `https://storage.googleapis.com/${storageBucket.name}/${filename}`
-        console.log("HTML file made public at:", publicUrl)
+        logger.info("HTML file made public at:", publicUrl)
         resolve(publicUrl)
       } catch (err) {
-        console.error("Error making HTML file public:", err)
+        logger.error("Error making HTML file public:", err)
         reject(err)
       }
     })
@@ -71,7 +85,10 @@ async function uploadHtmlFile(htmlContent: string, userId: string) {
 export async function generateAndUploadCertificate(
   userId: string,
   userName: string,
-  issuanceTimestamp: admin.firestore.Timestamp
+  issuanceTimestamp: admin.firestore.Timestamp,
+  numVotesTarget: number,
+  numReportTarget: number,
+  accuracyTarget: number
 ) {
   // Format the issuance date inside the function
   const issuanceDate = issuanceTimestamp.toDate().toLocaleDateString("en-GB", {
@@ -80,17 +97,24 @@ export async function generateAndUploadCertificate(
     day: "numeric",
   })
 
-  console.log(
+  logger.info(
     `Generating HTML for user: ${userName} (${userId}) with issuance date: ${issuanceDate}`
   )
 
   // Generate dynamic HTML with userName and formatted issuanceDate
-  const htmlContent = await generateHtml(userName, issuanceDate, userId)
+  const htmlContent = await generateHtml(
+    userName,
+    issuanceDate,
+    userId,
+    numVotesTarget,
+    numReportTarget,
+    accuracyTarget
+  )
 
   // Upload the generated HTML to Firebase Storage
   const publicUrl = await uploadHtmlFile(htmlContent, userId)
 
-  console.log(`HTML uploaded for user: ${userName} (${userId}) to ${publicUrl}`)
+  logger.info(`HTML uploaded for user: ${userName} (${userId}) to ${publicUrl}`)
 
   return publicUrl
 }
