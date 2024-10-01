@@ -2,6 +2,7 @@ import * as admin from "firebase-admin"
 import Hashids from "hashids"
 import { Timestamp } from "firebase-admin/firestore"
 import { UserData } from "../../types"
+import { logger } from "firebase-functions/v2"
 const salt = process.env.HASHIDS_SALT
 const hashids = new Hashids(salt)
 if (!admin.apps.length) {
@@ -112,7 +113,7 @@ export async function getUserSnapshot(
       }
     }
   } else {
-    console.error(`Unknown platform: ${platform} for userId ${userId}`)
+    logger.error(`Unknown platform: ${platform} for userId ${userId}`)
   }
   return null
 }
