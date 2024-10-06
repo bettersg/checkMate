@@ -248,6 +248,7 @@ export type CheckerData = {
     | "joinGroupChat"
     | "nlb"
     | "completed"
+  onboardingTime: Timestamp | null
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
   singpassOpenId: string | null
