@@ -17,6 +17,7 @@ import { getSignedUrl } from "../common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { resetL2Status } from "../common/voteUtils"
 import { WhatsappMessageObject, CheckerData } from "../../types"
+import { on } from "events"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -121,6 +122,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     isQuizComplete: false,
     quizScore: null,
     onboardingStatus: "name",
+    onboardingTime: null,
     lastTrackedMessageId: null,
     isAdmin: false,
     singpassOpenId: null,
@@ -396,6 +398,7 @@ async function onButtonReply(
         const factCheckerDocRef = checkersQuerySnap.docs[0].ref
         await factCheckerDocRef.update({
           isOnboardingComplete: true,
+          onboardingTime: Timestamp.now(),
         })
         break
     }

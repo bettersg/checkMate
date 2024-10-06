@@ -59,6 +59,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     type,
     isActive: isActive || false,
     isOnboardingComplete: isOnboardingComplete || false,
+    onboardingTime: isOnboardingComplete ? Timestamp.now() : null,
     isQuizComplete: isQuizComplete || false,
     quizScore: quizScore || null,
     onboardingStatus: "name",
