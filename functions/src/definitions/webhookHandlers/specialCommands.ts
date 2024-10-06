@@ -103,6 +103,7 @@ const mockDb = async function () {
     isQuizComplete: true,
     quizScore: null,
     onboardingStatus: "completed",
+    onboardingTime: Timestamp.now(),
     lastTrackedMessageId: null,
     isAdmin: true,
     singpassOpenId: null,

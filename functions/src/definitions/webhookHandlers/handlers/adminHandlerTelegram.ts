@@ -5,6 +5,7 @@ import { message } from "telegraf/filters"
 
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
 const CHECKERS_CHAT_ID = Number(process.env.CHECKERS_CHAT_ID)
+const NEW_CHECKERS_CHAT_ID = Number(process.env.NEW_CHECKERS_CHAT_ID)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 
 if (!admin.apps.length) {
@@ -16,7 +17,7 @@ const db = admin.firestore()
 //check when new user joins chat
 adminBot.on(message("new_chat_members"), async (ctx) => {
   const chatId = ctx.chat.id
-  if (chatId === CHECKERS_CHAT_ID) {
+  if (chatId === NEW_CHECKERS_CHAT_ID) {
     //may want to check chatID in future
     const newMembers = ctx.message.new_chat_members
     const messagePromises = newMembers.map(async (member) => {
@@ -54,6 +55,7 @@ If you've any feedback or queries, you can share them in the chat too 🤗`
           is_disabled: true,
         },
         parse_mode: "HTML",
+        disable_notification: true,
       })
     })
     await Promise.all(messagePromises)
