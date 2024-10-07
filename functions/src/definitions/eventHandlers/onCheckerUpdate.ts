@@ -65,39 +65,64 @@ const onCheckerUpdateV2 = onDocumentUpdated(
           postChangeData.telegramId &&
           completionTimestamp !== null
         ) {
-          const telegramId = postChangeData.telegramId
+          const telegramId = postChangeData.telegramId;
+
+          // Generate the certificate and get the URL
           const certificateUrl = await generateCertificate(
             postChangeSnap,
             completionTimestamp
-          )
+          );
+
           if (!certificateUrl) {
             logger.error(
               `Error generating certificate for ${postChangeSnap.id}`
-            )
-            return
+            );
+            return;
           }
+
+          // Update the checker document with the certificate URL
           await postChangeSnap.ref.update({
             certificateUrl,
-          })
-          const url = `${checkerAppHost}/`
-          const checkerResponses = await getResponsesObj("factChecker")
-          const baseMessage = checkerResponses.PROGRAM_COMPLETED
+          });
+
+          // Prepare the issue date components
+          const issueDate = completionTimestamp.toDate();
+          const issueYear = issueDate.getFullYear();
+          const issueMonth = issueDate.getMonth() + 1; // Months are zero-indexed in JavaScript
+
+          // Get the certificate URL and encode it for use in a URL
+          const certificateUrlEncoded = encodeURIComponent(certificateUrl);
+
+          // Get the checker ID
+          const checkerId = postChangeSnap.id;
+
+          // Construct the LinkedIn URL
+          const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=CheckMate%20Practitioner&organizationId=103003347&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${certificateUrlEncoded}&certId=${checkerId}`;
+
+          // Existing code to get the checker app host URL
+          const url = `${checkerAppHost}/`;
+
+          // Fetch the base message template
+          const checkerResponses = await getResponsesObj("factChecker");
+          const baseMessage = checkerResponses.PROGRAM_COMPLETED;
           if (!baseMessage) {
             logger.error(
               "No base message found when trying to handle program conclusion completed"
-            )
-            throw new Error("No base message found")
+            );
+            throw new Error("No base message found");
           }
-          const message = checkerResponses.PROGRAM_COMPLETED.replace(
-            "{{num_messages}}",
-            numVotes.toString()
-          )
+
+          // Replace placeholders in the message template
+          const message = baseMessage
+            .replace("{{num_messages}}", numVotes.toString())
             .replace("{{num_referred}}", numReferrals.toString())
             .replace("{{num_reported}}", numReports.toString())
             .replace(
               "{{accuracy}}",
               accuracy === null ? "N/A" : accuracy.toFixed(1)
-            )
+            );
+
+          // Send the Telegram message with the updated inline keyboard
           await sendTelegramTextMessage(
             "factChecker",
             telegramId,
@@ -110,11 +135,16 @@ const onCheckerUpdateV2 = onDocumentUpdated(
                     text: "Get your certificate!",
                     web_app: { url: url },
                   },
+                  {
+                    text: "Add to LinkedIn",
+                    url: linkedInUrl,
+                  },
                 ],
               ],
             }
-          )
+          );
         }
+
       } catch (error) {
         logger.error(
           `Error on checker update for ${postChangeSnap.id}: ${error}`
