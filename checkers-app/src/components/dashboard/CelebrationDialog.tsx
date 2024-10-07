@@ -60,7 +60,7 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
           and scams. Would you like to stay on?
         </Typography>
       </DialogBody>
-      <DialogFooter className="space-x-2">
+      <DialogFooter className="flex flex-wrap gap-2 justify-center">
         <Button variant="text" color="blue-gray" onClick={handleNoContinue}>
           No, I'm good
         </Button>
