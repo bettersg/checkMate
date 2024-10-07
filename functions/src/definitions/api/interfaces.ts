@@ -42,6 +42,7 @@ interface createChecker {
   numVerifiedLinks?: number
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
+  certificateUrl?: string | null
 }
 
 interface updateChecker {
@@ -63,6 +64,7 @@ interface updateChecker {
   preferredPlatform?: string | null
   lastVotedTimestamp?: null
   programData?: "reset" | "complete" | "withdraw"
+  certificateUrl?: string | null
 }
 
 interface Checker {
@@ -81,6 +83,7 @@ interface Checker {
   achievements: Achievements | null
   level: number
   experience: number
+  certificateUrl?: string | null
 }
 
 interface ProgramStats

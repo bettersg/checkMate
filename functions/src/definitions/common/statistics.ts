@@ -131,13 +131,15 @@ function tabulateVoteStats(
 }
 
 async function computeProgramStats(
-  checkerSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>
+  checkerSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
+  updateCompletion: boolean = false
 ) {
   try {
     const checkerData = checkerSnap.data() as CheckerData
     if (!checkerData.programData?.isOnProgram) {
       throw new Error(`Checker ${checkerSnap.ref.id} is not on program`)
     }
+    let timestamp = null
     const numVotes =
       checkerData.numVoted - checkerData.programData.numVotesAtProgramStart
     const numCorrectVotes =
@@ -168,9 +170,14 @@ async function computeProgramStats(
         isReportTargetMet &&
         isAccuracyTargetMet)
     let isNewlyCompleted = false
-    if (isProgramCompleted && checkerData.programData.programEnd == null) {
+    if (
+      updateCompletion &&
+      isProgramCompleted &&
+      checkerData.programData.programEnd == null
+    ) {
+      timestamp = Timestamp.fromDate(new Date())
       await checkerSnap.ref.update({
-        "programData.programEnd": Timestamp.fromDate(new Date()),
+        "programData.programEnd": timestamp,
         "programData.numVotesAtProgramEnd": checkerData.numVoted,
         "programData.numReferralsAtProgramEnd": checkerData.numReferred,
         "programData.numReportsAtProgramEnd": checkerData.numReported,
@@ -187,6 +194,7 @@ async function computeProgramStats(
       accuracy,
       isProgramCompleted,
       isNewlyCompleted,
+      completionTimestamp: timestamp,
     }
   } catch (error) {
     logger.error(
