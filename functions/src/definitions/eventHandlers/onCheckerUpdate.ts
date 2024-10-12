@@ -136,7 +136,7 @@ const onCheckerUpdateV2 = onDocumentUpdated(
                     web_app: { url: url },
                   },
                   {
-                    text: "Add to LinkedIn",
+                    text: "Add certificate to LinkedIn",
                     url: linkedInUrl,
                   },
                 ],

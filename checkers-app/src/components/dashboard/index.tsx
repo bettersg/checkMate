@@ -28,7 +28,7 @@ export default function Dashboard() {
   const [isOnProgram, setIsOnProgram] = useState<boolean>(false);
   const [hasCompletedProgram, setHasCompletedProgram] =
     useState<boolean>(false);
-  const [programStats, setProgramStats] = useState<null | ProgramStats>(null);
+  const [programStats, setProgramStats] = useState<ProgramStats | null>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,18 +47,24 @@ export default function Dashboard() {
     const fetchChecker = async () => {
       setIsLoading(true);
       if (!checkerDetails.checkerId) {
+        setIsLoading(false);
         return;
       }
       const checker: Checker = await getChecker(checkerDetails.checkerId);
-      console.log("Checker details fetched:", checker); // Log the entire checker object
+      console.log("Checker details fetched:", checker);
       if (checker) {
-        setCheckerDetails((prev) => ({ ...prev, isActive: checker.isActive }));
+        // Update checkerDetails with isActive and certificateUrl
+        setCheckerDetails((prev) => ({
+          ...prev,
+          isActive: checker.isActive,
+          certificateUrl: checker.certificateUrl || null,
+        }));
+
         if (checker.last30days) {
           setTotalVotes(checker.last30days.totalVoted);
           setAccuracyRate(checker.last30days.accuracyRate);
           setAvgResponseTime(checker.last30days.averageResponseTime);
           setPeopleHelped(checker.last30days.peopleHelped);
-          setIsLoading(false);
         }
         if (checker.isOnProgram && checker.programStats) {
           setIsOnProgram(checker.isOnProgram);
@@ -73,11 +79,12 @@ export default function Dashboard() {
       } else {
         console.log("Checker data not found");
       }
+      setIsLoading(false);
     };
     if (checkerDetails.checkerId) {
       fetchChecker();
     }
-  }, [checkerDetails.checkerId]);
+  }, [checkerDetails.checkerId, setCheckerDetails]);
 
   if (isLoading) {
     return <Loading />;
@@ -116,7 +123,9 @@ export default function Dashboard() {
               name="Voting Accuracy"
               img_src="/accuracy.png"
               current={
-                programStats.accuracy === null ? 0 : programStats.accuracy * 100
+                programStats.accuracy === null
+                  ? 0
+                  : programStats.accuracy * 100
               }
               target={programStats.accuracyTarget * 100}
               isPercentageTarget={true}
@@ -149,8 +158,8 @@ export default function Dashboard() {
                     >
                       WhatsApp Bot
                     </a>
-                    . You need to submit at least $
-                    {programStats.numReportTarget} messages
+                    . You need to submit at least{" "}
+                    {programStats.numReportTarget} messages.
                   </>
                 }
               />

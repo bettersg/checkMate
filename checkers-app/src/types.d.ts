@@ -18,6 +18,7 @@ interface CheckerDetails {
   isAdmin: boolean;
   tier: string;
   isActive: boolean;
+  certificateUrl?: string | null;
 }
 
 interface Window {
