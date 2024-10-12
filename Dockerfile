@@ -30,7 +30,7 @@ RUN mkdir $NVM_DIR && \
     bash $NVM_DIR/nvm.sh ${NODE_VERSION}
 
 # Install firebase-tools and emulators \
-RUN npm i -g firebase-tools && \
+RUN npm i -g firebase-tools@13.20.2 && \
     firebase setup:emulators:database && \
     firebase setup:emulators:firestore && \
     firebase setup:emulators:pubsub && \
