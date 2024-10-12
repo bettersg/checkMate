@@ -329,7 +329,7 @@ bot.on(message("text"), async (ctx) => {
                 )
                 await sendOTPPrompt(chatId, userSnap, whatsappId)
               } else {
-                console.error(`OTP error with ${chatId}: ${message}`)
+                logger.error(`OTP error with ${chatId}: ${message}`)
                 await ctx.reply(
                   "Apologies - an error occurred, please try again later."
                 )

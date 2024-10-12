@@ -2,6 +2,7 @@ import * as admin from "firebase-admin"
 import Hashids from "hashids"
 import { Timestamp } from "firebase-admin/firestore"
 import { UserData } from "../../types"
+import { logger } from "firebase-functions/v2"
 const salt = process.env.HASHIDS_SALT
 const hashids = new Hashids(salt)
 if (!admin.apps.length) {
@@ -51,7 +52,7 @@ export async function createNewUser(
       break
 
     default:
-      console.error("Unknown source!")
+      logger.error("Unknown source!")
       return null
   }
 
@@ -82,7 +83,7 @@ export async function createNewUser(
     const res = await db.collection("users").add(newUserObject)
     return res
   } catch (error) {
-    console.error("Error adding new user: ", error)
+    logger.error("Error adding new user: ", error)
     return null
   }
 }
@@ -112,7 +113,7 @@ export async function getUserSnapshot(
       }
     }
   } else {
-    console.error(`Unknown platform: ${platform} for userId ${userId}`)
+    logger.error(`Unknown platform: ${platform} for userId ${userId}`)
   }
   return null
 }
