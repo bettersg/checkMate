@@ -633,7 +633,6 @@ const sendTGGroupPrompt = async (
   if (isFirstPrompt) {
     await checkerSnap.ref.update({ onboardingStatus: "joinGroupChat" })
   }
-  console.log(NEW_CHECKERS_GROUP_LINK)
   await bot.telegram.sendMessage(
     chatId,
     `${
@@ -642,7 +641,7 @@ const sendTGGroupPrompt = async (
         : "We noticed you have not joined the groupchat yet. P"
     }lease join the <a href="${NEW_CHECKERS_GROUP_LINK}">groupchat for new checkers!</a>. This group chat is to help you get familiarised with your new role as a checker!
     
-You can ask questions of our fact-checking team, share tips, and get to know fellow newly-onboarded checkers.`,
+You can ask questions of our fact-checking team, share tips, and get to know fellow newly-onboarded checkers. 🤝`,
     {
       reply_markup: {
         inline_keyboard: [
