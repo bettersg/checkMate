@@ -41,7 +41,9 @@ export function validateURLs(text: string): Promise<URLValidationResult[]> {
             const virusTotalURL: string = `https://www.virustotal.com/api/v3/urls/${base64URL}`;
             console.log(`Calling API ${virusTotalURL} to get scan results of ${url}`);
             const VIRUS_TOTAL_API_KEY = String(process.env.VIRUS_TOTAL_API_KEY);
-            console.log(`VIRUS_TOTAL_API_KEY: ${VIRUS_TOTAL_API_KEY}`);
+
+            //Print only the last 4 characters of the API key instead of the full key for security reasons
+            console.log(`VIRUS_TOTAL_API_KEY: ${VIRUS_TOTAL_API_KEY.slice(-4)}`);
             const options = {
                 method: 'GET',
                 url: virusTotalURL,
@@ -79,7 +81,7 @@ export function validateURLs(text: string): Promise<URLValidationResult[]> {
 
         // Wait for all requests to complete and return results
         return Promise.all(requests).then(() => {
-            console.log('All requests completed. Results:', results);
+            console.log('All validate URLs requests completed. Results:', results);
             return results;
         });
     } else {
