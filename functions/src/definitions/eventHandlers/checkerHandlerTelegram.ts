@@ -12,14 +12,16 @@ import { isNumeric } from "../common/utils"
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
 const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
+const NEW_CHECKERS_CHAT_ID = String(process.env.NEW_CHECKERS_CHAT_ID)
 const bot = new Telegraf(TOKEN)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
+const NEW_CHECKERS_GROUP_LINK = String(process.env.NEW_CHECKERS_GROUP_LINK)
 const USERS_WHATSAPP_NUMBER = String(process.env.USERS_WHATSAPP_NUMBER)
 const CHECKER_APP_HOST = process.env.CHECKER_APP_HOST
 const TYPEFORM_URL = process.env.TYPEFORM_URL
 const WHATSAPP_BOT_LINK =
-  process.env.ENVRIONMENT === "PROD"
+  process.env.ENVIRONMENT === "PROD"
     ? "https://ref.checkmate.sg/add"
     : `https://wa.me/${USERS_WHATSAPP_NUMBER}`
 const NLB_SURE_IMAGE =
@@ -327,7 +329,7 @@ bot.on(message("text"), async (ctx) => {
                 )
                 await sendOTPPrompt(chatId, userSnap, whatsappId)
               } else {
-                console.error(`OTP error with ${chatId}: ${message}`)
+                logger.error(`OTP error with ${chatId}: ${message}`)
                 await ctx.reply(
                   "Apologies - an error occurred, please try again later."
                 )
@@ -393,10 +395,14 @@ ${progressBars(4)}`)
       case "TG_COMPLETED":
         try {
           const member = await adminBot.telegram.getChatMember(
-            CHECKERS_CHAT_ID,
+            NEW_CHECKERS_CHAT_ID,
             callbackQuery.from.id
           )
-          if (member.status) {
+          if (
+            member.status &&
+            member.status !== "left" &&
+            member.status !== "kicked"
+          ) {
             await sendNLBPrompt(chatId, checkerDocSnap)
           } else {
             await sendTGGroupPrompt(chatId, checkerDocSnap, false)
@@ -557,9 +563,10 @@ const sendQuizPrompt = async (
   const linkURL = `${TYPEFORM_URL}#name=${name}&phone=${whatsappId}`
   await bot.telegram.sendMessage(
     chatId,
-    `${isFirstPrompt
-      ? "Thank you for verifying your WhatsApp number"
-      : "We noticed you have not completed the quiz yet"
+    `${
+      isFirstPrompt
+        ? "Thank you for verifying your WhatsApp number"
+        : "We noticed you have not completed the quiz yet"
     }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!
     
 ${progressBars(2)}`,
@@ -593,9 +600,10 @@ const sendWABotPrompt = async (
   }
   await bot.telegram.sendMessage(
     chatId,
-    `${isFirstPrompt
-      ? "Next, try out our CheckMate WhatsApp service"
-      : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
+    `${
+      isFirstPrompt
+        ? "Next, try out our CheckMate WhatsApp service"
+        : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
     } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, and send in the pre-populated message.
     
 This Whatsapp service is where people send in the messages that you'll be checking. Part of your role will also be to report suspicious messages here!
@@ -627,14 +635,13 @@ const sendTGGroupPrompt = async (
   }
   await bot.telegram.sendMessage(
     chatId,
-    `${isFirstPrompt
-      ? "Next, p"
-      : "We noticed you have not joined the groupchat yet. P"
-    }lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
-
-1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
-
-2) Share relevant links from reputable news sources to aid fact-checking. Do note that beyond this, checkers should not discuss what to vote, as this may make the collective outcome biased.`,
+    `${
+      isFirstPrompt
+        ? "Next, p"
+        : "We noticed you have not joined the groupchat yet. P"
+    }lease join the <a href="${NEW_CHECKERS_GROUP_LINK}">groupchat for new checkers!</a>. This group chat is to help you get familiarised with your new role as a checker!
+    
+You can ask questions of our fact-checking team, share tips, and get to know fellow newly-onboarded checkers. 🤝`,
     {
       reply_markup: {
         inline_keyboard: [
@@ -675,6 +682,7 @@ const sendCompletionPrompt = async (
   await checkerSnap.ref.update({
     onboardingStatus: "completed",
     isOnboardingComplete: true,
+    onboardingTime: Timestamp.now(),
     isActive: true,
   })
   await bot.telegram.sendMessage(
@@ -703,10 +711,13 @@ You may view these resources with the command /resources.`,
     `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
-
+//TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
-  const userSnap = await db.collection("users").doc(whatsappId).get()
-  return userSnap.exists
+  const userSnap = await db
+    .collection("users")
+    .where("whatsappId", "==", whatsappId)
+    .get()
+  return !userSnap.empty
 }
 
 const createChecker = async (telegramId: number) => {
@@ -724,6 +735,7 @@ const createChecker = async (telegramId: number) => {
         type: "human",
         isActive: false,
         isOnboardingComplete: false,
+        onboardingTime: null,
         isQuizComplete: false,
         quizScore: null,
         onboardingStatus: "name",

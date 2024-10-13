@@ -1,4 +1,5 @@
 import thresholds from "./parameters/thresholds.json"
+import others from "./parameters/others.json"
 import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
@@ -19,7 +20,7 @@ function isNumeric(str: string) {
   return !isNaN(Number(str))
 }
 
-const getThresholds = async function () {
+async function getThresholds(is5point: boolean = false) {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
@@ -28,7 +29,20 @@ const getThresholds = async function () {
   if (env !== "PROD") {
     returnThresholds.surveyLikelihood = 1
   }
+  if (is5point) {
+    returnThresholds.falseUpperBound = 2.5
+    returnThresholds.misleadingUpperBound = 4.0
+  }
   return returnThresholds
+}
+
+async function getTags() {
+  const db = admin.firestore()
+  const tagsRef = db.doc("systemParameters/tags")
+  const tagsSnap = await tagsRef.get()
+  const returnTags = tagsSnap.get("tags") ?? others.tags
+  //return array of keys
+  return returnTags
 }
 
 function normalizeSpaces(str: string) {
@@ -103,32 +117,6 @@ function firestoreTimestampToYYYYMM(timestamp: Timestamp) {
   return `${year}${month}`
 }
 
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
-}
-
-function buildRegexFromTemplate(template: string) {
-  // Escape special regex characters in the template except for placeholders
-  const escapedTemplate = escapeRegExp(template)
-
-  // Replace the placeholder {{code}} with the regex pattern for alphanumeric characters
-  const pattern = escapedTemplate.replace(
-    /\\\{\\\{code\\\}\\\}/g,
-    "[a-zA-Z0-9]+"
-  )
-
-  // Add start (^) and end ($) anchors to match the entire string
-  return new RegExp("^" + pattern + "$")
-}
-
-function checkTemplate(message: string, template: string) {
-  // Build the regex pattern from the template
-  const regex = buildRegexFromTemplate(template)
-
-  // Check if the message matches the pattern
-  return regex.test(message)
-}
-
 function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
@@ -144,6 +132,6 @@ export {
   normalizeSpaces,
   checkMessageId,
   checkUrlPresence,
-  checkTemplate,
   isNumeric,
+  getTags,
 }

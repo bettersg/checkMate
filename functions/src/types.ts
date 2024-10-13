@@ -38,6 +38,82 @@ export type WhatsappMessageObject = {
   image?: { caption: string; id: string; mime_type: string }
 }
 
+type TagsMap = {
+  [tag: string]: boolean
+}
+
+export type TelegramMessageObject = {
+  message_id: number
+  from?: {
+    id: number
+    is_bot: boolean
+    first_name: string
+    language_code: string
+  }
+  chat: {
+    id: number
+    type: string
+  }
+  reply_to_message?: TelegramMessageObject
+  date: number
+  text?: string
+  entities?: {
+    type: string
+    offset: number
+    length: number
+    url: string
+  }[]
+  photo?: {
+    file_id: string
+    file_unique_id: string
+    file_size: number
+    width: number
+    height: number
+  }[] //an array of photo sizes, last one in the array gives the full size
+  video?: {
+    file_id: string
+    file_unique_id: string
+    width: number
+    height: number
+    duration: number
+    thumbnail?: {
+      file_id: string
+      file_unique_id: string
+      file_size: number
+      width: number
+      height: number
+    }
+    file_name?: string
+    mime_type?: string
+    file_size?: number
+  }
+  caption?: string
+  caption_entities?: {
+    type: string
+    offset: number
+    length: number
+    url: string
+  }[]
+}
+//General Message object
+export type GeneralMessage = {
+  source: string //the source of the message, e.g. whatsapp, telegram
+  id: string //the message id received
+  userId: string
+  type: string
+  subject: string | null //for emails
+  text: string | null
+  media?: {
+    fileId: string | null //to download the media
+    caption: string | null
+    mimeType: string | null //determines if it is an image or video
+  } | null
+  timestamp: number
+  isForwarded: boolean | null
+  frequently_forwarded: boolean | null
+  isFirstTimeUser: boolean
+}
+
 export type MessageData = {
   machineCategory: string
   isMachineCategorised: boolean
@@ -54,6 +130,7 @@ export type MessageData = {
   assessmentExpiry: Timestamp | null
   assessmentExpired: boolean
   truthScore: number | null
+  numberPointScale: 5 | 6
   isIrrelevant: boolean | null
   isScam: boolean | null
   isIllicit: boolean | null
@@ -64,6 +141,7 @@ export type MessageData = {
   isSatire: boolean | null
   isHarmful: boolean | null // whether the sum of scam + illicit + untrue votes > harmful threshold
   isHarmless: boolean | null // whether the sum of legitimate + accurate + spam votes > harmless threshold
+  tags: TagsMap
   primaryCategory: string | null
   customReply: string | null
   instanceCount: number
@@ -128,6 +206,9 @@ export type ReferralClicksData = {
 }
 
 export type UserData = {
+  whatsappId: string | null
+  telegramId: string | null
+  emailId: string | null
   instanceCount: number
   firstMessageReceiptTime: Timestamp
   firstMessageType: "normal" | "irrelevant" | "prepopulated" // Assuming "normal" is one of the possible types
@@ -167,6 +248,7 @@ export type CheckerData = {
     | "joinGroupChat"
     | "nlb"
     | "completed"
+  onboardingTime: Timestamp | null
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
   singpassOpenId: string | null
@@ -234,7 +316,8 @@ export type VoteRequest = {
   triggerL2Vote: boolean | null
   triggerL2Others: boolean | null
   sentMessageId: string | null
-  truthScore: 1 | 2 | 3 | 4 | 5 | null
+  truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null
+  numberPointScale: 5 | 6
   category:
     | "scam"
     | "illicit"
@@ -246,14 +329,18 @@ export type VoteRequest = {
     | "unsure"
     | "pass"
     | null
+  isAutoPassed: boolean
   reasoning: string | null
   createdTimestamp: Timestamp | null
   acceptedTimestamp: Timestamp | null
   votedTimestamp: Timestamp | null
   isCorrect: boolean | null
   score: number | null
+  tags: TagsMap
   duration: number | null //duration in minutes
 }
+
+export type VoteRequestUpdateObject = Partial<VoteRequest>
 
 export type CustomReply = {
   type: "text" | "image"

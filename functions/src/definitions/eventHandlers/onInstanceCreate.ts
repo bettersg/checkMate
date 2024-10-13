@@ -49,6 +49,10 @@ const onInstanceCreateV2 = onDocumentCreated(
       logger.log("Missing 'from' field in instance data")
       return Promise.resolve()
     }
+    if (!data.source) {
+      logger.log("Missing 'source' field in instance data")
+      return Promise.resolve()
+    }
     const parentMessageRef = snap.ref.parent.parent
     if (!parentMessageRef) {
       logger.error(`Instance ${snap.ref.path} has no parent message`)
@@ -99,7 +103,7 @@ const onInstanceCreateV2 = onDocumentCreated(
 
     await parentMessageRef.update(messageUpdateObj)
 
-    await upsertUser(data.from, data.timestamp)
+    await upsertUser(data.from, data.source, data.timestamp)
 
     if (data?.embedding && data?.text) {
       const updateObj = {
@@ -146,9 +150,23 @@ const onInstanceCreateV2 = onDocumentCreated(
   }
 )
 
-async function upsertUser(from: string, messageTimestamp: Timestamp) {
+async function upsertUser(from: string, source:string, messageTimestamp: Timestamp) {
   const db = admin.firestore()
-  const userRef = db.collection("users").doc(from)
+  let idField
+  if (source === "whatsapp") {
+    idField = "whatsappId"
+  } else if (source === "telegram") {
+    idField = "telegramId"
+  } else {
+    logger.error(`Invalid source: ${source}`)
+    return
+  }
+  const userSnap = await db.collection("users").where(idField, "==", from).limit(1).get()
+  if (userSnap.empty) {
+    logger.log("No user found in database")
+    return
+  }
+  const userRef = userSnap.docs[0].ref
   await userRef.set(
     {
       lastSent: messageTimestamp,
@@ -245,8 +263,11 @@ async function sendTemplateMessageAndCreateVoteRequest(
     platform: preferredPlatform,
     sentMessageId: null,
     category: null,
+    isAutoPassed: false,
     truthScore: null,
+    numberPointScale: 6,
     reasoning: null,
+    tags: {},
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: null,
     votedTimestamp: null,

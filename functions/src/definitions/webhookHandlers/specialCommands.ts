@@ -2,11 +2,12 @@ import * as functions from "firebase-functions"
 import * as admin from "firebase-admin"
 import { defineString } from "firebase-functions/params"
 import {
-  WhatsappMessage,
+  WhatsappMessageObject,
   CheckerData,
   BlastData,
   ReferralClicksData,
 } from "../../types"
+import { getUserSnapshot } from "../../services/common/userManagement"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
@@ -20,7 +21,9 @@ const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const checker1PhoneNumber = defineString(AppEnv.CHECKER1_PHONE_NUMBER)
 const checker1TelegramId = defineString(AppEnv.CHECKER1_TELEGRAM_ID)
 
-const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
+const handleSpecialCommands = async function (
+  messageObj: WhatsappMessageObject
+) {
   const command = messageObj.text.body.toLowerCase()
   if (command.startsWith("/")) {
     switch (command) {
@@ -42,7 +45,10 @@ const handleSpecialCommands = async function (messageObj: WhatsappMessage) {
         await interimPromptHandler()
         return
       case "/blast":
-        await sendBlast(messageObj.from)
+        const userSnap = await getUserSnapshot(messageObj.from)
+        if (userSnap !== null) {
+          await sendBlast(userSnap)
+        }
         return
     }
   }
@@ -97,6 +103,7 @@ const mockDb = async function () {
     isQuizComplete: true,
     quizScore: null,
     onboardingStatus: "completed",
+    onboardingTime: Timestamp.now(),
     lastTrackedMessageId: null,
     isAdmin: true,
     singpassOpenId: null,

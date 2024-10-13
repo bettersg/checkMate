@@ -1134,7 +1134,7 @@
 									"pm.test(\"Your test name\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -1227,7 +1227,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -1236,7 +1237,8 @@
 								"exec": [
 									"setTimeout(() => {}, 3000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1256,27 +1258,30 @@
 					"response": []
 				},
 				{
-					"name": "[DB CALL] Check referral count",
+					"name": "[DB CALL] Get Referral Count",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Check that has is created\", function () {\r",
+									"pm.test(\"Check that referral ID is created\", function () {\r",
 									"\r",
 									"    var jsonData = pm.response.json();\r",
-									"    const referralId = jsonData.fields.referralId.stringValue\r",
+									"    const referralId = jsonData[0].document.fields.referralId.stringValue\r",
+									"    const firestoreId = jsonData[0].document.name.split(\"/\").slice(-1)[0]\r",
 									"    pm.collectionVariables.set(\"referralId_USER1\", referralId);\r",
+									"    pm.collectionVariables.set(\"firestoreId_USER1\",firestoreId)\r",
 									"    pm.collectionVariables.set(\"referralLink_USER1\", `https://ref.checkmate.sg/${referralId}`);\r",
 									"    pm.expect(referralId.length).to.be.above(0);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1284,8 +1289,17 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"structuredQuery\": {\r\n    \"from\": [\r\n      {\r\n        \"collectionId\": \"users\"\r\n      }\r\n    ],\r\n    \"where\": {\r\n      \"fieldFilter\": {\r\n        \"field\": {\r\n          \"fieldPath\": \"whatsappId\"\r\n        },\r\n        \"op\": \"EQUAL\",\r\n        \"value\": {\r\n          \"stringValue\": \"{{USER_1_NUMBER}}\"\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents:runQuery",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -1295,9 +1309,7 @@
 								"{{PROJECT_ID}}",
 								"databases",
 								"(default)",
-								"documents",
-								"users",
-								"{{USER_1_NUMBER}}"
+								"documents:runQuery"
 							]
 						}
 					},
@@ -1380,7 +1392,7 @@
 									"pm.test(\"Message auto-categorised as irrelevant returns correct menu\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IRRELEVANT_AUTO_MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -3075,9 +3087,10 @@
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\");\r",
+											"    const PLACEHOLDER_SPAM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_SPAM.en\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",PLACEHOLDER_SPAM).replace(\"{{info_placeholder}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -3222,9 +3235,10 @@
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
+											"    const PLACEHOLDER_SPAM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_SPAM.en\")\r",
 											"    const instanceId = pm.variables.get(\"spamInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"spam🚧\").replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",\"\")\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",PLACEHOLDER_SPAM).replace(\"{{info_placeholder}}\",\"\").replace(\"{{get_feedback}}\",\"\")\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -4610,6 +4624,12 @@
 											"    const isImage = false\r",
 											"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+											"    const isGenerated = false\r",
+											"    const isIncorrect = false\r",
+											"    const primaryCategory = \"spam\"\r",
+											"    const GENERATED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GENERATED.en\")\r",
+											"    const INCORRECT_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_SUFFIX.en\")\r",
+											"    const INCORRECT_TRIVIAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_TRIVIAL.en\")\r",
 											"    function getFinalResponseText(responseText) {\r",
 											"        return responseText\r",
 											"        .replace(\r",
@@ -4631,6 +4651,14 @@
 											"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
 											"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
 											"        .replace(\"{{reporting_nudge}}\", REPORTING_NUDGE)\r",
+											"        .replace(\"{{generated}}\", isGenerated ? GENERATED : \"\")\r",
+											"        .replace(\"{{incorrect}}\", isIncorrect ? INCORRECT_SUFFIX : \"\")\r",
+											"        .replace(\r",
+											"            \"{{incorrect_trivial}}\",\r",
+											"            isIncorrect && primaryCategory.includes(\"irrelevant\")\r",
+											"                ? INCORRECT_TRIVIAL\r",
+											"                : \"\"\r",
+											"        )\r",
 											"    }\r",
 											"    const spamResponse = getFinalResponseText(SPAM)\r",
 											"    const expected = {\r",
@@ -4724,6 +4752,8 @@
 											"        \"method\": \"POST\"\r",
 											"    }\r",
 											"    var jsonData = pm.response.json();\r",
+											"\r",
+											"    console.log(JSON.stringify(expected,null,2))\r",
 											"    \r",
 											"    pm.expect(jsonData).to.eql(expected);\r",
 											"});"
@@ -4958,13 +4988,14 @@
 											"pm.test(\"STATS_TEMPLATE sent to user 1\", function () {\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_11\")\r",
+											"    \r",
 											"    //we not using the template for this, its hardcoded.\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"66.7% of our CheckMates felt this was *spam🚧*. 33.3% felt this was *satirical in nature🙃*.\",\r",
+											"                \"body\": \"66.7% of our CheckMates felt this was *marketing/viral content📣*. 33.3% felt this was *satirical in nature🙃*.\",\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -6108,9 +6139,10 @@
 											"    const INTERIM_TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INTERIM_TEMPLATE.en\");\r",
 											"    const INFO_PLACEHOLDER = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INFO_PLACEHOLDER.en\")\r",
 											"    const BUTTON_ANOTHER_UPDATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_ANOTHER_UPDATE.en\")\r",
+											"    const PLACEHOLDER_UNTRUE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_UNTRUE.en\")\r",
 											"    const instanceId = pm.variables.get(\"infoInstanceId\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
-											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",\"untrue❌\").replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"1.0\"))\r",
+											"    const interimResponse = INTERIM_TEMPLATE.replace(\"{{%voted}}\", \"33.3\").replace(\"{{prelim_assessment}}\",PLACEHOLDER_UNTRUE).replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"1.0\"))\r",
 											"    const expected = {\r",
 											"            \"hostname\": \"resultserver\",\r",
 											"            \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -6560,6 +6592,12 @@
 											"    const isImage = false\r",
 											"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+											"    const isGenerated = false\r",
+											"    const isIncorrect = false\r",
+											"    const primaryCategory = \"spam\"\r",
+											"    const GENERATED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GENERATED.en\")\r",
+											"    const INCORRECT_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_SUFFIX.en\")\r",
+											"    const INCORRECT_TRIVIAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_TRIVIAL.en\")\r",
 											"    function getFinalResponseText(responseText) {\r",
 											"        return responseText\r",
 											"        .replace(\r",
@@ -6581,6 +6619,14 @@
 											"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
 											"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
 											"        .replace(\"{{reporting_nudge}}\", REPORTING_NUDGE)\r",
+											"        .replace(\"{{generated}}\", isGenerated ? GENERATED : \"\")\r",
+											"        .replace(\"{{incorrect}}\", isIncorrect ? INCORRECT_SUFFIX : \"\")\r",
+											"        .replace(\r",
+											"            \"{{incorrect_trivial}}\",\r",
+											"            isIncorrect && primaryCategory.includes(\"irrelevant\")\r",
+											"                ? INCORRECT_TRIVIAL\r",
+											"                : \"\"\r",
+											"        )\r",
 											"    }\r",
 											"    const response = getFinalResponseText(UNTRUE)\r",
 											"    const expected = {\r",
@@ -7358,9 +7404,9 @@
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const wamid = pm.variables.get(\"whatsapp_id_19\")\r",
 											"    const STATS_TEMPLATE_1 = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.STATS_TEMPLATE_1.en\")\r",
-											"    const PLACEHOLDER_UNTRUE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_UNTRUE.en\")\r",
+											"    const PLACEHOLDER_MISLEADING = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.PLACEHOLDER_MISLEADING.en\")\r",
 											"    const INFO_PLACEHOLDER = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INFO_PLACEHOLDER.en\")\r",
-											"    const expectedBody = STATS_TEMPLATE_1.replace(\"{{top}}\", \"100.0\").replace(\"{{category}}\",PLACEHOLDER_UNTRUE).replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"2.3\"))\r",
+											"    const expectedBody = STATS_TEMPLATE_1.replace(\"{{top}}\", \"100.0\").replace(\"{{category}}\",PLACEHOLDER_MISLEADING).replace(\"{{info_placeholder}}\",INFO_PLACEHOLDER.replace(\"{{score}}\",\"2.3\"))\r",
 											"    //we not using the template for this, its hardcoded.\r",
 											"    const expected = {\r",
 											"        \"hostname\": \"resultserver\",\r",
@@ -10403,6 +10449,7 @@
 											"    const [, messageId, , voteRequestId] = pm.variables.get(\"unsureVoteRequestPath_CHECKER3\").split(\"/\")\r",
 											"    const instanceId = pm.variables.get(\"unsureInstanceId\")\r",
 											"    const HARMLESS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.HARMLESS.en\");\r",
+											"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\");\r",
 											"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\");\r",
 											"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\");\r",
 											"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\");\r",
@@ -10419,15 +10466,41 @@
 											"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 											"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
 											"    const STATS_TEMPLATE = \"33.3% of our CheckMates felt this was *spam🚧*. 33.3% felt this was *misleading⚠️*, with an average score of 3.0 on a scale of 1-5 (5 = completely true).\"\r",
+											"        const isGenerated = false\r",
+											"    const isIncorrect = false\r",
+											"    const primaryCategory = \"spam\"\r",
+											"    const GENERATED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GENERATED.en\")\r",
+											"    const INCORRECT_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_SUFFIX.en\")\r",
+											"    const INCORRECT_TRIVIAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_TRIVIAL.en\")\r",
 											"    function getFinalResponseText(responseText) {\r",
 											"        return responseText\r",
 											"        .replace(\r",
 											"            \"{{thanks}}\",\r",
 											"            isImmediate ? THANKS_IMMEDIATE : THANKS_DELAYED\r",
 											"        )\r",
-											"        .replace(\"{{methodology}}\",METHODOLOGY_HUMAN)\r",
+											"        .replace(\r",
+											"            \"{{matched}}\",\r",
+											"            instanceCount >= 5\r",
+											"            ? `In fact, others have already sent this message in ${instanceCount} times. `\r",
+											"            : \"\"\r",
+											"        )\r",
+											"        .replace(\r",
+											"            \"{{methodology}}\",\r",
+											"            isMachineCategorised\r",
+											"            ? METHODOLOGY_AUTO\r",
+											"            : METHODOLOGY_HUMAN\r",
+											"        )\r",
+											"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
 											"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
 											"        .replace(\"{{reporting_nudge}}\", REPORTING_NUDGE)\r",
+											"        .replace(\"{{generated}}\", isGenerated ? GENERATED : \"\")\r",
+											"        .replace(\"{{incorrect}}\", isIncorrect ? INCORRECT_SUFFIX : \"\")\r",
+											"        .replace(\r",
+											"            \"{{incorrect_trivial}}\",\r",
+											"            isIncorrect && primaryCategory.includes(\"irrelevant\")\r",
+											"                ? INCORRECT_TRIVIAL\r",
+											"                : \"\"\r",
+											"        )\r",
 											"    }\r",
 											"    const response = getFinalResponseText(HARMLESS)\r",
 											"    const expected = {\r",
@@ -10578,7 +10651,7 @@
 											"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
 											"        \"body\": {\r",
 											"            \"text\": {\r",
-											"                \"body\": \"33.3% of our CheckMates felt this was *spam🚧*. 33.3% felt this was *misleading⚠️*, with an average score of 3.0 on a scale of 1-5 (5 = completely true).\",\r",
+											"                \"body\": \"33.3% of our CheckMates felt this was *marketing/viral content📣*. 33.3% felt this was *misleading⚠️*, with an average score of 3.0 on a scale of 0-5 (5 = completely true).\",\r",
 											"                \"preview_url\": false\r",
 											"            },\r",
 											"            \"to\": USER_1_NUMBER,\r",
@@ -10702,7 +10775,7 @@
 									"pm.test(\"Check that generic menu is sent\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -10795,7 +10868,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -10804,7 +10878,8 @@
 								"exec": [
 									"setTimeout(() => {}, 2000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -11502,7 +11577,7 @@
 									"pm.test(\"Your test name\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -11595,7 +11670,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -11604,7 +11680,8 @@
 								"exec": [
 									"setTimeout(() => {}, 3000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12053,7 +12130,8 @@
 									"    pm.expect(isSubscribedUpdates).to.be.false;\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12067,7 +12145,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -12079,7 +12157,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -12157,7 +12235,7 @@
 									"pm.test(\"Check that menu now has subscribe button\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -12250,7 +12328,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -12259,7 +12338,8 @@
 								"exec": [
 									"setTimeout(() => {}, 2000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12409,7 +12489,8 @@
 									"    pm.expect(isSubscribedUpdates).to.be.true;\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12423,7 +12504,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -12435,7 +12516,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -12516,19 +12597,61 @@
 							"script": {
 								"exec": [
 									"pm.test(\"scam immediate autocategorised no matched response\", function () {\r",
-									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SCAM.en\");\r",
-									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\")\r",
-									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\")\r",
-									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\")\r",
-									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\")\r",
-									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\")\r",
+									"    const SCAM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SCAM.en\");\r",
+									"    const HARMLESS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.HARMLESS.en\");\r",
+									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\");\r",
+									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\");\r",
+									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\");\r",
+									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\");\r",
 									"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+									"    const REPORTING_NUDGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REPORTING_NUDGE.en\")\r",
 									"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
 									"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
-									"    const wamid = pm.variables.get(\"whatsapp_id_37\")\r",
-									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\").replace(\"{{results}}\",\"\").replace(\"{{image_caveat}}\",\"\")\r",
-									"    const USER_1_NAME = pm.variables.get(\"USER_1_NAME\")\r",
+									"    const isMachineCategorised = true\r",
+									"    const instanceCount = 1\r",
+									"    const isImmediate = true\r",
+									"    const isImage = false\r",
+									"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const isGenerated = false\r",
+									"    const isIncorrect = false\r",
+									"    const primaryCategory = \"spam\"\r",
+									"    const GENERATED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GENERATED.en\")\r",
+									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\");\r",
+									"    const INCORRECT_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_SUFFIX.en\")\r",
+									"    const INCORRECT_TRIVIAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_TRIVIAL.en\")\r",
+									"    const wamid = pm.variables.get(\"whatsapp_id_37\")\r",
+									"    function getFinalResponseText(responseText) {\r",
+									"        return responseText\r",
+									"        .replace(\r",
+									"            \"{{thanks}}\",\r",
+									"            isImmediate ? THANKS_IMMEDIATE : THANKS_DELAYED\r",
+									"        )\r",
+									"        .replace(\r",
+									"            \"{{matched}}\",\r",
+									"            instanceCount >= 5\r",
+									"            ? `In fact, others have already sent this message in ${instanceCount} times. `\r",
+									"            : \"\"\r",
+									"        )\r",
+									"        .replace(\r",
+									"            \"{{methodology}}\",\r",
+									"            isMachineCategorised\r",
+									"            ? METHODOLOGY_AUTO\r",
+									"            : METHODOLOGY_HUMAN\r",
+									"        )\r",
+									"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
+									"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
+									"        .replace(\"{{reporting_nudge}}\", REPORTING_NUDGE)\r",
+									"        .replace(\"{{generated}}\", isGenerated ? GENERATED : \"\")\r",
+									"        .replace(\"{{incorrect}}\", isIncorrect ? INCORRECT_SUFFIX : \"\")\r",
+									"        .replace(\r",
+									"            \"{{incorrect_trivial}}\",\r",
+									"            isIncorrect && primaryCategory.includes(\"irrelevant\")\r",
+									"                ? INCORRECT_TRIVIAL\r",
+									"                : \"\"\r",
+									"        )\r",
+									"    }\r",
+									"    const BODY_TEXT = getFinalResponseText(SCAM)\r",
 									"    const expected = {\r",
 									"        \"hostname\": \"resultserver\",\r",
 									"        \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -12567,7 +12690,7 @@
 									"        },\r",
 									"        \"method\": \"POST\"\r",
 									"    }\r",
-									"\r",
+									"    \r",
 									"    var jsonData = pm.response.json();\r",
 									"\r",
 									"    let reply_id_rationalisation = jsonData.body.interactive.action.buttons[0].reply.id;\r",
@@ -12585,7 +12708,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -12594,7 +12718,8 @@
 								"exec": [
 									"setTimeout(() => {}, 5000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -12688,16 +12813,61 @@
 							"script": {
 								"exec": [
 									"pm.test(\"spam immediate autocategorised no matched response\", function () {\r",
-									"    const TEMPLATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM.en\");\r",
-									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\")\r",
-									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\")\r",
-									"    const REPORTING_NUDGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REPORTING_NUDGE.en\")\r",
+									"    const SPAM = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.SPAM.en\");\r",
+									"    const HARMLESS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.HARMLESS.en\");\r",
+									"    const THANKS_DELAYED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_DELAYED.en\");\r",
+									"    const THANKS_IMMEDIATE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.THANKS_IMMEDIATE.en\");\r",
+									"    const METHODOLOGY_HUMAN = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_HUMAN.en\");\r",
+									"    const METHODOLOGY_AUTO = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.METHODOLOGY_AUTO.en\");\r",
 									"    const BUTTON_RESULTS = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RESULTS.en\")\r",
+									"    const REPORTING_NUDGE = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.REPORTING_NUDGE.en\")\r",
 									"    const BUTTON_DECLINE_REPORT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_DECLINE_REPORT.en\")\r",
 									"    const BUTTON_RATIONALISATION = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.BUTTON_RATIONALISATION.en\")\r",
-									"    const BODY_TEXT = TEMPLATE.replace(\"{{thanks}}\",THANKS_IMMEDIATE).replace(\"{{methodology}}\",METHODOLOGY_AUTO).replace(\"{{matched}}\",\"\").replace(\"{{image_caveat}}\",\"\").replace(\"{{reporting_nudge}}\",REPORTING_NUDGE)\r",
-									"    const wamid = pm.variables.get(\"whatsapp_id_38\")\r",
+									"    const isMachineCategorised = true\r",
+									"    const instanceCount = 1\r",
+									"    const isImmediate = true\r",
+									"    const isImage = false\r",
+									"    const IMAGE_CAVEAT = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.IMAGE_CAVEAT.en\")\r",
 									"    const USER_1_NUMBER = pm.variables.get(\"USER_1_NUMBER\")\r",
+									"        const isGenerated = false\r",
+									"    const isIncorrect = false\r",
+									"    const primaryCategory = \"spam\"\r",
+									"    const GENERATED = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.GENERATED.en\")\r",
+									"    const VOTE_RESULTS_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.VOTE_RESULTS_SUFFIX.en\");\r",
+									"    const INCORRECT_SUFFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_SUFFIX.en\")\r",
+									"    const INCORRECT_TRIVIAL = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.INCORRECT_TRIVIAL.en\")\r",
+									"    const wamid = pm.variables.get(\"whatsapp_id_38\")\r",
+									"     function getFinalResponseText(responseText) {\r",
+									"        return responseText\r",
+									"        .replace(\r",
+									"            \"{{thanks}}\",\r",
+									"            isImmediate ? THANKS_IMMEDIATE : THANKS_DELAYED\r",
+									"        )\r",
+									"        .replace(\r",
+									"            \"{{matched}}\",\r",
+									"            instanceCount >= 5\r",
+									"            ? `In fact, others have already sent this message in ${instanceCount} times. `\r",
+									"            : \"\"\r",
+									"        )\r",
+									"        .replace(\r",
+									"            \"{{methodology}}\",\r",
+									"            isMachineCategorised\r",
+									"            ? METHODOLOGY_AUTO\r",
+									"            : METHODOLOGY_HUMAN\r",
+									"        )\r",
+									"        .replace(\"{{results}}\", isImmediate ? \"\" : VOTE_RESULTS_SUFFIX)\r",
+									"        .replace(\"{{image_caveat}}\", isImage ? IMAGE_CAVEAT : \"\")\r",
+									"        .replace(\"{{reporting_nudge}}\", REPORTING_NUDGE)\r",
+									"        .replace(\"{{generated}}\", isGenerated ? GENERATED : \"\")\r",
+									"        .replace(\"{{incorrect}}\", isIncorrect ? INCORRECT_SUFFIX : \"\")\r",
+									"        .replace(\r",
+									"            \"{{incorrect_trivial}}\",\r",
+									"            isIncorrect && primaryCategory.includes(\"irrelevant\")\r",
+									"                ? INCORRECT_TRIVIAL\r",
+									"                : \"\"\r",
+									"        )\r",
+									"    }\r",
+									"    const BODY_TEXT = getFinalResponseText(SPAM)\r",
 									"    const expected = {\r",
 									"    \"hostname\": \"resultserver\",\r",
 									"    \"path\": \"/v15.0/WHATSAPP_TEST_USER_BOT_PHONE_NUMBER_ID/messages\",\r",
@@ -12713,7 +12883,7 @@
 									"        }\r",
 									"    },\r",
 									"    \"method\": \"POST\"\r",
-									"}\r",
+									"    }\r",
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
@@ -12818,7 +12988,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -12830,7 +13000,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -13114,7 +13284,7 @@
 									"pm.test(\"Your test name\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -13207,7 +13377,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -13216,7 +13387,8 @@
 								"exec": [
 									"setTimeout(() => {}, 3000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -13249,7 +13421,8 @@
 									"    pm.expect(parseInt(referralCount)).to.eql(1);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -13263,7 +13436,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{USER_1_NUMBER}}",
+							"raw": "{{FIRESTORE_URL}}/v1/projects/{{PROJECT_ID}}/databases/(default)/documents/users/{{firestoreId_USER1}}",
 							"host": [
 								"{{FIRESTORE_URL}}"
 							],
@@ -13275,7 +13448,7 @@
 								"(default)",
 								"documents",
 								"users",
-								"{{USER_1_NUMBER}}"
+								"{{firestoreId_USER1}}"
 							]
 						}
 					},
@@ -13353,7 +13526,7 @@
 									"pm.test(\"Check that generic menu is sent\", function () {\r",
 									"        const MENU = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU.en\");\r",
 									"        const PREFIX = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_PREFIX.en\");\r",
-									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX);\r",
+									"        const MENU_TEXT = MENU.replace(\"{{prefix}}\",PREFIX).replace(\"{{generated}}\",\"\").replace(\"{{incorrect}}\",\"\")\r",
 									"        const MENU_BUTTON = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_BUTTON.en\");\r",
 									"        const MENU_TITLE_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_TITLE_CHECK.en\");\r",
 									"        const MENU_DESCRIPTION_CHECK = pm.variables.get(\"__CONSTANTS__.USER_BOT_RESPONSES.MENU_DESCRIPTION_CHECK.en\");\r",
@@ -13446,7 +13619,8 @@
 									"    pm.expect(jsonData).to.eql(expected);\r",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -13455,7 +13629,8 @@
 								"exec": [
 									"setTimeout(() => {}, 2000);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -14285,6 +14460,10 @@
 		},
 		{
 			"key": "whatsapp_id_41",
+			"value": ""
+		},
+		{
+			"key": "firestoreId_USER1",
 			"value": ""
 		}
 	]

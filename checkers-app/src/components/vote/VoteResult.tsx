@@ -1,9 +1,9 @@
 import { Typography } from "@material-tailwind/react";
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
-import { FaceFrownIcon } from "@heroicons/react/24/solid";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { MegaphoneIcon } from "@heroicons/react/24/solid";
 import { HandThumbUpIcon } from "@heroicons/react/20/solid";
+import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
 import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import { NewspaperIcon } from "@heroicons/react/20/solid";
 import { FaceSmileIcon } from "@heroicons/react/20/solid";
@@ -11,6 +11,7 @@ import { FaceSmileIcon } from "@heroicons/react/20/solid";
 interface PropType {
   category: string | null;
   truthScore: number | null;
+  tags: string[];
 }
 
 export default function VoteResult(Prop: PropType) {
@@ -19,7 +20,7 @@ export default function VoteResult(Prop: PropType) {
     switch (Prop.category) {
       case "scam":
         catName = "Scam";
-        catIcon = <XMarkIcon className="h-7 w-7" />;
+        catIcon = <XCircleIcon className="h-7 w-7" />;
         break;
       case "illicit":
         catName = "Illicit";
@@ -33,15 +34,15 @@ export default function VoteResult(Prop: PropType) {
         catIcon = <NewspaperIcon className="h-7 w-7" />;
         break;
       case "spam":
-        catName = "Spam";
-        catIcon = <FaceFrownIcon className="h-7 w-7" />;
+        catName = "Marketing/Spam";
+        catIcon = <MegaphoneIcon className="h-7 w-7" />;
         break;
       case "irrelevant":
-        catName = "Trivial";
-        catIcon = <CheckCircleIcon className="h-7 w-7" />;
+        catName = "NVC-Can't Tell";
+        catIcon = <EllipsisHorizontalCircleIcon className="h-7 w-7" />;
         break;
       case "legitimate":
-        catName = "Legitimate";
+        catName = "NVC-Credible";
         catIcon = <HandThumbUpIcon className="h-7 w-7" />;
         break;
       case "satire":

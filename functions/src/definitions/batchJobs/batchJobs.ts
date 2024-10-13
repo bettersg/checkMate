@@ -46,7 +46,7 @@ async function deactivateAndRemind() {
         .collectionGroup("voteRequests")
         .where("factCheckerDocRef", "==", factCheckerDocRef)
         .where("createdTimestamp", "<", cutoffTimestamp)
-        .where("category", "==", null)
+        .where("isAutoPassed", "==", true)
         .get()
       if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
         logger.log(`Checker ${doc.id}, ${doc.get("name")} set to inactive`)
@@ -79,15 +79,15 @@ async function deactivateAndRemind() {
           }
           const replyMarkup = checkerAppHost
             ? {
-                inline_keyboard: [
-                  [
-                    {
-                      text: "CheckMates' Portal↗️",
-                      web_app: { url: checkerAppHost },
-                    },
-                  ],
+              inline_keyboard: [
+                [
+                  {
+                    text: "CheckMates' Portal↗️",
+                    web_app: { url: checkerAppHost },
+                  },
                 ],
-              }
+              ],
+            }
             : null
           const reactivationMessage = `Hello ${doc.get(
             "name"

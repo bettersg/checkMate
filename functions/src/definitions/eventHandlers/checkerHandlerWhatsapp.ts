@@ -17,6 +17,7 @@ import { getSignedUrl } from "../common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { resetL2Status } from "../common/voteUtils"
 import { WhatsappMessageObject, CheckerData } from "../../types"
+import { on } from "events"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -121,6 +122,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     isQuizComplete: false,
     quizScore: null,
     onboardingStatus: "name",
+    onboardingTime: null,
     lastTrackedMessageId: null,
     isAdmin: false,
     singpassOpenId: null,
@@ -396,6 +398,7 @@ async function onButtonReply(
         const factCheckerDocRef = checkersQuerySnap.docs[0].ref
         await factCheckerDocRef.update({
           isOnboardingComplete: true,
+          onboardingTime: Timestamp.now(),
         })
         break
     }
@@ -423,9 +426,6 @@ async function onTextListReceipt(
     .collection("voteRequests")
     .doc(voteRequestId)
   const voteRequestSnap = await voteRequestRef.get()
-  const isLegacy =
-    voteRequestSnap.get("truthScore") === undefined &&
-    voteRequestSnap.get("vote") !== undefined
   const updateObj: {
     category?: string
     truthScore?: number | null
@@ -500,13 +500,6 @@ async function onTextListReceipt(
       isEnd = true
       break
   }
-  //if isLegacy and updateObject has truthScore, remove truthScore and change it to vote
-  //START REMOVE IN APRIL//
-  if (isLegacy && updateObj.truthScore !== undefined) {
-    updateObj.vote = updateObj.truthScore
-    delete updateObj.truthScore
-  }
-  //END REMOVE IN APRIL//
   if (!response) {
     functions.logger.warn(
       `Response not set for id ${voteRequestId} for message ${messageId}. Unexpected text list selection likely the cause.`

@@ -3,36 +3,19 @@ import * as functions from "firebase-functions"
 import { validateURLs } from '../../utils/utils';
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { Timestamp } from "firebase-admin/firestore"
+import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
 import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
-  sendWhatsappContactMessage,
 } from "../common/sendWhatsappMessage"
-import { sendDisputeNotification } from "../common/sendMessage"
-import {
-  sleep,
-  hashMessage,
-  normalizeSpaces,
-  checkMessageId,
-  checkTemplate,
-} from "../common/utils"
-import {
-  getUserResponsesObject,
-  sendMenuMessage,
-  sendInterimUpdate,
-  sendVotingStats,
-  sendReferralMessage,
-  sendRationalisation,
-  respondToRationalisationFeedback,
-  updateLanguageAndSendMenu,
-  sendLanguageSelection,
-  sendBlast,
-  respondToBlastFeedback,
-} from "../common/responseUtils"
+import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
+import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
+import { getUserSnapshot } from "../../services/common/userManagement"
+import { sendMenuMessage, getResponsesObj } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
+  downloadTelegramMedia,
   getHash,
-  getSignedUrl,
   getCloudStorageUrl,
 } from "../common/mediaUtils"
 import { incrementCheckerCounts } from "../common/counters"
@@ -43,27 +26,24 @@ import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
-import {
-  WhatsappMessageObject,
-  MessageData,
-  InstanceData,
-  UserData,
-} from "../../types"
+import { GeneralMessage, MessageData, InstanceData } from "../../types"
 import { AppEnv } from "../../appEnv"
+import { logger } from "firebase-functions"
 
-const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
-
 const salt = process.env.HASHIDS_SALT
 const hashids = new Hashids(salt)
 
 const db = admin.firestore()
 
-const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
+//not whatsapp specific anymore
+const userGenericMessageHandlerWhatsapp = async function (
+  message: GeneralMessage
+) {
   if (!message?.id) {
     functions.logger.error("No message id")
     return
@@ -73,43 +53,34 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
     return
   }
 
-  let from = message.from // extract the phone number from the webhook payload
-  let type = message.type
-  const responses = await getUserResponsesObject("user", from)
-
-  //check whether new user
-  const userRef = db.collection("users").doc(from)
-  const userSnap = await userRef.get()
+  const from = message.userId // extract the userid (wa phone no./tele userid etc.)
+  const type = message.type // image/text
+  const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  const isFirstTimeUser = !userSnap.exists
-  let triggerOnboarding = isFirstTimeUser
-  let step
-  if (isFirstTimeUser) {
-    await createNewUser(userRef, messageTimestamp)
-  }
-  const firstMessageReceiptTime = isFirstTimeUser
-    ? messageTimestamp
-    : userSnap.get("firstMessageReceiptTime")
-  const isNewlyJoined =
-    messageTimestamp.seconds - firstMessageReceiptTime.seconds < 86400
-
-  const isIgnored = userSnap.get("isIgnored")
-  if (isIgnored) {
-    functions.logger.warn(
-      `Message from banned user ${from}!, text: ${message?.text?.body}`
-    )
+  let isFirstTimeUser = message.isFirstTimeUser
+  let userSnap = await getUserSnapshot(from, source)
+  if (userSnap == null) {
+    logger.error(`User ${from} not found in userHandler`)
     return
   }
+  const language = userSnap.get("language") ?? "en"
+
+  const responses = await getResponsesObj("user", language)
+
+  let step
+
+  const isNewlyJoined = checkNewlyJoined(userSnap, messageTimestamp)
 
   console.log(`Message is of type "${type}"`)
   switch (type) {
+    //only two types: text or image
     case "text":
       // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-      if (!message.text || !message.text.body) {
+      if (!message.text) {
         break
       }
       console.log(`Text message is "${message.text.body}"`)
-      const textNormalised = normalizeSpaces(message.text.body).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
+      const textNormalised = normalizeSpaces(message.text).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
         checkTemplate(
           textNormalised,
@@ -123,79 +94,40 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
-          await referralHandler(message.text.body, from)
+          await referralHandler(userSnap, message.text, from)
         } else {
-          await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
+          await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         }
         console.log(`step ${step}`)
         break
       }
-      if (checkMenu(message.text.body)) {
-        step = "text_menu"
-        await sendMenuMessage(from, "MENU_PREFIX", "whatsapp", null, null)
-        console.log(`step ${step}`)
-        break
-      }
       step = await newTextInstanceHandler({
-        text: message.text.body,
+        userSnap,
+        source: message.source,
+        text: message.text,
         timestamp: messageTimestamp,
         id: message.id,
-        from: from || null,
-        isForwarded: message?.context?.forwarded || null,
-        isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
+        from: from,
+        isForwarded: message?.isForwarded || null,
+        isFrequentlyForwarded: message?.frequently_forwarded || null,
         isFirstTimeUser,
       })
       break
 
     case "image":
       step = await newImageInstanceHandler({
-        caption: message?.image?.caption || null,
+        userSnap,
+        source: message.source,
+        caption: message?.media?.caption || null,
         timestamp: messageTimestamp,
         id: message.id,
-        mediaId: message?.image?.id || null,
-        mimeType: message?.image?.mime_type || null,
-        from: from || null,
-        isForwarded: message?.context?.forwarded || null,
-        isFrequentlyForwarded: message?.context?.frequently_forwarded || null,
+        mediaId: message?.media?.fileId || null,
+        mimeType: message?.media?.mimeType || null,
+        from: from,
+        isForwarded: message?.isForwarded || null,
+        isFrequentlyForwarded: message?.frequently_forwarded || null,
         isFirstTimeUser,
       })
-      break
-
-    case "interactive":
-      // handle consent here
-      const interactive = message.interactive
-      switch (interactive.type) {
-        case "button_reply":
-          step = await onButtonReply(message)
-          break
-        case "list_reply":
-          step = await onTextListReceipt(message)
-          break
-      }
-      break
-
-    case "button":
-      const button = message.button
-      switch (button.text) {
-        case "Get Latest Update":
-          await sendBlast(from)
-          break
-        case "Unsubscribe":
-          await toggleUserSubscription(from, false)
-          break
-        case "Get Referral Message":
-          await sendReferralMessage(from)
-          break
-        default:
-          functions.logger.error("Unsupported button type:", button.text)
-          await sendWhatsappTextMessage(
-            "user",
-            from,
-            responses.GENERIC_ERROR,
-            null,
-            true
-          )
-      }
       break
 
     default:
@@ -207,13 +139,10 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
       )
       break
   }
-  if (triggerOnboarding) {
-    await newUserHandler(from)
-  }
   if (isNewlyJoined && step) {
     const timestampKey =
       messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
-    await userRef.update({
+    userSnap.ref.update({
       [`initialJourney.${timestampKey}`]: step,
     })
   }
@@ -221,6 +150,8 @@ const userHandlerWhatsapp = async function (message: WhatsappMessageObject) {
 }
 
 async function newTextInstanceHandler({
+  userSnap,
+  source,
   text,
   timestamp,
   id,
@@ -229,10 +160,12 @@ async function newTextInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
+  userSnap: admin.firestore.DocumentSnapshot
+  source: string
   text: string
   timestamp: Timestamp
   id: string
-  from: string | null
+  from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
@@ -242,7 +175,7 @@ async function newTextInstanceHandler({
   let messageUpdateObj: MessageData | null = null
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
-    await db.collection("users").doc(from).update({
+    await userSnap.ref.update({
       firstMessageType: "irrelevant",
     })
     return Promise.resolve(`text_machine_${machineCategory}`)
@@ -307,54 +240,45 @@ async function newTextInstanceHandler({
       rationalisation = await rationaliseMessage(text, machineCategory)
     }
     messageRef = db.collection("messages").doc()
-
-    let validatedURLS: any;
-    try {
-        const validatedURLS: any = await validateURLs(text)
-        console.log('Validated URLs:', validatedURLS)
-
-        messageUpdateObj = {
-          machineCategory: machineCategory, //Can be "fake news" or "scam"
-          isMachineCategorised: isMachineAssessed,
-          originalText: text,
-          text: strippedMessage, //text
-          caption: null,
-          latestInstance: null,
-          firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
-          lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
-          lastRefreshedTimestamp: timestamp,
-          isPollStarted: false, //boolean, whether or not polling has started
-          isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
-          assessedTimestamp: null,
-          assessmentExpiry: null,
-          assessmentExpired: false,
-          truthScore: null, //float, the mean truth score
-          isIrrelevant:
-            isMachineAssessed && machineCategory.includes("irrelevant")
-              ? true
-              : null, //bool, if majority voted irrelevant then update this
-          isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-          isIllicit:
-            isMachineAssessed && machineCategory === "illicit" ? true : null,
-          isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
-          isLegitimate: null,
-          isUnsure: null,
-          isInfo: machineCategory === "info" ? true : null,
-          isSatire: null,
-          isHarmful: null,
-          isHarmless: null,
-          primaryCategory: isMachineAssessed
-            ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-            : null,
-          customReply: null, //string
-          instanceCount: 0,
-          rationalisation: rationalisation,
-        }
-      } catch (error) {
-        console.error('Error validating URLs:', error)
-        // You might want to handle the error, such as setting a default value
-        validatedURLS = null
-      }
+    messageUpdateObj = {
+      machineCategory: machineCategory, //Can be "fake news" or "scam"
+      isMachineCategorised: isMachineAssessed,
+      originalText: text,
+      text: strippedMessage, //text
+      caption: null,
+      latestInstance: null,
+      firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+      lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+      lastRefreshedTimestamp: timestamp,
+      isPollStarted: false, //boolean, whether or not polling has started
+      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+      assessedTimestamp: null,
+      assessmentExpiry: null,
+      assessmentExpired: false,
+      truthScore: null, //float, the mean truth score
+      numberPointScale: 6,
+      isIrrelevant:
+        isMachineAssessed && machineCategory.includes("irrelevant")
+          ? true
+          : null, //bool, if majority voted irrelevant then update this
+      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+      isIllicit:
+        isMachineAssessed && machineCategory === "illicit" ? true : null,
+      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+      isLegitimate: null,
+      isUnsure: null,
+      isInfo: machineCategory === "info" ? true : null,
+      isSatire: null,
+      isHarmful: null,
+      isHarmless: null,
+      tags: {},
+      primaryCategory: isMachineAssessed
+        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+        : null,
+      customReply: null, //string
+      instanceCount: 0,
+      rationalisation: rationalisation,
+    }
   } else {
     messageRef = matchedParentMessageRef
   }
@@ -366,7 +290,7 @@ async function newTextInstanceHandler({
   }
   const instanceRef = messageRef.collection("instances").doc()
   const instanceUpdateObj = {
-    source: "whatsapp",
+    source: source,
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "text", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
@@ -417,6 +341,8 @@ async function newTextInstanceHandler({
 }
 
 async function newImageInstanceHandler({
+  userSnap,
+  source,
   caption,
   timestamp,
   id,
@@ -427,12 +353,14 @@ async function newImageInstanceHandler({
   isFrequentlyForwarded,
   isFirstTimeUser,
 }: {
+  userSnap: admin.firestore.DocumentSnapshot
+  source: string
   caption: string | null
   mediaId: string | null
   mimeType: string | null
   timestamp: Timestamp
   id: string
-  from: string | null
+  from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
   isFirstTimeUser: boolean
@@ -452,7 +380,15 @@ async function newImageInstanceHandler({
     throw new Error(`No mimeType for whatsapp message with id ${id}`)
   }
   //get response buffer
-  const buffer = await downloadWhatsappMedia(mediaId)
+  let buffer
+  if (source === "whatsapp") {
+    buffer = await downloadWhatsappMedia(mediaId)
+  } else if (source === "telegram") {
+    buffer = await downloadTelegramMedia(mediaId)
+  } else {
+    throw new Error(`Unsupported platform ${source}`)
+  }
+  // const buffer = await downloadWhatsappMedia(mediaId)
   const hash = await getHash(buffer)
   //check if same image already exists
   let imageMatchSnapshot = await db
@@ -597,6 +533,7 @@ async function newImageInstanceHandler({
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
+      numberPointScale: 6,
       isIrrelevant:
         isMachineAssessed && machineCategory.includes("irrelevant")
           ? true
@@ -611,6 +548,7 @@ async function newImageInstanceHandler({
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
+      tags: {},
       primaryCategory: isMachineAssessed
         ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
         : null,
@@ -636,7 +574,7 @@ async function newImageInstanceHandler({
   }
   const instanceRef = messageRef.collection("instances").doc()
   const instanceUpdateObj: InstanceData = {
-    source: "whatsapp",
+    source: source,
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
     type: "image", //message type, taken from webhook object. Can be 'audio', 'button', 'document', 'text', 'image', 'interactive', 'order', 'sticker', 'system', 'unknown', 'video'.
@@ -647,7 +585,7 @@ async function newImageInstanceHandler({
     sender: sender ?? null, //sender name or number extracted from OCR
     imageType: imageType, //either "convo", "email", "letter" or "others"
     ocrVersion: "2",
-    from: from, //sender phone number, taken from webhook object
+    from: from, //sender id, taken from webhook object
     subject: subject,
     hash: hash,
     mediaId: mediaId,
@@ -690,176 +628,6 @@ async function newImageInstanceHandler({
   return Promise.resolve("image")
 }
 
-async function newUserHandler(from: string) {
-  await sendLanguageSelection(from, true)
-}
-
-async function onButtonReply(
-  messageObj: WhatsappMessageObject,
-  platform = "whatsapp"
-) {
-  const buttonId = messageObj.interactive.button_reply.id
-  const from = messageObj.from
-  const responses = await getUserResponsesObject("user", from)
-  const [type, ...rest] = buttonId.split("_")
-  let instancePath, selection, instanceRef, blastPath
-  switch (type) {
-    case "scamshieldDecline":
-      ;[instancePath] = rest
-      instanceRef = db.doc(instancePath)
-      const replyText = responses?.SCAMSHIELD_ON_DECLINE
-      await instanceRef.update({
-        scamShieldConsent: false,
-      })
-      if (!replyText) {
-        functions.logger.error("No replyText for scamshieldConsent")
-        break
-      }
-      await sendWhatsappTextMessage("user", from, replyText)
-      break
-    case "votingResults":
-      let scamShield
-      ;[instancePath, ...scamShield] = rest
-      const triggerScamShieldConsent =
-        scamShield.length > 0 && scamShield[0] === "scamshield"
-      //await sendVotingStats(instancePath, triggerScamShieldConsent)
-      await sendVotingStats(instancePath)
-      break
-    case "sendInterim":
-      ;[instancePath] = rest
-      await sendInterimUpdate(instancePath)
-      break
-    case "rationalisation":
-      ;[instancePath] = rest
-      await sendRationalisation(instancePath)
-      break
-    case "feedbackRationalisation":
-      ;[instancePath, selection] = rest
-      await respondToRationalisationFeedback(instancePath, selection)
-      break
-    case "feedbackBlast":
-      ;[blastPath, selection] = rest
-      await respondToBlastFeedback(blastPath, selection, from)
-      break
-    case "languageSelection":
-      ;[selection] = rest
-      await updateLanguageAndSendMenu(from, selection)
-      break
-  }
-  const step = type + (selection ? `_${selection}` : "")
-  return Promise.resolve(step)
-}
-
-async function onTextListReceipt(
-  messageObj: WhatsappMessageObject,
-  platform = "whatsapp"
-) {
-  const listId = messageObj.interactive.list_reply.id
-  const from = messageObj.from
-  const responses = await getUserResponsesObject("user", from)
-  const [type, selection, ...rest] = listId.split("_")
-  let response, instancePath
-  const step = `${type}_${selection}`
-  let hasReplied = false
-  switch (type) {
-    case "menu":
-      switch (selection) {
-        case "check":
-          response = responses.PROCEED_TO_SEND
-          break
-        case "help":
-          response = responses.HOW_TO
-          break
-
-        case "about":
-          response = responses.LEARN_MORE
-          break
-
-        case "feedback":
-          response = responses.FEEDBACK
-          break
-
-        case "language":
-          await sendLanguageSelection(from, false)
-          hasReplied = true
-          break
-
-        case "contact":
-          const nameObj = { formatted_name: "CheckMate", suffix: "CheckMate" }
-          response = responses.CONTACT
-          await sendWhatsappContactMessage(
-            "user",
-            from,
-            runtimeEnvironment.value() === "PROD"
-              ? "+65 80432188"
-              : "+1 555-093-3685",
-            nameObj,
-            "https://checkmate.sg"
-          )
-          await sleep(3000)
-          break
-
-        case "referral":
-          await sendReferralMessage(from)
-          hasReplied = true
-          break
-
-        case "dispute":
-          ;[instancePath] = rest
-          const instanceRef = db.doc(instancePath)
-          const parentMessageRef = instanceRef.parent.parent
-          if (!parentMessageRef) {
-            throw new Error(
-              `parentMessageRef is null for instance ${instancePath}`
-            )
-          }
-          const instanceSnap = await instanceRef.get()
-          const parentMessageSnapshot = await parentMessageRef.get()
-          const instanceType = instanceSnap.get("type")
-          const text = instanceSnap.get("text")
-          const category = parentMessageSnapshot.get("primaryCategory")
-          await sendDisputeNotification(
-            from,
-            instancePath,
-            instanceType,
-            text,
-            category
-          )
-          response = responses.DISPUTE
-          break
-        case "unsubscribeUpdates":
-          await toggleUserSubscription(from, false)
-          response = responses.UNSUBSCRIBE
-          break
-        case "subscribeUpdates":
-          await toggleUserSubscription(from, true)
-          response = responses.SUBSCRIBE
-          break
-      }
-      break
-    case "satisfactionSurvey":
-      ;[instancePath] = rest
-      const instanceRef = db.doc(instancePath)
-      //check if selection is number
-      if (!isNaN(Number(selection))) {
-        const selectionNumber = parseInt(selection)
-        await instanceRef.update({
-          satisfactionScore: selectionNumber,
-        })
-      } else {
-        functions.logger.warn(
-          `invalid selection for satisfaction survey: ${selection}`
-        )
-      }
-      response = responses.SATISFACTION_SURVEY_THANKS
-      break
-  }
-  if (!hasReplied && response) {
-    await sendWhatsappTextMessage("user", from, response, null, true)
-  }
-  return Promise.resolve(step)
-}
-
 async function addInstanceToDb(
   id: string,
   hasMatch: boolean,
@@ -887,20 +655,13 @@ async function addInstanceToDb(
   }
 }
 
-function checkMenu(text: string) {
-  const menuKeywords = ["menu", "菜单", "菜單"]
-  return menuKeywords.includes(text.toLowerCase())
-}
-
-async function toggleUserSubscription(userId: string, toSubscribe: boolean) {
-  db.collection("users").doc(userId).update({
-    isSubscribedUpdates: toSubscribe,
-  })
-}
-
-async function referralHandler(message: string, from: string) {
+async function referralHandler(
+  userSnap: admin.firestore.DocumentData,
+  message: string,
+  from: string
+) {
   const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
-  const userRef = db.collection("users").doc(from)
+  const userRef = userSnap.ref
   if (code.length > 0) {
     const referralClickRef = db.collection("referralClicks").doc(code)
     const referralClickSnap = await referralClickRef.get()
@@ -928,11 +689,8 @@ async function referralHandler(message: string, from: string) {
           )
         }
         if (referrer) {
-          const referralSourceSnap = await db
-            .collection("users")
-            .doc(`${referrer}`) //convert to string cos firestore doesn't accept numbers as doc ids
-            .get()
-          if (referralSourceSnap.exists) {
+          const referralSourceSnap = await getUserSnapshot(referrer)
+          if (referralSourceSnap !== null) {
             await referralSourceSnap.ref.update({
               referralCount: FieldValue.increment(1),
             })
@@ -966,40 +724,9 @@ async function referralHandler(message: string, from: string) {
   }
 }
 
-async function createNewUser(
-  userRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
-  messageTimestamp: Timestamp
-) {
-  const id = userRef.id
-  const referralId = hashids.encode(id)
-  const newUserObject: UserData = {
-    instanceCount: 0,
-    firstMessageReceiptTime: messageTimestamp,
-    firstMessageType: "normal",
-    lastSent: null,
-    satisfactionSurveyLastSent: null,
-    initialJourney: {},
-    referralId: referralId,
-    utm: {
-      source: "direct",
-      medium: "none",
-      content: "none",
-      campaign: "none",
-      term: "none",
-    },
-    referralCount: 0,
-    language: "en",
-    isReferralMessageSent: false,
-    isReminderMessageSent: false,
-    isSubscribedUpdates: true,
-    isIgnored: false,
-  }
-  await userRef.set(newUserObject)
-}
-
-const onUserPublish = onMessagePublished(
+const onUserGenericMessagePublish = onMessagePublished(
   {
-    topic: "userEvents",
+    topic: "userGenericMessages",
     secrets: [
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
@@ -1014,7 +741,7 @@ const onUserPublish = onMessagePublished(
   async (event) => {
     if (event.data.message.json) {
       functions.logger.log(`Processing ${event.data.message.messageId}`)
-      await userHandlerWhatsapp(event.data.message.json)
+      await userGenericMessageHandlerWhatsapp(event.data.message.json)
     } else {
       functions.logger.warn(
         `Unknown message type for messageId ${event.data.message.messageId})`
@@ -1022,4 +749,4 @@ const onUserPublish = onMessagePublished(
     }
   }
 )
-export { onUserPublish }
+export { onUserGenericMessagePublish }
