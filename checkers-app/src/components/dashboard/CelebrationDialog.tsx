@@ -4,11 +4,13 @@ import {
   DialogBody,
   DialogFooter,
   Typography,
+  IconButton,
   Button,
 } from "@material-tailwind/react";
-import { completeProgram, deactivateChecker } from "../../services/api";
+import { completeProgram } from "../../services/api";
 import { useUser } from "../../providers/UserContext";
 import { useNavigate } from "react-router-dom";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface PropType {
   display: boolean;
@@ -21,27 +23,31 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
   const navigate = useNavigate();
   const handleOpen = () => setOpen(!open);
 
-  const handleContinue = async () => {
+  const handleBack = async () => {
     if (checkerDetails.checkerId) {
-      await completeProgram(checkerDetails.checkerId);
       setOpen(false);
       navigate(0);
     }
   };
 
-  const handleNoContinue = async () => {
-    if (checkerDetails.checkerId) {
-      await completeProgram(checkerDetails.checkerId);
-      await deactivateChecker(checkerDetails.checkerId);
-      setOpen(false);
-      navigate(0);
-    }
-  };
+  // const handleNoContinue = async () => {
+  //   if (checkerDetails.checkerId) {
+  //     await completeProgram(checkerDetails.checkerId);
+  //     await deactivateChecker(checkerDetails.checkerId);
+  //     setOpen(false);
+  //     navigate(0);
+  //   }
+  // };
 
   React.useEffect(() => {
-    console.log("Certificate URL in CelebrationDialog:", certificateUrl);
-    setOpen(display); // Ensure open state is updated when display prop changes
-  }, [display, certificateUrl]);
+    const completeCheckerProgram = async () => {
+      if (checkerDetails.checkerId) {
+        await completeProgram(checkerDetails.checkerId);
+      }
+    };
+
+    completeCheckerProgram();
+  }, []);
 
   return (
     <Dialog open={open} handler={handleOpen}>
@@ -51,22 +57,25 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
           alt="Celebration"
           className="w-16 h-16 rounded-full mx-auto mb-4"
         />
+        <IconButton
+          size="sm"
+          variant="text"
+          className="!absolute right-3.5 top-3.5"
+          onClick={handleBack}
+        >
+          <XMarkIcon className="h-4 w-4 stroke-2" />
+        </IconButton>
         <Typography color="red" variant="h4">
           Congratulations!!!
         </Typography>
         <Typography className="text-center font-normal">
-          Hooray! You've completed the CheckMate program!! We'd love for you to
-          stay on as a checker and help us in our fight against misinformation
-          and scams. Would you like to stay on?
+          Hooray! You've completed the CheckMate program!! You may view your
+          certificate below. If you'd would like to stop receiving messages,
+          type /deactivate to the bot. Otherwise, we'd be more than happy to
+          have you continue!
         </Typography>
       </DialogBody>
       <DialogFooter className="flex flex-wrap gap-2 justify-center">
-        <Button variant="text" color="blue-gray" onClick={handleNoContinue}>
-          No, I'm good
-        </Button>
-        <Button variant="gradient" color="deep-orange" onClick={handleContinue}>
-          Yes!
-        </Button>
         {certificateUrl && (
           <Button
             variant="gradient"
