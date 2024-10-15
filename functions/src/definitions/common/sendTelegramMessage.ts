@@ -49,7 +49,9 @@ const sendTelegramTextMessage = async function (
       "Content-Type": "application/json",
     },
   }).catch((error) => {
-    functions.logger.log(error.response)
+    functions.logger.log(
+      `Error: ${error.response.status} - ${error.response.data.description}`
+    )
     throw "error with sending telegram message"
   })
   return response
