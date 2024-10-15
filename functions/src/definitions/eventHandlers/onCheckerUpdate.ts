@@ -104,17 +104,18 @@ const onCheckerUpdateV2 = onDocumentUpdated(
             organizationId: linkedInOrgID ?? "", // Use empty string if undefined
             issueYear: String(issueYear),
             issueMonth: String(issueMonth),
-            certUrl: certificateUrlEncoded,
             certId: checkerId,
           }
 
           // Construct the query string
           const queryString = new URLSearchParams(params).toString()
 
-          // Build the LinkedIn URL
-          const linkedInUrl = `https://www.linkedin.com/profile/add?${queryString}`
+          // Append certUrl manually without encoding
+          const linkedInUrl = `https://www.linkedin.com/profile/add?${queryString}&certUrl=${certificateUrlEncoded}`
           // Existing code to get the checker app host URL
           const url = `${checkerAppHost}/`
+
+          console.log(linkedInUrl)
 
           // Fetch the base message template
           const checkerResponses = await getResponsesObj("factChecker")
