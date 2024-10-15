@@ -30,15 +30,6 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
     }
   };
 
-  // const handleNoContinue = async () => {
-  //   if (checkerDetails.checkerId) {
-  //     await completeProgram(checkerDetails.checkerId);
-  //     await deactivateChecker(checkerDetails.checkerId);
-  //     setOpen(false);
-  //     navigate(0);
-  //   }
-  // };
-
   React.useEffect(() => {
     const completeCheckerProgram = async () => {
       if (checkerDetails.checkerId) {
