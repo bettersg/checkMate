@@ -12,6 +12,7 @@ import { Timestamp } from "firebase-admin/firestore"
 import { generateAndUploadCertificate } from "../certificates/generateCertificate"
 
 const checkerAppHost = process.env.CHECKER_APP_HOST
+const linkedInOrgID = process.env.LINKEDIN_ORG_ID
 
 const onCheckerUpdateV2 = onDocumentUpdated(
   {
@@ -65,51 +66,64 @@ const onCheckerUpdateV2 = onDocumentUpdated(
           postChangeData.telegramId &&
           completionTimestamp !== null
         ) {
-          const telegramId = postChangeData.telegramId;
+          const telegramId = postChangeData.telegramId
 
           // Generate the certificate and get the URL
           const certificateUrl = await generateCertificate(
             postChangeSnap,
             completionTimestamp
-          );
+          )
 
           if (!certificateUrl) {
             logger.error(
               `Error generating certificate for ${postChangeSnap.id}`
-            );
-            return;
+            )
+            return
           }
 
           // Update the checker document with the certificate URL
           await postChangeSnap.ref.update({
             certificateUrl,
-          });
+          })
 
           // Prepare the issue date components
-          const issueDate = completionTimestamp.toDate();
-          const issueYear = issueDate.getFullYear();
-          const issueMonth = issueDate.getMonth() + 1; // Months are zero-indexed in JavaScript
+          const issueDate = completionTimestamp.toDate()
+          const issueYear = issueDate.getFullYear()
+          const issueMonth = issueDate.getMonth() + 1 // Months are zero-indexed in JavaScript
 
           // Get the certificate URL and encode it for use in a URL
-          const certificateUrlEncoded = encodeURIComponent(certificateUrl);
+          const certificateUrlEncoded = encodeURIComponent(certificateUrl)
 
           // Get the checker ID
-          const checkerId = postChangeSnap.id;
+          const checkerId = postChangeSnap.id
 
-          // Construct the LinkedIn URL
-          const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=CheckMate%20Practitioner&organizationId=103003347&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${certificateUrlEncoded}&certId=${checkerId}`;
+          // Define query parameters
+          const params: Record<string, string> = {
+            startTask: "CERTIFICATION_NAME",
+            name: "CheckMate Practitioner",
+            organizationId: linkedInOrgID ?? "", // Use empty string if undefined
+            issueYear: String(issueYear),
+            issueMonth: String(issueMonth),
+            certUrl: certificateUrlEncoded,
+            certId: checkerId,
+          }
 
+          // Construct the query string
+          const queryString = new URLSearchParams(params).toString()
+
+          // Build the LinkedIn URL
+          const linkedInUrl = `https://www.linkedin.com/profile/add?${queryString}`
           // Existing code to get the checker app host URL
-          const url = `${checkerAppHost}/`;
+          const url = `${checkerAppHost}/`
 
           // Fetch the base message template
-          const checkerResponses = await getResponsesObj("factChecker");
-          const baseMessage = checkerResponses.PROGRAM_COMPLETED;
+          const checkerResponses = await getResponsesObj("factChecker")
+          const baseMessage = checkerResponses.PROGRAM_COMPLETED
           if (!baseMessage) {
             logger.error(
               "No base message found when trying to handle program conclusion completed"
-            );
-            throw new Error("No base message found");
+            )
+            throw new Error("No base message found")
           }
 
           // Replace placeholders in the message template
@@ -120,7 +134,7 @@ const onCheckerUpdateV2 = onDocumentUpdated(
             .replace(
               "{{accuracy}}",
               accuracy === null ? "N/A" : accuracy.toFixed(1)
-            );
+            )
 
           // Send the Telegram message with the updated inline keyboard
           await sendTelegramTextMessage(
@@ -142,9 +156,8 @@ const onCheckerUpdateV2 = onDocumentUpdated(
                 ],
               ],
             }
-          );
+          )
         }
-
       } catch (error) {
         logger.error(
           `Error on checker update for ${postChangeSnap.id}: ${error}`
