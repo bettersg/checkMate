@@ -953,7 +953,11 @@ async function respondToInstance(
   await instanceSnap.ref.update(updateObj)
 
   //check if category does not contain irrelevant, then updated reported number by 1
-  if (category !== "irrelevant" && category !== "irrelevant_auto") {
+  if (
+    category !== "irrelevant" &&
+    category !== "irrelevant_auto" &&
+    category !== "spam"
+  ) {
     //count number of instances from this sender
     const countOfInstancesFromSender = (
       await parentMessageRef
