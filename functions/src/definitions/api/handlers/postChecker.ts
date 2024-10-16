@@ -13,7 +13,7 @@ if (!admin.apps.length) {
 const db = admin.firestore()
 
 const postCheckerHandler = async (req: Request, res: Response) => {
-  //check request body
+  // Check request body
   const {
     name,
     type,
@@ -41,7 +41,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     return res.status(400).send("Name, type, and telegramId are required")
   }
   if (type === "ai") {
-    //check if name already exists:
+    // Check if name already exists
     const checkersRef = db.collection("checkers")
     const checkersSnap = await checkersRef
       .where("type", "==", type)
@@ -78,9 +78,10 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     numCorrectVotes: numCorrectVotes || 0,
     numNonUnsureVotes: numNonUnsureVotes || 0,
     numVerifiedLinks: numVerifiedLinks || 0,
-    preferredPlatform: preferredPlatform || type === "ai" ? null : "telegram",
+    preferredPlatform: preferredPlatform || (type === "ai" ? null : "telegram"),
     lastVotedTimestamp: lastVotedTimestamp || null,
     getNameMessageId: null,
+    certificateUrl: null, // Initialize certificateUrl as an empty string
     leaderboardStats: {
       numVoted: 0,
       numCorrectVotes: 0,
@@ -91,10 +92,10 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       isOnProgram: type === "human" ? true : false,
       programStart: type === "human" ? Timestamp.fromDate(new Date()) : null,
       programEnd: null,
-      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, //target number of messages voted on to complete program
-      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, //target number of referrals made to complete program
-      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, //number of non-trivial messages sent in to complete program
-      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, //target accuracy of non-unsure votes
+      numVotesTarget: thresholds.volunteerProgramVotesRequirement ?? 0, // Target number of messages voted on to complete program
+      numReferralTarget: thresholds.volunteerProgramReferralRequirement ?? 0, // Target number of referrals made to complete program
+      numReportTarget: thresholds.volunteerProgramReportRequirement ?? 0, // Number of non-trivial messages sent in to complete program
+      accuracyTarget: thresholds.volunteerProgramAccuracyRequirement ?? 0, // Target accuracy of non-unsure votes
       numVotesAtProgramStart: 0,
       numReferralsAtProgramStart: 0,
       numReportsAtProgramStart: 0,
@@ -110,7 +111,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
 
   logger.info("Creating new checker", newChecker)
 
-  //create new factChecker in message
+  // Create new factChecker in message
   const ref = await db.collection("checkers").add(newChecker)
   return res.status(200).send({
     success: true,

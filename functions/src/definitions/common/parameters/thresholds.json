@@ -23,6 +23,6 @@
   "satisfactionSurveyCooldownDays": 30,
   "volunteerProgramVotesRequirement": 50,
   "volunteerProgramReferralRequirement": 0,
-  "volunteerProgramReportRequirement": 10,
+  "volunteerProgramReportRequirement": 3,
   "volunteerProgramAccuracyRequirement": 0.6
 }

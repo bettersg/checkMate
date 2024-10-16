@@ -7,9 +7,11 @@ import {
   computeLast30DaysStats,
   computeProgramStats,
 } from "../../common/statistics"
+
 if (!admin.apps.length) {
   admin.initializeApp()
 }
+
 import Hashids from "hashids"
 const salt = process.env.HASHIDS_SALT
 const hashids = new Hashids(salt)
@@ -64,8 +66,9 @@ const getCheckerHandler = async (req: Request, res: Response) => {
       referralCode: referralCode,
       pendingVoteCount: pendingVoteCount,
       achievements: null,
-      level: 0, //TODO,check
-      experience: 0, //TOD0
+      level: 0, // TODO: Check
+      experience: 0, // TODO: Check
+      certificateUrl: checkerData.certificateUrl ?? null, // Include certificateUrl in the response
     }
 
     if (checkerData.programData.isOnProgram) {
@@ -79,7 +82,6 @@ const getCheckerHandler = async (req: Request, res: Response) => {
         } = await computeProgramStats(checkerSnap)
 
         returnData.programStats = {
-          //TODO
           numVotes: numVotes,
           numVotesTarget: checkerData.programData.numVotesTarget,
           numReferrals: numReferrals,
@@ -94,17 +96,18 @@ const getCheckerHandler = async (req: Request, res: Response) => {
         logger.error("Error fetching program stats")
         return res.status(500).send("Error fetching program stats")
       }
-      //calculate and send back program statistics
     }
-    //calculate and send back last 30 day statistics
+
     const { totalVoted, accuracyRate, averageResponseTime, peopleHelped } =
       await computeLast30DaysStats(checkerSnap)
+
     returnData.last30days = {
       totalVoted: totalVoted,
       accuracyRate: accuracyRate,
       averageResponseTime: averageResponseTime,
       peopleHelped: peopleHelped,
     }
+
     res.status(200).send(returnData)
   } catch (error) {
     logger.error("Error fetching checker", error)

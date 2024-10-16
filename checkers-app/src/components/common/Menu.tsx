@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Menu,
   MenuHandler,
@@ -9,15 +10,9 @@ import {
   DialogFooter,
   Button,
 } from "@material-tailwind/react";
-
-import { useState } from "react";
-
-import { useUser } from "../../providers/UserContext";
-
-import { Bars3Icon } from "@heroicons/react/20/solid";
-
 import { useNavigate } from "react-router-dom";
-
+import { Bars3Icon } from "@heroicons/react/20/solid";
+import { useUser } from "../../providers/UserContext";
 import {
   resetCheckerProgram,
   deactivateChecker,
@@ -97,9 +92,21 @@ export default function MenuComponent(Props: PropType) {
           <MenuItem onClick={() => handleMenuItemClick("resetProgram")}>
             {menuOptions.resetProgram.header}
           </MenuItem>
+
+          {/* New "View Certificate" Menu Item */}
+          {checkerDetails.certificateUrl && (
+            <MenuItem
+              onClick={() =>
+                window.open(checkerDetails.certificateUrl as string, "_blank")
+              }
+            >
+              View Certificate
+            </MenuItem>
+          )}
         </MenuList>
       </Menu>
 
+      {/* Existing Dialog for activation/deactivation */}
       <Dialog open={dialogOpen} handler={handleCancel} size="xs">
         <DialogHeader>{dialogHeader}</DialogHeader>
         <DialogBody divider>{dialogBody}</DialogBody>

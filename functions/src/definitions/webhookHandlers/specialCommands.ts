@@ -123,6 +123,7 @@ const mockDb = async function () {
       runtimeEnvironment.value() === "SIT" ? "whatsapp" : "telegram",
     lastVotedTimestamp: null,
     getNameMessageId: null,
+    certificateUrl: null, // Initialize certificateUrl as an empty string
     leaderboardStats: {
       numVoted: 0,
       numCorrectVotes: 0,
@@ -133,10 +134,10 @@ const mockDb = async function () {
       isOnProgram: true,
       programStart: Timestamp.fromDate(new Date()),
       programEnd: null,
-      numVotesTarget: 1, //target number of messages voted on to complete program
-      numReferralTarget: 0, //target number of referrals made to complete program
-      numReportTarget: 0, //number of non-trivial messages sent in to complete program
-      accuracyTarget: 0.6, //target accuracy of non-unsure votes
+      numVotesTarget: 1, // Target number of messages voted on to complete program
+      numReferralTarget: 0, // Target number of referrals made to complete program
+      numReportTarget: 0, // Number of non-trivial messages sent in to complete program
+      accuracyTarget: 0.6, // Target accuracy of non-unsure votes
       numVotesAtProgramStart: 0,
       numReferralsAtProgramStart: 0,
       numReportsAtProgramStart: 0,
