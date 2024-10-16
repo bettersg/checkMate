@@ -12,11 +12,9 @@ import { isNumeric } from "../common/utils"
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
 const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
-const NEW_CHECKERS_CHAT_ID = String(process.env.NEW_CHECKERS_CHAT_ID)
 const bot = new Telegraf(TOKEN)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
-const NEW_CHECKERS_GROUP_LINK = String(process.env.NEW_CHECKERS_GROUP_LINK)
 const USERS_WHATSAPP_NUMBER = String(process.env.USERS_WHATSAPP_NUMBER)
 const CHECKER_APP_HOST = process.env.CHECKER_APP_HOST
 const TYPEFORM_URL = process.env.TYPEFORM_URL
@@ -395,7 +393,7 @@ ${progressBars(4)}`)
       case "TG_COMPLETED":
         try {
           const member = await adminBot.telegram.getChatMember(
-            NEW_CHECKERS_CHAT_ID,
+            CHECKERS_CHAT_ID,
             callbackQuery.from.id
           )
           if (
@@ -639,9 +637,11 @@ const sendTGGroupPrompt = async (
       isFirstPrompt
         ? "Next, p"
         : "We noticed you have not joined the groupchat yet. P"
-    }lease join the <a href="${NEW_CHECKERS_GROUP_LINK}">groupchat for new checkers!</a>. This group chat is to help you get familiarised with your new role as a checker!
-    
-You can ask questions of our fact-checking team, share tips, and get to know fellow newly-onboarded checkers. 🤝`,
+    }}lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
+
+1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
+
+2) Share relevant links from reputable news sources to aid fact-checking. Do note that beyond this, checkers should not discuss what to vote, as this may make the collective outcome biased.`,
     {
       reply_markup: {
         inline_keyboard: [
