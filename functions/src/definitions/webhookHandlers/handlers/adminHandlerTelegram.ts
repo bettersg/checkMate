@@ -4,7 +4,7 @@ import { logger } from "firebase-functions/v2"
 import { message } from "telegraf/filters"
 
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
-const NEW_CHECKERS_CHAT_ID = Number(process.env.NEW_CHECKERS_CHAT_ID)
+const CHECKERS_CHAT_ID = Number(process.env.CHECKERS_CHAT_ID)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 
 if (!admin.apps.length) {
@@ -16,7 +16,7 @@ const db = admin.firestore()
 //check when new user joins chat
 adminBot.on(message("new_chat_members"), async (ctx) => {
   const chatId = ctx.chat.id
-  if (chatId === NEW_CHECKERS_CHAT_ID) {
+  if (chatId === CHECKERS_CHAT_ID) {
     //may want to check chatID in future
     const newMembers = ctx.message.new_chat_members
     const messagePromises = newMembers.map(async (member) => {
