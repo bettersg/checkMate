@@ -11,12 +11,10 @@ import { isNumeric } from "../common/utils"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
-const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
 const NEW_CHECKERS_CHAT_ID = String(process.env.NEW_CHECKERS_CHAT_ID)
 const bot = new Telegraf(TOKEN)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
-const NEW_CHECKERS_GROUP_LINK = String(process.env.NEW_CHECKERS_GROUP_LINK)
 const USERS_WHATSAPP_NUMBER = String(process.env.USERS_WHATSAPP_NUMBER)
 const CHECKER_APP_HOST = process.env.CHECKER_APP_HOST
 const TYPEFORM_URL = process.env.TYPEFORM_URL
