@@ -34,7 +34,7 @@ adminBot.on(message("new_chat_members"), async (ctx) => {
       const username = member.username ? ` @${member.username}` : ""
       const message = `Hi ${name}${username},
     
-Thanks for joining CheckMate as a checker 🙏🏻 and welcome to the new CheckMate Checker's groupchat 🎉! Do check out the pinned message above to get oriented.`
+Thanks for joining CheckMate as a checker 🙏🏻 and welcome to the CheckMate Checker's groupchat 🎉! Do check out the pinned message above to get oriented.`
 
       return ctx.reply(message, {
         link_preview_options: {
