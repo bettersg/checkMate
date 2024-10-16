@@ -5,7 +5,6 @@ import { message } from "telegraf/filters"
 
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
 const CHECKERS_CHAT_ID = Number(process.env.CHECKERS_CHAT_ID)
-const NEW_CHECKERS_CHAT_ID = Number(process.env.NEW_CHECKERS_CHAT_ID)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 
 if (!admin.apps.length) {
