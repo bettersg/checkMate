@@ -51,7 +51,7 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
         <IconButton
           size="sm"
           variant="text"
-          className="!absolute right-3.5 top-3.5"
+          className="!absolute right-3.5 top-3.5 focus:outline-none"
           onClick={handleBack}
         >
           <XMarkIcon className="h-4 w-4 stroke-2" />
@@ -59,11 +59,17 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
         <Typography color="red" variant="h4">
           Congratulations!!!
         </Typography>
-        <Typography className="text-center font-normal">
-          Hooray! You've completed the CheckMate program!! You may view your
-          certificate below. If you'd would like to stop receiving messages,
-          type /deactivate to the bot. Otherwise, we'd be more than happy to
-          have you continue!
+        <Typography className="text-left font-normal">
+          Congratulations! You've successfully completed the CheckMate Checkers
+          program. Your certificate is available below.
+        </Typography>
+        <Typography className="text-left font-normal">
+          We'd love for you to continue assessing messages and help others
+          navigate the information landscape. 💪
+        </Typography>
+        <Typography className="text-left font-normal">
+          If you'd prefer to stop, simply type /deactivate to the bot at any
+          time.
         </Typography>
       </DialogBody>
       <DialogFooter className="flex flex-wrap gap-2 justify-center">
