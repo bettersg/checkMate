@@ -30,7 +30,10 @@ const resources = `Here are some resources 📚 you might find useful:
 1) <a href="https://checkmate.sg">Our official CheckMate website</a>
 2) <a href="https://bit.ly/checkmates-wiki">Our fact-checking wiki</a>
 3) <a href="https://bit.ly/checkmates-quiz">The Typeform quiz you just took</a>
-4) <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">The S.U.R.E Learning Community</a> that we're partnering the National Library Board on`
+4) <a href="https://www.nlb.gov.sg/main/site/learnx/explore-communities/explore-communities-content/sure-learning-community">The S.U.R.E Learning Community</a> that we're partnering the National Library Board on
+5) <a href="https://facticity.ai/">Facticity</a>, which is useful for video links (just put them into facticity)
+6) <a href="https://www.virustotal.com/gui/home/url">Virustotal</a>, which you can use for scanning suspicious URL links
+7) <a href="https://onelink.to/scamshield">The ScamShield app</a>, which you can use for checking phone numbers`
 
 if (!admin.apps.length) {
   admin.initializeApp()
