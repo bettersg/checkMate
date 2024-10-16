@@ -11,7 +11,7 @@ import { isNumeric } from "../common/utils"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
-const NEW_CHECKERS_CHAT_ID = String(process.env.NEW_CHECKERS_CHAT_ID)
+const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
 const bot = new Telegraf(TOKEN)
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
@@ -396,7 +396,7 @@ ${progressBars(4)}`)
       case "TG_COMPLETED":
         try {
           const member = await adminBot.telegram.getChatMember(
-            NEW_CHECKERS_CHAT_ID,
+            CHECKERS_CHAT_ID,
             callbackQuery.from.id
           )
           if (
