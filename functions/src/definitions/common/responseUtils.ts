@@ -577,12 +577,22 @@ async function sendRationalisation(
 
 async function updateLanguageAndSendMenu(
   userSnap: DocumentSnapshot,
-  language: string
+  language: "en" | "cn"
 ) {
   await userSnap.ref.update({
     language: language,
   })
-  await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
+  await sendMenuMessage(
+    userSnap,
+    "MENU_PREFIX",
+    "whatsapp",
+    null,
+    null,
+    true,
+    false,
+    false,
+    language
+  ) //truncated menu on onboarding
 }
 
 async function sendInterimUpdate(
