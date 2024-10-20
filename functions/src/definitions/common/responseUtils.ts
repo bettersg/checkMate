@@ -925,7 +925,7 @@ async function respondToInstance(
             language
           )
           const responseText = getFinalResponseText(
-            "UNSURE",
+            responses["UNSURE"],
             responses,
             isImmediate,
             instanceCount,
