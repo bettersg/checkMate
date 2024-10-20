@@ -18,7 +18,7 @@ import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
-import { CustomReply, UserBlast } from "../../types"
+import { CustomReply, LanguageSelection, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { get } from "http"
 
@@ -73,11 +73,11 @@ type ResponseObject = {
 async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
 async function getResponsesObj(
   botType: "user",
-  language: "en" | "cn"
+  language: LanguageSelection
 ): Promise<ResponseObject>
 async function getResponsesObj(
   botType: "user" | "factChecker" = "user",
-  language: "en" | "cn" = "en"
+  language: LanguageSelection = "en"
 ) {
   let path
   if (botType === "factChecker") {
@@ -179,7 +179,7 @@ async function sendMenuMessage(
   isTruncated: boolean = false,
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
-  language: "en" | "cn" | null = null
+  language: LanguageSelection | null = null
 ) {
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
   const resolvedLanguage = language ?? userSnap.get("language") ?? "en"
@@ -376,7 +376,7 @@ async function getVotingStatsMessage(
   truthScore: number | null,
   numberPointScale: number,
   messageRef: DocumentReference,
-  language: "en" | "cn" = "en"
+  language: LanguageSelection = "en"
 ) {
   if (!messageRef) {
     throw new Error("messageRef missing")
@@ -577,7 +577,7 @@ async function sendRationalisation(
 
 async function updateLanguageAndSendMenu(
   userSnap: DocumentSnapshot,
-  language: "en" | "cn"
+  language: LanguageSelection
 ) {
   await userSnap.ref.update({
     language: language,
