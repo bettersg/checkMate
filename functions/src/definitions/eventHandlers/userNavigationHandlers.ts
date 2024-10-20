@@ -26,7 +26,7 @@ import {
   respondToBlastFeedback,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
-import { WhatsappMessageObject } from "../../types"
+import { LanguageSelection, WhatsappMessageObject } from "../../types"
 import { AppEnv } from "../../appEnv"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -191,7 +191,7 @@ async function onButtonReply(
       await respondToBlastFeedback(userSnap, blastPath, selection)
       break
     case "languageSelection":
-      ;[selection] = rest
+      ;[selection] = rest as [LanguageSelection]
       await updateLanguageAndSendMenu(userSnap, selection)
       break
   }

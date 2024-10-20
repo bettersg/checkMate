@@ -18,7 +18,7 @@ import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
-import { CustomReply, UserBlast } from "../../types"
+import { CustomReply, LanguageSelection, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { get } from "http"
 
@@ -73,11 +73,11 @@ type ResponseObject = {
 async function getResponsesObj(botType: "factChecker"): Promise<ResponseObject>
 async function getResponsesObj(
   botType: "user",
-  language: "en" | "cn"
+  language: LanguageSelection
 ): Promise<ResponseObject>
 async function getResponsesObj(
   botType: "user" | "factChecker" = "user",
-  language: "en" | "cn" = "en"
+  language: LanguageSelection = "en"
 ) {
   let path
   if (botType === "factChecker") {
@@ -178,11 +178,12 @@ async function sendMenuMessage(
   disputedInstancePath: string | null = null,
   isTruncated: boolean = false,
   isGenerated: boolean = false,
-  isIncorrect: boolean = false
+  isIncorrect: boolean = false,
+  language: LanguageSelection | null = null
 ) {
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
-  const language = userSnap.get("language") ?? "en"
-  const responses = await getResponsesObj("user", language)
+  const resolvedLanguage = language ?? userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", resolvedLanguage)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
@@ -375,7 +376,7 @@ async function getVotingStatsMessage(
   truthScore: number | null,
   numberPointScale: number,
   messageRef: DocumentReference,
-  language: "en" | "cn" = "en"
+  language: LanguageSelection = "en"
 ) {
   if (!messageRef) {
     throw new Error("messageRef missing")
@@ -576,12 +577,22 @@ async function sendRationalisation(
 
 async function updateLanguageAndSendMenu(
   userSnap: DocumentSnapshot,
-  language: string
+  language: LanguageSelection
 ) {
   await userSnap.ref.update({
     language: language,
   })
-  await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null, true) //truncated menu on onboarding
+  await sendMenuMessage(
+    userSnap,
+    "MENU_PREFIX",
+    "whatsapp",
+    null,
+    null,
+    true,
+    false,
+    false,
+    language
+  ) //truncated menu on onboarding
 }
 
 async function sendInterimUpdate(
