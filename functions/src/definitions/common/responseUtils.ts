@@ -178,11 +178,12 @@ async function sendMenuMessage(
   disputedInstancePath: string | null = null,
   isTruncated: boolean = false,
   isGenerated: boolean = false,
-  isIncorrect: boolean = false
+  isIncorrect: boolean = false,
+  language: "en" | "cn" | null = null
 ) {
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
-  const language = userSnap.get("language") ?? "en"
-  const responses = await getResponsesObj("user", language)
+  const resolvedLanguage = language ?? userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", resolvedLanguage)
   if (!(prefixName in responses)) {
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
