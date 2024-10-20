@@ -8,7 +8,11 @@ import {
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
 } from "./sendWhatsappMessage"
-import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
+import {
+  DocumentSnapshot,
+  Timestamp,
+  DocumentReference,
+} from "firebase-admin/firestore"
 import { getUserSnapshot } from "../../services/common/userManagement"
 import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
@@ -16,6 +20,7 @@ import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
 import { CustomReply, UserBlast } from "../../types"
 import { incrementCheckerCounts } from "./counters"
+import { get } from "http"
 
 const db = admin.firestore()
 
@@ -366,18 +371,15 @@ async function sendSatisfactionSurvey(instanceSnap: DocumentSnapshot) {
   }
 }
 
-async function sendVotingStats(
-  userSnap: DocumentSnapshot,
-  instancePath: string,
-  isUnsureReply = false
+async function getVotingStatsMessage(
+  truthScore: number | null,
+  numberPointScale: number,
+  messageRef: DocumentReference,
+  language: "en" | "cn" = "en"
 ) {
-  //get statistics
-  const messageRef = db.doc(instancePath).parent.parent
   if (!messageRef) {
-    return
+    throw new Error("messageRef missing")
   }
-  const messageSnap = await messageRef.get()
-  const instanceSnap = await db.doc(instancePath).get()
   const {
     irrelevantCount,
     scamCount,
@@ -390,31 +392,15 @@ async function sendVotingStats(
     validResponsesCount,
     susCount,
   } = await getVoteCounts(messageRef)
-  const truthScore = messageSnap.get("truthScore")
-  const numberPointScale = messageSnap.get("numberPointScale") || 6
   const thresholds = await getThresholds(numberPointScale === 5)
-  const from = instanceSnap.get("from")
-  const whatsappId = userSnap.get("whatsappId")
-  if (from !== whatsappId) {
-    functions.logger.error(
-      `Instance ${instancePath} requested by ${from} but accessed by ${whatsappId}`
-    )
-  }
-  const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
   let truthCategory
 
   if (validResponsesCount <= 0) {
     functions.logger.error(
-      `Stats requested for instance ${instancePath} with 0 votes`
+      `Stats requested for instance ${messageRef.path} with 0 votes`
     )
-    await sendTextMessage(
-      "user",
-      from,
-      responses.GENERIC_ERROR,
-      instanceSnap.get("id")
-    )
-    return
+    throw new Error("No votes for message")
   }
 
   if (truthScore !== null) {
@@ -475,13 +461,49 @@ async function sendVotingStats(
       .replace("{{category}}", secondCategory)
       .replace("{{info_placeholder}}", isSecondInfo ? infoLiner : "")
   }
-  if (isUnsureReply) {
-    response = responses.UNSURE.replace("{{voting_stats}}", response).replace(
-      "{{thanks}}",
-      responses.THANKS_DELAYED
+  return response
+}
+
+async function sendVotingStats(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const instanceSnap = await db.doc(instancePath).get()
+  const from = instanceSnap.get("from")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instancePath} requested by ${from} but accessed by ${whatsappId}`
     )
   }
-  await sendTextMessage("user", from, response, instanceSnap.get("id"))
+  try {
+    const messageRef = db.doc(instancePath).parent.parent
+    if (!messageRef) {
+      throw new Error("messageRef is null")
+    }
+    const messageSnap = await messageRef.get()
+    const truthScore = messageSnap.get("truthScore")
+    const numberPointScale = messageSnap.get("numberPointScale")
+    const response = await getVotingStatsMessage(
+      truthScore,
+      numberPointScale,
+      messageRef,
+      language
+    )
+    if (!response) {
+      return
+    }
+    await sendTextMessage("user", from, response, instanceSnap.get("id"))
+  } catch {
+    const responses = await getResponsesObj("user", "en")
+    await sendTextMessage(
+      "user",
+      from,
+      responses.GENERIC_ERROR,
+      instanceSnap.get("id")
+    )
+  }
 }
 
 async function sendRationalisation(
@@ -894,7 +916,30 @@ async function respondToInstance(
         } else if (isHarmless) {
           category = "harmless"
         } else {
-          sendVotingStats(userSnap, instanceSnap.ref.path, true)
+          const truthScore = parentMessageSnap.get("truthScore")
+          const numberPointScale = parentMessageSnap.get("numberPointScale")
+          const votingStatsResponse = await getVotingStatsMessage(
+            truthScore,
+            numberPointScale,
+            parentMessageRef,
+            language
+          )
+          const responseText = getFinalResponseText(
+            "UNSURE",
+            responses,
+            isImmediate,
+            instanceCount,
+            isMachineCategorised,
+            isMatched,
+            isImage,
+            hasCaption,
+            isGenerated,
+            isIncorrect,
+            "unsure",
+            null,
+            votingStatsResponse
+          )
+          await sendTextMessage("user", from, responseText, data.id)
           break
         }
       }
@@ -1200,7 +1245,8 @@ function getFinalResponseText(
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
   primaryCategory: string = "irrelevant",
-  prefixName: string | null = null
+  prefixName: string | null = null,
+  votingStats: string | null = null
 ) {
   let finalResponse = responseText
     .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
@@ -1235,6 +1281,7 @@ function getFinalResponseText(
         ? responses.INCORRECT_TRIVIAL
         : ""
     )
+    .replace("{{voting_stats}}", votingStats ?? "")
   return finalResponse
 }
 
