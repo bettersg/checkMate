@@ -19,6 +19,7 @@ interface PropType {
 
 export function CelebrationDialog({ display, certificateUrl }: PropType) {
   const [open, setOpen] = React.useState(display);
+  const hasCompletedRef = React.useRef(false);
   const { checkerDetails } = useUser();
   const navigate = useNavigate();
   const handleOpen = () => setOpen(!open);
@@ -32,13 +33,14 @@ export function CelebrationDialog({ display, certificateUrl }: PropType) {
 
   React.useEffect(() => {
     const completeCheckerProgram = async () => {
-      if (checkerDetails.checkerId) {
+      if (checkerDetails.checkerId && open && !hasCompletedRef.current) {
         await completeProgram(checkerDetails.checkerId);
+        hasCompletedRef.current = true;
       }
     };
 
     completeCheckerProgram();
-  }, []);
+  }, [open, checkerDetails.checkerId]);
 
   return (
     <Dialog open={open} handler={handleOpen}>
