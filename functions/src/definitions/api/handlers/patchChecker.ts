@@ -84,6 +84,9 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
         } else if (body.programData === "complete") {
           //delete programdata from body
           delete body.programData
+          if (checkerSnap.get("programData.programEnd") == null) {
+            return res.status(400).send("Program not yet able to be completed")
+          }
           body["programData.isOnProgram"] = false
         } else if (body.programData === "withdraw") {
           const thresholds = await getThresholds()

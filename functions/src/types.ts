@@ -19,6 +19,8 @@ export type WhatsappButton = {
   }
 }
 
+export type LanguageSelection = "en" | "cn"
+
 export type WhatsappMessageObject = {
   from: string
   type: string
@@ -226,7 +228,7 @@ export type UserData = {
   referralCount: number
   isReferralMessageSent: boolean
   isReminderMessageSent: boolean //whether the response
-  language: "en" | "cn"
+  language: LanguageSelection
   isSubscribedUpdates: boolean
   isIgnored: boolean
 }

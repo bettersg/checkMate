@@ -115,8 +115,6 @@ const onCheckerUpdateV2 = onDocumentUpdated(
           // Existing code to get the checker app host URL
           const url = `${checkerAppHost}/`
 
-          console.log(linkedInUrl)
-
           // Fetch the base message template
           const checkerResponses = await getResponsesObj("factChecker")
           const baseMessage = checkerResponses.PROGRAM_COMPLETED
