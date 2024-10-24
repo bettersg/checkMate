@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
+import { validateURLs } from '../../utils/utils';
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { Timestamp } from "firebase-admin/firestore"
 import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
@@ -70,6 +71,7 @@ const userGenericMessageHandlerWhatsapp = async function (
 
   const isNewlyJoined = checkNewlyJoined(userSnap, messageTimestamp)
 
+  console.log(`Message is of type "${type}"`)
   switch (type) {
     //only two types: text or image
     case "text":
@@ -77,6 +79,7 @@ const userGenericMessageHandlerWhatsapp = async function (
       if (!message.text) {
         break
       }
+      console.log(`Text message is "${message.text}"`)
       const textNormalised = normalizeSpaces(message.text).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
       if (
         checkTemplate(
@@ -87,6 +90,7 @@ const userGenericMessageHandlerWhatsapp = async function (
           textNormalised,
           responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
         )
+
       ) {
         step = "text_prepopulated"
         if (isFirstTimeUser) {
@@ -94,9 +98,9 @@ const userGenericMessageHandlerWhatsapp = async function (
         } else {
           await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         }
+        console.log(`step ${step}`)
         break
       }
-
       step = await newTextInstanceHandler({
         userSnap,
         source: message.source,
@@ -169,6 +173,8 @@ async function newTextInstanceHandler({
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
+  let validatedURLS: any;
+
   const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
     await userSnap.ref.update({
@@ -181,6 +187,7 @@ async function newTextInstanceHandler({
   let embedding
   let textHash = hashMessage(text)
   // 1 - check if the exact same message exists in database
+
   try {
     ;({ embedding, similarity } = await calculateSimilarity(
       text,
@@ -236,45 +243,58 @@ async function newTextInstanceHandler({
       rationalisation = await rationaliseMessage(text, machineCategory)
     }
     messageRef = db.collection("messages").doc()
-    messageUpdateObj = {
-      machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: isMachineAssessed,
-      originalText: text,
-      text: strippedMessage, //text
-      caption: null,
-      latestInstance: null,
-      firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
-      lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
-      lastRefreshedTimestamp: timestamp,
-      isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
-      assessedTimestamp: null,
-      assessmentExpiry: null,
-      assessmentExpired: false,
-      truthScore: null, //float, the mean truth score
-      numberPointScale: 6,
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
-      isLegitimate: null,
-      isUnsure: null,
-      isInfo: machineCategory === "info" ? true : null,
-      isSatire: null,
-      isHarmful: null,
-      isHarmless: null,
-      tags: {},
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
-      customReply: null, //string
-      instanceCount: 0,
-      rationalisation: rationalisation,
+
+    try {
+        validatedURLS = await validateURLs(text)
+        console.log('Validated URLs:', validatedURLS)
+
+        messageUpdateObj = {
+          machineCategory: machineCategory, //Can be "fake news" or "scam"
+          isMachineCategorised: isMachineAssessed,
+          originalText: text,
+          text: strippedMessage, //text
+          caption: null,
+          latestInstance: null,
+          firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+          lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+          lastRefreshedTimestamp: timestamp,
+          isPollStarted: false, //boolean, whether or not polling has started
+          isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+          assessedTimestamp: null,
+          assessmentExpiry: null,
+          assessmentExpired: false,
+          truthScore: null, //float, the mean truth score
+          numberPointScale: 6,
+          isIrrelevant:
+            isMachineAssessed && machineCategory.includes("irrelevant")
+              ? true
+              : null, //bool, if majority voted irrelevant then update this
+          isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+          isIllicit:
+            isMachineAssessed && machineCategory === "illicit" ? true : null,
+          isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+          isLegitimate: null,
+          isUnsure: null,
+          isInfo: machineCategory === "info" ? true : null,
+          isSatire: null,
+          isHarmful: null,
+          isHarmless: null,
+          tags: {},
+          primaryCategory: isMachineAssessed
+            ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+            : null,
+          customReply: null, //string
+          instanceCount: 0,
+          rationalisation: rationalisation,
+          virtualTotalResults: validatedURLS
+        }
+        console.log('messageUpdateObj:', messageUpdateObj)
+    } catch (error) {
+      console.error('Error validating URLs:', error)
+      // You might want to handle the error, such as setting a default value
+      validatedURLS = null
     }
+
   } else {
     messageRef = matchedParentMessageRef
   }
@@ -368,6 +388,8 @@ async function newImageInstanceHandler({
   let matchType = "none" // will be set to either "similarity" or "image" or "none"
   let matchedInstanceSnap
   let captionHash = caption ? hashMessage(caption) : null
+
+  let validatedURLS: any;
 
   if (!mediaId) {
     throw new Error(`No mediaId for whatsapp message with id ${id}`)
@@ -513,44 +535,55 @@ async function newImageInstanceHandler({
       )
     }
     messageRef = db.collection("messages").doc()
-    messageUpdateObj = {
-      machineCategory: machineCategory,
-      isMachineCategorised: isMachineAssessed,
-      originalText: extractedMessage ?? null,
-      text: strippedMessage ?? null, //text
-      caption: caption ?? null,
-      latestInstance: null,
-      firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
-      lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
-      lastRefreshedTimestamp: timestamp,
-      isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
-      assessedTimestamp: null,
-      assessmentExpiry: null,
-      assessmentExpired: false,
-      truthScore: null, //float, the mean truth score
-      numberPointScale: 6,
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
-      isLegitimate: null,
-      isUnsure: null,
-      isInfo: !caption && machineCategory === "info" ? true : null,
-      isSatire: null,
-      isHarmful: null,
-      isHarmless: null,
-      tags: {},
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
-      customReply: null, //string
-      instanceCount: 0,
-      rationalisation: rationalisation,
+
+    try {
+      validatedURLS = await validateURLs(extractedMessage)
+      console.log('Validated URLs:', validatedURLS)
+
+      messageUpdateObj = {
+        machineCategory: machineCategory,
+        isMachineCategorised: isMachineAssessed,
+        originalText: extractedMessage ?? null,
+        text: strippedMessage ?? null, //text
+        caption: caption ?? null,
+        latestInstance: null,
+        firstTimestamp: timestamp, //timestamp of first instance (firestore timestamp data type)
+        lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
+        lastRefreshedTimestamp: timestamp,
+        isPollStarted: false, //boolean, whether or not polling has started
+        isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+        assessedTimestamp: null,
+        assessmentExpiry: null,
+        assessmentExpired: false,
+        truthScore: null, //float, the mean truth score
+        numberPointScale: 6,
+        isIrrelevant:
+          isMachineAssessed && machineCategory.includes("irrelevant")
+            ? true
+            : null, //bool, if majority voted irrelevant then update this
+        isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
+        isIllicit:
+          isMachineAssessed && machineCategory === "illicit" ? true : null,
+        isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+        isLegitimate: null,
+        isUnsure: null,
+        isInfo: !caption && machineCategory === "info" ? true : null,
+        isSatire: null,
+        isHarmful: null,
+        isHarmless: null,
+        tags: {},
+        primaryCategory: isMachineAssessed
+          ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
+          : null,
+        customReply: null, //string
+        instanceCount: 0,
+        rationalisation: rationalisation,
+        virtualTotalResults: validatedURLS
+      }
+    } catch (error) {
+      console.error('Error validating URLs:', error)
+      // You might want to handle the error, such as setting a default value
+      validatedURLS = null
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {

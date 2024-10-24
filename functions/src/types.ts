@@ -148,6 +148,7 @@ export type MessageData = {
   customReply: string | null
   instanceCount: number
   rationalisation: string | null // Assuming 'rationalisation' is a string; adjust as necessary if it's a different type.
+  virtualTotalResults: any | null
 }
 
 export type InstanceData = {
