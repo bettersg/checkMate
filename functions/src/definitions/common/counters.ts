@@ -102,13 +102,14 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
   const factCheckerCount = totalVoteRequestsCount - passCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
   const validResponsesCount = responsesCount - passCount //can remove in future and replace with nonErrorCount
   const susCount = scamCount + illicitCount
+  const noClaimCount = irrelevantCount + legitimateCount
   const truthScore = computeTruthScore(infoCount, voteTotal)
   let harmfulCount = scamCount + illicitCount
-  let harmlessCount = legitimateCount + spamCount + irrelevantCount
+  let harmlessCount = legitimateCount + spamCount
   if (truthScore !== null) {
     if (truthScore < (thresholds.falseUpperBound || 2.5)) {
       harmfulCount += infoCount
-    } else if (truthScore <= (thresholds.misleadingUpperBound || 4)) {
+    } else if (truthScore <= (thresholds.misleadingUpperBound || 3.75)) {
       //pass
     } else {
       harmlessCount += infoCount
@@ -132,6 +133,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     voteTotal,
     validResponsesCount,
     susCount,
+    noClaimCount,
     truthScore,
     harmfulCount,
     harmlessCount,
