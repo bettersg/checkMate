@@ -97,6 +97,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         voteTotal,
         validResponsesCount,
         susCount,
+        noClaimCount,
         factCheckerCount,
         truthScore,
         harmfulCount,
@@ -112,10 +113,10 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       const isInfo = infoCount > thresholds.isInfo * validResponsesCount
       const isSatire = satireCount > thresholds.isSatire * validResponsesCount
       const isSpam = spamCount > thresholds.isSpam * validResponsesCount
-      const isLegitimate =
-        legitimateCount > thresholds.isLegitimate * validResponsesCount
-      const isIrrelevant =
-        irrelevantCount > thresholds.isIrrelevant * validResponsesCount
+      const isNoClaim =
+        noClaimCount > thresholds.isNoClaim * validResponsesCount
+      const isLegitimate = isNoClaim && legitimateCount > irrelevantCount
+      const isIrrelevant = isNoClaim && !isLegitimate
       const isHarmless =
         harmlessCount > thresholds.isHarmless * validResponsesCount
       const isHarmful =
