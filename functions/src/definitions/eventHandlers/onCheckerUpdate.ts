@@ -10,6 +10,7 @@ import { logger } from "firebase-functions/v2"
 import { storage } from "firebase-admin"
 import { Timestamp } from "firebase-admin/firestore"
 import { generateAndUploadCertificate } from "../certificates/generateCertificate"
+import { nudgeForAccuracy } from "../../services/checker/nudgeService"
 
 const checkerAppHost = process.env.CHECKER_APP_HOST
 const linkedInOrgID = process.env.LINKEDIN_ORG_ID
@@ -51,21 +52,25 @@ const onCheckerUpdateV2 = onDocumentUpdated(
       preChangeData.numCorrectVotes !== postChangeData.numCorrectVotes ||
       preChangeData.numNonUnsureVotes !== postChangeData.numNonUnsureVotes
     ) {
-      try {
-        const {
-          numVotes,
-          numReferrals,
-          numReports,
-          accuracy,
-          isNewlyCompleted,
-          completionTimestamp,
-        } = await computeProgramStats(postChangeSnap, true)
-        if (
-          isNewlyCompleted &&
-          postChangeData.preferredPlatform === "telegram" &&
-          postChangeData.telegramId &&
-          completionTimestamp !== null
-        ) {
+      const checkerProgramStats = await computeProgramStats(
+        postChangeSnap,
+        true
+      )
+      const {
+        numVotes,
+        numReferrals,
+        numReports,
+        accuracy,
+        isNewlyCompleted,
+        completionTimestamp,
+      } = checkerProgramStats
+      if (
+        isNewlyCompleted &&
+        postChangeData.preferredPlatform === "telegram" &&
+        postChangeData.telegramId &&
+        completionTimestamp !== null
+      ) {
+        try {
           const telegramId = postChangeData.telegramId
 
           // Generate the certificate and get the URL
@@ -157,12 +162,13 @@ const onCheckerUpdateV2 = onDocumentUpdated(
               ],
             }
           )
+        } catch (error) {
+          logger.error(
+            `Error on checker update for ${postChangeSnap.id}: ${error}`
+          )
         }
-      } catch (error) {
-        logger.error(
-          `Error on checker update for ${postChangeSnap.id}: ${error}`
-        )
       }
+      await nudgeForAccuracy(postChangeSnap, checkerProgramStats)
     }
     return Promise.resolve()
   }

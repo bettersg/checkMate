@@ -281,6 +281,16 @@ type LeaderBoardStats = {
   score: number // total score
 }
 
+export type CheckerProgramStats = {
+  accuracy: number | null
+  numVotes: number
+  numReferrals: number
+  numReports: number
+  isProgramCompleted: boolean
+  isNewlyCompleted: boolean
+  completionTimestamp: Timestamp | null
+}
+
 export type ProgramData = {
   isOnProgram: boolean
   programStart: Timestamp | null

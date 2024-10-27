@@ -45,8 +45,6 @@ async function handleInactiveCheckers() {
     const promisesArr = activeCheckMatesSnap.docs.map(async (doc) => {
       const telegramId = doc.get("telegramId")
       const preferredPlatform = doc.get("preferredPlatform") ?? "whatsapp"
-
-      console.log(`deactiviateAfter: ${deactivateAfter}`)
       const deactivationCheckResponse = await checkCheckerActivity(
         doc,
         deactivateAfter

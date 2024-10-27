@@ -25,5 +25,7 @@
   "volunteerProgramVotesRequirement": 50,
   "volunteerProgramReferralRequirement": 0,
   "volunteerProgramReportRequirement": 3,
-  "volunteerProgramAccuracyRequirement": 0.6
+  "volunteerProgramAccuracyRequirement": 0.6,
+  "accuracyNudgeThreshold": 0.5,
+  "numberBeforeAccuracyNudge": 20
 }
