@@ -150,7 +150,11 @@ const onInstanceCreateV2 = onDocumentCreated(
   }
 )
 
-async function upsertUser(from: string, source:string, messageTimestamp: Timestamp) {
+async function upsertUser(
+  from: string,
+  source: string,
+  messageTimestamp: Timestamp
+) {
   const db = admin.firestore()
   let idField
   if (source === "whatsapp") {
@@ -161,7 +165,11 @@ async function upsertUser(from: string, source:string, messageTimestamp: Timesta
     logger.error(`Invalid source: ${source}`)
     return
   }
-  const userSnap = await db.collection("users").where(idField, "==", from).limit(1).get()
+  const userSnap = await db
+    .collection("users")
+    .where(idField, "==", from)
+    .limit(1)
+    .get()
   if (userSnap.empty) {
     logger.log("No user found in database")
     return
@@ -306,6 +314,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
           "factChecker",
           factChecker.telegramId,
           `New message received! 📩\n\n${previewText}`,
+          null,
           null,
           {
             inline_keyboard: [

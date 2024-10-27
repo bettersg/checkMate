@@ -141,6 +141,7 @@ const onCheckerUpdateV2 = onDocumentUpdated(
             telegramId,
             message,
             null,
+            "HTML",
             {
               inline_keyboard: [
                 [

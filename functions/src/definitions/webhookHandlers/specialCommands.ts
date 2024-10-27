@@ -7,12 +7,15 @@ import {
   BlastData,
   ReferralClicksData,
 } from "../../types"
-import { getUserSnapshot } from "../../services/common/userManagement"
+import { getUserSnapshot } from "../../services/user/userManagement"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
 import thresholds from "../common/parameters/thresholds.json"
-import { interimPromptHandler } from "../batchJobs/batchJobs"
+import {
+  interimPromptHandler,
+  handleInactiveCheckers,
+} from "../batchJobs/batchJobs"
 import { sendBlast } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { AppEnv } from "../../appEnv"
@@ -43,6 +46,9 @@ const handleSpecialCommands = async function (
         return
       case "/interim":
         await interimPromptHandler()
+        return
+      case "/deactivate":
+        await handleInactiveCheckers()
         return
       case "/blast":
         const userSnap = await getUserSnapshot(messageObj.from)

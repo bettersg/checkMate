@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin"
-import { sendWhatsappTemplateMessage } from "../common/sendWhatsappMessage"
 import {
   respondToInstance,
   sendInterimPrompt as sendInterimPromptImported,
@@ -14,61 +13,47 @@ import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { AppEnv } from "../../appEnv"
 import { TIME } from "../../utils/time"
 import { getFullLeaderboard } from "../common/statistics"
+import { getResponsesObj } from "../common/responseUtils"
+import { checkCheckerActivity } from "../../services/checker/checkActivity"
+import { enqueueTask } from "../common/cloudTasks"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
-const checkerAppHost = process.env.CHECKER_APP_HOST
+const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
 
 if (!admin.apps.length) {
   admin.initializeApp()
 }
 const db = admin.firestore()
 
-async function deactivateAndRemind() {
+async function handleInactiveCheckers() {
   try {
-    const cutoffHours = 72
+    const remindAfterDays = 3
+    const deactivateAfterDays = 10
+    const remindAfter =
+      runtimeEnvironment.value() === "PROD"
+        ? remindAfterDays * 24 * 60 * 60 //3 days in seconds
+        : 60
+    const deactivateAfter =
+      runtimeEnvironment.value() === "PROD"
+        ? deactivateAfterDays * 24 * 60 * 60 //10 days in seconds
+        : 300
     const activeCheckMatesSnap = await db
       .collection("checkers")
       .where("type", "==", "human")
       .where("isActive", "==", true)
       .get()
     const promisesArr = activeCheckMatesSnap.docs.map(async (doc) => {
-      const lastVotedTimestamp =
-        doc.get("lastVotedTimestamp") ?? Timestamp.fromDate(new Date(0))
-      const factCheckerDocRef = doc.ref
-      const whatsappId = doc.get("whatsappId")
       const telegramId = doc.get("telegramId")
       const preferredPlatform = doc.get("preferredPlatform") ?? "whatsapp"
-      const lastVotedDate = lastVotedTimestamp.toDate()
-      //set cutoff to 72 hours ago
-      const cutoffDate = new Date(Date.now() - cutoffHours * TIME.ONE_HOUR)
-      const cutoffTimestamp = Timestamp.fromDate(cutoffDate)
-      const voteRequestsQuerySnap = await db
-        .collectionGroup("voteRequests")
-        .where("factCheckerDocRef", "==", factCheckerDocRef)
-        .where("createdTimestamp", "<", cutoffTimestamp)
-        .where("isAutoPassed", "==", true)
-        .get()
-      if (!voteRequestsQuerySnap.empty && lastVotedDate < cutoffDate) {
+
+      console.log(`deactiviateAfter: ${deactivateAfter}`)
+      const deactivationCheckResponse = await checkCheckerActivity(
+        doc,
+        deactivateAfter
+      )
+      if (deactivationCheckResponse.data?.isActive === false) {
         logger.log(`Checker ${doc.id}, ${doc.get("name")} set to inactive`)
-        if (preferredPlatform === "whatsapp") {
-          if (!whatsappId) {
-            logger.error(
-              `No whatsappId for ${doc.id}, ${doc.get(
-                "name"
-              )} despite preferred platform being whatsapp`
-            )
-            return Promise.resolve()
-          }
-          await doc.ref.update({ isActive: false })
-          return sendWhatsappTemplateMessage(
-            "factChecker",
-            whatsappId,
-            "deactivation_notification",
-            "en",
-            [doc.get("name") || "CheckMate", `${cutoffHours}`],
-            [`${whatsappId}`]
-          )
-        } else if (preferredPlatform === "telegram") {
+        if (preferredPlatform === "telegram") {
           if (!telegramId) {
             logger.error(
               `No telegramId for ${doc.id}, ${doc.get(
@@ -77,31 +62,89 @@ async function deactivateAndRemind() {
             )
             return Promise.resolve()
           }
-          const replyMarkup = checkerAppHost
-            ? {
-              inline_keyboard: [
-                [
-                  {
-                    text: "CheckMates' Portal↗️",
-                    web_app: { url: checkerAppHost },
-                  },
-                ],
+          const replyMarkup = {
+            inline_keyboard: [
+              [
+                {
+                  text: "Reactivate Now",
+                  callback_data: "REACTIVATE",
+                },
               ],
-            }
-            : null
-          const reactivationMessage = `Hello ${doc.get(
-            "name"
-          )}! Thanks for all your contributions so far🙏. We noticed that you haven't voted in 3 days! You're probably busy, and we don't want your votes to pile up, so we're temporarily stopped sending you messages to vote on. 
-
-To resume getting messages, just vote on any of your outstanding messages, which you can find by visiting the CheckMates' Portal. Remember, if you're busy, you can vote "pass" too!`
+            ],
+          }
+          const responses = await getResponsesObj("factChecker")
+          const deactivationMessage = responses.DEACTIVATION.replace(
+            "{{name}}",
+            doc.get("name")
+          )
           await doc.ref.update({ isActive: false })
+
+          //enqueue reactivation message
+          const lastVotedTimestamp = doc.get("lastVotedTimestamp")
+          const onboardingTime = doc.get("onboardingTime")
+          const referenceTime =
+            lastVotedTimestamp ?? onboardingTime ?? Timestamp.now()
+          const secondsSinceLastVote = Math.floor(
+            Date.now() / 1000 - referenceTime.seconds
+          )
+          const baseDelaySeconds = 7 * 24 * 60 * 60 // 1 week in seconds
+          const nextAttemptPayload = {
+            attemptNumber: 1,
+            maxAttempts: 4,
+            baseDelaySeconds: baseDelaySeconds,
+            cumulativeDelaySeconds: secondsSinceLastVote + baseDelaySeconds,
+            checkerId: doc.id,
+          }
+          await enqueueTask(
+            nextAttemptPayload,
+            "sendCheckerReactivation",
+            baseDelaySeconds,
+            "asia-southeast1"
+          )
           return sendTelegramTextMessage(
             "factChecker",
             telegramId,
-            reactivationMessage,
+            deactivationMessage,
             null,
+            "HTML",
             replyMarkup
           )
+        } else {
+          logger.error("Unsupported preferred platform for checker")
+          return
+        }
+      }
+      //if didn't hit 10 days, check 3 days reminder
+      const reminderCheckResponse = await checkCheckerActivity(doc, remindAfter)
+      if (reminderCheckResponse.data?.isActive === false) {
+        logger.log(`Reminder sent to checker ${doc.id}, ${doc.get("name")}`)
+        if (preferredPlatform === "telegram") {
+          if (!telegramId) {
+            logger.error(
+              `No telegramId for ${doc.id}, ${doc.get(
+                "name"
+              )} despite preferred platform being telegram`
+            )
+            return Promise.resolve()
+          }
+          const responses = await getResponsesObj("factChecker")
+          const reminderMessage = responses.REMINDER.replace(
+            "{{name}}",
+            doc.get("name")
+          )
+            .replace("{{checkers_group_link}}", CHECKERS_GROUP_LINK)
+            .replace("{{num_days}}", `${remindAfterDays}`)
+          return sendTelegramTextMessage(
+            "factChecker",
+            telegramId,
+            reminderMessage,
+            null,
+            "HTML",
+            null
+          )
+        } else {
+          logger.error("Unsupported preferred platform for checker")
+          return
         }
       }
     })
@@ -226,14 +269,10 @@ const scheduledDeactivation = onSchedule(
   {
     schedule: "11 20 * * *",
     timeZone: "Asia/Singapore",
-    secrets: [
-      "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
-      "WHATSAPP_TOKEN",
-      "TELEGRAM_CHECKER_BOT_TOKEN",
-    ],
+    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN"],
     region: "asia-southeast1",
   },
-  deactivateAndRemind
+  handleInactiveCheckers
 )
 
 const sendInterimPrompt = onSchedule(
@@ -256,6 +295,7 @@ const resetLeaderboard = onSchedule(
 )
 
 export {
+  handleInactiveCheckers,
   checkSessionExpiring,
   scheduledDeactivation,
   sendInterimPrompt,

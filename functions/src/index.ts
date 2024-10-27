@@ -21,4 +21,5 @@ export { onCheckerPublishTelegram } from "./definitions/eventHandlers/checkerHan
 export { apiHandler } from "./definitions/api/api"
 export { internalApiHandler } from "./definitions/api/apiInternal"
 export { passVoteRequest } from "./definitions/taskHandlers/autoPass"
+export { sendCheckerReactivation } from "./definitions/taskHandlers/reactivations"
 export { batchJobs }

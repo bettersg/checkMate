@@ -8,6 +8,7 @@ import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 import { message, callbackQuery } from "telegraf/filters"
 import { isNumeric } from "../common/utils"
+import { reactivateChecker } from "../../services/checker/reactivateChecker"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
@@ -164,27 +165,9 @@ bot.command("activate", async (ctx) => {
     const msg = ctx.message
     if (msg.from) {
       const checkerId = msg.from.id
-      const checkerQuerySnap = await db
-        .collection("checkers")
-        .where("telegramId", "==", checkerId)
-        .get()
-
-      if (checkerQuerySnap.size > 0) {
-        const checkerSnap = checkerQuerySnap.docs[0]
-        await checkerSnap.ref.update({ isActive: true })
-        await ctx.reply(
-          `You've been reactivated! Go to the CheckMate's Portal to start voting on messages`
-        )
-      } else if (checkerQuerySnap.size === 0) {
-        logger.error(`Checker with TelegramID ${checkerId} not found`)
-        throw new Error("Checker not found")
-      } else {
-        logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
-        throw new Error("Multiple checkers found")
-      }
+      await reactivateChecker(checkerId)
     } else {
-      logger.error("No user id found for activate command")
-      throw new Error("No user id found")
+      logger.error("No user id found")
     }
   } catch (error) {
     logger.error("Error in activate command", error)
@@ -431,6 +414,9 @@ ${progressBars(4)}`)
           lastTrackedMessageId: null,
         })
         await sendNamePrompt(chatId, checkerDocSnap)
+        break
+      case "REACTIVATE":
+        await reactivateChecker(chatId)
         break
       default:
         logger.log("Unhandled callback data: ", action)

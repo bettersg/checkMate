@@ -7,7 +7,7 @@ import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
-import { referralHandler } from "../../services/whatsapp/referrals"
+import { referralHandler } from "../../services/user/referrals"
 import { Request, Response } from "express"
 import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { AppEnv } from "../../appEnv"
@@ -15,7 +15,7 @@ import { GeneralMessage, WhatsappMessageObject } from "../../types"
 import {
   createNewUser,
   getUserSnapshot,
-} from "../../services/common/userManagement"
+} from "../../services/user/userManagement"
 import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
 import { Timestamp } from "firebase-admin/firestore"
 import {

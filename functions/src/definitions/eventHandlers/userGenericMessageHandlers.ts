@@ -9,7 +9,7 @@ import {
 } from "../common/sendWhatsappMessage"
 import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
 import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
-import { getUserSnapshot } from "../../services/common/userManagement"
+import { getUserSnapshot } from "../../services/user/userManagement"
 import { sendMenuMessage, getResponsesObj } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
