@@ -220,7 +220,7 @@ async function welcomeNewCheckers() {
   try {
     const lastWeek = new Date()
     lastWeek.setDate(lastWeek.getDate() - 7)
-    lastWeek.setHours(12, 0, 0, 0)
+    lastWeek.setHours(12, 3, 0, 0)
     const lastWeekTimestamp = Timestamp.fromDate(lastWeek)
     const checkersQuerySnap = await db.collection("checkers").where("onboardingTime", ">=", lastWeekTimestamp).get()
     if (checkersQuerySnap.empty) {
@@ -321,7 +321,7 @@ const scheduledDeactivation = onSchedule(
 
 const sendCheckersWelcomeMesssage = onSchedule(
   {
-    schedule: "00 12 * * 2",
+    schedule: "3 12 * * 2",
     timeZone: "Asia/Singapore",
     secrets: ["TELEGRAM_ADMIN_BOT_TOKEN"],
     region: "asia-southeast1",
