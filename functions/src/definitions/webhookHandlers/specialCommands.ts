@@ -132,6 +132,7 @@ const mockDb = async function () {
       runtimeEnvironment.value() === "SIT" ? "whatsapp" : "telegram",
     lastVotedTimestamp: null,
     getNameMessageId: null,
+    hasCompletedProgram: false,
     certificateUrl: null, // Initialize certificateUrl as an empty string
     leaderboardStats: {
       numVoted: 0,
@@ -158,6 +159,7 @@ const mockDb = async function () {
       numCorrectVotesAtProgramEnd: null,
       numNonUnsureVotesAtProgramEnd: null,
     },
+    offboardingTime: null,
   }
   if (querySnap.empty) {
     await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj)

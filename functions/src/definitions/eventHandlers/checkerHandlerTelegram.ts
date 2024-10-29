@@ -8,10 +8,9 @@ import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 import { message, callbackQuery } from "telegraf/filters"
 import { isNumeric } from "../common/utils"
-import {
-  reactivateChecker,
-  updateNudge,
-} from "../../services/checker/nudgeService"
+import { updateNudge } from "../../services/checker/nudgeService"
+import { reactivateChecker } from "../../services/checker/managementService"
+import { enqueueTask } from "../common/cloudTasks"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
@@ -168,8 +167,19 @@ bot.command("activate", async (ctx) => {
   try {
     const msg = ctx.message
     if (msg.from) {
-      const checkerId = msg.from.id
-      await reactivateChecker(checkerId)
+      const telegramId = msg.from.id
+      const checkerQuerySnap = await db
+        .collection("checkers")
+        .where("telegramId", "==", telegramId)
+        .get()
+      if (checkerQuerySnap.empty) {
+        logger.error(
+          `Checker with TelegramID ${telegramId} trying to /activate but not found`
+        )
+        return
+      }
+      const checkerSnap = checkerQuerySnap.docs[0]
+      await reactivateChecker(checkerSnap)
     } else {
       logger.error("No user id found")
     }
@@ -352,6 +362,13 @@ bot.on(callbackQuery("data"), async (ctx) => {
       .collection("checkers")
       .where("telegramId", "==", callbackQuery.from.id)
     const checkerQuerySnap = await checkerDocQuery.get()
+
+    if (checkerQuerySnap.empty) {
+      logger.error(
+        `Checker with TelegramID ${callbackQuery.from.id} triggered callback but not found`
+      )
+      return
+    }
     const checkerDocSnap = checkerQuerySnap.docs[0]
     const whatsappId = checkerDocSnap.data()?.whatsappId
 
@@ -424,7 +441,7 @@ ${progressBars(4)}`)
         await sendNamePrompt(chatId, checkerDocSnap)
         break
       case "REACTIVATE":
-        await reactivateChecker(chatId)
+        await reactivateChecker(checkerDocSnap)
         break
       case "RESOURCES":
         await ctx.reply(resources, { parse_mode: "HTML" })
@@ -713,6 +730,13 @@ You may view these resources with the command /resources.`,
     chatId,
     `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
+  // Queue up program completion checks
+  const payload = {
+    checkerId: checkerSnap.id,
+  }
+  logger.log(`Enqueuing completion checks for checker ${checkerSnap.id}`)
+  await enqueueTask(payload, "firstCompletionCheck", 60 * 24 * 60 * 60) //first completion check 60 days later
+  await enqueueTask(payload, "secondCompletionCheck", 90 * 24 * 60 * 60) //second completion check 90 days later
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
@@ -764,7 +788,8 @@ const createChecker = async (
         preferredPlatform: "telegram",
         lastVotedTimestamp: null,
         getNameMessageId: null,
-        certificateUrl: null, // Initialize certificateUrl as an empty string
+        hasCompletedProgram: false,
+        certificateUrl: null,
         leaderboardStats: {
           numVoted: 0,
           numCorrectVotes: 0,
@@ -791,6 +816,7 @@ const createChecker = async (
           numCorrectVotesAtProgramEnd: null,
           numNonUnsureVotesAtProgramEnd: null,
         },
+        offboardingTime: null,
       }
       transaction.set(newCheckerRef, newChecker)
       return newCheckerRef

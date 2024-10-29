@@ -15,29 +15,6 @@ if (!admin.apps.length) {
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
 const db = admin.firestore()
 
-export async function reactivateChecker(telegramId: number) {
-  const checkerQuerySnap = await db
-    .collection("checkers")
-    .where("telegramId", "==", telegramId)
-    .get()
-
-  if (checkerQuerySnap.size > 0) {
-    const checkerSnap = checkerQuerySnap.docs[0]
-    const message = `Welcome back! 💪 You'll now start receiving messages to vote on again.`
-    await sendTelegramTextMessage("factChecker", telegramId, message)
-    await checkerSnap.ref.update({ isActive: true })
-    return ServiceResponse.success({
-      message: "Checker reactivated",
-    })
-  } else if (checkerQuerySnap.size === 0) {
-    logger.error(`Checker with TelegramID ${telegramId} not found`)
-    return ServiceResponse.error("Checker not found")
-  } else {
-    logger.error(`Multiple checkers with TelegramID ${telegramId} found`)
-    return ServiceResponse.error("Multiple checkers found")
-  }
-}
-
 async function checkNudgeStatus(
   docRef: admin.firestore.DocumentReference,
   type: string

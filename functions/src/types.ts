@@ -251,12 +251,15 @@ export type CheckerData = {
     | "joinGroupChat"
     | "nlb"
     | "completed"
+    | "offboarded"
   onboardingTime: Timestamp | null
+  offboardingTime: Timestamp | null
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null
+  hasCompletedProgram: boolean
   certificateUrl?: string | null
   level: number
   experience: number

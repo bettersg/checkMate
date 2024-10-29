@@ -177,6 +177,7 @@ async function computeProgramStats(
     ) {
       timestamp = Timestamp.fromDate(new Date())
       await checkerSnap.ref.update({
+        hasCompletedProgram: true,
         "programData.programEnd": timestamp,
         "programData.numVotesAtProgramEnd": checkerData.numVoted,
         "programData.numReferralsAtProgramEnd": checkerData.numReferred,

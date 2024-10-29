@@ -83,7 +83,8 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     preferredPlatform: preferredPlatform || (type === "ai" ? null : "telegram"),
     lastVotedTimestamp: lastVotedTimestamp || null,
     getNameMessageId: null,
-    certificateUrl: null, // Initialize certificateUrl as an empty string
+    hasCompletedProgram: false,
+    certificateUrl: null,
     leaderboardStats: {
       numVoted: 0,
       numCorrectVotes: 0,
@@ -109,6 +110,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       numCorrectVotesAtProgramEnd: null,
       numNonUnsureVotesAtProgramEnd: null,
     },
+    offboardingTime: null,
   }
 
   logger.info("Creating new checker", newChecker)
