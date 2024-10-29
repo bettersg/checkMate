@@ -15,6 +15,7 @@ import thresholds from "../common/parameters/thresholds.json"
 import {
   interimPromptHandler,
   handleInactiveCheckers,
+  welcomeNewCheckers,
 } from "../batchJobs/batchJobs"
 import { sendBlast } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
@@ -49,6 +50,9 @@ const handleSpecialCommands = async function (
         return
       case "/deactivate":
         await handleInactiveCheckers()
+        return
+      case "/welcome":
+        await welcomeNewCheckers()
         return
       case "/blast":
         const userSnap = await getUserSnapshot(messageObj.from)
@@ -103,6 +107,7 @@ const mockDb = async function () {
     .get()
   const checkerObj: CheckerData = {
     name: "CHECKER1",
+    telegramUsername: "CHECKER1",
     type: "human",
     isActive: true,
     isOnboardingComplete: true,

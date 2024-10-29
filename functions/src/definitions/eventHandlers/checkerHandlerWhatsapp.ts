@@ -116,6 +116,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
   const thresholds = await getThresholds()
   const checkerObj: CheckerData = {
     name: "",
+    telegramUsername: null,
     type: "human",
     isActive: true,
     isOnboardingComplete: false,

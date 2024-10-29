@@ -235,21 +235,22 @@ export type UserData = {
 
 export type CheckerData = {
   name: string | null
+  telegramUsername: string | null
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null
   isQuizComplete: boolean
   quizScore: number | null
   onboardingStatus:
-    | "name"
-    | "number"
-    | "otpSent"
-    | "verify"
-    | "quiz"
-    | "onboardWhatsapp"
-    | "joinGroupChat"
-    | "nlb"
-    | "completed"
+  | "name"
+  | "number"
+  | "otpSent"
+  | "verify"
+  | "quiz"
+  | "onboardWhatsapp"
+  | "joinGroupChat"
+  | "nlb"
+  | "completed"
   onboardingTime: Timestamp | null
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
@@ -332,16 +333,16 @@ export type VoteRequest = {
   truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null
   numberPointScale: 5 | 6
   category:
-    | "scam"
-    | "illicit"
-    | "info"
-    | "satire"
-    | "spam"
-    | "legitimate"
-    | "irrelevant"
-    | "unsure"
-    | "pass"
-    | null
+  | "scam"
+  | "illicit"
+  | "info"
+  | "satire"
+  | "spam"
+  | "legitimate"
+  | "irrelevant"
+  | "unsure"
+  | "pass"
+  | null
   isAutoPassed: boolean
   reasoning: string | null
   createdTimestamp: Timestamp | null

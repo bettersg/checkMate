@@ -16,6 +16,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
   // Check request body
   const {
     name,
+    telegramUsername,
     type,
     isActive,
     isOnboardingComplete,
@@ -56,6 +57,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
 
   const newChecker: CheckerData = {
     name,
+    telegramUsername,
     type,
     isActive: isActive || false,
     isOnboardingComplete: isOnboardingComplete || false,

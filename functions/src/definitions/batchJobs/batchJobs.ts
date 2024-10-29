@@ -19,6 +19,7 @@ import { enqueueTask } from "../common/cloudTasks"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
+const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -214,6 +215,51 @@ async function interimPromptHandler() {
   }
 }
 
+async function welcomeNewCheckers() {
+  // find checkers that onboarded since last week 12pm on Tuesday
+  try {
+    const lastWeek = new Date()
+    lastWeek.setDate(lastWeek.getDate() - 7)
+    lastWeek.setHours(12, 0, 0, 0)
+    const lastWeekTimestamp = Timestamp.fromDate(lastWeek)
+    const checkersQuerySnap = await db.collection("checkers").where("onboardingTime", ">=", lastWeekTimestamp).get()
+    if (checkersQuerySnap.empty) {
+      return
+    }
+
+    // Create concatenated string of names
+    const names = checkersQuerySnap.docs
+      .map(doc => {
+        const name = doc.get("name")
+        const telegramUsername = doc.get("telegramUsername")
+        const username = telegramUsername ? ` @${telegramUsername}` : ""
+        return `${name}${username}`
+      })
+      .join("\n")
+
+    // Get responses object
+    const responses = await getResponsesObj("factChecker")
+    const welcomeMessage = responses.WELCOME.replace("{{names}}", names)
+
+    // Send single welcome message to group chat
+    if (!CHECKERS_CHAT_ID) {
+      logger.error("Missing TELEGRAM_CHECKERS_GROUP_ID env var")
+      return
+    }
+
+    await sendTelegramTextMessage(
+      "admin",
+      CHECKERS_CHAT_ID,
+      welcomeMessage,
+      null,
+      "HTML",
+      null
+    )
+  } catch (error) {
+    logger.error("Error occured in welcomeNewCheckers:", error)
+  }
+}
+
 async function resetLeaderboardHandler() {
   await saveLeaderboard()
   try {
@@ -273,6 +319,16 @@ const scheduledDeactivation = onSchedule(
   handleInactiveCheckers
 )
 
+const sendCheckersWelcomeMesssage = onSchedule(
+  {
+    schedule: "00 12 * * 2",
+    timeZone: "Asia/Singapore",
+    secrets: ["TELEGRAM_ADMIN_BOT_TOKEN"],
+    region: "asia-southeast1",
+  },
+  welcomeNewCheckers
+)
+
 const sendInterimPrompt = onSchedule(
   {
     schedule: "2,22,42 * * * *",
@@ -294,6 +350,7 @@ const resetLeaderboard = onSchedule(
 
 export {
   handleInactiveCheckers,
+  welcomeNewCheckers,
   checkSessionExpiring,
   scheduledDeactivation,
   sendInterimPrompt,
