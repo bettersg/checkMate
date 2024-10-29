@@ -1,0 +1,8 @@
+{
+  "REACTIVATION": {
+    "1": "<b>📍 We Miss You at CheckMate! 🥺</b>\n\nHey {{name}},\n\nIt's been {{num_days}} days since we last saw you on the CheckMate bot, and we miss having you around! We'd love to have you back, so why not pop in when you have a moment? 😄\n\nSimply press the button below to resume your checking journey. If you need any help, don't hesitate to reach out!\n\nLooking forward to seeing you again 🤗"
+  },
+  "ACCURACY": {
+    "1": "<b>📍 Let's Review Together!</b>\n\nHi {{name}},\n\nIt looks like you've had some challenges with your first {{num_messages}} messages, with over {{accuracy_threshold}} of them marked incorrect. Don't worry! This is all part of the learning process. 😊\n\nWe recommend revisiting the resources which you can assess by pressing the button below. If you're still unsure about categorization, feel free to ask any questions in the <a href='{{checkers_group_link}}'>Checker's Telegram group</a>. We're here to help you improve and succeed!\n\nKeep going, you've got this 💪"
+  }
+}

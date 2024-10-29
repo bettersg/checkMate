@@ -275,6 +275,14 @@ export type CheckerData = {
   programData: ProgramData
 }
 
+export type NudgeData = {
+  type: string //type of nudge, e.g. "reactivation"
+  sentTimestamp: Timestamp
+  outcomeTimestamp: Timestamp | null
+  variant: string
+  outcome: string | null
+}
+
 type LeaderBoardStats = {
   numVoted: number // number of votes cast where the parent message category is not unsure
   numCorrectVotes: number // number of correct votes cast where the parent message category is not unsure

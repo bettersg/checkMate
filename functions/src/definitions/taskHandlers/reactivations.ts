@@ -3,7 +3,7 @@ import { logger } from "firebase-functions/v2"
 import { enqueueTask } from "../common/cloudTasks"
 import { HttpsError } from "firebase-functions/https"
 import { getFirestore, Timestamp } from "firebase-admin/firestore"
-import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
+import { sendNudge } from "../../services/checker/nudgeService"
 import * as admin from "firebase-admin"
 import { getResponsesObj } from "../common/responseUtils"
 import { checkCheckerActivity } from "../../services/checker/checkActivity"
@@ -133,7 +133,6 @@ async function remindChecker(
   secondsTranspired: number
 ) {
   const daysTranspired = Math.floor(secondsTranspired / 86400)
-  const responses = await getResponsesObj("factChecker")
   const checkerId = checkerDocSnap.id
   logger.info(`Sending reminder for checker ${checkerId}`)
   const telegramId = checkerDocSnap.get("telegramId")
@@ -142,28 +141,17 @@ async function remindChecker(
     logger.error(`No telegramId found for checker ${checkerId}`)
     return
   }
-  const response = responses.REACTIVATION
-  const message = response
-    .replace("{{name}}", checkerName)
-    .replace("{{num_days}}", `${daysTranspired}`)
+  const replaceParams = {
+    name: checkerName,
+    num_days: `${daysTranspired}`,
+  }
   try {
-    const replyMarkup = {
-      inline_keyboard: [
-        [
-          {
-            text: "Reactivate Now",
-            callback_data: "REACTIVATE",
-          },
-        ],
-      ],
-    }
-    await sendTelegramTextMessage(
-      "factChecker",
-      telegramId,
-      message,
-      null,
-      "HTML",
-      replyMarkup
+    await sendNudge(
+      checkerDocSnap,
+      "REACTIVATION",
+      replaceParams,
+      "Reactivate Now",
+      "REACTIVATE"
     )
     logger.info(`Reminder successfully sent to ${checkerName}`)
   } catch {

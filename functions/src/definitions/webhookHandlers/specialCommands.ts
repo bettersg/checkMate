@@ -11,6 +11,7 @@ import { getUserSnapshot } from "../../services/user/userManagement"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
+import NUDGES from "../common/parameters/nudges.json"
 import thresholds from "../common/parameters/thresholds.json"
 import { utils } from "../batchJobs/batchJobs"
 import { sendBlast } from "../common/responseUtils"
@@ -91,6 +92,7 @@ const mockDb = async function () {
   await systemParametersRef
     .doc("factCheckerBotResponses")
     .set(CHECKER_BOT_RESPONSES)
+  await systemParametersRef.doc("nudges").set(NUDGES)
   await systemParametersRef.doc("supportedTypes").set({
     whatsapp: ["text", "image"],
   })

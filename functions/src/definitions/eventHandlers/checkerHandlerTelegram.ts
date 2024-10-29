@@ -8,7 +8,10 @@ import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 import { message, callbackQuery } from "telegraf/filters"
 import { isNumeric } from "../common/utils"
-import { reactivateChecker } from "../../services/checker/nudgeService"
+import {
+  reactivateChecker,
+  updateNudge,
+} from "../../services/checker/nudgeService"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
@@ -336,7 +339,11 @@ bot.on(message("text"), async (ctx) => {
 
 bot.on(callbackQuery("data"), async (ctx) => {
   const callbackQuery = ctx.callbackQuery
-  const action = callbackQuery?.data
+  const callbackAction = callbackQuery?.data
+  //split action by "|" to get the action and the nudge ID if any
+  const action = callbackAction.split("|")[0]
+  const nudgeId = callbackAction.split("|")[1]
+
   const chatId = callbackQuery?.message?.chat.id
   let isUser = false
 
@@ -419,8 +426,14 @@ ${progressBars(4)}`)
       case "REACTIVATE":
         await reactivateChecker(chatId)
         break
+      case "RESOURCES":
+        await ctx.reply(resources, { parse_mode: "HTML" })
+        break
       default:
         logger.log("Unhandled callback data: ", action)
+    }
+    if (nudgeId) {
+      await updateNudge(checkerDocSnap, nudgeId, "clicked")
     }
   }
 })
@@ -551,9 +564,10 @@ const sendQuizPrompt = async (
   const linkURL = `${TYPEFORM_URL}#name=${name}&phone=${whatsappId}`
   await bot.telegram.sendMessage(
     chatId,
-    `${isFirstPrompt
-      ? "Thank you for verifying your WhatsApp number"
-      : "We noticed you have not completed the quiz yet"
+    `${
+      isFirstPrompt
+        ? "Thank you for verifying your WhatsApp number"
+        : "We noticed you have not completed the quiz yet"
     }. Please proceed to complete the onboarding quiz <a href="${linkURL}">here</a>. This will equip you with the skills and knowledge to be a better checker!
     
 ${progressBars(2)}`,
@@ -587,9 +601,10 @@ const sendWABotPrompt = async (
   }
   await bot.telegram.sendMessage(
     chatId,
-    `${isFirstPrompt
-      ? "Next, try out our CheckMate WhatsApp service"
-      : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
+    `${
+      isFirstPrompt
+        ? "Next, try out our CheckMate WhatsApp service"
+        : "We noticed you haven't tried out the WhatsApp service yet. Please try out the CheckMate WhatsApp service"
     } as a user <a href="${WHATSAPP_BOT_LINK}?utm_source=checkersonboarding&utm_medium=telegram&utm_campaign=${chatId}">here</a>, and send in the pre-populated message.
     
 This Whatsapp service is where people send in the messages that you'll be checking. Part of your role will also be to report suspicious messages here!
@@ -621,9 +636,10 @@ const sendTGGroupPrompt = async (
   }
   await bot.telegram.sendMessage(
     chatId,
-    `${isFirstPrompt
-      ? "Next, p"
-      : "We noticed you have not joined the groupchat yet. P"
+    `${
+      isFirstPrompt
+        ? "Next, p"
+        : "We noticed you have not joined the groupchat yet. P"
     }}lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
 
 1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
@@ -707,7 +723,10 @@ const checkCheckerIsUser = async (whatsappId: string) => {
   return !userSnap.empty
 }
 
-const createChecker = async (telegramId: number, telegramUsername: string | null) => {
+const createChecker = async (
+  telegramId: number,
+  telegramUsername: string | null
+) => {
   const thresholds = await getThresholds()
   const checkerRef = await db.runTransaction(async (transaction) => {
     const checkerDocQuery = db
