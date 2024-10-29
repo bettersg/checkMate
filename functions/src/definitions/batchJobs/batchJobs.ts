@@ -222,14 +222,17 @@ async function welcomeNewCheckers() {
     lastWeek.setDate(lastWeek.getDate() - 7)
     lastWeek.setHours(12, 3, 0, 0)
     const lastWeekTimestamp = Timestamp.fromDate(lastWeek)
-    const checkersQuerySnap = await db.collection("checkers").where("onboardingTime", ">=", lastWeekTimestamp).get()
+    const checkersQuerySnap = await db
+      .collection("checkers")
+      .where("onboardingTime", ">=", lastWeekTimestamp)
+      .get()
     if (checkersQuerySnap.empty) {
       return
     }
 
     // Create concatenated string of names
     const names = checkersQuerySnap.docs
-      .map(doc => {
+      .map((doc) => {
         const name = doc.get("name")
         const telegramUsername = doc.get("telegramUsername")
         const username = telegramUsername ? ` @${telegramUsername}` : ""
