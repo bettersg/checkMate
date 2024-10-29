@@ -348,12 +348,18 @@ const resetLeaderboard = onSchedule(
   resetLeaderboardHandler
 )
 
-export {
-  handleInactiveCheckers,
-  welcomeNewCheckers,
+// Export scheduled cloud functions
+export const batchJobs = {
   checkSessionExpiring,
   scheduledDeactivation,
+  sendCheckersWelcomeMesssage,
   sendInterimPrompt,
   resetLeaderboard,
+}
+
+// Export utility functions
+export const utils = {
+  handleInactiveCheckers,
+  welcomeNewCheckers,
   interimPromptHandler,
 }

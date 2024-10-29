@@ -1,4 +1,4 @@
-import * as batchJobs from "./definitions/batchJobs/batchJobs"
+import { batchJobs } from "./definitions/batchJobs/batchJobs"
 import { setGlobalOptions } from "firebase-functions/v2"
 
 setGlobalOptions({ region: "asia-southeast1" })
