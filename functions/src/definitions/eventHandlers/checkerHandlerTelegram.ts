@@ -734,9 +734,22 @@ You may view these resources with the command /resources.`,
   const payload = {
     checkerId: checkerSnap.id,
   }
+  const thresholds = await getThresholds()
+  const daysToFirstCompletionCheck =
+    thresholds.daysBeforeFirstCompletionCheck ?? 60
+  const daysToSecondCompletionCheck =
+    thresholds.daysBeforeSecondCompletionCheck ?? 90
   logger.log(`Enqueuing completion checks for checker ${checkerSnap.id}`)
-  await enqueueTask(payload, "firstCompletionCheck", 60 * 24 * 60 * 60) //first completion check 60 days later
-  await enqueueTask(payload, "secondCompletionCheck", 90 * 24 * 60 * 60) //second completion check 90 days later
+  await enqueueTask(
+    payload,
+    "firstCompletionCheck",
+    daysToFirstCompletionCheck * 24 * 60 * 60 + 300
+  ) //first completion check 60 days later. Add 300 so that we can test in UAT
+  await enqueueTask(
+    payload,
+    "secondCompletionCheck",
+    daysToSecondCompletionCheck * 24 * 60 * 60 + 600
+  ) //second completion check 90 days later. Add 600 so that we can test in UAT
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
