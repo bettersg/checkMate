@@ -123,9 +123,7 @@ export default function Dashboard() {
               name="Voting Accuracy"
               img_src="/accuracy.png"
               current={
-                programStats.accuracy === null
-                  ? 0
-                  : programStats.accuracy * 100
+                programStats.accuracy === null ? 0 : programStats.accuracy * 100
               }
               target={programStats.accuracyTarget * 100}
               isPercentageTarget={true}
@@ -158,8 +156,8 @@ export default function Dashboard() {
                     >
                       WhatsApp Bot
                     </a>
-                    . You need to submit at least{" "}
-                    {programStats.numReportTarget} messages.
+                    . You need to submit at least {programStats.numReportTarget}{" "}
+                    messages that are not eventually marked nvc-can't tell.
                   </>
                 }
               />

@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
 import { Timestamp } from "firebase-admin/firestore"
-import { getUserSnapshot } from "../common/userManagement"
+import { getUserSnapshot } from "./userManagement"
 import { incrementCheckerCounts } from "../../definitions/common/counters"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"

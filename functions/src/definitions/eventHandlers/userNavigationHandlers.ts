@@ -10,7 +10,7 @@ import {
 } from "../common/sendWhatsappMessage"
 import { sendDisputeNotification } from "../common/sendMessage"
 import { sleep, checkMessageId } from "../common/utils"
-import { getUserSnapshot } from "../../services/common/userManagement"
+import { getUserSnapshot } from "../../services/user/userManagement"
 import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
 import { sendMenuMessage } from "../common/responseUtils"
 import {
