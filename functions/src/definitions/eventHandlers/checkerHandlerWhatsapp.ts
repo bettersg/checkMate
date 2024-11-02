@@ -116,6 +116,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
   const thresholds = await getThresholds()
   const checkerObj: CheckerData = {
     name: "",
+    telegramUsername: null,
     type: "human",
     isActive: true,
     isOnboardingComplete: false,
@@ -141,7 +142,8 @@ async function onSignUp(from: string, platform = "whatsapp") {
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
     lastVotedTimestamp: null,
-    certificateUrl: null, // Initialize certificateUrl as an empty string
+    hasCompletedProgram: false,
+    certificateUrl: null,
     leaderboardStats: {
       numVoted: 0,
       numCorrectVotes: 0,
@@ -167,6 +169,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
       numCorrectVotesAtProgramEnd: null,
       numNonUnsureVotesAtProgramEnd: null,
     },
+    offboardingTime: null,
   }
   await db.collection("checkers").add(checkerObj)
 }

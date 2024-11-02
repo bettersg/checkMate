@@ -9,7 +9,6 @@ import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
 import { referralHandler } from "../../services/user/referrals"
 import { Request, Response } from "express"
-import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { AppEnv } from "../../appEnv"
 import { GeneralMessage, WhatsappMessageObject } from "../../types"
 import {
@@ -413,7 +412,7 @@ const postHandlerTelegramAdmin = async (req: Request, res: Response) => {
     req.header("x-telegram-bot-api-secret-token") ===
     process.env.TELEGRAM_WEBHOOK_TOKEN
   ) {
-    await adminBotHandlerTelegram(req.body)
+    functions.logger.log("Telegram admin bot received message")
   } else {
     functions.logger.warn(
       "Telegram handler endpoint was called from unexpected source"

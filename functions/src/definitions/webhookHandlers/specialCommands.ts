@@ -11,11 +11,9 @@ import { getUserSnapshot } from "../../services/user/userManagement"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
+import NUDGES from "../common/parameters/nudges.json"
 import thresholds from "../common/parameters/thresholds.json"
-import {
-  interimPromptHandler,
-  handleInactiveCheckers,
-} from "../batchJobs/batchJobs"
+import { utils } from "../batchJobs/batchJobs"
 import { sendBlast } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { AppEnv } from "../../appEnv"
@@ -45,10 +43,13 @@ const handleSpecialCommands = async function (
         await archiveMessages()
         return
       case "/interim":
-        await interimPromptHandler()
+        await utils.interimPromptHandler()
         return
       case "/deactivate":
-        await handleInactiveCheckers()
+        await utils.handleInactiveCheckers()
+        return
+      case "/welcome":
+        await utils.welcomeNewCheckers()
         return
       case "/blast":
         const userSnap = await getUserSnapshot(messageObj.from)
@@ -91,6 +92,7 @@ const mockDb = async function () {
   await systemParametersRef
     .doc("factCheckerBotResponses")
     .set(CHECKER_BOT_RESPONSES)
+  await systemParametersRef.doc("nudges").set(NUDGES)
   await systemParametersRef.doc("supportedTypes").set({
     whatsapp: ["text", "image"],
   })
@@ -103,6 +105,7 @@ const mockDb = async function () {
     .get()
   const checkerObj: CheckerData = {
     name: "CHECKER1",
+    telegramUsername: "CHECKER1",
     type: "human",
     isActive: true,
     isOnboardingComplete: true,
@@ -129,6 +132,7 @@ const mockDb = async function () {
       runtimeEnvironment.value() === "SIT" ? "whatsapp" : "telegram",
     lastVotedTimestamp: null,
     getNameMessageId: null,
+    hasCompletedProgram: false,
     certificateUrl: null, // Initialize certificateUrl as an empty string
     leaderboardStats: {
       numVoted: 0,
@@ -155,6 +159,7 @@ const mockDb = async function () {
       numCorrectVotesAtProgramEnd: null,
       numNonUnsureVotesAtProgramEnd: null,
     },
+    offboardingTime: null,
   }
   if (querySnap.empty) {
     await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj)

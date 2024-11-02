@@ -22,7 +22,6 @@ export async function checkCheckerActivity(
     //set cutoff to 10 days ago
     const cutoffDate = new Date(Date.now() - durationInSeconds * 1000)
     const cutoffTimestamp = Timestamp.fromDate(cutoffDate)
-    console.log(cutoffTimestamp.toDate().toISOString())
     const voteRequestsQuerySnap = await db
       .collectionGroup("voteRequests")
       .where("factCheckerDocRef", "==", factCheckerDocRef)

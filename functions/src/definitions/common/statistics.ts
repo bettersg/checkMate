@@ -3,7 +3,7 @@ import { logger } from "firebase-functions/v2"
 import { LeaderboardEntry } from "../../types"
 import { Timestamp } from "firebase-admin/firestore"
 import { TIME } from "../../utils/time"
-import { CheckerData } from "../../types"
+import { CheckerData, CheckerProgramStats } from "../../types"
 
 function checkAccuracy(
   parentMessageSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
@@ -133,7 +133,7 @@ function tabulateVoteStats(
 async function computeProgramStats(
   checkerSnap: admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>,
   updateCompletion: boolean = false
-) {
+): Promise<CheckerProgramStats> {
   try {
     const checkerData = checkerSnap.data() as CheckerData
     if (!checkerData.programData?.isOnProgram) {
@@ -177,6 +177,7 @@ async function computeProgramStats(
     ) {
       timestamp = Timestamp.fromDate(new Date())
       await checkerSnap.ref.update({
+        hasCompletedProgram: true,
         "programData.programEnd": timestamp,
         "programData.numVotesAtProgramEnd": checkerData.numVoted,
         "programData.numReferralsAtProgramEnd": checkerData.numReferred,
@@ -195,7 +196,7 @@ async function computeProgramStats(
       isProgramCompleted,
       isNewlyCompleted,
       completionTimestamp: timestamp,
-    }
+    } as CheckerProgramStats
   } catch (error) {
     logger.error(
       `Error computing program stats for checker ${checkerSnap.ref.id}: ${error}`

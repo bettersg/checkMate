@@ -24,6 +24,7 @@ interface updateVoteRequest {
 
 interface createChecker {
   name: string | null
+  telegramUsername: string | null
   type: "human" | "ai"
   isActive?: boolean
   isOnboardingComplete?: boolean
@@ -47,6 +48,7 @@ interface createChecker {
 
 interface updateChecker {
   name?: string
+  telegramUsername?: string | null
   type?: "human" | "ai"
   isActive?: boolean
   isOnboardingComplete?: boolean

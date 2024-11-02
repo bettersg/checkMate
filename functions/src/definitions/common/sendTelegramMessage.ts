@@ -30,6 +30,8 @@ const sendTelegramTextMessage = async function (
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else if (bot === "report") {
     token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else if (bot === "admin") {
+    token = process.env.TELEGRAM_ADMIN_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }

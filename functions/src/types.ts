@@ -235,6 +235,7 @@ export type UserData = {
 
 export type CheckerData = {
   name: string | null
+  telegramUsername: string | null
   type: "human" | "ai"
   isActive: boolean
   isOnboardingComplete: boolean | null
@@ -250,12 +251,15 @@ export type CheckerData = {
     | "joinGroupChat"
     | "nlb"
     | "completed"
+    | "offboarded"
   onboardingTime: Timestamp | null
+  offboardingTime: Timestamp | null
   lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
   isAdmin: boolean
   singpassOpenId: string | null
   telegramId: number | null
   whatsappId?: string | null
+  hasCompletedProgram: boolean
   certificateUrl?: string | null
   level: number
   experience: number
@@ -274,11 +278,29 @@ export type CheckerData = {
   programData: ProgramData
 }
 
+export type NudgeData = {
+  type: string //type of nudge, e.g. "reactivation"
+  sentTimestamp: Timestamp
+  outcomeTimestamp: Timestamp | null
+  variant: string
+  outcome: string | null
+}
+
 type LeaderBoardStats = {
   numVoted: number // number of votes cast where the parent message category is not unsure
   numCorrectVotes: number // number of correct votes cast where the parent message category is not unsure
   totalTimeTaken: number // total time taken to vote where the parent message category is not unsure
   score: number // total score
+}
+
+export type CheckerProgramStats = {
+  accuracy: number | null
+  numVotes: number
+  numReferrals: number
+  numReports: number
+  isProgramCompleted: boolean
+  isNewlyCompleted: boolean
+  completionTimestamp: Timestamp | null
 }
 
 export type ProgramData = {
