@@ -244,7 +244,6 @@ export type CheckerData = {
   onboardingStatus:
     | "name"
     | "number"
-    | "otpSent"
     | "verify"
     | "quiz"
     | "onboardWhatsapp"
