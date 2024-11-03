@@ -4,7 +4,6 @@ import {
   Card,
   ListItem,
   List,
-  Alert,
 } from "@material-tailwind/react";
 
 interface TruthScoreOptionsProps {
