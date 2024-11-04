@@ -13,7 +13,7 @@ import {
   Timestamp,
   DocumentReference,
 } from "firebase-admin/firestore"
-import { getUserSnapshot } from "../../services/common/userManagement"
+import { getUserSnapshot } from "../../services/user/userManagement"
 import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"

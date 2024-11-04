@@ -16,6 +16,7 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
+import { ReactivationDialog } from "../common/ReactivationModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -32,14 +33,19 @@ export default function Dashboard() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showReactivationDialog, setShowReactivationDialog] = useState(false);
+
   const handleOpen = () => setDialogOpen(!dialogOpen);
   const handleConfirm = async () => {
     if (!checkerDetails.checkerId) {
       return;
     }
     await withdrawCheckerProgram(checkerDetails.checkerId);
+    setCheckerDetails((prev) => ({
+      ...prev,
+      isAgainstReactivating: true,
+    }));
     setDialogOpen(false);
-    navigate(0);
   };
   const isProd = import.meta.env.MODE === "production";
 
@@ -59,6 +65,10 @@ export default function Dashboard() {
           isActive: checker.isActive,
           certificateUrl: checker.certificateUrl || null,
         }));
+
+        if (!checker.isActive && !checkerDetails.isAgainstReactivating) {
+          setShowReactivationDialog(true);
+        }
 
         if (checker.last30days) {
           setTotalVotes(checker.last30days.totalVoted);
@@ -92,6 +102,13 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-y-4 left-right-padding">
+      <ReactivationDialog
+        open={showReactivationDialog}
+        onClose={() => setShowReactivationDialog(false)}
+        onActivation={() => {
+          navigate(0);
+        }}
+      />
       {checkerDetails.pendingCount > 0 && (
         <PendingMessageAlert
           hasPending={true}
@@ -123,9 +140,7 @@ export default function Dashboard() {
               name="Voting Accuracy"
               img_src="/accuracy.png"
               current={
-                programStats.accuracy === null
-                  ? 0
-                  : programStats.accuracy * 100
+                programStats.accuracy === null ? 0 : programStats.accuracy * 100
               }
               target={programStats.accuracyTarget * 100}
               isPercentageTarget={true}
@@ -158,8 +173,8 @@ export default function Dashboard() {
                     >
                       WhatsApp Bot
                     </a>
-                    . You need to submit at least{" "}
-                    {programStats.numReportTarget} messages.
+                    . You need to submit at least {programStats.numReportTarget}{" "}
+                    messages that are not eventually marked nvc-can't tell.
                   </>
                 }
               />

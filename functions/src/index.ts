@@ -1,4 +1,4 @@
-import * as batchJobs from "./definitions/batchJobs/batchJobs"
+import { batchJobs } from "./definitions/batchJobs/batchJobs"
 import { setGlobalOptions } from "firebase-functions/v2"
 
 setGlobalOptions({ region: "asia-southeast1" })
@@ -21,4 +21,7 @@ export { onCheckerPublishTelegram } from "./definitions/eventHandlers/checkerHan
 export { apiHandler } from "./definitions/api/api"
 export { internalApiHandler } from "./definitions/api/apiInternal"
 export { passVoteRequest } from "./definitions/taskHandlers/autoPass"
+export { sendCheckerReactivation } from "./definitions/taskHandlers/reactivations"
+export { firstCompletionCheck } from "./definitions/taskHandlers/firstCompletionCheck"
+export { secondCompletionCheck } from "./definitions/taskHandlers/secondCompletionCheck"
 export { batchJobs }

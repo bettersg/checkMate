@@ -99,6 +99,8 @@ category: ${finalCategory}`
     "report",
     reportChannelId.value(),
     messageText,
+    null,
+    null,
     null
   )
 }

@@ -4,7 +4,6 @@ import {
   Card,
   ListItem,
   List,
-  Alert,
 } from "@material-tailwind/react";
 
 interface TruthScoreOptionsProps {
@@ -63,13 +62,6 @@ export default function InfoOptions(Prop: InfoOptionsProps) {
     <div>
       {
         <>
-          <Alert color="amber">
-            {" "}
-            {/* REMOVE EVENTUALLY */}
-            <span className="font-bold">
-              NOTE: Scale has changed from 1-5 to 0-5!
-            </span>
-          </Alert>
           <Typography className="text-primary-color text-justify my-3">
             Please assess the veracity of the claim(s) in the message on a scale
             from 0 (entirely false) to 5 (entirely true).

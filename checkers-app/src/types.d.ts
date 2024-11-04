@@ -19,6 +19,7 @@ interface CheckerDetails {
   tier: string;
   isActive: boolean;
   certificateUrl?: string | null;
+  isAgainstReactivating?: boolean;
 }
 
 interface Window {

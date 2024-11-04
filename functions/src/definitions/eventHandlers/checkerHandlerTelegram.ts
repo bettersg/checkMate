@@ -8,6 +8,9 @@ import { getThresholds } from "../common/utils"
 import { CheckerData } from "../../types"
 import { message, callbackQuery } from "telegraf/filters"
 import { isNumeric } from "../common/utils"
+import { updateNudge } from "../../services/checker/nudgeService"
+import { reactivateChecker } from "../../services/checker/managementService"
+import { enqueueTask } from "../common/cloudTasks"
 
 const TOKEN = String(process.env.TELEGRAM_CHECKER_BOT_TOKEN)
 const ADMIN_BOT_TOKEN = String(process.env.TELEGRAM_ADMIN_BOT_TOKEN)
@@ -84,6 +87,7 @@ bot.command("start", async (ctx) => {
 bot.command("onboard", async (ctx) => {
   const chatId = ctx.chat?.id
   const telegramId = ctx.from?.id
+  const telegramUsername = ctx.from?.username ?? null
   let currentStep = "name"
   const checkerDocQuery = db
     .collection("checkers")
@@ -93,7 +97,7 @@ bot.command("onboard", async (ctx) => {
 
   if (checkerQuerySnap.empty) {
     if (telegramId) {
-      const checkerRef = await createChecker(telegramId)
+      const checkerRef = await createChecker(telegramId, telegramUsername)
       checkerSnap = await checkerRef.get()
     } else {
       logger.log("No user id found")
@@ -163,28 +167,21 @@ bot.command("activate", async (ctx) => {
   try {
     const msg = ctx.message
     if (msg.from) {
-      const checkerId = msg.from.id
+      const telegramId = msg.from.id
       const checkerQuerySnap = await db
         .collection("checkers")
-        .where("telegramId", "==", checkerId)
+        .where("telegramId", "==", telegramId)
         .get()
-
-      if (checkerQuerySnap.size > 0) {
-        const checkerSnap = checkerQuerySnap.docs[0]
-        await checkerSnap.ref.update({ isActive: true })
-        await ctx.reply(
-          `You've been reactivated! Go to the CheckMate's Portal to start voting on messages`
+      if (checkerQuerySnap.empty) {
+        logger.error(
+          `Checker with TelegramID ${telegramId} trying to /activate but not found`
         )
-      } else if (checkerQuerySnap.size === 0) {
-        logger.error(`Checker with TelegramID ${checkerId} not found`)
-        throw new Error("Checker not found")
-      } else {
-        logger.error(`Multiple checkers with TelegramID ${checkerId} found`)
-        throw new Error("Multiple checkers found")
+        return
       }
+      const checkerSnap = checkerQuerySnap.docs[0]
+      await reactivateChecker(checkerSnap)
     } else {
-      logger.error("No user id found for activate command")
-      throw new Error("No user id found")
+      logger.error("No user id found")
     }
   } catch (error) {
     logger.error("Error in activate command", error)
@@ -352,7 +349,11 @@ bot.on(message("text"), async (ctx) => {
 
 bot.on(callbackQuery("data"), async (ctx) => {
   const callbackQuery = ctx.callbackQuery
-  const action = callbackQuery?.data
+  const callbackAction = callbackQuery?.data
+  //split action by "|" to get the action and the nudge ID if any
+  const action = callbackAction.split("|")[0]
+  const nudgeId = callbackAction.split("|")[1]
+
   const chatId = callbackQuery?.message?.chat.id
   let isUser = false
 
@@ -361,6 +362,13 @@ bot.on(callbackQuery("data"), async (ctx) => {
       .collection("checkers")
       .where("telegramId", "==", callbackQuery.from.id)
     const checkerQuerySnap = await checkerDocQuery.get()
+
+    if (checkerQuerySnap.empty) {
+      logger.error(
+        `Checker with TelegramID ${callbackQuery.from.id} triggered callback but not found`
+      )
+      return
+    }
     const checkerDocSnap = checkerQuerySnap.docs[0]
     const whatsappId = checkerDocSnap.data()?.whatsappId
 
@@ -432,8 +440,17 @@ ${progressBars(4)}`)
         })
         await sendNamePrompt(chatId, checkerDocSnap)
         break
+      case "REACTIVATE":
+        await reactivateChecker(checkerDocSnap)
+        break
+      case "RESOURCES":
+        await ctx.reply(resources, { parse_mode: "HTML" })
+        break
       default:
         logger.log("Unhandled callback data: ", action)
+    }
+    if (nudgeId) {
+      await updateNudge(checkerDocSnap, nudgeId, "clicked")
     }
   }
 })
@@ -713,6 +730,26 @@ You may view these resources with the command /resources.`,
     chatId,
     `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
+  // Queue up program completion checks
+  const payload = {
+    checkerId: checkerSnap.id,
+  }
+  const thresholds = await getThresholds()
+  const daysToFirstCompletionCheck =
+    thresholds.daysBeforeFirstCompletionCheck ?? 60
+  const daysToSecondCompletionCheck =
+    thresholds.daysBeforeSecondCompletionCheck ?? 90
+  logger.log(`Enqueuing completion checks for checker ${checkerSnap.id}`)
+  await enqueueTask(
+    payload,
+    "firstCompletionCheck",
+    daysToFirstCompletionCheck * 24 * 60 * 60 + 300
+  ) //first completion check 60 days later. Add 300 so that we can test in UAT
+  await enqueueTask(
+    payload,
+    "secondCompletionCheck",
+    daysToSecondCompletionCheck * 24 * 60 * 60 + 600
+  ) //second completion check 90 days later. Add 600 so that we can test in UAT
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
@@ -723,7 +760,10 @@ const checkCheckerIsUser = async (whatsappId: string) => {
   return !userSnap.empty
 }
 
-const createChecker = async (telegramId: number) => {
+const createChecker = async (
+  telegramId: number,
+  telegramUsername: string | null
+) => {
   const thresholds = await getThresholds()
   const checkerRef = await db.runTransaction(async (transaction) => {
     const checkerDocQuery = db
@@ -735,6 +775,7 @@ const createChecker = async (telegramId: number) => {
       const newCheckerRef = db.collection("checkers").doc()
       const newChecker: CheckerData = {
         name: null,
+        telegramUsername: telegramUsername,
         type: "human",
         isActive: false,
         isOnboardingComplete: false,
@@ -760,7 +801,8 @@ const createChecker = async (telegramId: number) => {
         preferredPlatform: "telegram",
         lastVotedTimestamp: null,
         getNameMessageId: null,
-        certificateUrl: null, // Initialize certificateUrl as an empty string
+        hasCompletedProgram: false,
+        certificateUrl: null,
         leaderboardStats: {
           numVoted: 0,
           numCorrectVotes: 0,
@@ -787,6 +829,7 @@ const createChecker = async (telegramId: number) => {
           numCorrectVotesAtProgramEnd: null,
           numNonUnsureVotesAtProgramEnd: null,
         },
+        offboardingTime: null,
       }
       transaction.set(newCheckerRef, newChecker)
       return newCheckerRef
