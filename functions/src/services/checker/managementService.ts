@@ -3,7 +3,7 @@ import { logger } from "firebase-functions/v2"
 import { ServiceResponse } from "../../infrastructure/responseDefinitions/serviceResponse"
 import { sendTelegramTextMessage } from "../../messaging/telegram/sendTelegramMessages"
 import { replaceTemplatePlaceholders } from "../../utils/messageUtils"
-import { DocumentSnapshot } from "firebase-admin/firestore"
+import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getResponsesObj } from "../../definitions/common/responseUtils"
 import { adminBot } from "../../infrastructure/telegram/botInstances"
 
@@ -13,12 +13,14 @@ if (!admin.apps.length) {
 
 const CHECKERS_CHAT_ID = String(process.env.CHECKERS_CHAT_ID)
 
-const db = admin.firestore()
 export async function reactivateChecker(checkerSnap: DocumentSnapshot) {
   const telegramId = checkerSnap.get("telegramId")
   const message = `Welcome back! 💪 You'll now start receiving messages to vote on again.`
   await sendTelegramTextMessage("factChecker", telegramId, message)
-  await checkerSnap.ref.update({ isActive: true })
+  await checkerSnap.ref.update({
+    isActive: true,
+    lastActivatedDate: Timestamp.now(),
+  })
   return ServiceResponse.success({
     message: "Checker reactivated",
   })

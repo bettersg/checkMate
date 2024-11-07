@@ -119,6 +119,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     telegramUsername: null,
     type: "human",
     isActive: true,
+    lastActivatedDate: Timestamp.fromDate(new Date()),
     isOnboardingComplete: false,
     isQuizComplete: false,
     quizScore: null,
