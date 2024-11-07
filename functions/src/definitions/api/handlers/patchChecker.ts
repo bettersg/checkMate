@@ -40,6 +40,10 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
       return res.status(400).send("whatsappId cannot be updated")
     }
 
+    if (keys.includes("lastActivatedDate")) {
+      return res.status(400).send("lastActivatedDate cannot be updated")
+    }
+
     if (keys.includes("telegramId")) {
       return res.status(400).send("telegramId cannot be updated")
     }
@@ -117,6 +121,11 @@ const patchCheckerHandler = async (req: Request, res: Response) => {
           .send(
             "programData will only work with the value 'reset' or 'complete'"
           )
+      }
+    }
+    if (keys.includes("isActive")) {
+      if (body.isActive === true) {
+        body.lastActivatedDate = Timestamp.now()
       }
     }
 

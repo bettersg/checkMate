@@ -238,6 +238,7 @@ export type CheckerData = {
   telegramUsername: string | null
   type: "human" | "ai"
   isActive: boolean
+  lastActivatedDate: Timestamp | null
   isOnboardingComplete: boolean | null
   isQuizComplete: boolean
   quizScore: number | null

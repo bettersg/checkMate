@@ -704,6 +704,7 @@ const sendCompletionPrompt = async (
     isOnboardingComplete: true,
     onboardingTime: Timestamp.now(),
     isActive: true,
+    lastActivatedDate: Timestamp.now(),
   })
   await bot.telegram.sendMessage(
     chatId,
@@ -778,6 +779,7 @@ const createChecker = async (
         telegramUsername: telegramUsername,
         type: "human",
         isActive: false,
+        lastActivatedDate: null,
         isOnboardingComplete: false,
         onboardingTime: null,
         isQuizComplete: false,

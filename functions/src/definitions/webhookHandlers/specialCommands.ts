@@ -108,6 +108,7 @@ const mockDb = async function () {
     telegramUsername: "CHECKER1",
     type: "human",
     isActive: true,
+    lastActivatedDate: Timestamp.now(),
     isOnboardingComplete: true,
     isQuizComplete: true,
     quizScore: null,

@@ -25,9 +25,11 @@ export async function checkCheckerActivity(
       Timestamp.fromDate(new Date(0))
     const onboardingTimestamp =
       checkerDocSnap.get("onboardingTime") ?? Timestamp.fromDate(new Date(0))
-    // take later of the two timestamps
-    const onboardingDate = onboardingTimestamp.toDate()
+    const lastActivatedTimestamp =
+      checkerDocSnap.get("lastActivatedDate") ?? Timestamp.fromDate(new Date(0))
     const factCheckerDocRef = checkerDocSnap.ref
+    const onboardingDate = onboardingTimestamp.toDate()
+    const lastActivatedDate = lastActivatedTimestamp.toDate()
     const lastVotedDate = lastVotedTimestamp.toDate()
 
     //set cutoff to 10 days ago
@@ -56,6 +58,7 @@ export async function checkCheckerActivity(
       voteRequestsQuerySnap.empty ||
       lastVotedDate > cutoffDate ||
       onboardingDate > cutoffDate ||
+      lastActivatedDate > cutoffDate ||
       !hasOverdueVoteRequests
     return ServiceResponse.success({
       message: "Checker is active",
