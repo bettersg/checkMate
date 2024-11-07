@@ -60,6 +60,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     telegramUsername,
     type,
     isActive: isActive || false,
+    lastActivatedDate: isActive ? Timestamp.now() : null,
     isOnboardingComplete: isOnboardingComplete || false,
     onboardingTime: isOnboardingComplete ? Timestamp.now() : null,
     isQuizComplete: isQuizComplete || false,
