@@ -58,6 +58,11 @@ export async function offboardChecker(checkerDocSnap: DocumentSnapshot) {
   )
   //call Telegram API to kick checker from group
   await adminBot.telegram.unbanChatMember(CHECKERS_CHAT_ID, telegramId)
+  await checkerDocSnap.ref.update({
+    isActive: false,
+    offboardingTime: Timestamp.now(),
+    onboardingStatus: "offboarded",
+  })
   return ServiceResponse.success({
     message: "Checker expelled",
   })
