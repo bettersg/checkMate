@@ -67,6 +67,12 @@ export const sendCheckerReactivation = onTaskDispatched(
         logger.error(`Checker ${checkerId} not found`)
         return
       }
+      if (checkerDocSnap.get("offboardingTime") != null) {
+        logger.info(
+          `Checker ${checkerId} has been offboarded. Stopping reactivation attempts.`
+        )
+        return
+      }
       const reactivationCheckResponse = await checkCheckerActivity(
         checkerDocSnap,
         cumulativeDelaySeconds
