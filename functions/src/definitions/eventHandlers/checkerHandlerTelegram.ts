@@ -657,7 +657,7 @@ const sendTGGroupPrompt = async (
       isFirstPrompt
         ? "Next, p"
         : "We noticed you have not joined the groupchat yet. P"
-    }}lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
+    }lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
 
 1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
 
