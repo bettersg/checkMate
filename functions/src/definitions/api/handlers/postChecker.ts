@@ -84,6 +84,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     preferredPlatform: preferredPlatform || (type === "ai" ? null : "telegram"),
     lastVotedTimestamp: lastVotedTimestamp || null,
     getNameMessageId: null,
+    hasReceivedExtension: false,
     hasCompletedProgram: false,
     certificateUrl: null,
     leaderboardStats: {

@@ -259,6 +259,7 @@ export type CheckerData = {
   singpassOpenId: string | null // The Singpass OpenID of the checker, if available. Not yet implemented
   telegramId: number | null // The Telegram ID of the checker
   whatsappId: string | null // The WhatsApp ID of the checker, obtained on onboarding
+  hasReceivedExtension: boolean // Whether the checker has received an extension to complete the program
   hasCompletedProgram: boolean // Whether the checker has completed the CheckMate's program
   certificateUrl?: string | null // The public cloud storage URL of the certificate, if the checker has completed the program
   level: number // The level of the checker, for gamification. Not yet implemented

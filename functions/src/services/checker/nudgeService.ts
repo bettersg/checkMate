@@ -43,8 +43,18 @@ export async function sendNudge(
   type: string,
   replaceParams: { [key: string]: string },
   ctaButtonText: string | null = null,
-  callbackDataText: string | null = null
+  callbackDataText: string | null = null,
+  onlyOnceReceipt = false
 ): Promise<ServiceResponse> {
+  if (onlyOnceReceipt) {
+    const nudgeResponse = await checkNudgeStatus(docSnap.ref, type)
+    const hasBeenNudged = nudgeResponse.data?.hasBeenNudged ?? true
+    if (hasBeenNudged) {
+      return ServiceResponse.success({
+        message: "Nudge already sent",
+      })
+    }
+  }
   const nudges = await getNudges()
   const nudgeType = type.toUpperCase()
   const response = selectNudge(nudgeType, nudges)
