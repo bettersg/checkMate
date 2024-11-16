@@ -6,6 +6,7 @@ import { replaceTemplatePlaceholders } from "../../utils/messageUtils"
 import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { getResponsesObj } from "../../definitions/common/responseUtils"
 import { adminBot } from "../../infrastructure/telegram/botInstances"
+import { sendNudge } from "./nudgeService"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -24,6 +25,58 @@ export async function reactivateChecker(checkerSnap: DocumentSnapshot) {
   return ServiceResponse.success({
     message: "Checker reactivated",
   })
+}
+
+export async function initialCompletionCheck(checkerSnap: DocumentSnapshot) {
+  try {
+    const hasCompletedProgram = checkerSnap.get("hasCompletedProgram")
+    const replaceParams = {
+      name: checkerSnap.get("name"),
+      revision_quiz_link: "", //TODO
+    }
+
+    if (!hasCompletedProgram) {
+      await sendNudge(checkerSnap, "EXTENSION", replaceParams, null, null, true)
+      await checkerSnap.ref.update({
+        hasReceivedExtension: true,
+      })
+    }
+    return ServiceResponse.success({
+      message: "Checker nudged to continue program",
+    })
+  } catch (error) {
+    logger.error(
+      `Error in initialCompletionCheck for checker ${checkerSnap.id}: ${error}`
+    )
+    return ServiceResponse.error("Uh-oh. Something broke.")
+  }
+}
+
+export async function finalCompletionCheck(checkerSnap: DocumentSnapshot) {
+  try {
+    const hasCompletedProgram = checkerSnap.get("hasCompletedProgram")
+    if (!hasCompletedProgram) {
+      try {
+        await offboardChecker(checkerSnap)
+      } catch (error) {
+        logger.error(
+          `Error in secondCompletionCheck for checker ${checkerSnap.id}: ${error}`
+        )
+      }
+      return ServiceResponse.success({
+        message: "Checker nudged to continue program",
+      })
+    } else {
+      return ServiceResponse.success({
+        message: "Checker has already completed program",
+      })
+    }
+  } catch (error) {
+    logger.error(
+      `Error in finalCompletionCheck for checker ${checkerSnap.id}: ${error}`
+    )
+    return ServiceResponse.error("Uh-oh. Something broke.")
+  }
 }
 
 export async function offboardChecker(checkerDocSnap: DocumentSnapshot) {

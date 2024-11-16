@@ -133,6 +133,7 @@ const mockDb = async function () {
       runtimeEnvironment.value() === "SIT" ? "whatsapp" : "telegram",
     lastVotedTimestamp: null,
     getNameMessageId: null,
+    hasReceivedExtension: false,
     hasCompletedProgram: false,
     certificateUrl: null, // Initialize certificateUrl as an empty string
     leaderboardStats: {

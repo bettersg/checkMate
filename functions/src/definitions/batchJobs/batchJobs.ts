@@ -11,11 +11,15 @@ import { onSchedule } from "firebase-functions/v2/scheduler"
 import { logger } from "firebase-functions/v2"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
 import { AppEnv } from "../../appEnv"
-import { TIME } from "../../utils/time"
+import { TIME, getDateNDaysAgo } from "../../utils/time"
 import { getFullLeaderboard } from "../common/statistics"
 import { getResponsesObj } from "../common/responseUtils"
 import { checkCheckerActivity } from "../../services/checker/checkActivity"
 import { enqueueTask } from "../common/cloudTasks"
+import {
+  finalCompletionCheck,
+  initialCompletionCheck,
+} from "../../services/checker/managementService"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
@@ -89,7 +93,7 @@ async function handleInactiveCheckers() {
           const baseDelaySeconds = 7 * 24 * 60 * 60 // 1 week in seconds
           const nextAttemptPayload = {
             attemptNumber: 1,
-            maxAttempts: 4,
+            maxAttempts: 2,
             baseDelaySeconds: baseDelaySeconds,
             cumulativeDelaySeconds: secondsSinceLastVote + baseDelaySeconds,
             checkerId: doc.id,
@@ -284,6 +288,47 @@ async function resetLeaderboardHandler() {
   }
 }
 
+async function checkCheckerCompletion() {
+  try {
+    const thresholds = await getThresholds()
+    const daysToFirstCompletionCheck =
+      thresholds.daysBeforeFirstCompletionCheck ?? 60
+    const daysToSecondCompletionCheck =
+      thresholds.daysBeforeSecondCompletionCheck ?? 90
+    const firstCheckDate = getDateNDaysAgo(daysToFirstCompletionCheck)
+    const secondCheckDate = getDateNDaysAgo(daysToSecondCompletionCheck)
+
+    const checkersQuerySnap = await db
+      .collection("checkers")
+      .where("hasCompletedProgram", "==", false)
+      .where("offboardingTime", "==", null)
+      .where("onboardingTime", "<", Timestamp.fromDate(firstCheckDate))
+      .get()
+
+    logger.log(`Processing ${checkersQuerySnap.size} checkers`)
+    const promisesArr = checkersQuerySnap.docs.map(async (doc) => {
+      try {
+        const onboardingTime = doc.get("onboardingTime")
+        const hasReceivedExtension = doc.get("hasReceivedExtension")
+
+        if (onboardingTime < Timestamp.fromDate(secondCheckDate)) {
+          return await finalCompletionCheck(doc)
+        }
+
+        if (hasReceivedExtension === false) {
+          return await initialCompletionCheck(doc)
+        }
+      } catch (error) {
+        logger.error(`Error processing doc ID ${doc.id}:`, error)
+      }
+    })
+
+    await Promise.all(promisesArr)
+  } catch (error) {
+    logger.error("Error in checkCheckerCompletion:", error)
+  }
+}
+
 async function saveLeaderboard() {
   try {
     const leaderboardData = await getFullLeaderboard()
@@ -322,6 +367,16 @@ const scheduledDeactivation = onSchedule(
   handleInactiveCheckers
 )
 
+const checkForCompletion = onSchedule(
+  {
+    schedule: "11 20 * * *",
+    timeZone: "Asia/Singapore",
+    secrets: ["TELEGRAM_CHECKER_BOT_TOKEN", "TELEGRAM_ADMIN_BOT_TOKEN"],
+    region: "asia-southeast1",
+  },
+  checkCheckerCompletion
+)
+
 const sendCheckersWelcomeMesssage = onSchedule(
   {
     schedule: "3 12 * * 2",
@@ -354,6 +409,7 @@ const resetLeaderboard = onSchedule(
 // Export scheduled cloud functions
 export const batchJobs = {
   checkSessionExpiring,
+  checkForCompletion,
   scheduledDeactivation,
   sendCheckersWelcomeMesssage,
   sendInterimPrompt,

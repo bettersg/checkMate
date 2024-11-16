@@ -143,6 +143,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     preferredPlatform: "whatsapp",
     getNameMessageId: res.data.messages[0].id,
     lastVotedTimestamp: null,
+    hasReceivedExtension: false,
     hasCompletedProgram: false,
     certificateUrl: null,
     leaderboardStats: {

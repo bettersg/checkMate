@@ -1,10 +1,8 @@
 import { onTaskDispatched } from "firebase-functions/tasks"
-import { logger } from "firebase-functions/v2"
 import { HttpsError } from "firebase-functions/https"
-import { getFirestore, Timestamp } from "firebase-admin/firestore"
-import { offboardChecker } from "../../services/checker/managementService"
+import { getFirestore } from "firebase-admin/firestore"
 import * as admin from "firebase-admin"
-import { CheckerData } from "../../types"
+import { finalCompletionCheck } from "../../services/checker/managementService"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -24,28 +22,10 @@ export const secondCompletionCheck = onTaskDispatched(
   },
   async (req) => {
     const { checkerId = "" } = req.data
-    try {
-      const checkerDocRef = db.collection("checkers").doc(checkerId)
-      const checkerDocSnap = await checkerDocRef.get()
-      if (!checkerDocSnap.exists) {
-        logger.error(`Checker ${checkerId} not found upon firstCompletionCheck`)
-        throw new HttpsError("not-found", "Checker not found")
-      } else {
-        const hasCompletedProgram = checkerDocSnap.get("hasCompletedProgram")
-        if (!hasCompletedProgram) {
-          try {
-            await offboardChecker(checkerDocSnap)
-          } catch (error) {
-            logger.error(
-              `Error in secondCompletionCheck for checker ${checkerId}: ${error}`
-            )
-          }
-        }
-      }
-    } catch (error) {
-      logger.error(
-        `Error in firstCompletionCheck for checker ${checkerId}: ${error}`
-      )
+    const checkerDocRef = db.collection("checkers").doc(checkerId)
+    const checkerDocSnap = await checkerDocRef.get()
+    const result = await finalCompletionCheck(checkerDocSnap)
+    if (result.hasError()) {
       throw new HttpsError("internal", "Uh-oh. Something broke.")
     }
   }
