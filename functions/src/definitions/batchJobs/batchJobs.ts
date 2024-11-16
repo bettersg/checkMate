@@ -369,7 +369,7 @@ const scheduledDeactivation = onSchedule(
 
 const checkForCompletion = onSchedule(
   {
-    schedule: "11 20 * * *",
+    schedule: "41 20 * * *",
     timeZone: "Asia/Singapore",
     secrets: ["TELEGRAM_CHECKER_BOT_TOKEN", "TELEGRAM_ADMIN_BOT_TOKEN"],
     region: "asia-southeast1",
