@@ -657,7 +657,7 @@ const sendTGGroupPrompt = async (
       isFirstPrompt
         ? "Next, p"
         : "We noticed you have not joined the groupchat yet. P"
-    }}lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
+    }lease join the <a href="${CHECKERS_GROUP_LINK}">CheckMate Checker's groupchat</a>. This group chat is important as it will be used to:
 
 1) Inform checkers of any downtime in the system, updates/improvements being deployed to the bots
 
@@ -731,26 +731,6 @@ You may view these resources with the command /resources.`,
     chatId,
     `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
-  // Queue up program completion checks
-  const payload = {
-    checkerId: checkerSnap.id,
-  }
-  const thresholds = await getThresholds()
-  const daysToFirstCompletionCheck =
-    thresholds.daysBeforeFirstCompletionCheck ?? 60
-  const daysToSecondCompletionCheck =
-    thresholds.daysBeforeSecondCompletionCheck ?? 90
-  logger.log(`Enqueuing completion checks for checker ${checkerSnap.id}`)
-  await enqueueTask(
-    payload,
-    "firstCompletionCheck",
-    daysToFirstCompletionCheck * 24 * 60 * 60 + 300
-  ) //first completion check 60 days later. Add 300 so that we can test in UAT
-  await enqueueTask(
-    payload,
-    "secondCompletionCheck",
-    daysToSecondCompletionCheck * 24 * 60 * 60 + 600
-  ) //second completion check 90 days later. Add 600 so that we can test in UAT
 }
 //TODO: edit this to allow checking against diff idfields
 const checkCheckerIsUser = async (whatsappId: string) => {
@@ -803,6 +783,7 @@ const createChecker = async (
         preferredPlatform: "telegram",
         lastVotedTimestamp: null,
         getNameMessageId: null,
+        hasReceivedExtension: false,
         hasCompletedProgram: false,
         certificateUrl: null,
         leaderboardStats: {

@@ -10,3 +10,9 @@ export enum TIME {
   // 30 days in milliseconds
   THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000,
 }
+
+export function getDateNDaysAgo(daysAgo: number): Date {
+  const date = new Date() // Current date
+  date.setDate(date.getDate() - daysAgo) // Subtract n days
+  return date
+}
