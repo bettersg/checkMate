@@ -117,133 +117,133 @@ export type GeneralMessage = {
 }
 
 export type MessageData = {
-  machineCategory: string
-  isMachineCategorised: boolean
-  originalText: string | null
-  text: string | null
-  caption: string | null
-  latestInstance: DocumentReference | null
-  firstTimestamp: Timestamp
-  lastTimestamp: Timestamp
-  lastRefreshedTimestamp: Timestamp
-  isPollStarted: boolean
-  isAssessed: boolean
-  assessedTimestamp: Timestamp | null
-  assessmentExpiry: Timestamp | null
-  assessmentExpired: boolean
-  truthScore: number | null
-  numberPointScale: 5 | 6
-  isIrrelevant: boolean | null
-  isScam: boolean | null
-  isIllicit: boolean | null
-  isSpam: boolean | null
-  isLegitimate: boolean | null
-  isUnsure: boolean | null
-  isInfo: boolean | null
-  isSatire: boolean | null
-  isHarmful: boolean | null // whether the sum of scam + illicit + untrue votes > harmful threshold
-  isHarmless: boolean | null // whether the sum of legitimate + accurate + spam votes > harmless threshold
-  tags: TagsMap
-  primaryCategory: string | null
-  customReply: string | null
-  instanceCount: number
-  rationalisation: string | null // Assuming 'rationalisation' is a string; adjust as necessary if it's a different type.
+  machineCategory: string //category assigned by the machine learning model. Can be either "scam", "illicit", "spam", "info", "irrelevant", "irrelevant_length", or "unsure"
+  isMachineCategorised: boolean //whether or not the message was categorised by the machine learning model
+  originalText: string | null //the original, unredacted text of the message. For image messages, this is the OCR-extracted text from the image if present
+  text: string | null //the text of the message, redacted for PII, to be shown on website and to checkers. For image messages, this is the redacted OCR-extracted text from the image if present
+  caption: string | null //for image messages, the caption of the image
+  latestInstance: DocumentReference | null //reference to the most recent instance of the message that has been sent in
+  firstTimestamp: Timestamp //the timestamp of the first instance of the message
+  lastTimestamp: Timestamp //the timestamp of the most recent instance of the message
+  lastRefreshedTimestamp: Timestamp //the timestamp of the last time the message was refreshed
+  isPollStarted: boolean //whether or not the checkers poll has been sent out for this message
+  isAssessed: boolean //whether or not the message has been considered assessed, i.e. ready to reply the users who sent it in
+  assessedTimestamp: Timestamp | null //the timestamp when the message was considered assessed
+  assessmentExpiry: Timestamp | null //the timestamp at which the assessment expires, not yet implemented
+  assessmentExpired: boolean //whether the assessment has expired
+  truthScore: number | null //the mean of the checker-submitted truth scores for this message
+  numberPointScale: 5 | 6 //whether or not this message was voted on with the 5-point or 6-point truth scale
+  isIrrelevant: boolean | null //whether this message is considered irrelevant, i.e. whether the sum of irrelevant votes > irrelevant threshold
+  isScam: boolean | null //whether this message is considered scam, i.e. the sum of scam votes > scam threshold
+  isIllicit: boolean | null //whether this message is considered illicit, i.e. the sum of illicit votes > illicit threshold
+  isSpam: boolean | null //whether this message is considered spam, i.e. the sum of spam votes > spam threshold
+  isLegitimate: boolean | null //whether this message is considered legitimate, i.e. the sum of legitimate votes > legitimate threshold
+  isUnsure: boolean | null //whether this message is considerde unsure, i.e. if the message is not any of the other categories
+  isInfo: boolean | null //whether this message is considered info, i.e. the sum of info votes > info threshold
+  isSatire: boolean | null //whether this message is considered satire, i.e. the sum of satire votes > satire threshold
+  isHarmful: boolean | null //whether this message is considered harmful, i.e. the sum of scam + illicit + untrue votes > harmful threshold
+  isHarmless: boolean | null //whether this message is considered harmless, i.e. the sum of legitimate + accurate + spam votes > harmless threshold
+  tags: TagsMap //tags assigned to the message
+  primaryCategory: string | null //the category that the message has been assigned to. Either "scam", "illicit", "satire", "untrue", "misleading", "accurate", "spam", "legitimate", "irrelevant", "unsure" or "error". Note, legitimate refers to nvc-credible and irrelevant nvc-cant-tell.
+  customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
+  instanceCount: number //the number of instances of this message
+  rationalisation: string | null //the AI-generated "rationaliastion" for why this message might have received the primaryCategory it did
 }
 
 export type InstanceData = {
-  source: string
-  id: string | null
-  timestamp: Timestamp
-  type: "text" | "image"
-  text: string | null
-  textHash: string | null
-  caption: string | null
-  captionHash: string | null
-  sender: string | null
-  imageType: "convo" | "email" | "letter" | "others"
-  ocrVersion: string
-  from: string | null
-  subject: string | null
-  hash: string | null
-  mediaId: string
-  mimeType: string
-  storageUrl: string
-  isForwarded: boolean | null
-  isFrequentlyForwarded: boolean | null
-  isReplied: boolean
-  isInterimPromptSent: boolean | null
-  isInterimReplySent: boolean | null
-  isMeaningfulInterimReplySent: boolean | null
-  isRationalisationSent: boolean | null
-  isRationalisationUseful: boolean | null
-  isReplyForced: boolean | null
-  isMatched: boolean
-  isReplyImmediate: boolean | null
-  replyCategory: string | null
-  replyTimestamp: Timestamp | null
-  matchType: string
-  scamShieldConsent: boolean | null
-  embedding: number[] | null // Specify more precisely based on the actual type used
+  source: string //Source of the message, e.g. whatsapp, telegram, email
+  id: string | null //Firebase unique identifier for the instance
+  timestamp: Timestamp //Timestamp where the instance was received by CheckMate
+  type: "text" | "image" //Type of the message. Currently either "text" or "image"
+  text: string | null //Either the text of the message for text messages, or the OCR-extracted text of the image for image messages. Not redacted for PII.
+  textHash: string | null //Hash of the text of the message. Identifical messages will have the same hash
+  caption: string | null //Caption of the image, if the message is an image
+  captionHash: string | null //Hash of the caption of the image, if the message is an image
+  sender: string | null //OCR-extracted sender of the original message to the user (e.g. the scammer etc), if present in the screenshot
+  imageType: "convo" | "email" | "letter" | "others" //Type of image, if the message is an image. Either "convo" for conversation screenshots, "email" for email screenshots, "letter" for letter screenshots, or "others" for other types of images. Decided by the LLM.
+  ocrVersion: string //Version of the OCR engine used to extract text from the image
+  from: string | null //The sender of the message to CheckMate. For whatsapp, this would be the whatsapp phone number
+  subject: string | null //The subject of the message, if the message is an email
+  hash: string | null //Locality sensitive hash of the image. Similar images will have the same hash
+  mediaId: string //file ID of the image, if the message is an image
+  mimeType: string //MIME type of the image, if the message is an image
+  storageUrl: string //URL of the image in the storage bucket
+  isForwarded: boolean | null //Whether the message was forwarded, based on whatsapp webhook
+  isFrequentlyForwarded: boolean | null //Whether the message was frequently forwarded, based on whatsapp webhook
+  isReplied: boolean //Whether the message has been replied to
+  isInterimPromptSent: boolean | null //Whether the interim prompt, inviting the user to get the interim response, has been sent
+  isInterimReplySent: boolean | null //Whether the interim response has been sent
+  isMeaningfulInterimReplySent: boolean | null //Whether the interim response was meaningful, i.e. not unsure
+  isRationalisationSent: boolean | null //Whether the rationalisation has been sent
+  isRationalisationUseful: boolean | null //Whether the rationalisation was voted as useful by the user
+  isReplyForced: boolean | null //Whether the reply was forced at the end of 24 hours, without the message naturally being assessed.
+  isMatched: boolean //Whether this instance has been matched to a message in the database. If it is not matched, it will be the first instance of a new message.
+  isReplyImmediate: boolean | null //Whether the reply was sent immediately after the message was received, meaning it was either matched or auto-categorised
+  replyCategory: string | null //The category of the reply sent to the user. May not be equivalent to the primaryCategory of the message, which could change over time.
+  replyTimestamp: Timestamp | null //The timestamp when the reply was sent
+  matchType: string //The type of match. Either "none" (no match), "similarity" (match based on semantic similarity of text), "image" (match based on the perceptual hash) or "exact" (match based on exact text match)
+  scamShieldConsent: boolean | null //Whether the user has consented to share the message with ScamShield. Defaults to true unless user explicitly opts out.
+  embedding: number[] | null // Embedding of the message
   closestMatch: {
-    instanceRef: DocumentReference | null
-    text: string | null
-    score: number | null
-    parentRef: DocumentReference | null
-    algorithm: string
+    instanceRef: DocumentReference | null //Reference to the closest matching instance
+    text: string | null //Text of the closest matching instance
+    score: number | null //Similarity score of the closest matching instance
+    parentRef: DocumentReference | null //Reference to the parent message of the closest matching instance
+    algorithm: string //Algorithm used to find the closest match
   }
-  isSatisfactionSurveySent: boolean | null
-  satisfactionScore: number | null
+  isSatisfactionSurveySent: boolean | null //Whether the satisfaction (aka NPS) survey was sent for this message
+  satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
 }
 
 export type ReferralClicksData = {
-  referralId: string
-  utmSource: string
-  utmMedium: string
-  utmCampaign: string
-  utmContent: string
-  utmTerm: string
-  isConverted: boolean
-  variant: string
-  timestamp: Timestamp
+  referralId: string //either "add", or a hash identifying the user.
+  utmSource: string //the source of the click
+  utmMedium: string //the medium of the click
+  utmCampaign: string //the campaign of the click
+  utmContent: string //the content of the click
+  utmTerm: string //the term of the click
+  isConverted: boolean //whether they onboarded onto the users app or not
+  variant: string //the variant of the referral message
+  timestamp: Timestamp //the timestamp of the click
 }
 
 export type UserData = {
-  whatsappId: string | null
-  telegramId: string | null
-  emailId: string | null
-  instanceCount: number
-  firstMessageReceiptTime: Timestamp
-  firstMessageType: "normal" | "irrelevant" | "prepopulated" // Assuming "normal" is one of the possible types
-  lastSent: Timestamp | null
-  satisfactionSurveyLastSent: Timestamp | null //when satisfaction survey was last sent, used to implement cooldown for sending the survey
+  whatsappId: string | null // The user's whatsapp phone number
+  telegramId: string | null // The user's telegram id, if available. Note this is not the username
+  emailId: string | null // The user's email address, if available
+  instanceCount: number // Number of instances sent by this user
+  firstMessageReceiptTime: Timestamp // Timestamp of the first interaction between the user and the WhatsApp bot.
+  firstMessageType: "normal" | "irrelevant" | "prepopulated" // One of "normal" (a normal message that wasn't categorised as "irrelevant", and so created an instance), "irrelevant" (stuff like hello which got auto-categorised as this), or "prepopulated" (referral link)
+  lastSent: Timestamp | null //Timestamp of the last instance sent by the and the WhatsApp bot
+  satisfactionSurveyLastSent: Timestamp | null // When satisfaction survey was last sent, used to implement cooldown for sending the survey
   initialJourney: Record<string, string> // Assuming initialJourney is an object with unknown properties
-  referralId: string // Assuming referralId is a string
+  referralId: string // Hash of the user, used to track referrals
   utm: {
-    source: string
-    medium: string
-    content: string
-    campaign: string
-    term: string
+    source: string // The source of the referral
+    medium: string // The medium of the referral
+    content: string // The content of the referral
+    campaign: string // The campaign of the referral
+    term: string // The term of the referral
   }
-  referralCount: number
-  isReferralMessageSent: boolean
-  isReminderMessageSent: boolean //whether the response
-  language: LanguageSelection
-  isSubscribedUpdates: boolean
-  isIgnored: boolean
+  referralCount: number // Number of referrals made by this user
+  isReferralMessageSent: boolean // Whether the referral prompt, asking the user to send a referral link to their friends, has been sent
+  isReminderMessageSent: boolean // Whether the reminder message, reminding the user of how to use CheckMate, has been sent
+  language: LanguageSelection // The user's preferred language, either "en" or "cn"
+  isSubscribedUpdates: boolean // Whether the user wants to receive proactive updates/messages from CheckMate
+  isIgnored: boolean // Whether the user is blocked
 }
 
 export type CheckerData = {
-  name: string | null
-  telegramUsername: string | null
-  type: "human" | "ai"
-  isActive: boolean
-  lastActivatedDate: Timestamp | null
-  isOnboardingComplete: boolean | null
-  isQuizComplete: boolean
-  quizScore: number | null
-  onboardingStatus:
-    | "name"
+  name: string | null // The name of the Checker, set by them on onboarding
+  telegramUsername: string | null // The Telegram username of the Checker, if available
+  type: "human" | "ai" // Either "human" or "ai"
+  isActive: boolean // Whether the Checker is active and receiving new messages to vote on
+  lastActivatedDate: Timestamp | null // The last date the Checker was made active
+  isOnboardingComplete: boolean | null // Whether the Checker has completed onboarding
+  isQuizComplete: boolean // Whether the Checker has completed the quiz
+  quizScore: number | null // The score the Checker got on the quiz, not yet saved
+  onboardingStatus: // The onboarding status of the Checker, either "name", "number", "verify", "quiz", "onboardWhatsapp", "joinGroupChat", "nlb", "completed", or "offboarded"
+  | "name"
     | "number"
     | "verify"
     | "quiz"
@@ -252,30 +252,30 @@ export type CheckerData = {
     | "nlb"
     | "completed"
     | "offboarded"
-  onboardingTime: Timestamp | null
-  offboardingTime: Timestamp | null
-  lastTrackedMessageId: number | null //to handle onboarding callback replies in a serverless context
-  isAdmin: boolean
-  singpassOpenId: string | null
-  telegramId: number | null
-  whatsappId?: string | null
-  hasCompletedProgram: boolean
-  certificateUrl?: string | null
-  level: number
-  experience: number
-  tier: "beginner" | "intermediate" | "expert"
-  numVoted: number //"Number of messages voted on"
-  numReferred: number //"Number of new users referred"
-  numReported: number //"Number of non-trivial instances sent in sent in"
-  voteWeight: number
-  numCorrectVotes: number //
-  numNonUnsureVotes: number //"Number of votes on messages that didn't end as unsure, for computing accuracy"
-  numVerifiedLinks: number
-  preferredPlatform: string | null
-  lastVotedTimestamp: Timestamp | null
-  getNameMessageId: string | null
-  leaderboardStats: LeaderBoardStats
-  programData: ProgramData
+  onboardingTime: Timestamp | null // The time the Checker completed his onboarding
+  offboardingTime: Timestamp | null // The time the Checker was offboarded, if he was offboarded
+  lastTrackedMessageId: number | null // The last Telegram message ID of the message sent to user. Used for determining where the user was at in the onboarding process.
+  isAdmin: boolean // Whether this checker is an admin
+  singpassOpenId: string | null // The Singpass OpenID of the checker, if available. Not yet implemented
+  telegramId: number | null // The Telegram ID of the checker
+  whatsappId: string | null // The WhatsApp ID of the checker, obtained on onboarding
+  hasCompletedProgram: boolean // Whether the checker has completed the CheckMate's program
+  certificateUrl?: string | null // The public cloud storage URL of the certificate, if the checker has completed the program
+  level: number // The level of the checker, for gamification. Not yet implemented
+  experience: number // The experience of the checker, for gamification. Not yet implemented
+  tier: "beginner" | "intermediate" | "expert" // The tier of the checker. Not yet implemented
+  numVoted: number // Number of messages voted on
+  numReferred: number // Number of new users referred
+  numReported: number // Number of non-trivial (aka nvc-cant tell) instances sent in sent in
+  voteWeight: number // How much weight to give this checker's votes. Not implemented
+  numCorrectVotes: number // Number of correct votes made by the checker. Correct is defined as same category, and if category is info, +-1 away from mean truth score
+  numNonUnsureVotes: number // Number of votes on messages that didn't end as unsure, to act as the denominator for computing accuracy
+  numVerifiedLinks: number // Number of links sent in by the checker. Not yet implemented
+  preferredPlatform: string | null // The preferred platform of the checker, either "telegram" or "whatsapp", but only "telegram" for now
+  lastVotedTimestamp: Timestamp | null // The timestamp of the last vote made by the checker
+  getNameMessageId: string | null // The Telegram message ID of the message asking the checker to input their name, used for onboarding ops only
+  leaderboardStats: LeaderBoardStats // The leaderboard stats of the checker
+  programData: ProgramData // The Checker Program data of the checker
 }
 
 export type NudgeData = {
@@ -290,7 +290,7 @@ type LeaderBoardStats = {
   numVoted: number // number of votes cast where the parent message category is not unsure
   numCorrectVotes: number // number of correct votes cast where the parent message category is not unsure
   totalTimeTaken: number // total time taken to vote where the parent message category is not unsure
-  score: number // total score
+  score: number // total score of this checker for the leaderboard
 }
 
 export type CheckerProgramStats = {
@@ -334,17 +334,17 @@ export type LeaderboardEntry = {
 }
 
 export type VoteRequest = {
-  factCheckerDocRef: DocumentReference
-  platformId: string | null
-  platform: "whatsapp" | "telegram" | "agent"
-  hasAgreed: boolean | null
-  triggerL2Vote: boolean | null
-  triggerL2Others: boolean | null
-  sentMessageId: string | null
-  truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null
-  numberPointScale: 5 | 6
-  category:
-    | "scam"
+  factCheckerDocRef: DocumentReference // The firestore document reference of the checker
+  platformId: string | null // The platform id of the checker, either the whatsappId or the telegramId
+  platform: "whatsapp" | "telegram" | "agent" // The platform the checker is on, either "whatsapp", "telegram" or "agent"
+  hasAgreed: boolean | null // to remove eventually
+  triggerL2Vote: boolean | null // to remove eventually
+  triggerL2Others: boolean | null // to remove eventually
+  sentMessageId: string | null // The message id of the message sent to the checker. To remove eventually
+  truthScore: 0 | 1 | 2 | 3 | 4 | 5 | null // The truth score assigned to the message by the checker, on a 0-5 scale. Null means no truth score
+  numberPointScale: 5 | 6 // The number point scale of the vote, either 5 (1-5) or 6 (0-5)
+  category: // The category of the message, either "scam", "illicit", "info", "satire", "spam", "legitimate", "irrelevant", "unsure", "pass". Null means not yet voted
+  | "scam"
     | "illicit"
     | "info"
     | "satire"
@@ -354,15 +354,15 @@ export type VoteRequest = {
     | "unsure"
     | "pass"
     | null
-  isAutoPassed: boolean
-  reasoning: string | null
-  createdTimestamp: Timestamp | null
-  acceptedTimestamp: Timestamp | null
-  votedTimestamp: Timestamp | null
-  isCorrect: boolean | null
-  score: number | null
-  tags: TagsMap
-  duration: number | null //duration in minutes
+  isAutoPassed: boolean // Whether the message was auto-passed after 48 hours, to avoid massive influx of messages to vote upon return
+  reasoning: string | null // The reasoning given by the fact-checking agent for their vote. Null for human checkers
+  createdTimestamp: Timestamp | null // The timestamp when the vote request was created
+  acceptedTimestamp: Timestamp | null // The timestamp when the vote request was accepted by the checker
+  votedTimestamp: Timestamp | null // The timestamp when the vote was submitted by the checker
+  isCorrect: boolean | null // Whether the checker's vote was correct, based on the final category of the message. Correct is defined as same category, and if category is info, +-1 away from mean truth score
+  score: number | null // The score that this vote contributes to the checker's leaderboard score
+  tags: TagsMap // Tags assigned to the vote request
+  duration: number | null // The time taken by the checker to vote on the message, in minutes
 }
 
 export type VoteRequestUpdateObject = Partial<VoteRequest>
