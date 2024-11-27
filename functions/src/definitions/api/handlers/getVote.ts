@@ -128,7 +128,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
       caption:
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
+      communityNote: voteRequestSnap.get("communityNote"),
       category: voteRequestSnap.get("category"),
+      communityNoteCategory: voteRequestSnap.get("communityNoteCategory"),
       sender: maskedSender,
       truthScore: voteRequestSnap.get("truthScore"),
       isAssessed: isAssessed,

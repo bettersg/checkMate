@@ -88,6 +88,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
     numberPointScale: 6,
     reasoning: null,
     tags: {},
+    communityNoteCategory: null,
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: null,
     votedTimestamp: null,

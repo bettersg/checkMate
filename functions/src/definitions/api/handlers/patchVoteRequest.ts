@@ -19,7 +19,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(400).send("Message Id or vote request Id missing.")
   }
   //confirm category in body
-  const { category, truthScore, reasoning, tags } =
+  const { category, communityNoteCategory, truthScore, reasoning, tags } =
     req.body as updateVoteRequest
   if (!category) {
     return res.status(400).send("A category is required in the body")
@@ -56,6 +56,15 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     return res.status(400).send(`${category} is not a valid category`)
   }
 
+  if (
+    communityNoteCategory &&
+    !["unacceptable", "acceptable", "great"].includes(communityNoteCategory)
+  ) {
+    return res
+      .status(400)
+      .send(`${communityNoteCategory} is not a valid category`)
+  }
+
   const allowedTags = await getTags()
   if (Array.isArray(tags)) {
     const allElementsValid = tags.every(
@@ -84,6 +93,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   }
   const updateObj = {
     category: category,
+    communityNoteCategory: communityNoteCategory ?? null,
     truthScore: truthScore ?? null,
     votedTimestamp: Timestamp.fromDate(new Date()),
     reasoning: reasoning ?? null,

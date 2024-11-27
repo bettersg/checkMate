@@ -1,4 +1,9 @@
-import { CustomReply, LeaderboardEntry, ProgramData } from "../../types"
+import {
+  CustomReply,
+  LeaderboardEntry,
+  ProgramData,
+  CommunityNote,
+} from "../../types"
 
 interface createVoteRequest {
   factCheckerId?: string
@@ -17,6 +22,7 @@ interface postWhatsappTestMessage {
 
 interface updateVoteRequest {
   category: string
+  communityNoteCategory?: string
   truthScore?: number //between 1 and 5
   reasoning?: string
   tags?: string[]
@@ -138,9 +144,11 @@ interface Vote {
   text: string | null //only for type text
   sender: string
   caption: string | null //only for type image
+  communityNote: CommunityNote
   signedImageUrl: string | null //only for type image
   category: string | null
   truthScore: number | null
+  communityNoteCategory: "great" | "acceptable" | "unacceptable" | null
   isAssessed: boolean //if the message is assessed
   finalStats: AssessedInfo | null
   tags: string[]

@@ -371,6 +371,7 @@ export type VoteRequest = {
   isCorrect: boolean | null // Whether the checker's vote was correct, based on the final category of the message. Correct is defined as same category, and if category is info, +-1 away from mean truth score
   score: number | null // The score that this vote contributes to the checker's leaderboard score
   tags: TagsMap // Tags assigned to the vote request
+  communityNoteCategory: "great" | "acceptable" | "unacceptable" | null // The category assigned to the community note, either "great" i.e. "super", "acceptable", or "bad"
   duration: number | null // The time taken by the checker to vote on the message, in minutes
 }
 
