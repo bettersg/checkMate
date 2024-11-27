@@ -11,6 +11,7 @@ import CategoryRationalisation from "./Rationalisation";
 import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 import CustomReply from "./CustomReply";
+import VotingTagChart from "./VotingTagChart";
 
 export default function VotePage() {
   const { checkerDetails } = useUser();
@@ -105,6 +106,7 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
+            {(vote.finalStats?.tags ?? []).length > 0 && <VotingTagChart assessedInfo={vote.finalStats}/>}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />
