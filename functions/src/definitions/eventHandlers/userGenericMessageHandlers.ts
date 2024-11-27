@@ -10,7 +10,11 @@ import {
 import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
 import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
 import { getUserSnapshot } from "../../services/user/userManagement"
-import { sendMenuMessage, getResponsesObj } from "../common/responseUtils"
+import {
+  sendMenuMessage,
+  getResponsesObj,
+  sendOutOfSubmissionsMessage,
+} from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
   downloadTelegramMedia,
@@ -70,6 +74,18 @@ const userGenericMessageHandlerWhatsapp = async function (
   const language = userSnap.get("language") ?? "en"
 
   const responses = await getResponsesObj("user", language)
+
+  if (userSnap.get("numSubmissionsRemaining") <= 0) {
+    await sendOutOfSubmissionsMessage(userSnap)
+    markWhatsappMessageAsRead("user", message.id)
+    return
+  }
+
+  if (!isFirstTimeUser) {
+    await userSnap.ref.update({
+      numSubmissionsRemaining: FieldValue.increment(-1),
+    })
+  }
 
   let step
 
@@ -147,6 +163,7 @@ const userGenericMessageHandlerWhatsapp = async function (
       [`initialJourney.${timestampKey}`]: step,
     })
   }
+
   markWhatsappMessageAsRead("user", message.id)
 }
 

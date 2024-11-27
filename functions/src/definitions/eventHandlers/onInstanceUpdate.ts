@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions"
+import * as admin from "firebase-admin"
 import {
   updateOne,
   CollectionTypes,
@@ -10,7 +11,13 @@ import { getCommunityNote } from "../common/machineLearningServer/operations"
 import { MessageData } from "../../types"
 import { despatchPoll } from "../../services/checker/votingService"
 import { respondToInstance } from "../common/responseUtils"
-import { message } from "telegraf/filters"
+import { FieldValue } from "@google-cloud/firestore"
+
+if (!admin.apps.length) {
+  admin.initializeApp()
+}
+
+const db = admin.firestore()
 
 const onInstanceUpdateV2 = onDocumentUpdated(
   {
@@ -82,11 +89,15 @@ const onInstanceUpdateV2 = onDocumentUpdated(
             links: communityNoteData?.links || [],
             downvoted: false,
           }
-          await messageRef.update(messageUpdateObj)
         } catch (error) {
           functions.logger.error("Error in getCommunityNote:", error)
         }
       }
+      await messageRef.update(messageUpdateObj)
+      await snap.ref.update({
+        isReplied: false,
+      })
+      // send response
       await respondToInstance(snap, false, true)
       if (messageSnap.get("isPollStarted") === false) {
         await despatchPoll(messageRef)

@@ -243,6 +243,14 @@
     "en": "Sorry to hear that, but thanks anyway for your valuable feedback!",
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
   },
+  "REMAINING_SUBMISSION_QUOTA": {
+    "en": "You have {{num_remaining_submissions}} out of {{free_tier_limit}} free submissions remaining this month. This resets at the start of next month.",
+    "cn": "您本月还剩余 {{num_remaining_submissions}} 次免费提交机会（每月总额度为 {{free_tier_limit}} 次）。额度将在下月初重置。"
+  },
+  "OUT_OF_SUBMISSIONS": {
+    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free monthly submissions. Want more? Join our waitlist for premium membership below - less than a cup of coffee per month ($4.99) gets you {{paid_tier_limit}} submissions and helps keep our service running!",
+    "cn": "感谢使用 CheckMate 🙏🏻。您本月 {{free_tier_limit}} 次的免费提交机会已用完。想要更多额度吗？欢迎加入下方的高级会员候补名单 - 每月只需一杯咖啡的价格（$4.99），即可获得 {{paid_tier_limit}} 次提交机会，同时帮助我们持续提供服务！"
+  },
   "BLAST_FEEDBACK": {
     "en": "Did you find this content useful?\n\nIf you wish to unsubscribe, type \"menu\" and select the \"Unsubscribe\" option",
     "cn": "是否认为这份内容对您有帮助？\n\n如果您希望取消订阅，请输入“菜单”并选择“取消订阅”选项。"

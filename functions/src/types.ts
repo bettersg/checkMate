@@ -236,6 +236,9 @@ export type UserData = {
   language: LanguageSelection // The user's preferred language, either "en" or "cn"
   isSubscribedUpdates: boolean // Whether the user wants to receive proactive updates/messages from CheckMate
   isIgnored: boolean // Whether the user is blocked
+  numSubmissionsRemaining: number // Number of submissions made a month
+  monthlySubmissionLimit: number // Number of submissions allowed a month
+  tier: "free" | "paid"
 }
 
 export type CheckerData = {

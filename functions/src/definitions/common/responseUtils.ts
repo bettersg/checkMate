@@ -1031,7 +1031,7 @@ async function respondToInstance(
     return
   }
 
-  if (category === "irrelevant" && isMachineCategorised) {
+  if (category === "irrelevant" && isMachineCase) {
     category = "irrelevant_auto"
   }
 
@@ -1182,6 +1182,8 @@ async function respondToInstance(
     }
   }
 
+  await sendRemainingSubmissionQuota(userSnap)
+
   if (
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"
@@ -1210,6 +1212,48 @@ async function sendReferralMessage(userSnap: DocumentSnapshot) {
     "user",
     whatsappId,
     referralResponse,
+    null,
+    "whatsapp",
+    true
+  )
+}
+
+async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
+  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const responseText = responses.REMAINING_SUBMISSION_QUOTA.replace(
+    "{{num_remaining_submissions}}",
+    numSubmissionsRemaining.toString()
+  ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
+  //TODO: change to whatsapp flow
+  await sendTextMessage(
+    "user",
+    whatsappId,
+    responseText,
+    null,
+    "whatsapp",
+    true
+  )
+}
+
+async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const thresholds = await getThresholds()
+  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
+  const responseText = responses.OUT_OF_SUBMISSIONS.replace(
+    "{{paid_tier_limit}}",
+    paidTierLimit.toString()
+  ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
+  await sendTextMessage(
+    "user",
+    whatsappId,
+    responseText,
     null,
     "whatsapp",
     true
@@ -1446,4 +1490,5 @@ export {
   respondToBlastFeedback,
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
+  sendOutOfSubmissionsMessage,
 }

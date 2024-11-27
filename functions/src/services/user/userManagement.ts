@@ -3,6 +3,7 @@ import Hashids from "hashids"
 import { Timestamp } from "firebase-admin/firestore"
 import { UserData } from "../../types"
 import { logger } from "firebase-functions/v2"
+import { getThresholds } from "../../definitions/common/utils"
 const salt = process.env.HASHIDS_SALT
 const hashids = new Hashids(salt)
 if (!admin.apps.length) {
@@ -56,6 +57,8 @@ export async function createNewUser(
       return null
   }
 
+  const thresholds = await getThresholds()
+
   const newUserObject: UserData = {
     ...ids,
     instanceCount: 0,
@@ -78,6 +81,9 @@ export async function createNewUser(
     isReminderMessageSent: false,
     isSubscribedUpdates: true,
     isIgnored: false,
+    tier: "free",
+    numSubmissionsRemaining: thresholds.freeTierMonthlyLimit ?? 5,
+    monthlySubmissionLimit: thresholds.freeTierMonthlyLimit ?? 5,
   }
   try {
     const res = await db.collection("users").add(newUserObject)

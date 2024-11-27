@@ -29,5 +29,7 @@
   "accuracyNudgeThreshold": 0.5,
   "numberBeforeAccuracyNudge": 20,
   "daysBeforeFirstCompletionCheck": 60,
-  "daysBeforeSecondCompletionCheck": 90
+  "daysBeforeSecondCompletionCheck": 90,
+  "freeTierMonthlyLimit": 5,
+  "paidTierMonthlyLimit": 50
 }
