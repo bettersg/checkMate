@@ -18,15 +18,20 @@ import {
   getCloudStorageUrl,
 } from "../common/mediaUtils"
 import { incrementCheckerCounts } from "../common/counters"
-import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
+import { anonymiseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
-import { performOCR } from "../common/machineLearningServer/operations"
+import {
+  performOCR,
+  getCommunityNote,
+  determineNeedsChecking,
+} from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { GeneralMessage, MessageData, InstanceData } from "../../types"
 import { AppEnv } from "../../appEnv"
+import { getSignedUrl } from "../common/mediaUtils"
 import { logger } from "firebase-functions"
 
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
@@ -170,11 +175,14 @@ async function newTextInstanceHandler({
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
   const machineCategory = (await classifyText(text)) ?? "error"
-  if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
+  const needsChecking = await determineNeedsChecking({
+    text: text,
+  })
+  if (from && isFirstTimeUser && !needsChecking) {
     await userSnap.ref.update({
       firstMessageType: "irrelevant",
     })
-    return Promise.resolve(`text_machine_${machineCategory}`)
+    return Promise.resolve(`text_machine_irrelevant`)
   }
   let matchType = "none" // will be set to either "similarity" or "none"
   let similarity
@@ -220,25 +228,27 @@ async function newTextInstanceHandler({
       machineCategory !== "unsure" &&
       machineCategory !== "info"
     )
-
+    let communityNoteData
+    let isCommunityNoteGenerated = false
+    if (needsChecking) {
+      try {
+        communityNoteData = await getCommunityNote({
+          text: text,
+        })
+        isCommunityNoteGenerated = true
+      } catch (error) {
+        functions.logger.error("Error in getCommunityNote:", error)
+      }
+    }
     let strippedMessage = await anonymiseMessage(text, true)
 
-    if (strippedMessage && machineCategory === "legitimate") {
-      strippedMessage = await anonymiseMessage(strippedMessage, false) //won't run for now till machineCategory returns legitimate
-    }
-
-    let rationalisation: null | string = null
-    if (
-      isMachineAssessed &&
-      strippedMessage &&
-      !machineCategory.includes("irrelevant")
-    ) {
-      rationalisation = await rationaliseMessage(text, machineCategory)
-    }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
-      machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: isMachineAssessed,
+      machineCategory: needsChecking
+        ? machineCategory.split("_")[0]
+        : "irrelevant",
+      isMachineCategorised: isMachineAssessed || !needsChecking,
+      isWronglyCategorisedIrrelevant: false,
       originalText: text,
       text: strippedMessage, //text
       caption: null,
@@ -247,33 +257,35 @@ async function newTextInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+      isAssessed: false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+      isIrrelevant: !needsChecking,
+      isScam: null,
+      isIllicit: null,
+      isSpam: null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: machineCategory === "info" ? true : null,
+      isInfo: null,
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
       tags: {},
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
-      customReply: null, //string
+      primaryCategory: needsChecking ? null : "irrelevant",
+      customReply: null,
+      communityNote:
+        isCommunityNoteGenerated && communityNoteData
+          ? {
+              en: communityNoteData?.en || "",
+              cn: communityNoteData?.cn || "",
+              links: communityNoteData?.links || [],
+              downvoted: false,
+            }
+          : null,
       instanceCount: 0,
-      rationalisation: rationalisation,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -307,9 +319,13 @@ async function newTextInstanceHandler({
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
     isRationalisationUseful: null,
+    isCommunityNoteSent: null,
+    isCommunityNoteUseful: null,
+    isCommunityNoteReviewRequested: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
+    isIrrelevantAppealed: false,
     replyCategory: null,
     replyTimestamp: null,
     matchType: matchType,
@@ -333,7 +349,7 @@ async function newTextInstanceHandler({
     instanceRef,
     instanceUpdateObj
   )
-  return Promise.resolve(`text_machine_${machineCategory}`)
+  return Promise.resolve(`text_normal`)
 }
 
 async function newImageInstanceHandler({
@@ -490,7 +506,18 @@ async function newImageInstanceHandler({
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
-    let rationalisation: null | string = null
+    let communityNoteData
+    let isCommunityNoteGenerated = false
+    try {
+      const signedUrl = (await getSignedUrl(filename)) ?? null
+      communityNoteData = await getCommunityNote({
+        url: signedUrl,
+        caption: caption ?? null,
+      })
+      isCommunityNoteGenerated = true
+    } catch (error) {
+      functions.logger.error("Error in getCommunityNote:", error)
+    }
     if (extractedMessage) {
       strippedMessage = await anonymiseMessage(extractedMessage)
     }
@@ -501,21 +528,11 @@ async function newImageInstanceHandler({
       machineCategory !== "unsure" &&
       machineCategory !== "info"
     )
-    if (
-      extractedMessage &&
-      isMachineAssessed &&
-      strippedMessage &&
-      !machineCategory.includes("irrelevant")
-    ) {
-      rationalisation = await rationaliseMessage(
-        strippedMessage,
-        machineCategory
-      )
-    }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
+      isWronglyCategorisedIrrelevant: false,
       originalText: extractedMessage ?? null,
       text: strippedMessage ?? null, //text
       caption: caption ?? null,
@@ -524,33 +541,35 @@ async function newImageInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+      isAssessed: false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+      isIrrelevant: false,
+      isScam: null,
+      isIllicit: null,
+      isSpam: null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: !caption && machineCategory === "info" ? true : null,
+      isInfo: null,
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
       tags: {},
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
+      primaryCategory: null,
       customReply: null, //string
+      communityNote:
+        isCommunityNoteGenerated && communityNoteData
+          ? {
+              en: communityNoteData?.en || "",
+              cn: communityNoteData?.cn || "",
+              links: communityNoteData?.links || [],
+              downvoted: false,
+            }
+          : null,
       instanceCount: 0,
-      rationalisation: rationalisation,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -595,9 +614,13 @@ async function newImageInstanceHandler({
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
     isRationalisationUseful: null,
+    isCommunityNoteSent: null,
+    isCommunityNoteUseful: null,
+    isCommunityNoteReviewRequested: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
+    isIrrelevantAppealed: false,
     replyCategory: null,
     replyTimestamp: null,
     matchType: matchType,

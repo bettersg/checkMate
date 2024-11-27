@@ -3,6 +3,7 @@ import axios, { AxiosError } from "axios"
 import * as functions from "firebase-functions"
 import { GoogleAuth } from "google-auth-library"
 import { AppEnv } from "../../../appEnv"
+import { CommunityNote } from "../../../types"
 
 const embedderHost = defineString(AppEnv.EMBEDDER_HOST)
 const env = process.env.ENVIRONMENT
@@ -12,8 +13,15 @@ interface EmbedResponse {
 }
 
 interface TrivialResponse {
-  prediction: string
+  needsChecking: boolean
 }
+
+interface CommunityNoteResponse {
+  success: boolean
+  data: CommunityNoteReturn
+}
+
+type CommunityNoteReturn = Pick<CommunityNote, "en" | "cn" | "links">
 
 interface L1CategoryResponse {
   prediction: string
@@ -43,12 +51,85 @@ async function getEmbedding(text: string): Promise<number[]> {
   return response.data.embedding
 }
 
-async function checkTrivial(text: string): Promise<string> {
-  const data = {
-    text: text,
+async function determineNeedsChecking(input: {
+  text?: string
+  url?: string
+  caption?: string
+}): Promise<boolean> {
+  if (input.text && input.url) {
+    throw new Error("Cannot pass both text and url to determineNeedsChecking")
   }
-  const response = await callAPI<TrivialResponse>("checkTrivial", data)
-  return response.data.prediction
+  // Mock response in non-prod environment
+  if (env !== "PROD") {
+    // You can add more sophisticated mock logic here
+    if (
+      input.text?.toLowerCase().includes("trivial") ||
+      input.caption?.toLowerCase().includes("trivial") ||
+      input.text?.toLowerCase() == "hello"
+    ) {
+      return false
+    }
+    return true
+  }
+
+  const data = { ...input }
+  const response = await callAPI<TrivialResponse>(
+    "determineNeedsChecking",
+    data
+  )
+  return response.data.needsChecking
+}
+
+async function getCommunityNote(input: {
+  text?: string
+  url?: string | null
+  caption?: string | null
+}): Promise<CommunityNoteReturn> {
+  if (env !== "PROD") {
+    // You can add more sophisticated mock logic here
+    if (env === "SIT") {
+      throw new Error("Cannot call getCommunityNote in SIT environment")
+    }
+    if (
+      input.text?.toLowerCase().includes("test") ||
+      input.caption?.toLowerCase().includes("test") ||
+      env === "DEV"
+    ) {
+      return {
+        en: "This is a test community note.",
+        cn: "这是一个测试社区笔记。",
+        links: ["https://example1.com", "https://example2.com"],
+      }
+    }
+  }
+
+  try {
+    const data = { ...input }
+
+    // Timeout logic
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => {
+        reject(new Error("The API call timed out after 60 seconds"))
+      }, 60000)
+    )
+
+    // API call
+    const apiCallPromise = callAPI<CommunityNoteResponse>(
+      "getCommunityNote",
+      data
+    )
+
+    // Race between the API call and the timeout
+    const response = await Promise.race([apiCallPromise, timeoutPromise])
+
+    return response.data.data
+  } catch (error) {
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "An error occurred calling the machine learning API"
+    )
+  }
 }
 
 async function getL1Category(text: string): Promise<string> {
@@ -119,8 +200,18 @@ async function callAPI<T>(endpoint: string, data: object) {
     } else {
       functions.logger.log(error)
     }
-    throw new Error("An error occurred calling the machine learning API")
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "An error occurred calling the machine learning API"
+    )
   }
 }
 
-export { getEmbedding, checkTrivial, getL1Category, performOCR }
+export {
+  getEmbedding,
+  determineNeedsChecking,
+  getL1Category,
+  performOCR,
+  getCommunityNote,
+}

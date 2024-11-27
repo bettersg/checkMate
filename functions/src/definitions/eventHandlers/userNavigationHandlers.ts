@@ -24,6 +24,8 @@ import {
   sendLanguageSelection,
   sendBlast,
   respondToBlastFeedback,
+  respondToCommunityNoteFeedback,
+  respondToIrrelevantDispute,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -182,9 +184,17 @@ async function onButtonReply(
       ;[instancePath] = rest
       await sendRationalisation(userSnap, instancePath)
       break
+    case "isWronglyIrrelevant":
+      ;[instancePath] = rest
+      await respondToIrrelevantDispute(userSnap, instancePath)
+      break
     case "feedbackRationalisation":
       ;[instancePath, selection] = rest
       await respondToRationalisationFeedback(userSnap, instancePath, selection)
+      break
+    case "feedbackNote":
+      ;[instancePath, selection] = rest
+      await respondToCommunityNoteFeedback(userSnap, instancePath, selection)
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest

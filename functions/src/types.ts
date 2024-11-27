@@ -119,6 +119,7 @@ export type GeneralMessage = {
 export type MessageData = {
   machineCategory: string //category assigned by the machine learning model. Can be either "scam", "illicit", "spam", "info", "irrelevant", "irrelevant_length", or "unsure"
   isMachineCategorised: boolean //whether or not the message was categorised by the machine learning model
+  isWronglyCategorisedIrrelevant: boolean //whether or not the message was categorised as irrelevant by the machine learning model but was actually not as indicated by the user
   originalText: string | null //the original, unredacted text of the message. For image messages, this is the OCR-extracted text from the image if present
   text: string | null //the text of the message, redacted for PII, to be shown on website and to checkers. For image messages, this is the redacted OCR-extracted text from the image if present
   caption: string | null //for image messages, the caption of the image
@@ -146,13 +147,13 @@ export type MessageData = {
   tags: TagsMap //tags assigned to the message
   primaryCategory: string | null //the category that the message has been assigned to. Either "scam", "illicit", "satire", "untrue", "misleading", "accurate", "spam", "legitimate", "irrelevant", "unsure" or "error". Note, legitimate refers to nvc-credible and irrelevant nvc-cant-tell.
   customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
+  communityNote: CommunityNote | null // the gen-ai generated community note for this message
   instanceCount: number //the number of instances of this message
-  rationalisation: string | null //the AI-generated "rationaliastion" for why this message might have received the primaryCategory it did
 }
 
 export type InstanceData = {
   source: string //Source of the message, e.g. whatsapp, telegram, email
-  id: string | null //Firebase unique identifier for the instance
+  id: string | null //whatsapp id for the instance
   timestamp: Timestamp //Timestamp where the instance was received by CheckMate
   type: "text" | "image" //Type of the message. Currently either "text" or "image"
   text: string | null //Either the text of the message for text messages, or the OCR-extracted text of the image for image messages. Not redacted for PII.
@@ -176,6 +177,10 @@ export type InstanceData = {
   isMeaningfulInterimReplySent: boolean | null //Whether the interim response was meaningful, i.e. not unsure
   isRationalisationSent: boolean | null //Whether the rationalisation has been sent
   isRationalisationUseful: boolean | null //Whether the rationalisation was voted as useful by the user
+  isCommunityNoteSent: boolean | null //Whether the community note has been sent
+  isCommunityNoteUseful: boolean | null //Whether the community note was voted as useful by the user
+  isCommunityNoteReviewRequested: boolean | null //Whether the user requested to see the human review
+  isIrrelevantAppealed: boolean | null //Whether the user indicate that they message was incorrectly marked by the automated pipelines as irrelevant
   isReplyForced: boolean | null //Whether the reply was forced at the end of 24 hours, without the message naturally being assessed.
   isMatched: boolean //Whether this instance has been matched to a message in the database. If it is not matched, it will be the first instance of a new message.
   isReplyImmediate: boolean | null //Whether the reply was sent immediately after the message was received, meaning it was either matched or auto-categorised
@@ -374,6 +379,13 @@ export type CustomReply = {
   caption: string | null
   lastUpdatedBy: DocumentReference
   lastUpdatedTimestamp: Timestamp
+}
+
+export type CommunityNote = {
+  en: string
+  cn: string
+  links: string[]
+  downvoted: boolean
 }
 
 export type BlastData = {

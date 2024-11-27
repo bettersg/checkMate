@@ -18,9 +18,13 @@ import { getThresholds, sleep } from "./utils"
 import { getSignedUrl } from "./mediaUtils"
 import { sendTextMessage } from "./sendMessage"
 import { getVoteCounts } from "./counters"
-import { CustomReply, LanguageSelection, UserBlast } from "../../types"
+import {
+  CustomReply,
+  LanguageSelection,
+  UserBlast,
+  CommunityNote,
+} from "../../types"
 import { incrementCheckerCounts } from "./counters"
-import { get } from "http"
 
 const db = admin.firestore()
 
@@ -147,12 +151,96 @@ async function respondToRationalisationFeedback(
       await instanceRef.update({ isRationalisationUseful: true })
       break
     default:
-      response = responses?.RATIONALISATION_NOT_USEFUL
+      response = responses?.FEEDBACK_NOT_USEFUL
       await instanceRef.update({ isRationalisationUseful: false })
       break
   }
 
   await sendWhatsappTextMessage("user", from, response)
+}
+
+async function respondToCommunityNoteFeedback(
+  userSnap: DocumentSnapshot,
+  instancePath: string,
+  isUseful: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  if (!data) {
+    functions.logger.log("Missing data in respondToCommunityNoteFeedback")
+    return
+  }
+  let response
+  switch (isUseful) {
+    case "yes":
+      response = responses?.FEEDBACK_THANKS
+      await instanceRef.update({ isCommunityNoteUseful: true })
+      const isReminderMessageSent =
+        userSnap.get("isReminderMessageSent") ?? false
+      const isReferralMessageSent =
+        userSnap.get("isReferralMessageSent") ?? false
+
+      let followUpWithReminder = !isReminderMessageSent
+      let followUpWithReferral = !isReferralMessageSent
+
+      if (followUpWithReminder) {
+        await sleep(3000)
+        await sendTextMessage("user", from, responses.NEXT_TIME)
+        await userSnap.ref.update({
+          isReminderMessageSent: true,
+        })
+      }
+
+      if (followUpWithReferral) {
+        await sendReferralMessage(userSnap)
+        await userSnap.ref.update({
+          isReferralMessageSent: true,
+        })
+      }
+      break
+    default:
+      response = responses?.FEEDBACK_NOT_USEFUL
+      await instanceRef.update({ isRationalisationUseful: false })
+      break
+  }
+
+  await sendWhatsappTextMessage("user", from, response)
+}
+
+async function respondToIrrelevantDispute(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  if (!data) {
+    functions.logger.log("Missing data in respondToCommunityNoteFeedback")
+    return
+  }
+  const response = responses?.IRRELEVANT_APPEAL
+  await instanceRef.update({ isIrrelevantAppealed: true })
+
+  await sendWhatsappTextMessage("user", from, response, data.id)
 }
 
 async function respondToBlastFeedback(
@@ -802,8 +890,13 @@ async function respondToInstance(
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
+  const isWronglyCategorisedIrrelevant = parentMessageSnap.get(
+    "isWronglyCategorisedIrrelevant"
+  )
+  const machineCategory = parentMessageSnap.get("machineCategory")
   const instanceCount = parentMessageSnap.get("instanceCount")
   const customReply: CustomReply = parentMessageSnap.get("customReply")
+  const communityNote: CommunityNote = parentMessageSnap.get("communityNote")
   const { validResponsesCount } = await getVoteCounts(parentMessageRef)
   const isImage = data?.type === "image"
   const hasCaption = data?.caption != null
@@ -814,16 +907,71 @@ async function respondToInstance(
 
   let category = primaryCategory
 
+  let bespokeReply = false
+
+  let isMachineCase = false
+
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
       category = "custom"
       await sendTextMessage("user", from, customReply.text, data.id)
+      bespokeReply = true
     } else if (customReply.type === "image") {
       //TODO: implement later
     }
   }
 
-  if (!isAssessed && !forceReply) {
+  if (
+    isMachineCategorised &&
+    machineCategory &&
+    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
+  ) {
+    category = machineCategory
+    isMachineCase = true
+  }
+
+  if (communityNote && !communityNote.downvoted) {
+    category = "communityNote"
+    bespokeReply = true
+    //get the text based on language
+    const note = communityNote[language as keyof CommunityNote] as string
+    const responseText = responses.COMMUNITY_NOTE.replace(
+      "{{community_note}}",
+      note
+    )
+    const buttons = [
+      {
+        type: "reply",
+        reply: {
+          id: `feedbackNote_${instanceSnap.ref.path}_yes`,
+          title: responses.BUTTON_USEFUL,
+        },
+      },
+      {
+        type: "reply",
+        reply: {
+          id: `feedbackNote_${instanceSnap.ref.path}_no`,
+          title: responses.BUTTON_NOT_USEFUL,
+        },
+      },
+      // {
+      //   type: "reply",
+      //   reply: {
+      //     id: `requestNoteReview_${instanceSnap.ref.path}`,
+      //     title: responses.BUTTON_RESULTS,
+      //   },
+      // }
+    ]
+    await sendWhatsappButtonMessage(
+      "user",
+      from,
+      responseText,
+      buttons,
+      data.id
+    )
+  }
+
+  if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
     await sendTextMessage(
       "user",
       from,
@@ -874,6 +1022,7 @@ async function respondToInstance(
   if (
     category !== "irrelevant" &&
     category !== "custom" &&
+    category !== "communityNote" &&
     !Object.keys(responses).includes(category.toUpperCase())
   ) {
     functions.logger.error("Unknown category assigned, error response sent")
@@ -889,15 +1038,23 @@ async function respondToInstance(
   let responseText
   switch (category) {
     case "irrelevant_auto":
-      await sendMenuMessage(
-        userSnap,
-        "IRRELEVANT_AUTO_MENU_PREFIX",
-        "whatsapp",
-        data.id,
-        instanceSnap.ref.path,
-        false,
-        isGenerated,
-        isIncorrect
+      responseText = getFinalResponseText(
+        responses["IRRELEVANT_AUTO"],
+        responses
+      )
+      const misunderstoodButton = {
+        type: "reply",
+        reply: {
+          id: `isWronglyIrrelevant_${instanceSnap.ref.path}`,
+          title: responses.BUTTON_MISUNDERSTOOD,
+        },
+      }
+      await sendWhatsappButtonMessage(
+        "user",
+        from,
+        responseText,
+        [misunderstoodButton],
+        data.id
       )
       break
     case "irrelevant":
@@ -917,6 +1074,8 @@ async function respondToInstance(
       await sendTextMessage("user", from, responseText, data.id)
       break
     case "custom":
+      break
+    case "communityNote":
       break
     default:
       if (category === "unsure") {
@@ -1023,33 +1182,7 @@ async function respondToInstance(
     }
   }
 
-  const isReminderMessageSent = userSnap.get("isReminderMessageSent") ?? false
-  const isReferralMessageSent = userSnap.get("isReferralMessageSent") ?? false
-
-  let followUpWithReminder = !isReminderMessageSent
-  let followUpWithReferral =
-    !isReferralMessageSent &&
-    category !== "irrelevant" &&
-    category !== "irrelevant_auto"
-
-  if (followUpWithReminder) {
-    await sleep(3000)
-    await sendTextMessage("user", from, responses.NEXT_TIME)
-    await userSnap.ref.update({
-      isReminderMessageSent: true,
-    })
-  }
-
-  if (followUpWithReferral) {
-    await sendReferralMessage(userSnap)
-    await userSnap.ref.update({
-      isReferralMessageSent: true,
-    })
-  }
-
   if (
-    !followUpWithReferral &&
-    !followUpWithReminder && // No follow-up messages
     Math.random() < thresholds.surveyLikelihood &&
     category != "irrelevant_auto"
   ) {
@@ -1311,4 +1444,6 @@ export {
   sendUnsupportedTypeMessage,
   sendBlast,
   respondToBlastFeedback,
+  respondToCommunityNoteFeedback,
+  respondToIrrelevantDispute,
 }
