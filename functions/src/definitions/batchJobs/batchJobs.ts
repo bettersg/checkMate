@@ -347,6 +347,39 @@ async function saveLeaderboard() {
   }
 }
 
+async function resetUserSubmissions() {
+  try {
+    const usersRef = db.collection("users")
+    const usersSnapshot = await usersRef.get()
+    
+    const batch = db.batch()
+    let batchCount = 0
+    const BATCH_LIMIT = 500
+
+    for (const userDoc of usersSnapshot.docs) {
+      const monthlySubmissionLimit = userDoc.get("monthlySubmissionLimit")
+      batch.update(userDoc.ref, {
+        numSubmissionsRemaining: monthlySubmissionLimit
+      })
+      
+      batchCount++
+      if (batchCount >= BATCH_LIMIT) {
+        await batch.commit()
+        batchCount = 0
+      }
+    }
+
+    if (batchCount > 0) {
+      await batch.commit()
+    }
+
+    logger.info("Successfully reset submission counts for all users")
+  } catch (error) {
+    logger.error("Error resetting user submission counts:", error)
+    throw error
+  }
+}
+
 const checkSessionExpiring = onSchedule(
   {
     schedule: "1 * * * *",
@@ -406,6 +439,15 @@ const resetLeaderboard = onSchedule(
   resetLeaderboardHandler
 )
 
+const resetUserSubmissionCounts = onSchedule(
+  {
+    schedule: "0 0 1 * *", // Run at midnight (00:00) on the first day of every month
+    timeZone: "Asia/Singapore",
+    retryCount: 3,
+  },
+  resetUserSubmissions
+)
+
 // Export scheduled cloud functions
 export const batchJobs = {
   checkSessionExpiring,
@@ -414,6 +456,7 @@ export const batchJobs = {
   sendCheckersWelcomeMesssage,
   sendInterimPrompt,
   resetLeaderboard,
+  resetUserSubmissionCounts,
 }
 
 // Export utility functions
