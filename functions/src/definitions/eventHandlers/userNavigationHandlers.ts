@@ -88,6 +88,9 @@ const userWhatsappInteractionHandler = async function (
         case "list_reply":
           step = await onTextListReceipt(userSnap, message, "whatsapp")
           break
+        case "nfm_reply":
+          step = await onFlowResponse(userSnap, message, "whatsapp")
+          break
       }
       break
 
@@ -323,6 +326,35 @@ async function onTextListReceipt(
     await sendWhatsappTextMessage("user", from, response, null, true)
   }
   return Promise.resolve(step)
+}
+
+async function onFlowResponse(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  messageObj: WhatsappMessageObject,
+  platform = "whatsapp"
+) {
+  const from = messageObj.from
+  const jsonString = messageObj.interactive?.nfm_reply?.response_json
+  if (!jsonString) {
+    functions.logger.error("No jsonString in interactive object")
+    return
+  }
+  const flowResponse = JSON.parse(jsonString)
+  const flowType = flowResponse?.flow_token
+
+  switch (flowType) {
+    case "onboarding":
+      const language = flowResponse?.language ?? "en"
+      const ageGroup = flowResponse?.age_group ?? null
+      await userSnap.ref.update({
+        isOnboardingComplete: true,
+        ageGroup: ageGroup,
+      })
+      await updateLanguageAndSendMenu(userSnap, language)
+      break
+    default:
+      functions.logger.error("Unsupported flow type:", flowType)
+  }
 }
 
 async function toggleUserSubscription(

@@ -1,0 +1,306 @@
+{
+  "version": "5.1",
+  "routing_model": {
+    "LANGUAGE": ["SIGNUP_EN", "SIGNUP_CN"],
+    "SIGNUP_EN": ["TERMS_AND_CONDITIONS_en"],
+    "SIGNUP_CN": ["TERMS_AND_CONDITIONS_cn"]
+  },
+  "screens": [
+    {
+      "id": "LANGUAGE",
+      "title": "Welcome to CheckMate",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "RadioButtonsGroup",
+                "name": "language_selection",
+                "label": "Select your language / 请选择语言",
+                "required": true,
+                "data-source": [
+                  {
+                    "id": "en",
+                    "title": "English"
+                  },
+                  {
+                    "id": "cn",
+                    "title": "华语"
+                  }
+                ]
+              },
+              {
+                "type": "If",
+                "condition": "(${form.language_selection} == 'cn')",
+                "then": [
+                  {
+                    "type": "Footer",
+                    "label": "继续",
+                    "on-click-action": {
+                      "name": "navigate",
+                      "next": {
+                        "type": "screen",
+                        "name": "SIGNUP_CN"
+                      },
+                      "payload": {
+                        "language": "${form.language_selection}"
+                      }
+                    }
+                  }
+                ],
+                "else": [
+                  {
+                    "type": "Footer",
+                    "label": "Continue",
+                    "on-click-action": {
+                      "name": "navigate",
+                      "next": {
+                        "type": "screen",
+                        "name": "SIGNUP_EN"
+                      },
+                      "payload": {
+                        "language": "${form.language_selection}"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SIGNUP_EN",
+      "title": "Welcome to CheckMate",
+      "data": {
+        "language": {
+          "type": "string",
+          "__example__": "en"
+        }
+      },
+      "terminal": true,
+      "success": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "TextSubheading",
+                "text": "We help check things you're unsure about. Signup & enjoy 5 free checks monthly!"
+              },
+              {
+                "type": "TextBody",
+                "text": "In future, you'll be able to subscribe to support our work and receive more checks."
+              },
+              {
+                "type": "Dropdown",
+                "name": "age_group",
+                "label": "Pick your age group",
+                "required": true,
+                "data-source": [
+                  {
+                    "id": "<20",
+                    "title": "20 or younger"
+                  },
+                  {
+                    "id": "21-35",
+                    "title": "21-35"
+                  },
+                  {
+                    "id": "36-50",
+                    "title": "36-50"
+                  },
+                  {
+                    "id": "51-65",
+                    "title": "51-65"
+                  },
+                  {
+                    "id": ">65",
+                    "title": "66 or older"
+                  }
+                ]
+              },
+              {
+                "type": "OptIn",
+                "label": "I agree to the terms of use.",
+                "required": true,
+                "name": "tos_optin",
+                "on-click-action": {
+                  "name": "navigate",
+                  "payload": {},
+                  "next": {
+                    "name": "TERMS_AND_CONDITIONS_en",
+                    "type": "screen"
+                  }
+                }
+              },
+              {
+                "type": "Footer",
+                "label": "Sign Up",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "tos_optin": "${form.tos_optin}",
+                    "age_group": "${form.age_group}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SIGNUP_CN",
+      "title": "欢迎来到查友",
+      "data": {
+        "language": {
+          "type": "string",
+          "__example__": "en"
+        }
+      },
+      "terminal": true,
+      "success": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "TextSubheading",
+                "text": "我们帮助您核实不确定的信息。注册即可每月享受5次免费检查！"
+              },
+              {
+                "type": "TextBody",
+                "text": "未来，您可以订阅我们的服务，以支持我们的工作并获得更多检查次数。"
+              },
+              {
+                "type": "Dropdown",
+                "name": "age_group",
+                "label": "请问您属于哪个年龄段？",
+                "required": true,
+                "data-source": [
+                  {
+                    "id": "<20",
+                    "title": "20 岁或以下"
+                  },
+                  {
+                    "id": "21-35",
+                    "title": "21-35"
+                  },
+                  {
+                    "id": "36-50",
+                    "title": "36-50"
+                  },
+                  {
+                    "id": "51-65",
+                    "title": "51-65"
+                  },
+                  {
+                    "id": ">65",
+                    "title": "66 岁或以上"
+                  }
+                ]
+              },
+              {
+                "type": "OptIn",
+                "label": "我同意使用条款。",
+                "required": true,
+                "name": "tos_optin",
+                "on-click-action": {
+                  "name": "navigate",
+                  "payload": {},
+                  "next": {
+                    "name": "TERMS_AND_CONDITIONS_cn",
+                    "type": "screen"
+                  }
+                }
+              },
+              {
+                "type": "Footer",
+                "label": "注册",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "tos_optin": "${form.tos_optin}",
+                    "age_group": "${form.age_group}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "TERMS_AND_CONDITIONS_en",
+      "title": "Terms and conditions",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Our Terms"
+          },
+          {
+            "type": "TextSubheading",
+            "text": "Data usage"
+          },
+          {
+            "type": "TextBody",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus."
+          },
+          {
+            "type": "TextSubheading",
+            "text": "Privacy policy"
+          },
+          {
+            "type": "TextBody",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus."
+          }
+        ]
+      }
+    },
+    {
+      "id": "TERMS_AND_CONDITIONS_cn",
+      "title": "Terms and conditions",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Our Terms"
+          },
+          {
+            "type": "TextSubheading",
+            "text": "Data usage"
+          },
+          {
+            "type": "TextBody",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus."
+          },
+          {
+            "type": "TextSubheading",
+            "text": "Privacy policy"
+          },
+          {
+            "type": "TextBody",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus."
+          }
+        ]
+      }
+    }
+  ]
+}

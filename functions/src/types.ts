@@ -33,6 +33,11 @@ export type WhatsappMessageObject = {
     type: string
     list_reply: { id: string }
     button_reply: { id: string }
+    nfm_reply?: {
+      name: string
+      body: string
+      response_json: string // JSON string containing flow-specific data
+    }
   }
   text: { body: string }
   context: { id: string; forwarded: boolean; frequently_forwarded: boolean }
@@ -216,6 +221,7 @@ export type UserData = {
   whatsappId: string | null // The user's whatsapp phone number
   telegramId: string | null // The user's telegram id, if available. Note this is not the username
   emailId: string | null // The user's email address, if available
+  ageGroup: "<20" | "21-35" | "36-50" | "51-65" | ">65" | null // The user's age group
   instanceCount: number // Number of instances sent by this user
   firstMessageReceiptTime: Timestamp // Timestamp of the first interaction between the user and the WhatsApp bot.
   firstMessageType: "normal" | "irrelevant" | "prepopulated" // One of "normal" (a normal message that wasn't categorised as "irrelevant", and so created an instance), "irrelevant" (stuff like hello which got auto-categorised as this), or "prepopulated" (referral link)
@@ -236,8 +242,13 @@ export type UserData = {
   language: LanguageSelection // The user's preferred language, either "en" or "cn"
   isSubscribedUpdates: boolean // Whether the user wants to receive proactive updates/messages from CheckMate
   isIgnored: boolean // Whether the user is blocked
+  isOnboardingComplete: boolean // Whether the user has completed the onboarding flow (selected language, age group, agreed to terms of use)
   numSubmissionsRemaining: number // Number of submissions made a month
   monthlySubmissionLimit: number // Number of submissions allowed a month
+  isInterestedInSubscription: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at $5 a month
+  isInterestedAtALowerPoint: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at a lower price point
+  priceWhereInterested: number | null // The price point when the user is interested
+  feedback: string | null // The user's feedback, if they've provided any
   tier: "free" | "paid"
 }
 

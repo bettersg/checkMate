@@ -81,7 +81,7 @@
   },
   "REPORTING_NUDGE": {
     "en": "By sending in such messages, you are helping us notify others who encounter similar ones. ",
-    "cn": "您的每一个报告都在帮助其他收到同类消息的人。 "
+    "cn": "您的每次查询都在帮助其他收到同类消息的人。 "
   },
   "MATCHED": {
     "en": "In fact, other users have sent this message in {{numberInstances}} times. ",
@@ -146,6 +146,14 @@
   "MENU": {
     "en": "{{prefix}}\n\nSelect \"Menu\" below to see what CheckMate can do! 👈\n\nAnytime you need a refresher, type \"menu\" to get here again! 😊{{incorrect}}",
     "cn": "{{prefix}}\n\n请点击“菜单\"查看查友的功能！👈\n\n您只需输入\"菜单\"即可随时返回这里，查看查友的功能！😊{{incorrect}}"
+  },
+  "INTRODUCTION": {
+    "en": "Hello and welcome to CheckMate! Press the button below to sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。",
+    "cn": "Hello and welcome to CheckMate! Press the button below and sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。"
+  },
+  "PLEASE_ONBOARD": {
+    "en": "We noticed you haven't completed sign up. Please do so below.\n\n我们注意到您尚未完成注册。请在下方完成注册。",
+    "cn": "We noticed you haven't completed sign up. Please do so below.\r\n\r\n我们注意到您尚未完成注册。请在下方完成注册。"
   },
   "NEW_USER_PREFIX_EN": {
     "en": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊.",
@@ -244,11 +252,15 @@
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
   },
   "REMAINING_SUBMISSION_QUOTA": {
-    "en": "You have {{num_remaining_submissions}} out of {{free_tier_limit}} free submissions remaining this month. This resets at the start of next month.",
+    "en": " You have {{num_remaining_submissions}} out of {{free_tier_limit}} free submissions remaining this month. This resets at the start of next month.",
     "cn": "您本月还剩余 {{num_remaining_submissions}} 次免费提交机会（每月总额度为 {{free_tier_limit}} 次）。额度将在下月初重置。"
   },
   "OUT_OF_SUBMISSIONS": {
-    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free monthly submissions. Want more? Join our waitlist for premium membership below - less than a cup of coffee per month ($4.99) gets you {{paid_tier_limit}} submissions and helps keep our service running!",
+    "en": "Thanks for using CheckMate 🙏🏻.\n\n You have run out of your {{free_tier_limit}} free monthly submissions. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it.",
+    "cn": "感谢使用 CheckMate 🙏🏻。\n\n您本月 {{free_tier_limit}} 次的免费提交机会已用完。我们感谢您对高级会员服务的关注，并感谢您的耐心等待，我们正在努力推出该服务。"
+  },
+  "OUT_OF_SUBMISSIONS_NUDGE": {
+    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free monthly submissions. Want more? Join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you {{paid_tier_limit}} submissions and helps keep our service running!",
     "cn": "感谢使用 CheckMate 🙏🏻。您本月 {{free_tier_limit}} 次的免费提交机会已用完。想要更多额度吗？欢迎加入下方的高级会员候补名单 - 每月只需一杯咖啡的价格（$4.99），即可获得 {{paid_tier_limit}} 次提交机会，同时帮助我们持续提供服务！"
   },
   "BLAST_FEEDBACK": {
@@ -442,5 +454,13 @@
   "PLACEHOLDER_UNSURE": {
     "en": "too difficult to assess",
     "cn": "很难做评估"
+  },
+  "CTA_JOIN_WAITLIST": {
+    "en": "Join our waitlist!",
+    "cn": "加入候补名单！"
+  },
+  "CTA_GET_MORE": {
+    "en": "Get more!",
+    "cn": "获取更多!"
   }
 }

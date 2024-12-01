@@ -317,6 +317,67 @@ async function sendWhatsappButtonMessage(
   return response
 }
 
+async function sendWhatsappFlowMessage(
+  bot: string,
+  to: string,
+  flow_type: string,
+  flow_id: string,
+  cta: string,
+  bodyText: string,
+  screen: string,
+  headerText: string | null = null,
+  footerText: string | null = null,
+  isDraft: boolean = false
+) {
+  const interactive: any = {
+    type: "flow",
+    body: {
+      text: bodyText,
+    },
+    action: {
+      name: "flow",
+      parameters: {
+        flow_message_version: "3",
+        flow_token: flow_type,
+        flow_id: flow_id,
+        flow_cta: cta,
+        flow_action: "navigate",
+        flow_action_payload: {
+          screen: screen,
+        },
+      },
+    },
+  }
+
+  if (headerText) {
+    interactive.header = {
+      type: "text",
+      text: headerText,
+    }
+  }
+
+  if (footerText) {
+    interactive.footer = {
+      text: footerText,
+    }
+  }
+
+  if (isDraft) {
+    interactive.action.parameters.mode = "draft"
+  }
+
+  const data = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: to,
+    type: "interactive",
+    interactive: interactive,
+  }
+
+  const response = await callWhatsappSendMessageApi(data, bot)
+  return response
+}
+
 async function sendWhatsappContactMessage(
   bot: string,
   to: string,
@@ -411,5 +472,6 @@ export {
   sendWhatsappButtonMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
+  sendWhatsappFlowMessage,
   sendWhatsappOTP,
 }

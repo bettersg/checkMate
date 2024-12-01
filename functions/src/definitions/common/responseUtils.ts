@@ -7,6 +7,7 @@ import {
   sendWhatsappImageMessage,
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
+  sendWhatsappFlowMessage,
 } from "./sendWhatsappMessage"
 import {
   DocumentSnapshot,
@@ -1224,19 +1225,43 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
+  const isPaidTier = userSnap.get("tier") !== "free"
   const responseText = responses.REMAINING_SUBMISSION_QUOTA.replace(
     "{{num_remaining_submissions}}",
     numSubmissionsRemaining.toString()
   ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
   //TODO: change to whatsapp flow
-  await sendTextMessage(
-    "user",
-    whatsappId,
-    responseText,
-    null,
-    "whatsapp",
-    true
-  )
+  if (isPaidTier || hasExpressedInterest) {
+    await sendTextMessage(
+      "user",
+      whatsappId,
+      responseText,
+      null,
+      "whatsapp",
+      true
+    )
+    return
+  } else {
+    const waitListFlowID = process.env.WAITLIST_FLOW_ID
+    const ctaText = responses.CTA_GET_MORE
+    if (!waitListFlowID) {
+      functions.logger.error("WAITLIST_FLOW_ID not defined")
+      return
+    }
+    await sendWhatsappFlowMessage(
+      "user",
+      whatsappId,
+      "waitlist",
+      waitListFlowID,
+      ctaText,
+      responseText,
+      "JOIN_WAITLIST",
+      null,
+      null,
+      true
+    )
+  }
 }
 
 async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
@@ -1245,18 +1270,73 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const responses = await getResponsesObj("user", language)
   const thresholds = await getThresholds()
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
+  const isPaidTier = userSnap.get("tier") !== "free"
   const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
-  const responseText = responses.OUT_OF_SUBMISSIONS.replace(
-    "{{paid_tier_limit}}",
-    paidTierLimit.toString()
-  ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
-  await sendTextMessage(
+  if (isPaidTier || hasExpressedInterest) {
+    const responseText = responses.OUT_OF_SUBMISSIONS.replace(
+      "{{free_tier_limit}}",
+      monthlySubmissionLimit.toString()
+    )
+    await sendTextMessage(
+      "user",
+      whatsappId,
+      responseText,
+      null,
+      "whatsapp",
+      true
+    )
+  } else {
+    const waitListFlowID = process.env.WAITLIST_FLOW_ID
+    if (!waitListFlowID) {
+      functions.logger.error("WAITLIST_FLOW_ID not defined")
+      return
+    }
+    const responseText = responses.OUT_OF_SUBMISSIONS_NUDGE.replace(
+      "{{paid_tier_limit}}",
+      paidTierLimit.toString()
+    ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
+    const ctaText = responses.CTA_JOIN_WAITLIST
+    await sendWhatsappFlowMessage(
+      "user",
+      whatsappId,
+      "waitlist",
+      waitListFlowID,
+      ctaText,
+      responseText,
+      "JOIN_WAITLIST",
+      null,
+      null,
+      true
+    )
+  }
+}
+
+async function sendOnboardingFlow(
+  userSnap: DocumentSnapshot,
+  firstTime: boolean
+) {
+  const onboardingFlowId = process.env.ONBOARDING_FLOW_ID
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  let responseText = responses.INTRODUCTION
+  if (!onboardingFlowId) {
+    functions.logger.error("ONBOARDING_FLOW_ID not defined")
+    return
+  }
+  if (!firstTime) {
+    responseText = responses.PLEASE_ONBOARD
+  }
+  await sendWhatsappFlowMessage(
     "user",
-    whatsappId,
+    userSnap.get("whatsappId"),
+    "onboarding",
+    onboardingFlowId,
+    "Sign Up/注册",
     responseText,
+    "LANGUAGE",
     null,
-    "whatsapp",
-    true
+    null
   )
 }
 
@@ -1491,4 +1571,5 @@ export {
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
   sendOutOfSubmissionsMessage,
+  sendOnboardingFlow,
 }
