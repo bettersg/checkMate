@@ -148,6 +148,7 @@ export type MessageData = {
   customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
   instanceCount: number //the number of instances of this message
   rationalisation: string | null //the AI-generated "rationaliastion" for why this message might have received the primaryCategory it did
+  sentMessageId: string | null // The original message id of the message sent to the admin group
 }
 
 export type InstanceData = {
