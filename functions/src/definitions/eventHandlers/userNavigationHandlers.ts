@@ -26,6 +26,7 @@ import {
   respondToBlastFeedback,
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
+  respondToWaitlist,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -351,6 +352,27 @@ async function onFlowResponse(
         ageGroup: ageGroup,
       })
       await updateLanguageAndSendMenu(userSnap, language)
+      break
+    case "waitlist":
+      const isInterestedInSubscription = flowResponse?.is_interested === "yes"
+      const isInterestedAtALowerPoint =
+        flowResponse?.is_interested_when_cheaper === "yes"
+          ? true
+          : flowResponse?.is_interested_when_cheaper === "no"
+          ? false
+          : null
+      const priceWhereInterested =
+        flowResponse?.price_where_interested == null
+          ? null
+          : Number(flowResponse?.price_where_interested)
+      const feedback = flowResponse?.feedback ?? null
+      await userSnap.ref.update({
+        isInterestedInSubscription: isInterestedInSubscription,
+        isInterestedAtALowerPoint: isInterestedAtALowerPoint,
+        priceWhereInterested: priceWhereInterested,
+        feedback: feedback,
+      })
+      await respondToWaitlist(userSnap, isInterestedInSubscription)
       break
     default:
       functions.logger.error("Unsupported flow type:", flowType)

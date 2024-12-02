@@ -160,6 +160,23 @@ async function respondToRationalisationFeedback(
   await sendWhatsappTextMessage("user", from, response)
 }
 
+async function respondToWaitlist(
+  userSnap: DocumentSnapshot,
+  isInterested: boolean
+) {
+  const whatsappId = userSnap.get("whatsappId")
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  console.log(isInterested)
+  let response
+  if (isInterested) {
+    response = responses?.WAITLIST_THANKS
+  } else {
+    response = responses?.FEEDBACK_THANKS
+  }
+  await sendWhatsappTextMessage("user", whatsappId, response)
+}
+
 async function respondToCommunityNoteFeedback(
   userSnap: DocumentSnapshot,
   instancePath: string,
@@ -1185,12 +1202,12 @@ async function respondToInstance(
 
   await sendRemainingSubmissionQuota(userSnap)
 
-  if (
-    Math.random() < thresholds.surveyLikelihood &&
-    category != "irrelevant_auto"
-  ) {
-    await sendSatisfactionSurvey(instanceSnap)
-  }
+  // if (
+  //   Math.random() < thresholds.surveyLikelihood &&
+  //   category != "irrelevant_auto"
+  // ) {
+  //   await sendSatisfactionSurvey(instanceSnap)
+  // }
   return
 }
 
@@ -1570,6 +1587,7 @@ export {
   respondToBlastFeedback,
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
+  respondToWaitlist,
   sendOutOfSubmissionsMessage,
   sendOnboardingFlow,
 }
