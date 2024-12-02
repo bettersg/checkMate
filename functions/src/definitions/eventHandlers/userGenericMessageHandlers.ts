@@ -237,6 +237,7 @@ async function newTextInstanceHandler({
     }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
+      sentMessageId: null,
       machineCategory: machineCategory, //Can be "fake news" or "scam"
       isMachineCategorised: isMachineAssessed,
       originalText: text,
