@@ -4,6 +4,9 @@ import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
+import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
+
+const ADMIN_CHAT_ID = String(process.env.ADMIN_CHAT_ID)
 
 const onMessageUpdateV2 = onDocumentUpdated(
   {
@@ -25,7 +28,18 @@ const onMessageUpdateV2 = onDocumentUpdated(
     const preChangeData = preChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
+
+    // If changes from not assessed to assessed
     if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
+      // Reply the admin feed with the primary category results
+      let message = `Primary Category: ${primaryCategory}`
+      await sendTelegramTextMessage(
+        "admin",
+        ADMIN_CHAT_ID,
+        message,
+        messageData?.sentMessageId
+      )
+
       //TODO: rationalisation here
       let rationalisation: null | string = null
       if (
@@ -63,6 +77,19 @@ const onMessageUpdateV2 = onDocumentUpdated(
         rationalisation: rationalisation,
       })
     }
+
+    // If the primaryCategory changes, update the admin feed
+    if (preChangeSnap.data().primaryCategory !== primaryCategory) {
+      // Reply the admin feed with the primary category results
+      let message = `There is a change in the primary categorisation to ${primaryCategory}`
+      await sendTelegramTextMessage(
+        "admin",
+        ADMIN_CHAT_ID,
+        message,
+        messageData?.sentMessageId
+      )
+    }
+
     if (
       preChangeSnap.data().primaryCategory !== primaryCategory &&
       primaryCategory === "legitimate" &&
