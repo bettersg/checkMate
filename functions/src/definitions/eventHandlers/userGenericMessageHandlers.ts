@@ -514,6 +514,7 @@ async function newImageInstanceHandler({
     }
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
+      sentMessageId: null,
       machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
       originalText: extractedMessage ?? null,
