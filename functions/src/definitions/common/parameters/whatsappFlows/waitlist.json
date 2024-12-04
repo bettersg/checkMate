@@ -1,0 +1,184 @@
+{
+  "version": "5.1",
+  "routing_model": {
+    "JOIN_WAITLIST": ["FEEDBACK", "PRICE_DISCOVERY"],
+    "PRICE_DISCOVERY": ["FEEDBACK"]
+  },
+  "screens": [
+    {
+      "id": "JOIN_WAITLIST",
+      "title": "Join Our Waitlist",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "TextSubheading",
+                "text": "Join the waitlist for our premium tier!"
+              },
+              {
+                "type": "TextBody",
+                "text": "We’re exploring a paid subscription. At the price of a meal a month  ($5) , this enables you to support our work, unlock 10x more messages a month, and receive access to exclusive features (to be announced)."
+              },
+              {
+                "type": "RadioButtonsGroup",
+                "name": "interested",
+                "label": "Would you be interested?",
+                "required": true,
+                "data-source": [
+                  {
+                    "id": "yes",
+                    "title": "Yes, sign me up!"
+                  },
+                  {
+                    "id": "no",
+                    "title": "I'm not interested"
+                  }
+                ]
+              },
+              {
+                "type": "If",
+                "condition": "(${form.interested} == 'yes')",
+                "then": [
+                  {
+                    "type": "Footer",
+                    "label": "Continue",
+                    "on-click-action": {
+                      "name": "navigate",
+                      "next": {
+                        "type": "screen",
+                        "name": "FEEDBACK"
+                      },
+                      "payload": {}
+                    }
+                  }
+                ],
+                "else": [
+                  {
+                    "type": "Footer",
+                    "label": "Continue",
+                    "on-click-action": {
+                      "name": "navigate",
+                      "next": {
+                        "type": "screen",
+                        "name": "PRICE_DISCOVERY"
+                      },
+                      "payload": {}
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PRICE_DISCOVERY",
+      "title": "Join Our Waitlist",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "RadioButtonsGroup",
+                "name": "isThereAPrice",
+                "label": "Is there any price where you'd be interested?",
+                "required": true,
+                "data-source": [
+                  {
+                    "id": "yes",
+                    "title": "Yes"
+                  },
+                  {
+                    "id": "no",
+                    "title": "No"
+                  }
+                ]
+              },
+              {
+                "type": "If",
+                "condition": "(${form.isThereAPrice} == 'yes')",
+                "then": [
+                  {
+                    "type": "TextBody",
+                    "text": "How much would you be willing to pay a month?"
+                  },
+                  {
+                    "type": "TextInput",
+                    "name": "pricePoint",
+                    "label": "E.g. 3",
+                    "input-type": "number",
+                    "required": true
+                  }
+                ]
+              },
+              {
+                "type": "Footer",
+                "label": "Continue",
+                "on-click-action": {
+                  "name": "navigate",
+                  "next": {
+                    "type": "screen",
+                    "name": "FEEDBACK"
+                  },
+                  "payload": {}
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "FEEDBACK",
+      "title": "Join Our Waitlist",
+      "terminal": true,
+      "success": true,
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "TextSubheading",
+                "text": "Any other feedback for us?"
+              },
+              {
+                "type": "TextArea",
+                "label": "Your feedback",
+                "required": false,
+                "name": "feedback"
+              },
+              {
+                "type": "Footer",
+                "label": "Submit",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "name": "complete",
+                    "is_interested": "${screen.JOIN_WAITLIST.form.interested}",
+                    "is_interested_when_cheaper": "${screen.PRICE_DISCOVERY.form.isThereAPrice}",
+                    "price_where_interested": "${screen.PRICE_DISCOVERY.form.pricePoint}",
+                    "feedback": "${screen.FEEDBACK.form.feedback}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -95,7 +95,6 @@ async function getCommunityNote(input: {
       input.caption?.toLowerCase().includes("test") ||
       env === "DEV"
     ) {
-      throw new Error("Cannot pass both text and url to determineNeedsChecking")
       return {
         en: "This is a test community note.",
         cn: "这是一个测试社区笔记。",

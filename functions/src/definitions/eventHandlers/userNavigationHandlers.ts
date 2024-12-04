@@ -26,6 +26,7 @@ import {
   respondToBlastFeedback,
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
+  respondToWaitlist,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -87,6 +88,9 @@ const userWhatsappInteractionHandler = async function (
           break
         case "list_reply":
           step = await onTextListReceipt(userSnap, message, "whatsapp")
+          break
+        case "nfm_reply":
+          step = await onFlowResponse(userSnap, message, "whatsapp")
           break
       }
       break
@@ -323,6 +327,58 @@ async function onTextListReceipt(
     await sendWhatsappTextMessage("user", from, response, null, true)
   }
   return Promise.resolve(step)
+}
+
+async function onFlowResponse(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  messageObj: WhatsappMessageObject,
+  platform = "whatsapp"
+) {
+  const from = messageObj.from
+  const jsonString = messageObj.interactive?.nfm_reply?.response_json
+  if (!jsonString) {
+    functions.logger.error("No jsonString in interactive object")
+    return
+  }
+  const flowResponse = JSON.parse(jsonString)
+  const flowType = flowResponse?.flow_token
+
+  switch (flowType) {
+    case "onboarding":
+      const language = flowResponse?.language ?? "en"
+      const ageGroup = flowResponse?.age_group ?? null
+      await userSnap.ref.update({
+        isOnboardingComplete: true,
+        ageGroup: ageGroup,
+      })
+      await updateLanguageAndSendMenu(userSnap, language)
+      break
+    case "waitlist":
+      const isInterestedInSubscription = flowResponse?.is_interested === "yes"
+      const isInterestedAtALowerPoint =
+        flowResponse?.is_interested_when_cheaper === "yes"
+          ? true
+          : flowResponse?.is_interested_when_cheaper === "no"
+          ? false
+          : null
+      const priceWhereInterested =
+        flowResponse?.price_where_interested == null
+          ? null
+          : Number(flowResponse?.price_where_interested)
+      const interestedFor = flowResponse?.interested_for ?? null
+      const feedback = flowResponse?.feedback ?? null
+      await userSnap.ref.update({
+        isInterestedInSubscription: isInterestedInSubscription,
+        isInterestedAtALowerPoint: isInterestedAtALowerPoint,
+        priceWhereInterested: priceWhereInterested,
+        interestedFor: interestedFor,
+        feedback: feedback,
+      })
+      await respondToWaitlist(userSnap, isInterestedInSubscription)
+      break
+    default:
+      functions.logger.error("Unsupported flow type:", flowType)
+  }
 }
 
 async function toggleUserSubscription(

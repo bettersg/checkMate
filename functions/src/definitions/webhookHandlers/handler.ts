@@ -18,8 +18,8 @@ import {
 import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
 import { Timestamp } from "firebase-admin/firestore"
 import {
-  sendLanguageSelection,
   sendUnsupportedTypeMessage,
+  sendOnboardingFlow,
 } from "../common/responseUtils"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -154,7 +154,8 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     functions.logger.warn(
                       `New user ${whatsappId}, but not due to request_welcome event`
                     )
-                    await sendLanguageSelection(userSnap, true)
+                    await sendOnboardingFlow(userSnap, true)
+                    return res.sendStatus(200)
                   }
                 } else if (userSnap.get("isIgnored")) {
                   //handle ban
@@ -171,6 +172,9 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     message,
                     "whatsapp"
                   )
+                } else if (!userSnap.get("isOnboardingComplete")) {
+                  await sendOnboardingFlow(userSnap, false)
+                  return res.sendStatus(200)
                 } else {
                   switch (type) {
                     case "text":
@@ -207,7 +211,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                       )
                       break
                     case "request_welcome":
-                      await sendLanguageSelection(userSnap, true)
+                      await sendOnboardingFlow(userSnap, true)
                       break
                     default:
                       await sendUnsupportedTypeMessage(userSnap, message.id)
