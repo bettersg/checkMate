@@ -85,6 +85,7 @@ export async function createNewUser(
     isOnboardingComplete: false,
     isInterestedInSubscription: null,
     isInterestedAtALowerPoint: null,
+    interestedFor: null,
     priceWhereInterested: null,
     feedback: null,
     tier: "free",

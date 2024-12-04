@@ -247,6 +247,7 @@ export type UserData = {
   monthlySubmissionLimit: number // Number of submissions allowed a month
   isInterestedInSubscription: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at $5 a month
   isInterestedAtALowerPoint: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at a lower price point
+  interestedFor: Array<string> | null // For whom the user is interested subscribing, can be "me", "parents", "children", "relatives", "friends", "others"
   priceWhereInterested: number | null // The price point when the user is interested
   feedback: string | null // The user's feedback, if they've provided any
   tier: "free" | "paid"

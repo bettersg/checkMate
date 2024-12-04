@@ -365,11 +365,13 @@ async function onFlowResponse(
         flowResponse?.price_where_interested == null
           ? null
           : Number(flowResponse?.price_where_interested)
+      const interestedFor = flowResponse?.interested_for ?? null
       const feedback = flowResponse?.feedback ?? null
       await userSnap.ref.update({
         isInterestedInSubscription: isInterestedInSubscription,
         isInterestedAtALowerPoint: isInterestedAtALowerPoint,
         priceWhereInterested: priceWhereInterested,
+        interestedFor: interestedFor,
         feedback: feedback,
       })
       await respondToWaitlist(userSnap, isInterestedInSubscription)
