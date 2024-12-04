@@ -13,7 +13,6 @@ import CustomReply from "./CustomReply";
 import CommunityCard from "../myvotes/CommunityCard";
 import VotingSystem from "./VotingSystem";
 import VotingNoteChart from "./VoteNoteChart";
-import VoteCategories from "./VoteCategories";
 import OldVoteCategories from "./OldVoteCategories";
 
 

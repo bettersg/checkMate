@@ -211,6 +211,7 @@ export default function VotingSystem(Prop: PropType) {
                             >
                             Select tags:
                             </Typography>
+                            <p className="text-xs text-gray-600 font-normal italic">(optional)</p>
                             <TooltipWithHelperIcon
                             header="Tags"
                             text="Select where appropriate. Multiple selections allowed."

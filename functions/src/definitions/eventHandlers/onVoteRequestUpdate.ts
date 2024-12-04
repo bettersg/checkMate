@@ -94,6 +94,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         legitimateCount,
         unsureCount,
         satireCount,
+        greatCount,
+        acceptableCount,
+        unacceptableCount,
         voteTotal,
         validResponsesCount,
         susCount,
@@ -308,6 +311,10 @@ async function updateCounts(
   const currentCategory = after.category
   let previousScore = before.truthScore
   let currentScore = after.truthScore
+  const previousCommunityCategory = before.communityNoteCategory
+  console.log(previousCommunityCategory)
+  const currentCommunityCategory = after.communityNoteCategory
+  console.log(currentCommunityCategory)
 
   for (const tag of addedTags) {
     await incrementCounter(messageRef, tag, numVoteShards.value())
@@ -350,6 +357,20 @@ async function updateCounts(
         currentScore
       )
     }
+  }
+
+  // Remove the previous community category if it exists
+  if (previousCommunityCategory !== null) {
+    await incrementCounter(
+      messageRef,
+      previousCommunityCategory,
+      numVoteShards.value(),
+      -1
+    )
+  }
+  // Increment the counter for Community Category
+  if (currentCommunityCategory !== null) {
+    await incrementCounter(messageRef, currentCommunityCategory, numVoteShards.value())
   }
 }
 

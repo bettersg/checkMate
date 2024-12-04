@@ -81,6 +81,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
       legitimateCount,
       unsureCount,
       satireCount,
+      greatCount,
+      acceptableCount,
+      unacceptableCount,
       validResponsesCount,
       tagCounts,
     } = await getVoteCounts(messageRef)
@@ -162,6 +165,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
             tags: parentTagArray,
             primaryCategory: messageSnap.get("primaryCategory"),
             rationalisation: messageSnap.get("rationalisation"),
+            greatCount: greatCount,
+            acceptableCount: acceptableCount,
+            unacceptableCount: unacceptableCount
           }
         : null,
       tags: tagArray,
