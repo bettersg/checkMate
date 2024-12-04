@@ -28,6 +28,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       messageRef.get(),
       voteRequestRef.get(),
     ])
+
     if (!messageSnap.exists) {
       return res.status(404).send("Message not found")
     }
@@ -128,7 +129,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       caption:
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
-      communityNote: voteRequestSnap.get("communityNote"),
+      communityNote: messageSnap.get("communityNote"),
       category: voteRequestSnap.get("category"),
       communityNoteCategory: voteRequestSnap.get("communityNoteCategory"),
       sender: maskedSender,
