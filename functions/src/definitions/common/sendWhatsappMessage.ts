@@ -1,7 +1,7 @@
 import axios from "axios"
 import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
-import { WhatsappButton } from "../../types"
+import { WhatsappButton, FlowData } from "../../types"
 import { AppEnv } from "../../appEnv"
 
 const graphApiVersion = defineString(AppEnv.GRAPH_API_VERSION)
@@ -320,11 +320,10 @@ async function sendWhatsappButtonMessage(
 async function sendWhatsappFlowMessage(
   bot: string,
   to: string,
-  flow_type: string,
+  flow_token: string,
   flow_id: string,
   cta: string,
   bodyText: string,
-  screen: string,
   headerText: string | null = null,
   footerText: string | null = null,
   isDraft: boolean = false
@@ -338,13 +337,10 @@ async function sendWhatsappFlowMessage(
       name: "flow",
       parameters: {
         flow_message_version: "3",
-        flow_token: flow_type,
+        flow_token: flow_token,
         flow_id: flow_id,
         flow_cta: cta,
-        flow_action: "navigate",
-        flow_action_payload: {
-          screen: screen,
-        },
+        flow_action: "data_exchange",
       },
     },
   }

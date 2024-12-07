@@ -166,14 +166,14 @@ export type InstanceData = {
   caption: string | null //Caption of the image, if the message is an image
   captionHash: string | null //Hash of the caption of the image, if the message is an image
   sender: string | null //OCR-extracted sender of the original message to the user (e.g. the scammer etc), if present in the screenshot
-  imageType: "convo" | "email" | "letter" | "others" //Type of image, if the message is an image. Either "convo" for conversation screenshots, "email" for email screenshots, "letter" for letter screenshots, or "others" for other types of images. Decided by the LLM.
-  ocrVersion: string //Version of the OCR engine used to extract text from the image
+  imageType: "convo" | "email" | "letter" | "others" | null //Type of image, if the message is an image. Either "convo" for conversation screenshots, "email" for email screenshots, "letter" for letter screenshots, or "others" for other types of images. Decided by the LLM.
+  ocrVersion: string | null //Version of the OCR engine used to extract text from the image
   from: string | null //The sender of the message to CheckMate. For whatsapp, this would be the whatsapp phone number
   subject: string | null //The subject of the message, if the message is an email
   hash: string | null //Locality sensitive hash of the image. Similar images will have the same hash
-  mediaId: string //file ID of the image, if the message is an image
-  mimeType: string //MIME type of the image, if the message is an image
-  storageUrl: string //URL of the image in the storage bucket
+  mediaId: string | null //file ID of the image, if the message is an image
+  mimeType: string | null //MIME type of the image, if the message is an image
+  storageUrl: string | null //URL of the image in the storage bucket
   isForwarded: boolean | null //Whether the message was forwarded, based on whatsapp webhook
   isFrequentlyForwarded: boolean | null //Whether the message was frequently forwarded, based on whatsapp webhook
   isReplied: boolean //Whether the message has been replied to
@@ -203,6 +203,7 @@ export type InstanceData = {
   }
   isSatisfactionSurveySent: boolean | null //Whether the satisfaction (aka NPS) survey was sent for this message
   satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
+  flowId: string | null //If a flow was triggered from this instance, this tracks the flowId. Otherwise null
 }
 
 export type ReferralClicksData = {
@@ -305,6 +306,15 @@ export type NudgeData = {
   outcomeTimestamp: Timestamp | null
   variant: string
   outcome: string | null
+}
+
+export type FlowData = {
+  type: "waitlist" | "onboarding" //types of flows available
+  whatsappId: string //whatsappId of the user the flow was sent to
+  sentTimestamp: Timestamp
+  outcomeTimestamp: Timestamp | null
+  outcome: string | null
+  variant: string
 }
 
 type LeaderBoardStats = {

@@ -24,9 +24,11 @@ import {
   LanguageSelection,
   UserBlast,
   CommunityNote,
+  FlowData,
 } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { FieldValue } from "firebase-admin/firestore"
+import { create } from "domain"
 
 const db = admin.firestore()
 
@@ -1330,14 +1332,11 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
       functions.logger.error("WAITLIST_FLOW_ID not defined")
       return
     }
-    await sendWhatsappFlowMessage(
-      "user",
+    await createAndSendFlow(
       whatsappId,
       "waitlist",
-      waitListFlowID,
       ctaText,
       responseText,
-      "JOIN_WAITLIST",
       null,
       null,
       true
@@ -1400,9 +1399,21 @@ async function sendCommunityNoteSources(
   )
 }
 
-async function sendGetMoreSubmissionsMessage(userSnap: DocumentSnapshot) {
-  const language = userSnap.get("language") ?? "en"
+async function sendGetMoreSubmissionsMessage(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
   const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+  const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
@@ -1431,18 +1442,19 @@ async function sendGetMoreSubmissionsMessage(userSnap: DocumentSnapshot) {
       functions.logger.error("WAITLIST_FLOW_ID not defined")
       return
     }
-    await sendWhatsappFlowMessage(
-      "user",
+    const flowId = await createAndSendFlow(
       whatsappId,
       "waitlist",
-      waitListFlowID,
       ctaText,
       responseText,
-      "JOIN_WAITLIST",
       null,
       null,
-      true
+      true,
+      "get_more_submissions"
     )
+    await instanceRef.update({
+      flowId: flowId,
+    })
   }
 }
 
@@ -1479,17 +1491,15 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
       paidTierLimit.toString()
     ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
     const ctaText = responses.CTA_JOIN_WAITLIST
-    await sendWhatsappFlowMessage(
-      "user",
+    await createAndSendFlow(
       whatsappId,
       "waitlist",
-      waitListFlowID,
       ctaText,
       responseText,
-      "JOIN_WAITLIST",
       null,
       null,
-      true
+      true,
+      "out_of_submissions"
     )
   }
 }
@@ -1509,17 +1519,65 @@ async function sendOnboardingFlow(
   if (!firstTime) {
     responseText = responses.PLEASE_ONBOARD
   }
-  await sendWhatsappFlowMessage(
-    "user",
+  const ctaText = responses.BUTTON_SIGN_UP
+  await createAndSendFlow(
     userSnap.get("whatsappId"),
     "onboarding",
-    onboardingFlowId,
-    "Sign Up/注册",
+    ctaText,
     responseText,
-    "LANGUAGE",
     null,
-    null
+    null,
+    true
   )
+}
+
+async function createAndSendFlow(
+  to: string,
+  flow_type: "waitlist" | "onboarding",
+  cta: string,
+  bodyText: string,
+  headerText: string | null = null,
+  footerText: string | null = null,
+  isDraft: boolean = false,
+  variant: string | null = null
+) {
+  let flow_id = ""
+  switch (flow_type) {
+    case "waitlist":
+      flow_id = process.env.WAITLIST_FLOW_ID ?? ""
+      break
+    case "onboarding":
+      flow_id = process.env.ONBOARDING_FLOW_ID ?? ""
+      break
+    default:
+      throw new Error("Invalid flow type")
+  }
+  const flowData: FlowData = {
+    type: flow_type,
+    whatsappId: to,
+    sentTimestamp: Timestamp.now(),
+    outcomeTimestamp: null,
+    outcome: null,
+    variant: variant ?? "1",
+  }
+  const flowRef = await db.collection("flows").add(flowData)
+  const token = flowRef.id
+  if (token) {
+    await sendWhatsappFlowMessage(
+      "user",
+      to,
+      token,
+      flow_id,
+      cta,
+      bodyText,
+      headerText,
+      footerText,
+      isDraft
+    )
+  } else {
+    functions.logger.error("Failed to create flow")
+  }
+  return token
 }
 
 async function sendLanguageSelection(

@@ -260,12 +260,12 @@
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
   },
   "REMAINING_SUBMISSIONS_SUFFIX": {
-    "en": "\n\n[{{num_remaining_submissions}} / {{free_tier_limit}} free submissions remaining this month]",
-    "cn": "\n\n[本月剩余 {{num_remaining_submissions}} / {{free_tier_limit}} 次免费提交]"
+    "en": "\n\n[ {{num_remaining_submissions}} / {{free_tier_limit}} free submissions remaining this month ]",
+    "cn": "\n\n[ 本月剩余 {{num_remaining_submissions}} / {{free_tier_limit}} 次免费提交 ]"
   },
   "GET_MORE_SUBMISSIONS": {
-    "en": "Your free submissions will reset at the start of next month. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.\r\n.",
-    "cn": "您的免费提交次数将在下个月初重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻.\r\n。"
+    "en": "Your free submissions will reset at the start of next month. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.",
+    "cn": "您的免费提交次数将在下个月初重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻。"
   },
   "GET_MORE_SUBMISSIONS_NUDGE": {
     "en": "Your free limit resets at the start of next month. If you find our service useful, you can join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
@@ -446,6 +446,10 @@
   "BUTTON_GET_MORE_CHECKS": {
     "en": "Get more/Support us",
     "cn": "支持我们 / 获取更多"
+  },
+  "BUTTON_SIGN_UP": {
+    "en": "Sign Up/注册",
+    "cn": "Sign Up/注册"
   },
   "PLACEHOLDER_SCAM": {
     "en": "a scam🚫",

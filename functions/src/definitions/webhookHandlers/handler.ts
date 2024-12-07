@@ -21,17 +21,22 @@ import {
   sendUnsupportedTypeMessage,
   sendOnboardingFlow,
 } from "../common/responseUtils"
+import { decryptRequest, encryptResponse } from "../../utils/cyptography"
+import { flowEndpointHandler } from "./handlers/flowEndpointHandler"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 const webhookPathWhatsapp = process.env.WEBHOOK_PATH_WHATSAPP
 const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
 const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
+const webhookPathWhatsappFlow = process.env.WEBHOOK_PATH_WHATSAPP_FLOW
 const webhookPathTelegramAdmin = process.env.WEBHOOK_PATH_TELEGRAM_ADMIN
 const typeformSecretToken = process.env.TYPEFORM_SECRET_TOKEN
 const typeformURL = process.env.TYPEFORM_URL
 const ingressSetting =
   process.env.ENVIRONMENT === "PROD" ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
+const whatsappPrivateKey = process.env.PRIVATE_KEY
+const privateKeyPassphrase = process.env.PRIVATE_KEY_PASSPHRASE
 
 interface CustomRequest extends Request {
   rawBody?: string // Define your custom property here
@@ -425,6 +430,35 @@ const postHandlerTelegramAdmin = async (req: Request, res: Response) => {
   res.sendStatus(200)
 }
 
+const postHandlerWhatsappFlow = async (req: Request, res: Response) => {
+  if (!whatsappPrivateKey || !privateKeyPassphrase) {
+    functions.logger.error(
+      'Private key or passphrase is empty. Please check your env variable "PRIVATE_KEY".'
+    )
+    return
+  }
+  let decryptedRequest = null
+  decryptedRequest = decryptRequest(
+    req.body,
+    whatsappPrivateKey,
+    privateKeyPassphrase
+  )
+  try {
+    decryptedRequest = decryptRequest(
+      req.body,
+      whatsappPrivateKey,
+      privateKeyPassphrase
+    )
+  } catch (err) {
+    functions.logger.error(`Error decrypting request: ${err}`)
+    return res.status(500).send()
+  }
+
+  const { aesKeyBuffer, initialVectorBuffer, decryptedBody } = decryptedRequest
+  const response = await flowEndpointHandler(decryptedBody)
+  res.send(encryptResponse(response, aesKeyBuffer, initialVectorBuffer))
+}
+
 const verifySignature = function (receivedSignature: string, payload: string) {
   const hash = crypto
     .createHmac("sha256", typeformSecretToken as string)
@@ -451,7 +485,7 @@ const checkNavigational = function (message: WhatsappMessageObject) {
 // Accepts POST requests at /{webhookPath} endpoint
 app.post(`/${webhookPathWhatsapp}`, postHandlerWhatsapp)
 app.get(`/${webhookPathWhatsapp}`, getHandlerWhatsapp)
-
+app.post(`/${webhookPathWhatsappFlow}`, postHandlerWhatsappFlow)
 app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
 app.post(`/${webhookPathTelegramAdmin}`, postHandlerTelegramAdmin)
 app.post(`/${webhookPathTypeform}`, postHandlerTypeform)
@@ -472,6 +506,8 @@ const webhookHandlerV2 = onRequest(
       "TELEGRAM_WEBHOOK_TOKEN",
       "TYPEFORM_SECRET_TOKEN",
       "TELEGRAM_ADMIN_BOT_TOKEN",
+      "PRIVATE_KEY",
+      "PRIVATE_KEY_PASSPHRASE",
     ],
   },
   app

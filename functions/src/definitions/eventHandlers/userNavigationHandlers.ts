@@ -213,7 +213,7 @@ async function onButtonReply(
       break
     case "getMoreChecks":
       ;[instancePath] = rest
-      await sendGetMoreSubmissionsMessage(userSnap)
+      await sendGetMoreSubmissionsMessage(userSnap, instancePath)
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest
@@ -356,8 +356,19 @@ async function onFlowResponse(
     return
   }
   const flowResponse = JSON.parse(jsonString)
-  const flowType = flowResponse?.flow_token
+  const flowToken = flowResponse?.flow_token
 
+  const flowRef = db.collection("flows").doc(flowToken)
+  const flowSnap = await flowRef.get()
+  if (!flowSnap.exists) {
+    functions.logger.error("Flow not found in database")
+    return
+  }
+  const flowType = flowSnap.get("type")
+  await flowRef.update({
+    outcome: "completed",
+    outcomeTimestamp: Timestamp.now(),
+  })
   switch (flowType) {
     case "onboarding":
       const language = flowResponse?.language ?? "en"
