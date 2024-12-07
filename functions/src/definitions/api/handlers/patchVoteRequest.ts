@@ -21,6 +21,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   //confirm category in body
   const { category, communityNoteCategory, truthScore, reasoning, tags } =
     req.body as updateVoteRequest
+  console.log(communityNoteCategory)
   if (!category) {
     return res.status(400).send("A category is required in the body")
   }

@@ -28,6 +28,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       messageRef.get(),
       voteRequestRef.get(),
     ])
+
     if (!messageSnap.exists) {
       return res.status(404).send("Message not found")
     }
@@ -80,6 +81,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
       legitimateCount,
       unsureCount,
       satireCount,
+      greatCount,
+      acceptableCount,
+      unacceptableCount,
       validResponsesCount,
       tagCounts,
     } = await getVoteCounts(messageRef)
@@ -128,7 +132,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       caption:
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
-      communityNote: voteRequestSnap.get("communityNote"),
+      communityNote: messageSnap.get("communityNote"),
       category: voteRequestSnap.get("category"),
       communityNoteCategory: voteRequestSnap.get("communityNoteCategory"),
       sender: maskedSender,
@@ -161,6 +165,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
             tags: parentTagArray,
             primaryCategory: messageSnap.get("primaryCategory"),
             rationalisation: messageSnap.get("rationalisation"),
+            greatCount: greatCount,
+            acceptableCount: acceptableCount,
+            unacceptableCount: unacceptableCount
           }
         : null,
       tags: tagArray,
