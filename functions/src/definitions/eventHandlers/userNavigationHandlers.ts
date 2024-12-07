@@ -27,6 +27,9 @@ import {
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
   respondToWaitlist,
+  sendGetMoreSubmissionsMessage,
+  sendCommunityNoteFeedbackMessage,
+  sendCommunityNoteSources,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -197,8 +200,20 @@ async function onButtonReply(
       await respondToRationalisationFeedback(userSnap, instancePath, selection)
       break
     case "feedbackNote":
+      ;[instancePath] = rest
+      await sendCommunityNoteFeedbackMessage(userSnap, instancePath)
+      break
+    case "feedbackNoteResponse":
       ;[instancePath, selection] = rest
       await respondToCommunityNoteFeedback(userSnap, instancePath, selection)
+      break
+    case "viewSources":
+      ;[instancePath] = rest
+      await sendCommunityNoteSources(userSnap, instancePath)
+      break
+    case "getMoreChecks":
+      ;[instancePath] = rest
+      await sendGetMoreSubmissionsMessage(userSnap)
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest
