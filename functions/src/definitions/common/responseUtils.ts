@@ -882,7 +882,6 @@ async function respondToInstance(
   forceReply = false,
   isImmediate = false
 ) {
-  console.log("RESPONDING TO INSTANCE")
   const userSnap = await getUserSnapshot(
     instanceSnap.get("from"),
     instanceSnap.get("source")
