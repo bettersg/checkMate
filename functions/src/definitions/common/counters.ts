@@ -52,9 +52,13 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     getCount(messageRef, "unsure"),
     getCount(messageRef, "satire"),
     getCount(messageRef, "totalVoteScore"),
+    getCount(messageRef, "great"),
+    getCount(messageRef, "acceptable"),
+    getCount(messageRef, "unacceptable"),
     totalVoteRequestQuery,
     getThresholds(),
   ]
+
   const allPromises = [
     ...otherPromises, // spread the other fixed promises
     ...tagPromises, // spread the tag promises
@@ -74,9 +78,15 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     unsureCount,
     satireCount,
     voteTotal,
+    greatCount,
+    acceptableCount,
+    unacceptableCount,
     voteRequestCountSnapshot,
     thresholds,
   ] = results.slice(0, otherPromises.length) as [
+    number,
+    number,
+    number,
     number,
     number,
     number,
@@ -130,6 +140,9 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     legitimateCount,
     unsureCount,
     satireCount,
+    greatCount,
+    acceptableCount,
+    unacceptableCount,
     voteTotal,
     validResponsesCount,
     susCount,

@@ -3,6 +3,7 @@ import { updateVoteRequest } from "../interfaces"
 import { Timestamp } from "firebase-admin/firestore"
 import { getTags } from "../../common/utils"
 import * as admin from "firebase-admin"
+import { logger } from "firebase-functions/v2"
 
 if (!admin.apps.length) {
   admin.initializeApp()
