@@ -53,8 +53,6 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     const beforeTags = preChangeData?.tags ?? {}
     const afterTags = postChangeData?.tags ?? {}
     const currentCommunityCategory = postChangeData.communityNoteCategory
-    console.log("COMMUNITY CATEGORY")
-    console.log(currentCommunityCategory)
     const { addedTags, removedTags } = getChangedTags(beforeTags, afterTags)
     if (
       preChangeData.triggerL2Vote !== true &&
