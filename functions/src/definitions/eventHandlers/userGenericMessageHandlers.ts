@@ -314,7 +314,7 @@ async function newTextInstanceHandler({
     return
   }
   const instanceRef = messageRef.collection("instances").doc()
-  const instanceUpdateObj = {
+  const instanceUpdateObj: InstanceData = {
     source: source,
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
@@ -323,6 +323,10 @@ async function newTextInstanceHandler({
     textHash: textHash ?? null,
     caption: null,
     captionHash: null,
+    hash: null,
+    mediaId: null,
+    mimeType: null,
+    storageUrl: null,
     sender: null, //sender name or number (for now not collected)
     imageType: null, //either "convo", "email", "letter" or "others"
     ocrVersion: null,
@@ -357,6 +361,7 @@ async function newTextInstanceHandler({
     },
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
+    flowId: null,
   }
   await addInstanceToDb(
     id,
@@ -652,6 +657,7 @@ async function newImageInstanceHandler({
     },
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
+    flowId: null,
   }
   await addInstanceToDb(
     id,

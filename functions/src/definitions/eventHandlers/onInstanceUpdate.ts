@@ -12,6 +12,7 @@ import { MessageData } from "../../types"
 import { despatchPoll } from "../../services/checker/votingService"
 import { respondToInstance } from "../common/responseUtils"
 import { FieldValue } from "@google-cloud/firestore"
+import { logger } from "firebase-functions"
 
 if (!admin.apps.length) {
   admin.initializeApp()

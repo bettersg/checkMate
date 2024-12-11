@@ -27,6 +27,9 @@ import {
   respondToCommunityNoteFeedback,
   respondToIrrelevantDispute,
   respondToWaitlist,
+  sendGetMoreSubmissionsMessage,
+  sendCommunityNoteFeedbackMessage,
+  sendCommunityNoteSources,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -197,8 +200,20 @@ async function onButtonReply(
       await respondToRationalisationFeedback(userSnap, instancePath, selection)
       break
     case "feedbackNote":
+      ;[instancePath] = rest
+      await sendCommunityNoteFeedbackMessage(userSnap, instancePath)
+      break
+    case "feedbackNoteResponse":
       ;[instancePath, selection] = rest
       await respondToCommunityNoteFeedback(userSnap, instancePath, selection)
+      break
+    case "viewSources":
+      ;[instancePath] = rest
+      await sendCommunityNoteSources(userSnap, instancePath)
+      break
+    case "getMoreChecks":
+      ;[instancePath] = rest
+      await sendGetMoreSubmissionsMessage(userSnap, instancePath)
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest
@@ -341,8 +356,19 @@ async function onFlowResponse(
     return
   }
   const flowResponse = JSON.parse(jsonString)
-  const flowType = flowResponse?.flow_token
+  const flowToken = flowResponse?.flow_token
 
+  const flowRef = db.collection("flows").doc(flowToken)
+  const flowSnap = await flowRef.get()
+  if (!flowSnap.exists) {
+    functions.logger.error("Flow not found in database")
+    return
+  }
+  const flowType = flowSnap.get("type")
+  await flowRef.update({
+    outcome: "completed",
+    outcomeTimestamp: Timestamp.now(),
+  })
   switch (flowType) {
     case "onboarding":
       const language = flowResponse?.language ?? "en"

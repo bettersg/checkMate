@@ -24,8 +24,11 @@ import {
   LanguageSelection,
   UserBlast,
   CommunityNote,
+  FlowData,
 } from "../../types"
 import { incrementCheckerCounts } from "./counters"
+import { FieldValue } from "firebase-admin/firestore"
+import { create } from "domain"
 
 const db = admin.firestore()
 
@@ -167,7 +170,6 @@ async function respondToWaitlist(
   const whatsappId = userSnap.get("whatsappId")
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  console.log(isInterested)
   let response
   if (isInterested) {
     response = responses?.WAITLIST_THANKS
@@ -199,32 +201,29 @@ async function respondToCommunityNoteFeedback(
     return
   }
   let response
+  let followUpWithReferral = false
   switch (isUseful) {
     case "yes":
       response = responses?.FEEDBACK_THANKS
       await instanceRef.update({ isCommunityNoteUseful: true })
-      const isReminderMessageSent =
-        userSnap.get("isReminderMessageSent") ?? false
+      // const isReminderMessageSent =
+      //   userSnap.get("isReminderMessageSent") ?? false
       const isReferralMessageSent =
         userSnap.get("isReferralMessageSent") ?? false
 
-      let followUpWithReminder = !isReminderMessageSent
-      let followUpWithReferral = !isReferralMessageSent
+      followUpWithReferral = !isReferralMessageSent
 
-      if (followUpWithReminder) {
-        await sleep(3000)
-        await sendTextMessage("user", from, responses.NEXT_TIME)
-        await userSnap.ref.update({
-          isReminderMessageSent: true,
-        })
-      }
-
-      if (followUpWithReferral) {
-        await sendReferralMessage(userSnap)
-        await userSnap.ref.update({
-          isReferralMessageSent: true,
-        })
-      }
+      // if (followUpWithReminder) {
+      //   await sleep(3000)
+      //   await sendTextMessage("user", from, responses.NEXT_TIME)
+      //   await userSnap.ref.update({
+      //     isReminderMessageSent: true,
+      //   })
+      // }
+      break
+    case "no":
+      response = responses?.FEEDBACK_NOT_USEFUL
+      await instanceRef.update({ isCommunityNoteUseful: false })
       break
     default:
       response = responses?.FEEDBACK_NOT_USEFUL
@@ -233,6 +232,12 @@ async function respondToCommunityNoteFeedback(
   }
 
   await sendWhatsappTextMessage("user", from, response)
+  if (followUpWithReferral) {
+    await sendReferralMessage(userSnap)
+    await userSnap.ref.update({
+      isReferralMessageSent: true,
+    })
+  }
 }
 
 async function respondToIrrelevantDispute(
@@ -297,6 +302,8 @@ async function sendMenuMessage(
   const text = getFinalResponseText(
     responses.MENU,
     responses,
+    null,
+    null,
     false,
     1,
     false,
@@ -904,7 +911,8 @@ async function respondToInstance(
   }
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-
+  const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
+  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
@@ -948,38 +956,73 @@ async function respondToInstance(
     isMachineCase = true
   }
 
+  const votingResultsButton = {
+    type: "reply",
+    reply: {
+      id: `votingResults_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_RESULTS,
+    },
+  }
+
+  const declineScamShieldButton = {
+    type: "reply",
+    reply: {
+      id: `scamshieldDecline_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_DECLINE_REPORT,
+    },
+  }
+
+  const getMoreChecksButton = {
+    type: "reply",
+    reply: {
+      id: `getMoreChecks_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_GET_MORE_CHECKS,
+    },
+  }
+
+  const viewSourcesButton = {
+    type: "reply",
+    reply: {
+      id: `viewSources_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_VIEW_SOURCES,
+    },
+  }
+
   if (communityNote && !communityNote.downvoted) {
     category = "communityNote"
     bespokeReply = true
     //get the text based on language
     const note = communityNote[language as keyof CommunityNote] as string
+    const sources = communityNote.links as string[]
+
     const responseText = responses.COMMUNITY_NOTE.replace(
       "{{community_note}}",
       note
     )
+      .replace(
+        "{{submissions_remaining}}",
+        responses.REMAINING_SUBMISSIONS_SUFFIX
+      )
+      .replace(
+        "{{num_remaining_submissions}}",
+        numSubmissionsRemaining.toString()
+      )
+      .replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
     const buttons = [
       {
         type: "reply",
         reply: {
-          id: `feedbackNote_${instanceSnap.ref.path}_yes`,
-          title: responses.BUTTON_USEFUL,
+          id: `feedbackNote_${instanceSnap.ref.path}`,
+          title: responses.BUTTON_GIVE_FEEDBACK,
         },
       },
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackNote_${instanceSnap.ref.path}_no`,
-          title: responses.BUTTON_NOT_USEFUL,
-        },
-      },
-      // {
-      //   type: "reply",
-      //   reply: {
-      //     id: `requestNoteReview_${instanceSnap.ref.path}`,
-      //     title: responses.BUTTON_RESULTS,
-      //   },
-      // }
     ]
+    //if sources exists, add them in between the 2 buttons
+    if (sources.length > 0) {
+      buttons.push(viewSourcesButton)
+    }
+    buttons.push(getMoreChecksButton)
+
     await sendWhatsappButtonMessage(
       "user",
       from,
@@ -1006,36 +1049,13 @@ async function respondToInstance(
     replyCategory?: string
     replyTimestamp?: Timestamp
     scamShieldConsent?: boolean
+    isCommunityNoteSent?: boolean
   } = {
     isReplied: true,
     isReplyForced: forceReply,
     isReplyImmediate: isImmediate,
   }
   let buttons = []
-
-  const votingResultsButton = {
-    type: "reply",
-    reply: {
-      id: `votingResults_${instanceSnap.ref.path}`,
-      title: responses.BUTTON_RESULTS,
-    },
-  }
-
-  const declineScamShieldButton = {
-    type: "reply",
-    reply: {
-      id: `scamshieldDecline_${instanceSnap.ref.path}`,
-      title: responses.BUTTON_DECLINE_REPORT,
-    },
-  }
-
-  const viewRationalisationButton = {
-    type: "reply",
-    reply: {
-      id: `rationalisation_${instanceSnap.ref.path}`,
-      title: responses.BUTTON_RATIONALISATION,
-    },
-  }
 
   if (
     category !== "irrelevant" &&
@@ -1058,7 +1078,9 @@ async function respondToInstance(
     case "irrelevant_auto":
       responseText = getFinalResponseText(
         responses["IRRELEVANT_AUTO"],
-        responses
+        responses,
+        numSubmissionsRemaining,
+        monthlySubmissionLimit
       )
       const misunderstoodButton = {
         type: "reply",
@@ -1115,6 +1137,8 @@ async function respondToInstance(
           const responseText = getFinalResponseText(
             responses["UNSURE"],
             responses,
+            numSubmissionsRemaining,
+            monthlySubmissionLimit,
             isImmediate,
             instanceCount,
             isMachineCategorised,
@@ -1127,6 +1151,10 @@ async function respondToInstance(
             null,
             votingStatsResponse
           )
+          //reinstate count if we really unsure.
+          await userSnap.ref.update({
+            numSubmissionsRemaining: FieldValue.increment(1),
+          })
           await sendTextMessage("user", from, responseText, data.id)
           break
         }
@@ -1138,6 +1166,8 @@ async function respondToInstance(
       responseText = getFinalResponseText(
         responses[category.toUpperCase() as keyof typeof responses],
         responses,
+        numSubmissionsRemaining,
+        monthlySubmissionLimit,
         isImmediate,
         instanceCount,
         isMachineCategorised,
@@ -1147,6 +1177,7 @@ async function respondToInstance(
         isGenerated,
         isIncorrect,
         category,
+        null,
         null
       )
 
@@ -1154,20 +1185,12 @@ async function respondToInstance(
         buttons.push(votingResultsButton)
       }
 
-      const rationalisation = parentMessageSnap.get("rationalisation")
-
-      if ((category === "scam" || category === "illicit") && rationalisation) {
-        // const language =
-        //   userDoc.get("language") ?? "en"
-        if (language === "en") {
-          buttons.push(viewRationalisationButton)
-        }
-      }
-
       if (category === "scam" || category === "illicit") {
         buttons.push(declineScamShieldButton)
         updateObj.scamShieldConsent = true
       }
+
+      buttons.push(getMoreChecksButton)
 
       if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
@@ -1182,6 +1205,7 @@ async function respondToInstance(
       }
   }
   updateObj.replyCategory = category
+  updateObj.isCommunityNoteSent = category === "communityNote"
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   await instanceSnap.ref.update(updateObj)
 
@@ -1200,7 +1224,7 @@ async function respondToInstance(
     }
   }
 
-  await sendRemainingSubmissionQuota(userSnap)
+  //await sendRemainingSubmissionQuota(userSnap)
 
   // if (
   //   Math.random() < thresholds.surveyLikelihood &&
@@ -1236,6 +1260,48 @@ async function sendReferralMessage(userSnap: DocumentSnapshot) {
   )
 }
 
+async function sendCommunityNoteFeedbackMessage(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const responseText = responses.COMMUNITY_NOTE_FEEDBACK
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackNoteResponse_${instancePath}_yes`,
+        title: responses.BUTTON_USEFUL,
+      },
+    },
+    {
+      type: "reply",
+      reply: {
+        id: `feedbackNoteResponse_${instancePath}_no`,
+        title: responses.BUTTON_NOT_USEFUL,
+      },
+    },
+  ]
+  await sendWhatsappButtonMessage(
+    "user",
+    whatsappId,
+    responseText,
+    buttons,
+    data?.id ?? null
+  )
+}
+
 async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
@@ -1266,18 +1332,129 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
       functions.logger.error("WAITLIST_FLOW_ID not defined")
       return
     }
-    await sendWhatsappFlowMessage(
-      "user",
+    await createAndSendFlow(
       whatsappId,
       "waitlist",
-      waitListFlowID,
       ctaText,
       responseText,
-      "JOIN_WAITLIST",
       null,
       null,
       true
     )
+  }
+}
+
+async function sendCommunityNoteSources(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+
+  const parentMessageRef = instanceRef.parent.parent
+  if (!parentMessageRef) {
+    functions.logger.error(`Parent message not found for ${instancePath}`)
+    await sendErrorMessage(userSnap)
+    return
+  }
+  const parentMessageSnap = await parentMessageRef.get()
+  const communityNote = parentMessageSnap.get("communityNote") as CommunityNote
+  if (!communityNote) {
+    functions.logger.error(
+      `Community note not found for message: ${parentMessageRef.path}`
+    )
+    await sendErrorMessage(userSnap)
+    return
+  }
+  const links = communityNote.links
+  if (!links || links.length === 0) {
+    functions.logger.error(
+      `Source links not found for community note for message: ${parentMessageRef.path}`
+    )
+    await sendErrorMessage(userSnap)
+    return
+  }
+  const sourceText = links.join("\n")
+  const responseText = responses.COMMUNITY_NOTE_SOURCES.replace(
+    "{{sources}}",
+    sourceText
+  )
+  await sendTextMessage(
+    "user",
+    whatsappId,
+    responseText,
+    data?.id ?? null,
+    "whatsapp",
+    false
+  )
+}
+
+async function sendGetMoreSubmissionsMessage(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  const instanceSnap = await instanceRef.get()
+  const data = instanceSnap.data()
+  const from = data?.from ?? null
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
+  const isPaidTier = userSnap.get("tier") !== "free"
+  //TODO: change to whatsapp flow
+  if (isPaidTier || hasExpressedInterest) {
+    const responseText = responses.GET_MORE_SUBMISSIONS
+    await sendTextMessage(
+      "user",
+      whatsappId,
+      responseText,
+      null,
+      "whatsapp",
+      true
+    )
+    return
+  } else {
+    const thresholds = await getThresholds()
+    const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
+    const responseText = responses.GET_MORE_SUBMISSIONS_NUDGE.replace(
+      "{{paid_tier_limit}}",
+      paidTierLimit.toString()
+    )
+    const waitListFlowID = process.env.WAITLIST_FLOW_ID
+    const ctaText = responses.CTA_GET_MORE
+    if (!waitListFlowID) {
+      functions.logger.error("WAITLIST_FLOW_ID not defined")
+      return
+    }
+    const flowId = await createAndSendFlow(
+      whatsappId,
+      "waitlist",
+      ctaText,
+      responseText,
+      null,
+      null,
+      true,
+      "get_more_submissions"
+    )
+    await instanceRef.update({
+      flowId: flowId,
+    })
   }
 }
 
@@ -1314,17 +1491,15 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
       paidTierLimit.toString()
     ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
     const ctaText = responses.CTA_JOIN_WAITLIST
-    await sendWhatsappFlowMessage(
-      "user",
+    await createAndSendFlow(
       whatsappId,
       "waitlist",
-      waitListFlowID,
       ctaText,
       responseText,
-      "JOIN_WAITLIST",
       null,
       null,
-      true
+      true,
+      "out_of_submissions"
     )
   }
 }
@@ -1344,17 +1519,65 @@ async function sendOnboardingFlow(
   if (!firstTime) {
     responseText = responses.PLEASE_ONBOARD
   }
-  await sendWhatsappFlowMessage(
-    "user",
+  const ctaText = responses.BUTTON_SIGN_UP
+  await createAndSendFlow(
     userSnap.get("whatsappId"),
     "onboarding",
-    onboardingFlowId,
-    "Sign Up/注册",
+    ctaText,
     responseText,
-    "LANGUAGE",
     null,
-    null
+    null,
+    true
   )
+}
+
+async function createAndSendFlow(
+  to: string,
+  flow_type: "waitlist" | "onboarding",
+  cta: string,
+  bodyText: string,
+  headerText: string | null = null,
+  footerText: string | null = null,
+  isDraft: boolean = false,
+  variant: string | null = null
+) {
+  let flow_id = ""
+  switch (flow_type) {
+    case "waitlist":
+      flow_id = process.env.WAITLIST_FLOW_ID ?? ""
+      break
+    case "onboarding":
+      flow_id = process.env.ONBOARDING_FLOW_ID ?? ""
+      break
+    default:
+      throw new Error("Invalid flow type")
+  }
+  const flowData: FlowData = {
+    type: flow_type,
+    whatsappId: to,
+    sentTimestamp: Timestamp.now(),
+    outcomeTimestamp: null,
+    outcome: null,
+    variant: variant ?? "1",
+  }
+  const flowRef = await db.collection("flows").add(flowData)
+  const token = flowRef.id
+  if (token) {
+    await sendWhatsappFlowMessage(
+      "user",
+      to,
+      token,
+      flow_id,
+      cta,
+      bodyText,
+      headerText,
+      footerText,
+      isDraft
+    )
+  } else {
+    functions.logger.error("Failed to create flow")
+  }
+  return token
 }
 
 async function sendLanguageSelection(
@@ -1521,6 +1744,8 @@ async function sendBlast(userSnap: DocumentSnapshot) {
 function getFinalResponseText(
   responseText: string,
   responses: ResponseObject,
+  remainingSubmissions: number | null = null,
+  freeTierLimit: number | null = null,
   isImmediate: boolean = false,
   instanceCount: number = 1,
   isMachineCategorised: boolean = false,
@@ -1567,7 +1792,29 @@ function getFinalResponseText(
         : ""
     )
     .replace("{{voting_stats}}", votingStats ?? "")
+    .replace(
+      "{{submissions_remaining}}",
+      responses.REMAINING_SUBMISSIONS_SUFFIX
+    )
+    .replace(
+      "{{num_remaining_submissions}}",
+      remainingSubmissions?.toString() ?? ""
+    )
+    .replace("{{free_tier_limit}}", freeTierLimit?.toString() ?? "")
   return finalResponse
+}
+
+async function sendErrorMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  await sendTextMessage(
+    "user",
+    whatsappId,
+    responses.GENERIC_ERROR,
+    null,
+    "whatsapp"
+  )
 }
 
 export {
@@ -1590,4 +1837,7 @@ export {
   respondToWaitlist,
   sendOutOfSubmissionsMessage,
   sendOnboardingFlow,
+  sendGetMoreSubmissionsMessage,
+  sendCommunityNoteFeedbackMessage,
+  sendCommunityNoteSources,
 }
