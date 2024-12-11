@@ -204,6 +204,7 @@ export type InstanceData = {
   isSatisfactionSurveySent: boolean | null //Whether the satisfaction (aka NPS) survey was sent for this message
   satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
   flowId: string | null //If a flow was triggered from this instance, this tracks the flowId. Otherwise null
+  communityNoteMessageId: string | null
 }
 
 export type ReferralClicksData = {

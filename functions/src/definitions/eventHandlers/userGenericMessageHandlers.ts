@@ -362,6 +362,7 @@ async function newTextInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
     flowId: null,
+    communityNoteMessageId: null
   }
   await addInstanceToDb(
     id,
@@ -658,6 +659,7 @@ async function newImageInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
     flowId: null,
+    communityNoteMessageId: null,
   }
   await addInstanceToDb(
     id,

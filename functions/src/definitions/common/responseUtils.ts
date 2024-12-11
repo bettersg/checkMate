@@ -882,6 +882,7 @@ async function respondToInstance(
   forceReply = false,
   isImmediate = false
 ) {
+  console.log("RESPONDING TO INSTANCE")
   const userSnap = await getUserSnapshot(
     instanceSnap.get("from"),
     instanceSnap.get("source")
@@ -988,6 +989,8 @@ async function respondToInstance(
     },
   }
 
+  let communityNoteMessageId = null;
+
   if (communityNote && !communityNote.downvoted) {
     category = "communityNote"
     bespokeReply = true
@@ -1023,13 +1026,14 @@ async function respondToInstance(
     }
     buttons.push(getMoreChecksButton)
 
-    await sendWhatsappButtonMessage(
+    const response = await sendWhatsappButtonMessage(
       "user",
       from,
       responseText,
       buttons,
       data.id
     )
+    communityNoteMessageId = response?.data?.messages?.[0]?.id;
   }
 
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
@@ -1050,10 +1054,12 @@ async function respondToInstance(
     replyTimestamp?: Timestamp
     scamShieldConsent?: boolean
     isCommunityNoteSent?: boolean
+    communityNoteMessageId?: string
   } = {
     isReplied: true,
     isReplyForced: forceReply,
     isReplyImmediate: isImmediate,
+    communityNoteMessageId: communityNoteMessageId ? communityNoteMessageId : null
   }
   let buttons = []
 
@@ -1089,13 +1095,14 @@ async function respondToInstance(
           title: responses.BUTTON_MISUNDERSTOOD,
         },
       }
-      await sendWhatsappButtonMessage(
-        "user",
-        from,
-        responseText,
-        [misunderstoodButton],
-        data.id
-      )
+        await sendWhatsappButtonMessage(
+          "user",
+          from,
+          responseText,
+          [misunderstoodButton],
+          data.id
+        )
+      
       break
     case "irrelevant":
       await sendMenuMessage(
@@ -1155,7 +1162,14 @@ async function respondToInstance(
           await userSnap.ref.update({
             numSubmissionsRemaining: FieldValue.increment(1),
           })
-          await sendTextMessage("user", from, responseText, data.id)
+          if (communityNote.downvoted) {
+            const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+            const finalResponseText = sorryText.concat(responseText)
+            await sendTextMessage("user", from, finalResponseText, data.communityNoteMessageId)
+          }
+          else {
+            await sendTextMessage("user", from, responseText, data.id)
+          }
           break
         }
       }
@@ -1193,15 +1207,37 @@ async function respondToInstance(
       buttons.push(getMoreChecksButton)
 
       if (buttons.length > 0) {
-        await sendWhatsappButtonMessage(
-          "user",
-          from,
-          responseText,
-          buttons,
-          data.id
-        )
+        if (communityNote.downvoted) {
+          const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+          const finalResponseText = sorryText.concat(responseText)
+  
+          await sendWhatsappButtonMessage(
+            "user",
+            from,
+            finalResponseText,
+            buttons,
+            data.communityNoteMessageId
+          )
+        }
+        else {
+          await sendWhatsappButtonMessage(
+            "user",
+            from,
+            responseText,
+            buttons,
+            data.id
+          )
+        }
       } else {
-        await sendTextMessage("user", from, responseText, data.id)
+        if (communityNote.downvoted) {
+          const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+          const finalResponseText = sorryText.concat(responseText)
+  
+          await sendTextMessage("user", from, finalResponseText, data.communityNoteMessageId)
+        }
+        else {
+          await sendTextMessage("user", from, responseText, data.id)
+        }
       }
   }
   updateObj.replyCategory = category

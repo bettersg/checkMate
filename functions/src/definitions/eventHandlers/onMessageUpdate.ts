@@ -43,6 +43,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
       await replyPendingInstances(postChangeSnap)
     }
+
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
     else if (
       messageData.isAssessed &&
@@ -62,6 +63,11 @@ const onMessageUpdateV2 = onDocumentUpdated(
       await postChangeSnap.ref.update({
         rationalisation: rationalisation,
       })
+    }
+
+    // if isAssessed && communityNote.downvoted == True then we need to resend message
+    else if (messageData.isAssessed && messageData.communityNote.downvoted){
+      await replyCommunityNoteInstances(postChangeSnap)
     }
     if (
       preChangeSnap.data().primaryCategory !== primaryCategory &&
@@ -92,6 +98,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
       await Promise.all(promiseArr)
     }
+     
     return Promise.resolve()
   }
 )
@@ -103,6 +110,19 @@ async function replyPendingInstances(
     .collection("instances")
     .where("isReplied", "==", false)
     .get()
+  pendingSnapshot.forEach(async (instanceSnap) => {
+    await respondToInstance(instanceSnap)
+  })
+}
+
+async function replyCommunityNoteInstances(
+  docSnap: functions.firestore.QueryDocumentSnapshot
+) {
+  const pendingSnapshot = await docSnap.ref
+    .collection("instances")
+    .where("isCommunityNoteSent", "==", true)
+    .get()
+  
   pendingSnapshot.forEach(async (instanceSnap) => {
     await respondToInstance(instanceSnap)
   })

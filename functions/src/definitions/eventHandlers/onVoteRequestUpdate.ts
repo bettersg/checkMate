@@ -52,6 +52,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     const messageSnap = await messageRef.get()
     const beforeTags = preChangeData?.tags ?? {}
     const afterTags = postChangeData?.tags ?? {}
+    const currentCommunityCategory = postChangeData.communityNoteCategory
+    console.log("COMMUNITY CATEGORY")
+    console.log(currentCommunityCategory)
     const { addedTags, removedTags } = getChangedTags(beforeTags, afterTags)
     if (
       preChangeData.triggerL2Vote !== true &&
@@ -108,6 +111,8 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         tagCounts,
       } = await getVoteCounts(messageRef)
 
+      // Check if unacceptableCount is more than 50%
+      const isUnacceptable = unacceptableCount > 0.5 * validResponsesCount
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
       const isSus =
         isBigSus || susCount > thresholds.isSus * validResponsesCount
@@ -196,7 +201,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         primaryCategory = "error"
         functions.logger.error("Error in primary category determination")
       }
-
+      
       const updateObj: Partial<MessageData> & {
         [key: string]: FieldValue | boolean | number | string | null
       } = {
@@ -226,6 +231,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             updateObj[`tags.${tag}`] = FieldValue.delete()
           }
         }
+      }
+
+      if (isUnacceptable){
+        // Change the downvoted to true in communityNote
+        updateObj['communityNote.downvoted'] = true
       }
 
       await messageRef.update(updateObj)
