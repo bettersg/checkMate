@@ -10,7 +10,7 @@ import CategoryRationalisation from "./Rationalisation";
 import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 import CustomReply from "./CustomReply";
-import CommunityCard from "../myvotes/CommunityCard";
+import CommunityNoteCard from "../myvotes/CommunityNoteCard";
 import VotingSystem from "./VotingSystem";
 import VotingNoteChart from "./VoteNoteChart";
 import OldVoteCategories from "./OldVoteCategories";
@@ -67,7 +67,7 @@ export default function VotePage() {
         />
         <Alert variant="ghost">Sender: {vote.sender}</Alert>
         {vote.communityNote ? (
-          <CommunityCard 
+          <CommunityNoteCard 
           en = {vote.communityNote.en}
           cn = {vote.communityNote.cn}
           links = {vote.communityNote.links}
@@ -133,7 +133,9 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
-            <VotingNoteChart assessedInfo={vote.finalStats} />
+            {vote.communityNote ?
+             (<VotingNoteChart assessedInfo={vote.finalStats} />): 
+             null}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />

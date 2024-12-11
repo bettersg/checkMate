@@ -3,6 +3,7 @@ import { updateVoteRequest } from "../interfaces"
 import { Timestamp } from "firebase-admin/firestore"
 import { getTags } from "../../common/utils"
 import * as admin from "firebase-admin"
+import { logger } from "firebase-functions/v2"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -21,7 +22,6 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
   //confirm category in body
   const { category, communityNoteCategory, truthScore, reasoning, tags } =
     req.body as updateVoteRequest
-  console.log(communityNoteCategory)
   if (!category) {
     return res.status(400).send("A category is required in the body")
   }

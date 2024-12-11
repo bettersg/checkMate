@@ -35,7 +35,7 @@ const CATEGORIES = [
 ]
 
 
-export default function CommunityCategories(Prop: PropType) {
+export default function CommunityNoteCategories(Prop: PropType) {
     const currentCategory = Prop.currentCommunityCategory
     const messageId = Prop.messageId;
     const voteRequestId = Prop.voteRequestId;

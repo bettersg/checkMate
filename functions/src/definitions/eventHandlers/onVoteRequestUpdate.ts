@@ -312,9 +312,7 @@ async function updateCounts(
   let previousScore = before.truthScore
   let currentScore = after.truthScore
   const previousCommunityCategory = before.communityNoteCategory
-  console.log(previousCommunityCategory)
   const currentCommunityCategory = after.communityNoteCategory
-  console.log(currentCommunityCategory)
 
   for (const tag of addedTags) {
     await incrementCounter(messageRef, tag, numVoteShards.value())

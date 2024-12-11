@@ -7,7 +7,7 @@ import {
     Button
   } from "@material-tailwind/react"
 import VoteCategories from "./VoteCategories"
-import CommunityCategories from "./CommunityCategories";
+import CommunityNoteCategories from "./CommunityNoteCategories";
 import VoteTags from "./VoteTags";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
 import { patchVote } from "../../services/api";
@@ -161,7 +161,7 @@ export default function VotingSystem(Prop: PropType) {
                     </div>
                 </AccordionHeader>
                 <AccordionBody className="pt-0 text-base font-normal">
-                    <CommunityCategories
+                    <CommunityNoteCategories
                         messageId={messageId ?? null}
                         voteRequestId={voteRequestId ?? null}
                         currentCommunityCategory={currentCommunityNoteCategory ?? null}

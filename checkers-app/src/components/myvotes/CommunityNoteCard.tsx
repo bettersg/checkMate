@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {Card, CardBody, Typography, Button} from "@material-tailwind/react";
-import { UserIcon } from "@heroicons/react/24/solid";
+import {Card, CardBody, Typography, Button, Collapse} from "@material-tailwind/react";
+import { UserIcon, LinkIcon } from "@heroicons/react/24/solid";
 
 interface PropType {
     en: string;
@@ -42,7 +42,10 @@ const splitTextByUrls = (text: string) => {
  return parts;
  }
 
-export default function CommunityCard(prop: PropType){
+export default function CommunityNoteCard(prop: PropType){
+    const [open, setOpen] = useState(false);
+    const toggleOpen = () => setOpen((cur) => !cur);
+
     const [isExpanded, setIsExpanded] = useState(false);
     const lengthBeforeTruncation = 300;
     const { en, cn, links, downvoted } = prop;
@@ -63,7 +66,7 @@ export default function CommunityCard(prop: PropType){
     const textParts = splitTextByUrls(textToShow)
 
     return (
-    <Card className="bg-blue-100 overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3 mb-2">
+    <Card className="bg-blue-100 overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3 mb-2 mt-3">
      <CardBody className="-m-3">
        <Typography className="flex items-center mb-2">
          <UserIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-shrink-0"/>
@@ -107,6 +110,26 @@ export default function CommunityCard(prop: PropType){
                     {isExpanded ? "Show Less" : "Read More"}
                 </Button>
             )}
+
+            {links.length > 0 ? (
+                <>
+                     <Typography className="pt-4">
+                        <p className="font-semibold leading-none">Reference Links:</p> 
+                    </Typography>
+                <ul className="list-disc pt-1">
+                    {links.map((link) => {
+                        return (
+                            <li className = "flex gap-x-2">
+                                <LinkIcon aria-hidden = "true" className='h-6 w-5 flex-none'/>
+                                <a href={link} rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline">{link}</a>
+                            </li>
+                        )
+                    })}
+                </ul>
+                </>
+            ) : null}
+           
         </CardBody>
     </Card>
    )
