@@ -42,6 +42,25 @@ const onMessageUpdateV2 = onDocumentUpdated(
         rationalisation: rationalisation,
       })
       await replyPendingInstances(postChangeSnap)
+      if (
+        messageData?.communityNote?.downvoted &&
+        messageData?.communityNote?.pendingCorrection
+      ) {
+        await replyCommunityNoteInstances(postChangeSnap)
+      }
+    }
+
+    if (
+      !preChangeSnap.data().communityNote?.downvoted &&
+      messageData?.communityNote.downvoted
+    ) {
+      if (messageData.isAssessed) {
+        await replyCommunityNoteInstances(postChangeSnap)
+      } else {
+        postChangeSnap.ref.update({
+          "communityNote.pendingCorrection": true,
+        })
+      }
     }
 
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
@@ -66,9 +85,9 @@ const onMessageUpdateV2 = onDocumentUpdated(
     }
 
     // if isAssessed && communityNote.downvoted == True then we need to resend message
-    else if (messageData.isAssessed && messageData.communityNote.downvoted){
-      await replyCommunityNoteInstances(postChangeSnap)
-    }
+    // else if (messageData.isAssessed && messageData.communityNote.downvoted) {
+    //   await replyCommunityNoteInstances(postChangeSnap)
+    // }
     if (
       preChangeSnap.data().primaryCategory !== primaryCategory &&
       primaryCategory === "legitimate" &&
@@ -98,7 +117,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
       await Promise.all(promiseArr)
     }
-     
+
     return Promise.resolve()
   }
 )
@@ -122,7 +141,7 @@ async function replyCommunityNoteInstances(
     .collection("instances")
     .where("isCommunityNoteSent", "==", true)
     .get()
-  
+
   pendingSnapshot.forEach(async (instanceSnap) => {
     await respondToInstance(instanceSnap)
   })

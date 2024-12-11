@@ -413,6 +413,7 @@ export type CommunityNote = {
   cn: string
   links: string[]
   downvoted: boolean
+  pendingCorrection: boolean
 }
 
 export type BlastData = {

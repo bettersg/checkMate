@@ -168,6 +168,14 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVoteAbsolute //10
             ))
 
+      const isAssessedUnacceptable =
+        isUnacceptable &&
+        validResponsesCount >
+          Math.min(
+            thresholds.endVote * factCheckerCount,
+            thresholds.endVoteAbsolute //10
+          )
+
       //set primaryCategory
       let primaryCategory
       if (isScam) {
@@ -199,7 +207,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         primaryCategory = "error"
         functions.logger.error("Error in primary category determination")
       }
-      
+
       const updateObj: Partial<MessageData> & {
         [key: string]: FieldValue | boolean | number | string | null
       } = {
@@ -231,9 +239,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         }
       }
 
-      if (isUnacceptable){
+      if (isAssessedUnacceptable) {
         // Change the downvoted to true in communityNote
-        updateObj['communityNote.downvoted'] = true
+        updateObj["communityNote.downvoted"] = true
       }
 
       await messageRef.update(updateObj)
@@ -376,7 +384,11 @@ async function updateCounts(
   }
   // Increment the counter for Community Category
   if (currentCommunityCategory !== null) {
-    await incrementCounter(messageRef, currentCommunityCategory, numVoteShards.value())
+    await incrementCounter(
+      messageRef,
+      currentCommunityCategory,
+      numVoteShards.value()
+    )
   }
 }
 
