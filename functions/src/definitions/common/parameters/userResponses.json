@@ -19,9 +19,13 @@
     "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
     "cn": "抱歉，查友在评估您提供的短信时发生了问题。\n\n欢迎您稍后重试，或者通过这份表格向我们反馈：https://bit.ly/checkmate-feedback。对此造成的不便，我们非常抱歉！😔"
   },
+  "WAIT_FOR_AI": {
+    "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖",
+    "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。"
+  },
   "MESSAGE_NOT_YET_ASSESSED": {
-    "en": "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
-    "cn": "你好！👋 感谢您使用查友！我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
+    "en": "Unfortunately, our AI wasn't able to assess this message.\n\nOur volunteers🕵🏻 will review this and *provide the results soon*.",
+    "cn": "很遗憾，我们的人工智能无法对此进行评估。\n\n我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
   },
   "SCAM": {
     "en": "{{thanks}}{{methodology}}*a scam*!🚫{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
@@ -184,8 +188,8 @@
     "cn": "嗯...这条短信似乎没有可以评估的内容。😕{{generated}}"
   },
   "IRRELEVANT_APPEAL": {
-    "en": "Sorry for the wrong assessment. We have sent your message for checking.",
-    "cn": "抱歉评估有误。我们已将您的信息送去评估。"
+    "en": "Sorry for misunderstanding your intent. We have sent your message to our AI system for checking.",
+    "cn": "抱歉误解了你的意图。我们已将你的消息发送到我们的人工智能系统进行检查。"
   },
   "MENU_PREFIX": {
     "en": "Hi! Thanks for using CheckMate. 🙏🏻",

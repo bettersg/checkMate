@@ -877,6 +877,7 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
     isInterimPromptSent: true,
   })
 }
+
 async function respondToInstance(
   instanceSnap: DocumentSnapshot,
   forceReply = false,
@@ -1233,6 +1234,21 @@ async function respondToInstance(
   //   await sendSatisfactionSurvey(instanceSnap)
   // }
   return
+}
+
+async function sendWaitingMessage(
+  userSnap: DocumentSnapshot,
+  replyMessageId: string | null = null
+) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  await sendTextMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responses.WAIT_FOR_AI,
+    replyMessageId,
+    "whatsapp"
+  )
 }
 
 async function sendReferralMessage(userSnap: DocumentSnapshot) {
@@ -1840,4 +1856,5 @@ export {
   sendGetMoreSubmissionsMessage,
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
+  sendWaitingMessage,
 }
