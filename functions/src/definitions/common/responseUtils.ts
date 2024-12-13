@@ -1447,7 +1447,7 @@ async function sendGetMoreSubmissionsMessage(
     return
   } else {
     const thresholds = await getThresholds()
-    const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
+    const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
     const responseText = responses.GET_MORE_SUBMISSIONS_NUDGE.replace(
       "{{paid_tier_limit}}",
       paidTierLimit.toString()
@@ -1482,7 +1482,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
-  const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
+  const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
   if (isPaidTier || hasExpressedInterest) {
     const responseText = responses.OUT_OF_SUBMISSIONS.replace(
       "{{free_tier_limit}}",
@@ -1791,8 +1791,8 @@ function getFinalResponseText(
       isMachineCategorised
         ? responses.METHODOLOGY_AUTO
         : isMatched
-        ? responses.METHODOLOGY_HUMAN_PREVIOUS
-        : responses.METHODOLOGY_HUMAN
+          ? responses.METHODOLOGY_HUMAN_PREVIOUS
+          : responses.METHODOLOGY_HUMAN
     )
     .replace(
       "{{image_caveat}}",

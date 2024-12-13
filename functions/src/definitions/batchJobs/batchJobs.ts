@@ -351,7 +351,7 @@ async function resetUserSubmissions() {
   try {
     const usersRef = db.collection("users")
     const usersSnapshot = await usersRef.get()
-    
+
     const batch = db.batch()
     let batchCount = 0
     const BATCH_LIMIT = 500
@@ -361,7 +361,7 @@ async function resetUserSubmissions() {
       batch.update(userDoc.ref, {
         numSubmissionsRemaining: monthlySubmissionLimit
       })
-      
+
       batchCount++
       if (batchCount >= BATCH_LIMIT) {
         await batch.commit()
@@ -441,7 +441,7 @@ const resetLeaderboard = onSchedule(
 
 const resetUserSubmissionCounts = onSchedule(
   {
-    schedule: "0 0 1 * *", // Run at midnight (00:00) on the first day of every month
+    schedule: "0 0 * * *", // Run at midnight daily
     timeZone: "Asia/Singapore",
     retryCount: 3,
   },
