@@ -886,7 +886,7 @@ async function respondToInstance(
   instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false,
-  isDisclaimerAgeed = false,
+  isDisclaimerAgreed = false,
   isCorrection = false
 ) {
   const userSnap = await getUserSnapshot(
@@ -920,7 +920,6 @@ async function respondToInstance(
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
-  const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isControversial = parentMessageSnap.get("isControversial")
   const isDisclaimerSent = data.disclaimerSentTimestamp != null
@@ -940,6 +939,7 @@ async function respondToInstance(
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
+  const replyId = isCorrection ? data?.communityNoteMessageId : data?.id
 
   let category = primaryCategory
 
@@ -947,7 +947,7 @@ async function respondToInstance(
 
   let isMachineCase = false
 
-  if (isControversial && !isDisclaimed && !isDisclaimerAgeed) {
+  if (isControversial && !isDisclaimed && !isDisclaimerAgreed) {
     if (!isDisclaimerSent) {
       const text = responses.CONTROVERSIAL_DISCLAIMER
       const controversialButton = {
@@ -962,7 +962,7 @@ async function respondToInstance(
         from,
         text,
         [controversialButton],
-        data.id
+        replyId
       )
     }
     await instanceSnap.ref.update({
@@ -974,7 +974,7 @@ async function respondToInstance(
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
       category = "custom"
-      await sendTextMessage("user", from, customReply.text, data.id)
+      await sendTextMessage("user", from, customReply.text, replyId)
       bespokeReply = true
     } else if (customReply.type === "image") {
       //TODO: implement later
@@ -1064,7 +1064,7 @@ async function respondToInstance(
       from,
       responseText,
       buttons,
-      data.id
+      replyId
     )
     communityNoteMessageId = response?.data?.messages?.[0]?.id
   }
@@ -1074,7 +1074,7 @@ async function respondToInstance(
       "user",
       from,
       responses.MESSAGE_NOT_YET_ASSESSED,
-      data.id
+      replyId
     )
     return
   }
@@ -1106,7 +1106,7 @@ async function respondToInstance(
   ) {
     functions.logger.error("Unknown category assigned, error response sent")
     updateObj.replyCategory = "error"
-    await sendTextMessage("user", from, responses.ERROR, data.id)
+    await sendTextMessage("user", from, responses.ERROR, replyId)
     return
   }
 
@@ -1135,7 +1135,7 @@ async function respondToInstance(
         from,
         responseText,
         [misunderstoodButton],
-        data.id
+        replyId
       )
 
       break
@@ -1144,7 +1144,7 @@ async function respondToInstance(
         userSnap,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
-        data.id,
+        replyId,
         instanceSnap.ref.path,
         false,
         isGenerated,
@@ -1153,7 +1153,7 @@ async function respondToInstance(
       break
     case "error":
       responseText = getFinalResponseText(responses.ERROR, responses)
-      await sendTextMessage("user", from, responseText, data.id)
+      await sendTextMessage("user", from, responseText, replyId)
       break
     case "custom":
       break
@@ -1198,7 +1198,7 @@ async function respondToInstance(
           await userSnap.ref.update({
             numSubmissionsRemaining: FieldValue.increment(1),
           })
-          await sendTextMessage("user", from, responseText, data.id)
+          await sendTextMessage("user", from, responseText, replyId)
           break
         }
       }
@@ -1237,29 +1237,15 @@ async function respondToInstance(
       buttons.push(getMoreChecksButton)
 
       if (buttons.length > 0) {
-        if (communityNote.downvoted) {
-          const sorryText =
-            "Sorry, our checkers have determined that the AI got that wrong!\n\n"
-          const finalResponseText = sorryText.concat(responseText)
-
-          await sendWhatsappButtonMessage(
-            "user",
-            from,
-            finalResponseText,
-            buttons,
-            data.communityNoteMessageId
-          )
-        } else {
-          await sendWhatsappButtonMessage(
-            "user",
-            from,
-            responseText,
-            buttons,
-            data.id
-          )
-        }
+        await sendWhatsappButtonMessage(
+          "user",
+          from,
+          responseText,
+          buttons,
+          replyId
+        )
       } else {
-        await sendTextMessage("user", from, responseText, data.id)
+        await sendTextMessage("user", from, responseText, replyId)
       }
   }
   updateObj.replyCategory = category
@@ -1901,7 +1887,9 @@ async function sendErrorMessage(userSnap: DocumentSnapshot) {
   )
 }
 
-async function correctCommunityNote(instanceSnap: DocumentSnapshot) {}
+async function correctCommunityNote(instanceSnap: DocumentSnapshot) {
+  await respondToInstance(instanceSnap, false, false, false, true)
+}
 
 export {
   getResponsesObj,
