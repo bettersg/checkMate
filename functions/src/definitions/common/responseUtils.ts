@@ -881,7 +881,8 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
 async function respondToInstance(
   instanceSnap: DocumentSnapshot,
   forceReply = false,
-  isImmediate = false
+  isImmediate = false,
+  isDisclaimerAgeed = false
 ) {
   const userSnap = await getUserSnapshot(
     instanceSnap.get("from"),
@@ -916,6 +917,9 @@ async function respondToInstance(
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
+  const isControversial = parentMessageSnap.get("isControversial")
+  const isDisclaimerSent = data.disclaimerSentTimestamp != null
+  const isDisclaimed = data?.disclaimerAcceptanceTimestamp != null
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const isWronglyCategorisedIrrelevant = parentMessageSnap.get(
     "isWronglyCategorisedIrrelevant"
@@ -937,6 +941,30 @@ async function respondToInstance(
   let bespokeReply = false
 
   let isMachineCase = false
+
+  if (isControversial && !isDisclaimed && !isDisclaimerAgeed) {
+    if (!isDisclaimerSent) {
+      const text = responses.CONTROVERSIAL_DISCLAIMER
+      const controversialButton = {
+        type: "reply",
+        reply: {
+          id: `controversial_${instanceSnap.ref.path}`,
+          title: responses.BUTTON_PROCEED_ANYWAY,
+        },
+      }
+      await sendWhatsappButtonMessage(
+        "user",
+        from,
+        text,
+        [controversialButton],
+        data.id
+      )
+    }
+    await instanceSnap.ref.update({
+      disclaimerSentTimestamp: Timestamp.now(),
+    })
+    return
+  }
 
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
@@ -1249,6 +1277,18 @@ async function sendWaitingMessage(
     replyMessageId,
     "whatsapp"
   )
+}
+
+async function handleDisclaimer(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  await instanceRef.update({
+    disclaimerAcceptanceTimestamp: Timestamp.now(),
+  })
+  const instanceSnap = await instanceRef.get()
+  await respondToInstance(instanceSnap, false, true, true)
 }
 
 async function sendReferralMessage(userSnap: DocumentSnapshot) {
@@ -1857,4 +1897,5 @@ export {
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
   sendWaitingMessage,
+  handleDisclaimer,
 }

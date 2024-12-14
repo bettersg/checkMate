@@ -29,6 +29,7 @@ import {
   performOCR,
   getCommunityNote,
   determineNeedsChecking,
+  determineControversial,
 } from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
@@ -248,6 +249,9 @@ async function newTextInstanceHandler({
     )
     let communityNoteData
     let isCommunityNoteGenerated = false
+    const isControversial = await determineControversial({
+      text: text,
+    })
     if (needsChecking) {
       await sendWaitingMessage(userSnap, id)
       try {
@@ -282,6 +286,7 @@ async function newTextInstanceHandler({
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
+      isControversial: isControversial,
       isIrrelevant: !needsChecking,
       isScam: null,
       isIllicit: null,
@@ -364,6 +369,8 @@ async function newTextInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
     flowId: null,
+    disclaimerSentTimestamp: null,
+    disclaimerAcceptanceTimestamp: null,
   }
   await addInstanceToDb(
     id,
@@ -534,16 +541,24 @@ async function newImageInstanceHandler({
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
     let communityNoteData
     let isCommunityNoteGenerated = false
-    try {
-      const signedUrl = (await getSignedUrl(filename)) ?? null
-      communityNoteData = await getCommunityNote({
+    let isControversial = false
+    const signedUrl = (await getSignedUrl(filename)) ?? null
+    if (signedUrl) {
+      isControversial = await determineControversial({
         url: signedUrl,
         caption: caption ?? null,
       })
-      isCommunityNoteGenerated = true
-    } catch (error) {
-      functions.logger.error("Error in getCommunityNote:", error)
+      try {
+        communityNoteData = await getCommunityNote({
+          url: signedUrl,
+          caption: caption ?? null,
+        })
+        isCommunityNoteGenerated = true
+      } catch (error) {
+        functions.logger.error("Error in getCommunityNote:", error)
+      }
     }
+
     if (extractedMessage) {
       strippedMessage = await anonymiseMessage(extractedMessage)
     }
@@ -573,6 +588,7 @@ async function newImageInstanceHandler({
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
+      isControversial: isControversial,
       isIrrelevant: false,
       isScam: null,
       isIllicit: null,
@@ -662,6 +678,8 @@ async function newImageInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
     flowId: null,
+    disclaimerSentTimestamp: null,
+    disclaimerAcceptanceTimestamp: null,
   }
   await addInstanceToDb(
     id,
