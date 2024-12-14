@@ -4,6 +4,9 @@ import { VoteRequest } from "../../types"
 import { Timestamp } from "firebase-admin/firestore"
 import { sendWhatsappTemplateMessage } from "../../definitions/common/sendWhatsappMessage"
 import { sendTelegramTextMessage } from "../../definitions/common/sendTelegramMessage"
+import { getShuffledDocsFromSnapshot } from "../../utils/shuffleUtils"
+import { getThresholds } from "../../definitions/common/utils"
+import { FieldValue } from "@google-cloud/firestore"
 
 const checkerAppHost = process.env.CHECKER_APP_HOST
 
@@ -15,6 +18,7 @@ export async function despatchPoll(
     .collection("checkers")
     .where("type", "==", "human")
     .where("isActive", "==", true)
+    .orderBy("dailyAssignmentCount", "asc")
     .get()
   const messageSnap = await messageRef.get()
   const latestInstanceRef = messageSnap.get("latestInstance")
@@ -42,15 +46,51 @@ export async function despatchPoll(
 
   // get preview text if message exists, else get image
   if (!factCheckersSnapshot.empty) {
-    const despatchPromises = factCheckersSnapshot.docs.map(
-      (factCheckerDocSnap) =>
-        sendTemplateMessageAndCreateVoteRequest(
-          factCheckerDocSnap,
-          messageRef,
-          previewText
-        )
+    const thresholds = await getThresholds()
+    //const numberToTrigger = thresholds.numberToTrigger ?? "all"
+    const targetDailyVotes = thresholds.targetDailyVotes ?? 8
+    const minVotesPerMessage = thresholds.minVotesPerMessage ?? 30
+    const poolSize = factCheckersSnapshot.size
+    const numVotesToday = (
+      await db.collection("systemParameters").doc("counts").get()
+    ).get("polls")
+    const numberToTrigger = determineNumberOfVotes(
+      minVotesPerMessage,
+      numVotesToday,
+      poolSize,
+      targetDailyVotes
     )
-    await Promise.all(despatchPromises)
+    let docs: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>[]
+    // check if numberToTrigger is string
+    if (typeof numberToTrigger !== "number") {
+      docs = factCheckersSnapshot.docs
+    } else {
+      docs = getShuffledDocsFromSnapshot(
+        factCheckersSnapshot.docs,
+        "dailyAssignmentCount",
+        numberToTrigger
+      )
+    }
+    const despatchPromises = docs.map((factCheckerDocSnap) =>
+      sendTemplateMessageAndCreateVoteRequest(
+        factCheckerDocSnap,
+        messageRef,
+        previewText
+      )
+    )
+    try {
+      await Promise.all(despatchPromises)
+    } catch (error) {
+      logger.error(
+        `Error despatching poll for message ${messageRef.id}: ${error}`
+      )
+    }
+    await db
+      .collection("systemParameters")
+      .doc("counts")
+      .update({
+        polls: FieldValue.increment(1),
+      })
   }
 }
 
@@ -96,6 +136,9 @@ async function sendTemplateMessageAndCreateVoteRequest(
     score: null,
     duration: null,
   }
+  await factCheckerDocSnap.ref.update({
+    dailyAssignmentCount: FieldValue.increment(1),
+  })
   if (preferredPlatform === "whatsapp") {
     // First, add the voteRequest object to the "voteRequests" sub-collection
     return messageRef
@@ -148,6 +191,22 @@ async function sendTemplateMessageAndCreateVoteRequest(
       new Error(
         `Preferred platform not supported for factChecker ${factChecker.id}`
       )
+    )
+  }
+}
+
+function determineNumberOfVotes(
+  minVotesPerMessage: number,
+  totalMessagesToday: number,
+  poolSize: number,
+  idealVotesPerChecker: number
+) {
+  if (totalMessagesToday <= idealVotesPerChecker) {
+    return "all"
+  } else {
+    return Math.max(
+      minVotesPerMessage,
+      Math.ceil((poolSize / totalMessagesToday) * idealVotesPerChecker)
     )
   }
 }

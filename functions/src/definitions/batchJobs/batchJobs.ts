@@ -347,7 +347,7 @@ async function saveLeaderboard() {
   }
 }
 
-async function resetUserSubmissions() {
+async function resetUserSubmissionsHandler() {
   try {
     const usersRef = db.collection("users")
     const usersSnapshot = await usersRef.get()
@@ -359,7 +359,7 @@ async function resetUserSubmissions() {
     for (const userDoc of usersSnapshot.docs) {
       const monthlySubmissionLimit = userDoc.get("monthlySubmissionLimit")
       batch.update(userDoc.ref, {
-        numSubmissionsRemaining: monthlySubmissionLimit
+        numSubmissionsRemaining: monthlySubmissionLimit,
       })
 
       batchCount++
@@ -378,6 +378,41 @@ async function resetUserSubmissions() {
     logger.error("Error resetting user submission counts:", error)
     throw error
   }
+}
+
+async function resetCheckerAssignmentCountHandler() {
+  try {
+    const checkersRef = db.collection("checkers")
+    const checkersSnapshot = await checkersRef.get()
+
+    const batch = db.batch()
+    let batchCount = 0
+    const BATCH_LIMIT = 500
+
+    for (const checkerDoc of checkersSnapshot.docs) {
+      batch.update(checkerDoc.ref, {
+        dailyAssignmentCount: 0,
+      })
+
+      batchCount++
+      if (batchCount >= BATCH_LIMIT) {
+        await batch.commit()
+        batchCount = 0
+      }
+    }
+
+    if (batchCount > 0) {
+      await batch.commit()
+    }
+
+    logger.info("Successfully reset submission counts for all users")
+  } catch (error) {
+    logger.error("Error resetting user submission counts:", error)
+    throw error
+  }
+  await db.collection("systemParameters").doc("counts").update({
+    polls: 0,
+  })
 }
 
 const checkSessionExpiring = onSchedule(
@@ -445,7 +480,16 @@ const resetUserSubmissionCounts = onSchedule(
     timeZone: "Asia/Singapore",
     retryCount: 3,
   },
-  resetUserSubmissions
+  resetUserSubmissionsHandler
+)
+
+const resetCheckerAssignmentCount = onSchedule(
+  {
+    schedule: "0 5 * * *", // Run at midnight daily
+    timeZone: "Asia/Singapore",
+    retryCount: 3,
+  },
+  resetCheckerAssignmentCountHandler
 )
 
 // Export scheduled cloud functions
@@ -457,6 +501,7 @@ export const batchJobs = {
   sendInterimPrompt,
   resetLeaderboard,
   resetUserSubmissionCounts,
+  resetCheckerAssignmentCount,
 }
 
 // Export utility functions

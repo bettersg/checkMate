@@ -31,5 +31,8 @@
   "daysBeforeFirstCompletionCheck": 60,
   "daysBeforeSecondCompletionCheck": 90,
   "freeTierDailyLimit": 5,
-  "paidTierDailyLimit": 50
+  "paidTierDailyLimit": 50,
+  "numberToTrigger": 40,
+  "targetDailyVotes": 8,
+  "minVotesPerMessage": 30
 }

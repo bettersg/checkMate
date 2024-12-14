@@ -813,6 +813,7 @@ const createChecker = async (
           numNonUnsureVotesAtProgramEnd: null,
         },
         offboardingTime: null,
+        dailyAssignmentCount: 0,
       }
       transaction.set(newCheckerRef, newChecker)
       return newCheckerRef

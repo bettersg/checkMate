@@ -5,7 +5,7 @@ import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
 //import RE2 from "re2"
 import { Timestamp } from "firebase-admin/firestore"
-
+import { Thresholds } from "../../types"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -20,12 +20,12 @@ function isNumeric(str: string) {
   return !isNaN(Number(str))
 }
 
-async function getThresholds(is5point: boolean = false) {
+async function getThresholds(is5point: boolean = false): Promise<Thresholds> {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
-  const returnThresholds =
-    (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
+  const returnThresholds: Thresholds =
+    (theresholdsSnap.data() as Thresholds | undefined) ?? thresholds
   if (env !== "PROD") {
     returnThresholds.surveyLikelihood = 1
   }
