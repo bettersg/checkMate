@@ -50,15 +50,13 @@ const onMessageUpdateV2 = onDocumentUpdated(
         messageData?.communityNote?.downvoted &&
         messageData?.communityNote?.pendingCorrection
       ) {
-        console.log("REPLYING BECAUSE DOWNVOTED")
         await replyCommunityNoteInstances(postChangeSnap)
       }
     } else if (
       !preChangeSnap.data().communityNote?.downvoted &&
-      messageData?.communityNote.downvoted
+      messageData?.communityNote?.downvoted
     ) {
       if (messageData.isAssessed) {
-        console.log("REPLYING BECAUSE DOWNVOTED 2")
         await replyCommunityNoteInstances(postChangeSnap)
       } else {
         postChangeSnap.ref.update({

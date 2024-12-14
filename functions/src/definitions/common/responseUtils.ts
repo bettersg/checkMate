@@ -939,7 +939,7 @@ async function respondToInstance(
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
-  const replyId = isCorrection ? data?.communityNoteMessageId : data?.id
+  const replyId = data?.id
 
   let category = primaryCategory
 
@@ -1148,7 +1148,8 @@ async function respondToInstance(
         instanceSnap.ref.path,
         false,
         isGenerated,
-        isIncorrect
+        isIncorrect,
+        isCorrection
       )
       break
     case "error":
@@ -1833,14 +1834,6 @@ function getFinalResponseText(
   let finalResponse = responseText
     .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
     .replace(
-      "{{thanks}}",
-      isCorrection
-        ? responses.CORRECTION_PREFIX
-        : isImmediate
-        ? responses.THANKS_IMMEDIATE
-        : responses.THANKS_DELAYED
-    )
-    .replace(
       "{{methodology}}",
       isMachineCategorised
         ? responses.METHODOLOGY_AUTO
@@ -1888,6 +1881,25 @@ async function sendErrorMessage(userSnap: DocumentSnapshot) {
 }
 
 async function correctCommunityNote(instanceSnap: DocumentSnapshot) {
+  const userSnap = await getUserSnapshot(
+    instanceSnap.get("from"),
+    instanceSnap.get("source")
+  )
+  if (userSnap == null) {
+    functions.logger.error(
+      `User ${instanceSnap.get("from")} not found in database`
+    )
+    return Promise.resolve()
+  }
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  await sendTextMessage(
+    "user",
+    instanceSnap.get("from"),
+    responses.CORRECTION,
+    instanceSnap.get("communityNoteMessageId") ?? null,
+    "whatsapp"
+  )
   await respondToInstance(instanceSnap, false, false, false, true)
 }
 

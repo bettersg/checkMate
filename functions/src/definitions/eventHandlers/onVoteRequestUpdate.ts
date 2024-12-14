@@ -12,7 +12,6 @@ import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
-import { logger } from "firebase-functions/v2"
 import { MessageData } from "../../types"
 
 // Define some parameters
@@ -328,7 +327,7 @@ async function updateCounts(
   const currentCategory = after.category
   let previousScore = before.truthScore
   let currentScore = after.truthScore
-  const previousCommunityCategory = before.communityNoteCategory
+  const previousCommunityNoteCategory = before.communityNoteCategory
   const currentCommunityNoteCategory = after.communityNoteCategory
 
   for (const tag of addedTags) {
@@ -375,10 +374,10 @@ async function updateCounts(
   }
 
   // Remove the previous community category if it exists
-  if (previousCommunityCategory !== null) {
+  if (previousCommunityNoteCategory !== null) {
     await incrementCounter(
       messageRef,
-      previousCommunityCategory,
+      previousCommunityNoteCategory,
       numVoteShards.value(),
       -1
     )

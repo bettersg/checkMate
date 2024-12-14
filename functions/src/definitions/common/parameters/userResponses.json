@@ -1,19 +1,19 @@
 {
   "UNTRUE": {
-    "en": "{{thanks}}{{methodology}}*untrue*.❌{{image_caveat}}{{generated}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}不属实。❌{{image_caveat}}{{generated}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*untrue*.❌{{image_caveat}}{{generated}}\n\nPlease do not spread it further⛔️⛔️\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}不属实。❌{{image_caveat}}{{generated}}\n\n请不要转发⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "MISLEADING": {
-    "en": "{{thanks}}{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}{{generated}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}虽然包含一些真实的信息，但它存在误导性或缺乏公正性。⚠️{{image_caveat}}{{generated}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*presented in a misleading or unbalanced way*, even though some elements within could be true!⚠️{{image_caveat}}{{generated}}\n\nPlease take it with a pinch of salt and think twice before spreading it further🚧🚧.\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}虽然包含一些真实的信息，但它存在误导性或缺乏公正性。⚠️{{image_caveat}}{{generated}}\n\n在分享之前，请三思🚧🚧。\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "ACCURATE": {
-    "en": "{{thanks}}{{methodology}}*accurate*.✅{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}是准确的。✅{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*accurate*.✅{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}是准确的。✅{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "SATIRE": {
-    "en": "{{thanks}}{{methodology}}*satirical in nature. Some elements may be untrue, but it's probably meant to be humourous rather than to deceive*.🙃{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}具有讽刺性质。虽然其中一些信息并不属实。不过它们似乎是以幽默的方式呈现，而不是恶意欺骗。🙃{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*satirical in nature. Some elements may be untrue, but it's probably meant to be humourous rather than to deceive*.🙃{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore informed!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}具有讽刺性质。虽然其中一些信息并不属实。不过它们似乎是以幽默的方式呈现，而不是恶意欺骗。🙃{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "ERROR": {
     "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
@@ -28,36 +28,36 @@
     "cn": "很遗憾，我们的人工智能无法对此进行评估。\n\n我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
   },
   "SCAM": {
-    "en": "{{thanks}}{{methodology}}*a scam*!🚫{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}是诈骗信息！ 🚫{{image_caveat}}{{generated}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*a scam*!🚫{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}是诈骗信息！ 🚫{{image_caveat}}{{generated}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。{{incorrect}}{{submissions_remaining}}"
   },
   "ILLICIT": {
-    "en": "{{thanks}}{{methodology}}*suspicious*!🚨{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}很可疑！🚨{{image_caveat}}{{generated}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*suspicious*!🚨{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}很可疑！🚨{{image_caveat}}{{generated}}\n\n建议您停止交流⛔️⛔️\n\n查友会代表您向ScamShield (https://scamshield.org.sg) 举报这条可疑的短信。\n\n如果您不想举报此短信，请选择\"不举报\"。{{incorrect}}{{submissions_remaining}}"
   },
   "SPAM": {
-    "en": "{{thanks}}{{methodology}}*marketing/viral content*!📣{{image_caveat}}{{generated}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}是营销/病毒式信息！📣{{image_caveat}}{{generated}}\n\n虽然它看似无害，但请仍然保持警惕 🧐\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*marketing/viral content*!📣{{image_caveat}}{{generated}}\n\nIt's likely harmless, but you should always make sure 🧐\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}是营销/病毒式信息！📣{{image_caveat}}{{generated}}\n\n虽然它看似无害，但请仍然保持警惕 🧐\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "LEGITIMATE": {
-    "en": "{{thanks}}{{methodology}}*from a legitimate source*.✅{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}的来源是可靠的。✅{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*from a legitimate source*.✅{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}的来源是可靠的。✅{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "HARMLESS": {
-    "en": "{{thanks}}{{methodology}}*harmless*.🟢{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}看似无害。🟢{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*harmless*.🟢{{image_caveat}}{{generated}}\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}看似无害。🟢{{image_caveat}}{{generated}}\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "HARMFUL": {
-    "en": "\"{{thanks}}{{methodology}}*not to be trusted*!⛔️{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
-    "cn": "{{thanks}}{{methodology}}不可信任！🔴{{image_caveat}}{{generated}}\n\n建议您停止交流⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
+    "en": "{{methodology}}*not to be trusted*!⛔️{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nThank you for keeping Singapore safe!{{incorrect}}{{submissions_remaining}}",
+    "cn": "{{methodology}}不可信任！🔴{{image_caveat}}{{generated}}\n\n建议您停止交流⛔️⛔️\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}{{submissions_remaining}}"
   },
   "IRRELEVANT_AUTO": {
     "en": "Thanks for sending this in.\n\nIt seems there isn't any content in this message that we can help assess.\n\nIf you do wish for us to assess this, consider resending it with more context, e.g. by taking a screenshot.\n\nOtherwise if you feel we have misunderstood you, please press the button below.{{submissions_remaining}}",
     "cn": "感谢您的来信。\n\n这条信息似乎没有任何我们可以评估的内容。\n\n如果您希望我们进行评估，建议您重新发送并附上更多背景信息，比如截图等。\n\n如果您认为我们理解有误，请点击下方按钮。"
   },
   "UNSURE": {
-    "en": "{{thanks}}\n\n{{voting_stats}}{{generated}}\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.\n\nThank you for keeping Singapore safe!{{incorrect}}",
-    "cn": "{{thanks}}\n\n{{voting_stats}}{{generated}}\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}"
+    "en": "{{voting_stats}}{{generated}}\n\nIf you haven't done so, you could send in the message with more context, e.g. sending in a screenshot containing the sender's number.\n\nThank you for keeping Singapore safe!{{incorrect}}",
+    "cn": "{{voting_stats}}{{generated}}\n\n如果您能提供更多信息，例如发信人电话号码或截图，将有助于我们更好地评估。\n\n感谢您对新加坡网络安全的支持和贡献！{{incorrect}}"
   },
   "THANKS_IMMEDIATE": {
     "en": "Thanks for sending this in! ",
@@ -66,6 +66,10 @@
   "THANKS_DELAYED": {
     "en": "Thanks for waiting! ",
     "cn": "感谢您的耐心等待！"
+  },
+  "CORRECTION": {
+    "en": "❗After a review, our volunteer checkers have determined that this AI-generated response is inaccurate. We apologise for this.\n\nWe will send over the checkers' assessment of the original message shortly.",
+    "cn": "❗经过审核，我们的查哥查妹已确定此人工智能生成的回复不准确。对此我们深表歉意。\n\n我们将很快发送审查员对原始消息的评估。"
   },
   "IMAGE_CAVEAT": {
     "en": "This assessment refers to the claims made within the accompanying message.",
@@ -184,8 +188,8 @@
     "cn": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。"
   },
   "IRRELEVANT_MENU_PREFIX": {
-    "en": "Thanks for waiting!🙏🏻 Our volunteer checkers were unable to assess the claims in this message.😕 Sorry about that!{{generated}}",
-    "cn": "感谢您的耐心等待！🙏🏻 我们的查哥查妹没有在这条短信中找到可以评估的内容。😕{{generated}}"
+    "en": "Our volunteer checkers were unable to assess the claims in this message.😕 Sorry about that!{{generated}}",
+    "cn": "我们的查哥查妹没有在这条短信中找到可以评估的内容。😕{{generated}}"
   },
   "IRRELEVANT_AUTO_MENU_PREFIX": {
     "en": "Hmm...we couldn't assess the claims in this message.😕 Sorry about that!{{generated}}",
