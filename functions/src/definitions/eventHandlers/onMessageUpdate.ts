@@ -1,9 +1,13 @@
 import * as functions from "firebase-functions"
-import { respondToInstance, correctCommunityNote } from "../common/responseUtils"
+import {
+  respondToInstance,
+  correctCommunityNote,
+} from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
+import { logger } from "firebase-functions"
 
 const onMessageUpdateV2 = onDocumentUpdated(
   {
@@ -48,24 +52,14 @@ const onMessageUpdateV2 = onDocumentUpdated(
       ) {
         console.log("REPLYING BECAUSE DOWNVOTED")
         await replyCommunityNoteInstances(postChangeSnap)
-        // Update pendingCorrection field to show that the corrected message is sent to users
-        // postChangeSnap.ref.update({
-        //   "communityNote.pendingCorrection": false
-        // })
       }
-    }
-
-    else if (
+    } else if (
       !preChangeSnap.data().communityNote?.downvoted &&
       messageData?.communityNote.downvoted
     ) {
       if (messageData.isAssessed) {
         console.log("REPLYING BECAUSE DOWNVOTED 2")
         await replyCommunityNoteInstances(postChangeSnap)
-        // Update pendingCorrection field to show that the corrected message is sent to users
-        postChangeSnap.ref.update({
-          "communityNote.pendingCorrection": false
-        })
       } else {
         postChangeSnap.ref.update({
           "communityNote.pendingCorrection": true,
@@ -139,9 +133,15 @@ async function replyPendingInstances(
     .collection("instances")
     .where("isReplied", "==", false)
     .get()
-  pendingSnapshot.forEach(async (instanceSnap) => {
-    await respondToInstance(instanceSnap)
-  })
+  try {
+    await Promise.all(
+      pendingSnapshot.docs.map(async (instanceSnap) => {
+        await respondToInstance(instanceSnap)
+      })
+    )
+  } catch (error) {
+    logger.error(`Error in replyPendingInstances: ${error}`)
+  }
 }
 
 async function replyCommunityNoteInstances(
@@ -151,9 +151,17 @@ async function replyCommunityNoteInstances(
     .collection("instances")
     .where("isCommunityNoteSent", "==", true)
     .get()
-
-  pendingSnapshot.forEach(async (instanceSnap) => {
-    await correctCommunityNote(instanceSnap)
+  try {
+    await Promise.all(
+      pendingSnapshot.docs.map(async (instanceSnap) => {
+        await correctCommunityNote(instanceSnap)
+      })
+    )
+  } catch (error) {
+    logger.error(`Error in replyCommunityNoteInstances: ${error}`)
+  }
+  await docSnap.ref.update({
+    "communityNote.pendingCorrection": false,
   })
 }
 
