@@ -193,6 +193,9 @@ interface AssessedInfo {
   primaryCategory: string
   tags: string[]
   rationalisation: string | null
+  greatCount: number
+  acceptableCount: number
+  unacceptableCount: number
 }
 
 export type {

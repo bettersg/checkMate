@@ -290,6 +290,7 @@ async function sendMenuMessage(
   isTruncated: boolean = false,
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
+  isCorrection: boolean = false,
   language: LanguageSelection | null = null
 ) {
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
@@ -299,7 +300,7 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const text = getFinalResponseText(
+  let text = getFinalResponseText(
     responses.MENU,
     responses,
     null,
@@ -312,9 +313,11 @@ async function sendMenuMessage(
     false,
     isGenerated,
     isIncorrect,
+    isCorrection,
     "irrelevant",
     prefixName
   )
+
   switch (platform) {
     case "telegram":
       functions.logger.warn("Telegram menu not implemented yet")
@@ -704,6 +707,7 @@ async function updateLanguageAndSendMenu(
     true,
     false,
     false,
+    false,
     language
   ) //truncated menu on onboarding
 }
@@ -882,7 +886,8 @@ async function respondToInstance(
   instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false,
-  isDisclaimerAgeed = false
+  isDisclaimerAgreed = false,
+  isCorrection = false
 ) {
   const userSnap = await getUserSnapshot(
     instanceSnap.get("from"),
@@ -915,7 +920,6 @@ async function respondToInstance(
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
-  const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isControversial = parentMessageSnap.get("isControversial")
   const isDisclaimerSent = data.disclaimerSentTimestamp != null
@@ -935,6 +939,7 @@ async function respondToInstance(
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
+  const replyId = isCorrection ? data?.communityNoteMessageId : data?.id
 
   let category = primaryCategory
 
@@ -942,7 +947,7 @@ async function respondToInstance(
 
   let isMachineCase = false
 
-  if (isControversial && !isDisclaimed && !isDisclaimerAgeed) {
+  if (isControversial && !isDisclaimed && !isDisclaimerAgreed) {
     if (!isDisclaimerSent) {
       const text = responses.CONTROVERSIAL_DISCLAIMER
       const controversialButton = {
@@ -957,7 +962,7 @@ async function respondToInstance(
         from,
         text,
         [controversialButton],
-        data.id
+        replyId
       )
     }
     await instanceSnap.ref.update({
@@ -969,7 +974,7 @@ async function respondToInstance(
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
       category = "custom"
-      await sendTextMessage("user", from, customReply.text, data.id)
+      await sendTextMessage("user", from, customReply.text, replyId)
       bespokeReply = true
     } else if (customReply.type === "image") {
       //TODO: implement later
@@ -1017,6 +1022,8 @@ async function respondToInstance(
     },
   }
 
+  let communityNoteMessageId = null
+
   if (communityNote && !communityNote.downvoted) {
     category = "communityNote"
     bespokeReply = true
@@ -1052,13 +1059,14 @@ async function respondToInstance(
     }
     buttons.push(getMoreChecksButton)
 
-    await sendWhatsappButtonMessage(
+    const response = await sendWhatsappButtonMessage(
       "user",
       from,
       responseText,
       buttons,
-      data.id
+      replyId
     )
+    communityNoteMessageId = response?.data?.messages?.[0]?.id
   }
 
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
@@ -1066,7 +1074,7 @@ async function respondToInstance(
       "user",
       from,
       responses.MESSAGE_NOT_YET_ASSESSED,
-      data.id
+      replyId
     )
     return
   }
@@ -1079,10 +1087,14 @@ async function respondToInstance(
     replyTimestamp?: Timestamp
     scamShieldConsent?: boolean
     isCommunityNoteSent?: boolean
+    communityNoteMessageId?: string
   } = {
     isReplied: true,
     isReplyForced: forceReply,
     isReplyImmediate: isImmediate,
+    communityNoteMessageId: communityNoteMessageId
+      ? communityNoteMessageId
+      : null,
   }
   let buttons = []
 
@@ -1094,7 +1106,7 @@ async function respondToInstance(
   ) {
     functions.logger.error("Unknown category assigned, error response sent")
     updateObj.replyCategory = "error"
-    await sendTextMessage("user", from, responses.ERROR, data.id)
+    await sendTextMessage("user", from, responses.ERROR, replyId)
     return
   }
 
@@ -1123,15 +1135,16 @@ async function respondToInstance(
         from,
         responseText,
         [misunderstoodButton],
-        data.id
+        replyId
       )
+
       break
     case "irrelevant":
       await sendMenuMessage(
         userSnap,
         "IRRELEVANT_MENU_PREFIX",
         "whatsapp",
-        data.id,
+        replyId,
         instanceSnap.ref.path,
         false,
         isGenerated,
@@ -1140,7 +1153,7 @@ async function respondToInstance(
       break
     case "error":
       responseText = getFinalResponseText(responses.ERROR, responses)
-      await sendTextMessage("user", from, responseText, data.id)
+      await sendTextMessage("user", from, responseText, replyId)
       break
     case "custom":
       break
@@ -1176,6 +1189,7 @@ async function respondToInstance(
             hasCaption,
             isGenerated,
             isIncorrect,
+            isCorrection,
             "unsure",
             null,
             votingStatsResponse
@@ -1184,7 +1198,7 @@ async function respondToInstance(
           await userSnap.ref.update({
             numSubmissionsRemaining: FieldValue.increment(1),
           })
-          await sendTextMessage("user", from, responseText, data.id)
+          await sendTextMessage("user", from, responseText, replyId)
           break
         }
       }
@@ -1205,6 +1219,7 @@ async function respondToInstance(
         hasCaption,
         isGenerated,
         isIncorrect,
+        isCorrection,
         category,
         null,
         null
@@ -1227,10 +1242,10 @@ async function respondToInstance(
           from,
           responseText,
           buttons,
-          data.id
+          replyId
         )
       } else {
-        await sendTextMessage("user", from, responseText, data.id)
+        await sendTextMessage("user", from, responseText, replyId)
       }
   }
   updateObj.replyCategory = category
@@ -1810,6 +1825,7 @@ function getFinalResponseText(
   hasCaption: boolean = false,
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
+  isCorrection: boolean = false,
   primaryCategory: string = "irrelevant",
   prefixName: string | null = null,
   votingStats: string | null = null
@@ -1818,21 +1834,19 @@ function getFinalResponseText(
     .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
     .replace(
       "{{thanks}}",
-      isImmediate ? responses.THANKS_IMMEDIATE : responses.THANKS_DELAYED
-    )
-    .replace(
-      "{{matched}}",
-      instanceCount >= 5
-        ? responses.MATCHED.replace("{{numberInstances}}", `${instanceCount}`)
-        : ""
+      isCorrection
+        ? responses.CORRECTION_PREFIX
+        : isImmediate
+        ? responses.THANKS_IMMEDIATE
+        : responses.THANKS_DELAYED
     )
     .replace(
       "{{methodology}}",
       isMachineCategorised
         ? responses.METHODOLOGY_AUTO
         : isMatched
-          ? responses.METHODOLOGY_HUMAN_PREVIOUS
-          : responses.METHODOLOGY_HUMAN
+        ? responses.METHODOLOGY_HUMAN_PREVIOUS
+        : responses.METHODOLOGY_HUMAN
     )
     .replace(
       "{{image_caveat}}",
@@ -1873,6 +1887,10 @@ async function sendErrorMessage(userSnap: DocumentSnapshot) {
   )
 }
 
+async function correctCommunityNote(instanceSnap: DocumentSnapshot) {
+  await respondToInstance(instanceSnap, false, false, false, true)
+}
+
 export {
   getResponsesObj,
   respondToInstance,
@@ -1898,4 +1916,5 @@ export {
   sendCommunityNoteSources,
   sendWaitingMessage,
   handleDisclaimer,
+  correctCommunityNote,
 }

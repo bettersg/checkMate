@@ -307,6 +307,7 @@ async function newTextInstanceHandler({
               cn: communityNoteData?.cn || "",
               links: communityNoteData?.links || [],
               downvoted: false,
+              pendingCorrection: false,
             }
           : null,
       instanceCount: 0,
@@ -371,6 +372,7 @@ async function newTextInstanceHandler({
     flowId: null,
     disclaimerSentTimestamp: null,
     disclaimerAcceptanceTimestamp: null,
+    communityNoteMessageId: null,
   }
   await addInstanceToDb(
     id,
@@ -609,6 +611,7 @@ async function newImageInstanceHandler({
               cn: communityNoteData?.cn || "",
               links: communityNoteData?.links || [],
               downvoted: false,
+              pendingCorrection: false,
             }
           : null,
       instanceCount: 0,
@@ -680,6 +683,7 @@ async function newImageInstanceHandler({
     flowId: null,
     disclaimerSentTimestamp: null,
     disclaimerAcceptanceTimestamp: null,
+    communityNoteMessageId: null,
   }
   await addInstanceToDb(
     id,

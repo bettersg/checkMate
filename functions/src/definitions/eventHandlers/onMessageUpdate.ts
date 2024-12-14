@@ -1,9 +1,13 @@
 import * as functions from "firebase-functions"
-import { respondToInstance } from "../common/responseUtils"
+import {
+  respondToInstance,
+  correctCommunityNote,
+} from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
+import { logger } from "firebase-functions"
 
 const onMessageUpdateV2 = onDocumentUpdated(
   {
@@ -42,7 +46,27 @@ const onMessageUpdateV2 = onDocumentUpdated(
         rationalisation: rationalisation,
       })
       await replyPendingInstances(postChangeSnap)
+      if (
+        messageData?.communityNote?.downvoted &&
+        messageData?.communityNote?.pendingCorrection
+      ) {
+        console.log("REPLYING BECAUSE DOWNVOTED")
+        await replyCommunityNoteInstances(postChangeSnap)
+      }
+    } else if (
+      !preChangeSnap.data().communityNote?.downvoted &&
+      messageData?.communityNote.downvoted
+    ) {
+      if (messageData.isAssessed) {
+        console.log("REPLYING BECAUSE DOWNVOTED 2")
+        await replyCommunityNoteInstances(postChangeSnap)
+      } else {
+        postChangeSnap.ref.update({
+          "communityNote.pendingCorrection": true,
+        })
+      }
     }
+
     // if either the text changed, or the primaryCategory changed, rerun rationalisation
     else if (
       messageData.isAssessed &&
@@ -63,6 +87,11 @@ const onMessageUpdateV2 = onDocumentUpdated(
         rationalisation: rationalisation,
       })
     }
+
+    // if isAssessed && communityNote.downvoted == True then we need to resend message
+    // else if (messageData.isAssessed && messageData.communityNote.downvoted) {
+    //   await replyCommunityNoteInstances(postChangeSnap)
+    // }
     if (
       preChangeSnap.data().primaryCategory !== primaryCategory &&
       primaryCategory === "legitimate" &&
@@ -92,6 +121,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
       await Promise.all(promiseArr)
     }
+
     return Promise.resolve()
   }
 )
@@ -103,8 +133,35 @@ async function replyPendingInstances(
     .collection("instances")
     .where("isReplied", "==", false)
     .get()
-  pendingSnapshot.forEach(async (instanceSnap) => {
-    await respondToInstance(instanceSnap)
+  try {
+    await Promise.all(
+      pendingSnapshot.docs.map(async (instanceSnap) => {
+        await respondToInstance(instanceSnap)
+      })
+    )
+  } catch (error) {
+    logger.error(`Error in replyPendingInstances: ${error}`)
+  }
+}
+
+async function replyCommunityNoteInstances(
+  docSnap: functions.firestore.QueryDocumentSnapshot
+) {
+  const pendingSnapshot = await docSnap.ref
+    .collection("instances")
+    .where("isCommunityNoteSent", "==", true)
+    .get()
+  try {
+    await Promise.all(
+      pendingSnapshot.docs.map(async (instanceSnap) => {
+        await correctCommunityNote(instanceSnap)
+      })
+    )
+  } catch (error) {
+    logger.error(`Error in replyCommunityNoteInstances: ${error}`)
+  }
+  await docSnap.ref.update({
+    "communityNote.pendingCorrection": false,
   })
 }
 
