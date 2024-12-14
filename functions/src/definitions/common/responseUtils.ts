@@ -290,6 +290,7 @@ async function sendMenuMessage(
   isTruncated: boolean = false,
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
+  isCommunityNotePendingCorrection: boolean = false,
   language: LanguageSelection | null = null
 ) {
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
@@ -299,7 +300,7 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const text = getFinalResponseText(
+  let text = getFinalResponseText(
     responses.MENU,
     responses,
     null,
@@ -315,6 +316,11 @@ async function sendMenuMessage(
     "irrelevant",
     prefixName
   )
+
+  if (isCommunityNotePendingCorrection) {
+    const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+    text = sorryText.concat(text)
+  }
   switch (platform) {
     case "telegram":
       functions.logger.warn("Telegram menu not implemented yet")
@@ -702,6 +708,7 @@ async function updateLanguageAndSendMenu(
     null,
     null,
     true,
+    false,
     false,
     false,
     language
@@ -1161,14 +1168,7 @@ async function respondToInstance(
           await userSnap.ref.update({
             numSubmissionsRemaining: FieldValue.increment(1),
           })
-          if (communityNote.downvoted) {
-            const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
-            const finalResponseText = sorryText.concat(responseText)
-            await sendTextMessage("user", from, finalResponseText, data.communityNoteMessageId)
-          }
-          else {
-            await sendTextMessage("user", from, responseText, data.id)
-          }
+          await sendTextMessage("user", from, responseText, data.id)
           break
         }
       }
@@ -1228,15 +1228,7 @@ async function respondToInstance(
           )
         }
       } else {
-        if (communityNote.downvoted) {
-          const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
-          const finalResponseText = sorryText.concat(responseText)
-  
-          await sendTextMessage("user", from, finalResponseText, data.communityNoteMessageId)
-        }
-        else {
-          await sendTextMessage("user", from, responseText, data.id)
-        }
+        await sendTextMessage("user", from, responseText, data.id)
       }
   }
   updateObj.replyCategory = category
@@ -1269,6 +1261,254 @@ async function respondToInstance(
   // }
   return
 }
+
+async function correctCommunityNote(
+  instanceSnap: DocumentSnapshot,
+  forceReply= false, 
+  isImmediate = false
+) {
+  const userSnap = await getUserSnapshot(
+    instanceSnap.get("from"),
+    instanceSnap.get("source")
+  )
+
+  if (userSnap == null) {
+    functions.logger.error(
+      `User ${instanceSnap.get("from")} not found in database`
+    )
+    return Promise.resolve()
+  }
+  const parentMessageRef = instanceSnap.ref.parent.parent
+  if (!parentMessageRef) {
+    return 
+  }
+  const parentMessageSnap = await parentMessageRef.get()
+  const data = instanceSnap.data()
+  if (!data?.from) {
+    functions.logger.log("Missing 'from' field in instance data")
+    return Promise.resolve()
+  }
+  const from = data.from 
+  const whatsappId = userSnap.get("whatsappId")
+  if (from !== whatsappId) {
+    functions.logger.error(
+      `Instance ${instanceSnap.ref.path} requested by ${from} but accessed by ${whatsappId}`
+    )
+  }
+
+  const language = userSnap.get("language")??"en"
+  const responses = await getResponsesObj("user", language)
+  const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
+  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const thresholds = await getThresholds()
+  const isAssessed = parentMessageSnap.get("isAssessed")
+  const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
+  const isWronglyCategorisedIrrelevant = parentMessageSnap.get(
+    "isWronglyCategorisedIrrelevant"
+  )
+
+  const machineCategory = parentMessageSnap.get("machineCategory")
+  const instanceCount = parentMessageSnap.get("instanceCount")
+  const customReply: CustomReply = parentMessageSnap.get("customReply")
+  const communityNote: CommunityNote = parentMessageSnap.get("communityNote")
+  const { validResponsesCount } = await getVoteCounts(parentMessageRef)
+  const isImage = data?.type === "image"
+  const hasCaption = data?.caption != null 
+  const isMatched = data?.isMatched ?? false 
+  const primaryCategory = parentMessageSnap.get("primaryCategory")
+  const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false 
+  const isGenerated = parentMessageSnap.get("tags.generated") ?? false 
+  const isCommunityNotePendingCorrection = communityNote.pendingCorrection
+  console.log("PENDING CORRECTION: ", isCommunityNotePendingCorrection)
+  let category = primaryCategory 
+
+  let bespokeReply = false 
+
+  let isMachineCase = false 
+
+  const votingResultsButton = {
+    type: "reply",
+    reply: {
+      id: `votingResults_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_RESULTS
+    }
+  }
+
+  const declineScamShieldButton = {
+    type: "reply",
+    reply: {
+      id: `scamshieldDecline_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_DECLINE_REPORT,
+    },
+  }
+
+  const getMoreChecksButton = {
+    type: "reply",
+    reply: {
+      id: `getMoreChecks_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_GET_MORE_CHECKS
+    }
+  }
+
+  const viewSourcesButton = {
+    type: "reply",
+    reply: {
+      id: `viewSources_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_VIEW_SOURCES,
+    },
+  }
+
+  const updateObj: {
+    isReplied: boolean
+    isReplyForced: boolean
+    isReplyImmediate: boolean
+    replyCategory?: string
+    replyTimestamp?: Timestamp
+    scamShieldConsent?: boolean
+  } = {
+    isReplied: true,
+    isReplyForced: forceReply,
+    isReplyImmediate: isImmediate,
+  }
+
+  let buttons = [];
+
+  let responseText;
+
+  switch (category) {
+    case "irrelevant":
+      await sendMenuMessage(
+        userSnap, 
+        "IRRELEVANT_MENU_PREFIX",
+        "whatsapp",
+        data.id, 
+        instanceSnap.ref.path, 
+        false,
+        isGenerated, 
+        isIncorrect,
+        isCommunityNotePendingCorrection,
+      )
+      break
+    case "error":
+      responseText = getFinalResponseText(responses.ERROR, responses)
+      await sendTextMessage("user", from, responseText, data.id)
+      break
+    case "custom":
+      break;
+    case "communityNote":
+      break
+    default:
+      if (category === "unsure") {
+        const isHarmful = parentMessageSnap.get("isHarmful") ?? false
+        const isHarmless = parentMessageSnap.get("isHarmless") ?? false 
+        if (isHarmful) {
+          category = "harmful"
+        } else if (isHarmless) {
+          category = "harmless"
+        } else {
+          const truthScore = parentMessageSnap.get("truthScore")
+          const numberPointScale = parentMessageSnap.get("numberPointScale")
+          const votingStatsResponse = await getVotingStatsMessage(
+            truthScore, 
+            numberPointScale, 
+            parentMessageRef,
+            language
+          )
+          const responseText = getFinalResponseText(
+            responses["UNSURE"],
+            responses, 
+            numSubmissionsRemaining,
+            monthlySubmissionLimit, 
+            isImmediate, 
+            instanceCount, 
+            isMachineCategorised, 
+            isMatched, 
+            isImage, 
+            hasCaption, 
+            isGenerated, 
+            isIncorrect, 
+            "unsure",
+            null, 
+            votingStatsResponse
+          )
+          // reinstate count if we really unsure
+          await userSnap.ref.update({
+            numSubmissionsRemaining: FieldValue.increment(1),
+          })
+          if (communityNote.downvoted) {
+            const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+            const finalResponseText = sorryText.concat(responseText)
+            await sendTextMessage("user", from, finalResponseText, data.communityNoteMessageId)
+          }
+          break
+        }
+      }
+      if (!(category.toUpperCase() in responses)) {
+        functions.logger.error(`category ${category} not found in responses`)
+        return 
+      }
+
+      responseText = getFinalResponseText(
+        responses[category.toUpperCase() as keyof typeof responses],
+        responses,
+        numSubmissionsRemaining,
+        monthlySubmissionLimit,
+        isImmediate,
+        instanceCount,
+        isMachineCategorised,
+        isMatched,
+        isImage,
+        hasCaption,
+        isGenerated,
+        isIncorrect,
+        category,
+        null,
+        null
+      )
+
+      if (!(isMachineCategorised || validResponsesCount <= 0)) {
+        buttons.push(votingResultsButton)
+      }
+
+      if (category === "scam" || category === "illicit") {
+        buttons.push(declineScamShieldButton)
+        updateObj.scamShieldConsent = true
+      }
+
+      buttons.push(getMoreChecksButton)
+
+      if (buttons.length > 0) {
+        if (communityNote.downvoted) {
+          const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+          const finalResponseText = sorryText.concat(responseText)
+  
+          await sendWhatsappButtonMessage(
+            "user",
+            from,
+            finalResponseText,
+            buttons,
+            data.communityNoteMessageId
+          )
+        }
+      } else {
+        if (communityNote.downvoted) {
+          const sorryText = "Sorry, our checkers have determined that the AI got that wrong!\n\n"
+          const finalResponseText = sorryText.concat(responseText)
+  
+          await sendTextMessage("user", from, finalResponseText, data.communityNoteMessageId)
+        }
+      }
+  }
+
+  await instanceSnap.ref.update(updateObj);
+  // Update pendingCorrection field to show that the corrected message is sent to users
+  parentMessageSnap.ref.update({
+    "communityNote.pendingCorrection": false
+  })
+
+  return;
+}
+
 
 async function sendReferralMessage(userSnap: DocumentSnapshot) {
   let referralResponse
@@ -1875,4 +2115,5 @@ export {
   sendGetMoreSubmissionsMessage,
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
+  correctCommunityNote,
 }

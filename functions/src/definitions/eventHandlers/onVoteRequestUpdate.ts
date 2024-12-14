@@ -52,7 +52,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     const messageSnap = await messageRef.get()
     const beforeTags = preChangeData?.tags ?? {}
     const afterTags = postChangeData?.tags ?? {}
-    const currentCommunityCategory = postChangeData.communityNoteCategory
+    const currentCommunityNoteCategory = postChangeData.communityNoteCategory
     const { addedTags, removedTags } = getChangedTags(beforeTags, afterTags)
     if (
       preChangeData.triggerL2Vote !== true &&
@@ -242,6 +242,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       if (isAssessedUnacceptable) {
         // Change the downvoted to true in communityNote
         updateObj["communityNote.downvoted"] = true
+        updateObj["communityNote.pendingCorrection"] = true
       }
 
       await messageRef.update(updateObj)
@@ -328,7 +329,7 @@ async function updateCounts(
   let previousScore = before.truthScore
   let currentScore = after.truthScore
   const previousCommunityCategory = before.communityNoteCategory
-  const currentCommunityCategory = after.communityNoteCategory
+  const currentCommunityNoteCategory = after.communityNoteCategory
 
   for (const tag of addedTags) {
     await incrementCounter(messageRef, tag, numVoteShards.value())
@@ -383,10 +384,10 @@ async function updateCounts(
     )
   }
   // Increment the counter for Community Category
-  if (currentCommunityCategory !== null) {
+  if (currentCommunityNoteCategory !== null) {
     await incrementCounter(
       messageRef,
-      currentCommunityCategory,
+      currentCommunityNoteCategory,
       numVoteShards.value()
     )
   }

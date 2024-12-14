@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions"
-import { respondToInstance } from "../common/responseUtils"
+import { respondToInstance, correctCommunityNote } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
@@ -46,16 +46,26 @@ const onMessageUpdateV2 = onDocumentUpdated(
         messageData?.communityNote?.downvoted &&
         messageData?.communityNote?.pendingCorrection
       ) {
+        console.log("REPLYING BECAUSE DOWNVOTED")
         await replyCommunityNoteInstances(postChangeSnap)
+        // Update pendingCorrection field to show that the corrected message is sent to users
+        // postChangeSnap.ref.update({
+        //   "communityNote.pendingCorrection": false
+        // })
       }
     }
 
-    if (
+    else if (
       !preChangeSnap.data().communityNote?.downvoted &&
       messageData?.communityNote.downvoted
     ) {
       if (messageData.isAssessed) {
+        console.log("REPLYING BECAUSE DOWNVOTED 2")
         await replyCommunityNoteInstances(postChangeSnap)
+        // Update pendingCorrection field to show that the corrected message is sent to users
+        postChangeSnap.ref.update({
+          "communityNote.pendingCorrection": false
+        })
       } else {
         postChangeSnap.ref.update({
           "communityNote.pendingCorrection": true,
@@ -143,7 +153,7 @@ async function replyCommunityNoteInstances(
     .get()
 
   pendingSnapshot.forEach(async (instanceSnap) => {
-    await respondToInstance(instanceSnap)
+    await correctCommunityNote(instanceSnap)
   })
 }
 
