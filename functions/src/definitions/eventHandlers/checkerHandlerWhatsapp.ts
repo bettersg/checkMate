@@ -172,6 +172,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
       numNonUnsureVotesAtProgramEnd: null,
     },
     offboardingTime: null,
+    dailyAssignmentCount: 0,
   }
   await db.collection("checkers").add(checkerObj)
 }

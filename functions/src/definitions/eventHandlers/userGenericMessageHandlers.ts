@@ -14,6 +14,7 @@ import {
   sendMenuMessage,
   getResponsesObj,
   sendOutOfSubmissionsMessage,
+  sendWaitingMessage,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -28,6 +29,7 @@ import {
   performOCR,
   getCommunityNote,
   determineNeedsChecking,
+  determineControversial,
 } from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
@@ -191,10 +193,10 @@ async function newTextInstanceHandler({
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
-  const machineCategory = (await classifyText(text)) ?? "error"
   const needsChecking = await determineNeedsChecking({
     text: text,
   })
+  const machineCategory = (await classifyText(text)) ?? "error"
   if (from && isFirstTimeUser && !needsChecking) {
     await userSnap.ref.update({
       firstMessageType: "irrelevant",
@@ -247,7 +249,11 @@ async function newTextInstanceHandler({
     )
     let communityNoteData
     let isCommunityNoteGenerated = false
+    const isControversial = await determineControversial({
+      text: text,
+    })
     if (needsChecking) {
+      await sendWaitingMessage(userSnap, id)
       try {
         communityNoteData = await getCommunityNote({
           text: text,
@@ -280,6 +286,7 @@ async function newTextInstanceHandler({
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
+      isControversial: isControversial,
       isIrrelevant: !needsChecking,
       isScam: null,
       isIllicit: null,
@@ -363,6 +370,8 @@ async function newTextInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
     flowId: null,
+    disclaimerSentTimestamp: null,
+    disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
   }
   await addInstanceToDb(
@@ -408,6 +417,8 @@ async function newImageInstanceHandler({
   let matchType = "none" // will be set to either "similarity" or "image" or "none"
   let matchedInstanceSnap
   let captionHash = caption ? hashMessage(caption) : null
+
+  await sendWaitingMessage(userSnap, id)
 
   if (!mediaId) {
     throw new Error(`No mediaId for whatsapp message with id ${id}`)
@@ -532,16 +543,24 @@ async function newImageInstanceHandler({
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
     let communityNoteData
     let isCommunityNoteGenerated = false
-    try {
-      const signedUrl = (await getSignedUrl(filename)) ?? null
-      communityNoteData = await getCommunityNote({
+    let isControversial = false
+    const signedUrl = (await getSignedUrl(filename)) ?? null
+    if (signedUrl) {
+      isControversial = await determineControversial({
         url: signedUrl,
         caption: caption ?? null,
       })
-      isCommunityNoteGenerated = true
-    } catch (error) {
-      functions.logger.error("Error in getCommunityNote:", error)
+      try {
+        communityNoteData = await getCommunityNote({
+          url: signedUrl,
+          caption: caption ?? null,
+        })
+        isCommunityNoteGenerated = true
+      } catch (error) {
+        functions.logger.error("Error in getCommunityNote:", error)
+      }
     }
+
     if (extractedMessage) {
       strippedMessage = await anonymiseMessage(extractedMessage)
     }
@@ -571,6 +590,7 @@ async function newImageInstanceHandler({
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
+      isControversial: isControversial,
       isIrrelevant: false,
       isScam: null,
       isIllicit: null,
@@ -661,6 +681,8 @@ async function newImageInstanceHandler({
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
     flowId: null,
+    disclaimerSentTimestamp: null,
+    disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
   }
   await addInstanceToDb(

@@ -16,6 +16,10 @@ interface TrivialResponse {
   needsChecking: boolean
 }
 
+interface ControversialResponse {
+  isControversial: boolean
+}
+
 interface CommunityNoteResponse {
   success: boolean
   data: CommunityNoteReturn
@@ -78,6 +82,38 @@ async function determineNeedsChecking(input: {
     data
   )
   return response.data.needsChecking
+}
+
+async function determineControversial(input: {
+  text?: string
+  url?: string | null
+  caption?: string | null
+}): Promise<boolean> {
+  switch (env) {
+    case "SIT":
+      return false
+    case "DEV":
+      if (
+        input.text?.toLowerCase().includes("controversial") ||
+        input.caption?.toLowerCase().includes("controversial")
+      ) {
+        return true
+      }
+      return false
+    default:
+      break
+  }
+  const data = { ...input }
+  try {
+    const response = await callAPI<ControversialResponse>(
+      "determineControversial",
+      data
+    )
+    return response.data.isControversial
+  } catch (error) {
+    functions.logger.error(`Error in determineControversial: ${error}`)
+    return false
+  }
 }
 
 async function getCommunityNote(input: {
@@ -214,4 +250,5 @@ export {
   getL1Category,
   performOCR,
   getCommunityNote,
+  determineControversial,
 }

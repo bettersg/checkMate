@@ -113,6 +113,7 @@ const postCheckerHandler = async (req: Request, res: Response) => {
       numNonUnsureVotesAtProgramEnd: null,
     },
     offboardingTime: null,
+    dailyAssignmentCount: 0,
   }
 
   logger.info("Creating new checker", newChecker)

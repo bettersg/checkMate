@@ -89,8 +89,8 @@ export async function createNewUser(
     priceWhereInterested: null,
     feedback: null,
     tier: "free",
-    numSubmissionsRemaining: thresholds.freeTierMonthlyLimit ?? 5,
-    monthlySubmissionLimit: thresholds.freeTierMonthlyLimit ?? 5,
+    numSubmissionsRemaining: thresholds.freeTierDailyLimit ?? 5,
+    monthlySubmissionLimit: thresholds.freeTierDailyLimit ?? 5,
   }
   try {
     const res = await db.collection("users").add(newUserObject)

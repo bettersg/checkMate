@@ -139,6 +139,7 @@ export type MessageData = {
   assessmentExpired: boolean //whether the assessment has expired
   truthScore: number | null //the mean of the checker-submitted truth scores for this message
   numberPointScale: 5 | 6 //whether or not this message was voted on with the 5-point or 6-point truth scale
+  isControversial: boolean | null //whether this message is considered controversial (by GenAI)
   isIrrelevant: boolean | null //whether this message is considered irrelevant, i.e. whether the sum of irrelevant votes > irrelevant threshold
   isScam: boolean | null //whether this message is considered scam, i.e. the sum of scam votes > scam threshold
   isIllicit: boolean | null //whether this message is considered illicit, i.e. the sum of illicit votes > illicit threshold
@@ -191,6 +192,8 @@ export type InstanceData = {
   isReplyImmediate: boolean | null //Whether the reply was sent immediately after the message was received, meaning it was either matched or auto-categorised
   replyCategory: string | null //The category of the reply sent to the user. May not be equivalent to the primaryCategory of the message, which could change over time.
   replyTimestamp: Timestamp | null //The timestamp when the reply was sent
+  disclaimerSentTimestamp: Timestamp | null //The timestamp when the controversial disclaimer was sent, if applicable
+  disclaimerAcceptanceTimestamp: Timestamp | null //The timestamp when the user accepted the controversial disclaimer, if applicable
   matchType: string //The type of match. Either "none" (no match), "similarity" (match based on semantic similarity of text), "image" (match based on the perceptual hash) or "exact" (match based on exact text match)
   scamShieldConsent: boolean | null //Whether the user has consented to share the message with ScamShield. Defaults to true unless user explicitly opts out.
   embedding: number[] | null // Embedding of the message
@@ -299,6 +302,7 @@ export type CheckerData = {
   getNameMessageId: string | null // The Telegram message ID of the message asking the checker to input their name, used for onboarding ops only
   leaderboardStats: LeaderBoardStats // The leaderboard stats of the checker
   programData: ProgramData // The Checker Program data of the checker
+  dailyAssignmentCount: Number // Daily count of checker votes
 }
 
 export type NudgeData = {
@@ -444,4 +448,43 @@ export type TeleMessage = {
   storageUrl: string | null
   crowdPercentage: number
   votedPercentage: number
+}
+
+export type Thresholds = {
+  endVote: number
+  endVoteBigSus: number
+  endVoteUnsure: number
+  endVoteAbsolute: number
+  endVoteBigSusAbsolute: number
+  endVoteUnsureAbsolute: number
+  startVote: number
+  isSpam: number
+  isNoClaim: number
+  isLegitimate: number
+  isInfo: number
+  isIrrelevant: number
+  isUnsure: number
+  isBigSus: number
+  isSus: number
+  isSatire: number
+  isHarmless: number
+  isHarmful: number
+  falseUpperBound: number
+  misleadingUpperBound: number
+  sendInterimMinVotes: number
+  surveyLikelihood: number
+  satisfactionSurveyCooldownDays: number
+  volunteerProgramVotesRequirement: number
+  volunteerProgramReferralRequirement: number
+  volunteerProgramReportRequirement: number
+  volunteerProgramAccuracyRequirement: number
+  accuracyNudgeThreshold: number
+  numberBeforeAccuracyNudge: number
+  daysBeforeFirstCompletionCheck: number
+  daysBeforeSecondCompletionCheck: number
+  freeTierDailyLimit: number
+  paidTierDailyLimit: number
+  numberToTrigger: number | string
+  targetDailyVotes: number
+  minVotesPerMessage: number
 }

@@ -881,10 +881,12 @@ async function sendInterimPrompt(instanceSnap: DocumentSnapshot) {
     isInterimPromptSent: true,
   })
 }
+
 async function respondToInstance(
   instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false,
+  isDisclaimerAgeed = false,
   isCorrection = false
 ) {
   const userSnap = await getUserSnapshot(
@@ -920,6 +922,9 @@ async function respondToInstance(
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const thresholds = await getThresholds()
   const isAssessed = parentMessageSnap.get("isAssessed")
+  const isControversial = parentMessageSnap.get("isControversial")
+  const isDisclaimerSent = data.disclaimerSentTimestamp != null
+  const isDisclaimed = data?.disclaimerAcceptanceTimestamp != null
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const isWronglyCategorisedIrrelevant = parentMessageSnap.get(
     "isWronglyCategorisedIrrelevant"
@@ -941,6 +946,30 @@ async function respondToInstance(
   let bespokeReply = false
 
   let isMachineCase = false
+
+  if (isControversial && !isDisclaimed && !isDisclaimerAgeed) {
+    if (!isDisclaimerSent) {
+      const text = responses.CONTROVERSIAL_DISCLAIMER
+      const controversialButton = {
+        type: "reply",
+        reply: {
+          id: `controversial_${instanceSnap.ref.path}`,
+          title: responses.BUTTON_PROCEED_ANYWAY,
+        },
+      }
+      await sendWhatsappButtonMessage(
+        "user",
+        from,
+        text,
+        [controversialButton],
+        data.id
+      )
+    }
+    await instanceSnap.ref.update({
+      disclaimerSentTimestamp: Timestamp.now(),
+    })
+    return
+  }
 
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
@@ -1264,6 +1293,33 @@ async function respondToInstance(
   return
 }
 
+async function sendWaitingMessage(
+  userSnap: DocumentSnapshot,
+  replyMessageId: string | null = null
+) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  await sendTextMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responses.WAIT_FOR_AI,
+    replyMessageId,
+    "whatsapp"
+  )
+}
+
+async function handleDisclaimer(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const instanceRef = db.doc(instancePath)
+  await instanceRef.update({
+    disclaimerAcceptanceTimestamp: Timestamp.now(),
+  })
+  const instanceSnap = await instanceRef.get()
+  await respondToInstance(instanceSnap, false, true, true)
+}
+
 async function sendReferralMessage(userSnap: DocumentSnapshot) {
   let referralResponse
   const language = userSnap.get("language") ?? "en"
@@ -1460,7 +1516,7 @@ async function sendGetMoreSubmissionsMessage(
     return
   } else {
     const thresholds = await getThresholds()
-    const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
+    const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
     const responseText = responses.GET_MORE_SUBMISSIONS_NUDGE.replace(
       "{{paid_tier_limit}}",
       paidTierLimit.toString()
@@ -1495,7 +1551,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
-  const paidTierLimit = thresholds.paidTierMonthlyLimit ?? 50
+  const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
   if (isPaidTier || hasExpressedInterest) {
     const responseText = responses.OUT_OF_SUBMISSIONS.replace(
       "{{free_tier_limit}}",
@@ -1870,5 +1926,7 @@ export {
   sendGetMoreSubmissionsMessage,
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
+  sendWaitingMessage,
+  handleDisclaimer,
   correctCommunityNote,
 }

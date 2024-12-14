@@ -30,6 +30,7 @@ import {
   sendGetMoreSubmissionsMessage,
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
+  handleDisclaimer,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -214,6 +215,10 @@ async function onButtonReply(
     case "getMoreChecks":
       ;[instancePath] = rest
       await sendGetMoreSubmissionsMessage(userSnap, instancePath)
+      break
+    case "controversial":
+      ;[instancePath] = rest
+      await handleDisclaimer(userSnap, instancePath)
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest

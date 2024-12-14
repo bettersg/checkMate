@@ -19,9 +19,13 @@
     "en": "Oops, we encountered an error assessing this message.\n\nYou can try sending the message in again, or report the error via our form at https://bit.ly/checkmate-feedback. Sorry about that! 😔",
     "cn": "抱歉，查友在评估您提供的短信时发生了问题。\n\n欢迎您稍后重试，或者通过这份表格向我们反馈：https://bit.ly/checkmate-feedback。对此造成的不便，我们非常抱歉！😔"
   },
+  "WAIT_FOR_AI": {
+    "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖",
+    "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。"
+  },
   "MESSAGE_NOT_YET_ASSESSED": {
-    "en": "Hello! 👋 Thanks for sending this in! Our *CheckMates🕵🏻 will review this* and *provide the results soon*.",
-    "cn": "你好！👋 感谢您使用查友！我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
+    "en": "Unfortunately, our AI wasn't able to assess this message.\n\nOur volunteers🕵🏻 will review this and *provide the results soon*.",
+    "cn": "很遗憾，我们的人工智能无法对此进行评估。\n\n我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
   },
   "SCAM": {
     "en": "{{thanks}}{{methodology}}*a scam*!🚫{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
@@ -115,6 +119,10 @@
     "en": "Here are the sources used by our AI 🧐:\n\n{{sources}}",
     "cn": "以下是我们人工智能使用的来源 🧐：\n\n{{sources}}"
   },
+  "CONTROVERSIAL_DISCLAIMER": {
+    "en": "This message appears to contain controversial views. At CheckMate, our checks are designed with harm prevention in mind, prioritizing speed and clarity. While we aim to provide reliable results, controversial topics requiring deeper nuance may be less suited to our process.\n\nIf you understand these limitations and still wish to view the result, please click the button below to proceed.",
+    "cn": "这条消息似乎包含争议性观点。查友的检查以防止危害为宗旨，重点关注速度和清晰度。尽管我们致力于提供可靠的结果，但对于需要更深入分析的争议性话题，我们的流程可能不完全适用。\n\n如果您理解这些局限性并仍希望查看结果，请点击下方按钮继续。"
+  },
   "NEXT_TIME": {
     "en": "The next time you want to check or report something, simply forward it in ↗️, copy-paste the text, or send a screenshot 📷 or image 🖼️.",
     "cn": "下次想用查友检查或举报信息时，只需转发短信↗️，发送截图📷，或其他图片🖼️即可。"
@@ -184,8 +192,8 @@
     "cn": "嗯...这条短信似乎没有可以评估的内容。😕{{generated}}"
   },
   "IRRELEVANT_APPEAL": {
-    "en": "Sorry for the wrong assessment. We have sent your message for checking.",
-    "cn": "抱歉评估有误。我们已将您的信息送去评估。"
+    "en": "Sorry for misunderstanding your intent. We have sent your message to our AI system for checking.",
+    "cn": "抱歉误解了你的意图。我们已将你的消息发送到我们的人工智能系统进行检查。"
   },
   "MENU_PREFIX": {
     "en": "Hi! Thanks for using CheckMate. 🙏🏻",
@@ -260,24 +268,24 @@
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
   },
   "REMAINING_SUBMISSIONS_SUFFIX": {
-    "en": "\n\n[ {{num_remaining_submissions}} / {{free_tier_limit}} free submissions remaining this month ]",
-    "cn": "\n\n[ 本月剩余 {{num_remaining_submissions}} / {{free_tier_limit}} 次免费提交 ]"
+    "en": "\n\n[ {{num_remaining_submissions}} / {{free_tier_limit}} free submissions remaining today ]",
+    "cn": "\n\n[ 今日剩余 {{num_remaining_submissions}} / {{free_tier_limit}} 次免费提交 ]"
   },
   "GET_MORE_SUBMISSIONS": {
-    "en": "Your free submissions will reset at the start of next month. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.",
-    "cn": "您的免费提交次数将在下个月初重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻。"
+    "en": "Your free submissions will reset at midnight. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.",
+    "cn": "您的免费提交次数将在午夜重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻。"
   },
   "GET_MORE_SUBMISSIONS_NUDGE": {
-    "en": "Your free limit resets at the start of next month. If you find our service useful, you can join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
-    "cn": "您的免费额度将在下个月初重置。如果您觉得我们的服务有用，可以通过以下链接加入我们的高级订阅候补名单——每月仅需一杯咖啡的价格（$4.99），即可享受您或您所关心的人{{paid_tier_limit}}次提交，并帮助我们维持服务运营！"
+    "en": "Your free limit resets at midnight. If you find our service useful, you can join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
+    "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有用，可以通过以下链接加入我们的高级订阅候补名单——每月仅需一杯咖啡的价格（$4.99），即可享受您或您所关心的人{{paid_tier_limit}}次提交，并帮助我们维持服务运营！"
   },
   "OUT_OF_SUBMISSIONS": {
-    "en": "Thanks for using CheckMate 🙏🏻.\n\n You have run out of your {{free_tier_limit}} free monthly submissions. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it.",
-    "cn": "感谢使用 CheckMate 🙏🏻。\n\n您本月 {{free_tier_limit}} 次的免费提交机会已用完。我们感谢您对高级会员服务的关注，并感谢您的耐心等待，我们正在努力推出该服务。"
+    "en": "Thanks for using CheckMate 🙏🏻.\n\n You have run out of your {{free_tier_limit}} free daily submissions. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it.",
+    "cn": "感谢使用 查友 🙏🏻。\n\n您今日 {{free_tier_limit}} 次的免费提交机会已用完。我们感谢您对高级会员服务的关注，并感谢您的耐心等待，我们正在努力推出该服务。"
   },
   "OUT_OF_SUBMISSIONS_NUDGE": {
-    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free monthly submissions. Want more? Join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
-    "cn": "\n感谢您使用 CheckMate 🙏🏻。您的{{free_tier_limit}}次每月免费提交已用完。想要更多吗？通过以下链接加入我们的高级订阅候补名单——每月仅需一杯咖啡的价格（$4.99），即可享受您或您所关心的人{{paid_tier_limit}}次提交，并帮助我们维持服务运营！"
+    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free daily submissions. Want more? Join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
+    "cn": "感谢您使用查友 🙏🏻。您今日的{{daily_free_tier_limit}}次免费提交已用完。想要更多吗？通过以下链接加入我们的高级订阅候补名单——每日仅需一杯咖啡的价格（$4.99/月），即可享受您或您所关心的人每日{{daily_paid_tier_limit}}次提交，并帮助我们维持服务运营！"
   },
   "WAITLIST_THANKS": {
     "en": "Thanks for signing up for the waitlist! We will inform you when the paid subscription is available.",
@@ -450,6 +458,10 @@
   "BUTTON_SIGN_UP": {
     "en": "Sign Up/注册",
     "cn": "Sign Up/注册"
+  },
+  "BUTTON_PROCEED_ANYWAY": {
+    "en": "Proceed anyway",
+    "cn": "仍然继续"
   },
   "PLACEHOLDER_SCAM": {
     "en": "a scam🚫",
