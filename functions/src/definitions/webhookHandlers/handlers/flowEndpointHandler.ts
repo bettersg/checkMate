@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin"
+import { Timestamp } from "firebase-admin/firestore"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -25,6 +26,10 @@ export async function flowEndpointHandler(decryptedBody: WhatsAppRequest) {
           throw new Error("Flow token not found")
         }
         const flowRef = db.collection("flows").doc(flowToken)
+        flowRef.update({
+          outcome: "opened",
+          outcomeTimestamp: Timestamp.now(),
+        })
         const flowSnap = await flowRef.get()
         if (!flowSnap.exists) {
           throw new Error("Flow not found in database")
