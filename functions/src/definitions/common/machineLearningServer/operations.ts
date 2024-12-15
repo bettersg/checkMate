@@ -187,24 +187,23 @@ async function performOCR(storageURL: string): Promise<camelCasedOCRResponse> {
 
 async function getGoogleIdentityToken(audience: string) {
   try {
-    const auth = new GoogleAuth()
-    const client = await auth.getIdTokenClient(audience)
-    const idToken = await client.idTokenProvider.fetchIdToken(audience)
-    return idToken
-  } catch (error) {
     if (env === "SIT" || env === "DEV") {
       functions.logger.log(
         "Unable to get Google identity token in lower environments"
       )
       return ""
-    } else {
-      if (error instanceof AxiosError) {
-        functions.logger.error(error.message)
-      } else {
-        functions.logger.error(error)
-      }
-      throw new Error("Unable to get Google identity token in prod environment")
     }
+    const auth = new GoogleAuth()
+    const client = await auth.getIdTokenClient(audience)
+    const idToken = await client.idTokenProvider.fetchIdToken(audience)
+    return idToken
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      functions.logger.error(error.message)
+    } else {
+      functions.logger.error(error)
+    }
+    throw new Error("Unable to get Google identity token in prod environment")
   }
 }
 

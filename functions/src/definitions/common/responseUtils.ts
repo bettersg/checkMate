@@ -1883,6 +1883,7 @@ async function correctCommunityNote(instanceSnap: DocumentSnapshot) {
     "whatsapp"
   )
   await respondToInstance(instanceSnap, false, false, false)
+  await instanceSnap.ref.update({ isCommunityNoteCorrected: true })
 }
 
 export {

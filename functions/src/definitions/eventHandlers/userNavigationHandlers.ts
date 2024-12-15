@@ -430,7 +430,6 @@ const onUserNavigationPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
       "OPENAI_API_KEY",
     ],
     timeoutSeconds: 120,

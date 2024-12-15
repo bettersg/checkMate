@@ -835,7 +835,6 @@ const onCheckerPublishTelegram = onMessagePublished(
     topic: "checkerEvents",
     secrets: [
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
       "TELEGRAM_CHECKER_BOT_TOKEN",
       "TELEGRAM_ADMIN_BOT_TOKEN",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",

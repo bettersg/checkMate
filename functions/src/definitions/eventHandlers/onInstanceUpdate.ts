@@ -90,6 +90,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
             links: communityNoteData?.links || [],
             downvoted: false,
             pendingCorrection: false,
+            adminGroupCommunityNoteSentMessageId: null,
           }
         } catch (error) {
           functions.logger.error("Error in getCommunityNote:", error)

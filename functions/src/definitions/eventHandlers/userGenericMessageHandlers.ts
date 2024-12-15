@@ -40,6 +40,7 @@ import { AppEnv } from "../../appEnv"
 import { getSignedUrl } from "../common/mediaUtils"
 import { logger } from "firebase-functions"
 import { stripTemplate } from "../../validators/whatsapp/checkWhatsappText"
+import { sendNewMessageNotification } from "../../services/admin/notificationService"
 
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
@@ -252,6 +253,8 @@ async function newTextInstanceHandler({
     }
     let strippedMessage = await anonymiseMessage(text, true)
 
+    const adminMessageId = (await sendNewMessageNotification(text)) ?? null
+
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: needsChecking
@@ -259,7 +262,6 @@ async function newTextInstanceHandler({
         : "irrelevant",
       isMachineCategorised: isMachineAssessed || !needsChecking,
       isWronglyCategorisedIrrelevant: false,
-      sentMessageId: null,
       originalText: text,
       text: strippedMessage, //text
       caption: null,
@@ -296,9 +298,11 @@ async function newTextInstanceHandler({
               links: communityNoteData?.links || [],
               downvoted: false,
               pendingCorrection: false,
+              adminGroupCommunityNoteSentMessageId: null,
             }
           : null,
       instanceCount: 0,
+      adminGroupSentMessageId: adminMessageId,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -336,7 +340,8 @@ async function newTextInstanceHandler({
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
     isRationalisationUseful: null,
-    isCommunityNoteSent: null,
+    isCommunityNoteSent: false,
+    isCommunityNoteCorrected: null,
     isCommunityNoteUseful: null,
     isCommunityNoteReviewRequested: null,
     isReplyForced: null,
@@ -557,9 +562,15 @@ async function newImageInstanceHandler({
       machineCategory !== "unsure" &&
       machineCategory !== "info"
     )
+
+    let adminMessageId = null
+    if (signedUrl) {
+      adminMessageId =
+        (await sendNewMessageNotification(null, signedUrl, caption)) ?? null
+    }
+
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
-      sentMessageId: null,
       machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
       isWronglyCategorisedIrrelevant: false,
@@ -599,9 +610,11 @@ async function newImageInstanceHandler({
               links: communityNoteData?.links || [],
               downvoted: false,
               pendingCorrection: false,
+              adminGroupCommunityNoteSentMessageId: null,
             }
           : null,
       instanceCount: 0,
+      adminGroupSentMessageId: adminMessageId,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -647,6 +660,7 @@ async function newImageInstanceHandler({
     isRationalisationSent: null,
     isRationalisationUseful: null,
     isCommunityNoteSent: null,
+    isCommunityNoteCorrected: false,
     isCommunityNoteUseful: null,
     isCommunityNoteReviewRequested: null,
     isReplyForced: null,
@@ -719,8 +733,8 @@ const onUserGenericMessagePublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
       "OPENAI_API_KEY",
+      "TELEGRAM_ADMIN_BOT_TOKEN",
     ],
     timeoutSeconds: 120,
   },

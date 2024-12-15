@@ -154,7 +154,7 @@ export type MessageData = {
   customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
   communityNote: CommunityNote | null // the gen-ai generated community note for this message
   instanceCount: number //the number of instances of this message
-  sentMessageId: string | null // The original message id of the message sent to the admin group
+  adminGroupSentMessageId: string | null // The original message id of the message sent to the admin group
 }
 
 export type InstanceData = {
@@ -184,6 +184,7 @@ export type InstanceData = {
   isRationalisationSent: boolean | null //Whether the rationalisation has been sent
   isRationalisationUseful: boolean | null //Whether the rationalisation was voted as useful by the user
   isCommunityNoteSent: boolean | null //Whether the community note has been sent
+  isCommunityNoteCorrected: boolean | null //Whether the community note has been corrected
   isCommunityNoteUseful: boolean | null //Whether the community note was voted as useful by the user
   isCommunityNoteReviewRequested: boolean | null //Whether the user requested to see the human review
   isIrrelevantAppealed: boolean | null //Whether the user indicate that they message was incorrectly marked by the automated pipelines as irrelevant
@@ -207,7 +208,7 @@ export type InstanceData = {
   isSatisfactionSurveySent: boolean | null //Whether the satisfaction (aka NPS) survey was sent for this message
   satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
   flowId: string | null //If a flow was triggered from this instance, this tracks the flowId. Otherwise null
-  communityNoteMessageId: string | null
+  communityNoteMessageId: string | null // ID of the community note sent in the telegram admin group
 }
 
 export type ReferralClicksData = {
@@ -418,6 +419,7 @@ export type CommunityNote = {
   links: string[]
   downvoted: boolean
   pendingCorrection: boolean
+  adminGroupCommunityNoteSentMessageId: string | null
 }
 
 export type BlastData = {

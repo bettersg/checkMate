@@ -138,4 +138,4 @@ async function rationaliseMessage(message: string, category: string) {
   return null
 }
 
-export { anonymiseMessage, rationaliseMessage }
+export { anonymiseMessage }

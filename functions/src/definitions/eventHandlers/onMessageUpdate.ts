@@ -4,11 +4,12 @@ import {
   correctCommunityNote,
 } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
+import { anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { logger } from "firebase-functions"
 import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
+import { sendVotingUpdate } from "../../services/admin/notificationService"
 
 const ADMIN_CHAT_ID = String(process.env.ADMIN_CHAT_ID)
 
@@ -19,6 +20,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "OPENAI_API_KEY",
+      "TELEGRAM_ADMIN_BOT_TOKEN",
     ],
   },
   async (event) => {
@@ -29,92 +31,61 @@ const onMessageUpdateV2 = onDocumentUpdated(
       return Promise.resolve()
     }
     const messageData = postChangeSnap.data()
-    const preChangeData = preChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
+    let correctionSent = false
 
     // If changes from not assessed to assessed
     if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
       // Reply the admin feed with the primary category results
-      let message = `Primary Category: ${primaryCategory}`
-      await sendTelegramTextMessage(
-        "admin",
-        ADMIN_CHAT_ID,
-        message,
-        messageData?.sentMessageId
-      )
+      sendVotingUpdate({
+        messageId: postChangeSnap.get("adminGroupSentMessageId"),
+        currentCategory: primaryCategory,
+      })
 
-      //TODO: rationalisation here
-      let rationalisation: null | string = null
-      if (
-        primaryCategory &&
-        primaryCategory !== "irrelevant" &&
-        primaryCategory !== "unsure" &&
-        !messageData.caption &&
-        text
-      ) {
-        rationalisation = await rationaliseMessage(text, primaryCategory)
-      }
       await postChangeSnap.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
-        rationalisation: rationalisation,
       })
       await replyPendingInstances(postChangeSnap)
       if (
         messageData?.communityNote?.downvoted &&
         messageData?.communityNote?.pendingCorrection
       ) {
+        correctionSent = true
         await replyCommunityNoteInstances(postChangeSnap)
       }
-    } else if (
-      !preChangeSnap.data().communityNote?.downvoted &&
-      messageData?.communityNote?.downvoted
-    ) {
-      if (messageData.isAssessed) {
-        await replyCommunityNoteInstances(postChangeSnap)
-      } else {
-        postChangeSnap.ref.update({
-          "communityNote.pendingCorrection": true,
-        })
-      }
-    }
-
-    // if either the text changed, or the primaryCategory changed, rerun rationalisation
+    } // if either the text changed, or the primaryCategory changed, rerun rationalisation
     else if (
       messageData.isAssessed &&
-      (preChangeData.text !== text ||
-        preChangeData.primaryCategory !== primaryCategory)
+      preChangeSnap.data().primaryCategory !== primaryCategory &&
+      preChangeSnap.data().primaryCategory !== null
     ) {
-      let rationalisation: null | string = null
-      if (
-        primaryCategory &&
-        primaryCategory !== "irrelevant" &&
-        primaryCategory !== "unsure" &&
-        !messageData.caption &&
-        text
-      ) {
-        rationalisation = await rationaliseMessage(text, primaryCategory)
-      }
-      await postChangeSnap.ref.update({
-        rationalisation: rationalisation,
+      sendVotingUpdate({
+        messageId: postChangeSnap.get("adminGroupSentMessageId"),
+        previousCategory: preChangeSnap.data().primaryCategory,
+        currentCategory: primaryCategory,
       })
     }
 
-    // if isAssessed && communityNote.downvoted == True then we need to resend message
-    // else if (messageData.isAssessed && messageData.communityNote.downvoted) {
-    //   await replyCommunityNoteInstances(postChangeSnap)
-    // }
-
-    // If the primaryCategory changes, update the admin feed
-    if (preChangeSnap.data().primaryCategory !== primaryCategory) {
-      // Reply the admin feed with the primary category results
-      let message = `There is a change in the primary categorisation to ${primaryCategory}`
-      await sendTelegramTextMessage(
-        "admin",
-        ADMIN_CHAT_ID,
-        message,
-        messageData?.sentMessageId
-      )
+    if (
+      !preChangeSnap.data().communityNote?.downvoted &&
+      messageData?.communityNote?.downvoted
+    ) {
+      if (!correctionSent) {
+        if (messageData.isAssessed) {
+          await replyCommunityNoteInstances(postChangeSnap)
+        } else {
+          postChangeSnap.ref.update({
+            "communityNote.pendingCorrection": true,
+          })
+        }
+      }
+      sendVotingUpdate({
+        messageId: postChangeSnap.get(
+          "communityNote.adminGroupCommunityNoteSentMessageId"
+        ),
+        downvoted: true,
+      })
     }
 
     if (
@@ -175,6 +146,7 @@ async function replyCommunityNoteInstances(
   const pendingSnapshot = await docSnap.ref
     .collection("instances")
     .where("isCommunityNoteSent", "==", true)
+    .where("isCommunityNoteCorrected", "==", false)
     .get()
   try {
     await Promise.all(
