@@ -8,9 +8,7 @@ import { MegaphoneIcon } from "@heroicons/react/24/solid";
 import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
 import { ForwardIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@material-tailwind/react";
-import { useUser } from "../../providers/UserContext";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
 import InfoOptions from "./InfoOptions";
 import NVCOptions from "./NvcOptions";
@@ -23,8 +21,8 @@ interface PropType {
   currentTags: string[] | null;
   numberPointScale: number;
   onNextStep: (value: number) => void;
-  onVoteCategorySelection: (value:string) => void;
-  onTruthScoreChange: (value: number|null) => void;
+  onVoteCategorySelection: (value: string) => void;
+  onTruthScoreChange: (value: number | null) => void;
 }
 
 function getSelectedCategory(primaryCategory: string | null) {
@@ -95,12 +93,8 @@ const CATEGORIES = [
 ];
 
 export default function VoteCategories(Prop: PropType) {
-
   const currentCategory = Prop.currentCategory;
   const currentTruthScore = Prop.currentTruthScore;
-  const currentTags = Prop.currentTags ?? [];
-  const messageId = Prop.messageId;
-  const voteRequestId = Prop.voteRequestId;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     getSelectedCategory(currentCategory)
   );
@@ -116,7 +110,7 @@ export default function VoteCategories(Prop: PropType) {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setTruthScore(Number(event.target.value));
-    Prop.onTruthScoreChange(Number(event.target.value))
+    Prop.onTruthScoreChange(Number(event.target.value));
   };
 
   const handleL2VoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +121,7 @@ export default function VoteCategories(Prop: PropType) {
     switch (category) {
       default:
         setVoteCategory(category);
-        Prop.onVoteCategorySelection(category)
+        Prop.onVoteCategorySelection(category);
         break;
     }
   };
@@ -138,7 +132,7 @@ export default function VoteCategories(Prop: PropType) {
     switch (categoryName) {
       case "nvc":
         setVoteCategory("nvc");
-        Prop.onVoteCategorySelection(categoryName)
+        Prop.onVoteCategorySelection(categoryName);
         break;
       default:
         handleVoteCategoryChange(categoryName);
@@ -147,8 +141,8 @@ export default function VoteCategories(Prop: PropType) {
   };
 
   const handleNextStep = (value: number) => {
-    Prop.onNextStep(value)
-  }
+    Prop.onNextStep(value);
+  };
 
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
@@ -188,14 +182,16 @@ export default function VoteCategories(Prop: PropType) {
         </>
       ))}
       {voteCategory ? (
-        <Button fullWidth className="flex items-center justify-center gap-3 bg-green-400" size="sm"
-        onClick = {() => handleNextStep(3)}
+        <Button
+          fullWidth
+          className="flex items-center justify-center gap-3 bg-green-400"
+          size="sm"
+          onClick={() => handleNextStep(3)}
         >
           Move to next step
-          <ForwardIcon className="h-5 w-5"/>
+          <ForwardIcon className="h-5 w-5" />
         </Button>
-      ): null}
-      
+      ) : null}
     </div>
   );
 }

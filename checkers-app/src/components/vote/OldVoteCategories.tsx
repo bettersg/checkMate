@@ -150,7 +150,7 @@ export default function OldVoteCategories(Prop: PropType) {
     category: string,
     truthScore: number | null,
     tags: string[] | null,
-    comCategory: string | null, 
+    comCategory: string | null
   ) => {
     if (category === "nvc") {
       return;
@@ -179,8 +179,6 @@ export default function OldVoteCategories(Prop: PropType) {
     setTags(tags);
     console.log(tags);
   };
-
-  const handleDropdownToggle = (isOpen: boolean) => {}
 
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
@@ -223,13 +221,19 @@ export default function OldVoteCategories(Prop: PropType) {
         </>
       ))}
 
-      <VoteTags tags={tags} onSelectTag={onSelectTagOption} onDropdownToggle={handleDropdownToggle}/>
+      <VoteTags
+        tags={tags}
+        onSelectTag={onSelectTagOption}
+        onDropdownToggle={() => {}}
+      />
 
       {voteCategory ? (
         <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
           <Button
             className="bg-highlight-color w-fit place-self-center"
-            onClick={() => handleSubmitVote(voteCategory, truthScore, tags, null)}
+            onClick={() =>
+              handleSubmitVote(voteCategory, truthScore, tags, null)
+            }
           >
             Done!
           </Button>

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { Card, CardBody, Typography, Button, Alert } from "@material-tailwind/react";
-import { ChatBubbleLeftEllipsisIcon, PaperAirplaneIcon } from "@heroicons/react/20/solid";
+import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
+import {
+  ChatBubbleLeftEllipsisIcon,
+  PaperAirplaneIcon,
+} from "@heroicons/react/20/solid";
 
 interface PropType {
   text: string | null;
@@ -72,8 +75,8 @@ export default function MessageCard(prop: PropType) {
     <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
       <CardBody className="-m-3">
         <Typography className="flex items-center mb-2">
-          <ChatBubbleLeftEllipsisIcon className="h-6 w-6 text-[#ff327d] mr-2 flex-shrink-0"/>
-          <p className="font-semibold leading-none">Message：</p>
+          <ChatBubbleLeftEllipsisIcon className="h-6 w-6 text-[#ff327d] mr-2 flex-shrink-0" />
+          <p className="font-semibold leading-none">Message</p>
         </Typography>
         <Typography className="w-full">
           {type === "image" && displayText.length > 0 && (
@@ -115,7 +118,6 @@ export default function MessageCard(prop: PropType) {
             {isExpanded ? "Show Less" : "Read More"}
           </Button>
         )}
-
       </CardBody>
       {type === "image" && imageUrl && (
         <img
@@ -125,10 +127,10 @@ export default function MessageCard(prop: PropType) {
         />
       )}
       <CardBody className="-m-3">
-      <Typography className="flex items-center mt-1 mb-2">
-        <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0"/>
-        <p className="font-medium leading-none">Sender: {sender}</p>
-      </Typography>
+        <Typography className="flex items-center mt-1 mb-2">
+          <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0" />
+          <p className="font-medium leading-none">Sender: {sender}</p>
+        </Typography>
       </CardBody>
     </Card>
   );
