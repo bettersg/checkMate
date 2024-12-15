@@ -73,7 +73,7 @@ export default function MessageCard(prop: PropType) {
       <CardBody className="-m-3">
         <Typography className="flex items-center mb-2">
           <ChatBubbleLeftEllipsisIcon className="h-6 w-6 text-[#ff327d] mr-2 flex-shrink-0"/>
-          <p className="font-semibold leading-none">Message Note:</p>
+          <p className="font-semibold leading-none">Message：</p>
         </Typography>
         <Typography className="w-full">
           {type === "image" && displayText.length > 0 && (
@@ -116,10 +116,6 @@ export default function MessageCard(prop: PropType) {
           </Button>
         )}
 
-      <Typography className="flex items-center mt-3 mb-2">
-        <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0"/>
-        <p className="font-medium leading-none">Sender: {sender}</p>
-      </Typography>
       </CardBody>
       {type === "image" && imageUrl && (
         <img
@@ -128,6 +124,12 @@ export default function MessageCard(prop: PropType) {
           className="w-full object-contain rounded-xl"
         />
       )}
+      <CardBody className="-m-3">
+      <Typography className="flex items-center mt-1 mb-2">
+        <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0"/>
+        <p className="font-medium leading-none">Sender: {sender}</p>
+      </Typography>
+      </CardBody>
     </Card>
   );
 }
