@@ -19,7 +19,10 @@ interface TrivialResponse {
 interface ControversialResponse {
   isControversial: boolean
 }
-type CommunityNoteReturn = Pick<CommunityNote, "en" | "cn" | "links">
+interface CommunityNoteReturn
+  extends Pick<CommunityNote, "en" | "cn" | "links"> {
+  isControversial: boolean // Add your new field
+}
 
 interface L1CategoryResponse {
   prediction: string
@@ -129,6 +132,7 @@ async function getCommunityNote(input: {
         en: "This is a test community note.",
         cn: "这是一个测试社区笔记。",
         links: ["https://example1.com", "https://example2.com"],
+        isControversial: false,
       }
     }
   }
