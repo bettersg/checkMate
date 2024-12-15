@@ -259,6 +259,7 @@ async function newTextInstanceHandler({
         : "irrelevant",
       isMachineCategorised: isMachineAssessed || !needsChecking,
       isWronglyCategorisedIrrelevant: false,
+      sentMessageId: null,
       originalText: text,
       text: strippedMessage, //text
       caption: null,
@@ -558,6 +559,7 @@ async function newImageInstanceHandler({
     )
     messageRef = db.collection("messages").doc()
     messageUpdateObj = {
+      sentMessageId: null,
       machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
       isWronglyCategorisedIrrelevant: false,

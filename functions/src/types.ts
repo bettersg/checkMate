@@ -154,6 +154,7 @@ export type MessageData = {
   customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
   communityNote: CommunityNote | null // the gen-ai generated community note for this message
   instanceCount: number //the number of instances of this message
+  sentMessageId: string | null // The original message id of the message sent to the admin group
 }
 
 export type InstanceData = {
