@@ -118,7 +118,6 @@ export type GeneralMessage = {
   timestamp: number
   isForwarded: boolean | null
   frequently_forwarded: boolean | null
-  isFirstTimeUser: boolean
 }
 
 export type MessageData = {

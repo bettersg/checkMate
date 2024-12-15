@@ -7,7 +7,7 @@ import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
-import { referralHandler } from "../../services/user/referrals"
+import { handlePreOnboardedMessage } from "../../services/user/referrals"
 import { Request, Response } from "express"
 import { AppEnv } from "../../appEnv"
 import { GeneralMessage, WhatsappMessageObject } from "../../types"
@@ -132,12 +132,10 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
               if (phoneNumberId === userPhoneNumberId) {
                 //check for new user
 
-                let isFirstTimeUser = false
                 const whatsappId = message.from
                 let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
                 if (userSnap === null) {
                   //new user
-                  isFirstTimeUser = true
 
                   const messageTimestamp = new Timestamp(
                     Number(message.timestamp),
@@ -160,6 +158,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                       `New user ${whatsappId}, but not due to request_welcome event`
                     )
                     await sendOnboardingFlow(userSnap, true)
+                    await handlePreOnboardedMessage(userSnap, message)
                     return res.sendStatus(200)
                   }
                 } else if (userSnap.get("isIgnored")) {
@@ -179,6 +178,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                   )
                 } else if (!userSnap.get("isOnboardingComplete")) {
                   await sendOnboardingFlow(userSnap, false)
+                  await handlePreOnboardedMessage(userSnap, message)
                   return res.sendStatus(200)
                 } else {
                   switch (type) {
@@ -201,7 +201,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                         isForwarded: message.context?.forwarded,
                         frequently_forwarded:
                           message.context?.frequently_forwarded,
-                        isFirstTimeUser: isFirstTimeUser,
                       }
                       await publishToTopic(
                         "userGenericMessages",

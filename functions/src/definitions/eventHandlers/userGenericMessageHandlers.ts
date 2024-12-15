@@ -7,8 +7,8 @@ import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
-import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
-import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
+import { hashMessage, checkMessageId } from "../common/utils"
+import { checkPrepopulatedMessage } from "../../services/user/referrals"
 import { getUserSnapshot } from "../../services/user/userManagement"
 import {
   sendMenuMessage,
@@ -39,6 +39,7 @@ import { GeneralMessage, MessageData, InstanceData } from "../../types"
 import { AppEnv } from "../../appEnv"
 import { getSignedUrl } from "../common/mediaUtils"
 import { logger } from "firebase-functions"
+import { stripTemplate } from "../../validators/whatsapp/checkWhatsappText"
 
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
@@ -67,7 +68,6 @@ const userGenericMessageHandlerWhatsapp = async function (
   const type = message.type // image/text
   const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  let isFirstTimeUser = message.isFirstTimeUser
   let userSnap = await getUserSnapshot(from, source)
   if (userSnap == null) {
     logger.error(`User ${from} not found in userHandler`)
@@ -83,11 +83,9 @@ const userGenericMessageHandlerWhatsapp = async function (
     return
   }
 
-  if (!isFirstTimeUser) {
-    await userSnap.ref.update({
-      numSubmissionsRemaining: FieldValue.increment(-1),
-    })
-  }
+  await userSnap.ref.update({
+    numSubmissionsRemaining: FieldValue.increment(-1),
+  })
 
   let step
 
@@ -100,26 +98,19 @@ const userGenericMessageHandlerWhatsapp = async function (
       if (!message.text) {
         break
       }
-      const textNormalised = normalizeSpaces(message.text).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
-      if (
-        checkTemplate(
-          textNormalised,
-          responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase()
-        ) ||
-        checkTemplate(
-          textNormalised,
-          responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
-        )
-      ) {
-        step = "text_prepopulated"
-        if (isFirstTimeUser) {
-          await referralHandler(userSnap, message.text, from)
-        } else {
-          await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
-        }
+      if (checkPrepopulatedMessage(responses, message.text)) {
+        await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         break
+      } else {
+        //replace prepopulated prefix if any in the text
+        const cleanedMessage = stripTemplate(
+          stripTemplate(message.text, responses?.REFERRAL_PREPOPULATED_PREFIX),
+          responses?.REFERRAL_PREPOPULATED_PREFIX_1
+        )
+        if (cleanedMessage) {
+          message.text = cleanedMessage
+        }
       }
-
       step = await newTextInstanceHandler({
         userSnap,
         source: message.source,
@@ -129,7 +120,6 @@ const userGenericMessageHandlerWhatsapp = async function (
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
-        isFirstTimeUser,
       })
       break
 
@@ -145,7 +135,6 @@ const userGenericMessageHandlerWhatsapp = async function (
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
-        isFirstTimeUser,
       })
       break
 
@@ -178,7 +167,6 @@ async function newTextInstanceHandler({
   from,
   isForwarded,
   isFrequentlyForwarded,
-  isFirstTimeUser,
 }: {
   userSnap: admin.firestore.DocumentSnapshot
   source: string
@@ -188,7 +176,6 @@ async function newTextInstanceHandler({
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
-  isFirstTimeUser: boolean
 }) {
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
@@ -197,12 +184,12 @@ async function newTextInstanceHandler({
     text: text,
   })
   const machineCategory = (await classifyText(text)) ?? "error"
-  if (from && isFirstTimeUser && !needsChecking) {
-    await userSnap.ref.update({
-      firstMessageType: "irrelevant",
-    })
-    return Promise.resolve(`text_machine_irrelevant`)
-  }
+  // if (from && isFirstTimeUser && !needsChecking) {
+  //   await userSnap.ref.update({
+  //     firstMessageType: "irrelevant",
+  //   })
+  //   return Promise.resolve(`text_machine_irrelevant`)
+  // }
   let matchType = "none" // will be set to either "similarity" or "none"
   let similarity
   let embedding
@@ -396,7 +383,6 @@ async function newImageInstanceHandler({
   from,
   isForwarded,
   isFrequentlyForwarded,
-  isFirstTimeUser,
 }: {
   userSnap: admin.firestore.DocumentSnapshot
   source: string
@@ -408,7 +394,6 @@ async function newImageInstanceHandler({
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
-  isFirstTimeUser: boolean
 }) {
   let filename
   let messageRef: FirebaseFirestore.DocumentReference | null = null
@@ -720,75 +705,6 @@ async function addInstanceToDb(
     functions.logger.log(`Transaction success for messageId ${id}!`)
   } catch (e) {
     functions.logger.error(`Transaction failure for messageId ${id}!`, e)
-  }
-}
-
-async function referralHandler(
-  userSnap: admin.firestore.DocumentData,
-  message: string,
-  from: string
-) {
-  const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
-  const userRef = userSnap.ref
-  if (code.length > 0) {
-    const referralClickRef = db.collection("referralClicks").doc(code)
-    const referralClickSnap = await referralClickRef.get()
-    if (referralClickSnap.exists) {
-      const referralId = referralClickSnap.get("referralId")
-      if (referralId === "add") {
-        await userRef.update({
-          firstMessageType: "prepopulated",
-          utm: {
-            source: referralClickSnap.get("utmSource") ?? "none",
-            medium: referralClickSnap.get("utmMedium") ?? "none",
-            content: referralClickSnap.get("utmContent") ?? "none",
-            campaign: referralClickSnap.get("utmCampaign") ?? "none",
-            term: referralClickSnap.get("utmTerm") ?? "none",
-          },
-        })
-      } else {
-        //try to get the userId from the referralId
-        let referrer
-        try {
-          referrer = String(hashids.decode(referralId)[0])
-        } catch (error) {
-          functions.logger.error(
-            `Error decoding referral code ${code}, sent by ${from}: ${error}`
-          )
-        }
-        if (referrer) {
-          const referralSourceSnap = await getUserSnapshot(referrer)
-          if (referralSourceSnap !== null) {
-            await referralSourceSnap.ref.update({
-              referralCount: FieldValue.increment(1),
-            })
-            //check if referrer is a checker
-            await incrementCheckerCounts(referrer, "numReferred", 1)
-            await userRef.update({
-              firstMessageType: "prepopulated",
-              utm: {
-                source: referrer,
-                medium: "uniqueLink",
-                content: "none",
-                campaign: "none",
-                term: "none",
-              },
-            })
-          } else {
-            functions.logger.error(
-              `Referrer ${referrer} not found in users collection`
-            )
-          }
-        }
-      }
-      await referralClickRef.update({
-        isConverted: true,
-      })
-    } else {
-      functions.logger.error(
-        "Referral code not found in referralClicks collection"
-      )
-    }
   }
 }
 

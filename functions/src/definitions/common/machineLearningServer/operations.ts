@@ -19,12 +19,6 @@ interface TrivialResponse {
 interface ControversialResponse {
   isControversial: boolean
 }
-
-interface CommunityNoteResponse {
-  success: boolean
-  data: CommunityNoteReturn
-}
-
 type CommunityNoteReturn = Pick<CommunityNote, "en" | "cn" | "links">
 
 interface L1CategoryResponse {
@@ -150,7 +144,7 @@ async function getCommunityNote(input: {
     )
 
     // API call
-    const apiCallPromise = callAPI<CommunityNoteResponse>(
+    const apiCallPromise = callAPI<CommunityNoteReturn>(
       "getCommunityNote",
       data
     )
@@ -158,7 +152,7 @@ async function getCommunityNote(input: {
     // Race between the API call and the timeout
     const response = await Promise.race([apiCallPromise, timeoutPromise])
 
-    return response.data.data
+    return response.data
   } catch (error) {
     throw new Error(
       error instanceof Error

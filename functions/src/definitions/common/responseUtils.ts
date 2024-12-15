@@ -28,8 +28,6 @@ import {
 } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { FieldValue } from "firebase-admin/firestore"
-import { create } from "domain"
-
 const db = admin.firestore()
 
 type BotResponses = {
@@ -38,7 +36,7 @@ type BotResponses = {
   }
 }
 
-type ResponseObject = {
+export type ResponseObject = {
   [key: string]: string
 }
 
@@ -290,7 +288,6 @@ async function sendMenuMessage(
   isTruncated: boolean = false,
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
-  isCorrection: boolean = false,
   language: LanguageSelection | null = null
 ) {
   const isSubscribedUpdates = userSnap.get("isSubscribedUpdates") ?? false
@@ -306,14 +303,11 @@ async function sendMenuMessage(
     null,
     null,
     false,
-    1,
-    false,
     false,
     false,
     false,
     isGenerated,
     isIncorrect,
-    isCorrection,
     "irrelevant",
     prefixName
   )
@@ -707,7 +701,6 @@ async function updateLanguageAndSendMenu(
     true,
     false,
     false,
-    false,
     language
   ) //truncated menu on onboarding
 }
@@ -886,8 +879,7 @@ async function respondToInstance(
   instanceSnap: DocumentSnapshot,
   forceReply = false,
   isImmediate = false,
-  isDisclaimerAgreed = false,
-  isCorrection = false
+  isDisclaimerAgreed = false
 ) {
   const userSnap = await getUserSnapshot(
     instanceSnap.get("from"),
@@ -1148,8 +1140,7 @@ async function respondToInstance(
         instanceSnap.ref.path,
         false,
         isGenerated,
-        isIncorrect,
-        isCorrection
+        isIncorrect
       )
       break
     case "error":
@@ -1182,15 +1173,12 @@ async function respondToInstance(
             responses,
             numSubmissionsRemaining,
             monthlySubmissionLimit,
-            isImmediate,
-            instanceCount,
             isMachineCategorised,
             isMatched,
             isImage,
             hasCaption,
             isGenerated,
             isIncorrect,
-            isCorrection,
             "unsure",
             null,
             votingStatsResponse
@@ -1212,15 +1200,12 @@ async function respondToInstance(
         responses,
         numSubmissionsRemaining,
         monthlySubmissionLimit,
-        isImmediate,
-        instanceCount,
         isMachineCategorised,
         isMatched,
         isImage,
         hasCaption,
         isGenerated,
         isIncorrect,
-        isCorrection,
         category,
         null,
         null
@@ -1818,15 +1803,12 @@ function getFinalResponseText(
   responses: ResponseObject,
   remainingSubmissions: number | null = null,
   freeTierLimit: number | null = null,
-  isImmediate: boolean = false,
-  instanceCount: number = 1,
   isMachineCategorised: boolean = false,
   isMatched: boolean = false,
   isImage: boolean = false,
   hasCaption: boolean = false,
   isGenerated: boolean = false,
   isIncorrect: boolean = false,
-  isCorrection: boolean = false,
   primaryCategory: string = "irrelevant",
   prefixName: string | null = null,
   votingStats: string | null = null
@@ -1900,7 +1882,7 @@ async function correctCommunityNote(instanceSnap: DocumentSnapshot) {
     instanceSnap.get("communityNoteMessageId") ?? null,
     "whatsapp"
   )
-  await respondToInstance(instanceSnap, false, false, false, true)
+  await respondToInstance(instanceSnap, false, false, false)
 }
 
 export {
