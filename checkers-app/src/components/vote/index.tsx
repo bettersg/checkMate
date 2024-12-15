@@ -1,5 +1,5 @@
 import MessageCard from "./MessageCard";
-import { Typography, Alert } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
@@ -64,8 +64,9 @@ export default function VotePage() {
           text={vote.text}
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
+          sender={vote.sender}
         />
-        <Alert variant="ghost">Sender: {vote.sender}</Alert>
+        
         {vote.communityNote ? (
           <CommunityNoteCard 
           en = {vote.communityNote.en}
