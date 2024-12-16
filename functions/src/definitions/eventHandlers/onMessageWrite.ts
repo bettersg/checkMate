@@ -33,7 +33,7 @@ const adminMessageHandler = onDocumentWritten(
       )
       const machineCategory = docSnap.get("machineCategory")
       const isMachineCategorised = docSnap.get("isMachineCategorised")
-      if (isMachineCategorised) {
+      if (isMachineCategorised && machineCategory !== null) {
         await sendVotingUpdate({
           messageId: docSnap.get("adminGroupSentMessageId"),
           machineCategory: machineCategory,
@@ -51,11 +51,7 @@ const adminMessageHandler = onDocumentWritten(
       const communityNoteAfter = docSnap.get("communityNote") ?? null
       const primaryCategoryBefore = before.get("primaryCategory") ?? null
       const primaryCategoryAfter = docSnap.get("primaryCategory") ?? null
-
-      if (
-        communityNoteBefore === null &&
-        communityNoteAfter !== null
-      ) {
+      if (communityNoteBefore === null && communityNoteAfter !== null) {
         //if community note was newly generated
         await sendCommunityNoteNotification(
           docSnap.get("communityNote"),
@@ -63,7 +59,7 @@ const adminMessageHandler = onDocumentWritten(
           docSnap.ref
         )
       }
-      if (isAssessedBefore === null && isAssessedAfter) {
+      if (!isAssessedBefore && isAssessedAfter) {
         //if message was newly assessed
         await sendVotingUpdate({
           messageId: docSnap.get("adminGroupSentMessageId"),
@@ -81,7 +77,12 @@ const adminMessageHandler = onDocumentWritten(
           currentCategory: primaryCategoryAfter,
         })
       }
-      if (!communityNoteBefore.downvoted && communityNoteAfter.downvoted) {
+      if (
+        communityNoteBefore !== null &&
+        communityNoteAfter !== null &&
+        !communityNoteBefore.downvoted &&
+        communityNoteAfter.downvoted
+      ) {
         //if community note got downvoted
         await sendVotingUpdate({
           messageId: docSnap.get(
