@@ -8,8 +8,6 @@ import { anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { logger } from "firebase-functions"
-import { sendTelegramTextMessage } from "../common/sendTelegramMessage"
-import { sendVotingUpdate } from "../../services/admin/notificationService"
 
 const ADMIN_CHAT_ID = String(process.env.ADMIN_CHAT_ID)
 
