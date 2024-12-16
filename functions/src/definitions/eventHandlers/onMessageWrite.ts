@@ -4,6 +4,7 @@ import {
   sendCommunityNoteNotification,
   sendVotingUpdate,
 } from "../../services/admin/notificationService"
+import { logger } from "firebase-functions/v2"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -15,9 +16,10 @@ const adminMessageHandler = onDocumentWritten(
     secrets: ["TELEGRAM_ADMIN_BOT_TOKEN"],
   },
   async (event) => {
-    const isDocumentCreation = !event.data?.before.exists
+    const isDocumentCreation = !event.data?.before?.exists
     const docSnap = event.data?.after
     if (!docSnap) {
+      logger.error("Missing after data on onMessageWrite")
       return
     }
     const adminMessageId = docSnap.get("adminGroupSentMessageId") ?? null
@@ -40,17 +42,53 @@ const adminMessageHandler = onDocumentWritten(
     } else {
       const before = event.data?.before
       if (!before) {
+        logger.error("Missing before data on onMessageWrite")
         return
       }
+      const isAssessedBefore = before.get("isAssessed") ?? null
+      const isAssessedAfter = docSnap.get("isAssessed") ?? null
+      const communityNoteBefore = before.get("communityNote") ?? null
+      const communityNoteAfter = docSnap.get("communityNote") ?? null
+      const primaryCategoryBefore = before.get("primaryCategory") ?? null
+      const primaryCategoryAfter = docSnap.get("primaryCategory") ?? null
+
       if (
-        before.get("communityNote") === null &&
-        docSnap.get("communityNote") !== null
+        communityNoteBefore === null &&
+        communityNoteAfter !== null
       ) {
+        //if community note was newly generated
         await sendCommunityNoteNotification(
           docSnap.get("communityNote"),
           adminMessageId,
           docSnap.ref
         )
+      }
+      if (isAssessedBefore === null && isAssessedAfter) {
+        //if message was newly assessed
+        await sendVotingUpdate({
+          messageId: docSnap.get("adminGroupSentMessageId"),
+          currentCategory: primaryCategoryAfter,
+        })
+      } else if (
+        isAssessedAfter &&
+        primaryCategoryBefore !== primaryCategoryAfter &&
+        primaryCategoryBefore !== null
+      ) {
+        //if there was a change in categories after the message was assessed
+        await sendVotingUpdate({
+          messageId: docSnap.get("adminGroupSentMessageId"),
+          previousCategory: primaryCategoryBefore,
+          currentCategory: primaryCategoryAfter,
+        })
+      }
+      if (!communityNoteBefore.downvoted && communityNoteAfter.downvoted) {
+        //if community note got downvoted
+        await sendVotingUpdate({
+          messageId: docSnap.get(
+            "communityNote.adminGroupCommunityNoteSentMessageId"
+          ),
+          downvoted: true,
+        })
       }
     }
   }

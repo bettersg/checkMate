@@ -37,11 +37,6 @@ const onMessageUpdateV2 = onDocumentUpdated(
 
     // If changes from not assessed to assessed
     if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
-      // Reply the admin feed with the primary category results
-      sendVotingUpdate({
-        messageId: postChangeSnap.get("adminGroupSentMessageId"),
-        currentCategory: primaryCategory,
-      })
 
       await postChangeSnap.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
@@ -55,17 +50,6 @@ const onMessageUpdateV2 = onDocumentUpdated(
         await replyCommunityNoteInstances(postChangeSnap)
       }
     } // if either the text changed, or the primaryCategory changed, rerun rationalisation
-    else if (
-      messageData.isAssessed &&
-      preChangeSnap.data().primaryCategory !== primaryCategory &&
-      preChangeSnap.data().primaryCategory !== null
-    ) {
-      sendVotingUpdate({
-        messageId: postChangeSnap.get("adminGroupSentMessageId"),
-        previousCategory: preChangeSnap.data().primaryCategory,
-        currentCategory: primaryCategory,
-      })
-    }
 
     if (
       !preChangeSnap.data().communityNote?.downvoted &&
@@ -80,12 +64,6 @@ const onMessageUpdateV2 = onDocumentUpdated(
           })
         }
       }
-      sendVotingUpdate({
-        messageId: postChangeSnap.get(
-          "communityNote.adminGroupCommunityNoteSentMessageId"
-        ),
-        downvoted: true,
-      })
     }
 
     if (
