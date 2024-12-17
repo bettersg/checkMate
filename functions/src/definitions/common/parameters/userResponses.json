@@ -284,6 +284,10 @@
     "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有用，可以通过以下链接加入我们的高级订阅候补名单——每月仅需一杯咖啡的价格（$4.99），即可享受您或您所关心的人{{paid_tier_limit}}次提交，并帮助我们维持服务运营！"
   },
   "OUT_OF_SUBMISSIONS": {
+    "en": "Thank you for your active engagement with CheckMate. Unfortunately, you've reached our daily limit. This will reset at midnight.\n\nWe appreciate your understanding and continued support as we work to serve everyone as efficiently as possible.",
+    "cn": "感谢您积极使用查友。很遗憾，您已达到今日使用限额。限额将在午夜重置。\n在我们努力为所有用户提供高效服务的同时，感谢您的理解与持续支持。"
+  },
+  "OUT_OF_SUBMISSIONS_THANKS": {
     "en": "Thanks for using CheckMate 🙏🏻.\n\n You have run out of your {{free_tier_limit}} free daily submissions. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it.",
     "cn": "感谢使用 查友 🙏🏻。\n\n您今日 {{free_tier_limit}} 次的免费提交机会已用完。我们感谢您对高级会员服务的关注，并感谢您的耐心等待，我们正在努力推出该服务。"
   },

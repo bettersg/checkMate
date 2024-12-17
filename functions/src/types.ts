@@ -257,6 +257,7 @@ export type UserData = {
   priceWhereInterested: number | null // The price point when the user is interested
   feedback: string | null // The user's feedback, if they've provided any
   tier: "free" | "paid"
+  isTester: boolean
 }
 
 export type CheckerData = {

@@ -297,20 +297,16 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  let text = getFinalResponseText(
-    responses.MENU,
+  const isTester = userSnap.get("isTester") ?? false
+  let text = getFinalResponseText({
+    responseText: responses.MENU,
     responses,
-    null,
-    null,
-    false,
-    false,
-    false,
-    false,
     isGenerated,
     isIncorrect,
-    "irrelevant",
-    prefixName
-  )
+    primaryCategory: "irrelevant",
+    prefixName,
+    isTester,
+  })
 
   switch (platform) {
     case "telegram":
@@ -909,6 +905,7 @@ async function respondToInstance(
     )
   }
   const language = userSnap.get("language") ?? "en"
+  const isTester = userSnap.get("isTester") ?? false
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
@@ -1016,7 +1013,7 @@ async function respondToInstance(
 
   let communityNoteMessageId = null
 
-  if (communityNote && !communityNote.downvoted) {
+  if (communityNote && !communityNote.downvoted && isTester) {
     category = "communityNote"
     bespokeReply = true
     //get the text based on language
@@ -1109,12 +1106,14 @@ async function respondToInstance(
   let responseText
   switch (category) {
     case "irrelevant_auto":
-      responseText = getFinalResponseText(
-        responses["IRRELEVANT_AUTO"],
+      responseText = getFinalResponseText({
+        responseText: responses["IRRELEVANT_AUTO"],
         responses,
-        numSubmissionsRemaining,
-        monthlySubmissionLimit
-      )
+        remainingSubmissions: numSubmissionsRemaining,
+        freeTierLimit: monthlySubmissionLimit,
+        primaryCategory: "irrelevant",
+        isTester,
+      })
       const misunderstoodButton = {
         type: "reply",
         reply: {
@@ -1144,7 +1143,12 @@ async function respondToInstance(
       )
       break
     case "error":
-      responseText = getFinalResponseText(responses.ERROR, responses)
+      responseText = getFinalResponseText({
+        responseText: responses.ERROR,
+        responses,
+        primaryCategory: "error",
+        isTester,
+      })
       await sendTextMessage("user", from, responseText, replyId)
       break
     case "custom":
@@ -1168,21 +1172,21 @@ async function respondToInstance(
             parentMessageRef,
             language
           )
-          const responseText = getFinalResponseText(
-            responses["UNSURE"],
+          const responseText = getFinalResponseText({
+            responseText: responses["UNSURE"],
             responses,
-            numSubmissionsRemaining,
-            monthlySubmissionLimit,
+            remainingSubmissions: numSubmissionsRemaining,
+            freeTierLimit: monthlySubmissionLimit,
             isMachineCategorised,
             isMatched,
             isImage,
             hasCaption,
             isGenerated,
             isIncorrect,
-            "unsure",
-            null,
-            votingStatsResponse
-          )
+            primaryCategory: "unsure",
+            votingStats: votingStatsResponse,
+            isTester,
+          })
           //reinstate count if we really unsure.
           await userSnap.ref.update({
             numSubmissionsRemaining: FieldValue.increment(1),
@@ -1195,21 +1199,20 @@ async function respondToInstance(
         functions.logger.error(`category ${category} not found in responses`)
         return
       }
-      responseText = getFinalResponseText(
-        responses[category.toUpperCase() as keyof typeof responses],
+      responseText = getFinalResponseText({
+        responseText: responses[category.toUpperCase()],
         responses,
-        numSubmissionsRemaining,
-        monthlySubmissionLimit,
+        remainingSubmissions: numSubmissionsRemaining,
+        freeTierLimit: monthlySubmissionLimit,
         isMachineCategorised,
         isMatched,
         isImage,
         hasCaption,
         isGenerated,
         isIncorrect,
-        category,
-        null,
-        null
-      )
+        primaryCategory: category,
+        isTester,
+      })
 
       if (!(isMachineCategorised || validResponsesCount <= 0)) {
         buttons.push(votingResultsButton)
@@ -1220,7 +1223,9 @@ async function respondToInstance(
         updateObj.scamShieldConsent = true
       }
 
-      buttons.push(getMoreChecksButton)
+      if (isTester) {
+        buttons.push(getMoreChecksButton)
+      }
 
       if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
@@ -1269,6 +1274,10 @@ async function sendWaitingMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
 ) {
+  const isTester = userSnap.get("isTester") ?? false
+  if (!isTester) {
+    return
+  }
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
   await sendTextMessage(
@@ -1474,7 +1483,6 @@ async function sendGetMoreSubmissionsMessage(
   const responses = await getResponsesObj("user", language)
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
-  //TODO: change to whatsapp flow
   if (isPaidTier || hasExpressedInterest) {
     const responseText = responses.GET_MORE_SUBMISSIONS
     await sendTextMessage(
@@ -1524,8 +1532,21 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
   const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
+  const isTester = userSnap.get("isTester") ?? false
+  if (!isTester) {
+    const responseText = responses.OUT_OF_SUBMISSIONS
+    await sendTextMessage(
+      "user",
+      whatsappId,
+      responseText,
+      null,
+      "whatsapp",
+      true
+    )
+    return
+  }
   if (isPaidTier || hasExpressedInterest) {
-    const responseText = responses.OUT_OF_SUBMISSIONS.replace(
+    const responseText = responses.OUT_OF_SUBMISSIONS_THANKS.replace(
       "{{free_tier_limit}}",
       monthlySubmissionLimit.toString()
     )
@@ -1798,21 +1819,39 @@ async function sendBlast(userSnap: DocumentSnapshot) {
   )
 }
 
-function getFinalResponseText(
-  responseText: string,
-  responses: ResponseObject,
-  remainingSubmissions: number | null = null,
-  freeTierLimit: number | null = null,
-  isMachineCategorised: boolean = false,
-  isMatched: boolean = false,
-  isImage: boolean = false,
-  hasCaption: boolean = false,
-  isGenerated: boolean = false,
-  isIncorrect: boolean = false,
-  primaryCategory: string = "irrelevant",
-  prefixName: string | null = null,
-  votingStats: string | null = null
-) {
+interface GetFinalResponseParams {
+  responseText: string
+  responses: Record<string, string>
+  remainingSubmissions?: number
+  freeTierLimit?: number
+  isMachineCategorised?: boolean
+  isMatched?: boolean
+  isImage?: boolean
+  hasCaption?: boolean
+  isGenerated?: boolean
+  isIncorrect?: boolean
+  primaryCategory?: string
+  prefixName?: string
+  votingStats?: string
+  isTester?: boolean
+}
+
+function getFinalResponseText({
+  responseText,
+  responses,
+  remainingSubmissions = undefined,
+  freeTierLimit = undefined,
+  isMachineCategorised = false,
+  isMatched = false,
+  isImage = false,
+  hasCaption = false,
+  isGenerated = false,
+  isIncorrect = false,
+  primaryCategory = "irrelevant",
+  prefixName = "",
+  votingStats = "",
+  isTester = false,
+}: GetFinalResponseParams): string {
   let finalResponse = responseText
     .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
     .replace(
@@ -1836,16 +1875,17 @@ function getFinalResponseText(
         ? responses.INCORRECT_TRIVIAL
         : ""
     )
-    .replace("{{voting_stats}}", votingStats ?? "")
+    .replace("{{voting_stats}}", votingStats)
     .replace(
       "{{submissions_remaining}}",
-      responses.REMAINING_SUBMISSIONS_SUFFIX
+      isTester ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
     )
     .replace(
       "{{num_remaining_submissions}}",
-      remainingSubmissions?.toString() ?? ""
+      remainingSubmissions?.toString() || ""
     )
-    .replace("{{free_tier_limit}}", freeTierLimit?.toString() ?? "")
+    .replace("{{free_tier_limit}}", freeTierLimit?.toString() || "")
+
   return finalResponse
 }
 
