@@ -9,8 +9,6 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { logger } from "firebase-functions"
 
-const ADMIN_CHAT_ID = String(process.env.ADMIN_CHAT_ID)
-
 const onMessageUpdateV2 = onDocumentUpdated(
   {
     document: "messages/{messageId}",
@@ -35,7 +33,6 @@ const onMessageUpdateV2 = onDocumentUpdated(
 
     // If changes from not assessed to assessed
     if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
-
       await postChangeSnap.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
       })

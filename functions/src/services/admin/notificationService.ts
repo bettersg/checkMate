@@ -83,7 +83,7 @@ export async function sendCommunityNoteNotification(
       replyId ?? topicId
     )
     const messageId = response?.data.result.message_id
-    if (messageId) {
+    if (messageId && communityNote !== null) {
       await messageRef.update({
         "communityNote.adminGroupCommunityNoteSentMessageId": messageId,
       })
