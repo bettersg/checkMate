@@ -60,24 +60,32 @@ async function determineNeedsChecking(input: {
   caption?: string
 }): Promise<boolean> {
   if (input.text && input.url) {
-    throw new Error("Cannot pass both text and url to determineNeedsChecking")
-  }
-  // Mock response in non-prod environment
-  if (env !== "PROD") {
-    // You can add more sophisticated mock logic here
-    if (
-      input.text?.toLowerCase().includes("trivial") ||
-      input.caption?.toLowerCase().includes("trivial") ||
-      input.text?.toLowerCase() == "hello"
-    ) {
-      return false
-    }
+    functions.logger.error(
+      "Both text and url provided to determineNeedsChecking"
+    )
     return true
   }
+  try {
+    // Mock response in non-prod environment
+    if (env !== "PROD") {
+      // You can add more sophisticated mock logic here
+      if (
+        input.text?.toLowerCase().includes("trivial") ||
+        input.caption?.toLowerCase().includes("trivial") ||
+        input.text?.toLowerCase() == "hello"
+      ) {
+        return false
+      }
+      return true
+    }
 
-  const data = { ...input }
-  const response = await callAPI<TrivialResponse>("getNeedsChecking", data)
-  return response.data.needsChecking
+    const data = { ...input }
+    const response = await callAPI<TrivialResponse>("getNeedsChecking", data)
+    return response.data.needsChecking
+  } catch (error) {
+    functions.logger.error(`Error in determineNeedsChecking: ${error}`)
+    return true
+  }
 }
 
 async function determineControversial(input: {

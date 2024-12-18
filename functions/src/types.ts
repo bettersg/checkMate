@@ -185,7 +185,7 @@ export type InstanceData = {
   isRationalisationSent: boolean | null //Whether the rationalisation has been sent
   isRationalisationUseful: boolean | null //Whether the rationalisation was voted as useful by the user
   isCommunityNoteSent: boolean | null //Whether the community note has been sent
-  isCommunityNoteCorrected: boolean | null //Whether the community note has been corrected
+  isCommunityNoteCorrected: boolean //Whether the community note has been corrected
   isCommunityNoteUseful: boolean | null //Whether the community note was voted as useful by the user
   isCommunityNoteReviewRequested: boolean | null //Whether the user requested to see the human review
   isIrrelevantAppealed: boolean | null //Whether the user indicate that they message was incorrectly marked by the automated pipelines as irrelevant

@@ -42,7 +42,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
         messageData?.communityNote?.pendingCorrection
       ) {
         correctionSent = true
-        await replyCommunityNoteInstances(postChangeSnap)
+        await correctCommunityNoteInstances(postChangeSnap)
       }
     } // if either the text changed, or the primaryCategory changed, rerun rationalisation
 
@@ -52,7 +52,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
     ) {
       if (!correctionSent) {
         if (messageData.isAssessed) {
-          await replyCommunityNoteInstances(postChangeSnap)
+          await correctCommunityNoteInstances(postChangeSnap)
         } else {
           postChangeSnap.ref.update({
             "communityNote.pendingCorrection": true,
@@ -113,7 +113,7 @@ async function replyPendingInstances(
   }
 }
 
-async function replyCommunityNoteInstances(
+async function correctCommunityNoteInstances(
   docSnap: functions.firestore.QueryDocumentSnapshot
 ) {
   const pendingSnapshot = await docSnap.ref
