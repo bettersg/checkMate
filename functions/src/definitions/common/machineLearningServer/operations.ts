@@ -76,6 +76,9 @@ async function determineNeedsChecking(input: {
       ) {
         return false
       }
+      if (env === "SIT") {
+        return true
+      }
     }
 
     const data = { ...input }
