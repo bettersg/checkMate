@@ -24,6 +24,13 @@ import {
   sendLanguageSelection,
   sendBlast,
   respondToBlastFeedback,
+  respondToCommunityNoteFeedback,
+  respondToIrrelevantDispute,
+  respondToWaitlist,
+  sendGetMoreSubmissionsMessage,
+  sendCommunityNoteFeedbackMessage,
+  sendCommunityNoteSources,
+  handleDisclaimer,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -85,6 +92,9 @@ const userWhatsappInteractionHandler = async function (
           break
         case "list_reply":
           step = await onTextListReceipt(userSnap, message, "whatsapp")
+          break
+        case "nfm_reply":
+          step = await onFlowResponse(userSnap, message, "whatsapp")
           break
       }
       break
@@ -182,9 +192,33 @@ async function onButtonReply(
       ;[instancePath] = rest
       await sendRationalisation(userSnap, instancePath)
       break
+    case "isWronglyIrrelevant":
+      ;[instancePath] = rest
+      await respondToIrrelevantDispute(userSnap, instancePath)
+      break
     case "feedbackRationalisation":
       ;[instancePath, selection] = rest
       await respondToRationalisationFeedback(userSnap, instancePath, selection)
+      break
+    case "feedbackNote":
+      ;[instancePath] = rest
+      await sendCommunityNoteFeedbackMessage(userSnap, instancePath)
+      break
+    case "feedbackNoteResponse":
+      ;[instancePath, selection] = rest
+      await respondToCommunityNoteFeedback(userSnap, instancePath, selection)
+      break
+    case "viewSources":
+      ;[instancePath] = rest
+      await sendCommunityNoteSources(userSnap, instancePath)
+      break
+    case "getMoreChecks":
+      ;[instancePath] = rest
+      await sendGetMoreSubmissionsMessage(userSnap, instancePath)
+      break
+    case "controversial":
+      ;[instancePath] = rest
+      await handleDisclaimer(userSnap, instancePath)
       break
     case "feedbackBlast":
       ;[blastPath, selection] = rest
@@ -315,6 +349,69 @@ async function onTextListReceipt(
   return Promise.resolve(step)
 }
 
+async function onFlowResponse(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  messageObj: WhatsappMessageObject,
+  platform = "whatsapp"
+) {
+  const from = messageObj.from
+  const jsonString = messageObj.interactive?.nfm_reply?.response_json
+  if (!jsonString) {
+    functions.logger.error("No jsonString in interactive object")
+    return
+  }
+  const flowResponse = JSON.parse(jsonString)
+  const flowToken = flowResponse?.flow_token
+
+  const flowRef = db.collection("flows").doc(flowToken)
+  const flowSnap = await flowRef.get()
+  if (!flowSnap.exists) {
+    functions.logger.error("Flow not found in database")
+    return
+  }
+  const flowType = flowSnap.get("type")
+  await flowRef.update({
+    outcome: "completed",
+    outcomeTimestamp: Timestamp.now(),
+  })
+  switch (flowType) {
+    case "onboarding":
+      const language = flowResponse?.language ?? "en"
+      const ageGroup = flowResponse?.age_group ?? null
+      await userSnap.ref.update({
+        isOnboardingComplete: true,
+        ageGroup: ageGroup,
+      })
+      await updateLanguageAndSendMenu(userSnap, language)
+      break
+    case "waitlist":
+      const isInterestedInSubscription = flowResponse?.is_interested === "yes"
+      const isInterestedAtALowerPoint =
+        flowResponse?.is_interested_when_cheaper === "yes"
+          ? true
+          : flowResponse?.is_interested_when_cheaper === "no"
+          ? false
+          : null
+      const priceWhereInterested =
+        flowResponse?.price_where_interested == null
+          ? null
+          : Number(flowResponse?.price_where_interested)
+      const interestedFor = flowResponse?.interested_for ?? null
+      const feedback = flowResponse?.feedback ?? null
+      await userSnap.ref.update({
+        isInterestedInSubscription: isInterestedInSubscription,
+        isInterestedAtALowerPoint: isInterestedAtALowerPoint,
+        priceWhereInterested: priceWhereInterested,
+        interestedFor: interestedFor,
+        feedback: feedback,
+      })
+      await respondToWaitlist(userSnap, isInterestedInSubscription)
+      break
+    default:
+      functions.logger.error("Unsupported flow type:", flowType)
+  }
+}
+
 async function toggleUserSubscription(
   userSnap: FirebaseFirestore.DocumentSnapshot,
   toSubscribe: boolean
@@ -333,7 +430,6 @@ const onUserNavigationPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
       "OPENAI_API_KEY",
     ],
     timeoutSeconds: 120,

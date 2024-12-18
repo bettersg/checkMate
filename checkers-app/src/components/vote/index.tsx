@@ -1,6 +1,5 @@
-import VoteCategories from "./VoteCategories";
 import MessageCard from "./MessageCard";
-import { Typography, Alert } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
@@ -11,6 +10,11 @@ import CategoryRationalisation from "./Rationalisation";
 import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 import CustomReply from "./CustomReply";
+import CommunityNoteCard from "../myvotes/CommunityNoteCard";
+import VotingSystem from "./VotingSystem";
+import VotingNoteChart from "./VoteNoteChart";
+import OldVoteCategories from "./OldVoteCategories";
+
 
 export default function VotePage() {
   const { checkerDetails } = useUser();
@@ -26,6 +30,7 @@ export default function VotePage() {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
         setSelectedTag(vote.tags);
+        console.log(vote)
       }
       setIsLoading(false);
     };
@@ -59,20 +64,44 @@ export default function VotePage() {
           text={vote.text}
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
+          sender={vote.sender}
         />
-        <Alert variant="ghost">Sender: {vote.sender}</Alert>
+        
+        {vote.communityNote ? (
+          <CommunityNoteCard 
+          en = {vote.communityNote.en}
+          cn = {vote.communityNote.cn}
+          links = {vote.communityNote.links}
+          downvoted = {vote.communityNote.downvoted}
+        />) : null}
+        
         {vote.category === null ||
         vote.category === "pass" ||
         !vote.isAssessed ? (
           <>
-            <VoteCategories
+            {vote.communityNote? (
+              <>
+              <VotingSystem
               messageId={messageId ?? null}
               voteRequestId={voteRequestId ?? null}
               currentCategory={vote.category}
               currentTruthScore={vote.truthScore}
               currentTags={selectedTag}
               numberPointScale={vote.numberPointScale}
-            />
+              currentCommunityNoteCategory={vote.communityNoteCategory}
+             />
+            </>
+            ) : (
+              <OldVoteCategories
+                messageId={messageId ?? null}
+                voteRequestId={voteRequestId ?? null}
+                currentCategory={vote.category}
+                currentTruthScore={vote.truthScore}
+                currentTags={selectedTag}
+                numberPointScale={vote.numberPointScale}
+              />
+            )}
+            
           </>
         ) : (
           <>
@@ -105,6 +134,9 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
+            {vote.communityNote ?
+             (<VotingNoteChart assessedInfo={vote.finalStats} />): 
+             null}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />

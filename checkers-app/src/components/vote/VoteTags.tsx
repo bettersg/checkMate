@@ -1,7 +1,5 @@
-import { Typography } from "@material-tailwind/react";
 import { MultiValue } from "react-select";
 import Select from "react-select";
-import { TooltipWithHelperIcon } from "../common/ToolTip";
 
 const options = [
   { value: "generated", label: "🤖 AI Generated" },
@@ -11,9 +9,10 @@ const options = [
 interface VoteTagsProps {
   tags: string[];
   onSelectTag: (tag: string[]) => void;
+  onDropdownToggle: (isOpen:boolean) => void; // Pass open/close state to parent
 }
 
-const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag }) => {
+const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag, onDropdownToggle}) => {
   const selectedOptions = tags
     .map((tag) => options.find((option) => option.value === tag))
     .filter(
@@ -30,19 +29,6 @@ const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag }) => {
 
   return (
     <div className="grid grid-flow-row gap-y-4">
-      <div className="flex items-center space-x-2">
-        <Typography
-          variant="h4"
-          className="text-primary-color3 dark:text-white"
-        >
-          Select tags:
-        </Typography>
-        <TooltipWithHelperIcon
-          header="Tags"
-          text="Select where appropriate. Multiple selections allowed."
-        />
-      </div>
-      <div>
       <Select
             className="mb-3 dark:text-black"
             value={selectedOptions}
@@ -50,9 +36,9 @@ const VoteTags: React.FC<VoteTagsProps> = ({ tags, onSelectTag }) => {
             options={options}
             isMulti
             isSearchable={false}
+            onMenuOpen={() => onDropdownToggle(true)} // Notify parent when dropdown opens
+            onMenuClose={() => onDropdownToggle(false)} // Notify parent when dropdown closes
       />
-      </div>
-        
     </div>
   );
 };

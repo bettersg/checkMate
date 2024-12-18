@@ -1,7 +1,7 @@
 import axios from "axios"
 import * as functions from "firebase-functions"
 import { defineString } from "firebase-functions/params"
-import { WhatsappButton } from "../../types"
+import { WhatsappButton, FlowData } from "../../types"
 import { AppEnv } from "../../appEnv"
 
 const graphApiVersion = defineString(AppEnv.GRAPH_API_VERSION)
@@ -317,6 +317,63 @@ async function sendWhatsappButtonMessage(
   return response
 }
 
+async function sendWhatsappFlowMessage(
+  bot: string,
+  to: string,
+  flow_token: string,
+  flow_id: string,
+  cta: string,
+  bodyText: string,
+  headerText: string | null = null,
+  footerText: string | null = null,
+  isDraft: boolean = false
+) {
+  const interactive: any = {
+    type: "flow",
+    body: {
+      text: bodyText,
+    },
+    action: {
+      name: "flow",
+      parameters: {
+        flow_message_version: "3",
+        flow_token: flow_token,
+        flow_id: flow_id,
+        flow_cta: cta,
+        flow_action: "data_exchange",
+      },
+    },
+  }
+
+  if (headerText) {
+    interactive.header = {
+      type: "text",
+      text: headerText,
+    }
+  }
+
+  if (footerText) {
+    interactive.footer = {
+      text: footerText,
+    }
+  }
+
+  if (isDraft) {
+    interactive.action.parameters.mode = "draft"
+  }
+
+  const data = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: to,
+    type: "interactive",
+    interactive: interactive,
+  }
+
+  const response = await callWhatsappSendMessageApi(data, bot)
+  return response
+}
+
 async function sendWhatsappContactMessage(
   bot: string,
   to: string,
@@ -411,5 +468,6 @@ export {
   sendWhatsappButtonMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
+  sendWhatsappFlowMessage,
   sendWhatsappOTP,
 }

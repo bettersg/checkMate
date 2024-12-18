@@ -172,6 +172,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
       numNonUnsureVotesAtProgramEnd: null,
     },
     offboardingTime: null,
+    dailyAssignmentCount: 0,
   }
   await db.collection("checkers").add(checkerObj)
 }
@@ -553,7 +554,6 @@ const onCheckerPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
     ],
   },
   async (event) => {

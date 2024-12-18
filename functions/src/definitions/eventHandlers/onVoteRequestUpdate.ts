@@ -12,7 +12,6 @@ import { defineInt } from "firebase-functions/params"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
-import { logger } from "firebase-functions/v2"
 import { MessageData } from "../../types"
 
 // Define some parameters
@@ -52,6 +51,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     const messageSnap = await messageRef.get()
     const beforeTags = preChangeData?.tags ?? {}
     const afterTags = postChangeData?.tags ?? {}
+    const currentCommunityNoteCategory = postChangeData.communityNoteCategory
     const { addedTags, removedTags } = getChangedTags(beforeTags, afterTags)
     if (
       preChangeData.triggerL2Vote !== true &&
@@ -94,6 +94,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         legitimateCount,
         unsureCount,
         satireCount,
+        greatCount,
+        acceptableCount,
+        unacceptableCount,
         voteTotal,
         validResponsesCount,
         susCount,
@@ -105,6 +108,8 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         tagCounts,
       } = await getVoteCounts(messageRef)
 
+      // Check if unacceptableCount is more than 50%
+      const isUnacceptable = unacceptableCount > 0.5 * validResponsesCount
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
       const isSus =
         isBigSus || susCount > thresholds.isSus * validResponsesCount
@@ -161,6 +166,14 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVote * factCheckerCount,
               thresholds.endVoteAbsolute //10
             ))
+
+      const isAssessedUnacceptable =
+        isUnacceptable &&
+        validResponsesCount >
+          Math.min(
+            thresholds.endVote * factCheckerCount,
+            thresholds.endVoteAbsolute //10
+          )
 
       //set primaryCategory
       let primaryCategory
@@ -223,6 +236,12 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
             updateObj[`tags.${tag}`] = FieldValue.delete()
           }
         }
+      }
+
+      if (isAssessedUnacceptable) {
+        // Change the downvoted to true in communityNote
+        updateObj["communityNote.downvoted"] = true
+        updateObj["communityNote.pendingCorrection"] = true
       }
 
       await messageRef.update(updateObj)
@@ -308,6 +327,8 @@ async function updateCounts(
   const currentCategory = after.category
   let previousScore = before.truthScore
   let currentScore = after.truthScore
+  const previousCommunityNoteCategory = before.communityNoteCategory
+  const currentCommunityNoteCategory = after.communityNoteCategory
 
   for (const tag of addedTags) {
     await incrementCounter(messageRef, tag, numVoteShards.value())
@@ -350,6 +371,24 @@ async function updateCounts(
         currentScore
       )
     }
+  }
+
+  // Remove the previous community category if it exists
+  if (previousCommunityNoteCategory !== null) {
+    await incrementCounter(
+      messageRef,
+      previousCommunityNoteCategory,
+      numVoteShards.value(),
+      -1
+    )
+  }
+  // Increment the counter for Community Category
+  if (currentCommunityNoteCategory !== null) {
+    await incrementCounter(
+      messageRef,
+      currentCommunityNoteCategory,
+      numVoteShards.value()
+    )
   }
 }
 

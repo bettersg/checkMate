@@ -1,9 +1,13 @@
 import * as functions from "firebase-functions"
-import { respondToInstance } from "../common/responseUtils"
+import {
+  respondToInstance,
+  correctCommunityNote,
+} from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-import { rationaliseMessage, anonymiseMessage } from "../common/genAI"
+import { anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
+import { logger } from "firebase-functions"
 
 const onMessageUpdateV2 = onDocumentUpdated(
   {
@@ -12,6 +16,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "OPENAI_API_KEY",
+      "TELEGRAM_ADMIN_BOT_TOKEN",
     ],
   },
   async (event) => {
@@ -22,47 +27,40 @@ const onMessageUpdateV2 = onDocumentUpdated(
       return Promise.resolve()
     }
     const messageData = postChangeSnap.data()
-    const preChangeData = preChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
+    let correctionSent = false
+
+    // If changes from not assessed to assessed
     if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
-      //TODO: rationalisation here
-      let rationalisation: null | string = null
-      if (
-        primaryCategory &&
-        primaryCategory !== "irrelevant" &&
-        primaryCategory !== "unsure" &&
-        !messageData.caption &&
-        text
-      ) {
-        rationalisation = await rationaliseMessage(text, primaryCategory)
-      }
       await postChangeSnap.ref.update({
         assessedTimestamp: Timestamp.fromDate(new Date()),
-        rationalisation: rationalisation,
       })
       await replyPendingInstances(postChangeSnap)
-    }
-    // if either the text changed, or the primaryCategory changed, rerun rationalisation
-    else if (
-      messageData.isAssessed &&
-      (preChangeData.text !== text ||
-        preChangeData.primaryCategory !== primaryCategory)
-    ) {
-      let rationalisation: null | string = null
       if (
-        primaryCategory &&
-        primaryCategory !== "irrelevant" &&
-        primaryCategory !== "unsure" &&
-        !messageData.caption &&
-        text
+        messageData?.communityNote?.downvoted &&
+        messageData?.communityNote?.pendingCorrection
       ) {
-        rationalisation = await rationaliseMessage(text, primaryCategory)
+        correctionSent = true
+        await correctCommunityNoteInstances(postChangeSnap)
       }
-      await postChangeSnap.ref.update({
-        rationalisation: rationalisation,
-      })
+    } // if either the text changed, or the primaryCategory changed, rerun rationalisation
+
+    if (
+      !preChangeSnap.data().communityNote?.downvoted &&
+      messageData?.communityNote?.downvoted
+    ) {
+      if (!correctionSent) {
+        if (messageData.isAssessed) {
+          await correctCommunityNoteInstances(postChangeSnap)
+        } else {
+          postChangeSnap.ref.update({
+            "communityNote.pendingCorrection": true,
+          })
+        }
+      }
     }
+
     if (
       preChangeSnap.data().primaryCategory !== primaryCategory &&
       primaryCategory === "legitimate" &&
@@ -92,6 +90,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       })
       await Promise.all(promiseArr)
     }
+
     return Promise.resolve()
   }
 )
@@ -103,8 +102,36 @@ async function replyPendingInstances(
     .collection("instances")
     .where("isReplied", "==", false)
     .get()
-  pendingSnapshot.forEach(async (instanceSnap) => {
-    await respondToInstance(instanceSnap)
+  try {
+    await Promise.all(
+      pendingSnapshot.docs.map(async (instanceSnap) => {
+        await respondToInstance(instanceSnap)
+      })
+    )
+  } catch (error) {
+    logger.error(`Error in replyPendingInstances: ${error}`)
+  }
+}
+
+async function correctCommunityNoteInstances(
+  docSnap: functions.firestore.QueryDocumentSnapshot
+) {
+  const pendingSnapshot = await docSnap.ref
+    .collection("instances")
+    .where("isCommunityNoteSent", "==", true)
+    .where("isCommunityNoteCorrected", "==", false)
+    .get()
+  try {
+    await Promise.all(
+      pendingSnapshot.docs.map(async (instanceSnap) => {
+        await correctCommunityNote(instanceSnap)
+      })
+    )
+  } catch (error) {
+    logger.error(`Error in replyCommunityNoteInstances: ${error}`)
+  }
+  await docSnap.ref.update({
+    "communityNote.pendingCorrection": false,
   })
 }
 

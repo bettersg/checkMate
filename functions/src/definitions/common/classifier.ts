@@ -7,8 +7,8 @@ async function classifyText(text: string): Promise<string> {
   }
   try {
     const category = await getL1Category(text)
-    if (category === "trivial") {
-      return "irrelevant"
+    if (category === "trivial" || category === "irrelevant") {
+      return "unsure"
     } else {
       return category
     }
