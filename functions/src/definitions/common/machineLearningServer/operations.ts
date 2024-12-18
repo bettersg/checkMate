@@ -76,7 +76,6 @@ async function determineNeedsChecking(input: {
       ) {
         return false
       }
-      return true
     }
 
     const data = { ...input }
