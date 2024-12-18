@@ -146,7 +146,15 @@ async function getCommunityNote(input: {
   }
 
   try {
-    const data = { ...input }
+    const data: Record<string, any> = {} // Initialize an empty object
+
+    // Populate `data` based on `input`
+    if (input.text) {
+      data.text = input.text
+    } else {
+      data.image_url = input.url // Rename `url` to `image_url`
+      data.caption = input.caption
+    }
 
     // Timeout logic
     const timeoutPromise = new Promise<never>((_, reject) =>
