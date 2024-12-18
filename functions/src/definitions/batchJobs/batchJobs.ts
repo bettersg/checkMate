@@ -479,6 +479,7 @@ const resetUserSubmissionCounts = onSchedule(
     schedule: "0 0 * * *", // Run at midnight daily
     timeZone: "Asia/Singapore",
     retryCount: 3,
+    region: "asia-southeast1",
   },
   resetUserSubmissionsHandler
 )
@@ -488,6 +489,7 @@ const resetCheckerAssignmentCount = onSchedule(
     schedule: "0 5 * * *", // Run at midnight daily
     timeZone: "Asia/Singapore",
     retryCount: 3,
+    region: "asia-southeast1",
   },
   resetCheckerAssignmentCountHandler
 )
