@@ -237,9 +237,12 @@ async function newTextInstanceHandler({
     )
     let communityNoteData
     let isCommunityNoteGenerated = false
-    const isControversial = await determineControversial({
-      text: text,
-    })
+    let isCommunityNoteUsable = false
+    let communityNoteStatus = "error"
+    // const isControversial = await determineControversial({
+    //   text: text,
+    // })
+    let isControversial = false
     if (needsChecking) {
       await sendWaitingMessage(userSnap, id)
       try {
@@ -247,6 +250,11 @@ async function newTextInstanceHandler({
           text: text,
         })
         isCommunityNoteGenerated = true
+        isControversial = communityNoteData.isControversial
+        isCommunityNoteUsable = !(
+          communityNoteData.isVideo || communityNoteData.isAccessBlocked
+        )
+        communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
       } catch (error) {
         functions.logger.error("Error in getCommunityNote:", error)
       }
@@ -290,8 +298,9 @@ async function newTextInstanceHandler({
       tags: {},
       primaryCategory: needsChecking ? null : "irrelevant",
       customReply: null,
+      communityNoteStatus: communityNoteStatus,
       communityNote:
-        isCommunityNoteGenerated && communityNoteData
+        isCommunityNoteGenerated && communityNoteData && isCommunityNoteUsable
           ? {
               en: communityNoteData?.en || "",
               cn: communityNoteData?.cn || "",
@@ -534,19 +543,26 @@ async function newImageInstanceHandler({
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
     let communityNoteData
     let isCommunityNoteGenerated = false
+    let isCommunityNoteUsable = false
     let isControversial = false
+    let communityNoteStatus = "error"
     const signedUrl = (await getSignedUrl(filename)) ?? null
     if (signedUrl) {
-      isControversial = await determineControversial({
-        url: signedUrl,
-        caption: caption ?? null,
-      })
+      // isControversial = await determineControversial({
+      //   url: signedUrl,
+      //   caption: caption ?? null,
+      // })
       try {
         communityNoteData = await getCommunityNote({
           url: signedUrl,
           caption: caption ?? null,
         })
         isCommunityNoteGenerated = true
+        isControversial = communityNoteData.isControversial
+        isCommunityNoteUsable = !(
+          communityNoteData.isVideo || communityNoteData.isAccessBlocked
+        )
+        communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
       } catch (error) {
         functions.logger.error("Error in getCommunityNote:", error)
       }
@@ -602,8 +618,9 @@ async function newImageInstanceHandler({
       tags: {},
       primaryCategory: null,
       customReply: null, //string
+      communityNoteStatus: communityNoteStatus,
       communityNote:
-        isCommunityNoteGenerated && communityNoteData
+        isCommunityNoteGenerated && communityNoteData && isCommunityNoteUsable
           ? {
               en: communityNoteData?.en || "",
               cn: communityNoteData?.cn || "",

@@ -22,6 +22,8 @@ interface ControversialResponse {
 interface CommunityNoteReturn
   extends Pick<CommunityNote, "en" | "cn" | "links"> {
   isControversial: boolean // Add your new field
+  isVideo: boolean
+  isAccessBlocked: boolean
 }
 
 interface L1CategoryResponse {
@@ -74,10 +76,7 @@ async function determineNeedsChecking(input: {
   }
 
   const data = { ...input }
-  const response = await callAPI<TrivialResponse>(
-    "determineNeedsChecking",
-    data
-  )
+  const response = await callAPI<TrivialResponse>("getNeedsChecking", data)
   return response.data.needsChecking
 }
 
@@ -123,16 +122,15 @@ async function getCommunityNote(input: {
     if (env === "SIT") {
       throw new Error("Cannot call getCommunityNote in SIT environment")
     }
-    if (
-      input.text?.toLowerCase().includes("test") ||
-      input.caption?.toLowerCase().includes("test") ||
-      env === "DEV"
-    ) {
+    if (env === "DEV") {
       return {
         en: "This is a test community note.",
         cn: "这是一个测试社区笔记。",
         links: ["https://example1.com", "https://example2.com"],
-        isControversial: false,
+        isControversial:
+          input.text?.toLowerCase().includes("controversial") || false,
+        isVideo: input.text?.toLowerCase().includes("video") || false,
+        isAccessBlocked: input.text?.toLowerCase().includes("blocked") || false,
       }
     }
   }
@@ -142,9 +140,12 @@ async function getCommunityNote(input: {
 
     // Timeout logic
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => {
-        reject(new Error("The API call timed out after 60 seconds"))
-      }, 60000)
+      setTimeout(
+        () => {
+          reject(new Error("The API call timed out after 60 seconds"))
+        },
+        env === "PROD" ? 60000 : 120000
+      )
     )
 
     // API call
