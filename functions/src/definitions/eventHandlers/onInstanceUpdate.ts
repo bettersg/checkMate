@@ -23,7 +23,7 @@ const db = admin.firestore()
 const onInstanceUpdateV2 = onDocumentUpdated(
   {
     document: "messages/{messageId}/instances/{instanceId}",
-    secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN"],
+    secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN", "WHATSAPP_TOKEN"],
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
