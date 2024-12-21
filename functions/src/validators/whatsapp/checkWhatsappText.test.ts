@@ -105,4 +105,11 @@ Referral Code/推荐码: XYZ789
       "Referral Code/推荐码: ABC123 incomplete template"
     )
   })
+
+  it("should remove the second template completely", () => {
+    const message = `S/N: 031jFpSWu
+
+Simply send this message to get started! (按发送按钮!) 👉`
+    expect(stripTemplate(message, template2)).toBe("")
+  })
 })

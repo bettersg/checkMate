@@ -1,4 +1,5 @@
 import { WhatsappMessageObject } from "../../types"
+import { normalizeSpaces } from "../../definitions/common/utils"
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
@@ -35,11 +36,11 @@ export function checkTemplate(message: string, template: string) {
 }
 
 export function stripTemplate(message: string, template: string) {
+  const textNormalised = normalizeSpaces(message)
   // Build the regex pattern from the template without anchors
   const regex = buildRegexFromTemplate(template, true)
-
   // Remove all occurrences of the template and trim whitespace
-  return message.replace(regex, "").trim()
+  return textNormalised.replace(regex, "").trim()
 }
 
 export function checkMenu(text: string) {
