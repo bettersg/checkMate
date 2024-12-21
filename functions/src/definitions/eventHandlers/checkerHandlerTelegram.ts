@@ -558,7 +558,7 @@ const sendVerificationPrompt = async (
   const otpPrompt = await bot.telegram.sendMessage(
     chatId,
     !rePrompt
-      ? `Verify your OTP:`
+      ? `Key in your OTP:`
       : `The OTP you provided doesn't match that in our records. Please key it in again:`,
     {
       reply_markup: { force_reply: true },
