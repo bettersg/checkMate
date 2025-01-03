@@ -179,7 +179,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
           }
           //if it's telegram, add the message_id so we can change the replymarkup later
         ).then((response) => {
-          if (response.data.result.message_id) {
+          if (response && response.data.result.message_id) {
             return voteRequestRef.update({
               sentMessageId: response.data.result.message_id,
             })
