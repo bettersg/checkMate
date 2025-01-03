@@ -8,13 +8,11 @@ import {
 } from "@material-tailwind/react";
 import VoteCategories from "./VoteCategories";
 import CommunityNoteCategories from "./CommunityNoteCategories";
-import { ForwardIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
+import { ForwardIcon } from "@heroicons/react/24/solid";
 import VoteTags from "./VoteTags";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
-import { patchVote } from "../../services/api";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../../providers/UserContext";
 import { CommunityNote } from "../../../../functions/src/types";
+import DoneButton from "./DoneButton";
 
 interface PropType {
   messageId: string | null;
@@ -55,8 +53,6 @@ function Icon({ id, open }: IconProps) {
 }
 
 export default function VotingSystem(Prop: PropType) {
-  const navigate = useNavigate();
-  const { incrementSessionVotedCount } = useUser();
   const [open, setOpen] = useState(1);
 
   const currentCategory = Prop.currentCategory;
@@ -122,41 +118,6 @@ export default function VotingSystem(Prop: PropType) {
 
   const handleTruthScoreChange = (value: number | null) => {
     setTruthScore(value);
-  };
-
-  // function to update vote request in firebase
-  const handleSubmitVote = (
-    comCategory: string | null,
-    category: string | null,
-    truthScore: number | null,
-    tags: string[] | null
-  ) => {
-    console.log("Community Category: ", comCategory);
-    console.log("Vote Category: ", category);
-    console.log("Truthscore: ", truthScore);
-    console.log("Tags: ", tags);
-
-    if (category === "nvc") {
-      return;
-    }
-    if (messageId && voteRequestId) {
-      // call api to update vote
-      patchVote(
-        messageId,
-        voteRequestId,
-        category,
-        comCategory,
-        category === "info" ? truthScore : null,
-        tags
-      )
-        .then(() => {
-          incrementSessionVotedCount();
-          navigate("/votes");
-        })
-        .catch((error) => {
-          console.error("Error updating vote: ", error);
-        });
-    }
   };
 
   return (
@@ -259,22 +220,14 @@ export default function VotingSystem(Prop: PropType) {
         </Button>
 
         ): (
-          <Button
-            fullWidth
-            className="flex items-center justify-center gap-3 bg-highlight-color"
-            size="sm"
-            onClick={() =>
-              handleSubmitVote(
-                null,
-                voteCategory,
-                truthScore,
-                tags
-              )
-            }
-          >
-            <CheckCircleIcon className="h-5 w-5"/>
-            Done!
-          </Button>
+          <DoneButton 
+            messageId={messageId ?? null}
+            voteRequestId={voteRequestId ?? null}
+            communityCategory={null}
+            voteCategory={voteCategory}
+            truthScore={truthScore}
+            tags={tags}
+          />
         )}
 
         </AccordionBody>
@@ -316,22 +269,14 @@ export default function VotingSystem(Prop: PropType) {
           />
 
         {voteCategory && communityCategory ? (
-              <Button
-              fullWidth
-              className="mt-3 flex items-center justify-center gap-3 bg-highlight-color"
-              size="sm"
-              onClick={() =>
-                handleSubmitVote(
-                  communityCategory,
-                  voteCategory,
-                  truthScore,
-                  tags
-                )
-              }
-            >
-              <CheckCircleIcon className="h-5 w-5"/>
-              Done!
-            </Button>
+            <DoneButton 
+              messageId={messageId ?? null}
+              voteRequestId={voteRequestId ?? null}
+              communityCategory={communityCategory}
+              voteCategory={voteCategory}
+              truthScore={truthScore}
+              tags={tags}
+            />
           ) : null}
         </AccordionBody>
       </Accordion>
