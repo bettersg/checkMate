@@ -18,6 +18,7 @@ interface CheckerDetails {
   isAdmin: boolean;
   tier: string;
   isActive: boolean;
+  isTester: boolean;
   certificateUrl?: string | null;
   isAgainstReactivating?: boolean;
 }

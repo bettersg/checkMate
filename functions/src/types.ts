@@ -258,7 +258,7 @@ export type UserData = {
   priceWhereInterested: number | null // The price point when the user is interested
   feedback: string | null // The user's feedback, if they've provided any
   tier: "free" | "paid"
-  isTester: boolean
+  isTester: boolean //Whether or not the user is whitelisted for the beta phase
 }
 
 export type CheckerData = {
@@ -306,6 +306,7 @@ export type CheckerData = {
   leaderboardStats: LeaderBoardStats // The leaderboard stats of the checker
   programData: ProgramData // The Checker Program data of the checker
   dailyAssignmentCount: Number // Daily count of checker votes
+  isTester: Boolean //Whether or not the checker is whitelisted for the beta phase. Whitelisted checkers will see and vote on GenAI replies
 }
 
 export type NudgeData = {

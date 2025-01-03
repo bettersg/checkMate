@@ -15,7 +15,6 @@ import VotingSystem from "./VotingSystem";
 import VotingNoteChart from "./VoteNoteChart";
 import OldVoteCategories from "./OldVoteCategories";
 
-
 export default function VotePage() {
   const { checkerDetails } = useUser();
   const { messageId, voteRequestId } = useParams();
@@ -30,7 +29,7 @@ export default function VotePage() {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
         setSelectedTag(vote.tags);
-        console.log(vote)
+        console.log(vote);
       }
       setIsLoading(false);
     };
@@ -50,8 +49,10 @@ export default function VotePage() {
 
   return (
     <>
-      <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding mb-2"
-           style = {{maxHeight: '100vh', overflowY: 'auto'}}>
+      <div
+        className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding mb-2"
+        style={{ maxHeight: "100vh", overflowY: "auto" }}
+      >
         <style>
           {`
             ::-webkit-scrollbar {
@@ -66,31 +67,32 @@ export default function VotePage() {
           caption={vote.caption}
           sender={vote.sender}
         />
-        
-        {vote.communityNote ? (
-          <CommunityNoteCard 
-          en = {vote.communityNote.en}
-          cn = {vote.communityNote.cn}
-          links = {vote.communityNote.links}
-          downvoted = {vote.communityNote.downvoted}
-        />) : null}
-        
+
+        {vote.communityNote && checkerDetails.isTester ? (
+          <CommunityNoteCard
+            en={vote.communityNote.en}
+            cn={vote.communityNote.cn}
+            links={vote.communityNote.links}
+            downvoted={vote.communityNote.downvoted}
+          />
+        ) : null}
+
         {vote.category === null ||
         vote.category === "pass" ||
         !vote.isAssessed ? (
           <>
-            {vote.communityNote? (
+            {vote.communityNote ? (
               <>
-              <VotingSystem
-              messageId={messageId ?? null}
-              voteRequestId={voteRequestId ?? null}
-              currentCategory={vote.category}
-              currentTruthScore={vote.truthScore}
-              currentTags={selectedTag}
-              numberPointScale={vote.numberPointScale}
-              currentCommunityNoteCategory={vote.communityNoteCategory}
-             />
-            </>
+                <VotingSystem
+                  messageId={messageId ?? null}
+                  voteRequestId={voteRequestId ?? null}
+                  currentCategory={vote.category}
+                  currentTruthScore={vote.truthScore}
+                  currentTags={selectedTag}
+                  numberPointScale={vote.numberPointScale}
+                  currentCommunityNoteCategory={vote.communityNoteCategory}
+                />
+              </>
             ) : (
               <OldVoteCategories
                 messageId={messageId ?? null}
@@ -101,7 +103,6 @@ export default function VotePage() {
                 numberPointScale={vote.numberPointScale}
               />
             )}
-            
           </>
         ) : (
           <>
@@ -134,9 +135,9 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
-            {vote.communityNote ?
-             (<VotingNoteChart assessedInfo={vote.finalStats} />): 
-             null}
+            {vote.communityNote ? (
+              <VotingNoteChart assessedInfo={vote.finalStats} />
+            ) : null}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />

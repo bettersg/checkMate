@@ -814,6 +814,7 @@ const createChecker = async (
         },
         offboardingTime: null,
         dailyAssignmentCount: 0,
+        isTester: false,
       }
       transaction.set(newCheckerRef, newChecker)
       return newCheckerRef
