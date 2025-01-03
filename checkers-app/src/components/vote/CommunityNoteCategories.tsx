@@ -3,7 +3,6 @@ import { TrophyIcon } from "@heroicons/react/20/solid";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
-import { ForwardIcon } from "@heroicons/react/24/solid";
 
 interface PropType {
   messageId: string | null;
@@ -57,10 +56,6 @@ export default function CommunityNoteCategories(Prop: PropType) {
     handleCommunityCategoryChange(categoryName);
   };
 
-  const handleNextStep = (value: number) => {
-    Prop.onNextStep(value);
-  };
-
   return (
     <div className="grid grid-flow-row gap-y-4 items-center">
       {CATEGORIES.map((cat, index) => (
@@ -80,18 +75,6 @@ export default function CommunityNoteCategories(Prop: PropType) {
           </Button>
         </>
       ))}
-
-      {communityCategory ? (
-        <Button
-          fullWidth
-          className="flex items-center justify-center gap-3 bg-green-400"
-          size="sm"
-          onClick={() => handleNextStep(2)}
-        >
-          Move to next step
-          <ForwardIcon className="h-5 w-5" />
-        </Button>
-      ) : null}
     </div>
   );
 }

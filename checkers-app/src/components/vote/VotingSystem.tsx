@@ -8,11 +8,11 @@ import {
 } from "@material-tailwind/react";
 import VoteCategories from "./VoteCategories";
 import CommunityNoteCategories from "./CommunityNoteCategories";
+import { ForwardIcon } from "@heroicons/react/24/solid";
 import VoteTags from "./VoteTags";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
-import { patchVote } from "../../services/api";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../../providers/UserContext";
+import { CommunityNote } from "../../../../functions/src/types";
+import DoneButton from "./DoneButton";
 
 interface PropType {
   messageId: string | null;
@@ -22,6 +22,8 @@ interface PropType {
   currentTags: string[] | null;
   numberPointScale: number;
   currentCommunityNoteCategory: string | null;
+  communityNote: CommunityNote;
+  isTester: boolean | null;
 }
 
 interface IconProps {
@@ -51,8 +53,6 @@ function Icon({ id, open }: IconProps) {
 }
 
 export default function VotingSystem(Prop: PropType) {
-  const navigate = useNavigate();
-  const { incrementSessionVotedCount } = useUser();
   const [open, setOpen] = useState(1);
 
   const currentCategory = Prop.currentCategory;
@@ -62,6 +62,8 @@ export default function VotingSystem(Prop: PropType) {
   const voteRequestId = Prop.voteRequestId;
   const numberPointScale = Prop.numberPointScale;
   const currentCommunityNoteCategory = Prop.currentCommunityNoteCategory;
+  const communityNote = Prop.communityNote;
+  const isTester = Prop.isTester;
   const [tags, setTags] = useState<string[]>(currentTags);
   const [isDropdownOpen, setDropdownOpen] = useState(false); // Track dropdown state
   // Saved CommunityCategory
@@ -118,41 +120,6 @@ export default function VotingSystem(Prop: PropType) {
     setTruthScore(value);
   };
 
-  // function to update vote request in firebase
-  const handleSubmitVote = (
-    comCategory: string,
-    category: string,
-    truthScore: number | null,
-    tags: string[] | null
-  ) => {
-    console.log("Community Category: ", comCategory);
-    console.log("Vote Category: ", category);
-    console.log("Truthscore: ", truthScore);
-    console.log("Tags: ", tags);
-
-    if (category === "nvc") {
-      return;
-    }
-    if (messageId && voteRequestId) {
-      // call api to update vote
-      patchVote(
-        messageId,
-        voteRequestId,
-        category,
-        comCategory,
-        category === "info" ? truthScore : null,
-        tags
-      )
-        .then(() => {
-          incrementSessionVotedCount();
-          navigate("/votes");
-        })
-        .catch((error) => {
-          console.error("Error updating vote: ", error);
-        });
-    }
-  };
-
   return (
     <div className="mt-2">
       <Accordion
@@ -173,47 +140,10 @@ export default function VotingSystem(Prop: PropType) {
               variant="h6"
               className="text-primary-color3 dark:text-white"
             >
-              Rate community note:
-            </Typography>
-            <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              1
-            </span>
-          </div>
-        </AccordionHeader>
-        <AccordionBody className="pt-0 text-base font-normal">
-          <CommunityNoteCategories
-            messageId={messageId ?? null}
-            voteRequestId={voteRequestId ?? null}
-            currentCommunityCategory={currentCommunityNoteCategory ?? null}
-            onNextStep={onNextStep}
-            onSelectCommunityCategory={handleSelectCommunityCategory}
-          />
-        </AccordionBody>
-      </Accordion>
-
-      <Accordion
-        disabled={enabledAccordions.includes(2) ? false : true}
-        open={open === 2}
-        icon={<Icon id={2} open={open} />}
-        className={`mb-3 rounded-lg border px-2 ${
-          open === 2
-            ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
-            : "border-blue-gray-200"
-        }`}
-      >
-        <AccordionHeader
-          onClick={() => handleOpen(2)}
-          className="border-b-0 relative"
-        >
-          <div className="pl-6">
-            <Typography
-              variant="h6"
-              className="text-primary-color3 dark:text-white"
-            >
               Select message category:
             </Typography>
             <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              2
+              1
             </span>
           </div>
         </AccordionHeader>
@@ -233,17 +163,17 @@ export default function VotingSystem(Prop: PropType) {
       </Accordion>
 
       <Accordion
-        disabled={enabledAccordions.includes(3) ? false : true}
-        open={open === 3}
-        icon={<Icon id={3} open={open} />}
+        disabled={enabledAccordions.includes(2) ? false : true}
+        open={open === 2}
+        icon={<Icon id={2} open={open} />}
         className={`mb-3 rounded-lg border px-2 ${
-          open === 3
+          open === 2
             ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
             : "border-blue-gray-200"
         }`}
       >
         <AccordionHeader
-          onClick={() => handleOpen(3)}
+          onClick={() => handleOpen(2)}
           className="border-b-0 relative"
         >
           <div className="pl-6">
@@ -263,7 +193,7 @@ export default function VotingSystem(Prop: PropType) {
               />
             </div>
             <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              3
+              2
             </span>
           </div>
         </AccordionHeader>
@@ -277,25 +207,80 @@ export default function VotingSystem(Prop: PropType) {
             onSelectTag={onSelectTagOption}
             onDropdownToggle={handleDropdownToggle}
           />
-          {voteCategory && communityCategory ? (
-            <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
-              <Button
-                className="bg-highlight-color w-fit place-self-center"
-                onClick={() =>
-                  handleSubmitVote(
-                    communityCategory,
-                    voteCategory,
-                    truthScore,
-                    tags
-                  )
-                }
-              >
-                Done!
-              </Button>
-            </div>
+
+        {voteCategory && communityNote && isTester ? (
+          <Button
+          fullWidth
+          className="flex items-center justify-center gap-3 bg-green-400"
+          size="sm"
+          onClick={() => handleNextStep(3)}
+        >
+          Move to next step
+          <ForwardIcon className="h-5 w-5" />
+        </Button>
+
+        ): (
+          <DoneButton 
+            messageId={messageId ?? null}
+            voteRequestId={voteRequestId ?? null}
+            communityCategory={null}
+            voteCategory={voteCategory}
+            truthScore={truthScore}
+            tags={tags}
+          />
+        )}
+
+        </AccordionBody>
+      </Accordion>
+      {isTester ? (
+      <Accordion
+        disabled={enabledAccordions.includes(3) ? false : true}
+        open={open === 3}
+        icon={<Icon id={3} open={open} />}
+        className={`mb-3 rounded-lg border px-2 ${
+          open === 3
+            ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
+            : "border-blue-gray-200"
+        }`}
+      >
+      <AccordionHeader
+          onClick={() => handleOpen(3)}
+          className="border-b-0 relative"
+        >
+          <div className="pl-6">
+            <Typography
+              variant="h6"
+              className="text-primary-color3 dark:text-white"
+            >
+              Rate community note:
+            </Typography>
+            <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
+              3
+            </span>
+          </div>
+        </AccordionHeader>
+        <AccordionBody className="pt-0 text-base font-normal">
+          <CommunityNoteCategories
+            messageId={messageId ?? null}
+            voteRequestId={voteRequestId ?? null}
+            currentCommunityCategory={currentCommunityNoteCategory ?? null}
+            onNextStep={onNextStep}
+            onSelectCommunityCategory={handleSelectCommunityCategory}
+          />
+
+        {voteCategory && communityCategory ? (
+            <DoneButton 
+              messageId={messageId ?? null}
+              voteRequestId={voteRequestId ?? null}
+              communityCategory={communityCategory}
+              voteCategory={voteCategory}
+              truthScore={truthScore}
+              tags={tags}
+            />
           ) : null}
         </AccordionBody>
       </Accordion>
+    ) : null}
     </div>
   );
 }
