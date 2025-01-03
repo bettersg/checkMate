@@ -106,10 +106,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         harmfulCount,
         harmlessCount,
         tagCounts,
+        totalCheckerTestersCount,
       } = await getVoteCounts(messageRef)
 
       // Check if unacceptableCount is more than 50%
-      const isUnacceptable = unacceptableCount > 0.5 * validResponsesCount
+      const isUnacceptable = unacceptableCount > 0.5 * totalCheckerTestersCount
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
       const isSus =
         isBigSus || susCount > thresholds.isSus * validResponsesCount
@@ -167,13 +168,13 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVoteAbsolute //10
             ))
 
-      const isAssessedUnacceptable =
-        isUnacceptable &&
-        validResponsesCount >
-          Math.min(
-            thresholds.endVote * factCheckerCount,
-            thresholds.endVoteAbsolute //10
-          )
+      const isAssessedUnacceptable = isUnacceptable
+      //&&
+      // validResponsesCount >
+      //   Math.min(
+      //     thresholds.endVote * factCheckerCount,
+      //     thresholds.endVoteAbsolute //10
+      //   )
 
       //set primaryCategory
       let primaryCategory
