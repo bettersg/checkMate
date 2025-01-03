@@ -13,7 +13,6 @@ import CustomReply from "./CustomReply";
 import CommunityNoteCard from "../myvotes/CommunityNoteCard";
 import VotingSystem from "./VotingSystem";
 import VotingNoteChart from "./VoteNoteChart";
-import OldVoteCategories from "./OldVoteCategories";
 
 export default function VotePage() {
   const { checkerDetails } = useUser();
@@ -81,28 +80,17 @@ export default function VotePage() {
         vote.category === "pass" ||
         !vote.isAssessed ? (
           <>
-            {vote.communityNote ? (
-              <>
-                <VotingSystem
-                  messageId={messageId ?? null}
-                  voteRequestId={voteRequestId ?? null}
-                  currentCategory={vote.category}
-                  currentTruthScore={vote.truthScore}
-                  currentTags={selectedTag}
-                  numberPointScale={vote.numberPointScale}
-                  currentCommunityNoteCategory={vote.communityNoteCategory}
-                />
-              </>
-            ) : (
-              <OldVoteCategories
+              <VotingSystem
                 messageId={messageId ?? null}
                 voteRequestId={voteRequestId ?? null}
                 currentCategory={vote.category}
                 currentTruthScore={vote.truthScore}
                 currentTags={selectedTag}
                 numberPointScale={vote.numberPointScale}
+                currentCommunityNoteCategory={vote.communityNoteCategory}
+                communityNote={vote.communityNote}
+                isTester={checkerDetails.isTester}
               />
-            )}
           </>
         ) : (
           <>
@@ -135,7 +123,7 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
-            {vote.communityNote ? (
+            {vote.communityNote && checkerDetails.isTester ? (
               <VotingNoteChart assessedInfo={vote.finalStats} />
             ) : null}
             <CategoryRationalisation

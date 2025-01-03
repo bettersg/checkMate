@@ -81,7 +81,7 @@ export default function CommunityNoteCategories(Prop: PropType) {
         </>
       ))}
 
-      {communityCategory ? (
+      {/* {communityCategory ? (
         <Button
           fullWidth
           className="flex items-center justify-center gap-3 bg-green-400"
@@ -91,7 +91,7 @@ export default function CommunityNoteCategories(Prop: PropType) {
           Move to next step
           <ForwardIcon className="h-5 w-5" />
         </Button>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

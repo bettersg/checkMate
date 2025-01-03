@@ -8,11 +8,13 @@ import {
 } from "@material-tailwind/react";
 import VoteCategories from "./VoteCategories";
 import CommunityNoteCategories from "./CommunityNoteCategories";
+import { ForwardIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import VoteTags from "./VoteTags";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
 import { patchVote } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
+import { CommunityNote } from "../../../../functions/src/types";
 
 interface PropType {
   messageId: string | null;
@@ -22,6 +24,8 @@ interface PropType {
   currentTags: string[] | null;
   numberPointScale: number;
   currentCommunityNoteCategory: string | null;
+  communityNote: CommunityNote;
+  isTester: boolean | null;
 }
 
 interface IconProps {
@@ -62,6 +66,8 @@ export default function VotingSystem(Prop: PropType) {
   const voteRequestId = Prop.voteRequestId;
   const numberPointScale = Prop.numberPointScale;
   const currentCommunityNoteCategory = Prop.currentCommunityNoteCategory;
+  const communityNote = Prop.communityNote;
+  const isTester = Prop.isTester;
   const [tags, setTags] = useState<string[]>(currentTags);
   const [isDropdownOpen, setDropdownOpen] = useState(false); // Track dropdown state
   // Saved CommunityCategory
@@ -120,8 +126,8 @@ export default function VotingSystem(Prop: PropType) {
 
   // function to update vote request in firebase
   const handleSubmitVote = (
-    comCategory: string,
-    category: string,
+    comCategory: string | null,
+    category: string | null,
     truthScore: number | null,
     tags: string[] | null
   ) => {
@@ -173,47 +179,10 @@ export default function VotingSystem(Prop: PropType) {
               variant="h6"
               className="text-primary-color3 dark:text-white"
             >
-              Rate community note:
-            </Typography>
-            <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              1
-            </span>
-          </div>
-        </AccordionHeader>
-        <AccordionBody className="pt-0 text-base font-normal">
-          <CommunityNoteCategories
-            messageId={messageId ?? null}
-            voteRequestId={voteRequestId ?? null}
-            currentCommunityCategory={currentCommunityNoteCategory ?? null}
-            onNextStep={onNextStep}
-            onSelectCommunityCategory={handleSelectCommunityCategory}
-          />
-        </AccordionBody>
-      </Accordion>
-
-      <Accordion
-        disabled={enabledAccordions.includes(2) ? false : true}
-        open={open === 2}
-        icon={<Icon id={2} open={open} />}
-        className={`mb-3 rounded-lg border px-2 ${
-          open === 2
-            ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
-            : "border-blue-gray-200"
-        }`}
-      >
-        <AccordionHeader
-          onClick={() => handleOpen(2)}
-          className="border-b-0 relative"
-        >
-          <div className="pl-6">
-            <Typography
-              variant="h6"
-              className="text-primary-color3 dark:text-white"
-            >
               Select message category:
             </Typography>
             <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              2
+              1
             </span>
           </div>
         </AccordionHeader>
@@ -233,17 +202,17 @@ export default function VotingSystem(Prop: PropType) {
       </Accordion>
 
       <Accordion
-        disabled={enabledAccordions.includes(3) ? false : true}
-        open={open === 3}
-        icon={<Icon id={3} open={open} />}
+        disabled={enabledAccordions.includes(2) ? false : true}
+        open={open === 2}
+        icon={<Icon id={2} open={open} />}
         className={`mb-3 rounded-lg border px-2 ${
-          open === 3
+          open === 2
             ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
             : "border-blue-gray-200"
         }`}
       >
         <AccordionHeader
-          onClick={() => handleOpen(3)}
+          onClick={() => handleOpen(2)}
           className="border-b-0 relative"
         >
           <div className="pl-6">
@@ -263,7 +232,7 @@ export default function VotingSystem(Prop: PropType) {
               />
             </div>
             <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              3
+              2
             </span>
           </div>
         </AccordionHeader>
@@ -277,25 +246,96 @@ export default function VotingSystem(Prop: PropType) {
             onSelectTag={onSelectTagOption}
             onDropdownToggle={handleDropdownToggle}
           />
-          {voteCategory && communityCategory ? (
-            <div className="place-self-center grid grid-flow-row gap-y-4 w-full">
+
+        {voteCategory && communityNote && isTester ? (
+          <Button
+          fullWidth
+          className="flex items-center justify-center gap-3 bg-green-400"
+          size="sm"
+          onClick={() => handleNextStep(3)}
+        >
+          Move to next step
+          <ForwardIcon className="h-5 w-5" />
+        </Button>
+
+        ): (
+          <Button
+            fullWidth
+            className="flex items-center justify-center gap-3 bg-highlight-color"
+            size="sm"
+            onClick={() =>
+              handleSubmitVote(
+                null,
+                voteCategory,
+                truthScore,
+                tags
+              )
+            }
+          >
+            <CheckCircleIcon className="h-5 w-5"/>
+            Done!
+          </Button>
+        )}
+
+        </AccordionBody>
+      </Accordion>
+      {isTester ? (
+      <Accordion
+        disabled={enabledAccordions.includes(3) ? false : true}
+        open={open === 3}
+        icon={<Icon id={3} open={open} />}
+        className={`mb-3 rounded-lg border px-2 ${
+          open === 3
+            ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
+            : "border-blue-gray-200"
+        }`}
+      >
+      <AccordionHeader
+          onClick={() => handleOpen(3)}
+          className="border-b-0 relative"
+        >
+          <div className="pl-6">
+            <Typography
+              variant="h6"
+              className="text-primary-color3 dark:text-white"
+            >
+              Rate community note:
+            </Typography>
+            <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
+              3
+            </span>
+          </div>
+        </AccordionHeader>
+        <AccordionBody className="pt-0 text-base font-normal">
+          <CommunityNoteCategories
+            messageId={messageId ?? null}
+            voteRequestId={voteRequestId ?? null}
+            currentCommunityCategory={currentCommunityNoteCategory ?? null}
+            onNextStep={onNextStep}
+            onSelectCommunityCategory={handleSelectCommunityCategory}
+          />
+
+        {voteCategory && communityCategory ? (
               <Button
-                className="bg-highlight-color w-fit place-self-center"
-                onClick={() =>
-                  handleSubmitVote(
-                    communityCategory,
-                    voteCategory,
-                    truthScore,
-                    tags
-                  )
-                }
-              >
-                Done!
-              </Button>
-            </div>
+              fullWidth
+              className="mt-3 flex items-center justify-center gap-3 bg-highlight-color"
+              size="sm"
+              onClick={() =>
+                handleSubmitVote(
+                  communityCategory,
+                  voteCategory,
+                  truthScore,
+                  tags
+                )
+              }
+            >
+              <CheckCircleIcon className="h-5 w-5"/>
+              Done!
+            </Button>
           ) : null}
         </AccordionBody>
       </Accordion>
+    ) : null}
     </div>
   );
 }
