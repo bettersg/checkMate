@@ -24,6 +24,12 @@ interface CommunityNoteReturn
   isControversial: boolean // Add your new field
   isVideo: boolean
   isAccessBlocked: boolean
+  requestId?: string
+  success?: boolean
+  report?: string
+  totalTimeTaken?: string
+  errorMessage?: string
+  agentTrace?: string[]
 }
 
 interface L1CategoryResponse {
@@ -168,12 +174,17 @@ async function getCommunityNote(input: {
 
     // API call
     const apiCallPromise = callAPI<CommunityNoteReturn>(
-      "getCommunityNote",
+      "v2/getCommunityNote",
       data
     )
 
     // Race between the API call and the timeout
     const response = await Promise.race([apiCallPromise, timeoutPromise])
+    if (response.data?.success && response.data?.requestId) {
+      functions.logger.log(
+        `Community note with request ID: ${response.data.requestId} successfully generated`
+      )
+    }
 
     return response.data
   } catch (error) {
