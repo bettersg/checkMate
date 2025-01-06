@@ -38,9 +38,7 @@ export default function CommunityNoteCategories(Prop: PropType) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     currentCategory
   );
-  const [communityCategory, setCommunityCategory] = useState<string | null>(
-    currentCategory
-  );
+  const [_, setCommunityCategory] = useState<string | null>(currentCategory);
 
   const handleCommunityCategoryChange = (category: string) => {
     switch (category) {
