@@ -186,7 +186,7 @@ export default function VoteCategories(Prop: PropType) {
           fullWidth
           className="flex items-center justify-center gap-3 bg-green-400"
           size="sm"
-          onClick={() => handleNextStep(3)}
+          onClick={() => handleNextStep(2)}
         >
           Move to next step
           <ForwardIcon className="h-5 w-5" />
