@@ -14,6 +14,7 @@ import { tabulateVoteStats } from "../common/statistics"
 import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
 import { MessageData } from "../../types"
 import { Langfuse } from "langfuse"
+import { message } from "telegraf/filters"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -322,7 +323,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
 
         const checkerId = postChangeData.factCheckerDocRef.id
         langfuse.score({
-          id: checkerId,
+          id: `${messageRef.id}-${checkerId}`,
           traceId: messageRef.id,
           name: "communityNoteRating",
           value: communityNoteCategory,
