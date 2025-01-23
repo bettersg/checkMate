@@ -1465,7 +1465,7 @@ async function sendCommunityNoteSources(
     await sendErrorMessage(userSnap)
     return
   }
-  const sourceText = links.join("\n")
+  const sourceText = links.map((link) => `📎 ${link}`).join("\n\n")
   const responseText = responses.COMMUNITY_NOTE_SOURCES.replace(
     "{{sources}}",
     sourceText
