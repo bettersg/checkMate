@@ -80,7 +80,7 @@
     "cn": "经过查哥查妹的评估，我们认为这条短信"
   },
   "METHODOLOGY_AUTO": {
-    "en": "Based on pattern matching, our auto-classifier is confident that this message is ",
+    "en": "Based on pattern matching, our AI is confident that this message is ",
     "cn": "根据我们的AI技术，我们认为这条短信"
   },
   "METHODOLOGY_HUMAN_PREVIOUS": {
