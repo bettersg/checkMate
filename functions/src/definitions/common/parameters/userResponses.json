@@ -20,8 +20,8 @@
     "cn": "抱歉，查友在评估您提供的短信时发生了问题。\n\n欢迎您稍后重试，或者通过这份表格向我们反馈：https://bit.ly/checkmate-feedback。对此造成的不便，我们非常抱歉！😔"
   },
   "WAIT_FOR_AI": {
-    "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖",
-    "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。"
+    "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖. Thank you for your patience.",
+    "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。感谢您的耐心。"
   },
   "MESSAGE_NOT_YET_ASSESSED": {
     "en": "Unfortunately, our AI wasn't able to assess this message.\n\nOur volunteers🕵🏻 will review this and *provide the results soon*.",

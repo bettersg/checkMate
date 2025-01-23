@@ -936,7 +936,22 @@ async function respondToInstance(
 
   let isMachineCase = false
 
-  if (isControversial && !isDisclaimed && !isDisclaimerAgreed) {
+  if (
+    isMachineCategorised &&
+    machineCategory &&
+    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
+  ) {
+    category = machineCategory
+    isMachineCase = true
+  }
+
+  const hasBespokeReply =
+    customReply || (communityNote && !communityNote.downvoted && isTester)
+
+  const readyToReply =
+    isAssessed || forceReply || isMachineCase || hasBespokeReply
+
+  if (isControversial && !isDisclaimed && !isDisclaimerAgreed && readyToReply) {
     if (!isDisclaimerSent) {
       const text = responses.CONTROVERSIAL_DISCLAIMER
       const controversialButton = {
@@ -1274,10 +1289,10 @@ async function sendWaitingMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
 ) {
-  const isTester = userSnap.get("isTester") ?? false
-  if (!isTester) {
-    return
-  }
+  // const isTester = userSnap.get("isTester") ?? false
+  // if (!isTester) {
+  //   return
+  // }
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
   await sendTextMessage(

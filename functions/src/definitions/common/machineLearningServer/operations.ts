@@ -163,10 +163,6 @@ async function getCommunityNote(input: {
       data.caption = input.caption
     }
 
-    if (input.requestId) {
-      data.requestId = input.requestId
-    }
-
     // Timeout logic
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(
@@ -180,7 +176,8 @@ async function getCommunityNote(input: {
     // API call
     const apiCallPromise = callAPI<CommunityNoteReturn>(
       "v2/getCommunityNote",
-      data
+      data,
+      input.requestId
     )
 
     // Race between the API call and the timeout
@@ -246,7 +243,11 @@ async function getGoogleIdentityToken(audience: string) {
   }
 }
 
-async function callAPI<T>(endpoint: string, data: object, requestId?: string) {
+async function callAPI<T>(
+  endpoint: string,
+  data: object,
+  requestId?: string | null
+) {
   try {
     const hostName = embedderHost.value()
     // Fetch identity token
