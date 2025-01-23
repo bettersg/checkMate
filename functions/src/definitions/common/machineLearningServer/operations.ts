@@ -132,6 +132,7 @@ async function getCommunityNote(input: {
   text?: string
   url?: string | null
   caption?: string | null
+  requestId?: string | null
 }): Promise<CommunityNoteReturn> {
   if (env !== "PROD") {
     // You can add more sophisticated mock logic here
@@ -160,6 +161,10 @@ async function getCommunityNote(input: {
     } else {
       data.image_url = input.url // Rename `url` to `image_url`
       data.caption = input.caption
+    }
+
+    if (input.requestId) {
+      data.requestId = input.requestId
     }
 
     // Timeout logic
@@ -241,7 +246,7 @@ async function getGoogleIdentityToken(audience: string) {
   }
 }
 
-async function callAPI<T>(endpoint: string, data: object) {
+async function callAPI<T>(endpoint: string, data: object, requestId?: string) {
   try {
     const hostName = embedderHost.value()
     // Fetch identity token
@@ -253,7 +258,7 @@ async function callAPI<T>(endpoint: string, data: object) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${identityToken}`,
-        //apikey: process.env.ML_SERVER_TOKEN ?? "",
+        ...(requestId ? { "x-request-id": requestId } : {}),
       },
     })
     return response

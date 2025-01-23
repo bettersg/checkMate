@@ -243,11 +243,13 @@ async function newTextInstanceHandler({
     //   text: text,
     // })
     let isControversial = false
+    messageRef = db.collection("messages").doc()
     if (needsChecking) {
       await sendWaitingMessage(userSnap, id)
       try {
         communityNoteData = await getCommunityNote({
           text: text,
+          requestId: messageRef !== null ? messageRef.id : null,
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -263,7 +265,6 @@ async function newTextInstanceHandler({
 
     const adminMessageId = (await sendNewMessageNotification(text)) ?? null
 
-    messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: needsChecking
         ? machineCategory.split("_")[0]
@@ -546,6 +547,7 @@ async function newImageInstanceHandler({
     let isCommunityNoteUsable = false
     let isControversial = false
     let communityNoteStatus = "error"
+    messageRef = db.collection("messages").doc()
     const signedUrl = (await getSignedUrl(filename)) ?? null
     if (signedUrl) {
       // isControversial = await determineControversial({
@@ -556,6 +558,7 @@ async function newImageInstanceHandler({
         communityNoteData = await getCommunityNote({
           url: signedUrl,
           caption: caption ?? null,
+          requestId: messageRef !== null ? messageRef.id : null,
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -585,7 +588,6 @@ async function newImageInstanceHandler({
         (await sendNewMessageNotification(null, signedUrl, caption)) ?? null
     }
 
-    messageRef = db.collection("messages").doc()
     messageUpdateObj = {
       machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
