@@ -307,6 +307,7 @@ export type CheckerData = {
   programData: ProgramData // The Checker Program data of the checker
   dailyAssignmentCount: Number // Daily count of checker votes
   isTester: Boolean //Whether or not the checker is whitelisted for the beta phase. Whitelisted checkers will see and vote on GenAI replies
+  hasBlockedTelegramMessages: Boolean //Whether or not the checker has blocked CheckMate from sending them messages on Telegram
 }
 
 export type NudgeData = {

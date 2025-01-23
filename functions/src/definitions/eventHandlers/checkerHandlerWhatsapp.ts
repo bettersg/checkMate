@@ -173,6 +173,7 @@ async function onSignUp(from: string, platform = "whatsapp") {
     offboardingTime: null,
     dailyAssignmentCount: 0,
     isTester: false,
+    hasBlockedTelegramMessages: false,
   }
   await db.collection("checkers").add(checkerObj)
 }
