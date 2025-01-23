@@ -31,6 +31,7 @@
     "googleapis": "^112.0.0",
     "hashids": "^2.3.0",
     "image-hash": "^5.3.1",
+    "langfuse": "^3.32.1",
     "libphonenumber-js": "^1.10.21",
     "openai": "^4.10.0",
     "re2": "^1.20.3",
