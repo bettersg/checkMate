@@ -1034,11 +1034,19 @@ async function respondToInstance(
     //get the text based on language
     const note = communityNote[language as keyof CommunityNote] as string
     const sources = communityNote.links as string[]
+    const dateStr = communityNote.timestamp
+      ? communityNote.timestamp.toDate().toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : ""
 
     const responseText = responses.COMMUNITY_NOTE.replace(
       "{{community_note}}",
       note
     )
+      .replace("{{date}}", dateStr)
       .replace(
         "{{submissions_remaining}}",
         responses.REMAINING_SUBMISSIONS_SUFFIX

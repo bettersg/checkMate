@@ -309,6 +309,7 @@ async function newTextInstanceHandler({
               downvoted: false,
               pendingCorrection: false,
               adminGroupCommunityNoteSentMessageId: null,
+              timestamp: Timestamp.now(),
             }
           : null,
       instanceCount: 0,
@@ -630,6 +631,7 @@ async function newImageInstanceHandler({
               downvoted: false,
               pendingCorrection: false,
               adminGroupCommunityNoteSentMessageId: null,
+              timestamp: Timestamp.now(),
             }
           : null,
       instanceCount: 0,

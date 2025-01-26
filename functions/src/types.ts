@@ -424,6 +424,7 @@ export type CommunityNote = {
   downvoted: boolean
   pendingCorrection: boolean
   adminGroupCommunityNoteSentMessageId: string | null
+  timestamp: Timestamp
 }
 
 export type BlastData = {

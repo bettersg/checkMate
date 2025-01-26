@@ -11,8 +11,7 @@ import { getCommunityNote } from "../common/machineLearningServer/operations"
 import { MessageData } from "../../types"
 import { despatchPoll } from "../../services/checker/votingService"
 import { respondToInstance } from "../common/responseUtils"
-import { FieldValue } from "@google-cloud/firestore"
-import { logger } from "firebase-functions"
+import { Timestamp } from "firebase-admin/firestore"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -91,6 +90,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
             downvoted: false,
             pendingCorrection: false,
             adminGroupCommunityNoteSentMessageId: null,
+            timestamp: Timestamp.now(),
           }
         } catch (error) {
           functions.logger.error("Error in getCommunityNote:", error)
