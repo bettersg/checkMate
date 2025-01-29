@@ -357,9 +357,9 @@ async function resetUserSubmissionsHandler() {
     const BATCH_LIMIT = 500
 
     for (const userDoc of usersSnapshot.docs) {
-      const monthlySubmissionLimit = userDoc.get("monthlySubmissionLimit")
+      const submissionLimit = userDoc.get("submissionLimit")
       batch.update(userDoc.ref, {
-        numSubmissionsRemaining: monthlySubmissionLimit,
+        numSubmissionsRemaining: submissionLimit,
       })
 
       batchCount++

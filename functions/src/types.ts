@@ -250,8 +250,8 @@ export type UserData = {
   isSubscribedUpdates: boolean // Whether the user wants to receive proactive updates/messages from CheckMate
   isIgnored: boolean // Whether the user is blocked
   isOnboardingComplete: boolean // Whether the user has completed the onboarding flow (selected language, age group, agreed to terms of use)
-  numSubmissionsRemaining: number // Number of submissions made a month
-  monthlySubmissionLimit: number // Number of submissions allowed a month
+  numSubmissionsRemaining: number // Number of submissions made in given time period
+  submissionLimit: number // Number of submissions allowed in given time period
   isInterestedInSubscription: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at $5 a month
   isInterestedAtALowerPoint: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at a lower price point
   interestedFor: Array<string> | null // For whom the user is interested subscribing, can be "me", "parents", "children", "relatives", "friends", "others"
