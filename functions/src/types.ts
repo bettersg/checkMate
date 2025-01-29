@@ -258,7 +258,7 @@ export type UserData = {
   priceWhereInterested: number | null // The price point when the user is interested
   feedback: string | null // The user's feedback, if they've provided any
   tier: "free" | "paid"
-  isTester: boolean
+  isTester: boolean //Whether or not the user is whitelisted for the beta phase
 }
 
 export type CheckerData = {
@@ -306,6 +306,8 @@ export type CheckerData = {
   leaderboardStats: LeaderBoardStats // The leaderboard stats of the checker
   programData: ProgramData // The Checker Program data of the checker
   dailyAssignmentCount: Number // Daily count of checker votes
+  isTester: Boolean //Whether or not the checker is whitelisted for the beta phase. Whitelisted checkers will see and vote on GenAI replies
+  hasBlockedTelegramMessages: Boolean //Whether or not the checker has blocked CheckMate from sending them messages on Telegram
 }
 
 export type NudgeData = {
@@ -422,6 +424,7 @@ export type CommunityNote = {
   downvoted: boolean
   pendingCorrection: boolean
   adminGroupCommunityNoteSentMessageId: string | null
+  timestamp: Timestamp
 }
 
 export type BlastData = {
@@ -486,9 +489,11 @@ export type Thresholds = {
   numberBeforeAccuracyNudge: number
   daysBeforeFirstCompletionCheck: number
   daysBeforeSecondCompletionCheck: number
-  freeTierDailyLimit: number
-  paidTierDailyLimit: number
+  freeTierLimit: number
+  paidTierLimit: number
+  frequency: string
   numberToTrigger: number | string
   targetDailyVotes: number
   minVotesPerMessage: number
+  price: number
 }

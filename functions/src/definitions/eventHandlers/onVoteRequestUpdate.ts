@@ -13,6 +13,8 @@ import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { updateTelegramReplyMarkup } from "../common/sendTelegramMessage"
 import { MessageData } from "../../types"
+import { Langfuse } from "langfuse"
+import { message } from "telegraf/filters"
 
 // Define some parameters
 const numVoteShards = defineInt("NUM_SHARDS_VOTE_COUNT")
@@ -31,6 +33,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",
       "WHATSAPP_TOKEN",
       "TELEGRAM_CHECKER_BOT_TOKEN",
+      "LANGFUSE_SECRET_KEY",
     ],
   },
   async (event) => {
@@ -106,10 +109,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         harmfulCount,
         harmlessCount,
         tagCounts,
+        totalCheckerTestersCount,
       } = await getVoteCounts(messageRef)
 
       // Check if unacceptableCount is more than 50%
-      const isUnacceptable = unacceptableCount > 0.5 * validResponsesCount
+      const isUnacceptable = unacceptableCount > 0.5 * totalCheckerTestersCount
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
       const isSus =
         isBigSus || susCount > thresholds.isSus * validResponsesCount
@@ -167,15 +171,8 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVoteAbsolute //10
             ))
 
-      const isAssessedUnacceptable =
-        isUnacceptable &&
-        validResponsesCount >
-          Math.min(
-            thresholds.endVote * factCheckerCount,
-            thresholds.endVoteAbsolute //10
-          )
+      const isAssessedUnacceptable = isUnacceptable
 
-      //set primaryCategory
       let primaryCategory
       if (isScam) {
         primaryCategory = "scam"
@@ -312,6 +309,31 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     if (preChangeData.isCorrect !== postChangeData.isCorrect) {
       await updateCheckerCorrectCounts(before, after)
     }
+    //update langfuse
+    try {
+      const communityNoteCategory = postChangeData.communityNoteCategory
+
+      if (communityNoteCategory) {
+        functions.logger.info("Updating langfuse")
+        const langfuse = new Langfuse({
+          secretKey: process.env.LANGFUSE_SECRET_KEY,
+          publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+          baseUrl: process.env.LANGFUSE_BASE_URL,
+        })
+
+        const checkerId = postChangeData.factCheckerDocRef.id
+        langfuse.score({
+          id: `${messageRef.id}-${checkerId}`,
+          traceId: messageRef.id,
+          name: "communityNoteRating",
+          value: communityNoteCategory,
+          dataType: "CATEGORICAL",
+        })
+      }
+    } catch (e) {
+      functions.logger.error("Error updating langfuse", e)
+    }
+
     return Promise.resolve()
   }
 )

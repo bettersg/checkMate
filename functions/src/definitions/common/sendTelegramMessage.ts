@@ -56,9 +56,15 @@ const sendTelegramTextMessage = async function (
       "Content-Type": "application/json",
     },
   }).catch((error) => {
-    functions.logger.log(
-      `Error: ${error.response.status} - ${error.response.data.description}`
-    )
+    if (error.response) {
+      functions.logger.log(
+        `Error: ${error.response.status} - ${error.response.data.description}`
+      )
+      if (error.response?.status === 403) {
+        // Return null instead of throwing error for 403 status
+        return null
+      }
+    }
     throw "error with sending telegram message"
   })
   return response

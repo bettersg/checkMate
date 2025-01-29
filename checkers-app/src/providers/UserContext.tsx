@@ -42,8 +42,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     tier: import.meta.env.MODE === "dev" ? "expert" : "beginner",
     isActive: true,
     certificateUrl: null, // Initialize certificateUrl
+    isTester: false,
   });
-  
+
   // const [checkerName, setCheckerName] = useState<string>(
   //   import.meta.env.MODE === "dev" ? import.meta.env.VITE_CHECKER_NAME : null
   // );

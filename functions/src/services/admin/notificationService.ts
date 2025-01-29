@@ -68,19 +68,33 @@ export async function sendCommunityNoteNotification(
       )
       return
     }
+    let replyMarkup = null
     if (communityNote === null) {
-      updateText =
-        "Community Note not generated. Either message deemed irrelevant or an error occured."
+      updateText = `ID: ${messageRef.id}\nCommunity Note not generated. Either message deemed irrelevant or an error occured.`
     } else {
-      updateText = `Community Note:\n\n${
+      updateText = `ID: ${messageRef.id}\nCommunity Note:\n\n${
         communityNote.en
       }\n\nLinks:\n${communityNote.links.join("\n")}`
+      const langfuseBaseURL = process.env.LANGFUSE_BASE_URL
+      const langfuseProjectId = process.env.LANGFUSE_PROJECT_ID
+      replyMarkup = {
+        inline_keyboard: [
+          [
+            {
+              text: "View on LangFuse",
+              url: `${langfuseBaseURL}/project/${langfuseProjectId}/traces/${messageRef.id}`,
+            },
+          ],
+        ],
+      }
     }
     const response = await sendTelegramTextMessage(
       "admin",
       adminChatId,
       updateText,
-      replyId ?? topicId
+      replyId ?? topicId,
+      null,
+      replyMarkup
     )
     const messageId = response?.data.result.message_id
     if (messageId && communityNote !== null) {

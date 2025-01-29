@@ -6,6 +6,7 @@ import {
   ReplyKeyboardMarkup,
   ForceReply,
 } from "@telegraf/types"
+import { recordBlockedStatus } from "../../services/checker/recordBlock"
 
 const telegramHost =
   process.env["TEST_SERVER_URL"] || "https://api.telegram.org" //only exists in integration test environment
@@ -56,9 +57,16 @@ const sendTelegramTextMessage = async function (
       "Content-Type": "application/json",
     },
   }).catch((error) => {
-    functions.logger.log(
-      `Error: ${error.response.status} - ${error.response.data.description}`
-    )
+    if (error.response) {
+      functions.logger.log(
+        `Error: ${error.response.status} - ${error.response.data.description}`
+      )
+      if (error.response?.status === 403) {
+        // Return null instead of throwing error for 403 status
+        recordBlockedStatus(to)
+        return null
+      }
+    }
     throw "error with sending telegram message"
   })
   return response

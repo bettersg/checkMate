@@ -166,6 +166,8 @@ const mockDb = async function () {
     },
     offboardingTime: null,
     dailyAssignmentCount: 0,
+    isTester: false,
+    hasBlockedTelegramMessages: false,
   }
   if (querySnap.empty) {
     await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj)

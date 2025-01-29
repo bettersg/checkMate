@@ -1,5 +1,7 @@
 import * as admin from "firebase-admin"
 import { Timestamp } from "firebase-admin/firestore"
+import { getThresholds, translateFrequency } from "../../common/utils"
+import { logger } from "firebase-functions/v2"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -26,31 +28,43 @@ export async function flowEndpointHandler(decryptedBody: WhatsAppRequest) {
           throw new Error("Flow token not found")
         }
         const flowRef = db.collection("flows").doc(flowToken)
-        flowRef.update({
-          outcome: "opened",
-          outcomeTimestamp: Timestamp.now(),
-        })
         const flowSnap = await flowRef.get()
         if (!flowSnap.exists) {
           throw new Error("Flow not found in database")
         }
+        flowRef.update({
+          outcome: "opened",
+          outcomeTimestamp: Timestamp.now(),
+        })
+        const thresholds = await getThresholds()
+        let dataPayload
         const flowType = flowSnap.get("type")
         let screen = "JOIN_WAITLIST"
         switch (flowType) {
           case "waitlist":
             screen = "LANDING"
+            dataPayload = {
+              num_paid_checks: String(thresholds.paidTierLimit ?? 30),
+              price: String(thresholds.price ?? 5.99),
+            }
             break
           case "onboarding":
             screen = "LANDING"
+            dataPayload = {
+              num_free_checks: String(thresholds.freeTierLimit ?? 5),
+              frequency_en: thresholds.frequency ?? "daily",
+              frequency_cn: translateFrequency(thresholds.frequency ?? "daily"),
+            }
             break
           default:
             throw new Error("Invalid flow type")
         }
         return {
-          data: {},
+          data: dataPayload,
           screen: screen,
         }
       } catch (error) {
+        logger.error("Error fetching flow data", error)
         return {
           data: {
             error_message: "Error fetching flow data",

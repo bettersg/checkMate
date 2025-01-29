@@ -141,7 +141,7 @@ export const getVote = async (
 export const patchVote = async (
   messageId: string,
   voteRequestId: string,
-  category: string,
+  category: string | null,
   communityNoteCategory: string | null,
   truthScore: number | null,
   tags: string[] | null,

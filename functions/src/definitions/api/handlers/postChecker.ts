@@ -114,6 +114,8 @@ const postCheckerHandler = async (req: Request, res: Response) => {
     },
     offboardingTime: null,
     dailyAssignmentCount: 0,
+    isTester: false,
+    hasBlockedTelegramMessages: false,
   }
 
   logger.info("Creating new checker", newChecker)

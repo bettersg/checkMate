@@ -936,7 +936,22 @@ async function respondToInstance(
 
   let isMachineCase = false
 
-  if (isControversial && !isDisclaimed && !isDisclaimerAgreed) {
+  if (
+    isMachineCategorised &&
+    machineCategory &&
+    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
+  ) {
+    category = machineCategory
+    isMachineCase = true
+  }
+
+  const hasBespokeReply =
+    customReply || (communityNote && !communityNote.downvoted && isTester)
+
+  const readyToReply =
+    isAssessed || forceReply || isMachineCase || hasBespokeReply
+
+  if (isControversial && !isDisclaimed && !isDisclaimerAgreed && readyToReply) {
     if (!isDisclaimerSent) {
       const text = responses.CONTROVERSIAL_DISCLAIMER
       const controversialButton = {
@@ -1019,11 +1034,19 @@ async function respondToInstance(
     //get the text based on language
     const note = communityNote[language as keyof CommunityNote] as string
     const sources = communityNote.links as string[]
+    const dateStr = communityNote.timestamp
+      ? communityNote.timestamp.toDate().toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : ""
 
     const responseText = responses.COMMUNITY_NOTE.replace(
       "{{community_note}}",
       note
     )
+      .replace("{{date}}", dateStr)
       .replace(
         "{{submissions_remaining}}",
         responses.REMAINING_SUBMISSIONS_SUFFIX
@@ -1059,6 +1082,10 @@ async function respondToInstance(
   }
 
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
+    if (!isTester) {
+      //TODO: Get rid of this block after beta.
+      return
+    }
     await sendTextMessage(
       "user",
       from,
@@ -1275,11 +1302,19 @@ async function sendWaitingMessage(
   replyMessageId: string | null = null
 ) {
   const isTester = userSnap.get("isTester") ?? false
-  if (!isTester) {
-    return
-  }
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
+  if (!isTester) {
+    //TODO: Get rid of this block after beta.
+    await sendTextMessage(
+      "user",
+      userSnap.get("whatsappId"),
+      responses.WAIT_FOR_ASSESSMENT,
+      replyMessageId,
+      "whatsapp"
+    )
+    return
+  }
   await sendTextMessage(
     "user",
     userSnap.get("whatsappId"),
@@ -1450,7 +1485,7 @@ async function sendCommunityNoteSources(
     await sendErrorMessage(userSnap)
     return
   }
-  const sourceText = links.join("\n")
+  const sourceText = links.map((link) => `📎 ${link}`).join("\n\n")
   const responseText = responses.COMMUNITY_NOTE_SOURCES.replace(
     "{{sources}}",
     sourceText
@@ -1496,7 +1531,7 @@ async function sendGetMoreSubmissionsMessage(
     return
   } else {
     const thresholds = await getThresholds()
-    const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
+    const paidTierLimit = thresholds.paidTierLimit ?? 50
     const responseText = responses.GET_MORE_SUBMISSIONS_NUDGE.replace(
       "{{paid_tier_limit}}",
       paidTierLimit.toString()
@@ -1531,7 +1566,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
-  const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
+  const paidTierLimit = thresholds.paidTierLimit ?? 50
   const isTester = userSnap.get("isTester") ?? false
   if (!isTester) {
     const responseText = responses.OUT_OF_SUBMISSIONS

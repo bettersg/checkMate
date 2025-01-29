@@ -24,6 +24,12 @@ interface CommunityNoteReturn
   isControversial: boolean // Add your new field
   isVideo: boolean
   isAccessBlocked: boolean
+  requestId?: string
+  success?: boolean
+  report?: string
+  totalTimeTaken?: string
+  errorMessage?: string
+  agentTrace?: string[]
 }
 
 interface L1CategoryResponse {
@@ -76,7 +82,9 @@ async function determineNeedsChecking(input: {
       ) {
         return false
       }
-      return true
+      if (env === "SIT") {
+        return true
+      }
     }
 
     const data = { ...input }
@@ -124,6 +132,7 @@ async function getCommunityNote(input: {
   text?: string
   url?: string | null
   caption?: string | null
+  requestId?: string | null
 }): Promise<CommunityNoteReturn> {
   if (env !== "PROD") {
     // You can add more sophisticated mock logic here
@@ -144,7 +153,15 @@ async function getCommunityNote(input: {
   }
 
   try {
-    const data = { ...input }
+    const data: Record<string, any> = {} // Initialize an empty object
+
+    // Populate `data` based on `input`
+    if (input.text) {
+      data.text = input.text
+    } else {
+      data.image_url = input.url // Rename `url` to `image_url`
+      data.caption = input.caption
+    }
 
     // Timeout logic
     const timeoutPromise = new Promise<never>((_, reject) =>
@@ -158,12 +175,18 @@ async function getCommunityNote(input: {
 
     // API call
     const apiCallPromise = callAPI<CommunityNoteReturn>(
-      "getCommunityNote",
-      data
+      "v2/getCommunityNote",
+      data,
+      input.requestId
     )
 
     // Race between the API call and the timeout
     const response = await Promise.race([apiCallPromise, timeoutPromise])
+    if (response.data?.success && response.data?.requestId) {
+      functions.logger.log(
+        `Community note with request ID: ${response.data.requestId} successfully generated`
+      )
+    }
 
     return response.data
   } catch (error) {
@@ -220,7 +243,11 @@ async function getGoogleIdentityToken(audience: string) {
   }
 }
 
-async function callAPI<T>(endpoint: string, data: object) {
+async function callAPI<T>(
+  endpoint: string,
+  data: object,
+  requestId?: string | null
+) {
   try {
     const hostName = embedderHost.value()
     // Fetch identity token
@@ -232,7 +259,7 @@ async function callAPI<T>(endpoint: string, data: object) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${identityToken}`,
-        //apikey: process.env.ML_SERVER_TOKEN ?? "",
+        ...(requestId ? { "x-request-id": requestId } : {}),
       },
     })
     return response

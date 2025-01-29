@@ -112,6 +112,7 @@ app.post("/", async (req, res) => {
         isActive: userDoc.data()?.isActive,
         isAdmin: userDoc.data()?.isAdmin,
         tier: userDoc.data()?.tier,
+        isTester: userDoc.data()?.isTester ?? false,
       })
     } catch (error) {
       functions.logger.error("Error creating custom token:", error)
