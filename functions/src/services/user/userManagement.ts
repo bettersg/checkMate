@@ -90,8 +90,8 @@ export async function createNewUser(
     priceWhereInterested: null,
     feedback: null,
     tier: "free",
-    numSubmissionsRemaining: thresholds.freeTierDailyLimit ?? 5,
-    monthlySubmissionLimit: thresholds.freeTierDailyLimit ?? 5,
+    numSubmissionsRemaining: thresholds.freeTierLimit ?? 5,
+    monthlySubmissionLimit: thresholds.freeTierLimit ?? 5,
     isTester:
       environment === "UAT" || environment === "DEV" || environment === "SIT"
         ? true

@@ -489,9 +489,11 @@ export type Thresholds = {
   numberBeforeAccuracyNudge: number
   daysBeforeFirstCompletionCheck: number
   daysBeforeSecondCompletionCheck: number
-  freeTierDailyLimit: number
-  paidTierDailyLimit: number
+  freeTierLimit: number
+  paidTierLimit: number
+  frequency: string
   numberToTrigger: number | string
   targetDailyVotes: number
   minVotesPerMessage: number
+  price: number
 }

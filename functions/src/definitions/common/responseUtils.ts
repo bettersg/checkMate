@@ -1082,6 +1082,10 @@ async function respondToInstance(
   }
 
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
+    if (!isTester) {
+      //TODO: Get rid of this block after beta.
+      return
+    }
     await sendTextMessage(
       "user",
       from,
@@ -1297,12 +1301,20 @@ async function sendWaitingMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
 ) {
-  // const isTester = userSnap.get("isTester") ?? false
-  // if (!isTester) {
-  //   return
-  // }
+  const isTester = userSnap.get("isTester") ?? false
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
+  if (!isTester) {
+    //TODO: Get rid of this block after beta.
+    await sendTextMessage(
+      "user",
+      userSnap.get("whatsappId"),
+      responses.WAIT_FOR_ASSESSMENT,
+      replyMessageId,
+      "whatsapp"
+    )
+    return
+  }
   await sendTextMessage(
     "user",
     userSnap.get("whatsappId"),
@@ -1519,7 +1531,7 @@ async function sendGetMoreSubmissionsMessage(
     return
   } else {
     const thresholds = await getThresholds()
-    const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
+    const paidTierLimit = thresholds.paidTierLimit ?? 50
     const responseText = responses.GET_MORE_SUBMISSIONS_NUDGE.replace(
       "{{paid_tier_limit}}",
       paidTierLimit.toString()
@@ -1554,7 +1566,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
-  const paidTierLimit = thresholds.paidTierDailyLimit ?? 50
+  const paidTierLimit = thresholds.paidTierLimit ?? 50
   const isTester = userSnap.get("isTester") ?? false
   if (!isTester) {
     const responseText = responses.OUT_OF_SUBMISSIONS

@@ -20,12 +20,16 @@
     "cn": "抱歉，查友在评估您提供的短信时发生了问题。\n\n欢迎您稍后重试，或者通过这份表格向我们反馈：https://bit.ly/checkmate-feedback。对此造成的不便，我们非常抱歉！😔"
   },
   "WAIT_FOR_AI": {
-    "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖. Thank you for your patience.",
-    "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。感谢您的耐心。"
+    "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖",
+    "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。"
+  },
+  "WAIT_FOR_ASSESSMENT": {
+    "en": "Thanks for sending this in! Our CheckMates🕵🏻 will review this and provide the results soon.",
+    "cn": "感谢您使用查友！我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
   },
   "MESSAGE_NOT_YET_ASSESSED": {
-    "en": "Unfortunately, our AI wasn't able to assess this message.\n\nOur volunteers🕵🏻 will review this and *provide the results soon*.",
-    "cn": "很遗憾，我们的人工智能无法对此进行评估。\n\n我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"
+    "en": "Unfortunately, our AI wasn't able to assess this message.\n\nOur volunteers🕵🏻 will review this and *provide the results soon*. Thank you for your patience.",
+    "cn": "很遗憾，我们的人工智能无法对此进行评估。\n\n我们的查哥查妹🕵🏻会尽快评估这条短信并回复。感谢您的耐心。"
   },
   "SCAM": {
     "en": "{{methodology}}*a scam*!🚫{{image_caveat}}{{generated}}\n\nWe recommend you do not engage further⛔️⛔️\n\nCheckMate will report suspicious messages to ScamShield (https://scamshield.org.sg) on your behalf.\n\nTo avoid reporting this message, select \"Don't report this\" below.{{incorrect}}{{submissions_remaining}}",
@@ -69,7 +73,7 @@
   },
   "CORRECTION": {
     "en": "❗After a review, our volunteer checkers have determined that this AI-generated response is inaccurate. We apologise for this.\n\nWe will send over the checkers' assessment of the original message shortly.",
-    "cn": "❗经过审核，我们的查哥查妹已确定此人工智能生成的回复不准确。对此我们深表歉意。\n\n我们将很快发送审查员对原始消息的评估。"
+    "cn": "❗经过审核，我们的查哥查妹已确定此人工智能生成的回复不准确。对此我们深表歉意。\n\n我们将尽快发送对于原始消息的人工评估结果。"
   },
   "IMAGE_CAVEAT": {
     "en": "This assessment refers to the claims made within the accompanying message.",
@@ -125,7 +129,7 @@
   },
   "CONTROVERSIAL_DISCLAIMER": {
     "en": "This message appears to contain controversial views. At CheckMate, our checks are designed with harm prevention in mind, prioritizing speed and clarity. While we aim to provide reliable results, controversial topics requiring deeper nuance may be less suited to our process.\n\nIf you understand these limitations and still wish to view the result, please click the button below to proceed.",
-    "cn": "这条消息似乎包含争议性观点。查友的检查以防止危害为宗旨，重点关注速度和清晰度。尽管我们致力于提供可靠的结果，但对于需要更深入分析的争议性话题，我们的流程可能不完全适用。\n\n如果您理解这些局限性并仍希望查看结果，请点击下方按钮继续。"
+    "cn": "这条消息似乎包含具有争议的观点。查友做事实核查的主要目的是快速、准确地判断出有害内容，并防止其更广泛的传播。我们致力于提供可靠的结果，但我们目前的流程可能无法完全适用于需要更深入分析的争议性话题。"
   },
   "NEXT_TIME": {
     "en": "The next time you want to check or report something, simply forward it in ↗️, copy-paste the text, or send a screenshot 📷 or image 🖼️.",
@@ -280,8 +284,8 @@
     "cn": "您的免费提交次数将在午夜重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻。"
   },
   "GET_MORE_SUBMISSIONS_NUDGE": {
-    "en": "Your free limit resets at midnight. If you find our service useful, you can join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
-    "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有用，可以通过以下链接加入我们的高级订阅候补名单——每月仅需一杯咖啡的价格（$4.99），即可享受您或您所关心的人{{paid_tier_limit}}次提交，并帮助我们维持服务运营！"
+    "en": "If you find our service useful, consider joining our waitlist for a premium subscription. For less than the cost of a cup of coffee per month ($4.99), you or a loved one can enjoy {{paid_tier_limit}} submissions while supporting the sustainability of our service!",
+    "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有价值，欢迎加入我们的高级订阅候补名单。每月仅需一杯咖啡的价格（$4.99），您或您的亲人即可享受 {{paid_tier_limit}} 次提交，并帮助我们保持服务的持续运营！"
   },
   "OUT_OF_SUBMISSIONS": {
     "en": "Thank you for your active engagement with CheckMate. Unfortunately, you've reached our daily limit. This will reset at midnight.\n\nWe appreciate your understanding and continued support as we work to serve everyone as efficiently as possible.",

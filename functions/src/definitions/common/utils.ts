@@ -121,6 +121,19 @@ function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
 
+function translateFrequency(en: string) {
+  switch (en) {
+    case "daily":
+      return "每日"
+    case "weekly":
+      return "每周"
+    case "monthly":
+      return "每月"
+    default:
+      return "每日"
+  }
+}
+
 export {
   stripPhone,
   stripUrl,
@@ -134,4 +147,5 @@ export {
   checkUrlPresence,
   isNumeric,
   getTags,
+  translateFrequency,
 }

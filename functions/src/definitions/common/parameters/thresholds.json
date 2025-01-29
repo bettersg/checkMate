@@ -30,9 +30,11 @@
   "numberBeforeAccuracyNudge": 20,
   "daysBeforeFirstCompletionCheck": 60,
   "daysBeforeSecondCompletionCheck": 90,
-  "freeTierDailyLimit": 5,
-  "paidTierDailyLimit": 50,
+  "freeTierLimit": 5,
+  "paidTierLimit": 50,
+  "frequency": "daily",
   "numberToTrigger": 40,
   "targetDailyVotes": 8,
-  "minVotesPerMessage": 30
+  "minVotesPerMessage": 30,
+  "price": 5.99
 }
