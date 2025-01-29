@@ -91,7 +91,7 @@ export async function createNewUser(
     feedback: null,
     tier: "free",
     numSubmissionsRemaining: thresholds.freeTierLimit ?? 5,
-    monthlySubmissionLimit: thresholds.freeTierLimit ?? 5,
+    submissionLimit: thresholds.freeTierLimit ?? 5,
     isTester:
       environment === "UAT" || environment === "DEV" || environment === "SIT"
         ? true

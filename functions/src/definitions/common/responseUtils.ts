@@ -908,7 +908,7 @@ async function respondToInstance(
   const isTester = userSnap.get("isTester") ?? false
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
-  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const submissionLimit = userSnap.get("submissionLimit")
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isControversial = parentMessageSnap.get("isControversial")
   const isDisclaimerSent = data.disclaimerSentTimestamp != null
@@ -1055,7 +1055,7 @@ async function respondToInstance(
         "{{num_remaining_submissions}}",
         numSubmissionsRemaining.toString()
       )
-      .replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
+      .replace("{{free_tier_limit}}", submissionLimit.toString())
     const buttons = [
       {
         type: "reply",
@@ -1137,7 +1137,7 @@ async function respondToInstance(
         responseText: responses["IRRELEVANT_AUTO"],
         responses,
         remainingSubmissions: numSubmissionsRemaining,
-        freeTierLimit: monthlySubmissionLimit,
+        freeTierLimit: submissionLimit,
         primaryCategory: "irrelevant",
         isTester,
       })
@@ -1203,7 +1203,7 @@ async function respondToInstance(
             responseText: responses["UNSURE"],
             responses,
             remainingSubmissions: numSubmissionsRemaining,
-            freeTierLimit: monthlySubmissionLimit,
+            freeTierLimit: submissionLimit,
             isMachineCategorised,
             isMatched,
             isImage,
@@ -1230,7 +1230,7 @@ async function respondToInstance(
         responseText: responses[category.toUpperCase()],
         responses,
         remainingSubmissions: numSubmissionsRemaining,
-        freeTierLimit: monthlySubmissionLimit,
+        freeTierLimit: submissionLimit,
         isMachineCategorised,
         isMatched,
         isImage,
@@ -1408,13 +1408,13 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
-  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const submissionLimit = userSnap.get("submissionLimit")
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
   const responseText = responses.REMAINING_SUBMISSION_QUOTA.replace(
     "{{num_remaining_submissions}}",
     numSubmissionsRemaining.toString()
-  ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
+  ).replace("{{free_tier_limit}}", submissionLimit.toString())
   //TODO: change to whatsapp flow
   if (isPaidTier || hasExpressedInterest) {
     await sendTextMessage(
@@ -1563,7 +1563,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
   const thresholds = await getThresholds()
-  const monthlySubmissionLimit = userSnap.get("monthlySubmissionLimit")
+  const submissionLimit = userSnap.get("submissionLimit")
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
   const paidTierLimit = thresholds.paidTierLimit ?? 50
@@ -1583,7 +1583,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   if (isPaidTier || hasExpressedInterest) {
     const responseText = responses.OUT_OF_SUBMISSIONS_THANKS.replace(
       "{{free_tier_limit}}",
-      monthlySubmissionLimit.toString()
+      submissionLimit.toString()
     )
     await sendTextMessage(
       "user",
@@ -1602,7 +1602,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
     const responseText = responses.OUT_OF_SUBMISSIONS_NUDGE.replace(
       "{{paid_tier_limit}}",
       paidTierLimit.toString()
-    ).replace("{{free_tier_limit}}", monthlySubmissionLimit.toString())
+    ).replace("{{free_tier_limit}}", submissionLimit.toString())
     const ctaText = responses.CTA_JOIN_WAITLIST
     await createAndSendFlow(
       whatsappId,
