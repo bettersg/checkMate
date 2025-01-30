@@ -1440,7 +1440,7 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
       responseText,
       null,
       null,
-      process.env.ENVIRONMENT === "DEV"
+      process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT"
     )
   }
 }
@@ -1549,7 +1549,7 @@ async function sendGetMoreSubmissionsMessage(
       responseText,
       null,
       null,
-      process.env.ENVIRONMENT === "DEV",
+      process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT",
       "get_more_submissions"
     )
     await instanceRef.update({
@@ -1611,7 +1611,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
       responseText,
       null,
       null,
-      process.env.ENVIRONMENT === "DEV",
+      process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT",
       "out_of_submissions"
     )
   }
@@ -1640,7 +1640,7 @@ async function sendOnboardingFlow(
     responseText,
     null,
     null,
-    process.env.ENVIRONMENT === "DEV"
+    process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT"
   )
 }
 
