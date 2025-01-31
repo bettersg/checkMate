@@ -7,7 +7,7 @@
     {
       "source": "functions",
       "codebase": "whatsapp-bot",
-      "runtime": "nodejs18",
+      "runtime": "nodejs22",
       "ignore": [
         "node_modules",
         ".git",
