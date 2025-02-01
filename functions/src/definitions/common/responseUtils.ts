@@ -28,6 +28,7 @@ import {
 } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { FieldValue } from "firebase-admin/firestore"
+import { checkMachineCase } from "../../validators/common/checkMachineCase"
 const db = admin.firestore()
 
 type BotResponses = {
@@ -914,9 +915,6 @@ async function respondToInstance(
   const isDisclaimerSent = data.disclaimerSentTimestamp != null
   const isDisclaimed = data?.disclaimerAcceptanceTimestamp != null
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
-  const isWronglyCategorisedIrrelevant = parentMessageSnap.get(
-    "isWronglyCategorisedIrrelevant"
-  )
   const machineCategory = parentMessageSnap.get("machineCategory")
   const instanceCount = parentMessageSnap.get("instanceCount")
   const customReply: CustomReply = parentMessageSnap.get("customReply")
@@ -934,16 +932,9 @@ async function respondToInstance(
 
   let bespokeReply = false
 
-  let isMachineCase = false
+  console.log("replying")
 
-  if (
-    isMachineCategorised &&
-    machineCategory &&
-    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
-  ) {
-    category = machineCategory
-    isMachineCase = true
-  }
+  let isMachineCase = checkMachineCase(parentMessageSnap)
 
   const hasBespokeReply =
     customReply || (communityNote && !communityNote.downvoted && isTester)
@@ -975,6 +966,10 @@ async function respondToInstance(
     return
   }
 
+  if (isMachineCase) {
+    category = machineCategory
+  }
+
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
       category = "custom"
@@ -983,15 +978,6 @@ async function respondToInstance(
     } else if (customReply.type === "image") {
       //TODO: implement later
     }
-  }
-
-  if (
-    isMachineCategorised &&
-    machineCategory &&
-    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
-  ) {
-    category = machineCategory
-    isMachineCase = true
   }
 
   const votingResultsButton = {
@@ -1132,6 +1118,10 @@ async function respondToInstance(
 
   let responseText
   switch (category) {
+    case "custom":
+      break
+    case "communityNote":
+      break
     case "irrelevant_auto":
       responseText = getFinalResponseText({
         responseText: responses["IRRELEVANT_AUTO"],
@@ -1177,10 +1167,6 @@ async function respondToInstance(
         isTester,
       })
       await sendTextMessage("user", from, responseText, replyId)
-      break
-    case "custom":
-      break
-    case "communityNote":
       break
     default:
       if (category === "unsure") {
