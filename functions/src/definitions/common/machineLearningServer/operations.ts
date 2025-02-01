@@ -182,13 +182,21 @@ async function getCommunityNote(input: {
 
     // Race between the API call and the timeout
     const response = await Promise.race([apiCallPromise, timeoutPromise])
-    if (response.data?.success && response.data?.requestId) {
-      functions.logger.log(
-        `Community note with request ID: ${response.data.requestId} successfully generated`
+    if (response.data?.success) {
+      if (response.data?.requestId) {
+        functions.logger.log(
+          `Community note with request ID: ${response.data.requestId} successfully generated`
+        )
+      }
+      return response.data
+    } else {
+      functions.logger.error(
+        `Failed to generate community note with request ID: ${response.data?.requestId}`
+      )
+      throw new Error(
+        response.data?.errorMessage ?? "An error occurred calling the API"
       )
     }
-
-    return response.data
   } catch (error) {
     throw new Error(
       error instanceof Error
