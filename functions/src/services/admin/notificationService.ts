@@ -53,6 +53,7 @@ export async function sendNewMessageNotification(
 
 export async function sendCommunityNoteNotification(
   communityNote: CommunityNote | null,
+  communityNoteStatus: string | null,
   replyId: string | null,
   messageRef: DocumentReference
 ) {
@@ -68,25 +69,38 @@ export async function sendCommunityNoteNotification(
       )
       return
     }
+    const langfuseBaseURL = process.env.LANGFUSE_BASE_URL
+    const langfuseProjectId = process.env.LANGFUSE_PROJECT_ID
+    const langfuseReplyMarkup = {
+      inline_keyboard: [
+        [
+          {
+            text: "View on LangFuse",
+            url: `${langfuseBaseURL}/project/${langfuseProjectId}/traces/${messageRef.id}`,
+          },
+        ],
+      ],
+    }
     let replyMarkup = null
     if (communityNote === null) {
-      updateText = `ID: ${messageRef.id}\nCommunity Note not generated. Either message deemed irrelevant or an error occured.`
+      switch (communityNoteStatus) {
+        case "error":
+          updateText = `ID: ${messageRef.id}\nAn error occurred generating Community Note.`
+          replyMarkup = langfuseReplyMarkup
+          break
+        case "unusable":
+          updateText = `ID: ${messageRef.id}\nCommunity Note was generated but deemed unusable, either due to 1)agent unable to access video 2)agent unable to access webpage.`
+          replyMarkup = langfuseReplyMarkup
+          break
+        default:
+          updateText = `ID: ${messageRef.id}\nCommunity Note not generated. Message was deemed irrelevant`
+          break
+      }
     } else {
       updateText = `ID: ${messageRef.id}\nCommunity Note:\n\n${
         communityNote.en
       }\n\nLinks:\n${communityNote.links.join("\n")}`
-      const langfuseBaseURL = process.env.LANGFUSE_BASE_URL
-      const langfuseProjectId = process.env.LANGFUSE_PROJECT_ID
-      replyMarkup = {
-        inline_keyboard: [
-          [
-            {
-              text: "View on LangFuse",
-              url: `${langfuseBaseURL}/project/${langfuseProjectId}/traces/${messageRef.id}`,
-            },
-          ],
-        ],
-      }
+      replyMarkup = langfuseReplyMarkup
     }
     const response = await sendTelegramTextMessage(
       "admin",

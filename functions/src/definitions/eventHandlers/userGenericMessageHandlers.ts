@@ -238,7 +238,7 @@ async function newTextInstanceHandler({
     let communityNoteData
     let isCommunityNoteGenerated = false
     let isCommunityNoteUsable = false
-    let communityNoteStatus = "error"
+    let communityNoteStatus = "not-generated"
     // const isControversial = await determineControversial({
     //   text: text,
     // })
@@ -259,6 +259,7 @@ async function newTextInstanceHandler({
         communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
       } catch (error) {
         functions.logger.error("Error in getCommunityNote:", error)
+        communityNoteStatus = "error"
       }
     }
     let strippedMessage = await anonymiseMessage(text, true)
@@ -547,7 +548,7 @@ async function newImageInstanceHandler({
     let isCommunityNoteGenerated = false
     let isCommunityNoteUsable = false
     let isControversial = false
-    let communityNoteStatus = "error"
+    let communityNoteStatus = "not-generated"
     messageRef = db.collection("messages").doc()
     const signedUrl = (await getSignedUrl(filename)) ?? null
     if (signedUrl) {
@@ -569,6 +570,7 @@ async function newImageInstanceHandler({
         communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
       } catch (error) {
         functions.logger.error("Error in getCommunityNote:", error)
+        communityNoteStatus = "error"
       }
     }
 
