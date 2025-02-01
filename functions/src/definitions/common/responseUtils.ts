@@ -1421,7 +1421,7 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
     }
     await createAndSendFlow(
       whatsappId,
-      "waitlist",
+      language === "cn" ? "waitlist_cn" : "waitlist_en",
       ctaText,
       responseText,
       null,
@@ -1530,7 +1530,7 @@ async function sendGetMoreSubmissionsMessage(
     }
     const flowId = await createAndSendFlow(
       whatsappId,
-      "waitlist",
+      language === "cn" ? "waitlist_cn" : "waitlist_en",
       ctaText,
       responseText,
       null,
@@ -1592,7 +1592,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
     const ctaText = responses.CTA_JOIN_WAITLIST
     await createAndSendFlow(
       whatsappId,
-      "waitlist",
+      language === "cn" ? "waitlist_cn" : "waitlist_en",
       ctaText,
       responseText,
       null,
@@ -1632,7 +1632,7 @@ async function sendOnboardingFlow(
 
 async function createAndSendFlow(
   to: string,
-  flow_type: "waitlist" | "onboarding",
+  flow_type: "waitlist_en" | "waitlist_cn" | "onboarding",
   cta: string,
   bodyText: string,
   headerText: string | null = null,
@@ -1642,8 +1642,11 @@ async function createAndSendFlow(
 ) {
   let flow_id = ""
   switch (flow_type) {
-    case "waitlist":
+    case "waitlist_en":
       flow_id = process.env.WAITLIST_FLOW_ID ?? ""
+      break
+    case "waitlist_cn":
+      flow_id = process.env.WAITLIST_CN_FLOW_ID ?? ""
       break
     case "onboarding":
       flow_id = process.env.ONBOARDING_FLOW_ID ?? ""
@@ -1661,7 +1664,7 @@ async function createAndSendFlow(
   }
   const flowRef = await db.collection("flows").add(flowData)
   const token = flowRef.id
-  if (token) {
+  if (token && flow_id) {
     await sendWhatsappFlowMessage(
       "user",
       to,

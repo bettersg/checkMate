@@ -319,7 +319,7 @@ export type NudgeData = {
 }
 
 export type FlowData = {
-  type: "waitlist" | "onboarding" //types of flows available
+  type: "waitlist_en" | "waitlist_cn" | "onboarding" //types of flows available
   whatsappId: string //whatsappId of the user the flow was sent to
   sentTimestamp: Timestamp
   outcomeTimestamp: Timestamp | null
