@@ -384,7 +384,8 @@ async function onFlowResponse(
       })
       await updateLanguageAndSendMenu(userSnap, language)
       break
-    case "waitlist":
+    case "waitlist_cn":
+    case "waitlist_en":
       const isInterestedInSubscription = flowResponse?.is_interested === "yes"
       const isInterestedAtALowerPoint =
         flowResponse?.is_interested_when_cheaper === "yes"
