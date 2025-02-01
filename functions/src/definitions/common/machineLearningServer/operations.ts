@@ -4,6 +4,7 @@ import * as functions from "firebase-functions"
 import { GoogleAuth } from "google-auth-library"
 import { AppEnv } from "../../../appEnv"
 import { CommunityNote } from "../../../types"
+import { getThresholds } from "../utils"
 
 const embedderHost = defineString(AppEnv.EMBEDDER_HOST)
 const env = process.env.ENVIRONMENT
@@ -169,14 +170,17 @@ async function getCommunityNote(input: {
         () => {
           reject(new Error("The API call timed out after 60 seconds"))
         },
-        env === "PROD" ? 60000 : 120000
+        env === "PROD" ? 120000 : 120000
       )
     )
+    const thresholds = await getThresholds()
+    const provider = thresholds?.LLMProvider ?? "openai"
 
     // API call
     const apiCallPromise = callAPI<CommunityNoteReturn>(
       "v2/getCommunityNote",
       data,
+      { provider: provider },
       input.requestId
     )
 
@@ -254,6 +258,7 @@ async function getGoogleIdentityToken(audience: string) {
 async function callAPI<T>(
   endpoint: string,
   data: object,
+  params?: object,
   requestId?: string | null
 ) {
   try {
@@ -264,6 +269,7 @@ async function callAPI<T>(
       method: "POST", // Required, HTTP method, a string, e.g. POST, GET
       url: `${hostName}/${endpoint}`,
       data: data,
+      params: params, // Add params to the API call
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${identityToken}`,
