@@ -21,8 +21,6 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-const checkerAppHost = process.env.CHECKER_APP_HOST
-
 const onInstanceCreateV2 = onDocumentCreated(
   {
     document: "messages/{messageId}/instances/{instanceId}",

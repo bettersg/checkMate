@@ -152,7 +152,7 @@ export type MessageData = {
   tags: TagsMap //tags assigned to the message
   primaryCategory: string | null //the category that the message has been assigned to. Either "scam", "illicit", "satire", "untrue", "misleading", "accurate", "spam", "legitimate", "irrelevant", "unsure" or "error". Note, legitimate refers to nvc-credible and irrelevant nvc-cant-tell.
   customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
-  communityNoteStatus: string | null //the status of the community note for this message, either "error", "generated" or "unusable"
+  communityNoteStatus: string | null //the status of the community note for this message, either "not-generated", "error", "generated" or "unusable"
   communityNote: CommunityNote | null // the gen-ai generated community note for this message
   instanceCount: number //the number of instances of this message
   adminGroupSentMessageId: string | null // The original message id of the message sent to the admin group
@@ -319,7 +319,7 @@ export type NudgeData = {
 }
 
 export type FlowData = {
-  type: "waitlist" | "onboarding" //types of flows available
+  type: "waitlist_en" | "waitlist_cn" | "onboarding" //types of flows available
   whatsappId: string //whatsappId of the user the flow was sent to
   sentTimestamp: Timestamp
   outcomeTimestamp: Timestamp | null

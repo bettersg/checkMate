@@ -28,6 +28,7 @@ import {
 } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { FieldValue } from "firebase-admin/firestore"
+import { checkMachineCase } from "../../validators/common/checkMachineCase"
 const db = admin.firestore()
 
 type BotResponses = {
@@ -914,9 +915,6 @@ async function respondToInstance(
   const isDisclaimerSent = data.disclaimerSentTimestamp != null
   const isDisclaimed = data?.disclaimerAcceptanceTimestamp != null
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
-  const isWronglyCategorisedIrrelevant = parentMessageSnap.get(
-    "isWronglyCategorisedIrrelevant"
-  )
   const machineCategory = parentMessageSnap.get("machineCategory")
   const instanceCount = parentMessageSnap.get("instanceCount")
   const customReply: CustomReply = parentMessageSnap.get("customReply")
@@ -934,16 +932,9 @@ async function respondToInstance(
 
   let bespokeReply = false
 
-  let isMachineCase = false
+  console.log("replying")
 
-  if (
-    isMachineCategorised &&
-    machineCategory &&
-    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
-  ) {
-    category = machineCategory
-    isMachineCase = true
-  }
+  let isMachineCase = checkMachineCase(parentMessageSnap)
 
   const hasBespokeReply =
     customReply || (communityNote && !communityNote.downvoted && isTester)
@@ -975,6 +966,10 @@ async function respondToInstance(
     return
   }
 
+  if (isMachineCase) {
+    category = machineCategory
+  }
+
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
       category = "custom"
@@ -983,15 +978,6 @@ async function respondToInstance(
     } else if (customReply.type === "image") {
       //TODO: implement later
     }
-  }
-
-  if (
-    isMachineCategorised &&
-    machineCategory &&
-    !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
-  ) {
-    category = machineCategory
-    isMachineCase = true
   }
 
   const votingResultsButton = {
@@ -1132,6 +1118,10 @@ async function respondToInstance(
 
   let responseText
   switch (category) {
+    case "custom":
+      break
+    case "communityNote":
+      break
     case "irrelevant_auto":
       responseText = getFinalResponseText({
         responseText: responses["IRRELEVANT_AUTO"],
@@ -1177,10 +1167,6 @@ async function respondToInstance(
         isTester,
       })
       await sendTextMessage("user", from, responseText, replyId)
-      break
-    case "custom":
-      break
-    case "communityNote":
       break
     default:
       if (category === "unsure") {
@@ -1435,7 +1421,7 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
     }
     await createAndSendFlow(
       whatsappId,
-      "waitlist",
+      language === "cn" ? "waitlist_cn" : "waitlist_en",
       ctaText,
       responseText,
       null,
@@ -1544,7 +1530,7 @@ async function sendGetMoreSubmissionsMessage(
     }
     const flowId = await createAndSendFlow(
       whatsappId,
-      "waitlist",
+      language === "cn" ? "waitlist_cn" : "waitlist_en",
       ctaText,
       responseText,
       null,
@@ -1606,7 +1592,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
     const ctaText = responses.CTA_JOIN_WAITLIST
     await createAndSendFlow(
       whatsappId,
-      "waitlist",
+      language === "cn" ? "waitlist_cn" : "waitlist_en",
       ctaText,
       responseText,
       null,
@@ -1646,7 +1632,7 @@ async function sendOnboardingFlow(
 
 async function createAndSendFlow(
   to: string,
-  flow_type: "waitlist" | "onboarding",
+  flow_type: "waitlist_en" | "waitlist_cn" | "onboarding",
   cta: string,
   bodyText: string,
   headerText: string | null = null,
@@ -1656,8 +1642,11 @@ async function createAndSendFlow(
 ) {
   let flow_id = ""
   switch (flow_type) {
-    case "waitlist":
+    case "waitlist_en":
       flow_id = process.env.WAITLIST_FLOW_ID ?? ""
+      break
+    case "waitlist_cn":
+      flow_id = process.env.WAITLIST_CN_FLOW_ID ?? ""
       break
     case "onboarding":
       flow_id = process.env.ONBOARDING_FLOW_ID ?? ""
@@ -1675,7 +1664,7 @@ async function createAndSendFlow(
   }
   const flowRef = await db.collection("flows").add(flowData)
   const token = flowRef.id
-  if (token) {
+  if (token && flow_id) {
     await sendWhatsappFlowMessage(
       "user",
       to,

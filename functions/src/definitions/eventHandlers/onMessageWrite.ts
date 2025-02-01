@@ -22,15 +22,10 @@ const adminMessageHandler = onDocumentWritten(
       logger.error("Missing after data on onMessageWrite")
       return
     }
+    const communityNote = docSnap.get("communityNote")
+    const communityNoteStatus = docSnap.get("communityNoteStatus")
     const adminMessageId = docSnap.get("adminGroupSentMessageId") ?? null
     if (isDocumentCreation) {
-      const communityNote = docSnap.get("communityNote")
-
-      await sendCommunityNoteNotification(
-        communityNote,
-        adminMessageId,
-        docSnap.ref
-      )
       const machineCategory = docSnap.get("machineCategory")
       const isMachineCategorised = docSnap.get("isMachineCategorised")
       if (isMachineCategorised && machineCategory !== null) {
@@ -39,6 +34,12 @@ const adminMessageHandler = onDocumentWritten(
           machineCategory: machineCategory,
         })
       }
+      await sendCommunityNoteNotification(
+        communityNote,
+        communityNoteStatus,
+        adminMessageId,
+        docSnap.ref
+      )
     } else {
       const before = event.data?.before
       if (!before) {
@@ -48,13 +49,13 @@ const adminMessageHandler = onDocumentWritten(
       const isAssessedBefore = before.get("isAssessed") ?? null
       const isAssessedAfter = docSnap.get("isAssessed") ?? null
       const communityNoteBefore = before.get("communityNote") ?? null
-      const communityNoteAfter = docSnap.get("communityNote") ?? null
       const primaryCategoryBefore = before.get("primaryCategory") ?? null
       const primaryCategoryAfter = docSnap.get("primaryCategory") ?? null
-      if (communityNoteBefore === null && communityNoteAfter !== null) {
+      if (communityNoteBefore === null && communityNote !== null) {
         //if community note was newly generated
         await sendCommunityNoteNotification(
           docSnap.get("communityNote"),
+          communityNoteStatus,
           adminMessageId,
           docSnap.ref
         )
@@ -79,9 +80,9 @@ const adminMessageHandler = onDocumentWritten(
       }
       if (
         communityNoteBefore !== null &&
-        communityNoteAfter !== null &&
+        communityNote !== null &&
         !communityNoteBefore.downvoted &&
-        communityNoteAfter.downvoted
+        communityNote.downvoted
       ) {
         //if community note got downvoted
         await sendVotingUpdate({

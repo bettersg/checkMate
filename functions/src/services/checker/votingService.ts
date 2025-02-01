@@ -7,6 +7,7 @@ import { sendTelegramTextMessage } from "../../definitions/common/sendTelegramMe
 import { getShuffledDocsFromSnapshot } from "../../utils/shuffleUtils"
 import { getThresholds } from "../../definitions/common/utils"
 import { FieldValue } from "@google-cloud/firestore"
+import { checkMachineCase } from "../../validators/common/checkMachineCase"
 
 const checkerAppHost = process.env.CHECKER_APP_HOST
 
@@ -14,13 +15,23 @@ export async function despatchPoll(
   messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
 ) {
   const db = admin.firestore()
-  const factCheckersSnapshot = await db
+  const messageSnap = await messageRef.get()
+  let query = db
     .collection("checkers")
     .where("type", "==", "human")
     .where("isActive", "==", true)
+  //TODO: REMOVE BELOW SECTION AFTER TRIAL ENDS
+  const isMachineCase = checkMachineCase(messageSnap)
+
+  if (isMachineCase) {
+    console.log("Machine case detected")
+    query = query.where("isTester", "==", true)
+  }
+  //END SECTION TO REMOVE
+
+  const factCheckersSnapshot = await query
     .orderBy("dailyAssignmentCount", "asc")
     .get()
-  const messageSnap = await messageRef.get()
   const latestInstanceRef = messageSnap.get("latestInstance")
   let previewText = ""
   if (!latestInstanceRef) {
