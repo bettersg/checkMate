@@ -496,4 +496,5 @@ export type Thresholds = {
   targetDailyVotes: number
   minVotesPerMessage: number
   price: number
+  LLMProvider: string
 }

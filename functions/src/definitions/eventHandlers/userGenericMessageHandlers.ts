@@ -304,8 +304,8 @@ async function newTextInstanceHandler({
       communityNote:
         isCommunityNoteGenerated && communityNoteData && isCommunityNoteUsable
           ? {
-              en: communityNoteData?.en || "",
-              cn: communityNoteData?.cn || "",
+              en: communityNoteData?.en || "Apologies, an error occurred.",
+              cn: communityNoteData?.cn || "Apologies, an error occurred.",
               links: communityNoteData?.links || [],
               downvoted: false,
               pendingCorrection: false,
@@ -627,8 +627,8 @@ async function newImageInstanceHandler({
       communityNote:
         isCommunityNoteGenerated && communityNoteData && isCommunityNoteUsable
           ? {
-              en: communityNoteData?.en || "",
-              cn: communityNoteData?.cn || "",
+              en: communityNoteData?.en || "Apologies, an error occurred",
+              cn: communityNoteData?.cn || "Apologies, an error occurred",
               links: communityNoteData?.links || [],
               downvoted: false,
               pendingCorrection: false,

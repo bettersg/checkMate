@@ -4,6 +4,7 @@ import * as functions from "firebase-functions"
 import { GoogleAuth } from "google-auth-library"
 import { AppEnv } from "../../../appEnv"
 import { CommunityNote } from "../../../types"
+import { getThresholds } from "../utils"
 
 const embedderHost = defineString(AppEnv.EMBEDDER_HOST)
 const env = process.env.ENVIRONMENT
@@ -169,26 +170,37 @@ async function getCommunityNote(input: {
         () => {
           reject(new Error("The API call timed out after 60 seconds"))
         },
-        env === "PROD" ? 60000 : 120000
+        env === "PROD" ? 120000 : 120000
       )
     )
+    const thresholds = await getThresholds()
+    const provider = thresholds?.LLMProvider ?? "openai"
 
     // API call
     const apiCallPromise = callAPI<CommunityNoteReturn>(
       "v2/getCommunityNote",
       data,
+      { provider: provider },
       input.requestId
     )
 
     // Race between the API call and the timeout
     const response = await Promise.race([apiCallPromise, timeoutPromise])
-    if (response.data?.success && response.data?.requestId) {
-      functions.logger.log(
-        `Community note with request ID: ${response.data.requestId} successfully generated`
+    if (response.data?.success) {
+      if (response.data?.requestId) {
+        functions.logger.log(
+          `Community note with request ID: ${response.data.requestId} successfully generated`
+        )
+      }
+      return response.data
+    } else {
+      functions.logger.error(
+        `Failed to generate community note with request ID: ${response.data?.requestId}`
+      )
+      throw new Error(
+        response.data?.errorMessage ?? "An error occurred calling the API"
       )
     }
-
-    return response.data
   } catch (error) {
     throw new Error(
       error instanceof Error
@@ -246,6 +258,7 @@ async function getGoogleIdentityToken(audience: string) {
 async function callAPI<T>(
   endpoint: string,
   data: object,
+  params?: object,
   requestId?: string | null
 ) {
   try {
@@ -256,6 +269,7 @@ async function callAPI<T>(
       method: "POST", // Required, HTTP method, a string, e.g. POST, GET
       url: `${hostName}/${endpoint}`,
       data: data,
+      params: params, // Add params to the API call
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${identityToken}`,

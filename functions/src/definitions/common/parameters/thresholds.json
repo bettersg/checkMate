@@ -33,6 +33,7 @@
   "freeTierLimit": 5,
   "paidTierLimit": 50,
   "frequency": "daily",
+  "LLMProvider": "openai",
   "numberToTrigger": 40,
   "targetDailyVotes": 8,
   "minVotesPerMessage": 30,
