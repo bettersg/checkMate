@@ -1,10 +1,14 @@
 import { WhatsappMessageObject } from "../../types"
+import { normalizeSpaces } from "../../definitions/common/utils"
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
 }
 
-function buildRegexFromTemplate(template: string) {
+function buildRegexFromTemplate(
+  template: string,
+  forStripping: boolean = false
+) {
   // Escape special regex characters in the template except for placeholders
   const escapedTemplate = escapeRegExp(template)
 
@@ -14,7 +18,12 @@ function buildRegexFromTemplate(template: string) {
     "[a-zA-Z0-9]+"
   )
 
-  // Add start (^) and end ($) anchors to match the entire string
+  // For stripping, we don't want anchors and need global flag
+  if (forStripping) {
+    return new RegExp(pattern, "g")
+  }
+
+  // For checking, we want strict matching with anchors
   return new RegExp("^" + pattern + "$")
 }
 
@@ -24,6 +33,14 @@ export function checkTemplate(message: string, template: string) {
 
   // Check if the message matches the pattern
   return regex.test(message)
+}
+
+export function stripTemplate(message: string, template: string) {
+  const textNormalised = normalizeSpaces(message)
+  // Build the regex pattern from the template without anchors
+  const regex = buildRegexFromTemplate(template, true)
+  // Remove all occurrences of the template and trim whitespace
+  return textNormalised.replace(regex, "").trim()
 }
 
 export function checkMenu(text: string) {

@@ -7,11 +7,11 @@ import {
   sendTelegramTextMessage,
   sendTelegramImageMessage,
 } from "./sendTelegramMessage"
+import { sendTicketNotification } from "../../services/admin/notificationService"
 import { checkUrl } from "./utils"
 import { defineString } from "firebase-functions/params"
 import { AppEnv } from "../../appEnv"
 
-const reportChannelId = defineString(AppEnv.TELEGRAM_REPORT_CHANNEL_ID)
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
 const sendTextMessage = async function (
@@ -95,14 +95,7 @@ text: ${text ?? "<none>"}
 
 category: ${finalCategory}`
 
-  await sendTelegramTextMessage(
-    "report",
-    reportChannelId.value(),
-    messageText,
-    null,
-    null,
-    null
-  )
+  await sendTicketNotification(messageText)
 }
 
 export { sendTextMessage, sendImageMessage, sendDisputeNotification }

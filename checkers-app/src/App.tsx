@@ -94,6 +94,7 @@ function App() {
                   checkerName: data.name,
                   isAdmin: data.isAdmin,
                   tier: data.tier,
+                  isTester: data.isTester,
                 }));
               })
               .catch((err) => {

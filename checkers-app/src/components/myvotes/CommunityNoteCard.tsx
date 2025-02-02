@@ -1,16 +1,12 @@
 import React, { useState } from "react";
 import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
-import {
-  ChatBubbleLeftEllipsisIcon,
-  PaperAirplaneIcon,
-} from "@heroicons/react/20/solid";
+import { UserIcon, LinkIcon } from "@heroicons/react/24/solid";
 
 interface PropType {
-  text: string | null;
-  type: "image" | "text";
-  caption: string | null;
-  imageUrl: string | null;
-  sender: string | null;
+  en: string;
+  cn: string;
+  links: string[];
+  downvoted: boolean;
 }
 
 // Helper function to detect URLs and split the text
@@ -21,7 +17,7 @@ const splitTextByUrls = (text: string) => {
   let lastIndex = 0;
   const parts = [];
 
-  // Find all matches and their indices
+  // Find al matches and their indices
   while ((match = urlRegex.exec(text)) !== null) {
     const url = match[0];
     const index = match.index;
@@ -46,21 +42,16 @@ const splitTextByUrls = (text: string) => {
   return parts;
 };
 
-export default function MessageCard(prop: PropType) {
+export default function CommunityNoteCard(prop: PropType) {
   const [isExpanded, setIsExpanded] = useState(false);
   const lengthBeforeTruncation = 300;
-  const { text, caption, imageUrl, type, sender } = prop;
+  const { en, links } = prop;
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
   };
 
-  let displayText = "";
-  if (type === "image") {
-    displayText = caption ?? "";
-  } else {
-    displayText = text ?? "";
-  }
+  let displayText = en ?? "";
 
   const shouldTruncate = displayText.length > lengthBeforeTruncation;
   const textToShow =
@@ -72,16 +63,14 @@ export default function MessageCard(prop: PropType) {
   const textParts = splitTextByUrls(textToShow);
 
   return (
-    <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
+    <Card className="bg-blue-100 overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3 mb-2 mt-3">
       <CardBody className="-m-3">
         <Typography className="flex items-center mb-2">
-          <ChatBubbleLeftEllipsisIcon className="h-6 w-6 text-[#ff327d] mr-2 flex-shrink-0" />
-          <p className="font-semibold leading-none">Message</p>
+          <UserIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-shrink-0" />
+          <p className="font-semibold leading-none">Community Note</p>
         </Typography>
+
         <Typography className="w-full">
-          {type === "image" && displayText.length > 0 && (
-            <span className="font-bold">Caption: </span>
-          )}
           {textParts.map((part, index) => {
             // Split the text part by new lines
             const lines = part.text.split("\n");
@@ -118,19 +107,33 @@ export default function MessageCard(prop: PropType) {
             {isExpanded ? "Show Less" : "Read More"}
           </Button>
         )}
-      </CardBody>
-      {type === "image" && imageUrl && (
-        <img
-          src={imageUrl}
-          alt="message-image"
-          className="w-full object-contain rounded-xl"
-        />
-      )}
-      <CardBody className="-m-3">
-        <Typography className="flex items-center mt-1 mb-2">
-          <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0" />
-          <p className="font-medium leading-none">Sender: {sender}</p>
-        </Typography>
+
+        {links.length > 0 ? (
+          <>
+            <Typography className="pt-4">
+              <p className="font-semibold leading-none">Reference Links:</p>
+            </Typography>
+            <ul className="list-disc pt-1">
+              {links.map((link) => {
+                return (
+                  <li className="flex gap-x-2">
+                    <LinkIcon
+                      aria-hidden="true"
+                      className="h-6 w-5 flex-none"
+                    />
+                    <a
+                      href={link}
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline break-all"
+                    >
+                      {link}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        ) : null}
       </CardBody>
     </Card>
   );

@@ -7,10 +7,15 @@ import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
-import { hashMessage, normalizeSpaces, checkMessageId } from "../common/utils"
-import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
+import { hashMessage, checkMessageId } from "../common/utils"
+import { checkPrepopulatedMessage } from "../../services/user/referrals"
 import { getUserSnapshot } from "../../services/user/userManagement"
-import { sendMenuMessage, getResponsesObj } from "../common/responseUtils"
+import {
+  sendMenuMessage,
+  getResponsesObj,
+  sendOutOfSubmissionsMessage,
+  sendWaitingMessage,
+} from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
   downloadTelegramMedia,
@@ -18,16 +23,24 @@ import {
   getCloudStorageUrl,
 } from "../common/mediaUtils"
 import { incrementCheckerCounts } from "../common/counters"
-import { anonymiseMessage, rationaliseMessage } from "../common/genAI"
+import { anonymiseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
-import { performOCR } from "../common/machineLearningServer/operations"
+import {
+  performOCR,
+  getCommunityNote,
+  determineNeedsChecking,
+  determineControversial,
+} from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
 import { FieldValue } from "@google-cloud/firestore"
 import Hashids from "hashids"
 import { GeneralMessage, MessageData, InstanceData } from "../../types"
 import { AppEnv } from "../../appEnv"
+import { getSignedUrl } from "../common/mediaUtils"
 import { logger } from "firebase-functions"
+import { stripTemplate } from "../../validators/whatsapp/checkWhatsappText"
+import { sendNewMessageNotification } from "../../services/admin/notificationService"
 
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
@@ -56,7 +69,6 @@ const userGenericMessageHandlerWhatsapp = async function (
   const type = message.type // image/text
   const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
-  let isFirstTimeUser = message.isFirstTimeUser
   let userSnap = await getUserSnapshot(from, source)
   if (userSnap == null) {
     logger.error(`User ${from} not found in userHandler`)
@@ -65,6 +77,16 @@ const userGenericMessageHandlerWhatsapp = async function (
   const language = userSnap.get("language") ?? "en"
 
   const responses = await getResponsesObj("user", language)
+
+  if (userSnap.get("numSubmissionsRemaining") <= 0) {
+    await sendOutOfSubmissionsMessage(userSnap)
+    markWhatsappMessageAsRead("user", message.id)
+    return
+  }
+
+  await userSnap.ref.update({
+    numSubmissionsRemaining: FieldValue.increment(-1),
+  })
 
   let step
 
@@ -77,26 +99,19 @@ const userGenericMessageHandlerWhatsapp = async function (
       if (!message.text) {
         break
       }
-      const textNormalised = normalizeSpaces(message.text).toLowerCase() //normalise spaces needed cos of potential &nbsp when copying message on desktop whatsapp
-      if (
-        checkTemplate(
-          textNormalised,
-          responses?.REFERRAL_PREPOPULATED_PREFIX.toLowerCase()
-        ) ||
-        checkTemplate(
-          textNormalised,
-          responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
-        )
-      ) {
-        step = "text_prepopulated"
-        if (isFirstTimeUser) {
-          await referralHandler(userSnap, message.text, from)
-        } else {
-          await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
-        }
+      if (checkPrepopulatedMessage(responses, message.text)) {
+        await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         break
+      } else {
+        //replace prepopulated prefix if any in the text
+        const cleanedMessage = stripTemplate(
+          stripTemplate(message.text, responses?.REFERRAL_PREPOPULATED_PREFIX),
+          responses?.REFERRAL_PREPOPULATED_PREFIX_1
+        )
+        if (cleanedMessage) {
+          message.text = cleanedMessage
+        }
       }
-
       step = await newTextInstanceHandler({
         userSnap,
         source: message.source,
@@ -106,7 +121,6 @@ const userGenericMessageHandlerWhatsapp = async function (
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
-        isFirstTimeUser,
       })
       break
 
@@ -122,7 +136,6 @@ const userGenericMessageHandlerWhatsapp = async function (
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
-        isFirstTimeUser,
       })
       break
 
@@ -142,6 +155,7 @@ const userGenericMessageHandlerWhatsapp = async function (
       [`initialJourney.${timestampKey}`]: step,
     })
   }
+
   markWhatsappMessageAsRead("user", message.id)
 }
 
@@ -154,7 +168,6 @@ async function newTextInstanceHandler({
   from,
   isForwarded,
   isFrequentlyForwarded,
-  isFirstTimeUser,
 }: {
   userSnap: admin.firestore.DocumentSnapshot
   source: string
@@ -164,18 +177,20 @@ async function newTextInstanceHandler({
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
-  isFirstTimeUser: boolean
 }) {
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
+  const needsChecking = await determineNeedsChecking({
+    text: text,
+  })
   const machineCategory = (await classifyText(text)) ?? "error"
-  if (from && isFirstTimeUser && machineCategory.includes("irrelevant")) {
-    await userSnap.ref.update({
-      firstMessageType: "irrelevant",
-    })
-    return Promise.resolve(`text_machine_${machineCategory}`)
-  }
+  // if (from && isFirstTimeUser && !needsChecking) {
+  //   await userSnap.ref.update({
+  //     firstMessageType: "irrelevant",
+  //   })
+  //   return Promise.resolve(`text_machine_irrelevant`)
+  // }
   let matchType = "none" // will be set to either "similarity" or "none"
   let similarity
   let embedding
@@ -220,25 +235,43 @@ async function newTextInstanceHandler({
       machineCategory !== "unsure" &&
       machineCategory !== "info"
     )
-
+    let communityNoteData
+    let isCommunityNoteGenerated = false
+    let isCommunityNoteUsable = false
+    let communityNoteStatus = "not-generated"
+    // const isControversial = await determineControversial({
+    //   text: text,
+    // })
+    let isControversial = false
+    messageRef = db.collection("messages").doc()
+    if (needsChecking) {
+      await sendWaitingMessage(userSnap, id)
+      try {
+        communityNoteData = await getCommunityNote({
+          text: text,
+          requestId: messageRef !== null ? messageRef.id : null,
+        })
+        isCommunityNoteGenerated = true
+        isControversial = communityNoteData.isControversial
+        isCommunityNoteUsable = !(
+          communityNoteData.isVideo || communityNoteData.isAccessBlocked
+        )
+        communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
+      } catch (error) {
+        functions.logger.error("Error in getCommunityNote:", error)
+        communityNoteStatus = "error"
+      }
+    }
     let strippedMessage = await anonymiseMessage(text, true)
 
-    if (strippedMessage && machineCategory === "legitimate") {
-      strippedMessage = await anonymiseMessage(strippedMessage, false) //won't run for now till machineCategory returns legitimate
-    }
+    const adminMessageId = (await sendNewMessageNotification(text)) ?? null
 
-    let rationalisation: null | string = null
-    if (
-      isMachineAssessed &&
-      strippedMessage &&
-      !machineCategory.includes("irrelevant")
-    ) {
-      rationalisation = await rationaliseMessage(text, machineCategory)
-    }
-    messageRef = db.collection("messages").doc()
     messageUpdateObj = {
-      machineCategory: machineCategory, //Can be "fake news" or "scam"
-      isMachineCategorised: isMachineAssessed,
+      machineCategory: needsChecking
+        ? machineCategory.split("_")[0]
+        : "irrelevant",
+      isMachineCategorised: isMachineAssessed || !needsChecking,
+      isWronglyCategorisedIrrelevant: false,
       originalText: text,
       text: strippedMessage, //text
       caption: null,
@@ -247,33 +280,41 @@ async function newTextInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+      isAssessed: false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+      isControversial: isControversial,
+      isIrrelevant: !needsChecking,
+      isScam: null,
+      isIllicit: null,
+      isSpam: null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: machineCategory === "info" ? true : null,
+      isInfo: null,
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
       tags: {},
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
-      customReply: null, //string
+      primaryCategory: needsChecking ? null : "irrelevant",
+      customReply: null,
+      communityNoteStatus: communityNoteStatus,
+      communityNote:
+        isCommunityNoteGenerated && communityNoteData && isCommunityNoteUsable
+          ? {
+              en: communityNoteData?.en || "Apologies, an error occurred.",
+              cn: communityNoteData?.cn || "Apologies, an error occurred.",
+              links: communityNoteData?.links || [],
+              downvoted: false,
+              pendingCorrection: false,
+              adminGroupCommunityNoteSentMessageId: null,
+              timestamp: Timestamp.now(),
+            }
+          : null,
       instanceCount: 0,
-      rationalisation: rationalisation,
+      adminGroupSentMessageId: adminMessageId,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -285,7 +326,7 @@ async function newTextInstanceHandler({
     return
   }
   const instanceRef = messageRef.collection("instances").doc()
-  const instanceUpdateObj = {
+  const instanceUpdateObj: InstanceData = {
     source: source,
     id: id || null, //taken from webhook object, needed to reply
     timestamp: timestamp, //timestamp, taken from webhook object (firestore timestamp data type)
@@ -294,6 +335,10 @@ async function newTextInstanceHandler({
     textHash: textHash ?? null,
     caption: null,
     captionHash: null,
+    hash: null,
+    mediaId: null,
+    mimeType: null,
+    storageUrl: null,
     sender: null, //sender name or number (for now not collected)
     imageType: null, //either "convo", "email", "letter" or "others"
     ocrVersion: null,
@@ -307,9 +352,14 @@ async function newTextInstanceHandler({
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
     isRationalisationUseful: null,
+    isCommunityNoteSent: null,
+    isCommunityNoteCorrected: false,
+    isCommunityNoteUseful: null,
+    isCommunityNoteReviewRequested: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
+    isIrrelevantAppealed: false,
     replyCategory: null,
     replyTimestamp: null,
     matchType: matchType,
@@ -324,6 +374,10 @@ async function newTextInstanceHandler({
     },
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
+    flowId: null,
+    disclaimerSentTimestamp: null,
+    disclaimerAcceptanceTimestamp: null,
+    communityNoteMessageId: null,
   }
   await addInstanceToDb(
     id,
@@ -333,7 +387,7 @@ async function newTextInstanceHandler({
     instanceRef,
     instanceUpdateObj
   )
-  return Promise.resolve(`text_machine_${machineCategory}`)
+  return Promise.resolve(`text_normal`)
 }
 
 async function newImageInstanceHandler({
@@ -347,7 +401,6 @@ async function newImageInstanceHandler({
   from,
   isForwarded,
   isFrequentlyForwarded,
-  isFirstTimeUser,
 }: {
   userSnap: admin.firestore.DocumentSnapshot
   source: string
@@ -359,7 +412,6 @@ async function newImageInstanceHandler({
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
-  isFirstTimeUser: boolean
 }) {
   let filename
   let messageRef: FirebaseFirestore.DocumentReference | null = null
@@ -368,6 +420,8 @@ async function newImageInstanceHandler({
   let matchType = "none" // will be set to either "similarity" or "image" or "none"
   let matchedInstanceSnap
   let captionHash = caption ? hashMessage(caption) : null
+
+  await sendWaitingMessage(userSnap, id)
 
   if (!mediaId) {
     throw new Error(`No mediaId for whatsapp message with id ${id}`)
@@ -490,7 +544,36 @@ async function newImageInstanceHandler({
   }
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
-    let rationalisation: null | string = null
+    let communityNoteData
+    let isCommunityNoteGenerated = false
+    let isCommunityNoteUsable = false
+    let isControversial = false
+    let communityNoteStatus = "not-generated"
+    messageRef = db.collection("messages").doc()
+    const signedUrl = (await getSignedUrl(filename)) ?? null
+    if (signedUrl) {
+      // isControversial = await determineControversial({
+      //   url: signedUrl,
+      //   caption: caption ?? null,
+      // })
+      try {
+        communityNoteData = await getCommunityNote({
+          url: signedUrl,
+          caption: caption ?? null,
+          requestId: messageRef !== null ? messageRef.id : null,
+        })
+        isCommunityNoteGenerated = true
+        isControversial = communityNoteData.isControversial
+        isCommunityNoteUsable = !(
+          communityNoteData.isVideo || communityNoteData.isAccessBlocked
+        )
+        communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
+      } catch (error) {
+        functions.logger.error("Error in getCommunityNote:", error)
+        communityNoteStatus = "error"
+      }
+    }
+
     if (extractedMessage) {
       strippedMessage = await anonymiseMessage(extractedMessage)
     }
@@ -501,21 +584,17 @@ async function newImageInstanceHandler({
       machineCategory !== "unsure" &&
       machineCategory !== "info"
     )
-    if (
-      extractedMessage &&
-      isMachineAssessed &&
-      strippedMessage &&
-      !machineCategory.includes("irrelevant")
-    ) {
-      rationalisation = await rationaliseMessage(
-        strippedMessage,
-        machineCategory
-      )
+
+    let adminMessageId = null
+    if (signedUrl) {
+      adminMessageId =
+        (await sendNewMessageNotification(null, signedUrl, caption)) ?? null
     }
-    messageRef = db.collection("messages").doc()
+
     messageUpdateObj = {
       machineCategory: machineCategory,
       isMachineCategorised: isMachineAssessed,
+      isWronglyCategorisedIrrelevant: false,
       originalText: extractedMessage ?? null,
       text: strippedMessage ?? null, //text
       caption: caption ?? null,
@@ -524,33 +603,41 @@ async function newImageInstanceHandler({
       lastTimestamp: timestamp, //timestamp of latest instance (firestore timestamp data type)
       lastRefreshedTimestamp: timestamp,
       isPollStarted: false, //boolean, whether or not polling has started
-      isAssessed: isMachineAssessed, //boolean, whether or not we have concluded the voting
+      isAssessed: false, //boolean, whether or not we have concluded the voting
       assessedTimestamp: null,
       assessmentExpiry: null,
       assessmentExpired: false,
       truthScore: null, //float, the mean truth score
       numberPointScale: 6,
-      isIrrelevant:
-        isMachineAssessed && machineCategory.includes("irrelevant")
-          ? true
-          : null, //bool, if majority voted irrelevant then update this
-      isScam: isMachineAssessed && machineCategory === "scam" ? true : null,
-      isIllicit:
-        isMachineAssessed && machineCategory === "illicit" ? true : null,
-      isSpam: isMachineAssessed && machineCategory === "spam" ? true : null,
+      isControversial: isControversial,
+      isIrrelevant: false,
+      isScam: null,
+      isIllicit: null,
+      isSpam: null,
       isLegitimate: null,
       isUnsure: null,
-      isInfo: !caption && machineCategory === "info" ? true : null,
+      isInfo: null,
       isSatire: null,
       isHarmful: null,
       isHarmless: null,
       tags: {},
-      primaryCategory: isMachineAssessed
-        ? machineCategory.split("_")[0] //in case of irrelevant_length, we want to store irrelevant
-        : null,
+      primaryCategory: null,
       customReply: null, //string
+      communityNoteStatus: communityNoteStatus,
+      communityNote:
+        isCommunityNoteGenerated && communityNoteData && isCommunityNoteUsable
+          ? {
+              en: communityNoteData?.en || "Apologies, an error occurred",
+              cn: communityNoteData?.cn || "Apologies, an error occurred",
+              links: communityNoteData?.links || [],
+              downvoted: false,
+              pendingCorrection: false,
+              adminGroupCommunityNoteSentMessageId: null,
+              timestamp: Timestamp.now(),
+            }
+          : null,
       instanceCount: 0,
-      rationalisation: rationalisation,
+      adminGroupSentMessageId: adminMessageId,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -595,9 +682,14 @@ async function newImageInstanceHandler({
     isMeaningfulInterimReplySent: null,
     isRationalisationSent: null,
     isRationalisationUseful: null,
+    isCommunityNoteSent: null,
+    isCommunityNoteCorrected: false,
+    isCommunityNoteUseful: null,
+    isCommunityNoteReviewRequested: null,
     isReplyForced: null,
     isMatched: hasMatch,
     isReplyImmediate: null,
+    isIrrelevantAppealed: false,
     replyCategory: null,
     replyTimestamp: null,
     matchType: matchType,
@@ -612,6 +704,10 @@ async function newImageInstanceHandler({
     },
     isSatisfactionSurveySent: null,
     satisfactionScore: null,
+    flowId: null,
+    disclaimerSentTimestamp: null,
+    disclaimerAcceptanceTimestamp: null,
+    communityNoteMessageId: null,
   }
   await addInstanceToDb(
     id,
@@ -651,75 +747,6 @@ async function addInstanceToDb(
   }
 }
 
-async function referralHandler(
-  userSnap: admin.firestore.DocumentData,
-  message: string,
-  from: string
-) {
-  const code = message.split("\n")[0].split(": ")[1].split(" ")[0]
-  const userRef = userSnap.ref
-  if (code.length > 0) {
-    const referralClickRef = db.collection("referralClicks").doc(code)
-    const referralClickSnap = await referralClickRef.get()
-    if (referralClickSnap.exists) {
-      const referralId = referralClickSnap.get("referralId")
-      if (referralId === "add") {
-        await userRef.update({
-          firstMessageType: "prepopulated",
-          utm: {
-            source: referralClickSnap.get("utmSource") ?? "none",
-            medium: referralClickSnap.get("utmMedium") ?? "none",
-            content: referralClickSnap.get("utmContent") ?? "none",
-            campaign: referralClickSnap.get("utmCampaign") ?? "none",
-            term: referralClickSnap.get("utmTerm") ?? "none",
-          },
-        })
-      } else {
-        //try to get the userId from the referralId
-        let referrer
-        try {
-          referrer = String(hashids.decode(referralId)[0])
-        } catch (error) {
-          functions.logger.error(
-            `Error decoding referral code ${code}, sent by ${from}: ${error}`
-          )
-        }
-        if (referrer) {
-          const referralSourceSnap = await getUserSnapshot(referrer)
-          if (referralSourceSnap !== null) {
-            await referralSourceSnap.ref.update({
-              referralCount: FieldValue.increment(1),
-            })
-            //check if referrer is a checker
-            await incrementCheckerCounts(referrer, "numReferred", 1)
-            await userRef.update({
-              firstMessageType: "prepopulated",
-              utm: {
-                source: referrer,
-                medium: "uniqueLink",
-                content: "none",
-                campaign: "none",
-                term: "none",
-              },
-            })
-          } else {
-            functions.logger.error(
-              `Referrer ${referrer} not found in users collection`
-            )
-          }
-        }
-      }
-      await referralClickRef.update({
-        isConverted: true,
-      })
-    } else {
-      functions.logger.error(
-        "Referral code not found in referralClicks collection"
-      )
-    }
-  }
-}
-
 const onUserGenericMessagePublish = onMessagePublished(
   {
     topic: "userGenericMessages",
@@ -729,8 +756,8 @@ const onUserGenericMessagePublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
       "OPENAI_API_KEY",
+      "TELEGRAM_ADMIN_BOT_TOKEN",
     ],
     timeoutSeconds: 120,
   },

@@ -34,6 +34,11 @@ const getCount = async function (docRef: DocumentReference, type: string) {
 
 const getVoteCounts = async function (messageRef: DocumentReference) {
   const tags = (await getTags()) as string[]
+  const totalCheckerTestersQuery = db
+    .collection("checkers")
+    .where("isTester", "==", true)
+    .count()
+    .get()
   const totalVoteRequestQuery = messageRef
     .collection("voteRequests")
     .count()
@@ -52,9 +57,14 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     getCount(messageRef, "unsure"),
     getCount(messageRef, "satire"),
     getCount(messageRef, "totalVoteScore"),
+    getCount(messageRef, "great"),
+    getCount(messageRef, "acceptable"),
+    getCount(messageRef, "unacceptable"),
     totalVoteRequestQuery,
+    totalCheckerTestersQuery,
     getThresholds(),
   ]
+
   const allPromises = [
     ...otherPromises, // spread the other fixed promises
     ...tagPromises, // spread the tag promises
@@ -74,7 +84,11 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     unsureCount,
     satireCount,
     voteTotal,
+    greatCount,
+    acceptableCount,
+    unacceptableCount,
     voteRequestCountSnapshot,
+    totalCheckerTestersQuerySnapshot,
     thresholds,
   ] = results.slice(0, otherPromises.length) as [
     number,
@@ -88,17 +102,21 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     number,
     number,
     number,
-    admin.firestore.AggregateQuerySnapshot<
-      {
-        count: admin.firestore.AggregateField<number>
-      },
-      admin.firestore.DocumentData,
-      admin.firestore.DocumentData
-    >,
+    number,
+    number,
+    number,
+    admin.firestore.AggregateQuerySnapshot<{
+      count: admin.firestore.AggregateField<number>
+    }>,
+    admin.firestore.AggregateQuerySnapshot<{
+      count: admin.firestore.AggregateField<number>
+    }>,
     any
   ] // slice the results to get the fixed promises
 
   const totalVoteRequestsCount = voteRequestCountSnapshot.data().count ?? 0
+  const totalCheckerTestersCount =
+    totalCheckerTestersQuerySnapshot.data().count ?? 10
   const factCheckerCount = totalVoteRequestsCount - passCount //don't count "error" votes in number of fact checkers, as this will slow the replies unnecessarily.
   const validResponsesCount = responsesCount - passCount //can remove in future and replace with nonErrorCount
   const susCount = scamCount + illicitCount
@@ -130,6 +148,9 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     legitimateCount,
     unsureCount,
     satireCount,
+    greatCount,
+    acceptableCount,
+    unacceptableCount,
     voteTotal,
     validResponsesCount,
     susCount,
@@ -139,6 +160,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
     harmlessCount,
     factCheckerCount,
     tagCounts: tagCountMap,
+    totalCheckerTestersCount,
   }
 }
 

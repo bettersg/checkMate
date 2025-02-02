@@ -17,7 +17,6 @@ import { getSignedUrl } from "../common/mediaUtils"
 import { Timestamp } from "firebase-admin/firestore"
 import { resetL2Status } from "../common/voteUtils"
 import { WhatsappMessageObject, CheckerData } from "../../types"
-import { on } from "events"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -172,6 +171,9 @@ async function onSignUp(from: string, platform = "whatsapp") {
       numNonUnsureVotesAtProgramEnd: null,
     },
     offboardingTime: null,
+    dailyAssignmentCount: 0,
+    isTester: false,
+    hasBlockedTelegramMessages: false,
   }
   await db.collection("checkers").add(checkerObj)
 }
@@ -553,7 +555,6 @@ const onCheckerPublish = onMessagePublished(
       "WHATSAPP_TOKEN",
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
     ],
   },
   async (event) => {

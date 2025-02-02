@@ -33,6 +33,11 @@ export type WhatsappMessageObject = {
     type: string
     list_reply: { id: string }
     button_reply: { id: string }
+    nfm_reply?: {
+      name: string
+      body: string
+      response_json: string // JSON string containing flow-specific data
+    }
   }
   text: { body: string }
   context: { id: string; forwarded: boolean; frequently_forwarded: boolean }
@@ -113,12 +118,12 @@ export type GeneralMessage = {
   timestamp: number
   isForwarded: boolean | null
   frequently_forwarded: boolean | null
-  isFirstTimeUser: boolean
 }
 
 export type MessageData = {
   machineCategory: string //category assigned by the machine learning model. Can be either "scam", "illicit", "spam", "info", "irrelevant", "irrelevant_length", or "unsure"
   isMachineCategorised: boolean //whether or not the message was categorised by the machine learning model
+  isWronglyCategorisedIrrelevant: boolean //whether or not the message was categorised as irrelevant by the machine learning model but was actually not as indicated by the user
   originalText: string | null //the original, unredacted text of the message. For image messages, this is the OCR-extracted text from the image if present
   text: string | null //the text of the message, redacted for PII, to be shown on website and to checkers. For image messages, this is the redacted OCR-extracted text from the image if present
   caption: string | null //for image messages, the caption of the image
@@ -133,6 +138,7 @@ export type MessageData = {
   assessmentExpired: boolean //whether the assessment has expired
   truthScore: number | null //the mean of the checker-submitted truth scores for this message
   numberPointScale: 5 | 6 //whether or not this message was voted on with the 5-point or 6-point truth scale
+  isControversial: boolean | null //whether this message is considered controversial (by GenAI)
   isIrrelevant: boolean | null //whether this message is considered irrelevant, i.e. whether the sum of irrelevant votes > irrelevant threshold
   isScam: boolean | null //whether this message is considered scam, i.e. the sum of scam votes > scam threshold
   isIllicit: boolean | null //whether this message is considered illicit, i.e. the sum of illicit votes > illicit threshold
@@ -146,13 +152,15 @@ export type MessageData = {
   tags: TagsMap //tags assigned to the message
   primaryCategory: string | null //the category that the message has been assigned to. Either "scam", "illicit", "satire", "untrue", "misleading", "accurate", "spam", "legitimate", "irrelevant", "unsure" or "error". Note, legitimate refers to nvc-credible and irrelevant nvc-cant-tell.
   customReply: CustomReply | null //the admin-assigned custom reply for this message, that supercedes the default replies
+  communityNoteStatus: string | null //the status of the community note for this message, either "not-generated", "error", "generated" or "unusable"
+  communityNote: CommunityNote | null // the gen-ai generated community note for this message
   instanceCount: number //the number of instances of this message
-  rationalisation: string | null //the AI-generated "rationaliastion" for why this message might have received the primaryCategory it did
+  adminGroupSentMessageId: string | null // The original message id of the message sent to the admin group
 }
 
 export type InstanceData = {
   source: string //Source of the message, e.g. whatsapp, telegram, email
-  id: string | null //Firebase unique identifier for the instance
+  id: string | null //whatsapp id for the instance
   timestamp: Timestamp //Timestamp where the instance was received by CheckMate
   type: "text" | "image" //Type of the message. Currently either "text" or "image"
   text: string | null //Either the text of the message for text messages, or the OCR-extracted text of the image for image messages. Not redacted for PII.
@@ -160,14 +168,14 @@ export type InstanceData = {
   caption: string | null //Caption of the image, if the message is an image
   captionHash: string | null //Hash of the caption of the image, if the message is an image
   sender: string | null //OCR-extracted sender of the original message to the user (e.g. the scammer etc), if present in the screenshot
-  imageType: "convo" | "email" | "letter" | "others" //Type of image, if the message is an image. Either "convo" for conversation screenshots, "email" for email screenshots, "letter" for letter screenshots, or "others" for other types of images. Decided by the LLM.
-  ocrVersion: string //Version of the OCR engine used to extract text from the image
+  imageType: "convo" | "email" | "letter" | "others" | null //Type of image, if the message is an image. Either "convo" for conversation screenshots, "email" for email screenshots, "letter" for letter screenshots, or "others" for other types of images. Decided by the LLM.
+  ocrVersion: string | null //Version of the OCR engine used to extract text from the image
   from: string | null //The sender of the message to CheckMate. For whatsapp, this would be the whatsapp phone number
   subject: string | null //The subject of the message, if the message is an email
   hash: string | null //Locality sensitive hash of the image. Similar images will have the same hash
-  mediaId: string //file ID of the image, if the message is an image
-  mimeType: string //MIME type of the image, if the message is an image
-  storageUrl: string //URL of the image in the storage bucket
+  mediaId: string | null //file ID of the image, if the message is an image
+  mimeType: string | null //MIME type of the image, if the message is an image
+  storageUrl: string | null //URL of the image in the storage bucket
   isForwarded: boolean | null //Whether the message was forwarded, based on whatsapp webhook
   isFrequentlyForwarded: boolean | null //Whether the message was frequently forwarded, based on whatsapp webhook
   isReplied: boolean //Whether the message has been replied to
@@ -176,11 +184,18 @@ export type InstanceData = {
   isMeaningfulInterimReplySent: boolean | null //Whether the interim response was meaningful, i.e. not unsure
   isRationalisationSent: boolean | null //Whether the rationalisation has been sent
   isRationalisationUseful: boolean | null //Whether the rationalisation was voted as useful by the user
+  isCommunityNoteSent: boolean | null //Whether the community note has been sent
+  isCommunityNoteCorrected: boolean //Whether the community note has been corrected
+  isCommunityNoteUseful: boolean | null //Whether the community note was voted as useful by the user
+  isCommunityNoteReviewRequested: boolean | null //Whether the user requested to see the human review
+  isIrrelevantAppealed: boolean | null //Whether the user indicate that they message was incorrectly marked by the automated pipelines as irrelevant
   isReplyForced: boolean | null //Whether the reply was forced at the end of 24 hours, without the message naturally being assessed.
   isMatched: boolean //Whether this instance has been matched to a message in the database. If it is not matched, it will be the first instance of a new message.
   isReplyImmediate: boolean | null //Whether the reply was sent immediately after the message was received, meaning it was either matched or auto-categorised
   replyCategory: string | null //The category of the reply sent to the user. May not be equivalent to the primaryCategory of the message, which could change over time.
   replyTimestamp: Timestamp | null //The timestamp when the reply was sent
+  disclaimerSentTimestamp: Timestamp | null //The timestamp when the controversial disclaimer was sent, if applicable
+  disclaimerAcceptanceTimestamp: Timestamp | null //The timestamp when the user accepted the controversial disclaimer, if applicable
   matchType: string //The type of match. Either "none" (no match), "similarity" (match based on semantic similarity of text), "image" (match based on the perceptual hash) or "exact" (match based on exact text match)
   scamShieldConsent: boolean | null //Whether the user has consented to share the message with ScamShield. Defaults to true unless user explicitly opts out.
   embedding: number[] | null // Embedding of the message
@@ -193,6 +208,8 @@ export type InstanceData = {
   }
   isSatisfactionSurveySent: boolean | null //Whether the satisfaction (aka NPS) survey was sent for this message
   satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
+  flowId: string | null //If a flow was triggered from this instance, this tracks the flowId. Otherwise null
+  communityNoteMessageId: string | null // ID of the community note sent in the telegram admin group
 }
 
 export type ReferralClicksData = {
@@ -211,6 +228,7 @@ export type UserData = {
   whatsappId: string | null // The user's whatsapp phone number
   telegramId: string | null // The user's telegram id, if available. Note this is not the username
   emailId: string | null // The user's email address, if available
+  ageGroup: "<20" | "21-35" | "36-50" | "51-65" | ">65" | null // The user's age group
   instanceCount: number // Number of instances sent by this user
   firstMessageReceiptTime: Timestamp // Timestamp of the first interaction between the user and the WhatsApp bot.
   firstMessageType: "normal" | "irrelevant" | "prepopulated" // One of "normal" (a normal message that wasn't categorised as "irrelevant", and so created an instance), "irrelevant" (stuff like hello which got auto-categorised as this), or "prepopulated" (referral link)
@@ -231,6 +249,16 @@ export type UserData = {
   language: LanguageSelection // The user's preferred language, either "en" or "cn"
   isSubscribedUpdates: boolean // Whether the user wants to receive proactive updates/messages from CheckMate
   isIgnored: boolean // Whether the user is blocked
+  isOnboardingComplete: boolean | null // Whether the user has completed the onboarding flow (selected language, age group, agreed to terms of use). Null for legacy users who onboarded before v2.
+  numSubmissionsRemaining: number // Number of submissions made in given time period
+  submissionLimit: number // Number of submissions allowed in given time period
+  isInterestedInSubscription: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at $5 a month
+  isInterestedAtALowerPoint: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at a lower price point
+  interestedFor: Array<string> | null // For whom the user is interested subscribing, can be "me", "parents", "children", "relatives", "friends", "others"
+  priceWhereInterested: number | null // The price point when the user is interested
+  feedback: string | null // The user's feedback, if they've provided any
+  tier: "free" | "paid"
+  isTester: boolean //Whether or not the user is whitelisted for the beta phase
 }
 
 export type CheckerData = {
@@ -277,6 +305,9 @@ export type CheckerData = {
   getNameMessageId: string | null // The Telegram message ID of the message asking the checker to input their name, used for onboarding ops only
   leaderboardStats: LeaderBoardStats // The leaderboard stats of the checker
   programData: ProgramData // The Checker Program data of the checker
+  dailyAssignmentCount: Number // Daily count of checker votes
+  isTester: Boolean //Whether or not the checker is whitelisted for the beta phase. Whitelisted checkers will see and vote on GenAI replies
+  hasBlockedTelegramMessages: Boolean //Whether or not the checker has blocked CheckMate from sending them messages on Telegram
 }
 
 export type NudgeData = {
@@ -285,6 +316,15 @@ export type NudgeData = {
   outcomeTimestamp: Timestamp | null
   variant: string
   outcome: string | null
+}
+
+export type FlowData = {
+  type: "waitlist_en" | "waitlist_cn" | "onboarding" //types of flows available
+  whatsappId: string //whatsappId of the user the flow was sent to
+  sentTimestamp: Timestamp
+  outcomeTimestamp: Timestamp | null
+  outcome: string | null
+  variant: string
 }
 
 type LeaderBoardStats = {
@@ -363,6 +403,7 @@ export type VoteRequest = {
   isCorrect: boolean | null // Whether the checker's vote was correct, based on the final category of the message. Correct is defined as same category, and if category is info, +-1 away from mean truth score
   score: number | null // The score that this vote contributes to the checker's leaderboard score
   tags: TagsMap // Tags assigned to the vote request
+  communityNoteCategory: "great" | "acceptable" | "unacceptable" | null // The category assigned to the community note, either "great" i.e. "super", "acceptable", or "bad"
   duration: number | null // The time taken by the checker to vote on the message, in minutes
 }
 
@@ -374,6 +415,16 @@ export type CustomReply = {
   caption: string | null
   lastUpdatedBy: DocumentReference
   lastUpdatedTimestamp: Timestamp
+}
+
+export type CommunityNote = {
+  en: string
+  cn: string
+  links: string[]
+  downvoted: boolean
+  pendingCorrection: boolean
+  adminGroupCommunityNoteSentMessageId: string | null
+  timestamp: Timestamp
 }
 
 export type BlastData = {
@@ -404,4 +455,46 @@ export type TeleMessage = {
   storageUrl: string | null
   crowdPercentage: number
   votedPercentage: number
+}
+
+export type Thresholds = {
+  endVote: number
+  endVoteBigSus: number
+  endVoteUnsure: number
+  endVoteAbsolute: number
+  endVoteBigSusAbsolute: number
+  endVoteUnsureAbsolute: number
+  startVote: number
+  isSpam: number
+  isNoClaim: number
+  isLegitimate: number
+  isInfo: number
+  isIrrelevant: number
+  isUnsure: number
+  isBigSus: number
+  isSus: number
+  isSatire: number
+  isHarmless: number
+  isHarmful: number
+  falseUpperBound: number
+  misleadingUpperBound: number
+  sendInterimMinVotes: number
+  surveyLikelihood: number
+  satisfactionSurveyCooldownDays: number
+  volunteerProgramVotesRequirement: number
+  volunteerProgramReferralRequirement: number
+  volunteerProgramReportRequirement: number
+  volunteerProgramAccuracyRequirement: number
+  accuracyNudgeThreshold: number
+  numberBeforeAccuracyNudge: number
+  daysBeforeFirstCompletionCheck: number
+  daysBeforeSecondCompletionCheck: number
+  freeTierLimit: number
+  paidTierLimit: number
+  frequency: string
+  numberToTrigger: number | string
+  targetDailyVotes: number
+  minVotesPerMessage: number
+  price: number
+  LLMProvider: string
 }

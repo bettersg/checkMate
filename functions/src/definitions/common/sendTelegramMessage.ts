@@ -56,9 +56,15 @@ const sendTelegramTextMessage = async function (
       "Content-Type": "application/json",
     },
   }).catch((error) => {
-    functions.logger.log(
-      `Error: ${error.response.status} - ${error.response.data.description}`
-    )
+    if (error.response) {
+      functions.logger.log(
+        `Error: ${error.response.status} - ${error.response.data.description}`
+      )
+      if (error.response?.status === 403) {
+        // Return null instead of throwing error for 403 status
+        return null
+      }
+    }
     throw "error with sending telegram message"
   })
   return response
@@ -75,6 +81,8 @@ const updateTelegramReplyMarkup = async function (
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
   } else if (bot === "report") {
     token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else if (bot === "admin") {
+    token = process.env.TELEGRAM_ADMIN_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -113,6 +121,10 @@ const sendTelegramImageMessage = async function (
   }
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
+  } else if (bot === "report") {
+    token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else if (bot === "admin") {
+    token = process.env.TELEGRAM_ADMIN_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -128,13 +140,18 @@ const sendTelegramImageMessage = async function (
   }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-    url: `https://api.telegram.org/bot${token}/sendMessage`,
+    url: `https://api.telegram.org/bot${token}/sendPhoto`,
     data: data,
     headers: {
       "Content-Type": "application/json",
     },
   }).catch((error) => {
-    functions.logger.log(error.response)
+    //log request
+    functions.logger.log(JSON.stringify(data))
+
+    functions.logger.log(
+      `Error: ${error.response.status} - ${error.response.data.description}`
+    )
     throw "error with sending telegram photo"
   })
   return response
@@ -150,6 +167,10 @@ const sendTelegramImageMessageImageStream = async function (
   let token
   if (bot == "factChecker") {
     token = process.env.TELEGRAM_CHECKER_BOT_TOKEN
+  } else if (bot === "report") {
+    token = process.env.TELEGRAM_REPORT_BOT_TOKEN
+  } else if (bot === "admin") {
+    token = process.env.TELEGRAM_ADMIN_BOT_TOKEN
   } else {
     token = process.env.TELEGRAM_USER_BOT_TOKEN
   }
@@ -168,7 +189,9 @@ const sendTelegramImageMessageImageStream = async function (
     data: formData,
     headers: formData.getHeaders(),
   }).catch((error) => {
-    functions.logger.log(error.response)
+    functions.logger.log(
+      `Error: ${error.response.status} - ${error.response.data.description}`
+    )
     throw "error with sending telegram photo"
   })
   return response

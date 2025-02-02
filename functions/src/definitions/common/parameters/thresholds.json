@@ -29,5 +29,13 @@
   "accuracyNudgeThreshold": 0.5,
   "numberBeforeAccuracyNudge": 20,
   "daysBeforeFirstCompletionCheck": 60,
-  "daysBeforeSecondCompletionCheck": 90
+  "daysBeforeSecondCompletionCheck": 90,
+  "freeTierLimit": 5,
+  "paidTierLimit": 50,
+  "frequency": "daily",
+  "LLMProvider": "openai",
+  "numberToTrigger": 40,
+  "targetDailyVotes": 8,
+  "minVotesPerMessage": 30,
+  "price": 5.99
 }

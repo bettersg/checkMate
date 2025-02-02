@@ -558,7 +558,7 @@ const sendVerificationPrompt = async (
   const otpPrompt = await bot.telegram.sendMessage(
     chatId,
     !rePrompt
-      ? `Verify your OTP:`
+      ? `Key in your OTP:`
       : `The OTP you provided doesn't match that in our records. Please key it in again:`,
     {
       reply_markup: { force_reply: true },
@@ -708,7 +708,7 @@ const sendCompletionPrompt = async (
   })
   await bot.telegram.sendMessage(
     chatId,
-    `Finally, check out the Checker's Portal below, which is where you will vote on messages, and see the leaderboard and your statistics.
+    `Congratulations on becoming a checker! Do check out the Checker's Portal below, which is where you will vote on messages and view your statistics. There's even a leaderboard!
 
 ${resources}
 
@@ -729,7 +729,7 @@ You may view these resources with the command /resources.`,
   )
   await bot.telegram.sendMessage(
     chatId,
-    `Hooray! You've now successfully onboarded as a Checker! 🥳 You can chill for now, but stay tuned - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
+    `You can chill for now while we wait for new messages to be sent in to CheckMate for fact-checking - you'll receive notifications in this chat when users submit messages for checking. You'll then do the fact-checks on the Checkers' Portal.`
   )
 }
 //TODO: edit this to allow checking against diff idfields
@@ -813,6 +813,9 @@ const createChecker = async (
           numNonUnsureVotesAtProgramEnd: null,
         },
         offboardingTime: null,
+        dailyAssignmentCount: 0,
+        isTester: false,
+        hasBlockedTelegramMessages: false,
       }
       transaction.set(newCheckerRef, newChecker)
       return newCheckerRef
@@ -834,7 +837,6 @@ const onCheckerPublishTelegram = onMessagePublished(
     topic: "checkerEvents",
     secrets: [
       "TYPESENSE_TOKEN",
-      "TELEGRAM_REPORT_BOT_TOKEN",
       "TELEGRAM_CHECKER_BOT_TOKEN",
       "TELEGRAM_ADMIN_BOT_TOKEN",
       "WHATSAPP_CHECKERS_BOT_PHONE_NUMBER_ID",

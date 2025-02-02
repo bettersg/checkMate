@@ -97,6 +97,9 @@ const mockDb = async function () {
     whatsapp: ["text", "image"],
   })
   await systemParametersRef.doc("thresholds").set(thresholds)
+  await systemParametersRef.doc("counts").set({
+    polls: 0,
+  })
   const checkersCollectionRef = db.collection("checkers")
   const referralClicksRef = db.collection("referralClicks")
   const querySnap = await checkersCollectionRef
@@ -162,6 +165,9 @@ const mockDb = async function () {
       numNonUnsureVotesAtProgramEnd: null,
     },
     offboardingTime: null,
+    dailyAssignmentCount: 0,
+    isTester: false,
+    hasBlockedTelegramMessages: false,
   }
   if (querySnap.empty) {
     await checkersCollectionRef.doc("d2Woe1h0x5Mw62n1vvxz").set(checkerObj)

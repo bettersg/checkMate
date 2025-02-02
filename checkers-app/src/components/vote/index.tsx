@@ -1,6 +1,5 @@
-import VoteCategories from "./VoteCategories";
 import MessageCard from "./MessageCard";
-import { Typography, Alert } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "../../providers/UserContext";
@@ -11,6 +10,9 @@ import CategoryRationalisation from "./Rationalisation";
 import VoteResult from "./VoteResult";
 import VotingChart from "./VotingChart";
 import CustomReply from "./CustomReply";
+import CommunityNoteCard from "../myvotes/CommunityNoteCard";
+import VotingSystem from "./VotingSystem";
+import VotingNoteChart from "./VoteNoteChart";
 
 export default function VotePage() {
   const { checkerDetails } = useUser();
@@ -26,6 +28,7 @@ export default function VotePage() {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
         setSelectedTag(vote.tags);
+        console.log(vote);
       }
       setIsLoading(false);
     };
@@ -45,8 +48,10 @@ export default function VotePage() {
 
   return (
     <>
-      <div className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding mb-2"
-           style = {{maxHeight: '100vh', overflowY: 'auto'}}>
+      <div
+        className="grid grid-flow-row items-center gap-2 pb-2 left-right-padding mb-2"
+        style={{ maxHeight: "100vh", overflowY: "auto" }}
+      >
         <style>
           {`
             ::-webkit-scrollbar {
@@ -59,20 +64,33 @@ export default function VotePage() {
           text={vote.text}
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
+          sender={vote.sender}
         />
-        <Alert variant="ghost">Sender: {vote.sender}</Alert>
+
+        {vote.communityNote && checkerDetails.isTester ? (
+          <CommunityNoteCard
+            en={vote.communityNote.en}
+            cn={vote.communityNote.cn}
+            links={vote.communityNote.links}
+            downvoted={vote.communityNote.downvoted}
+          />
+        ) : null}
+
         {vote.category === null ||
         vote.category === "pass" ||
         !vote.isAssessed ? (
           <>
-            <VoteCategories
-              messageId={messageId ?? null}
-              voteRequestId={voteRequestId ?? null}
-              currentCategory={vote.category}
-              currentTruthScore={vote.truthScore}
-              currentTags={selectedTag}
-              numberPointScale={vote.numberPointScale}
-            />
+              <VotingSystem
+                messageId={messageId ?? null}
+                voteRequestId={voteRequestId ?? null}
+                currentCategory={vote.category}
+                currentTruthScore={vote.truthScore}
+                currentTags={selectedTag}
+                numberPointScale={vote.numberPointScale}
+                currentCommunityNoteCategory={vote.communityNoteCategory}
+                communityNote={vote.communityNote}
+                isTester={checkerDetails.isTester}
+              />
           </>
         ) : (
           <>
@@ -105,6 +123,9 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
+            {vote.communityNote && checkerDetails.isTester ? (
+              <VotingNoteChart assessedInfo={vote.finalStats} />
+            ) : null}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}
             />

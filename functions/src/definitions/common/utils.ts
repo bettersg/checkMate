@@ -5,7 +5,7 @@ import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
 //import RE2 from "re2"
 import { Timestamp } from "firebase-admin/firestore"
-
+import { Thresholds } from "../../types"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -20,12 +20,12 @@ function isNumeric(str: string) {
   return !isNaN(Number(str))
 }
 
-async function getThresholds(is5point: boolean = false) {
+async function getThresholds(is5point: boolean = false): Promise<Thresholds> {
   const db = admin.firestore()
   const theresholdsRef = db.doc("systemParameters/thresholds")
   const theresholdsSnap = await theresholdsRef.get()
-  const returnThresholds =
-    (theresholdsSnap.data() as typeof thresholds | undefined) ?? thresholds
+  const returnThresholds: Thresholds =
+    (theresholdsSnap.data() as Thresholds | undefined) ?? thresholds
   if (env !== "PROD") {
     returnThresholds.surveyLikelihood = 1
   }
@@ -121,6 +121,19 @@ function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
 
+function translateFrequency(en: string) {
+  switch (en) {
+    case "daily":
+      return "每日"
+    case "weekly":
+      return "每周"
+    case "monthly":
+      return "每月"
+    default:
+      return "每日"
+  }
+}
+
 export {
   stripPhone,
   stripUrl,
@@ -134,4 +147,5 @@ export {
   checkUrlPresence,
   isNumeric,
   getTags,
+  translateFrequency,
 }

@@ -347,6 +347,74 @@ async function saveLeaderboard() {
   }
 }
 
+async function resetUserSubmissionsHandler() {
+  try {
+    const usersRef = db.collection("users")
+    const usersSnapshot = await usersRef.get()
+
+    const batch = db.batch()
+    let batchCount = 0
+    const BATCH_LIMIT = 500
+
+    for (const userDoc of usersSnapshot.docs) {
+      const submissionLimit = userDoc.get("submissionLimit")
+      batch.update(userDoc.ref, {
+        numSubmissionsRemaining: submissionLimit,
+      })
+
+      batchCount++
+      if (batchCount >= BATCH_LIMIT) {
+        await batch.commit()
+        batchCount = 0
+      }
+    }
+
+    if (batchCount > 0) {
+      await batch.commit()
+    }
+
+    logger.info("Successfully reset submission counts for all users")
+  } catch (error) {
+    logger.error("Error resetting user submission counts:", error)
+    throw error
+  }
+}
+
+async function resetCheckerAssignmentCountHandler() {
+  try {
+    const checkersRef = db.collection("checkers")
+    const checkersSnapshot = await checkersRef.get()
+
+    const batch = db.batch()
+    let batchCount = 0
+    const BATCH_LIMIT = 500
+
+    for (const checkerDoc of checkersSnapshot.docs) {
+      batch.update(checkerDoc.ref, {
+        dailyAssignmentCount: 0,
+      })
+
+      batchCount++
+      if (batchCount >= BATCH_LIMIT) {
+        await batch.commit()
+        batchCount = 0
+      }
+    }
+
+    if (batchCount > 0) {
+      await batch.commit()
+    }
+
+    logger.info("Successfully reset submission counts for all users")
+  } catch (error) {
+    logger.error("Error resetting user submission counts:", error)
+    throw error
+  }
+  await db.collection("systemParameters").doc("counts").update({
+    polls: 0,
+  })
+}
+
 const checkSessionExpiring = onSchedule(
   {
     schedule: "1 * * * *",
@@ -406,6 +474,26 @@ const resetLeaderboard = onSchedule(
   resetLeaderboardHandler
 )
 
+const resetUserSubmissionCounts = onSchedule(
+  {
+    schedule: "0 0 * * *", // Run at midnight daily
+    timeZone: "Asia/Singapore",
+    retryCount: 3,
+    region: "asia-southeast1",
+  },
+  resetUserSubmissionsHandler
+)
+
+const resetCheckerAssignmentCount = onSchedule(
+  {
+    schedule: "0 5 * * *", // Run at midnight daily
+    timeZone: "Asia/Singapore",
+    retryCount: 3,
+    region: "asia-southeast1",
+  },
+  resetCheckerAssignmentCountHandler
+)
+
 // Export scheduled cloud functions
 export const batchJobs = {
   checkSessionExpiring,
@@ -414,6 +502,8 @@ export const batchJobs = {
   sendCheckersWelcomeMesssage,
   sendInterimPrompt,
   resetLeaderboard,
+  resetUserSubmissionCounts,
+  resetCheckerAssignmentCount,
 }
 
 // Export utility functions
