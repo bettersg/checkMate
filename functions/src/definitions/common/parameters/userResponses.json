@@ -284,8 +284,8 @@
     "cn": "您的免费提交次数将在午夜重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻。"
   },
   "GET_MORE_SUBMISSIONS_NUDGE": {
-    "en": "If you find our service useful, consider joining our waitlist for a premium subscription. For less than the cost of a cup of coffee per month ($4.99), you or a loved one can enjoy {{paid_tier_limit}} submissions while supporting the sustainability of our service!",
-    "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有价值，欢迎加入我们的高级订阅候补名单。每月仅需一杯咖啡的价格（$4.99），您或您的亲人即可享受 {{paid_tier_limit}} 次提交，并帮助我们保持服务的持续运营！"
+    "en": "If you find our service useful, consider joining our waitlist for a premium subscription. For just $5.99 per month, you or a loved one can enjoy {{paid_tier_limit}} submissions while supporting the sustainability of our service!",
+    "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有价值，欢迎加入我们的高级订阅候补名单。每月仅需$5.99，您或您的亲人即可享受 {{paid_tier_limit}} 次提交，并帮助我们保持服务的持续运营！"
   },
   "OUT_OF_SUBMISSIONS": {
     "en": "Thank you for your active engagement with CheckMate. Unfortunately, you've reached our daily limit. This will reset at midnight.\n\nWe appreciate your understanding and continued support as we work to serve everyone as efficiently as possible.",
@@ -296,8 +296,8 @@
     "cn": "感谢使用 查友 🙏🏻。\n\n您今日 {{free_tier_limit}} 次的免费提交机会已用完。我们感谢您对高级会员服务的关注，并感谢您的耐心等待，我们正在努力推出该服务。"
   },
   "OUT_OF_SUBMISSIONS_NUDGE": {
-    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free daily submissions. Want more? Join our waitlist for a premium subscription below - less than a cup of coffee per month ($4.99) gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
-    "cn": "感谢您使用查友 🙏🏻。您今日的{{daily_free_tier_limit}}次免费提交已用完。想要更多吗？通过以下链接加入我们的高级订阅候补名单——每日仅需一杯咖啡的价格（$4.99/月），即可享受您或您所关心的人每日{{daily_paid_tier_limit}}次提交，并帮助我们维持服务运营！"
+    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free daily submissions. Want more? Join our waitlist for a premium subscription below - just $5.99 per month gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
+    "cn": "感谢您使用查友 🙏🏻。您今日的{{daily_free_tier_limit}}次免费提交已用完。想要更多吗？通过以下链接加入我们的高级订阅候补名单——每日仅需$5.99，即可享受您或您所关心的人每日{{daily_paid_tier_limit}}次提交，并帮助我们维持服务运营！"
   },
   "WAITLIST_THANKS": {
     "en": "Thanks for signing up for the waitlist! We will inform you when the paid subscription is available.",
