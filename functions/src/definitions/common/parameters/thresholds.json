@@ -30,7 +30,7 @@
   "numberBeforeAccuracyNudge": 20,
   "daysBeforeFirstCompletionCheck": 60,
   "daysBeforeSecondCompletionCheck": 90,
-  "freeTierLimit": 10,
+  "freeTierLimit": 5,
   "paidTierLimit": 50,
   "frequency": "daily",
   "LLMProvider": "openai",
