@@ -176,7 +176,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     message,
                     "whatsapp"
                   )
-                } else if (!userSnap.get("isOnboardingComplete")) {
+                } else if (userSnap.get("isOnboardingComplete") === false) {
                   await sendOnboardingFlow(userSnap, false)
                   await handlePreOnboardedMessage(userSnap, message)
                   return res.sendStatus(200)
