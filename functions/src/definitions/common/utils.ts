@@ -4,7 +4,7 @@ import * as admin from "firebase-admin"
 import { findPhoneNumbersInText } from "libphonenumber-js"
 import { createHash } from "crypto"
 //import RE2 from "re2"
-import { Timestamp } from "firebase-admin/firestore"
+import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore"
 import { Thresholds } from "../../types"
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -134,6 +134,28 @@ function translateFrequency(en: string) {
   }
 }
 
+/**
+ * Checks if a user joined before the v2 cutoff date
+ * @param userSnap Firestore DocumentSnapshot of the user
+ * @returns Promise<boolean> true if user joined before v2 cutoff
+ */
+function checkPreV2User(userSnap: DocumentSnapshot): boolean {
+  try {
+    const joinTimestamp: Timestamp | undefined = userSnap.get(
+      "firstMessageReceiptTime"
+    )
+    if (!joinTimestamp) {
+      return false
+    }
+    const joinDate = joinTimestamp.toDate()
+    const cutoffDate = new Date("2024-02-03")
+    return joinDate < cutoffDate
+  } catch (error) {
+    console.error("Error checking pre-v2 user status:", error)
+    return false
+  }
+}
+
 export {
   stripPhone,
   stripUrl,
@@ -148,4 +170,5 @@ export {
   isNumeric,
   getTags,
   translateFrequency,
+  checkPreV2User,
 }
