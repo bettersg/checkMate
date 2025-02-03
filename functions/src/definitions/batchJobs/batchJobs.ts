@@ -352,7 +352,7 @@ async function resetUserSubmissionsHandler() {
     const usersRef = db.collection("users")
     const usersSnapshot = await usersRef.get()
 
-    const batch = db.batch()
+    let batch = db.batch() // Create a new batch instance
     let batchCount = 0
     const BATCH_LIMIT = 500
 
@@ -365,10 +365,13 @@ async function resetUserSubmissionsHandler() {
       batchCount++
       if (batchCount >= BATCH_LIMIT) {
         await batch.commit()
+        // Create a new batch after committing the previous one
+        batch = db.batch()
         batchCount = 0
       }
     }
 
+    // Commit any remaining updates if there are any
     if (batchCount > 0) {
       await batch.commit()
     }
@@ -385,7 +388,7 @@ async function resetCheckerAssignmentCountHandler() {
     const checkersRef = db.collection("checkers")
     const checkersSnapshot = await checkersRef.get()
 
-    const batch = db.batch()
+    let batch = db.batch() // Initialize the batch
     let batchCount = 0
     const BATCH_LIMIT = 500
 
@@ -397,19 +400,24 @@ async function resetCheckerAssignmentCountHandler() {
       batchCount++
       if (batchCount >= BATCH_LIMIT) {
         await batch.commit()
+        // Create a new batch after committing the current one
+        batch = db.batch()
         batchCount = 0
       }
     }
 
+    // Commit any remaining updates
     if (batchCount > 0) {
       await batch.commit()
     }
 
-    logger.info("Successfully reset submission counts for all users")
+    logger.info("Successfully reset daily assignment counts for all checkers")
   } catch (error) {
-    logger.error("Error resetting user submission counts:", error)
+    logger.error("Error resetting daily assignment counts for checkers:", error)
     throw error
   }
+
+  // This update is executed after the try/catch block
   await db.collection("systemParameters").doc("counts").update({
     polls: 0,
   })

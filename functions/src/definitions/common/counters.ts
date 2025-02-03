@@ -37,6 +37,7 @@ const getVoteCounts = async function (messageRef: DocumentReference) {
   const totalCheckerTestersQuery = db
     .collection("checkers")
     .where("isTester", "==", true)
+    .where("isActive", "==", true)
     .count()
     .get()
   const totalVoteRequestQuery = messageRef
