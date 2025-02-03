@@ -4,13 +4,13 @@ import { Timestamp } from "firebase-admin/firestore"
 import { getUserSnapshot } from "./userManagement"
 import { incrementCheckerCounts } from "../../definitions/common/counters"
 import { FieldValue } from "@google-cloud/firestore"
-import { normalizeSpaces } from "../../definitions/common/utils"
+import { normalizeSpaces, checkPreV2User } from "../../definitions/common/utils"
 import {
   getResponsesObj,
   ResponseObject,
 } from "../../definitions/common/responseUtils"
 import { checkTemplate } from "../../validators/whatsapp/checkWhatsappText"
-import { WhatsappMessageObject } from "../../types"
+import { WhatsappMessageObject, UserData } from "../../types"
 
 import Hashids from "hashids"
 if (!admin.apps.length) {
@@ -137,7 +137,7 @@ async function referralHandler(
     if (referralClickSnap.exists) {
       const referralId = referralClickSnap.get("referralId")
       if (referralId === "add") {
-        await userRef.update({
+        const updateObj: Partial<UserData> = {
           firstMessageType: "prepopulated",
           utm: {
             source: referralClickSnap.get("utmSource") ?? "none",
@@ -146,7 +146,15 @@ async function referralHandler(
             campaign: referralClickSnap.get("utmCampaign") ?? "none",
             term: referralClickSnap.get("utmTerm") ?? "none",
           },
-        })
+        }
+        const BETA_CAMPAIGN = process.env.BETA_CAMPAIGN_NAME
+        if (
+          BETA_CAMPAIGN &&
+          referralClickSnap.get("utmCampaign") === BETA_CAMPAIGN
+        ) {
+          updateObj.isTester = true
+        } //TODO: Remove eventually after beta
+        await userRef.update(updateObj)
       } else {
         //try to get the userId from the referralId
         let referrer
@@ -190,7 +198,7 @@ async function referralHandler(
 }
 
 export async function handlePreOnboardedMessage(
-  userSnap: admin.firestore.DocumentData,
+  userSnap: admin.firestore.DocumentSnapshot,
   message: WhatsappMessageObject
 ) {
   let step
@@ -211,7 +219,10 @@ export async function handlePreOnboardedMessage(
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
   const timestampKey =
     messageTimestamp.toDate().toISOString().slice(0, -5) + "Z"
-  userSnap.ref.update({
+  if (checkPreV2User(userSnap)) {
+    return
+  }
+  await userSnap.ref.update({
     [`initialJourney.${timestampKey}`]: step,
   })
 }
