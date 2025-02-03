@@ -147,9 +147,13 @@ async function referralHandler(
             term: referralClickSnap.get("utmTerm") ?? "none",
           },
         }
-        if (referralClickSnap.get("utmCampaign") === "v2beta") {
+        const BETA_CAMPAIGN = process.env.BETA_CAMPAIGN_NAME
+        if (
+          BETA_CAMPAIGN &&
+          referralClickSnap.get("utmCampaign") === BETA_CAMPAIGN
+        ) {
           updateObj.isTester = true
-        }
+        } //TODO: Remove eventually after beta
         await userRef.update(updateObj)
       } else {
         //try to get the userId from the referralId
