@@ -6,7 +6,7 @@ import { sendWhatsappTemplateMessage } from "../common/sendWhatsappMessage"
 const onUserWhitelist = onDocumentUpdated(
   {
     document: "users/{userId}",
-    secrets: ["WHATSAPP_TOKEN"],
+    secrets: ["WHATSAPP_TOKEN", "WHATSAPP_USER_BOT_PHONE_NUMBER_ID"],
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
