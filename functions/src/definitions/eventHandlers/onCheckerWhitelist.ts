@@ -51,7 +51,26 @@ const onCheckerWhitelist = onDocumentUpdated(
       await sendTelegramTextMessage(
         "factChecker",
         telegramId,
-        "You've been successfully onboarded as a checker tester! In addition to the current voting, you will now receive GenAI-generated responses to review."
+        `<strong>🚀 Welcome to the CheckMate V2 Beta 🎉</strong>
+
+Hi ${postChangeData?.name},
+
+Great news! You have been whitelisted to test out CheckMate's brand new features!. 🧐🔎
+
+🔹 <b>What's New?</b>
+
+- GenAI-generated responses with sources for quicker and more informative checks
+- UI improvements for a smoother experience
+
+🔹 <b>What you have to do?</b>
+
+- 🗳️ Vote on the responses to assess their quality.
+
+Your feedback is invaluable—let us know what you think! Thanks for being part of this exciting next step. 🚀
+
+- The CheckMate Team`,
+        null,
+        "HTML"
       )
     }
     return Promise.resolve()
