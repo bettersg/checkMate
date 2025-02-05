@@ -442,6 +442,9 @@ async function callWhatsappSendMessageApi(data: any, bot: string) {
   } else {
     phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
   }
+  if (phoneNumberId === undefined) {
+    functions.logger.error("missing phone number id")
+  }
   const response = await axios({
     method: "POST", // Required, HTTP method, a string, e.g. POST, GET
     url:
