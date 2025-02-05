@@ -25,6 +25,10 @@ const onUserWhitelist = onDocumentUpdated(
       return
     }
 
+    if (process.env.ENVIRONMENT === "SIT") {
+      return Promise.resolve()
+    }
+
     const preChangeIsOnboardingComplete = preChangeData?.isOnboardingComplete
     const postChangeIsOnboardingComplete = postChangeData?.isOnboardingComplete
     const preChangeIsTester = preChangeData?.isTester
