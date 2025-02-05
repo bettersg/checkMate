@@ -55,7 +55,7 @@ const onCheckerWhitelist = onDocumentUpdated(
 
 Hi ${postChangeData?.name},
 
-Great news! You have been whitelisted to test out CheckMate's brand new features!. 🧐🔎
+Great news! You have been whitelisted to test out CheckMate's brand new features. 🧐🔎
 
 🔹 <b>What's New?</b>
 
