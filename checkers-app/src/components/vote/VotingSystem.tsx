@@ -81,7 +81,10 @@ export default function VotingSystem(Prop: PropType) {
     currentTruthScore
   );
 
+
   const [enabledAccordions, setEnabledAccordions] = useState<number[]>([1]);
+
+  const [commentOnNote, setCommentOnNote] = useState("");
 
   const handleOpen = (value: number) => {
     if (enabledAccordions.includes(value)) {
@@ -101,7 +104,6 @@ export default function VotingSystem(Prop: PropType) {
 
   const onSelectTagOption = (tags: string[]) => {
     setTags(tags);
-    console.log(tags);
   };
 
   const handleDropdownToggle = (isOpen: boolean) => {
@@ -119,6 +121,10 @@ export default function VotingSystem(Prop: PropType) {
   const handleTruthScoreChange = (value: number | null) => {
     setTruthScore(value);
   };
+
+  const handleCommentOnNote = (value: string) => {
+    setCommentOnNote(value);
+  }
 
   return (
     <div className="mt-2">
@@ -227,6 +233,7 @@ export default function VotingSystem(Prop: PropType) {
             voteCategory={voteCategory}
             truthScore={truthScore}
             tags={tags}
+            commentOnNote={commentOnNote}
           />
         )}
 
@@ -264,8 +271,10 @@ export default function VotingSystem(Prop: PropType) {
             messageId={messageId ?? null}
             voteRequestId={voteRequestId ?? null}
             currentCommunityCategory={currentCommunityNoteCategory ?? null}
+            commentOnNote={commentOnNote ?? ''}
             onNextStep={onNextStep}
             onSelectCommunityCategory={handleSelectCommunityCategory}
+            onCommentOnNote={handleCommentOnNote}
           />
 
         {voteCategory && communityCategory ? (
@@ -276,6 +285,7 @@ export default function VotingSystem(Prop: PropType) {
               voteCategory={voteCategory}
               truthScore={truthScore}
               tags={tags}
+              commentOnNote={commentOnNote}
             />
           ) : null}
         </AccordionBody>

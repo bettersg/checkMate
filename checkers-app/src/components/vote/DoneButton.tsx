@@ -12,7 +12,8 @@ interface PropType {
     communityCategory: string | null;
     voteCategory: string | null;
     truthScore: number | null;
-    tags: string[]
+    tags: string[];
+    commentOnNote: string;
 }
 
 export default function DoneButton(Prop: PropType) {
@@ -20,10 +21,11 @@ export default function DoneButton(Prop: PropType) {
     const { incrementSessionVotedCount } = useUser();
     const messageId = Prop.messageId;
     const voteRequestId = Prop.voteRequestId;
-    const communityCategory = Prop.communityCategory
-    const voteCategory = Prop.voteCategory
-    const truthScore = Prop.truthScore
-    const tags = Prop.tags
+    const communityCategory = Prop.communityCategory;
+    const voteCategory = Prop.voteCategory;
+    const truthScore = Prop.truthScore;
+    const tags = Prop.tags;
+    const commentOnNote = Prop.commentOnNote;
 
     // function to update vote request in firebase
     const handleSubmitVote = (
@@ -36,6 +38,7 @@ export default function DoneButton(Prop: PropType) {
         console.log("Vote Category: ", category);
         console.log("Truthscore: ", truthScore);
         console.log("Tags: ", tags);
+        console.log("CommentOnNote: ", commentOnNote);
 
         if (category === "nvc") {
         return;
@@ -48,7 +51,8 @@ export default function DoneButton(Prop: PropType) {
             category,
             comCategory,
             category === "info" ? truthScore : null,
-            tags
+            tags,
+            commentOnNote
         )
             .then(() => {
             incrementSessionVotedCount();
