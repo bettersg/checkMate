@@ -99,7 +99,7 @@ const patchVoteRequestHandler = async (req: Request, res: Response) => {
     votedTimestamp: Timestamp.fromDate(new Date()),
     reasoning: reasoning ?? null,
     tags: {} as { [key: string]: boolean },
-    commentOnNote: commentOnNote ?? null
+    commentOnNote: commentOnNote
   }
 
   console.log(updateObj)
