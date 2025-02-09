@@ -322,24 +322,14 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         })
 
         const checkerId = postChangeData.factCheckerDocRef.id
-        const scoreObject: {
-          id: string
-          traceId: string
-          name: string
-          value: any
-          dataType: string
-          comment?: string
-        } = {
+        await langfuse.score({
           id: `${messageRef.id}-${checkerId}`,
           traceId: messageRef.id,
           name: "communityNoteRating",
           value: communityNoteCategory,
           dataType: "CATEGORICAL",
-        }
-        if (postChangeData.commentOnNote) {
-          scoreObject["comment"] = postChangeData.commentOnNote
-        }
-        await langfuse.score(scoreObject)
+          comment: postChangeData.commentOnNote ?? undefined,
+        })
       }
     } catch (e) {
       functions.logger.error("Error updating langfuse", e)
