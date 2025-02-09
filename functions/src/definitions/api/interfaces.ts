@@ -26,7 +26,7 @@ interface updateVoteRequest {
   truthScore?: number //between 1 and 5
   reasoning?: string
   tags?: string[]
-  commentOnNote?: string
+  commentOnNote?: string | null
 }
 
 interface createChecker {

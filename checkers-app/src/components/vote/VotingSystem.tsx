@@ -29,7 +29,7 @@ interface PropType {
 
 interface IconProps {
   id: number;
-  open: number;
+  open: number | undefined;
 }
 
 function Icon({ id, open }: IconProps) {
@@ -54,7 +54,7 @@ function Icon({ id, open }: IconProps) {
 }
 
 export default function VotingSystem(Prop: PropType) {
-  const [open, setOpen] = useState(1);
+  const [open, setOpen] = useState([1]);
 
   const currentCategory = Prop.currentCategory;
   const currentTruthScore = Prop.currentTruthScore;
@@ -91,14 +91,14 @@ export default function VotingSystem(Prop: PropType) {
 
   const handleOpen = (value: number) => {
     if (enabledAccordions.includes(value)) {
-      setOpen(open === value ? 0 : value);
+      setOpen((prev) => [...prev, value]);
     }
   };
 
   const handleNextStep = (value: number) => {
     // Enable the next accordion and open it
     setEnabledAccordions((prev) => [...prev, value]);
-    setOpen(value);
+    setOpen((prev) => [...prev, value]);
   };
 
   const onNextStep = (value: any) => {
@@ -107,6 +107,7 @@ export default function VotingSystem(Prop: PropType) {
 
   const onSelectTagOption = (tags: string[]) => {
     setTags(tags);
+    handleNextStep(3);
   };
 
   const handleDropdownToggle = (isOpen: boolean) => {
@@ -132,10 +133,10 @@ export default function VotingSystem(Prop: PropType) {
   return (
     <div className="mt-2">
       <Accordion
-        open={open === 1}
-        icon={<Icon id={1} open={open} />}
+        open={open.includes(1)}
+        icon={<Icon id={1} open={open.find((element) => element === 1)} />}
         className={`mb-3 rounded-lg border px-2 ${
-          open === 1
+          open.includes(1)
             ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
             : "border-blue-gray-200"
         }`}
@@ -173,10 +174,10 @@ export default function VotingSystem(Prop: PropType) {
 
       <Accordion
         disabled={enabledAccordions.includes(2) ? false : true}
-        open={open === 2}
-        icon={<Icon id={2} open={open} />}
+        open={open.includes(2)}
+        icon={<Icon id={2} open={open.find((element) => element === 2)} />}
         className={`mb-3 rounded-lg border px-2 ${
-          open === 2
+          open.includes(2)
             ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
             : "border-blue-gray-200"
         }`}
@@ -218,15 +219,17 @@ export default function VotingSystem(Prop: PropType) {
           />
 
           {voteCategory && communityNote && isTester ? (
+            tags && !open.includes(3)? (
             <Button
-              fullWidth
-              className="flex items-center justify-center gap-3 bg-green-400"
-              size="sm"
-              onClick={() => handleNextStep(3)}
+            fullWidth
+            className="flex items-center justify-center gap-3 bg-green-400"
+            size="sm"
+            onClick={() => handleNextStep(3)}
             >
               Move to next step
               <ForwardIcon className="h-5 w-5" />
-            </Button>
+            </Button>): null
+            
           ) : (
             <DoneButton
               messageId={messageId ?? null}
@@ -237,16 +240,17 @@ export default function VotingSystem(Prop: PropType) {
               tags={tags}
               commentOnNote={commentOnNote}
             />
-          )}
+          )
+        }
         </AccordionBody>
       </Accordion>
       {isTester ? (
         <Accordion
           disabled={enabledAccordions.includes(3) ? false : true}
-          open={open === 3}
-          icon={<Icon id={3} open={open} />}
+          open={open.includes(3)}
+          icon={<Icon id={3} open={open.find((element) => element === 3)} />}
           className={`mb-3 rounded-lg border px-2 ${
-            open === 3
+            open.includes(3)
               ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
               : "border-blue-gray-200"
           }`}

@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TrophyIcon } from "@heroicons/react/20/solid";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
-import { getVote } from "../../services/api";
 
 interface PropType {
   messageId: string | null;
@@ -42,9 +41,6 @@ export default function CommunityNoteCategories(Prop: PropType) {
     currentCategory
   );
   const [_, setCommunityCategory] = useState<string | null>(currentCategory);
-  const [commentOnNote, setCommentOnNote] = useState("");
-  const messageId = Prop.messageId;
-  const voteRequestId = Prop.voteRequestId;
 
   const handleCommunityCategoryChange = (category: string) => {
     switch (category) {
@@ -60,24 +56,8 @@ export default function CommunityNoteCategories(Prop: PropType) {
     handleCommunityCategoryChange(categoryName);
   };
 
-  useEffect(() => {
-    const fetchMessage = async () => {
-      if (messageId && voteRequestId) {
-        const vote = await getVote(messageId, voteRequestId);
-        if (vote.commentOnNote) {
-          setCommentOnNote(vote?.commentOnNote ?? "");
-        } else {
-          setCommentOnNote("");
-        }
-      }
-    };
-    if (messageId) {
-      fetchMessage();
-    }
-  }, []);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCommentOnNote(event?.target.value);
     Prop.onCommentOnNote(event?.target.value);
   }
 
@@ -104,7 +84,7 @@ export default function CommunityNoteCategories(Prop: PropType) {
       <div className="relative w-full min-w-[200px]">
           <textarea
             rows={6}
-            value={commentOnNote}
+            value={Prop.commentOnNote}
             onChange={handleInputChange}
             className="peer h-full min-h-[100px] w-full resize-none rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0"
             placeholder=" "
