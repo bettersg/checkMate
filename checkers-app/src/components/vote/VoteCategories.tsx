@@ -6,7 +6,6 @@ import { FaceSmileIcon } from "@heroicons/react/20/solid";
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid";
 import { MegaphoneIcon } from "@heroicons/react/24/solid";
 import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
-import { ForwardIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { Button } from "@material-tailwind/react";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
