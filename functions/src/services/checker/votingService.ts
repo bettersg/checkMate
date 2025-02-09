@@ -140,6 +140,7 @@ async function sendTemplateMessageAndCreateVoteRequest(
     reasoning: null,
     tags: {},
     communityNoteCategory: null,
+    commentOnNote: null,
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: null,
     votedTimestamp: null,

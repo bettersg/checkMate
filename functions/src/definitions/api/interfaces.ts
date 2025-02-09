@@ -26,7 +26,7 @@ interface updateVoteRequest {
   truthScore?: number //between 1 and 5
   reasoning?: string
   tags?: string[]
-  commentOnNote?:string
+  commentOnNote?: string
 }
 
 interface createChecker {
@@ -155,7 +155,7 @@ interface Vote {
   finalStats: AssessedInfo | null
   tags: string[]
   numberPointScale: 5 | 6
-  commentOnNote?: string;
+  commentOnNote?: string | null
 }
 
 interface Last30DaysStats {

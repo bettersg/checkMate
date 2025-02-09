@@ -404,7 +404,7 @@ export type VoteRequest = {
   score: number | null // The score that this vote contributes to the checker's leaderboard score
   tags: TagsMap // Tags assigned to the vote request
   communityNoteCategory: "great" | "acceptable" | "unacceptable" | null // The category assigned to the community note, either "great" i.e. "super", "acceptable", or "bad"
-  commentOnNote: string
+  commentOnNote: string | null
   duration: number | null // The time taken by the checker to vote on the message, in minutes
 }
 
