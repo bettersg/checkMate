@@ -23,6 +23,7 @@ interface PropType {
   numberPointScale: number;
   currentCommunityNoteCategory: string | null;
   communityNote: CommunityNote;
+  commentOnNote: string | null;
   isTester: boolean | null;
 }
 
@@ -64,6 +65,7 @@ export default function VotingSystem(Prop: PropType) {
   const currentCommunityNoteCategory = Prop.currentCommunityNoteCategory;
   const communityNote = Prop.communityNote;
   const isTester = Prop.isTester;
+  const currentCommentOnNote = Prop.commentOnNote;
   const [tags, setTags] = useState<string[]>(currentTags);
   const [isDropdownOpen, setDropdownOpen] = useState(false); // Track dropdown state
   // Saved CommunityCategory
@@ -81,10 +83,11 @@ export default function VotingSystem(Prop: PropType) {
     currentTruthScore
   );
 
-
   const [enabledAccordions, setEnabledAccordions] = useState<number[]>([1]);
 
-  const [commentOnNote, setCommentOnNote] = useState("");
+  const [commentOnNote, setCommentOnNote] = useState(
+    currentCommentOnNote ?? ""
+  );
 
   const handleOpen = (value: number) => {
     if (enabledAccordions.includes(value)) {
@@ -124,7 +127,7 @@ export default function VotingSystem(Prop: PropType) {
 
   const handleCommentOnNote = (value: string) => {
     setCommentOnNote(value);
-  }
+  };
 
   return (
     <div className="mt-2">
@@ -214,83 +217,81 @@ export default function VotingSystem(Prop: PropType) {
             onDropdownToggle={handleDropdownToggle}
           />
 
-        {voteCategory && communityNote && isTester ? (
-          <Button
-          fullWidth
-          className="flex items-center justify-center gap-3 bg-green-400"
-          size="sm"
-          onClick={() => handleNextStep(3)}
-        >
-          Move to next step
-          <ForwardIcon className="h-5 w-5" />
-        </Button>
-
-        ): (
-          <DoneButton 
-            messageId={messageId ?? null}
-            voteRequestId={voteRequestId ?? null}
-            communityCategory={null}
-            voteCategory={voteCategory}
-            truthScore={truthScore}
-            tags={tags}
-            commentOnNote={commentOnNote}
-          />
-        )}
-
-        </AccordionBody>
-      </Accordion>
-      {isTester ? (
-      <Accordion
-        disabled={enabledAccordions.includes(3) ? false : true}
-        open={open === 3}
-        icon={<Icon id={3} open={open} />}
-        className={`mb-3 rounded-lg border px-2 ${
-          open === 3
-            ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
-            : "border-blue-gray-200"
-        }`}
-      >
-      <AccordionHeader
-          onClick={() => handleOpen(3)}
-          className="border-b-0 relative"
-        >
-          <div className="pl-6">
-            <Typography
-              variant="h6"
-              className="text-primary-color3 dark:text-white"
+          {voteCategory && communityNote && isTester ? (
+            <Button
+              fullWidth
+              className="flex items-center justify-center gap-3 bg-green-400"
+              size="sm"
+              onClick={() => handleNextStep(3)}
             >
-              Rate community note:
-            </Typography>
-            <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
-              3
-            </span>
-          </div>
-        </AccordionHeader>
-        <AccordionBody className="pt-0 text-base font-normal">
-          <CommunityNoteCategories
-            messageId={messageId ?? null}
-            voteRequestId={voteRequestId ?? null}
-            currentCommunityCategory={currentCommunityNoteCategory ?? null}
-            commentOnNote={commentOnNote ?? ''}
-            onNextStep={onNextStep}
-            onSelectCommunityCategory={handleSelectCommunityCategory}
-            onCommentOnNote={handleCommentOnNote}
-          />
-
-        {voteCategory && communityCategory ? (
-            <DoneButton 
+              Move to next step
+              <ForwardIcon className="h-5 w-5" />
+            </Button>
+          ) : (
+            <DoneButton
               messageId={messageId ?? null}
               voteRequestId={voteRequestId ?? null}
-              communityCategory={communityCategory}
+              communityCategory={null}
               voteCategory={voteCategory}
               truthScore={truthScore}
               tags={tags}
               commentOnNote={commentOnNote}
             />
-          ) : null}
+          )}
         </AccordionBody>
       </Accordion>
-    ) : null}
+      {isTester ? (
+        <Accordion
+          disabled={enabledAccordions.includes(3) ? false : true}
+          open={open === 3}
+          icon={<Icon id={3} open={open} />}
+          className={`mb-3 rounded-lg border px-2 ${
+            open === 3
+              ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-50"
+              : "border-blue-gray-200"
+          }`}
+        >
+          <AccordionHeader
+            onClick={() => handleOpen(3)}
+            className="border-b-0 relative"
+          >
+            <div className="pl-6">
+              <Typography
+                variant="h6"
+                className="text-primary-color3 dark:text-white"
+              >
+                Rate community note:
+              </Typography>
+              <span className="absolute top-1/2 left-[-8px] transform -translate-y-1/2 -translate-x-1/2 grid min-h-[32px] min-w-[32px] place-items-center rounded-full bg-amber-700 text-md font-medium leading-none text-white">
+                3
+              </span>
+            </div>
+          </AccordionHeader>
+          <AccordionBody className="pt-0 text-base font-normal">
+            <CommunityNoteCategories
+              messageId={messageId ?? null}
+              voteRequestId={voteRequestId ?? null}
+              currentCommunityCategory={currentCommunityNoteCategory ?? null}
+              commentOnNote={commentOnNote ?? ""}
+              onNextStep={onNextStep}
+              onSelectCommunityCategory={handleSelectCommunityCategory}
+              onCommentOnNote={handleCommentOnNote}
+            />
+
+            {voteCategory && communityCategory ? (
+              <DoneButton
+                messageId={messageId ?? null}
+                voteRequestId={voteRequestId ?? null}
+                communityCategory={communityCategory}
+                voteCategory={voteCategory}
+                truthScore={truthScore}
+                tags={tags}
+                commentOnNote={commentOnNote}
+              />
+            ) : null}
+          </AccordionBody>
+        </Accordion>
+      ) : null}
     </div>
   );
 }
