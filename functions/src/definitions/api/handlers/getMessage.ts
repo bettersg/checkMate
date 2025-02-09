@@ -34,6 +34,7 @@ const getMessageHandler = async (req: Request, res: Response) => {
     text: messageSnap.get("text"),
     caption: messageSnap.get("caption"),
     customReply: messageSnap.get("customReply"),
+    commentOnNote: messageSnap.get("commentOnNote"),
   }
   return res.status(200).send(returnObj)
 }

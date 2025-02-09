@@ -26,6 +26,7 @@ interface updateVoteRequest {
   truthScore?: number //between 1 and 5
   reasoning?: string
   tags?: string[]
+  commentOnNote?: string | null
 }
 
 interface createChecker {
@@ -131,6 +132,7 @@ interface MessageSummary {
   text: string | null //only for type text
   caption: string | null //only for type image
   customReply: CustomReply | null
+  commentOnNote: string | null
 }
 
 interface VoteSummaryApiResponse {
@@ -153,6 +155,7 @@ interface Vote {
   finalStats: AssessedInfo | null
   tags: string[]
   numberPointScale: 5 | 6
+  commentOnNote?: string | null
 }
 
 interface Last30DaysStats {

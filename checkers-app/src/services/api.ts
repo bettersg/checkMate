@@ -145,6 +145,7 @@ export const patchVote = async (
   communityNoteCategory: string | null,
   truthScore: number | null,
   tags: string[] | null,
+  commentOnNote: string | null
 ) => {
   if (!messageId || !voteRequestId) {
     throw new Error("Message Id or Vote Request Id missing.");
@@ -163,9 +164,10 @@ export const patchVote = async (
       `/api/messages/${messageId}/voteRequests/${voteRequestId}`,
       {
         category,
-        communityNoteCategory, 
+        communityNoteCategory,
         truthScore,
         tags,
+        commentOnNote,
       }
     )
   ).data;

@@ -80,17 +80,18 @@ export default function VotePage() {
         vote.category === "pass" ||
         !vote.isAssessed ? (
           <>
-              <VotingSystem
-                messageId={messageId ?? null}
-                voteRequestId={voteRequestId ?? null}
-                currentCategory={vote.category}
-                currentTruthScore={vote.truthScore}
-                currentTags={selectedTag}
-                numberPointScale={vote.numberPointScale}
-                currentCommunityNoteCategory={vote.communityNoteCategory}
-                communityNote={vote.communityNote}
-                isTester={checkerDetails.isTester}
-              />
+            <VotingSystem
+              messageId={messageId ?? null}
+              voteRequestId={voteRequestId ?? null}
+              currentCategory={vote.category}
+              currentTruthScore={vote.truthScore}
+              currentTags={selectedTag}
+              numberPointScale={vote.numberPointScale}
+              currentCommunityNoteCategory={vote.communityNoteCategory}
+              communityNote={vote.communityNote}
+              isTester={checkerDetails.isTester}
+              commentOnNote={vote.commentOnNote ?? null}
+            />
           </>
         ) : (
           <>

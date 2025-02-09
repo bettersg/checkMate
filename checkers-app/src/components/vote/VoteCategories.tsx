@@ -6,7 +6,6 @@ import { FaceSmileIcon } from "@heroicons/react/20/solid";
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid";
 import { MegaphoneIcon } from "@heroicons/react/24/solid";
 import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/solid";
-import { ForwardIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { Button } from "@material-tailwind/react";
 import { TooltipWithHelperIcon } from "../common/ToolTip";
@@ -115,6 +114,7 @@ export default function VoteCategories(Prop: PropType) {
 
   const handleL2VoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleVoteCategoryChange(event.target.value);
+    handleNextStep(2);
   };
 
   const handleVoteCategoryChange = (category: string) => {
@@ -122,6 +122,7 @@ export default function VoteCategories(Prop: PropType) {
       default:
         setVoteCategory(category);
         Prop.onVoteCategorySelection(category);
+        handleNextStep(2);
         break;
     }
   };
@@ -181,7 +182,7 @@ export default function VoteCategories(Prop: PropType) {
           )}
         </>
       ))}
-      {voteCategory ? (
+      {/* {voteCategory ? (
         <Button
           fullWidth
           className="flex items-center justify-center gap-3 bg-green-400"
@@ -191,7 +192,7 @@ export default function VoteCategories(Prop: PropType) {
           Move to next step
           <ForwardIcon className="h-5 w-5" />
         </Button>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

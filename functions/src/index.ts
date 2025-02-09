@@ -23,4 +23,6 @@ export { apiHandler } from "./definitions/api/api"
 export { internalApiHandler } from "./definitions/api/apiInternal"
 export { passVoteRequest } from "./definitions/taskHandlers/autoPass"
 export { sendCheckerReactivation } from "./definitions/taskHandlers/reactivations"
+export { onUserWhitelist } from "./definitions/eventHandlers/onUserWhitelist"
+export { onCheckerWhitelist } from "./definitions/eventHandlers/onCheckerWhitelist"
 export { batchJobs }
