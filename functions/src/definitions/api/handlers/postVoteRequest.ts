@@ -86,6 +86,7 @@ const postVoteRequestHandler = async (req: Request, res: Response) => {
     reasoning: null,
     tags: {},
     communityNoteCategory: null,
+    commentOnNote: '',
     createdTimestamp: Timestamp.fromDate(new Date()),
     acceptedTimestamp: Timestamp.fromDate(new Date()),
     votedTimestamp: null,

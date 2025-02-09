@@ -133,6 +133,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
       communityNote: messageSnap.get("communityNote"),
+      commentOnNote: voteRequestSnap.get("commentOnNote"),
       category: voteRequestSnap.get("category"),
       communityNoteCategory: voteRequestSnap.get("communityNoteCategory"),
       sender: maskedSender,
@@ -167,7 +168,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
             rationalisation: messageSnap.get("rationalisation"),
             greatCount: greatCount,
             acceptableCount: acceptableCount,
-            unacceptableCount: unacceptableCount
+            unacceptableCount: unacceptableCount,
           }
         : null,
       tags: tagArray,
