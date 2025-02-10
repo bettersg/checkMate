@@ -8,7 +8,10 @@ import {
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
 import { hashMessage, checkMessageId } from "../common/utils"
-import { checkPrepopulatedMessage } from "../../services/user/referrals"
+import {
+  checkPrepopulatedMessage,
+  checkBetaMessage,
+} from "../../services/user/referrals"
 import { getUserSnapshot } from "../../services/user/userManagement"
 import {
   sendMenuMessage,
@@ -101,6 +104,12 @@ const userGenericMessageHandlerWhatsapp = async function (
       }
       if (checkPrepopulatedMessage(responses, message.text)) {
         await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
+        break
+      } else if (checkBetaMessage(responses, message.text)) {
+        //TODO: Remove after BETA
+        await userSnap.ref.update({
+          isTester: true,
+        })
         break
       } else {
         //replace prepopulated prefix if any in the text
