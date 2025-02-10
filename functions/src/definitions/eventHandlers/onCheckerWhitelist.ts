@@ -74,7 +74,7 @@ Great news! You have been whitelisted to test out CheckMate's brand new features
 
 🔹 <b>What you have to do?</b>
 
-- Join the telegram group below to for coordination and to discuss.
+- Join the telegram group below for coordination and to discuss.
 - 🗳️ Vote on the responses to assess their quality.
 
 Your feedback is invaluable—let us know what you think! Thanks for being part of this exciting next step. 🚀
