@@ -48,6 +48,16 @@ const onCheckerWhitelist = onDocumentUpdated(
       const userDoc = userSnap.docs[0]
       //update userDoc isTester to true
       await userDoc.ref.update({ isTester: true })
+      const checkerGroupReplyMarkup = {
+        inline_keyboard: [
+          [
+            {
+              text: "Join Telegram Group",
+              url: process.env.BETA_CHECKERS_GROUP_LINK ?? "",
+            },
+          ],
+        ],
+      }
       await sendTelegramTextMessage(
         "factChecker",
         telegramId,
@@ -64,13 +74,15 @@ Great news! You have been whitelisted to test out CheckMate's brand new features
 
 🔹 <b>What you have to do?</b>
 
+- Join the telegram group below to for coordination and to discuss.
 - 🗳️ Vote on the responses to assess their quality.
 
 Your feedback is invaluable—let us know what you think! Thanks for being part of this exciting next step. 🚀
 
 - The CheckMate Team`,
         null,
-        "HTML"
+        "HTML",
+        checkerGroupReplyMarkup
       )
     }
     return Promise.resolve()

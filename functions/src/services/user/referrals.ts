@@ -205,7 +205,10 @@ export async function handlePreOnboardedMessage(
   if (message.type === "text") {
     step = "preonboard_text_normal"
     const responses = await getResponsesObj("user", "en")
-    if (checkPrepopulatedMessage(responses, message.text?.body)) {
+    if (
+      checkPrepopulatedMessage(responses, message.text?.body) ||
+      checkBetaMessage(responses, message.text?.body) //TODO: Remove after BETA
+    ) {
       step = "preonboard_text_prepopulated"
       await referralHandler(
         userSnap,
@@ -240,6 +243,22 @@ export function checkPrepopulatedMessage(
     checkTemplate(
       textNormalised,
       responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
+    )
+  ) {
+    return true
+  }
+  return false
+}
+
+export function checkBetaMessage( //TODO: Remove after BETA
+  responses: ResponseObject,
+  messageText: string
+) {
+  const textNormalised = normalizeSpaces(messageText).toLowerCase()
+  if (
+    checkTemplate(
+      textNormalised,
+      responses?.BETA_PREPOPULATED_PREFIX.toLowerCase()
     )
   ) {
     return true
