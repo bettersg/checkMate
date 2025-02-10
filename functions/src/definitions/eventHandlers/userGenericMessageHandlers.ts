@@ -109,6 +109,7 @@ const userGenericMessageHandlerWhatsapp = async function (
         //TODO: Remove after BETA
         await userSnap.ref.update({
           isTester: true,
+          numSubmissionsRemaining: FieldValue.increment(1),
         })
         break
       } else {
