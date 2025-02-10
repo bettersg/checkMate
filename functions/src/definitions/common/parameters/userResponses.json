@@ -251,6 +251,10 @@
     "en": "S/N: {{code}}\n\nSimply send this message to get started! (按发送按钮!) 👉",
     "cn": "S/N: {{code}}\n\nSimply send this message to get started! (按发送按钮!) 👉"
   },
+  "BETA_PREPOPULATED_PREFIX": {
+    "en": "S/N: {{code}}\n\nEnrol me in the new version of CheckMate!",
+    "cn": "S/N: {{code}}\n\nEnrol me in the new version of CheckMate!"
+  },
   "GENERIC_ERROR": {
     "en": "Sorry, an error occurred. 😔 We'll be looking into this! Meanwhile, you can try out other functions of the bot. Apologies!",
     "cn": "抱歉，查友出现了错误。😔 我们会尽快解决这个问题！您可以尝试使用查友的其他功能。我们再次为此道歉！"
