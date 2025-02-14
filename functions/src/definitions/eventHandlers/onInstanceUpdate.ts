@@ -17,12 +17,16 @@ if (!admin.apps.length) {
   admin.initializeApp()
 }
 
-const db = admin.firestore()
-
 const onInstanceUpdateV2 = onDocumentUpdated(
   {
     document: "messages/{messageId}/instances/{instanceId}",
-    secrets: ["TYPESENSE_TOKEN", "ML_SERVER_TOKEN", "WHATSAPP_TOKEN"],
+    secrets: [
+      "TYPESENSE_TOKEN",
+      "ML_SERVER_TOKEN",
+      "WHATSAPP_TOKEN",
+      "TELEGRAM_CHECKER_BOT_TOKEN",
+      "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+    ],
   },
   async (event) => {
     // Grab the current value of what was written to Firestore.
@@ -69,6 +73,9 @@ const onInstanceUpdateV2 = onDocumentUpdated(
       if (!messageSnap.get("communityNote")) {
         let communityNoteData
         let isCommunityNoteGenerated = false
+        let isControversial = false
+        let isCommunityNoteUsable = false
+        let communityNoteStatus = "not-generated"
         try {
           if (postChangeData.type === "text") {
             communityNoteData = await getCommunityNote({
@@ -80,9 +87,15 @@ const onInstanceUpdateV2 = onDocumentUpdated(
             communityNoteData = await getCommunityNote({
               url: signedUrl,
               caption: postChangeData.caption,
+              requestId: messageSnap.id,
             })
           }
           isCommunityNoteGenerated = true
+          isControversial = communityNoteData.isControversial
+          isCommunityNoteUsable = !(
+            communityNoteData.isVideo || communityNoteData.isAccessBlocked
+          )
+          communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
           messageUpdateObj.communityNote = {
             en: communityNoteData?.en || "",
             cn: communityNoteData?.cn || "",
@@ -92,6 +105,8 @@ const onInstanceUpdateV2 = onDocumentUpdated(
             adminGroupCommunityNoteSentMessageId: null,
             timestamp: Timestamp.now(),
           }
+          messageUpdateObj.isControversial = isControversial
+          messageUpdateObj.communityNoteStatus = communityNoteStatus
         } catch (error) {
           functions.logger.error("Error in getCommunityNote:", error)
         }
