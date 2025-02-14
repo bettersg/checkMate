@@ -1106,7 +1106,9 @@ async function respondToInstance(
     category !== "communityNote" &&
     !Object.keys(responses).includes(category.toUpperCase())
   ) {
-    functions.logger.error("Unknown category assigned, error response sent")
+    functions.logger.error(
+      `Unknown category ${category} assigned, error response sent`
+    )
     updateObj.replyCategory = "error"
     await sendTextMessage("user", from, responses.ERROR, replyId)
     return
