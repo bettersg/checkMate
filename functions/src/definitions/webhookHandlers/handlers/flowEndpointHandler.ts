@@ -38,7 +38,11 @@ export async function flowEndpointHandler(decryptedBody: WhatsAppRequest) {
         })
         const thresholds = await getThresholds()
         let dataPayload
-        const flowType = flowSnap.get("type")
+        let flowType = flowSnap.get("type")
+        if (!flowType) {
+          throw new Error("Flow type not found")
+        }
+        flowType = flowType.split("_")[0] //there is a language suffix that shoudl be removed
         let screen = "JOIN_WAITLIST"
         switch (flowType) {
           case "waitlist":
