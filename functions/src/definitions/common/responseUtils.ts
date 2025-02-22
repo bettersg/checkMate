@@ -933,8 +933,6 @@ async function respondToInstance(
 
   let bespokeReply = false
 
-  console.log("replying")
-
   let isMachineCase = checkMachineCase(parentMessageSnap)
 
   const hasBespokeReply =
@@ -971,16 +969,6 @@ async function respondToInstance(
     category = machineCategory
   }
 
-  if (customReply) {
-    if (customReply.type === "text" && customReply.text) {
-      category = "custom"
-      await sendTextMessage("user", from, customReply.text, replyId)
-      bespokeReply = true
-    } else if (customReply.type === "image") {
-      //TODO: implement later
-    }
-  }
-
   const votingResultsButton = {
     type: "reply",
     reply: {
@@ -1015,7 +1003,15 @@ async function respondToInstance(
 
   let communityNoteMessageId = null
 
-  if (communityNote && !communityNote.downvoted && isTester) {
+  if (customReply) {
+    if (customReply.type === "text" && customReply.text) {
+      category = "custom"
+      await sendTextMessage("user", from, customReply.text, replyId)
+      bespokeReply = true
+    } else if (customReply.type === "image") {
+      //TODO: implement later
+    }
+  } else if (communityNote && !communityNote.downvoted && isTester) {
     category = "communityNote"
     bespokeReply = true
     //get the text based on language
