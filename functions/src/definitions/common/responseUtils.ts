@@ -910,6 +910,7 @@ async function respondToInstance(
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const submissionLimit = userSnap.get("submissionLimit")
+  const numSubmissionsUsed = submissionLimit - numSubmissionsRemaining
   const isAssessed = parentMessageSnap.get("isAssessed")
   const isControversial = parentMessageSnap.get("isControversial")
   const isDisclaimerSent = data.disclaimerSentTimestamp != null
@@ -1030,17 +1031,14 @@ async function respondToInstance(
 
     const responseText = responses.COMMUNITY_NOTE.replace(
       "{{community_note}}",
-      note
+      note.trim()
     )
       .replace("{{date}}", dateStr)
       .replace(
         "{{submissions_remaining}}",
         responses.REMAINING_SUBMISSIONS_SUFFIX
       )
-      .replace(
-        "{{num_remaining_submissions}}",
-        numSubmissionsRemaining.toString()
-      )
+      .replace("{{num_submissions_used}}", numSubmissionsUsed.toString())
       .replace("{{free_tier_limit}}", submissionLimit.toString())
     const buttons = [
       {
@@ -1128,7 +1126,7 @@ async function respondToInstance(
       responseText = getFinalResponseText({
         responseText: responses["IRRELEVANT_AUTO"],
         responses,
-        remainingSubmissions: numSubmissionsRemaining,
+        submissionsUsed: numSubmissionsUsed,
         freeTierLimit: submissionLimit,
         primaryCategory: "irrelevant",
         isTester,
@@ -1190,7 +1188,7 @@ async function respondToInstance(
           const responseText = getFinalResponseText({
             responseText: responses["UNSURE"],
             responses,
-            remainingSubmissions: numSubmissionsRemaining,
+            submissionsUsed: numSubmissionsUsed,
             freeTierLimit: submissionLimit,
             isMachineCategorised,
             isMatched,
@@ -1217,7 +1215,7 @@ async function respondToInstance(
       responseText = getFinalResponseText({
         responseText: responses[category.toUpperCase()],
         responses,
-        remainingSubmissions: numSubmissionsRemaining,
+        submissionsUsed: numSubmissionsUsed,
         freeTierLimit: submissionLimit,
         isMachineCategorised,
         isMatched,
@@ -1397,11 +1395,12 @@ async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const submissionLimit = userSnap.get("submissionLimit")
+  const numSubmissionsUsed = submissionLimit - numSubmissionsRemaining
   const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
   const isPaidTier = userSnap.get("tier") !== "free"
   const responseText = responses.REMAINING_SUBMISSION_QUOTA.replace(
-    "{{num_remaining_submissions}}",
-    numSubmissionsRemaining.toString()
+    "{{num_submissions_used}}",
+    numSubmissionsUsed.toString()
   ).replace("{{free_tier_limit}}", submissionLimit.toString())
   //TODO: change to whatsapp flow
   if (isPaidTier || hasExpressedInterest) {
@@ -1848,7 +1847,7 @@ async function sendBlast(userSnap: DocumentSnapshot) {
 interface GetFinalResponseParams {
   responseText: string
   responses: Record<string, string>
-  remainingSubmissions?: number
+  submissionsUsed?: number
   freeTierLimit?: number
   isMachineCategorised?: boolean
   isMatched?: boolean
@@ -1865,7 +1864,7 @@ interface GetFinalResponseParams {
 function getFinalResponseText({
   responseText,
   responses,
-  remainingSubmissions = undefined,
+  submissionsUsed = undefined,
   freeTierLimit = undefined,
   isMachineCategorised = false,
   isMatched = false,
@@ -1906,10 +1905,7 @@ function getFinalResponseText({
       "{{submissions_remaining}}",
       isTester ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
     )
-    .replace(
-      "{{num_remaining_submissions}}",
-      remainingSubmissions?.toString() || ""
-    )
+    .replace("{{num_submissions_used}}", submissionsUsed?.toString() || "")
     .replace("{{free_tier_limit}}", freeTierLimit?.toString() || "")
 
   return finalResponse
