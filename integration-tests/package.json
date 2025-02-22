@@ -14,7 +14,7 @@
     "newman": "^6.2.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.197",
+    "@types/lodash": "^4.17.15",
     "ts-node": "^10.9.1"
   }
 }
