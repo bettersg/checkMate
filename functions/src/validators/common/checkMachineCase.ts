@@ -9,6 +9,5 @@ export function checkMachineCase(messageSnap: DocumentSnapshot) {
     isMachineCategorised &&
     machineCategory &&
     !(machineCategory === "irrelevant" && isWronglyCategorisedIrrelevant)
-  console.log(`isMachineCase: ${isMachineCase}`)
   return isMachineCase
 }
