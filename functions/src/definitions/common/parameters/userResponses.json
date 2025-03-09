@@ -280,8 +280,12 @@
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
   },
   "REMAINING_SUBMISSIONS_SUFFIX": {
-    "en": "\n\n[ You have used {{num_submissions_used}} out of your {{free_tier_limit}} free daily submissions to CheckMate. If you'd like more, press the \"Get More\" button below. ]",
-    "cn": "\n\n[ 您已使用 CheckMate 每日提供的 {{free_tier_limit}} 次免费提交中的 {{num_submissions_used}} 次。如果您需要更多，请点击下方的“获取更多”按钮。]"
+    "en": "\n\n[ You have used {{num_submissions_used}} out of your {{free_tier_limit}} free daily submissions to CheckMate.{{get_more_cta}}]",
+    "cn": "\n\n[ 您已使用 CheckMate 每日提供的 {{free_tier_limit}} 次免费提交中的 {{num_submissions_used}} 次。{{get_more_cta}}]"
+  },
+  "GET_MORE_CTA": {
+    "en": " If you'd like more, press the \"Get More\" button below. ",
+    "cn": "如果您需要更多，请点击下方的“获取更多”按钮。"
   },
   "GET_MORE_SUBMISSIONS": {
     "en": "Your free submissions will reset at midnight. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.",
@@ -460,15 +464,15 @@
     "cn": "您理解错了"
   },
   "BUTTON_GIVE_FEEDBACK": {
-    "en": "Give us feedback",
+    "en": "Give Feedback",
     "cn": "发送反馈"
   },
   "BUTTON_VIEW_SOURCES": {
-    "en": "View the sources",
+    "en": "View Sources",
     "cn": "审阅证据"
   },
   "BUTTON_GET_MORE_CHECKS": {
-    "en": "Get more/Support us",
+    "en": "Get More/Support Us",
     "cn": "支持我们 / 获取更多"
   },
   "BUTTON_SIGN_UP": {

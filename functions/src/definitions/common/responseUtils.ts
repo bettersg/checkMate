@@ -1126,6 +1126,7 @@ async function respondToInstance(
         freeTierLimit: submissionLimit,
         primaryCategory: "irrelevant",
         isTester,
+        hasGetMore: false,
       })
       const misunderstoodButton = {
         type: "reply",
@@ -1855,6 +1856,7 @@ interface GetFinalResponseParams {
   prefixName?: string
   votingStats?: string
   isTester?: boolean
+  hasGetMore?: boolean
 }
 
 function getFinalResponseText({
@@ -1872,6 +1874,7 @@ function getFinalResponseText({
   prefixName = "",
   votingStats = "",
   isTester = false,
+  hasGetMore = true,
 }: GetFinalResponseParams): string {
   let finalResponse = responseText
     .replace("{{prefix}}", prefixName ? responses[prefixName] : "")
@@ -1903,6 +1906,7 @@ function getFinalResponseText({
     )
     .replace("{{num_submissions_used}}", submissionsUsed?.toString() || "")
     .replace("{{free_tier_limit}}", freeTierLimit?.toString() || "")
+    .replace("{{get_more_cta}}", hasGetMore ? responses.GET_MORE_CTA : "")
 
   return finalResponse
 }

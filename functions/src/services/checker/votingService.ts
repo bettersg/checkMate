@@ -24,7 +24,6 @@ export async function despatchPoll(
   const isMachineCase = checkMachineCase(messageSnap)
 
   if (isMachineCase) {
-    console.log("Machine case detected")
     query = query.where("isTester", "==", true)
   }
   //END SECTION TO REMOVE
