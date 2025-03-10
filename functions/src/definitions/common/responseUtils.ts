@@ -1036,6 +1036,7 @@ async function respondToInstance(
       )
       .replace("{{num_submissions_used}}", numSubmissionsUsed.toString())
       .replace("{{free_tier_limit}}", submissionLimit.toString())
+      .replace("{{get_more_cta}}", responses.GET_MORE_CTA)
     const buttons = [
       {
         type: "reply",
@@ -1907,7 +1908,6 @@ function getFinalResponseText({
     .replace("{{num_submissions_used}}", submissionsUsed?.toString() || "")
     .replace("{{free_tier_limit}}", freeTierLimit?.toString() || "")
     .replace("{{get_more_cta}}", hasGetMore ? responses.GET_MORE_CTA : "")
-
   return finalResponse
 }
 
