@@ -218,18 +218,21 @@ export default function VotingSystem(Prop: PropType) {
             onDropdownToggle={handleDropdownToggle}
           />
 
-          {voteCategory && communityNote && isTester ? (
-            tags && !open.includes(3)? (
-            <Button
-            fullWidth
-            className="flex items-center justify-center gap-3 bg-green-400"
-            size="sm"
-            onClick={() => handleNextStep(3)}
-            >
-              Move to next step
-              <ForwardIcon className="h-5 w-5" />
-            </Button>): null
-            
+          {voteCategory &&
+          communityNote &&
+          isTester &&
+          voteCategory != "pass" ? (
+            tags && !open.includes(3) ? (
+              <Button
+                fullWidth
+                className="flex items-center justify-center gap-3 bg-green-400"
+                size="sm"
+                onClick={() => handleNextStep(3)}
+              >
+                Move to next step
+                <ForwardIcon className="h-5 w-5" />
+              </Button>
+            ) : null
           ) : (
             <DoneButton
               messageId={messageId ?? null}
@@ -240,8 +243,7 @@ export default function VotingSystem(Prop: PropType) {
               tags={tags}
               commentOnNote={commentOnNote}
             />
-          )
-        }
+          )}
         </AccordionBody>
       </Accordion>
       {isTester ? (

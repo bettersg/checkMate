@@ -166,7 +166,7 @@ const mockDb = async function () {
     },
     offboardingTime: null,
     dailyAssignmentCount: 0,
-    isTester: false,
+    isTester: true,
     hasBlockedTelegramMessages: false,
   }
   if (querySnap.empty) {
