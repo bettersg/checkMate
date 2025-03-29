@@ -33,7 +33,7 @@ const onMessageWriteV2 = onDocumentWritten(
       const lastTimestamp = messageData.lastTimestamp
       const response =
         messageData?.customReply?.text ?? messageData.communityNote?.en ?? null
-      const downvoted = messageData.communityNote?.downvoted ?? false
+      const downvoted = messageData?.communityNote?.downvoted ?? false
       const lastMonth = firestoreTimestampToYYYYMM(lastTimestamp)
       const firstTimestamp = messageData.firstTimestamp
       const firstMonth = firestoreTimestampToYYYYMM(firstTimestamp)
