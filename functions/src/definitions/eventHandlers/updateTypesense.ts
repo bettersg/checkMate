@@ -6,6 +6,7 @@ import {
 } from "../common/typesense/collectionOperations"
 import { firestoreTimestampToYYYYMM } from "../common/utils"
 import { onDocumentWritten } from "firebase-functions/v2/firestore"
+import { MessageData } from "../../types"
 
 const onMessageWriteV2 = onDocumentWritten(
   {
@@ -27,9 +28,12 @@ const onMessageWriteV2 = onDocumentWritten(
     }
 
     // Otherwise, create/update the message in the the Typesense index
-    const messageData = postChangeSnap.data()
+    const messageData = postChangeSnap.data() as MessageData
     if (messageData) {
       const lastTimestamp = messageData.lastTimestamp
+      const response =
+        messageData?.customReply?.text ?? messageData.communityNote?.en ?? null
+      const downvoted = messageData.communityNote?.downvoted ?? false
       const lastMonth = firestoreTimestampToYYYYMM(lastTimestamp)
       const firstTimestamp = messageData.firstTimestamp
       const firstMonth = firestoreTimestampToYYYYMM(firstTimestamp)
@@ -45,6 +49,8 @@ const onMessageWriteV2 = onDocumentWritten(
         firstReceivedUnixTimestamp: firstTimestamp.seconds,
         lastReceivedMonth: lastMonth,
         firstReceivedMonth: firstMonth,
+        response,
+        isDownvoted: downvoted,
       }
       try {
         await upsertOne(upsertDoc, CollectionTypes.Messages)
