@@ -50,6 +50,7 @@ const onMessageWriteV2 = onDocumentWritten(
         lastReceivedMonth: lastMonth,
         firstReceivedMonth: firstMonth,
         response,
+        hasResponse: !!response,
         isDownvoted: downvoted,
       }
       try {
