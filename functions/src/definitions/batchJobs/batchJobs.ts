@@ -463,7 +463,7 @@ async function gatherSystemStats() {
     } else {
       bucketName = "checkmate-stats-uat"
     }
-    const storageBucket = admin.storage().bucket()
+    const storageBucket = admin.storage().bucket(bucketName)
     const statsFile = storageBucket.file(`stats.json`)
 
     await statsFile.save(JSON.stringify(stats), {
