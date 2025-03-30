@@ -423,6 +423,59 @@ async function resetCheckerAssignmentCountHandler() {
   })
 }
 
+async function gatherSystemStats() {
+  try {
+    // Get current timestamp
+    const now = new Date()
+    const timestamp = Timestamp.fromDate(now)
+
+    // Query 1: Get total number of instances
+    const instancesSnapshot = await db
+      .collectionGroup("instances")
+      .count()
+      .get()
+    const totalInstances = instancesSnapshot.data().count
+
+    // Query 2: Get unique count of users with instanceCount > 0
+    const usersSnapshot = await db
+      .collection("users")
+      .where("instanceCount", ">", 0)
+      .count()
+      .get()
+    const activeUsers = usersSnapshot.data().count
+
+    // Query 3: Get total number of checkers
+    const checkersSnapshot = await db.collection("checkers").count().get()
+    const totalCheckers = checkersSnapshot.data().count
+
+    // Format data
+    const stats = {
+      timestamp,
+      submissions: totalInstances,
+      sentBy: activeUsers,
+      totalCheckers,
+    }
+
+    // Save to Firebase Storage
+    let bucketName
+    if (runtimeEnvironment.value() === "PROD") {
+      bucketName = "checkmate-stats"
+    } else {
+      bucketName = "checkmate-stats-uat"
+    }
+    const storageBucket = admin.storage().bucket()
+    const statsFile = storageBucket.file(`stats.json`)
+
+    await statsFile.save(JSON.stringify(stats), {
+      contentType: "application/json",
+    })
+
+    logger.log("System stats saved successfully")
+  } catch (error) {
+    logger.error("Error gathering system stats:", error)
+  }
+}
+
 const checkSessionExpiring = onSchedule(
   {
     schedule: "1 * * * *",
@@ -502,6 +555,15 @@ const resetCheckerAssignmentCount = onSchedule(
   resetCheckerAssignmentCountHandler
 )
 
+const scheduleSystemStats = onSchedule(
+  {
+    schedule: "*/5 * * * *", // Run every 5 minutes
+    timeZone: "Asia/Singapore",
+    region: "asia-southeast1",
+  },
+  gatherSystemStats
+)
+
 // Export scheduled cloud functions
 export const batchJobs = {
   checkSessionExpiring,
@@ -512,6 +574,7 @@ export const batchJobs = {
   resetLeaderboard,
   resetUserSubmissionCounts,
   resetCheckerAssignmentCount,
+  scheduleSystemStats, // Added new job
 }
 
 // Export utility functions
@@ -519,4 +582,5 @@ export const utils = {
   handleInactiveCheckers,
   welcomeNewCheckers,
   interimPromptHandler,
+  gatherSystemStats, // Added new utility function
 }
