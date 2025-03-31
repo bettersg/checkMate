@@ -8,6 +8,8 @@ import {
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
   sendWhatsappFlowMessage,
+  sendWhatsappVideoMessage,
+  sendWhatsappCtaUrlMessage,
 } from "./sendWhatsappMessage"
 import {
   DocumentSnapshot,
@@ -682,24 +684,124 @@ async function sendRationalisation(
   }
 }
 
-async function updateLanguageAndSendMenu(
+async function updateLanguageAndFollowUp(
   userSnap: DocumentSnapshot,
-  language: LanguageSelection
+  language: LanguageSelection,
+  firstTime: boolean
 ) {
   await userSnap.ref.update({
     language: language,
   })
-  await sendMenuMessage(
-    userSnap,
-    "MENU_PREFIX",
-    "whatsapp",
+  //refresh userSnap
+  userSnap = await userSnap.ref.get()
+  const ageGroup = userSnap.get("ageGroup")
+  const responses = await getResponsesObj("user", language)
+  const shareWithOthersButton = {
+    type: "reply",
+    reply: {
+      id: `shareWithOthers`,
+      title: responses.BUTTON_SHARE,
+    },
+  }
+  const showHowToUseButton = {
+    type: "reply",
+    reply: {
+      id: `show`,
+      title: responses.BUTTON_SHOW_ME,
+    },
+  }
+  if (firstTime) {
+    console.log(ageGroup)
+    switch (ageGroup) {
+      case "18-35":
+      case "36-50":
+        await sendFoundersMessage(userSnap)
+        break
+      case "<18":
+      case "51-65":
+      case ">65":
+      default:
+        await sendWhatsappButtonMessage(
+          "user",
+          userSnap.get("whatsappId"),
+          responses.ON_SIGNUP_MESSAGE,
+          [
+            showHowToUseButton,
+            shareWithOthersButton,
+            {
+              type: "reply",
+              reply: {
+                id: `viewFoundersMessage`,
+                title: responses.CTA_FOUNDER_MESSAGE,
+              },
+            },
+          ]
+        )
+    }
+  } else {
+    await sendMenuMessage(
+      userSnap,
+      "MENU_PREFIX",
+      "whatsapp",
+      null,
+      null,
+      true,
+      false,
+      false,
+      language
+    ) //truncated menu on onboarding
+  }
+}
+
+async function sendSharingMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const onBoardingVideoId = (
+    await db.collection("systemParameters").doc("others").get()
+  ).data()?.onboardingVideoId
+  const link = `https://wa.me/${process.env.USERS_WHATSAPP_NUMBER}`
+  await sendWhatsappVideoMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    onBoardingVideoId,
     null,
+    responses.FORWARDING_MESSAGE.replace("{{link}}", link),
+    null
+  )
+  await userSnap.ref.update({
+    getSharingMessageCount: FieldValue.increment(1),
+  })
+}
+
+async function sendFoundersMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const shareWithOthersButton = {
+    type: "reply",
+    reply: {
+      id: `shareWithOthers`,
+      title: responses.BUTTON_SHARE,
+    },
+  }
+  const supportOnPatreonButton = {
+    type: "reply",
+    reply: {
+      id: `supportOnPatreon`,
+      title: responses.BUTTON_SUPPORT_US,
+    },
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responses.FOUNDER_MESSAGE_BODY,
+    [supportOnPatreonButton, shareWithOthersButton],
     null,
-    true,
-    false,
-    false,
-    language
-  ) //truncated menu on onboarding
+    responses.FOUNDER_MESSAGE_HEADER,
+    responses.FOUNDER_MESSAGE_FOOTER
+  )
+  await userSnap.ref.update({
+    viewedFoundersMessageCount: FieldValue.increment(1),
+  })
 }
 
 async function sendInterimUpdate(
@@ -906,6 +1008,7 @@ async function respondToInstance(
     )
   }
   const language = userSnap.get("language") ?? "en"
+  const isOnboarded = userSnap.get("isOnboardingComplete")
   const isTester = userSnap.get("isTester") ?? false
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
@@ -917,7 +1020,6 @@ async function respondToInstance(
   const isDisclaimed = data?.disclaimerAcceptanceTimestamp != null
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const machineCategory = parentMessageSnap.get("machineCategory")
-  const instanceCount = parentMessageSnap.get("instanceCount")
   const customReply: CustomReply = parentMessageSnap.get("customReply")
   const communityNote: CommunityNote = parentMessageSnap.get("communityNote")
   const { validResponsesCount } = await getVoteCounts(parentMessageRef)
@@ -993,11 +1095,27 @@ async function respondToInstance(
     },
   }
 
+  const supportUsButton = {
+    type: "reply",
+    reply: {
+      id: `supportOnPatreon_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_SUPPORT_US,
+    },
+  }
+
   const viewSourcesButton = {
     type: "reply",
     reply: {
       id: `viewSources_${instanceSnap.ref.path}`,
       title: responses.BUTTON_VIEW_SOURCES,
+    },
+  }
+
+  const feedbackButton = {
+    type: "reply",
+    reply: {
+      id: `feedbackNote_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_GIVE_FEEDBACK,
     },
   }
 
@@ -1032,33 +1150,38 @@ async function respondToInstance(
       .replace("{{date}}", dateStr)
       .replace(
         "{{submissions_remaining}}",
-        responses.REMAINING_SUBMISSIONS_SUFFIX
+        isOnboarded ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
       )
       .replace("{{num_submissions_used}}", numSubmissionsUsed.toString())
       .replace("{{free_tier_limit}}", submissionLimit.toString())
       .replace("{{get_more_cta}}", responses.GET_MORE_CTA)
-    const buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackNote_${instanceSnap.ref.path}`,
-          title: responses.BUTTON_GIVE_FEEDBACK,
-        },
-      },
-    ]
+    const buttons = []
     //if sources exists, add them in between the 2 buttons
-    if (sources.length > 0) {
-      buttons.push(viewSourcesButton)
-    }
-    buttons.push(getMoreChecksButton)
 
-    const response = await sendWhatsappButtonMessage(
-      "user",
-      from,
-      responseText,
-      buttons,
-      replyId
-    )
+    if (isOnboarded) {
+      buttons.push(feedbackButton)
+      if (sources.length > 0) {
+        buttons.push(viewSourcesButton)
+      }
+      buttons.push(supportUsButton)
+    }
+    let response
+    if (buttons.length > 0) {
+      response = await sendWhatsappButtonMessage(
+        "user",
+        from,
+        responseText,
+        buttons,
+        replyId
+      )
+    } else {
+      response = await sendWhatsappTextMessage(
+        "user",
+        from,
+        responseText,
+        replyId
+      )
+    }
     communityNoteMessageId = response?.data?.messages?.[0]?.id
   }
 
@@ -1235,7 +1358,7 @@ async function respondToInstance(
       }
 
       if (isTester) {
-        buttons.push(getMoreChecksButton)
+        buttons.push(supportUsButton)
       }
 
       if (buttons.length > 0) {
@@ -1269,15 +1392,9 @@ async function respondToInstance(
       await incrementCheckerCounts(from, "numReported", 1)
     }
   }
-
-  //await sendRemainingSubmissionQuota(userSnap)
-
-  // if (
-  //   Math.random() < thresholds.surveyLikelihood &&
-  //   category != "irrelevant_auto"
-  // ) {
-  //   await sendSatisfactionSurvey(instanceSnap)
-  // }
+  if (!isOnboarded) {
+    await sendOnboardingFlow(userSnap, false)
+  }
   return
 }
 
@@ -1553,63 +1670,89 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const isPaidTier = userSnap.get("tier") !== "free"
   const paidTierLimit = thresholds.paidTierLimit ?? 50
   const isTester = userSnap.get("isTester") ?? false
-  if (!isTester) {
-    const responseText = responses.OUT_OF_SUBMISSIONS
-    await sendTextMessage(
-      "user",
-      whatsappId,
-      responseText,
-      null,
-      "whatsapp",
-      true
-    )
-    return
+  const responseText = responses.OUT_OF_SUBMISSIONS_SUPPORT
+  const supportOnPatreonButton = {
+    type: "reply",
+    reply: {
+      id: `supportOnPatreon`,
+      title: responses.BUTTON_SUPPORT_US,
+    },
   }
-  if (isPaidTier || hasExpressedInterest) {
-    const responseText = responses.OUT_OF_SUBMISSIONS_THANKS.replace(
-      "{{free_tier_limit}}",
-      submissionLimit.toString()
-    )
-    await sendTextMessage(
-      "user",
-      whatsappId,
-      responseText,
-      null,
-      "whatsapp",
-      true
-    )
-  } else {
-    const waitListFlowID = process.env.WAITLIST_FLOW_ID
-    if (!waitListFlowID) {
-      functions.logger.error("WAITLIST_FLOW_ID not defined")
-      return
-    }
-    const responseText = responses.OUT_OF_SUBMISSIONS_NUDGE.replace(
-      "{{paid_tier_limit}}",
-      paidTierLimit.toString()
-    ).replace("{{free_tier_limit}}", submissionLimit.toString())
-    const ctaText = responses.CTA_JOIN_WAITLIST
-    await createAndSendFlow(
-      whatsappId,
-      language === "cn" ? "waitlist_cn" : "waitlist_en",
-      ctaText,
-      responseText,
-      null,
-      null,
-      process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT",
-      "out_of_submissions"
-    )
-  }
+  const buttons = [supportOnPatreonButton]
+  await sendWhatsappButtonMessage(
+    "user",
+    whatsappId,
+    responseText,
+    buttons,
+    null
+  )
+  // if (!isTester) {
+  //   const responseText = responses.OUT_OF_SUBMISSIONS
+  //   await sendTextMessage(
+  //     "user",
+  //     whatsappId,
+  //     responseText,
+  //     null,
+  //     "whatsapp",
+  //     true
+  //   )
+  //   return
+  // }
+  // if (isPaidTier || hasExpressedInterest) {
+  //   const responseText = responses.OUT_OF_SUBMISSIONS_THANKS.replace(
+  //     "{{free_tier_limit}}",
+  //     submissionLimit.toString()
+  //   )
+  //   await sendTextMessage(
+  //     "user",
+  //     whatsappId,
+  //     responseText,
+  //     null,
+  //     "whatsapp",
+  //     true
+  //   )
+  // } else {
+  //   const waitListFlowID = process.env.WAITLIST_FLOW_ID
+  //   if (!waitListFlowID) {
+  //     functions.logger.error("WAITLIST_FLOW_ID not defined")
+  //     return
+  //   }
+  //   const responseText = responses.OUT_OF_SUBMISSIONS_NUDGE.replace(
+  //     "{{paid_tier_limit}}",
+  //     paidTierLimit.toString()
+  //   ).replace("{{free_tier_limit}}", submissionLimit.toString())
+  //   const ctaText = responses.CTA_JOIN_WAITLIST
+  //   await createAndSendFlow(
+  //     whatsappId,
+  //     language === "cn" ? "waitlist_cn" : "waitlist_en",
+  //     ctaText,
+  //     responseText,
+  //     null,
+  //     null,
+  //     process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT",
+  //     "out_of_submissions"
+  //   )
+  // }
 }
 
 async function sendOnboardingFlow(
   userSnap: DocumentSnapshot,
   firstTime: boolean
 ) {
+  //get userSnap which might have refreshed
+  const userRef = userSnap.ref
+  const userSnapRefreshed = await userRef.get()
+  if (userSnapRefreshed.exists) {
+    userSnap = userSnapRefreshed
+  }
+  if (!userSnap) {
+    functions.logger.error("User snap not found")
+    return
+  }
   const onboardingFlowId = process.env.ONBOARDING_FLOW_ID
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  let responseText = responses.INTRODUCTION
+  let responseText = responses.INITIAL_ONBOARD
   if (!onboardingFlowId) {
     functions.logger.error("ONBOARDING_FLOW_ID not defined")
     return
@@ -1617,7 +1760,8 @@ async function sendOnboardingFlow(
   if (!firstTime) {
     responseText = responses.PLEASE_ONBOARD
   }
-  const ctaText = responses.BUTTON_SIGN_UP
+  const ctaText = responses.BUTTON_SIGN_UP_FORMAL
+  console.log(`Onboarding Response Text: ${responseText}`)
   await createAndSendFlow(
     userSnap.get("whatsappId"),
     "onboarding",
@@ -1711,6 +1855,101 @@ async function sendLanguageSelection(
   await sendWhatsappButtonMessage("user", whatsappId, response, buttons)
 }
 
+async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
+  //TODO: IMPLEMENT
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const isOnboardingComplete = userSnap.get("isOnboardingComplete")
+  const onBoardingVideoId = (
+    await db.collection("systemParameters").doc("others").get()
+  ).data()?.onboardingVideoId
+  if (!onBoardingVideoId) {
+    functions.logger.error("ONBOARDING_VIDEO_ID not defined")
+    return
+  }
+  const noFishySuffix = responses.NO_FISHY_SUFFIX
+  const caption = responses.DEMO_CAPTION.replace(
+    "{{nofishy}}",
+    isOnboardingComplete ? noFishySuffix : ""
+  )
+  await sendWhatsappVideoMessage(
+    "user",
+    whatsappId,
+    onBoardingVideoId,
+    null,
+    caption
+  )
+  if (!isOnboardingComplete) {
+    //wait 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await sendWhatsappButtonMessage(
+      "user",
+      whatsappId,
+      responses.SIGNUP_PROMPT,
+      [
+        {
+          type: "reply",
+          reply: {
+            id: `signup`,
+            title: responses.BUTTON_SIGN_UP_FORMAL,
+          },
+        },
+      ],
+      null
+    )
+  }
+  await userSnap.ref.update({
+    viewedDemoCount: FieldValue.increment(1),
+  })
+}
+
+async function sendCheckMateUsagePrompt(
+  userSnap: DocumentSnapshot,
+  includeReminder: boolean = false,
+  includeSignup: boolean = true,
+  userPressedWrong: boolean = false
+) {
+  //get userSnap which might have refreshed
+  const userRef = userSnap.ref
+  const userSnapRefreshed = await userRef.get()
+  if (userSnapRefreshed.exists) {
+    userSnap = userSnapRefreshed
+  }
+  if (!userSnap) {
+    functions.logger.error("User snap not found")
+    return
+  }
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const reminder = responses.CANT_CHAT_PREFIX
+  const pressWrong = responses.PRESS_WRONG_PREFIX
+  let response = responses.INITIAL_TRIVIAL.replace(
+    "{{reminder}}",
+    includeReminder ? (userPressedWrong ? pressWrong : reminder) : ""
+  )
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `show`,
+        title: responses.BUTTON_SHOW_ME,
+      },
+    },
+  ]
+  if (includeSignup) {
+    buttons.push({
+      type: "reply",
+      reply: {
+        id: `signup`,
+        title: responses.BUTTON_SIGN_UP,
+      },
+    })
+  }
+  await sendWhatsappButtonMessage("user", whatsappId, response, buttons)
+}
+
 async function sendUnsupportedTypeMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
@@ -1724,6 +1963,31 @@ async function sendUnsupportedTypeMessage(
     responses?.UNSUPPORTED_TYPE,
     replyMessageId
   )
+}
+
+async function sendPatreonLink(
+  userSnap: DocumentSnapshot,
+  instancePath: string | null = null
+) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  await sendWhatsappCtaUrlMessage(
+    "user",
+    whatsappId,
+    responses.CTA_PATREON,
+    "https://patreon.com/CheckMateSG",
+    responses.DONATE_MESSAGE
+  )
+  await userSnap.ref.update({
+    supportUsCount: FieldValue.increment(1),
+  })
+  if (instancePath) {
+    const instanceRef = db.doc(instancePath)
+    await instanceRef.update({
+      userClickedSupportUs: true,
+    })
+  }
 }
 
 async function sendBlast(userSnap: DocumentSnapshot) {
@@ -1958,7 +2222,7 @@ export {
   sendReferralMessage,
   sendRationalisation,
   respondToRationalisationFeedback,
-  updateLanguageAndSendMenu,
+  updateLanguageAndFollowUp,
   sendLanguageSelection,
   sendUnsupportedTypeMessage,
   sendBlast,
@@ -1968,10 +2232,15 @@ export {
   respondToWaitlist,
   sendOutOfSubmissionsMessage,
   sendOnboardingFlow,
+  sendCheckMateDemonstration,
+  sendCheckMateUsagePrompt,
   sendGetMoreSubmissionsMessage,
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
   sendWaitingMessage,
   handleDisclaimer,
   correctCommunityNote,
+  sendFoundersMessage,
+  sendPatreonLink,
+  sendSharingMessage,
 }

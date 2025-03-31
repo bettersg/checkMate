@@ -537,7 +537,7 @@ const resetLeaderboard = onSchedule(
 
 const resetUserSubmissionCounts = onSchedule(
   {
-    schedule: "0 0 * * *", // Run at midnight daily
+    schedule: "0 0 1 * *", // Run at midnight on the 1st of each month
     timeZone: "Asia/Singapore",
     retryCount: 3,
     region: "asia-southeast1",

@@ -23,6 +23,7 @@ import {
 } from "../common/responseUtils"
 import { decryptRequest, encryptResponse } from "../../utils/cyptography"
 import { flowEndpointHandler } from "./handlers/flowEndpointHandler"
+import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -131,8 +132,16 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
               }
               if (phoneNumberId === userPhoneNumberId) {
                 //check for new user
-
                 const whatsappId = message.from
+                //check if whatsapp number starts with 65, otherwise ignore
+                if (!whatsappId.startsWith("65")) {
+                  await sendWhatsappTextMessage(
+                    "user",
+                    whatsappId,
+                    "Sorry, CheckMate currently only works for Singapore phone numbers"
+                  )
+                  return res.sendStatus(200)
+                }
                 let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
                 if (userSnap === null) {
                   //new user
@@ -153,14 +162,14 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     return res.sendStatus(400)
                   }
                   userSnap = await userRef.get()
-                  if (type !== "request_welcome") {
-                    functions.logger.warn(
-                      `New user ${whatsappId}, but not due to request_welcome event`
-                    )
-                    await sendOnboardingFlow(userSnap, true)
-                    await handlePreOnboardedMessage(userSnap, message)
-                    return res.sendStatus(200)
-                  }
+                  // if (type !== "request_welcome") {
+                  //   functions.logger.warn(
+                  //     `New user ${whatsappId}, but not due to request_welcome event`
+                  //   )
+                  //   await sendOnboardingFlow(userSnap, true)
+                  //   await handlePreOnboardedMessage(userSnap, message)
+                  //   return res.sendStatus(200)
+                  // }
                 } else if (userSnap.get("isIgnored")) {
                   //handle ban
                   functions.logger.warn(
@@ -168,18 +177,25 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                   )
                   return res.sendStatus(200)
                 }
-                //check whether it's navigational or message
                 const isNavigational = checkNavigational(message)
+                const isFlowSubmission = checkFlowSubmission(message)
+
+                if (
+                  userSnap.get("isOnboardingComplete") === false &&
+                  !isFlowSubmission
+                ) {
+                  console.log(`Handling Pre-Onboarded Message`)
+                  await handlePreOnboardedMessage(userSnap, message)
+                  return res.sendStatus(200)
+                }
+                //check whether it's navigational or message
+
                 if (isNavigational) {
                   await publishToTopic(
                     "userNavigationEvents",
                     message,
                     "whatsapp"
                   )
-                } else if (userSnap.get("isOnboardingComplete") === false) {
-                  await sendOnboardingFlow(userSnap, false)
-                  await handlePreOnboardedMessage(userSnap, message)
-                  return res.sendStatus(200)
                 } else {
                   switch (type) {
                     case "text":
@@ -189,6 +205,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                         source: "whatsapp",
                         id: message.id,
                         userId: message.from,
+                        isUserOnboarded: userSnap.get("isOnboardingComplete"),
                         type: message.type,
                         subject: null,
                         text: message.text?.body ?? null,
@@ -477,6 +494,15 @@ const checkNavigational = function (message: WhatsappMessageObject) {
     if (checkMenu(text)) {
       return true
     }
+  }
+  return false
+}
+
+const checkFlowSubmission = function (message: WhatsappMessageObject) {
+  //TODO: implement
+  const type = message.type
+  if (type === "interactive" && message?.interactive?.nfm_reply) {
+    return true
   }
   return false
 }

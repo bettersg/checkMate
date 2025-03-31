@@ -42,12 +42,12 @@ const onUserWhitelist = onDocumentUpdated(
         postChangeIsOnboardingComplete &&
         postChangeIsTester)
     ) {
-      await sendWhatsappTemplateMessage(
-        "user",
-        postChangeData?.whatsappId,
-        "checkmate_beta_onboarding",
-        "en"
-      )
+      // await sendWhatsappTemplateMessage(
+      //   "user",
+      //   postChangeData?.whatsappId,
+      //   "checkmate_beta_onboarding",
+      //   "en"
+      // )
     }
 
     return Promise.resolve()

@@ -107,6 +107,7 @@ export type GeneralMessage = {
   source: string //the source of the message, e.g. whatsapp, telegram
   id: string //the message id received
   userId: string
+  isUserOnboarded: boolean //whether or not the user has completed the onboarding flow
   type: string
   subject: string | null //for emails
   text: string | null
@@ -209,6 +210,7 @@ export type InstanceData = {
   isSatisfactionSurveySent: boolean | null //Whether the satisfaction (aka NPS) survey was sent for this message
   satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
   flowId: string | null //If a flow was triggered from this instance, this tracks the flowId. Otherwise null
+  userClickedSupportUs: boolean | null //Whether the user clicked the support us button
   communityNoteMessageId: string | null // WhatsApp ID of the community note sent to the user
 }
 
@@ -228,7 +230,7 @@ export type UserData = {
   whatsappId: string | null // The user's whatsapp phone number
   telegramId: string | null // The user's telegram id, if available. Note this is not the username
   emailId: string | null // The user's email address, if available
-  ageGroup: "<20" | "21-35" | "36-50" | "51-65" | ">65" | null // The user's age group
+  ageGroup: "<18" | "18-35" | "36-50" | "51-65" | ">65" | null // The user's age group
   instanceCount: number // Number of instances sent by this user
   firstMessageReceiptTime: Timestamp // Timestamp of the first interaction between the user and the WhatsApp bot.
   firstMessageType: "normal" | "irrelevant" | "prepopulated" // One of "normal" (a normal message that wasn't categorised as "irrelevant", and so created an instance), "irrelevant" (stuff like hello which got auto-categorised as this), or "prepopulated" (referral link)
@@ -251,6 +253,8 @@ export type UserData = {
   isIgnored: boolean // Whether the user is blocked
   isOnboardingComplete: boolean | null // Whether the user has completed the onboarding flow (selected language, age group, agreed to terms of use). Null for legacy users who onboarded before v2.
   numSubmissionsRemaining: number // Number of submissions made in given time period
+  numPreOnboardSubmissionsRemaining: number // Number of submissions made before the user completed the onboarding flow
+  numPreOnboardMessagesSent: number // Number of messages sent before the user completed the onboarding flow
   submissionLimit: number // Number of submissions allowed in given time period
   isInterestedInSubscription: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at $5 a month
   isInterestedAtALowerPoint: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at a lower price point
@@ -259,6 +263,10 @@ export type UserData = {
   feedback: string | null // The user's feedback, if they've provided any
   tier: "free" | "paid"
   isTester: boolean //Whether or not the user is whitelisted for the beta phase
+  supportUsCount: number // Number of times the user has clicked support us
+  getSharingMessageCount: number // Number of times the user has clicked to get sharing message
+  viewedDemoCount: number // Number of times the user has clicked to view the demo
+  viewedFoundersMessageCount: number // Number of times the user has viewed the founders message
 }
 
 export type CheckerData = {
@@ -498,4 +506,5 @@ export type Thresholds = {
   minVotesPerMessage: number
   price: number
   LLMProvider: string
+  preOnboardLimit: number
 }

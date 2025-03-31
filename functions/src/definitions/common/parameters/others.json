@@ -1,4 +1,5 @@
 {
   "supportedTypes": ["text", "image"],
-  "tags": ["incorrect", "generated"]
+  "tags": ["incorrect", "generated"],
+  "onboardingVideoId": "845832364395512"
 }

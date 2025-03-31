@@ -72,6 +72,7 @@ const userGenericMessageHandlerWhatsapp = async function (
   const type = message.type // image/text
   const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
+  const isUserOnboarded = message.isUserOnboarded
   let userSnap = await getUserSnapshot(from, source)
   if (userSnap == null) {
     logger.error(`User ${from} not found in userHandler`)
@@ -86,10 +87,15 @@ const userGenericMessageHandlerWhatsapp = async function (
     markWhatsappMessageAsRead("user", message.id)
     return
   }
-
-  await userSnap.ref.update({
-    numSubmissionsRemaining: FieldValue.increment(-1),
-  })
+  if (isUserOnboarded) {
+    await userSnap.ref.update({
+      numSubmissionsRemaining: FieldValue.increment(-1),
+    })
+  } else {
+    await userSnap.ref.update({
+      numPreOnboardSubmissionsRemaining: FieldValue.increment(-1),
+    })
+  }
 
   let step
 
@@ -388,6 +394,7 @@ async function newTextInstanceHandler({
     disclaimerSentTimestamp: null,
     disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
+    userClickedSupportUs: false,
   }
   await addInstanceToDb(
     id,
@@ -718,6 +725,7 @@ async function newImageInstanceHandler({
     disclaimerSentTimestamp: null,
     disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
+    userClickedSupportUs: false,
   }
   await addInstanceToDb(
     id,

@@ -175,9 +175,61 @@
     "en": "Hello and welcome to CheckMate! Press the button below to sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。",
     "cn": "Hello and welcome to CheckMate! Press the button below and sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。"
   },
+  "INITIAL_ONBOARD": {
+    "en": "That's how CheckMate works. You send in a message for checking - we'll do the research and send you a response. By the way, it works for images and screenshots too.\n\nIf you like, you can try sending in a message of your own for checking. Otherwise, sign up below to receive free checks each month. 👇",
+    "cn": "查友的服务方式如下：您发送需要查证的信息，我们会进行查找，并把结果发送给您。图片和截图也可以查证。\n\n您可以试着发送一条信息来查证，或者点击下方链接注册，每月可享有免费的查证次数。👇"
+  },
   "PLEASE_ONBOARD": {
-    "en": "We noticed you haven't completed sign up. Please do so below.\n\n我们注意到您尚未完成注册。请在下方完成注册。",
-    "cn": "We noticed you haven't completed sign up. Please do so below.\r\n\r\n我们注意到您尚未完成注册。请在下方完成注册。"
+    "en": "Complete your sign up below to receive free checks each month, and to view the sources used for future responses. 👇",
+    "cn": "完成下方注册，即可每月免费使用查友查证信息，并查看日后回复所用的资料来源。👇"
+  },
+  "INITIAL_TRIVIAL": {
+    "en": "{{reminder}}To use CheckMate, simply send in messages, links, images, or screenshots for checking. Would you like to try sending your own message?",
+    "cn": "{{reminder}}若要使用查友，只需发送您想查证的文字、链接、图片或截图。\n\n要不要试试看，发一条信息来查证？"
+  },
+  "CANT_CHAT_PREFIX": {
+    "en": "CheckMate can't chat with you freely. ",
+    "cn": "查友无法与您自由聊天。"
+  },
+  "PRESS_WRONG_PREFIX": {
+    "en": "Oops, not this one! But It's okay. ",
+    "cn": ""
+  },
+  "DEMO_CAPTION": {
+    "en": "Check out the video above on how to use CheckMate. If you have fishy messages on your phone already, you can try sending one in for checking.{{nofishy}}",
+    "cn": "查看上方的视频，了解如何使用查友。如果你手机里已经有可疑的信息，可以马上发送一条来查证。{{nofishy}}"
+  },
+  "NO_FISHY_SUFFIX": {
+    "en": "\n\nIf not, in future when you encounter one, send it in.",
+    "cn": "\n\n如果没有，没关系！将来如果遇到可疑的信息，随时欢迎发送给查友查证。"
+  },
+  "SIGNUP_PROMPT": {
+    "en": "If you don't have any messages on hand, you can still sign up by pressing the button below. Then next time you encounter something fishy, you can send it in.",
+    "cn": "如果您手边没有要查证的信息，也可以先点击下方按钮注册。下次遇到可疑的内容，就能马上发送给查友查证。"
+  },
+  "FOUNDER_MESSAGE_HEADER": {
+    "en": "Message from the founder: Help us help others",
+    "cn": "创办人的一句：帮助我们，去帮助更多人。"
+  },
+  "FOUNDER_MESSAGE_BODY": {
+    "en": "Hello and Welcome!\n\nRecently, I heard from a friend whose in-laws lost thousands to an investment scam. What stood out wasn't just the amount, but how the victim was in denial, until it was far too late.\n\nI'm guessing that like me, you're worried about your loved ones falling for the same fate. These stories are heartbreaking, but they also motivated the team and me to start this ground-up initiative 2 years ago, and to keep going since then.\n\nThat said, this AI capability that we've developed doesn't come free. Each check costs 6-8 cents. Right now, we're paying out of pocket to keep it going. But we can't do this at scale.\n\nIf you see value in what we're doing, make a contribution at our Patreon page if you can. Any funds will go towards increasing CheckMate's free tier. More details can be found there.\n\nOtherwise, just help us spread the word. If you find CheckMate useful, hit the button below for a message you can forward to others. Or just use it!\n\nHelp us help others - we'd appreciate it deeply 🙏.",
+    "cn": "你好！\n\n不久前，我听朋友说，她的岳父母在一场投资骗局中损失了数万元。最令人痛心的不只是金额，而是受害者在整个过程中始终否认自己被骗，直到一切为时已晚。\n\n我猜，像我一样，你也会担心身边的亲人遭遇同样的命运。这些故事令人心碎，但也正是它们激励了我和团队，在两年前发起了这个由下而上的公益项目，并一路坚持至今。\n\n不过，我们研发的这项查证能力并非免费。每一次查证大约成本在 6 到 8 分钱之间。目前，我们一直是自掏腰包来维持服务的运行，但这不是一个可以长期、大规模推进的方式。\n\n如果你认同我们正在做的事，也希望看到查友继续运作，欢迎通过下方链接到我们的 Patreon 页面做出支持。所有资金将用于扩大查友的每月免费查证额度，更多详情可在 Patreon 页面查看。\n\n如果你暂时无法资助我们，也没关系！只要愿意帮我们转发分享就已经是很大的支持。如果你觉得查友有帮助，点击下方按钮，获取一条可以转发给他人的信息。\n\n帮助我们，去帮助更多人 —— 我们将由衷感激 🙏\n\n"
+  },
+  "FOUNDER_MESSAGE_FOOTER": {
+    "en": "Bing Wen\nFounder of CheckMate",
+    "cn": "陈炳文\n查友创办人"
+  },
+  "ON_SIGNUP_MESSAGE": {
+    "en": "Thanks for signing up 🙏\n\nIf you need a refresher on how to use CheckMate, press \"Show me how to use\".\n\nPress \"Share with others\" to get a message you can forward to get others to join CheckMate.\n\nIf you'd like to read a message from our founder, press \"Founder's Message\".\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. That's all😊",
+    "cn": "感谢你的注册 🙏\n\n如果你需要回顾如何使用查友，请点击「给我演示一下」。\n\n点击「分享给他人」，即可获取一条可以转发的消息，邀请更多人加入查友。\n\n如果你想看看创办人的留言，请点击「听创办人寄语」。\n\n不然，以后遇到可疑的信息，也可以随时发送过来查证。就这样 😊"
+  },
+  "DONATE_MESSAGE": {
+    "en": "Thank you 🙏\n\nYou can make a contribution to CheckMate at our Patreon Page, linked below. Any contribution will go towards keeping the service going, and increasing the monthly free tier so everyone can benefit more from CheckMate.",
+    "cn": "感谢你的支持 🙏\n\n你可以通过下方链接前往我们的 Patreon 页面支持查友。任何金额的支持，都会用于维持查证服务的运作，并扩大每月的免费使用额度，让更多人能从查友受益。"
+  },
+  "FORWARDING_MESSAGE": {
+    "en": "CheckMate is a WhatsApp number where you and your loved ones can send in suspicious messages, links, and screenshots for checking.\nWatch how it works ☝️\n\n🛡️ Add it to you WhatsApp for free checks: {{link}}",
+    "cn": "查友是一个 WhatsApp 号码，您和家人可以将可疑的信息、链接或截图发送过去查证。\n看看它是如何运作的 ☝️\n\n🛡️ 点击添加至 WhatsApp，免费查证信息：{{link}}"
   },
   "NEW_USER_PREFIX_EN": {
     "en": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊.",
@@ -280,32 +332,36 @@
     "cn": "很遗憾此功能对您来说不是很有用。 查友已将您的反馈传递给我们的产品团队，以便进一步增强此功能。感谢您的反馈！"
   },
   "REMAINING_SUBMISSIONS_SUFFIX": {
-    "en": "\n\n[ You have used {{num_submissions_used}} out of your {{free_tier_limit}} free daily submissions to CheckMate.{{get_more_cta}}]",
-    "cn": "\n\n[ 您已使用 CheckMate 每日提供的 {{free_tier_limit}} 次免费提交中的 {{num_submissions_used}} 次。{{get_more_cta}}]"
+    "en": "\n\n[ You have used {{num_submissions_used}} out of your {{free_tier_limit}} free monthly submissions to CheckMate.{{get_more_cta}}]",
+    "cn": "\n\n[ 您已使用查友本月提供的 {{free_tier_limit}} 次免费查证中的 {{num_submissions_used}} 次。{{get_more_cta}}]"
   },
   "GET_MORE_CTA": {
-    "en": " If you'd like more, press the \"Get More\" button below. ",
-    "cn": "如果您需要更多，请点击下方的“获取更多”按钮。"
+    "en": " If you'd like more, consider supporting our work via Patreon. It'll help us expand the free tier.",
+    "cn": "如果您希望获得更多查证次数，欢迎通过 Patreon 支持我们的工作。您的支持将有助于我们扩大免费使用额度。"
   },
   "GET_MORE_SUBMISSIONS": {
-    "en": "Your free submissions will reset at midnight. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.",
-    "cn": "您的免费提交次数将在午夜重置。感谢您对我们付费订阅计划的关注，也感谢您耐心等待我们完成其上线工作 🙏🏻。"
+    "en": "Your free submissions will reset at the start of next month. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it 🙏🏻.",
+    "cn": "您的免费查证次数将于下个月初重置。感谢您对我们付费订阅计划的关注，也感谢您在我们筹备上线期间的耐心等待 🙏🏻。"
   },
   "GET_MORE_SUBMISSIONS_NUDGE": {
     "en": "If you find our service useful, consider joining our waitlist for a premium subscription. For just $5.99 per month, you or a loved one can enjoy {{paid_tier_limit}} submissions while supporting the sustainability of our service!",
-    "cn": "您的免费额度将在午夜重置。如果您觉得我们的服务有价值，欢迎加入我们的高级订阅候补名单。每月仅需$5.99，您或您的亲人即可享受 {{paid_tier_limit}} 次提交，并帮助我们保持服务的持续运营！"
+    "cn": "您的免费额度将下个月初重置。如果您觉得我们的服务有价值，欢迎加入我们的高级订阅候补名单。每月仅需$5.99，您或您的亲人即可享受 {{paid_tier_limit}} 次提交，并帮助我们保持服务的持续运营！"
+  },
+  "OUT_OF_SUBMISSIONS_SUPPORT": {
+    "en": "Thank you for your active engagement with CheckMate🙏🏻. Unfortunately, you've reached our monthly limit. This will reset at the start of next month.\n\nIf you enjoy using CheckMate, consider making a contribution to our initiative to keep it going, and so that we can expand the free tier for everyone.",
+    "cn": "感谢你积极使用查友。\n很抱歉，你已达到本月的免费查证次数上限，额度将在下个月初重置。\n\n如果你觉得查友对你有帮助，欢迎支持我们的公益项目，让服务持续运作，并帮助我们扩大每个人的免费使用额度。"
   },
   "OUT_OF_SUBMISSIONS": {
-    "en": "Thank you for your active engagement with CheckMate. Unfortunately, you've reached our daily limit. This will reset at midnight.\n\nWe appreciate your understanding and continued support as we work to serve everyone as efficiently as possible.",
-    "cn": "感谢您积极使用查友。很遗憾，您已达到今日使用限额。限额将在午夜重置。\n在我们努力为所有用户提供高效服务的同时，感谢您的理解与持续支持。"
+    "en": "Thank you for your active engagement with CheckMate. Unfortunately, you've reached our monthly limit. This will reset at the start of next month.\n\nWe appreciate your understanding and continued support as we work to serve everyone as efficiently as possible.",
+    "cn": "感谢您积极使用查友。很遗憾，您已达到本月使用限额。限额将在下个月初重置。\n\n在我们努力为所有用户提供高效服务的同时，感谢您的理解与持续支持。"
   },
   "OUT_OF_SUBMISSIONS_THANKS": {
-    "en": "Thanks for using CheckMate 🙏🏻.\n\n You have run out of your {{free_tier_limit}} free daily submissions. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it.",
-    "cn": "感谢使用 查友 🙏🏻。\n\n您今日 {{free_tier_limit}} 次的免费提交机会已用完。我们感谢您对高级会员服务的关注，并感谢您的耐心等待，我们正在努力推出该服务。"
+    "en": "Thanks for using CheckMate 🙏🏻.\n\n You have run out of your {{free_tier_limit}} free monthly submissions. We thank you for your interest in our paid subscriber tier and appreciate your patience as we work to implement it.",
+    "cn": "感谢使用查友 🙏🏻\n您本月 {{free_tier_limit}} 次的免费查证次数已用完。\n感谢您对高级会员服务的关注，也感谢您的耐心等待，我们正在努力推出该服务。"
   },
   "OUT_OF_SUBMISSIONS_NUDGE": {
-    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free daily submissions. Want more? Join our waitlist for a premium subscription below - just $5.99 per month gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
-    "cn": "感谢您使用查友 🙏🏻。您今日的{{daily_free_tier_limit}}次免费提交已用完。想要更多吗？通过以下链接加入我们的高级订阅候补名单——每日仅需$5.99，即可享受您或您所关心的人每日{{daily_paid_tier_limit}}次提交，并帮助我们维持服务运营！"
+    "en": "Thanks for using CheckMate 🙏🏻. You have run out of your {{free_tier_limit}} free monthly submissions. Want more? Join our waitlist for a premium subscription below - just $5.99 per month gets you or a loved one {{paid_tier_limit}} submissions and helps keep our service running!",
+    "cn": "感谢使用查友 🙏🏻\n您本月的 {{free_tier_limit}} 次免费查证次数已用完。\n想要更多查证次数？欢迎加入我们的高级会员等候名单 —— 每月只需 $5.99，您或您的亲人即可获得 {{paid_tier_limit}} 次查证机会，同时也能支持我们持续提供服务！"
   },
   "WAITLIST_THANKS": {
     "en": "Thanks for signing up for the waitlist! We will inform you when the paid subscription is available.",
@@ -475,13 +531,29 @@
     "en": "Get More/Support Us",
     "cn": "支持我们 / 获取更多"
   },
-  "BUTTON_SIGN_UP": {
-    "en": "Sign Up/注册",
-    "cn": "Sign Up/注册"
+  "BUTTON_SIGN_UP_FORMAL": {
+    "en": "Sign Up",
+    "cn": "注册"
   },
   "BUTTON_PROCEED_ANYWAY": {
     "en": "Proceed anyway",
     "cn": "仍然继续"
+  },
+  "BUTTON_SHOW_ME": {
+    "en": "Show me how to use",
+    "cn": "给我演示一下"
+  },
+  "BUTTON_SIGN_UP": {
+    "en": "No, sign me up",
+    "cn": "直接注册"
+  },
+  "BUTTON_SHARE": {
+    "en": "Share with others",
+    "cn": "分享给他人"
+  },
+  "BUTTON_SUPPORT_US": {
+    "en": "Support via Patreon",
+    "cn": "在Patreon上支持我们"
   },
   "PLACEHOLDER_SCAM": {
     "en": "a scam🚫",
@@ -530,5 +602,13 @@
   "CTA_GET_MORE": {
     "en": "Get More!",
     "cn": "获取更多!"
+  },
+  "CTA_FOUNDER_MESSAGE": {
+    "en": "Hear the founder out",
+    "cn": "创办人寄语"
+  },
+  "CTA_PATREON": {
+    "en": "Our Patreon Page",
+    "cn": "我们的 Patreon 页面"
   }
 }
