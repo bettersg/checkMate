@@ -103,7 +103,6 @@ export async function createNewUser(
     viewedDemoCount: 0,
     viewedFoundersMessageCount: 0,
   }
-  console.log(`New User Object: ${JSON.stringify(newUserObject)}`)
   try {
     const res = await db.collection("users").add(newUserObject)
     return res

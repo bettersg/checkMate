@@ -26,3 +26,4 @@ export { sendCheckerReactivation } from "./definitions/taskHandlers/reactivation
 export { onUserWhitelist } from "./definitions/eventHandlers/onUserWhitelist"
 export { onCheckerWhitelist } from "./definitions/eventHandlers/onCheckerWhitelist"
 export { batchJobs }
+export { onUserPreOnboardingPublish } from "./definitions/eventHandlers/userPreOnboardingHandler"

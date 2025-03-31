@@ -7,7 +7,6 @@ import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
 import { checkMessageId } from "../common/utils"
-import { handlePreOnboardedMessage } from "../../services/user/referrals"
 import { Request, Response } from "express"
 import { AppEnv } from "../../appEnv"
 import { GeneralMessage, WhatsappMessageObject } from "../../types"
@@ -184,8 +183,12 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                   userSnap.get("isOnboardingComplete") === false &&
                   !isFlowSubmission
                 ) {
-                  console.log(`Handling Pre-Onboarded Message`)
-                  await handlePreOnboardedMessage(userSnap, message)
+                  // Publish to queue instead of direct handling
+                  await publishToTopic(
+                    "userPreOnboardingEvents",
+                    message,
+                    "whatsapp"
+                  )
                   return res.sendStatus(200)
                 }
                 //check whether it's navigational or message

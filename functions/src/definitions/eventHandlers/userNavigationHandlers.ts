@@ -373,7 +373,6 @@ async function onFlowResponse(
   messageObj: WhatsappMessageObject,
   platform = "whatsapp"
 ) {
-  console.log("flow response received")
   const from = messageObj.from
   const jsonString = messageObj.interactive?.nfm_reply?.response_json
   if (!jsonString) {

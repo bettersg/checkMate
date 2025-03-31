@@ -328,7 +328,6 @@ async function sendWhatsappButtonMessage(
   headerText: string | null = null,
   footerText: string | null = null
 ) {
-  console.log(text.length)
   const data: {
     messaging_product: string
     recipient_type: string

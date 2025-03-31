@@ -711,7 +711,6 @@ async function updateLanguageAndFollowUp(
     },
   }
   if (firstTime) {
-    console.log(ageGroup)
     switch (ageGroup) {
       case "18-35":
       case "36-50":
@@ -1761,7 +1760,6 @@ async function sendOnboardingFlow(
     responseText = responses.PLEASE_ONBOARD
   }
   const ctaText = responses.BUTTON_SIGN_UP_FORMAL
-  console.log(`Onboarding Response Text: ${responseText}`)
   await createAndSendFlow(
     userSnap.get("whatsappId"),
     "onboarding",
