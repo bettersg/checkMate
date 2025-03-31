@@ -271,7 +271,6 @@ const onUserPreOnboardingPublish = onMessagePublished(
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
       "OPENAI_API_KEY",
-      "HASHIDS_SALT",
     ],
     timeoutSeconds: 120,
   },
