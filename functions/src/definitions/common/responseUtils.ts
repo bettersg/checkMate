@@ -1102,6 +1102,14 @@ async function respondToInstance(
     },
   }
 
+  const signUpButton = {
+    type: "reply",
+    reply: {
+      id: `signup_normal`,
+      title: responses.BUTTON_SIGN_UP_MORE,
+    },
+  }
+
   const viewSourcesButton = {
     type: "reply",
     reply: {
@@ -1163,6 +1171,8 @@ async function respondToInstance(
         buttons.push(viewSourcesButton)
       }
       buttons.push(supportUsButton)
+    } else {
+      buttons.push(signUpButton)
     }
     let response
     if (buttons.length > 0) {
@@ -1347,17 +1357,19 @@ async function respondToInstance(
         isTester,
       })
 
-      if (!(isMachineCategorised || validResponsesCount <= 0)) {
-        buttons.push(votingResultsButton)
-      }
-
-      if (category === "scam" || category === "illicit") {
-        buttons.push(declineScamShieldButton)
-        updateObj.scamShieldConsent = true
-      }
-
-      if (isTester) {
-        buttons.push(supportUsButton)
+      if (isOnboarded) {
+        if (!(isMachineCategorised || validResponsesCount <= 0)) {
+          buttons.push(votingResultsButton)
+        }
+        if (category === "scam" || category === "illicit") {
+          buttons.push(declineScamShieldButton)
+          updateObj.scamShieldConsent = true
+        }
+        if (isTester) {
+          buttons.push(supportUsButton)
+        }
+      } else {
+        buttons.push(signUpButton)
       }
 
       if (buttons.length > 0) {
@@ -1390,9 +1402,6 @@ async function respondToInstance(
     if (countOfInstancesFromSender == 1) {
       await incrementCheckerCounts(from, "numReported", 1)
     }
-  }
-  if (!isOnboarded) {
-    await sendOnboardingFlow(userSnap, false)
   }
   return
 }
@@ -1889,7 +1898,7 @@ async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
         {
           type: "reply",
           reply: {
-            id: `signup`,
+            id: `signup_normal`,
             title: responses.BUTTON_SIGN_UP_FORMAL,
           },
         },
@@ -1940,7 +1949,7 @@ async function sendCheckMateUsagePrompt(
     buttons.push({
       type: "reply",
       reply: {
-        id: `signup`,
+        id: `signup_normal`,
         title: responses.BUTTON_SIGN_UP,
       },
     })

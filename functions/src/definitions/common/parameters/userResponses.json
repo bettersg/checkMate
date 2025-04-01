@@ -176,7 +176,7 @@
     "cn": "Hello and welcome to CheckMate! Press the button below and sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。"
   },
   "INITIAL_ONBOARD": {
-    "en": "That's how CheckMate works. You send in a message for checking - we'll do the research and send you a response. By the way, it works for images and screenshots too.\n\nIf you like, you can try sending in a message of your own for checking. Otherwise, sign up below to receive free checks each month. 👇",
+    "en": "Yes, that's how CheckMate works. You send in a message for checking - we'll do the research and send you a response. By the way, it works for images and screenshots too.\n\nIf you like, you can try sending in a message of your own for checking. Otherwise, sign up below to receive free checks each month. 👇",
     "cn": "查友的服务方式如下：您发送需要查证的信息，我们会进行查找，并把结果发送给您。图片和截图也可以查证。\n\n您可以试着发送一条信息来查证，或者点击下方链接注册，每月可享有免费的查证次数。👇"
   },
   "PLEASE_ONBOARD": {
@@ -554,6 +554,14 @@
   "BUTTON_SUPPORT_US": {
     "en": "Support via Patreon",
     "cn": "在Patreon上支持我们"
+  },
+  "BUTTON_SIGN_UP_MORE": {
+    "en": "Sign up for more",
+    "cn": "注册以继续使用"
+  },
+  "BUTTON_THATS_HOW": {
+    "en": "I see how it works!",
+    "cn": "原来是这样用的"
   },
   "PLACEHOLDER_SCAM": {
     "en": "a scam🚫",

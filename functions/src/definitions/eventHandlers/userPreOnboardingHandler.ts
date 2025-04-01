@@ -8,9 +8,13 @@ import {
   sendCheckMateUsagePrompt,
   sendCheckMateDemonstration,
   sendUnsupportedTypeMessage,
+  getResponsesObj,
 } from "../../definitions/common/responseUtils"
 import { normalizeSpaces, checkPreV2User } from "../../definitions/common/utils"
-import { sendWhatsappTextMessage } from "../../definitions/common/sendWhatsappMessage"
+import {
+  sendWhatsappButtonMessage,
+  sendWhatsappTextMessage,
+} from "../../definitions/common/sendWhatsappMessage"
 import {
   WhatsappMessageObject,
   LanguageSelection,
@@ -98,9 +102,6 @@ async function handlePreOnboardedMessage(
           }
           if (await respondToSampleMessage(message, userSnap)) {
             step = "preonboard_sample"
-            //wait 5 seconds before sending onboarding flow
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-            await sendOnboardingFlow(userSnap, true)
             break
           }
           const needsChecking = await determineNeedsChecking({
@@ -216,7 +217,12 @@ async function onPreOnboardButtonReply(
       await sendCheckMateDemonstration(userSnap)
       break
     case "signup":
-      await sendOnboardingFlow(userSnap, false)
+      ;[selection] = rest
+      if (selection === "new") {
+        await sendOnboardingFlow(userSnap, true)
+      } else {
+        await sendOnboardingFlow(userSnap, false)
+      }
       break
     case "languageSelection":
       ;[selection] = rest as [LanguageSelection]
@@ -241,14 +247,26 @@ async function respondToSampleMessage(
     throw new Error("No text in message")
   }
   const textNormalised = normalizeSpaces(message.text?.body).toLowerCase()
-
   for (const sample of SAMPLE_MESSAGES) {
     const sampleNormalised = normalizeSpaces(sample.message).toLowerCase()
     if (textNormalised === sampleNormalised) {
-      await sendWhatsappTextMessage(
+      const responses = await getResponsesObj(
+        "user",
+        sample.language as LanguageSelection
+      )
+      await sendWhatsappButtonMessage(
         "user",
         userSnap.get("whatsappId"),
-        sample.response
+        sample.response,
+        [
+          {
+            type: "reply",
+            reply: {
+              id: `signup_new`,
+              title: responses.BUTTON_THATS_HOW,
+            },
+          },
+        ]
       )
       if (sample.language !== userSnap.get("language")) {
         await userSnap.ref.update({
