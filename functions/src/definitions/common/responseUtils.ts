@@ -1982,7 +1982,7 @@ async function sendPatreonLink(
   await sendWhatsappCtaUrlMessage(
     "user",
     whatsappId,
-    responses.CTA_PATREON,
+    responses.CTA_CHUFFED,
     "https://patreon.com/CheckMateSG",
     responses.DONATE_MESSAGE
   )

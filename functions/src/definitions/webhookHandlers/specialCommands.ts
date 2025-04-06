@@ -97,7 +97,7 @@ const mockDb = async function () {
     whatsapp: ["text", "image"],
   })
   await systemParametersRef.doc("others").set({
-    onboardingVideoId: "845832364395512",
+    onboardingVideoId: "1297825751317467",
   })
   await systemParametersRef.doc("thresholds").set(thresholds)
   await systemParametersRef.doc("counts").set({

@@ -26,6 +26,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
       "WHATSAPP_TOKEN",
       "TELEGRAM_CHECKER_BOT_TOKEN",
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "CHECKMATE_CORE_API_KEY",
     ],
   },
   async (event) => {
@@ -80,6 +81,8 @@ const onInstanceUpdateV2 = onDocumentUpdated(
           if (postChangeData.type === "text") {
             communityNoteData = await getCommunityNote({
               text: postChangeData.text,
+              requestId: messageSnap.id,
+              useCloudflare: true,
             })
           } else {
             const filename = postChangeData.storageUrl
@@ -88,6 +91,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
               url: signedUrl,
               caption: postChangeData.caption,
               requestId: messageSnap.id,
+              useCloudflare: true,
             })
           }
           isCommunityNoteGenerated = true
