@@ -142,17 +142,17 @@ async function getCommunityNote(input: {
     if (env === "SIT") {
       throw new Error("Cannot call getCommunityNote in SIT environment")
     }
-    // if (env === "DEV") {
-    //   return {
-    //     en: "This is a test community note.",
-    //     cn: "这是一个测试社区笔记。",
-    //     links: ["https://example1.com", "https://example2.com"],
-    //     isControversial:
-    //       input.text?.toLowerCase().includes("controversial") || false,
-    //     isVideo: input.text?.toLowerCase().includes("video") || false,
-    //     isAccessBlocked: input.text?.toLowerCase().includes("blocked") || false,
-    //   }
-    // }
+    if (env === "DEV") {
+      return {
+        en: "This is a test community note.",
+        cn: "这是一个测试社区笔记。",
+        links: ["https://example1.com", "https://example2.com"],
+        isControversial:
+          input.text?.toLowerCase().includes("controversial") || false,
+        isVideo: input.text?.toLowerCase().includes("video") || false,
+        isAccessBlocked: input.text?.toLowerCase().includes("blocked") || false,
+      }
+    }
   }
 
   try {
@@ -170,9 +170,9 @@ async function getCommunityNote(input: {
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(
         () => {
-          reject(new Error("The API call timed out after 60 seconds"))
+          reject(new Error("The API call timed out after 180 seconds"))
         },
-        env === "PROD" ? 120000 : 120000
+        env === "PROD" ? 180000 : 180000
       )
     )
     const thresholds = await getThresholds()
@@ -181,7 +181,6 @@ async function getCommunityNote(input: {
     // API call
 
     if (input.useCloudflare) {
-      console.log("Using Cloudflare API")
       const apiCallPromise = callCloudflareAPI<any>(
         "getAgentResult",
         data,
