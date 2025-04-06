@@ -758,7 +758,10 @@ async function sendSharingMessage(userSnap: DocumentSnapshot) {
   const onBoardingVideoId = (
     await db.collection("systemParameters").doc("others").get()
   ).data()?.onboardingVideoId
-  const link = `https://wa.me/${process.env.USERS_WHATSAPP_NUMBER}` //TODO: change to new link
+  const link =
+    process.env.ENVIRONMENT === "PROD"
+      ? `https://wa.me/${process.env.USERS_WHATSAPP_NUMBER}` //TODO: change to new link
+      : `https://wa.me/message/Z4VKE4XWCEVDI1`
   await sendWhatsappVideoMessage(
     "user",
     userSnap.get("whatsappId"),
