@@ -260,6 +260,7 @@ async function newTextInstanceHandler({
         communityNoteData = await getCommunityNote({
           text: text,
           requestId: messageRef !== null ? messageRef.id : null,
+          useCloudflare: true,
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -571,6 +572,7 @@ async function newImageInstanceHandler({
           url: signedUrl,
           caption: caption ?? null,
           requestId: messageRef !== null ? messageRef.id : null,
+          useCloudflare: true,
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -768,6 +770,7 @@ const onUserGenericMessagePublish = onMessagePublished(
       "TYPESENSE_TOKEN",
       "OPENAI_API_KEY",
       "TELEGRAM_ADMIN_BOT_TOKEN",
+      "CHECKMATE_CORE_API_KEY",
     ],
     timeoutSeconds: 120,
   },
