@@ -20,6 +20,11 @@ import {
   finalCompletionCheck,
   initialCompletionCheck,
 } from "../../services/checker/managementService"
+import axios from "axios"
+import * as fs from "fs"
+import * as os from "os"
+import * as path from "path"
+import FormData from "form-data"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 const CHECKERS_GROUP_LINK = String(process.env.CHECKERS_GROUP_LINK)
@@ -476,6 +481,79 @@ async function gatherSystemStats() {
   }
 }
 
+async function uploadOnboardingVideo() {
+  try {
+    const videoUrl =
+      "https://storage.googleapis.com/checkmate-static-assets/checkmate-onboarding.mp4"
+    const whatsappToken = process.env.WHATSAPP_TOKEN
+    const phoneNumberId = process.env.WHATSAPP_USER_BOT_PHONE_NUMBER_ID
+
+    if (!videoUrl || !whatsappToken || !phoneNumberId) {
+      logger.error("Missing required environment variables for video upload")
+      return
+    }
+
+    logger.info("Downloading onboarding video from URL")
+
+    // Download the video file
+    const response = await axios({
+      method: "GET",
+      url: videoUrl,
+      responseType: "stream",
+    })
+
+    // Create a temporary file path
+    const tempFilePath = path.join(os.tmpdir(), "checkmate-onboarding.mp4")
+
+    // Create a write stream to save the file
+    const writer = fs.createWriteStream(tempFilePath)
+
+    // Pipe the response data to the file
+    response.data.pipe(writer)
+
+    // Wait for the file to finish downloading
+    await new Promise<void>((resolve, reject) => {
+      writer.on("finish", () => resolve())
+      writer.on("error", (err) => reject(err))
+    })
+
+    logger.info("Video downloaded successfully, uploading to WhatsApp")
+
+    // Create form data for the upload
+    const formData = new FormData()
+    formData.append("messaging_product", "whatsapp")
+    formData.append("file", fs.createReadStream(tempFilePath))
+    formData.append("type", "video/mp4")
+
+    // Upload to WhatsApp API
+    const uploadResponse = await axios.post(
+      `https://graph.facebook.com/v22.0/${phoneNumberId}/media`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          Authorization: `Bearer ${whatsappToken}`,
+        },
+      }
+    )
+
+    const mediaId = uploadResponse.data.id
+
+    logger.info(
+      `Video uploaded successfully to WhatsApp with media ID: ${mediaId}`
+    )
+
+    await db.collection("systemParameters").doc("others").update({
+      onboardingVideoId: mediaId,
+    })
+
+    // Clean up the temporary file
+    fs.unlinkSync(tempFilePath)
+  } catch (error) {
+    logger.error("Error in uploadOnboardingVideo:", error)
+  }
+}
+
 const checkSessionExpiring = onSchedule(
   {
     schedule: "1 * * * *",
@@ -564,6 +642,16 @@ const scheduleSystemStats = onSchedule(
   gatherSystemStats
 )
 
+const scheduleOnboardingVideoUpload = onSchedule(
+  {
+    schedule: "0 0 1,15 * *", // Run on 1st and 15th of each month
+    timeZone: "Asia/Singapore",
+    secrets: ["WHATSAPP_TOKEN", "WHATSAPP_USER_BOT_PHONE_NUMBER_ID"],
+    region: "asia-southeast1",
+  },
+  uploadOnboardingVideo
+)
+
 // Export scheduled cloud functions
 export const batchJobs = {
   checkSessionExpiring,
@@ -574,7 +662,8 @@ export const batchJobs = {
   resetLeaderboard,
   resetUserSubmissionCounts,
   resetCheckerAssignmentCount,
-  scheduleSystemStats, // Added new job
+  scheduleSystemStats,
+  scheduleOnboardingVideoUpload,
 }
 
 // Export utility functions
@@ -582,5 +671,6 @@ export const utils = {
   handleInactiveCheckers,
   welcomeNewCheckers,
   interimPromptHandler,
-  gatherSystemStats, // Added new utility function
+  gatherSystemStats,
+  uploadOnboardingVideo,
 }
