@@ -162,7 +162,7 @@ async function getCommunityNote(input: {
     if (input.text) {
       data.text = input.text
     } else {
-      data.image_url = input.url // Rename `url` to `image_url`
+      data.imageUrl = input.url // Rename `url` to `image_url`
       data.caption = input.caption
     }
 
@@ -181,6 +181,7 @@ async function getCommunityNote(input: {
     // API call
 
     if (input.useCloudflare) {
+      data.findSimilar = false
       const apiCallPromise = callCloudflareAPI<any>(
         "getAgentResult",
         data,
@@ -212,6 +213,9 @@ async function getCommunityNote(input: {
         )
       }
     } else {
+      data.image_url = data.imageUrl
+      //remove data.imageUrl
+      delete data.imageUrl
       const apiCallPromise = callAPI<CommunityNoteReturn>(
         "v2/getCommunityNote",
         data,
