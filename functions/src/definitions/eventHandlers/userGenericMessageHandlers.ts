@@ -111,13 +111,6 @@ const userGenericMessageHandlerWhatsapp = async function (
       if (checkPrepopulatedMessage(responses, message.text)) {
         await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
         break
-      } else if (checkBetaMessage(responses, message.text)) {
-        //TODO: Remove after BETA
-        await userSnap.ref.update({
-          isTester: true,
-          numSubmissionsRemaining: FieldValue.increment(1),
-        })
-        break
       } else {
         //replace prepopulated prefix if any in the text
         const cleanedMessage = stripTemplate(

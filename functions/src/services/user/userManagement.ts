@@ -94,10 +94,7 @@ export async function createNewUser(
     numPreOnboardMessagesSent: 0,
     numSubmissionsRemaining: thresholds.freeTierLimit ?? 5,
     submissionLimit: thresholds.freeTierLimit ?? 5,
-    isTester:
-      environment === "UAT" || environment === "DEV" || environment === "SIT"
-        ? true
-        : false,
+    isTester: true,
     supportUsCount: 0,
     getSharingMessageCount: 0,
     viewedDemoCount: 0,

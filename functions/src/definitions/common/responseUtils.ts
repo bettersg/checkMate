@@ -300,7 +300,6 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const isTester = userSnap.get("isTester") ?? false
   let text = getFinalResponseText({
     responseText: responses.MENU,
     responses,
@@ -308,7 +307,6 @@ async function sendMenuMessage(
     isIncorrect,
     primaryCategory: "irrelevant",
     prefixName,
-    isTester,
   })
 
   switch (platform) {
@@ -1011,7 +1009,6 @@ async function respondToInstance(
   }
   const language = userSnap.get("language") ?? "en"
   const isOnboarded = userSnap.get("isOnboardingComplete")
-  const isTester = userSnap.get("isTester") ?? false
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const submissionLimit = userSnap.get("submissionLimit")
@@ -1040,7 +1037,7 @@ async function respondToInstance(
   let isMachineCase = checkMachineCase(parentMessageSnap)
 
   const hasBespokeReply =
-    customReply || (communityNote && !communityNote.downvoted && isTester)
+    customReply || (communityNote && !communityNote.downvoted)
 
   const readyToReply =
     isAssessed || forceReply || isMachineCase || hasBespokeReply
@@ -1139,7 +1136,7 @@ async function respondToInstance(
     } else if (customReply.type === "image") {
       //TODO: implement later
     }
-  } else if (communityNote && !communityNote.downvoted && isTester) {
+  } else if (communityNote && !communityNote.downvoted) {
     category = "communityNote"
     bespokeReply = true
     //get the text based on language
@@ -1198,10 +1195,6 @@ async function respondToInstance(
   }
 
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
-    if (!isTester) {
-      //TODO: Get rid of this block after beta.
-      return
-    }
     await sendTextMessage(
       "user",
       from,
@@ -1261,7 +1254,6 @@ async function respondToInstance(
         submissionsUsed: numSubmissionsUsed,
         freeTierLimit: submissionLimit,
         primaryCategory: "irrelevant",
-        isTester,
         hasGetMore: false,
       })
       const misunderstoodButton = {
@@ -1297,7 +1289,6 @@ async function respondToInstance(
         responseText: responses.ERROR,
         responses,
         primaryCategory: "error",
-        isTester,
       })
       await sendTextMessage("user", from, responseText, replyId)
       break
@@ -1331,7 +1322,6 @@ async function respondToInstance(
             isIncorrect,
             primaryCategory: "unsure",
             votingStats: votingStatsResponse,
-            isTester,
           })
           //reinstate count if we really unsure.
           await userSnap.ref.update({
@@ -1357,7 +1347,6 @@ async function respondToInstance(
         isGenerated,
         isIncorrect,
         primaryCategory: category,
-        isTester,
       })
 
       if (isOnboarded) {
@@ -1368,9 +1357,7 @@ async function respondToInstance(
           buttons.push(declineScamShieldButton)
           updateObj.scamShieldConsent = true
         }
-        if (isTester) {
-          buttons.push(supportUsButton)
-        }
+        buttons.push(supportUsButton)
       } else {
         buttons.push(signUpButton)
       }
@@ -1413,20 +1400,8 @@ async function sendWaitingMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
 ) {
-  const isTester = userSnap.get("isTester") ?? false
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  if (!isTester) {
-    //TODO: Get rid of this block after beta.
-    await sendTextMessage(
-      "user",
-      userSnap.get("whatsappId"),
-      responses.WAIT_FOR_ASSESSMENT,
-      replyMessageId,
-      "whatsapp"
-    )
-    return
-  }
   await sendTextMessage(
     "user",
     userSnap.get("whatsappId"),
@@ -1675,12 +1650,6 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
-  const thresholds = await getThresholds()
-  const submissionLimit = userSnap.get("submissionLimit")
-  const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
-  const isPaidTier = userSnap.get("tier") !== "free"
-  const paidTierLimit = thresholds.paidTierLimit ?? 50
-  const isTester = userSnap.get("isTester") ?? false
   const responseText = responses.OUT_OF_SUBMISSIONS_SUPPORT
   const supportOnPatreonButton = {
     type: "reply",
@@ -1697,53 +1666,6 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
     buttons,
     null
   )
-  // if (!isTester) {
-  //   const responseText = responses.OUT_OF_SUBMISSIONS
-  //   await sendTextMessage(
-  //     "user",
-  //     whatsappId,
-  //     responseText,
-  //     null,
-  //     "whatsapp",
-  //     true
-  //   )
-  //   return
-  // }
-  // if (isPaidTier || hasExpressedInterest) {
-  //   const responseText = responses.OUT_OF_SUBMISSIONS_THANKS.replace(
-  //     "{{free_tier_limit}}",
-  //     submissionLimit.toString()
-  //   )
-  //   await sendTextMessage(
-  //     "user",
-  //     whatsappId,
-  //     responseText,
-  //     null,
-  //     "whatsapp",
-  //     true
-  //   )
-  // } else {
-  //   const waitListFlowID = process.env.WAITLIST_FLOW_ID
-  //   if (!waitListFlowID) {
-  //     functions.logger.error("WAITLIST_FLOW_ID not defined")
-  //     return
-  //   }
-  //   const responseText = responses.OUT_OF_SUBMISSIONS_NUDGE.replace(
-  //     "{{paid_tier_limit}}",
-  //     paidTierLimit.toString()
-  //   ).replace("{{free_tier_limit}}", submissionLimit.toString())
-  //   const ctaText = responses.CTA_JOIN_WAITLIST
-  //   await createAndSendFlow(
-  //     whatsappId,
-  //     language === "cn" ? "waitlist_cn" : "waitlist_en",
-  //     ctaText,
-  //     responseText,
-  //     null,
-  //     null,
-  //     process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT",
-  //     "out_of_submissions"
-  //   )
-  // }
 }
 
 async function sendOnboardingFlow(
@@ -2130,7 +2052,6 @@ interface GetFinalResponseParams {
   primaryCategory?: string
   prefixName?: string
   votingStats?: string
-  isTester?: boolean
   hasGetMore?: boolean
 }
 
@@ -2148,7 +2069,6 @@ function getFinalResponseText({
   primaryCategory = "irrelevant",
   prefixName = "",
   votingStats = "",
-  isTester = false,
   hasGetMore = true,
 }: GetFinalResponseParams): string {
   let finalResponse = responseText
@@ -2177,7 +2097,7 @@ function getFinalResponseText({
     .replace("{{voting_stats}}", votingStats)
     .replace(
       "{{submissions_remaining}}",
-      isTester ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
+      responses.REMAINING_SUBMISSIONS_SUFFIX
     )
     .replace("{{num_submissions_used}}", submissionsUsed?.toString() || "")
     .replace("{{free_tier_limit}}", freeTierLimit?.toString() || "")
