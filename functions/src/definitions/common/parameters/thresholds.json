@@ -33,7 +33,7 @@
   "freeTierLimit": 5,
   "preOnboardLimit": 1,
   "paidTierLimit": 50,
-  "frequency": "daily",
+  "frequency": "monthly",
   "LLMProvider": "openai",
   "numberToTrigger": 40,
   "targetDailyVotes": 8,

@@ -56,8 +56,10 @@ export async function flowEndpointHandler(decryptedBody: WhatsAppRequest) {
             screen = "LANDING"
             dataPayload = {
               num_free_checks: String(thresholds.freeTierLimit ?? 5),
-              frequency_en: thresholds.frequency ?? "daily",
-              frequency_cn: translateFrequency(thresholds.frequency ?? "daily"),
+              frequency_en: thresholds.frequency ?? "monthly",
+              frequency_cn: translateFrequency(
+                thresholds.frequency ?? "monthly"
+              ),
             }
             break
           default:
