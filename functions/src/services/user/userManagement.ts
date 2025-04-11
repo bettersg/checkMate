@@ -99,6 +99,7 @@ export async function createNewUser(
     getSharingMessageCount: 0,
     viewedDemoCount: 0,
     viewedFoundersMessageCount: 0,
+    numCommunityNotesReceived: 0,
   }
   try {
     const res = await db.collection("users").add(newUserObject)

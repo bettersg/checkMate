@@ -712,8 +712,6 @@ async function updateLanguageAndFollowUp(
     switch (ageGroup) {
       case "18-35":
       case "36-50":
-        await sendFoundersMessage(userSnap)
-        break
       case "<18":
       case "51-65":
       case ">65":
@@ -1192,6 +1190,12 @@ async function respondToInstance(
       )
     }
     communityNoteMessageId = response?.data?.messages?.[0]?.id
+  }
+
+  if (bespokeReply) {
+    await userSnap.ref.update({
+      numCommunityNotesReceived: FieldValue.increment(1),
+    })
   }
 
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {

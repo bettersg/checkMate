@@ -255,6 +255,7 @@ export type UserData = {
   numSubmissionsRemaining: number // Number of submissions made in given time period
   numPreOnboardSubmissionsRemaining: number // Number of submissions made before the user completed the onboarding flow
   numPreOnboardMessagesSent: number // Number of messages sent before the user completed the onboarding flow
+  numCommunityNotesReceived: number // Number of community notes received by the user, as a proxy for "good" experiences.
   submissionLimit: number // Number of submissions allowed in given time period
   isInterestedInSubscription: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at $5 a month
   isInterestedAtALowerPoint: boolean | null // Whether the user is interested in subscribing to CheckMate's paid tier at a lower price point
