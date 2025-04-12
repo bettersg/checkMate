@@ -1909,13 +1909,14 @@ async function sendChuffedLink(
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
+  const referralId = userSnap.get("referralId")
   await sendWhatsappCtaUrlMessage(
     "user",
     whatsappId,
     responses.CTA_CHUFFED,
     `https://chuffed.org/project/checkmatesg?utm_source=whatsapp&utm_content=${
       utmContent ?? "none"
-    }`,
+    }&utm_term=${referralId ?? "none"}`,
     responses.DONATE_MESSAGE
   )
   await userSnap.ref.update({

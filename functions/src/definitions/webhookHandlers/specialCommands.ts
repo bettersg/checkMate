@@ -13,6 +13,7 @@ import USER_BOT_RESPONSES from "../common/parameters/userResponses.json"
 import CHECKER_BOT_RESPONSES from "../common/parameters/checkerResponses.json"
 import NUDGES from "../common/parameters/nudges.json"
 import thresholds from "../common/parameters/thresholds.json"
+import others from "../common/parameters/others.json"
 import { utils } from "../batchJobs/batchJobs"
 import { sendBlast } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
@@ -97,7 +98,7 @@ const mockDb = async function () {
     whatsapp: ["text", "image"],
   })
   await systemParametersRef.doc("others").set({
-    onboardingVideoId: "1297825751317467",
+    onboardingVideoId: others.onboardingVideoId,
   })
   await systemParametersRef.doc("thresholds").set(thresholds)
   await systemParametersRef.doc("counts").set({
