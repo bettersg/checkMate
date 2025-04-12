@@ -781,10 +781,10 @@ async function sendFoundersMessage(userSnap: DocumentSnapshot) {
       title: responses.BUTTON_SHARE,
     },
   }
-  const supportOnPatreonButton = {
+  const supportOnChuffedButton = {
     type: "reply",
     reply: {
-      id: `supportOnPatreon`,
+      id: `supportOnChuffed_foundersMessage`,
       title: responses.BUTTON_SUPPORT_US,
     },
   }
@@ -792,7 +792,7 @@ async function sendFoundersMessage(userSnap: DocumentSnapshot) {
     "user",
     userSnap.get("whatsappId"),
     responses.FOUNDER_MESSAGE_BODY,
-    [supportOnPatreonButton, shareWithOthersButton],
+    [supportOnChuffedButton, shareWithOthersButton],
     null,
     responses.FOUNDER_MESSAGE_HEADER,
     responses.FOUNDER_MESSAGE_FOOTER
@@ -1095,7 +1095,7 @@ async function respondToInstance(
   const supportUsButton = {
     type: "reply",
     reply: {
-      id: `supportOnPatreon_${instanceSnap.ref.path}`,
+      id: `supportOnChuffed_${instanceSnap.ref.path}`,
       title: responses.BUTTON_SUPPORT_US,
     },
   }
@@ -1655,14 +1655,14 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
   const responseText = responses.OUT_OF_SUBMISSIONS_SUPPORT
-  const supportOnPatreonButton = {
+  const supportOnChuffedButton = {
     type: "reply",
     reply: {
-      id: `supportOnPatreon`,
+      id: `supportOnChuffed_outOfSubmissions`,
       title: responses.BUTTON_SUPPORT_US,
     },
   }
-  const buttons = [supportOnPatreonButton]
+  const buttons = [supportOnChuffedButton]
   await sendWhatsappButtonMessage(
     "user",
     whatsappId,
@@ -1901,9 +1901,10 @@ async function sendUnsupportedTypeMessage(
   )
 }
 
-async function sendPatreonLink(
+async function sendChuffedLink(
   userSnap: DocumentSnapshot,
-  instancePath: string | null = null
+  instancePath: string | null = null,
+  utmContent: string | null = null
 ) {
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
@@ -1912,7 +1913,9 @@ async function sendPatreonLink(
     "user",
     whatsappId,
     responses.CTA_CHUFFED,
-    "https://patreon.com/CheckMateSG",
+    `https://chuffed.org/project/checkmatesg?utm_source=whatsapp&utm_content=${
+      utmContent ?? "none"
+    }`,
     responses.DONATE_MESSAGE
   )
   await userSnap.ref.update({
@@ -2175,6 +2178,6 @@ export {
   handleDisclaimer,
   correctCommunityNote,
   sendFoundersMessage,
-  sendPatreonLink,
+  sendChuffedLink,
   sendSharingMessage,
 }

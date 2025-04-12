@@ -38,5 +38,6 @@
   "numberToTrigger": 40,
   "targetDailyVotes": 8,
   "minVotesPerMessage": 30,
-  "price": 5.99
+  "price": 5.99,
+  "sendAppealMessageThreshold": 3
 }

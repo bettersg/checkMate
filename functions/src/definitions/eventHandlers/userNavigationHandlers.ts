@@ -16,7 +16,7 @@ import {
   sendCheckMateDemonstration,
   sendFoundersMessage,
   sendMenuMessage,
-  sendPatreonLink,
+  sendChuffedLink,
   sendSharingMessage,
   updateLanguageAndFollowUp,
 } from "../common/responseUtils"
@@ -234,9 +234,15 @@ async function onButtonReply(
       ;[selection] = rest as [LanguageSelection]
       await updateLanguageAndFollowUp(userSnap, selection, false)
       break
-    case "supportOnPatreon":
+    case "supportOnChuffed":
       ;[instancePath] = rest
-      await sendPatreonLink(userSnap, instancePath)
+      if (instancePath === "outOfSubmissions") {
+        await sendChuffedLink(userSnap, null, "outOfSubmissions")
+      } else if (instancePath === "foundersMessage") {
+        await sendChuffedLink(userSnap, null, "foundersMessage")
+      } else {
+        await sendChuffedLink(userSnap, instancePath, "onReply")
+      }
       break
     case "show":
       await sendCheckMateDemonstration(userSnap)

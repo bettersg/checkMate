@@ -508,4 +508,5 @@ export type Thresholds = {
   price: number
   LLMProvider: string
   preOnboardLimit: number
+  sendAppealMessageThreshold: number
 }
