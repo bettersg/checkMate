@@ -254,13 +254,12 @@ async function newTextInstanceHandler({
     let isControversial = false
     messageRef = db.collection("messages").doc()
     if (needsChecking) {
-      const abTestGroup = getABTestGroup(from) ?? "A"
+      // const abTestGroup = getABTestGroup(from) ?? "A"
       await sendWaitingMessage(userSnap, id)
       try {
         communityNoteData = await getCommunityNote({
           text: text,
           requestId: messageRef !== null ? messageRef.id : null,
-          useCloudflare: abTestGroup === "A",
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -560,7 +559,7 @@ async function newImageInstanceHandler({
     let isCommunityNoteGenerated = false
     let isCommunityNoteUsable = false
     let isControversial = false
-    const abTestGroup = getABTestGroup(from) ?? "A"
+    //const abTestGroup = getABTestGroup(from) ?? "A"
     let communityNoteStatus = "not-generated"
     messageRef = db.collection("messages").doc()
     const signedUrl = (await getSignedUrl(filename)) ?? null
@@ -574,7 +573,6 @@ async function newImageInstanceHandler({
           url: signedUrl,
           caption: caption ?? null,
           requestId: messageRef !== null ? messageRef.id : null,
-          useCloudflare: abTestGroup === "A",
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
