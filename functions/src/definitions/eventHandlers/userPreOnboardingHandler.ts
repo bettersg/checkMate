@@ -289,6 +289,7 @@ const onUserPreOnboardingPublish = onMessagePublished(
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
       "OPENAI_API_KEY",
+      "CHECKMATE_CORE_API_KEY",
     ],
     timeoutSeconds: 120,
   },
