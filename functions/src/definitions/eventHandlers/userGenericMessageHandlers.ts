@@ -7,11 +7,8 @@ import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
-import { hashMessage, checkMessageId, getABTestGroup } from "../common/utils"
-import {
-  checkPrepopulatedMessage,
-  checkBetaMessage,
-} from "../../services/user/referrals"
+import { hashMessage, checkMessageId } from "../common/utils"
+import { checkPrepopulatedMessage } from "../../services/user/referrals"
 import { getUserSnapshot } from "../../services/user/userManagement"
 import {
   sendMenuMessage,
@@ -25,14 +22,12 @@ import {
   getHash,
   getCloudStorageUrl,
 } from "../common/mediaUtils"
-import { incrementCheckerCounts } from "../common/counters"
 import { anonymiseMessage } from "../common/genAI"
 import { calculateSimilarity } from "../common/calculateSimilarity"
 import {
   performOCR,
   getCommunityNote,
   determineNeedsChecking,
-  determineControversial,
 } from "../common/machineLearningServer/operations"
 import { defineString } from "firebase-functions/params"
 import { classifyText } from "../common/classifier"
