@@ -180,67 +180,66 @@ async function getCommunityNote(input: {
 
     // API call
 
-    if (input.useCloudflare) {
-      data.findSimilar = false
-      const apiCallPromise = callCloudflareAPI<any>(
-        "getAgentResult",
-        data,
-        undefined,
-        input.requestId
-      )
-      const response = await Promise.race([apiCallPromise, timeoutPromise])
-      if (response.data?.success) {
-        if (response.data?.result) {
-          functions.logger.log(
-            `Community note with request ID: ${input.requestId} successfully generated`
-          )
-        }
-        const result = response.data.result
-        return {
-          en: result.communityNote.en,
-          cn: result.communityNote.cn,
-          links: result.communityNote.links,
-          isControversial: result.isControversial,
-          isVideo: result.isVideo,
-          isAccessBlocked: result.isAccessBlocked,
-        }
-      } else {
-        functions.logger.error(
-          `Failed to generate community note with request ID: ${response.data?.requestId}`
+    data.findSimilar = false
+    const apiCallPromise = callCloudflareAPI<any>(
+      "getAgentResult",
+      data,
+      undefined,
+      input.requestId
+    )
+    const response = await Promise.race([apiCallPromise, timeoutPromise])
+    if (response.data?.success) {
+      if (response.data?.result) {
+        functions.logger.log(
+          `Community note with request ID: ${input.requestId} successfully generated`
         )
-        throw new Error(
-          response.data?.errorMessage ?? "An error occurred calling the API"
-        )
+      }
+      const result = response.data.result
+      return {
+        en: result.communityNote.en,
+        cn: result.communityNote.cn,
+        links: result.communityNote.links,
+        isControversial: result.isControversial,
+        isVideo: result.isVideo,
+        isAccessBlocked: result.isAccessBlocked,
       }
     } else {
-      data.image_url = data.imageUrl
-      //remove data.imageUrl
-      delete data.imageUrl
-      const apiCallPromise = callAPI<CommunityNoteReturn>(
-        "v2/getCommunityNote",
-        data,
-        { provider: provider },
-        input.requestId
+      functions.logger.error(
+        `Failed to generate community note with request ID: ${response.data?.requestId}`
       )
-
-      // Race between the API call and the timeout
-      const response = await Promise.race([apiCallPromise, timeoutPromise])
-      if (response.data?.success) {
-        if (response.data?.requestId) {
-          functions.logger.log(
-            `Community note with request ID: ${response.data.requestId} successfully generated`
-          )
-        }
-        return response.data
-      } else {
-        functions.logger.error(
-          `Failed to generate community note with request ID: ${response.data?.requestId}`
-        )
-        throw new Error(
-          response.data?.errorMessage ?? "An error occurred calling the API"
-        )
-      }
+      throw new Error(
+        response.data?.errorMessage ?? "An error occurred calling the API"
+      )
     }
+    // } else {
+    //   data.image_url = data.imageUrl
+    //   //remove data.imageUrl
+    //   delete data.imageUrl
+    //   const apiCallPromise = callAPI<CommunityNoteReturn>(
+    //     "v2/getCommunityNote",
+    //     data,
+    //     { provider: provider },
+    //     input.requestId
+    //   )
+
+    //   // Race between the API call and the timeout
+    //   const response = await Promise.race([apiCallPromise, timeoutPromise])
+    //   if (response.data?.success) {
+    //     if (response.data?.requestId) {
+    //       functions.logger.log(
+    //         `Community note with request ID: ${response.data.requestId} successfully generated`
+    //       )
+    //     }
+    //     return response.data
+    //   } else {
+    //     functions.logger.error(
+    //       `Failed to generate community note with request ID: ${response.data?.requestId}`
+    //     )
+    //     throw new Error(
+    //       response.data?.errorMessage ?? "An error occurred calling the API"
+    //     )
+    //   }
+    // }
   } catch (error) {
     throw new Error(
       error instanceof Error
