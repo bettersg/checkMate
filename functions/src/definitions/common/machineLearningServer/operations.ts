@@ -90,7 +90,10 @@ async function determineNeedsChecking(input: {
     }
 
     const data = { ...input }
-    const response = await callAPI<TrivialResponse>("getNeedsChecking", data)
+    const response = await callCloudflareAPI<TrivialResponse>(
+      "getNeedsChecking",
+      data
+    )
     return response.data.needsChecking
   } catch (error) {
     functions.logger.error(`Error in determineNeedsChecking: ${error}`)
