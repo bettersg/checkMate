@@ -15,7 +15,11 @@ interface EmbedResponse {
 }
 
 interface TrivialResponse {
-  needsChecking: boolean
+  success: boolean
+  result: {
+    needsChecking: boolean
+  }
+  id: string
 }
 
 interface ControversialResponse {
@@ -94,7 +98,7 @@ async function determineNeedsChecking(input: {
       "getNeedsChecking",
       data
     )
-    return response.data.needsChecking
+    return response.data?.result?.needsChecking ?? true
   } catch (error) {
     functions.logger.error(`Error in determineNeedsChecking: ${error}`)
     return true
