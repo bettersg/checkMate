@@ -7,7 +7,7 @@ import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
-import { hashMessage, checkMessageId } from "../common/utils"
+import { hashMessage, checkMessageId, getABTestGroup } from "../common/utils"
 import {
   checkPrepopulatedMessage,
   checkBetaMessage,
@@ -72,6 +72,7 @@ const userGenericMessageHandlerWhatsapp = async function (
   const type = message.type // image/text
   const source = message.source
   const messageTimestamp = new Timestamp(Number(message.timestamp), 0)
+  const isUserOnboarded = message.isUserOnboarded
   let userSnap = await getUserSnapshot(from, source)
   if (userSnap == null) {
     logger.error(`User ${from} not found in userHandler`)
@@ -86,10 +87,15 @@ const userGenericMessageHandlerWhatsapp = async function (
     markWhatsappMessageAsRead("user", message.id)
     return
   }
-
-  await userSnap.ref.update({
-    numSubmissionsRemaining: FieldValue.increment(-1),
-  })
+  if (isUserOnboarded) {
+    await userSnap.ref.update({
+      numSubmissionsRemaining: FieldValue.increment(-1),
+    })
+  } else {
+    await userSnap.ref.update({
+      numPreOnboardSubmissionsRemaining: FieldValue.increment(-1),
+    })
+  }
 
   let step
 
@@ -104,13 +110,6 @@ const userGenericMessageHandlerWhatsapp = async function (
       }
       if (checkPrepopulatedMessage(responses, message.text)) {
         await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
-        break
-      } else if (checkBetaMessage(responses, message.text)) {
-        //TODO: Remove after BETA
-        await userSnap.ref.update({
-          isTester: true,
-          numSubmissionsRemaining: FieldValue.increment(1),
-        })
         break
       } else {
         //replace prepopulated prefix if any in the text
@@ -255,11 +254,13 @@ async function newTextInstanceHandler({
     let isControversial = false
     messageRef = db.collection("messages").doc()
     if (needsChecking) {
+      const abTestGroup = getABTestGroup(from) ?? "A"
       await sendWaitingMessage(userSnap, id)
       try {
         communityNoteData = await getCommunityNote({
           text: text,
           requestId: messageRef !== null ? messageRef.id : null,
+          useCloudflare: abTestGroup === "A",
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -388,6 +389,7 @@ async function newTextInstanceHandler({
     disclaimerSentTimestamp: null,
     disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
+    userClickedSupportUs: false,
   }
   await addInstanceToDb(
     id,
@@ -558,6 +560,7 @@ async function newImageInstanceHandler({
     let isCommunityNoteGenerated = false
     let isCommunityNoteUsable = false
     let isControversial = false
+    const abTestGroup = getABTestGroup(from) ?? "A"
     let communityNoteStatus = "not-generated"
     messageRef = db.collection("messages").doc()
     const signedUrl = (await getSignedUrl(filename)) ?? null
@@ -571,6 +574,7 @@ async function newImageInstanceHandler({
           url: signedUrl,
           caption: caption ?? null,
           requestId: messageRef !== null ? messageRef.id : null,
+          useCloudflare: abTestGroup === "A",
         })
         isCommunityNoteGenerated = true
         isControversial = communityNoteData.isControversial
@@ -718,6 +722,7 @@ async function newImageInstanceHandler({
     disclaimerSentTimestamp: null,
     disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
+    userClickedSupportUs: false,
   }
   await addInstanceToDb(
     id,
@@ -768,6 +773,7 @@ const onUserGenericMessagePublish = onMessagePublished(
       "TYPESENSE_TOKEN",
       "OPENAI_API_KEY",
       "TELEGRAM_ADMIN_BOT_TOKEN",
+      "CHECKMATE_CORE_API_KEY",
     ],
     timeoutSeconds: 120,
   },

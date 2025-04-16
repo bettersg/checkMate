@@ -156,6 +156,13 @@ function checkPreV2User(userSnap: DocumentSnapshot): boolean {
   }
 }
 
+function getABTestGroup(userWhatsappId: string) {
+  //if last digit of phone number is even, return "A", if last digit is odd, return "B"
+  const lastDigit = userWhatsappId.slice(-1)
+  const lastDigitInt = parseInt(lastDigit)
+  return lastDigitInt % 2 === 0 ? "A" : "B"
+}
+
 export {
   stripPhone,
   stripUrl,
@@ -171,4 +178,5 @@ export {
   getTags,
   translateFrequency,
   checkPreV2User,
+  getABTestGroup,
 }

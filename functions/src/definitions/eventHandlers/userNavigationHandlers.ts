@@ -2,7 +2,7 @@ import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
-import { Timestamp } from "firebase-admin/firestore"
+import { FieldValue, Timestamp } from "firebase-admin/firestore"
 import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
@@ -12,7 +12,14 @@ import { sendDisputeNotification } from "../common/sendMessage"
 import { sleep, checkMessageId } from "../common/utils"
 import { getUserSnapshot } from "../../services/user/userManagement"
 import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
-import { sendMenuMessage } from "../common/responseUtils"
+import {
+  sendCheckMateDemonstration,
+  sendFoundersMessage,
+  sendMenuMessage,
+  sendChuffedLink,
+  sendSharingMessage,
+  updateLanguageAndFollowUp,
+} from "../common/responseUtils"
 import {
   getResponsesObj,
   sendInterimUpdate,
@@ -20,7 +27,6 @@ import {
   sendReferralMessage,
   sendRationalisation,
   respondToRationalisationFeedback,
-  updateLanguageAndSendMenu,
   sendLanguageSelection,
   sendBlast,
   respondToBlastFeedback,
@@ -113,7 +119,7 @@ const userWhatsappInteractionHandler = async function (
           await toggleUserSubscription(userSnap, false)
           break
         case "Get Referral Message":
-          await sendReferralMessage(userSnap)
+          await sendSharingMessage(userSnap)
           break
         default:
           functions.logger.error("Unsupported button type:", button.text)
@@ -226,7 +232,26 @@ async function onButtonReply(
       break
     case "languageSelection":
       ;[selection] = rest as [LanguageSelection]
-      await updateLanguageAndSendMenu(userSnap, selection)
+      await updateLanguageAndFollowUp(userSnap, selection, false)
+      break
+    case "supportOnChuffed":
+      ;[instancePath] = rest
+      if (instancePath === "outOfSubmissions") {
+        await sendChuffedLink(userSnap, null, "outOfSubmissions")
+      } else if (instancePath === "foundersMessage") {
+        await sendChuffedLink(userSnap, null, "foundersMessage")
+      } else {
+        await sendChuffedLink(userSnap, instancePath, "onReply")
+      }
+      break
+    case "show":
+      await sendCheckMateDemonstration(userSnap)
+      break
+    case "viewFoundersMessage":
+      await sendFoundersMessage(userSnap)
+      break
+    case "shareWithOthers":
+      await sendSharingMessage(userSnap)
       break
   }
   const step = type + (selection ? `_${selection}` : "")
@@ -289,7 +314,7 @@ async function onTextListReceipt(
           break
 
         case "referral":
-          await sendReferralMessage(userSnap)
+          await sendSharingMessage(userSnap)
           hasReplied = true
           break
 
@@ -382,7 +407,7 @@ async function onFlowResponse(
         isOnboardingComplete: true,
         ageGroup: ageGroup,
       })
-      await updateLanguageAndSendMenu(userSnap, language)
+      await updateLanguageAndFollowUp(userSnap, language, true)
       break
     case "waitlist_cn":
     case "waitlist_en":

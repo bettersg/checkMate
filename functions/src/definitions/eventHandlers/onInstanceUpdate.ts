@@ -12,7 +12,7 @@ import { MessageData } from "../../types"
 import { despatchPoll } from "../../services/checker/votingService"
 import { respondToInstance } from "../common/responseUtils"
 import { Timestamp } from "firebase-admin/firestore"
-
+import { getABTestGroup } from "../common/utils"
 if (!admin.apps.length) {
   admin.initializeApp()
 }
@@ -26,6 +26,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
       "WHATSAPP_TOKEN",
       "TELEGRAM_CHECKER_BOT_TOKEN",
       "WHATSAPP_USER_BOT_PHONE_NUMBER_ID",
+      "CHECKMATE_CORE_API_KEY",
     ],
   },
   async (event) => {
@@ -58,6 +59,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
       postChangeData.isIrrelevantAppealed === true &&
       preChangeData.isIrrelevantAppealed === false
     ) {
+      const abTestGroup = getABTestGroup(snap.get("from")) ?? "A"
       //get the parent message
       const messageRef = snap.ref.parent.parent
       if (!messageRef) {
@@ -80,6 +82,8 @@ const onInstanceUpdateV2 = onDocumentUpdated(
           if (postChangeData.type === "text") {
             communityNoteData = await getCommunityNote({
               text: postChangeData.text,
+              requestId: messageSnap.id,
+              useCloudflare: abTestGroup === "A",
             })
           } else {
             const filename = postChangeData.storageUrl
@@ -88,6 +92,7 @@ const onInstanceUpdateV2 = onDocumentUpdated(
               url: signedUrl,
               caption: postChangeData.caption,
               requestId: messageSnap.id,
+              useCloudflare: abTestGroup === "A",
             })
           }
           isCommunityNoteGenerated = true

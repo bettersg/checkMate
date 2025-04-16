@@ -87,6 +87,56 @@ async function sendWhatsappImageMessage(
   return response
 }
 
+async function sendWhatsappVideoMessage(
+  bot: string,
+  to: string,
+  id: string | null,
+  url: string | null = null,
+  caption: string | null = null,
+  replyMessageId: string | null = null
+) {
+  if (caption && caption.length > 1024) {
+    caption = `${caption.slice(
+      0,
+      950
+    )}...*[TRUNCATED, MSG TOO LONG FOR WHATSAPP]*`
+  }
+  const mediaObj: {
+    link?: string
+    id?: string | null
+    caption?: string
+  } = {}
+  if (url) {
+    mediaObj.link = url
+  } else {
+    mediaObj.id = id
+  }
+  if (caption) {
+    mediaObj.caption = caption
+  }
+  const data: {
+    video: typeof mediaObj
+    to: string
+    type: string
+    messaging_product: string
+    context?: {
+      message_id: string
+    }
+  } = {
+    video: mediaObj,
+    to: to,
+    type: "video",
+    messaging_product: "whatsapp",
+  }
+  if (replyMessageId) {
+    data.context = {
+      message_id: replyMessageId,
+    }
+  }
+  const response = await callWhatsappSendMessageApi(data, bot)
+  return response
+}
+
 async function sendWhatsappTemplateMessage(
   bot: string,
   to: string,
@@ -274,7 +324,9 @@ async function sendWhatsappButtonMessage(
   to: string,
   text: string,
   buttons: WhatsappButton[],
-  replyMessageId: string | null = null
+  replyMessageId: string | null = null,
+  headerText: string | null = null,
+  footerText: string | null = null
 ) {
   const data: {
     messaging_product: string
@@ -284,6 +336,13 @@ async function sendWhatsappButtonMessage(
     interactive: {
       type: string
       body: {
+        text: string
+      }
+      header?: {
+        type: string
+        text: string
+      }
+      footer?: {
         text: string
       }
       action: {
@@ -308,6 +367,20 @@ async function sendWhatsappButtonMessage(
       },
     },
   }
+
+  if (headerText) {
+    data.interactive.header = {
+      type: "text",
+      text: headerText,
+    }
+  }
+
+  if (footerText) {
+    data.interactive.footer = {
+      text: footerText,
+    }
+  }
+
   if (replyMessageId) {
     data.context = {
       message_id: replyMessageId,
@@ -434,6 +507,73 @@ async function markWhatsappMessageAsRead(bot: string, messageId: string) {
   callWhatsappSendMessageApi(data, bot)
 }
 
+async function sendWhatsappCtaUrlMessage(
+  bot: string,
+  to: string,
+  buttonText: string,
+  buttonUrl: string,
+  bodyText: string | null = null,
+  headerText: string | null = null,
+  footerText: string | null = null,
+  replyMessageId: string | null = null
+) {
+  const interactive: any = {
+    type: "cta_url",
+    action: {
+      name: "cta_url",
+      parameters: {
+        display_text: buttonText,
+        url: buttonUrl,
+      },
+    },
+  }
+
+  if (bodyText) {
+    interactive.body = {
+      text: bodyText,
+    }
+  }
+
+  if (headerText) {
+    interactive.header = {
+      type: "text",
+      text: headerText,
+    }
+  }
+
+  if (footerText) {
+    interactive.footer = {
+      text: footerText,
+    }
+  }
+
+  const data: {
+    messaging_product: string
+    recipient_type: string
+    to: string
+    type: string
+    interactive: typeof interactive
+    context?: {
+      message_id: string
+    }
+  } = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: to,
+    type: "interactive",
+    interactive: interactive,
+  }
+
+  if (replyMessageId) {
+    data.context = {
+      message_id: replyMessageId,
+    }
+  }
+
+  const response = await callWhatsappSendMessageApi(data, bot)
+  return response
+}
+
 async function callWhatsappSendMessageApi(data: any, bot: string) {
   const token = process.env.WHATSAPP_TOKEN
   let phoneNumberId
@@ -463,6 +603,7 @@ async function callWhatsappSendMessageApi(data: any, bot: string) {
 export {
   sendWhatsappTextMessage,
   sendWhatsappImageMessage,
+  sendWhatsappVideoMessage,
   sendWhatsappTemplateMessage,
   sendWhatsappTextListMessage,
   sendWhatsappButtonMessage,
@@ -470,4 +611,5 @@ export {
   sendWhatsappContactMessage,
   sendWhatsappFlowMessage,
   sendWhatsappOTP,
+  sendWhatsappCtaUrlMessage,
 }
