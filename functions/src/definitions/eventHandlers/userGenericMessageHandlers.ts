@@ -15,6 +15,7 @@ import {
   getResponsesObj,
   sendOutOfSubmissionsMessage,
   sendWaitingMessage,
+  sendCheckMateDemonstration,
 } from "../common/responseUtils"
 import {
   downloadWhatsappMedia,
@@ -104,7 +105,7 @@ const userGenericMessageHandlerWhatsapp = async function (
         break
       }
       if (checkPrepopulatedMessage(responses, message.text)) {
-        await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
+        await sendCheckMateDemonstration(userSnap)
         break
       } else {
         //replace prepopulated prefix if any in the text
