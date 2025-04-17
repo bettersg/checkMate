@@ -66,6 +66,13 @@ async function checkMessageId(messageId: string) {
   return messageSnap.exists
 }
 
+async function checkWhitelistedUser(whatsappId: string) {
+  const db = admin.firestore()
+  const userRef = db.collection("whitelistedUsers").doc(whatsappId)
+  const userSnap = await userRef.get()
+  return userSnap.exists
+}
+
 function stripPhone(text: string, includePlaceholder = false): string {
   if (findPhoneNumbersInText(text).length === 0) {
     return text.replace(/[0-9]{7,}/g, includePlaceholder ? "<PHONE_NUM>" : "")
@@ -179,4 +186,5 @@ export {
   translateFrequency,
   checkPreV2User,
   getABTestGroup,
+  checkWhitelistedUser,
 }

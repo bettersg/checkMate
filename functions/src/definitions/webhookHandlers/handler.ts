@@ -6,7 +6,7 @@ import { defineString } from "firebase-functions/params"
 import { handleSpecialCommands } from "./specialCommands"
 import { publishToTopic } from "../common/pubsub"
 import { onRequest } from "firebase-functions/v2/https"
-import { checkMessageId } from "../common/utils"
+import { checkMessageId, checkWhitelistedUser } from "../common/utils"
 import { Request, Response } from "express"
 import { AppEnv } from "../../appEnv"
 import { GeneralMessage, WhatsappMessageObject } from "../../types"
@@ -133,114 +133,118 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                 //check for new user
                 const whatsappId = message.from
                 //check if whatsapp number starts with 65, otherwise ignore
-                if (!whatsappId.startsWith("65")) {
+                if (
+                  whatsappId.startsWith("65") ||
+                  (await checkWhitelistedUser(whatsappId))
+                ) {
+                  let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
+                  if (userSnap === null) {
+                    //new user
+
+                    const messageTimestamp = new Timestamp(
+                      Number(message.timestamp),
+                      0
+                    )
+                    const userRef = await createNewUser(
+                      whatsappId,
+                      "whatsapp",
+                      messageTimestamp
+                    )
+                    if (userRef === null) {
+                      functions.logger.error(
+                        `Error creating new user with whatsappId ${whatsappId}`
+                      )
+                      return res.sendStatus(400)
+                    }
+                    userSnap = await userRef.get()
+                    // if (type !== "request_welcome") {
+                    //   functions.logger.warn(
+                    //     `New user ${whatsappId}, but not due to request_welcome event`
+                    //   )
+                    //   await sendOnboardingFlow(userSnap, true)
+                    //   await handlePreOnboardedMessage(userSnap, message)
+                    //   return res.sendStatus(200)
+                    // }
+                  } else if (userSnap.get("isIgnored")) {
+                    //handle ban
+                    functions.logger.warn(
+                      `Message from banned user ${message.from}!, text: ${message?.text?.body}`
+                    )
+                    return res.sendStatus(200)
+                  }
+                  const isNavigational = checkNavigational(message)
+                  const isFlowSubmission = checkFlowSubmission(message)
+
+                  if (
+                    userSnap.get("isOnboardingComplete") === false &&
+                    !isFlowSubmission
+                  ) {
+                    // Publish to queue instead of direct handling
+                    await publishToTopic(
+                      "userPreOnboardingEvents",
+                      message,
+                      "whatsapp"
+                    )
+                    return res.sendStatus(200)
+                  }
+                  //check whether it's navigational or message
+
+                  if (isNavigational) {
+                    await publishToTopic(
+                      "userNavigationEvents",
+                      message,
+                      "whatsapp"
+                    )
+                  } else {
+                    switch (type) {
+                      case "text":
+                      case "image":
+                        //convert message to general Message object for processing
+                        let genericMessage: GeneralMessage = {
+                          source: "whatsapp",
+                          id: message.id,
+                          userId: message.from,
+                          isUserOnboarded: userSnap.get("isOnboardingComplete"),
+                          type: message.type,
+                          subject: null,
+                          text: message.text?.body ?? null,
+                          media: {
+                            fileId: message.image?.id ?? null, //to download the media
+                            caption: message.image?.caption ?? null,
+                            mimeType: message.image?.mime_type ?? null, //determines if it is an image or video
+                          },
+                          timestamp: message.timestamp,
+                          isForwarded: message.context?.forwarded,
+                          frequently_forwarded:
+                            message.context?.frequently_forwarded,
+                        }
+                        await publishToTopic(
+                          "userGenericMessages",
+                          genericMessage,
+                          "whatsapp"
+                        )
+                        break
+                      case "interactive":
+                      case "button":
+                        functions.logger.warn(
+                          `Message ${message.id} should have been handled by userNavigationEvents`
+                        )
+                        break
+                      case "request_welcome":
+                        await sendOnboardingFlow(userSnap, true)
+                        break
+                      default:
+                        await sendUnsupportedTypeMessage(userSnap, message.id)
+                        break
+                    }
+                  }
+                } else {
                   await sendWhatsappTextMessage(
                     "user",
                     whatsappId,
                     "Sorry, CheckMate currently only works for Singapore phone numbers"
                   )
                   return res.sendStatus(200)
-                }
-                let userSnap = await getUserSnapshot(whatsappId, "whatsapp")
-                if (userSnap === null) {
-                  //new user
-
-                  const messageTimestamp = new Timestamp(
-                    Number(message.timestamp),
-                    0
-                  )
-                  const userRef = await createNewUser(
-                    whatsappId,
-                    "whatsapp",
-                    messageTimestamp
-                  )
-                  if (userRef === null) {
-                    functions.logger.error(
-                      `Error creating new user with whatsappId ${whatsappId}`
-                    )
-                    return res.sendStatus(400)
-                  }
-                  userSnap = await userRef.get()
-                  // if (type !== "request_welcome") {
-                  //   functions.logger.warn(
-                  //     `New user ${whatsappId}, but not due to request_welcome event`
-                  //   )
-                  //   await sendOnboardingFlow(userSnap, true)
-                  //   await handlePreOnboardedMessage(userSnap, message)
-                  //   return res.sendStatus(200)
-                  // }
-                } else if (userSnap.get("isIgnored")) {
-                  //handle ban
-                  functions.logger.warn(
-                    `Message from banned user ${message.from}!, text: ${message?.text?.body}`
-                  )
-                  return res.sendStatus(200)
-                }
-                const isNavigational = checkNavigational(message)
-                const isFlowSubmission = checkFlowSubmission(message)
-
-                if (
-                  userSnap.get("isOnboardingComplete") === false &&
-                  !isFlowSubmission
-                ) {
-                  // Publish to queue instead of direct handling
-                  await publishToTopic(
-                    "userPreOnboardingEvents",
-                    message,
-                    "whatsapp"
-                  )
-                  return res.sendStatus(200)
-                }
-                //check whether it's navigational or message
-
-                if (isNavigational) {
-                  await publishToTopic(
-                    "userNavigationEvents",
-                    message,
-                    "whatsapp"
-                  )
-                } else {
-                  switch (type) {
-                    case "text":
-                    case "image":
-                      //convert message to general Message object for processing
-                      let genericMessage: GeneralMessage = {
-                        source: "whatsapp",
-                        id: message.id,
-                        userId: message.from,
-                        isUserOnboarded: userSnap.get("isOnboardingComplete"),
-                        type: message.type,
-                        subject: null,
-                        text: message.text?.body ?? null,
-                        media: {
-                          fileId: message.image?.id ?? null, //to download the media
-                          caption: message.image?.caption ?? null,
-                          mimeType: message.image?.mime_type ?? null, //determines if it is an image or video
-                        },
-                        timestamp: message.timestamp,
-                        isForwarded: message.context?.forwarded,
-                        frequently_forwarded:
-                          message.context?.frequently_forwarded,
-                      }
-                      await publishToTopic(
-                        "userGenericMessages",
-                        genericMessage,
-                        "whatsapp"
-                      )
-                      break
-                    case "interactive":
-                    case "button":
-                      functions.logger.warn(
-                        `Message ${message.id} should have been handled by userNavigationEvents`
-                      )
-                      break
-                    case "request_welcome":
-                      await sendOnboardingFlow(userSnap, true)
-                      break
-                    default:
-                      await sendUnsupportedTypeMessage(userSnap, message.id)
-                      break
-                  }
                 }
               }
             }
