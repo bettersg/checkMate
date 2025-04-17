@@ -7,6 +7,7 @@ import { CommunityNote } from "../../../types"
 import { getThresholds } from "../utils"
 
 const embedderHost = defineString(AppEnv.EMBEDDER_HOST)
+const cloudfareHost = defineString(AppEnv.CLOUDFLARE_API_HOST)
 const env = process.env.ENVIRONMENT
 
 interface EmbedResponse {
@@ -14,7 +15,11 @@ interface EmbedResponse {
 }
 
 interface TrivialResponse {
-  needsChecking: boolean
+  success: boolean
+  result: {
+    needsChecking: boolean
+  }
+  id: string
 }
 
 interface ControversialResponse {
@@ -89,8 +94,11 @@ async function determineNeedsChecking(input: {
     }
 
     const data = { ...input }
-    const response = await callAPI<TrivialResponse>("getNeedsChecking", data)
-    return response.data.needsChecking
+    const response = await callCloudflareAPI<TrivialResponse>(
+      "getNeedsChecking",
+      data
+    )
+    return response.data?.result?.needsChecking ?? true
   } catch (error) {
     functions.logger.error(`Error in determineNeedsChecking: ${error}`)
     return true
@@ -134,6 +142,7 @@ async function getCommunityNote(input: {
   url?: string | null
   caption?: string | null
   requestId?: string | null
+  useCloudflare?: boolean
 }): Promise<CommunityNoteReturn> {
   if (env !== "PROD") {
     // You can add more sophisticated mock logic here
@@ -160,7 +169,7 @@ async function getCommunityNote(input: {
     if (input.text) {
       data.text = input.text
     } else {
-      data.image_url = input.url // Rename `url` to `image_url`
+      data.imageUrl = input.url // Rename `url` to `image_url`
       data.caption = input.caption
     }
 
@@ -168,31 +177,39 @@ async function getCommunityNote(input: {
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(
         () => {
-          reject(new Error("The API call timed out after 60 seconds"))
+          reject(new Error("The API call timed out after 180 seconds"))
         },
-        env === "PROD" ? 120000 : 120000
+        env === "PROD" ? 180000 : 180000
       )
     )
     const thresholds = await getThresholds()
     const provider = thresholds?.LLMProvider ?? "openai"
 
     // API call
-    const apiCallPromise = callAPI<CommunityNoteReturn>(
-      "v2/getCommunityNote",
+
+    data.findSimilar = false
+    const apiCallPromise = callCloudflareAPI<any>(
+      "getAgentResult",
       data,
-      { provider: provider },
+      undefined,
       input.requestId
     )
-
-    // Race between the API call and the timeout
     const response = await Promise.race([apiCallPromise, timeoutPromise])
     if (response.data?.success) {
-      if (response.data?.requestId) {
+      if (response.data?.result) {
         functions.logger.log(
-          `Community note with request ID: ${response.data.requestId} successfully generated`
+          `Community note with request ID: ${input.requestId} successfully generated`
         )
       }
-      return response.data
+      const result = response.data.result
+      return {
+        en: result.communityNote.en,
+        cn: result.communityNote.cn,
+        links: result.communityNote.links,
+        isControversial: result.isControversial,
+        isVideo: result.isVideo,
+        isAccessBlocked: result.isAccessBlocked,
+      }
     } else {
       functions.logger.error(
         `Failed to generate community note with request ID: ${response.data?.requestId}`
@@ -201,6 +218,35 @@ async function getCommunityNote(input: {
         response.data?.errorMessage ?? "An error occurred calling the API"
       )
     }
+    // } else {
+    //   data.image_url = data.imageUrl
+    //   //remove data.imageUrl
+    //   delete data.imageUrl
+    //   const apiCallPromise = callAPI<CommunityNoteReturn>(
+    //     "v2/getCommunityNote",
+    //     data,
+    //     { provider: provider },
+    //     input.requestId
+    //   )
+
+    //   // Race between the API call and the timeout
+    //   const response = await Promise.race([apiCallPromise, timeoutPromise])
+    //   if (response.data?.success) {
+    //     if (response.data?.requestId) {
+    //       functions.logger.log(
+    //         `Community note with request ID: ${response.data.requestId} successfully generated`
+    //       )
+    //     }
+    //     return response.data
+    //   } else {
+    //     functions.logger.error(
+    //       `Failed to generate community note with request ID: ${response.data?.requestId}`
+    //     )
+    //     throw new Error(
+    //       response.data?.errorMessage ?? "An error occurred calling the API"
+    //     )
+    //   }
+    // }
   } catch (error) {
     throw new Error(
       error instanceof Error
@@ -273,6 +319,41 @@ async function callAPI<T>(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${identityToken}`,
+        ...(requestId ? { "x-request-id": requestId } : {}),
+      },
+    })
+    return response
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      functions.logger.log(error.message)
+    } else {
+      functions.logger.log(error)
+    }
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "An error occurred calling the machine learning API"
+    )
+  }
+}
+
+async function callCloudflareAPI<T>(
+  endpoint: string,
+  data: object,
+  params?: object,
+  requestId?: string | null
+) {
+  try {
+    const hostname = cloudfareHost.value()
+    const apikey = process.env.CHECKMATE_CORE_API_KEY
+    const response = await axios<T>({
+      method: "POST",
+      url: `${hostname}/${endpoint}`,
+      data: data,
+      params: params,
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apikey,
         ...(requestId ? { "x-request-id": requestId } : {}),
       },
     })

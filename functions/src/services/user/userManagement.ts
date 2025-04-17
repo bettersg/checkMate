@@ -90,12 +90,16 @@ export async function createNewUser(
     priceWhereInterested: null,
     feedback: null,
     tier: "free",
+    numPreOnboardSubmissionsRemaining: thresholds.preOnboardLimit ?? 1,
+    numPreOnboardMessagesSent: 0,
     numSubmissionsRemaining: thresholds.freeTierLimit ?? 5,
     submissionLimit: thresholds.freeTierLimit ?? 5,
-    isTester:
-      environment === "UAT" || environment === "DEV" || environment === "SIT"
-        ? true
-        : false,
+    isTester: true,
+    supportUsCount: 0,
+    getSharingMessageCount: 0,
+    viewedDemoCount: 0,
+    viewedFoundersMessageCount: 0,
+    numCommunityNotesReceived: 0,
   }
   try {
     const res = await db.collection("users").add(newUserObject)

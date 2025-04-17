@@ -35,19 +35,6 @@ const onCheckerWhitelist = onDocumentUpdated(
         logger.error(`No telegramId found for checker ${postChangeSnap.id}`)
         return Promise.resolve()
       }
-      const userSnap = await db
-        .collection("users")
-        .where("whatsappId", "==", whatsappId)
-        .get()
-      if (userSnap.empty) {
-        logger.error(
-          `No user found for whatsappId ${whatsappId} in checker ${postChangeSnap.id}`
-        )
-        return Promise.resolve()
-      }
-      const userDoc = userSnap.docs[0]
-      //update userDoc isTester to true
-      await userDoc.ref.update({ isTester: true })
       const checkerGroupReplyMarkup = {
         inline_keyboard: [
           [

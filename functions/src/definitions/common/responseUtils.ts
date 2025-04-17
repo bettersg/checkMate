@@ -8,6 +8,8 @@ import {
   sendWhatsappTextListMessage,
   sendWhatsappTextMessage,
   sendWhatsappFlowMessage,
+  sendWhatsappVideoMessage,
+  sendWhatsappCtaUrlMessage,
 } from "./sendWhatsappMessage"
 import {
   DocumentSnapshot,
@@ -298,7 +300,6 @@ async function sendMenuMessage(
     functions.logger.error(`prefixName ${prefixName} not found in responses`)
     return
   }
-  const isTester = userSnap.get("isTester") ?? false
   let text = getFinalResponseText({
     responseText: responses.MENU,
     responses,
@@ -306,7 +307,6 @@ async function sendMenuMessage(
     isIncorrect,
     primaryCategory: "irrelevant",
     prefixName,
-    isTester,
   })
 
   switch (platform) {
@@ -682,24 +682,124 @@ async function sendRationalisation(
   }
 }
 
-async function updateLanguageAndSendMenu(
+async function updateLanguageAndFollowUp(
   userSnap: DocumentSnapshot,
-  language: LanguageSelection
+  language: LanguageSelection,
+  firstTime: boolean
 ) {
   await userSnap.ref.update({
     language: language,
   })
-  await sendMenuMessage(
-    userSnap,
-    "MENU_PREFIX",
-    "whatsapp",
+  //refresh userSnap
+  userSnap = await userSnap.ref.get()
+  const ageGroup = userSnap.get("ageGroup")
+  const responses = await getResponsesObj("user", language)
+  const shareWithOthersButton = {
+    type: "reply",
+    reply: {
+      id: `shareWithOthers`,
+      title: responses.BUTTON_SHARE,
+    },
+  }
+  const showHowToUseButton = {
+    type: "reply",
+    reply: {
+      id: `show`,
+      title: responses.BUTTON_SHOW_ME,
+    },
+  }
+  if (firstTime) {
+    switch (ageGroup) {
+      case "18-35":
+      case "36-50":
+      case "<18":
+      case "51-65":
+      case ">65":
+      default:
+        await sendWhatsappButtonMessage(
+          "user",
+          userSnap.get("whatsappId"),
+          responses.ON_SIGNUP_MESSAGE,
+          [
+            showHowToUseButton,
+            shareWithOthersButton,
+            {
+              type: "reply",
+              reply: {
+                id: `viewFoundersMessage`,
+                title: responses.CTA_FOUNDER_MESSAGE,
+              },
+            },
+          ]
+        )
+    }
+  } else {
+    await sendMenuMessage(
+      userSnap,
+      "MENU_PREFIX",
+      "whatsapp",
+      null,
+      null,
+      true,
+      false,
+      false,
+      language
+    ) //truncated menu on onboarding
+  }
+}
+
+async function sendSharingMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const onBoardingVideoId = (
+    await db.collection("systemParameters").doc("others").get()
+  ).data()?.onboardingVideoId
+  const link =
+    process.env.ENVIRONMENT === "PROD"
+      ? `https://wa.me/${process.env.USERS_WHATSAPP_NUMBER}` //TODO: change to new link
+      : `https://wa.me/message/Z4VKE4XWCEVDI1`
+  await sendWhatsappVideoMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    onBoardingVideoId,
     null,
+    responses.FORWARDING_MESSAGE.replace("{{link}}", link),
+    null
+  )
+  await userSnap.ref.update({
+    getSharingMessageCount: FieldValue.increment(1),
+  })
+}
+
+async function sendFoundersMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const shareWithOthersButton = {
+    type: "reply",
+    reply: {
+      id: `shareWithOthers`,
+      title: responses.BUTTON_SHARE,
+    },
+  }
+  const supportOnChuffedButton = {
+    type: "reply",
+    reply: {
+      id: `supportOnChuffed_foundersMessage`,
+      title: responses.BUTTON_SUPPORT_US,
+    },
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responses.FOUNDER_MESSAGE_BODY,
+    [supportOnChuffedButton, shareWithOthersButton],
     null,
-    true,
-    false,
-    false,
-    language
-  ) //truncated menu on onboarding
+    responses.FOUNDER_MESSAGE_HEADER,
+    responses.FOUNDER_MESSAGE_FOOTER
+  )
+  await userSnap.ref.update({
+    viewedFoundersMessageCount: FieldValue.increment(1),
+  })
 }
 
 async function sendInterimUpdate(
@@ -906,7 +1006,7 @@ async function respondToInstance(
     )
   }
   const language = userSnap.get("language") ?? "en"
-  const isTester = userSnap.get("isTester") ?? false
+  const isOnboarded = userSnap.get("isOnboardingComplete")
   const responses = await getResponsesObj("user", language)
   const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
   const submissionLimit = userSnap.get("submissionLimit")
@@ -917,7 +1017,6 @@ async function respondToInstance(
   const isDisclaimed = data?.disclaimerAcceptanceTimestamp != null
   const isMachineCategorised = parentMessageSnap.get("isMachineCategorised")
   const machineCategory = parentMessageSnap.get("machineCategory")
-  const instanceCount = parentMessageSnap.get("instanceCount")
   const customReply: CustomReply = parentMessageSnap.get("customReply")
   const communityNote: CommunityNote = parentMessageSnap.get("communityNote")
   const { validResponsesCount } = await getVoteCounts(parentMessageRef)
@@ -936,7 +1035,7 @@ async function respondToInstance(
   let isMachineCase = checkMachineCase(parentMessageSnap)
 
   const hasBespokeReply =
-    customReply || (communityNote && !communityNote.downvoted && isTester)
+    customReply || (communityNote && !communityNote.downvoted)
 
   const readyToReply =
     isAssessed || forceReply || isMachineCase || hasBespokeReply
@@ -993,11 +1092,35 @@ async function respondToInstance(
     },
   }
 
+  const supportUsButton = {
+    type: "reply",
+    reply: {
+      id: `supportOnChuffed_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_SUPPORT_US,
+    },
+  }
+
+  const signUpButton = {
+    type: "reply",
+    reply: {
+      id: `signup_normal`,
+      title: responses.BUTTON_SIGN_UP_MORE,
+    },
+  }
+
   const viewSourcesButton = {
     type: "reply",
     reply: {
       id: `viewSources_${instanceSnap.ref.path}`,
       title: responses.BUTTON_VIEW_SOURCES,
+    },
+  }
+
+  const feedbackButton = {
+    type: "reply",
+    reply: {
+      id: `feedbackNote_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_GIVE_FEEDBACK,
     },
   }
 
@@ -1011,7 +1134,7 @@ async function respondToInstance(
     } else if (customReply.type === "image") {
       //TODO: implement later
     }
-  } else if (communityNote && !communityNote.downvoted && isTester) {
+  } else if (communityNote && !communityNote.downvoted) {
     category = "communityNote"
     bespokeReply = true
     //get the text based on language
@@ -1032,41 +1155,50 @@ async function respondToInstance(
       .replace("{{date}}", dateStr)
       .replace(
         "{{submissions_remaining}}",
-        responses.REMAINING_SUBMISSIONS_SUFFIX
+        isOnboarded ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
       )
       .replace("{{num_submissions_used}}", numSubmissionsUsed.toString())
       .replace("{{free_tier_limit}}", submissionLimit.toString())
       .replace("{{get_more_cta}}", responses.GET_MORE_CTA)
-    const buttons = [
-      {
-        type: "reply",
-        reply: {
-          id: `feedbackNote_${instanceSnap.ref.path}`,
-          title: responses.BUTTON_GIVE_FEEDBACK,
-        },
-      },
-    ]
+    const buttons = []
     //if sources exists, add them in between the 2 buttons
-    if (sources.length > 0) {
-      buttons.push(viewSourcesButton)
-    }
-    buttons.push(getMoreChecksButton)
 
-    const response = await sendWhatsappButtonMessage(
-      "user",
-      from,
-      responseText,
-      buttons,
-      replyId
-    )
+    if (isOnboarded) {
+      buttons.push(feedbackButton)
+      if (sources.length > 0) {
+        buttons.push(viewSourcesButton)
+      }
+      buttons.push(supportUsButton)
+    } else {
+      buttons.push(signUpButton)
+    }
+    let response
+    if (buttons.length > 0) {
+      response = await sendWhatsappButtonMessage(
+        "user",
+        from,
+        responseText,
+        buttons,
+        replyId
+      )
+    } else {
+      response = await sendWhatsappTextMessage(
+        "user",
+        from,
+        responseText,
+        replyId
+      )
+    }
     communityNoteMessageId = response?.data?.messages?.[0]?.id
   }
 
+  if (bespokeReply) {
+    await userSnap.ref.update({
+      numCommunityNotesReceived: FieldValue.increment(1),
+    })
+  }
+
   if (!isAssessed && !forceReply && !isMachineCase && !bespokeReply) {
-    if (!isTester) {
-      //TODO: Get rid of this block after beta.
-      return
-    }
     await sendTextMessage(
       "user",
       from,
@@ -1126,7 +1258,6 @@ async function respondToInstance(
         submissionsUsed: numSubmissionsUsed,
         freeTierLimit: submissionLimit,
         primaryCategory: "irrelevant",
-        isTester,
         hasGetMore: false,
       })
       const misunderstoodButton = {
@@ -1162,7 +1293,6 @@ async function respondToInstance(
         responseText: responses.ERROR,
         responses,
         primaryCategory: "error",
-        isTester,
       })
       await sendTextMessage("user", from, responseText, replyId)
       break
@@ -1196,7 +1326,6 @@ async function respondToInstance(
             isIncorrect,
             primaryCategory: "unsure",
             votingStats: votingStatsResponse,
-            isTester,
           })
           //reinstate count if we really unsure.
           await userSnap.ref.update({
@@ -1222,20 +1351,19 @@ async function respondToInstance(
         isGenerated,
         isIncorrect,
         primaryCategory: category,
-        isTester,
       })
 
-      if (!(isMachineCategorised || validResponsesCount <= 0)) {
-        buttons.push(votingResultsButton)
-      }
-
-      if (category === "scam" || category === "illicit") {
-        buttons.push(declineScamShieldButton)
-        updateObj.scamShieldConsent = true
-      }
-
-      if (isTester) {
-        buttons.push(getMoreChecksButton)
+      if (isOnboarded) {
+        if (!(isMachineCategorised || validResponsesCount <= 0)) {
+          buttons.push(votingResultsButton)
+        }
+        if (category === "scam" || category === "illicit") {
+          buttons.push(declineScamShieldButton)
+          updateObj.scamShieldConsent = true
+        }
+        buttons.push(supportUsButton)
+      } else {
+        buttons.push(signUpButton)
       }
 
       if (buttons.length > 0) {
@@ -1269,15 +1397,6 @@ async function respondToInstance(
       await incrementCheckerCounts(from, "numReported", 1)
     }
   }
-
-  //await sendRemainingSubmissionQuota(userSnap)
-
-  // if (
-  //   Math.random() < thresholds.surveyLikelihood &&
-  //   category != "irrelevant_auto"
-  // ) {
-  //   await sendSatisfactionSurvey(instanceSnap)
-  // }
   return
 }
 
@@ -1285,20 +1404,8 @@ async function sendWaitingMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
 ) {
-  const isTester = userSnap.get("isTester") ?? false
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  if (!isTester) {
-    //TODO: Get rid of this block after beta.
-    await sendTextMessage(
-      "user",
-      userSnap.get("whatsappId"),
-      responses.WAIT_FOR_ASSESSMENT,
-      replyMessageId,
-      "whatsapp"
-    )
-    return
-  }
   await sendTextMessage(
     "user",
     userSnap.get("whatsappId"),
@@ -1547,69 +1654,42 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
-  const thresholds = await getThresholds()
-  const submissionLimit = userSnap.get("submissionLimit")
-  const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
-  const isPaidTier = userSnap.get("tier") !== "free"
-  const paidTierLimit = thresholds.paidTierLimit ?? 50
-  const isTester = userSnap.get("isTester") ?? false
-  if (!isTester) {
-    const responseText = responses.OUT_OF_SUBMISSIONS
-    await sendTextMessage(
-      "user",
-      whatsappId,
-      responseText,
-      null,
-      "whatsapp",
-      true
-    )
-    return
+  const responseText = responses.OUT_OF_SUBMISSIONS_SUPPORT
+  const supportOnChuffedButton = {
+    type: "reply",
+    reply: {
+      id: `supportOnChuffed_outOfSubmissions`,
+      title: responses.BUTTON_SUPPORT_US,
+    },
   }
-  if (isPaidTier || hasExpressedInterest) {
-    const responseText = responses.OUT_OF_SUBMISSIONS_THANKS.replace(
-      "{{free_tier_limit}}",
-      submissionLimit.toString()
-    )
-    await sendTextMessage(
-      "user",
-      whatsappId,
-      responseText,
-      null,
-      "whatsapp",
-      true
-    )
-  } else {
-    const waitListFlowID = process.env.WAITLIST_FLOW_ID
-    if (!waitListFlowID) {
-      functions.logger.error("WAITLIST_FLOW_ID not defined")
-      return
-    }
-    const responseText = responses.OUT_OF_SUBMISSIONS_NUDGE.replace(
-      "{{paid_tier_limit}}",
-      paidTierLimit.toString()
-    ).replace("{{free_tier_limit}}", submissionLimit.toString())
-    const ctaText = responses.CTA_JOIN_WAITLIST
-    await createAndSendFlow(
-      whatsappId,
-      language === "cn" ? "waitlist_cn" : "waitlist_en",
-      ctaText,
-      responseText,
-      null,
-      null,
-      process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT",
-      "out_of_submissions"
-    )
-  }
+  const buttons = [supportOnChuffedButton]
+  await sendWhatsappButtonMessage(
+    "user",
+    whatsappId,
+    responseText,
+    buttons,
+    null
+  )
 }
 
 async function sendOnboardingFlow(
   userSnap: DocumentSnapshot,
   firstTime: boolean
 ) {
+  //get userSnap which might have refreshed
+  const userRef = userSnap.ref
+  const userSnapRefreshed = await userRef.get()
+  if (userSnapRefreshed.exists) {
+    userSnap = userSnapRefreshed
+  }
+  if (!userSnap) {
+    functions.logger.error("User snap not found")
+    return
+  }
   const onboardingFlowId = process.env.ONBOARDING_FLOW_ID
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  let responseText = responses.INTRODUCTION
+  let responseText = responses.INITIAL_ONBOARD
   if (!onboardingFlowId) {
     functions.logger.error("ONBOARDING_FLOW_ID not defined")
     return
@@ -1617,7 +1697,7 @@ async function sendOnboardingFlow(
   if (!firstTime) {
     responseText = responses.PLEASE_ONBOARD
   }
-  const ctaText = responses.BUTTON_SIGN_UP
+  const ctaText = responses.BUTTON_SIGN_UP_FORMAL
   await createAndSendFlow(
     userSnap.get("whatsappId"),
     "onboarding",
@@ -1711,6 +1791,101 @@ async function sendLanguageSelection(
   await sendWhatsappButtonMessage("user", whatsappId, response, buttons)
 }
 
+async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
+  //TODO: IMPLEMENT
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const isOnboardingComplete = userSnap.get("isOnboardingComplete")
+  const onBoardingVideoId = (
+    await db.collection("systemParameters").doc("others").get()
+  ).data()?.onboardingVideoId
+  if (!onBoardingVideoId) {
+    functions.logger.error("ONBOARDING_VIDEO_ID not defined")
+    return
+  }
+  const noFishySuffix = responses.NO_FISHY_SUFFIX
+  const caption = responses.DEMO_CAPTION.replace(
+    "{{nofishy}}",
+    isOnboardingComplete ? noFishySuffix : ""
+  )
+  await sendWhatsappVideoMessage(
+    "user",
+    whatsappId,
+    onBoardingVideoId,
+    null,
+    caption
+  )
+  if (!isOnboardingComplete) {
+    //wait 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await sendWhatsappButtonMessage(
+      "user",
+      whatsappId,
+      responses.SIGNUP_PROMPT,
+      [
+        {
+          type: "reply",
+          reply: {
+            id: `signup_normal`,
+            title: responses.BUTTON_SIGN_UP_FORMAL,
+          },
+        },
+      ],
+      null
+    )
+  }
+  await userSnap.ref.update({
+    viewedDemoCount: FieldValue.increment(1),
+  })
+}
+
+async function sendCheckMateUsagePrompt(
+  userSnap: DocumentSnapshot,
+  includeReminder: boolean = false,
+  includeSignup: boolean = true,
+  userPressedWrong: boolean = false
+) {
+  //get userSnap which might have refreshed
+  const userRef = userSnap.ref
+  const userSnapRefreshed = await userRef.get()
+  if (userSnapRefreshed.exists) {
+    userSnap = userSnapRefreshed
+  }
+  if (!userSnap) {
+    functions.logger.error("User snap not found")
+    return
+  }
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const reminder = responses.CANT_CHAT_PREFIX
+  const pressWrong = responses.PRESS_WRONG_PREFIX
+  let response = responses.INITIAL_TRIVIAL.replace(
+    "{{reminder}}",
+    includeReminder ? (userPressedWrong ? pressWrong : reminder) : ""
+  )
+  const buttons = [
+    {
+      type: "reply",
+      reply: {
+        id: `show`,
+        title: responses.BUTTON_SHOW_ME,
+      },
+    },
+  ]
+  if (includeSignup) {
+    buttons.push({
+      type: "reply",
+      reply: {
+        id: `signup_normal`,
+        title: responses.BUTTON_SIGN_UP,
+      },
+    })
+  }
+  await sendWhatsappButtonMessage("user", whatsappId, response, buttons)
+}
+
 async function sendUnsupportedTypeMessage(
   userSnap: DocumentSnapshot,
   replyMessageId: string | null = null
@@ -1724,6 +1899,35 @@ async function sendUnsupportedTypeMessage(
     responses?.UNSUPPORTED_TYPE,
     replyMessageId
   )
+}
+
+async function sendChuffedLink(
+  userSnap: DocumentSnapshot,
+  instancePath: string | null = null,
+  utmContent: string | null = null
+) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  const referralId = userSnap.get("referralId")
+  await sendWhatsappCtaUrlMessage(
+    "user",
+    whatsappId,
+    responses.CTA_CHUFFED,
+    `https://chuffed.org/project/checkmatesg?utm_source=whatsapp&utm_content=${
+      utmContent ?? "none"
+    }&utm_term=${referralId ?? "none"}`,
+    responses.DONATE_MESSAGE
+  )
+  await userSnap.ref.update({
+    supportUsCount: FieldValue.increment(1),
+  })
+  if (instancePath) {
+    const instanceRef = db.doc(instancePath)
+    await instanceRef.update({
+      userClickedSupportUs: true,
+    })
+  }
 }
 
 async function sendBlast(userSnap: DocumentSnapshot) {
@@ -1856,7 +2060,6 @@ interface GetFinalResponseParams {
   primaryCategory?: string
   prefixName?: string
   votingStats?: string
-  isTester?: boolean
   hasGetMore?: boolean
 }
 
@@ -1874,7 +2077,6 @@ function getFinalResponseText({
   primaryCategory = "irrelevant",
   prefixName = "",
   votingStats = "",
-  isTester = false,
   hasGetMore = true,
 }: GetFinalResponseParams): string {
   let finalResponse = responseText
@@ -1903,7 +2105,7 @@ function getFinalResponseText({
     .replace("{{voting_stats}}", votingStats)
     .replace(
       "{{submissions_remaining}}",
-      isTester ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
+      responses.REMAINING_SUBMISSIONS_SUFFIX
     )
     .replace("{{num_submissions_used}}", submissionsUsed?.toString() || "")
     .replace("{{free_tier_limit}}", freeTierLimit?.toString() || "")
@@ -1958,7 +2160,7 @@ export {
   sendReferralMessage,
   sendRationalisation,
   respondToRationalisationFeedback,
-  updateLanguageAndSendMenu,
+  updateLanguageAndFollowUp,
   sendLanguageSelection,
   sendUnsupportedTypeMessage,
   sendBlast,
@@ -1968,10 +2170,15 @@ export {
   respondToWaitlist,
   sendOutOfSubmissionsMessage,
   sendOnboardingFlow,
+  sendCheckMateDemonstration,
+  sendCheckMateUsagePrompt,
   sendGetMoreSubmissionsMessage,
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
   sendWaitingMessage,
   handleDisclaimer,
   correctCommunityNote,
+  sendFoundersMessage,
+  sendChuffedLink,
+  sendSharingMessage,
 }
