@@ -105,6 +105,11 @@ const userGenericMessageHandlerWhatsapp = async function (
         break
       }
       if (checkPrepopulatedMessage(responses, message.text)) {
+        if (userSnap.get("isOnboardingComplete") === null) {
+          await userSnap.ref.update({
+            isOnboardingComplete: false,
+          })
+        }
         await sendCheckMateDemonstration(userSnap)
         break
       } else {
