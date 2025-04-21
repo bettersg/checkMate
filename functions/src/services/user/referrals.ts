@@ -100,7 +100,8 @@ export function checkPrepopulatedMessage(
     checkTemplate(
       textNormalised,
       responses?.REFERRAL_PREPOPULATED_PREFIX_1.toLowerCase()
-    )
+    ) ||
+    messageText == "Show me how to use CheckMate"
   ) {
     return true
   }
