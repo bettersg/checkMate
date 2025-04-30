@@ -442,16 +442,36 @@ async function gatherSystemStats() {
     const totalInstances = instancesSnapshot.data().count
 
     // Query 2: Get unique count of users with instanceCount > 0
-    const usersSnapshot = await db
+    const activeUsersSnapshot = await db
       .collection("users")
       .where("instanceCount", ">", 0)
       .count()
       .get()
-    const activeUsers = usersSnapshot.data().count
+    const activeUsers = activeUsersSnapshot.data().count
 
     // Query 3: Get total number of checkers
     const checkersSnapshot = await db.collection("checkers").count().get()
     const totalCheckers = checkersSnapshot.data().count
+
+    // Query 4: Get total number of users
+    const usersSnapshot = await db.collection("users").count().get()
+    const totalUsers = usersSnapshot.data().count
+
+    const totalScamMessages = await countInstancesByCategory("scam")
+    const totalIllicitMessages = await countInstancesByCategory("illicit")
+    const totalUntrueMessages = await countInstancesByCategory("untrue")
+    const totalMisleadingMessages = await countInstancesByCategory("misleading")
+    const totalAccurateMessages = await countInstancesByCategory("accurate")
+    const totalLegitimateMessages = await countInstancesByCategory("legitimate")
+    const totalSpamMessages = await countInstancesByCategory("spam")
+
+    const totalScamMisinformation =
+      totalScamMessages +
+      totalIllicitMessages +
+      totalUntrueMessages +
+      totalMisleadingMessages
+    const totalLegit =
+      totalLegitimateMessages + totalAccurateMessages + totalSpamMessages
 
     // Format data
     const stats = {
@@ -459,6 +479,9 @@ async function gatherSystemStats() {
       submissions: totalInstances,
       sentBy: activeUsers,
       totalCheckers,
+      totalUsers,
+      totalScamMisinformation,
+      totalLegit,
     }
 
     // Save to Firebase Storage
@@ -651,6 +674,19 @@ const scheduleOnboardingVideoUpload = onSchedule(
   },
   uploadOnboardingVideo
 )
+
+async function countInstancesByCategory(category: string) {
+  const messageSnapshot = await db
+    .collection("messages")
+    .where("primaryCategory", "==", category)
+    .get()
+  //loop through docs, sum up numInstances
+  let totalInstances = 0
+  messageSnapshot.docs.forEach((doc) => {
+    totalInstances += doc.get("instanceCount")
+  })
+  return totalInstances
+}
 
 // Export scheduled cloud functions
 export const batchJobs = {
