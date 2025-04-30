@@ -442,16 +442,20 @@ async function gatherSystemStats() {
     const totalInstances = instancesSnapshot.data().count
 
     // Query 2: Get unique count of users with instanceCount > 0
-    const usersSnapshot = await db
+    const activeUsersSnapshot = await db
       .collection("users")
       .where("instanceCount", ">", 0)
       .count()
       .get()
-    const activeUsers = usersSnapshot.data().count
+    const activeUsers = activeUsersSnapshot.data().count
 
     // Query 3: Get total number of checkers
     const checkersSnapshot = await db.collection("checkers").count().get()
     const totalCheckers = checkersSnapshot.data().count
+
+    // Query 4: Get total number of users
+    const usersSnapshot = await db.collection("users").count().get()
+    const totalUsers = usersSnapshot.data().count
 
     // Format data
     const stats = {
@@ -459,6 +463,7 @@ async function gatherSystemStats() {
       submissions: totalInstances,
       sentBy: activeUsers,
       totalCheckers,
+      totalUsers,
     }
 
     // Save to Firebase Storage
