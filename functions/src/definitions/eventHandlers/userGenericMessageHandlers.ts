@@ -7,7 +7,7 @@ import {
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
-import { hashMessage, checkMessageId } from "../common/utils"
+import { hashMessage, checkMessageId, getSlugFromTitle } from "../common/utils"
 import { checkPrepopulatedMessage } from "../../services/user/referrals"
 import { getUserSnapshot } from "../../services/user/userManagement"
 import {
@@ -249,6 +249,8 @@ async function newTextInstanceHandler({
     let isCommunityNoteGenerated = false
     let isCommunityNoteUsable = false
     let communityNoteStatus = "not-generated"
+    let title = null
+    let slug = null
     // const isControversial = await determineControversial({
     //   text: text,
     // })
@@ -268,6 +270,8 @@ async function newTextInstanceHandler({
           communityNoteData.isVideo || communityNoteData.isAccessBlocked
         )
         communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
+        title = communityNoteData.title ?? null
+        slug = title ? getSlugFromTitle(title, messageRef.id) : null
       } catch (error) {
         functions.logger.error("Error in getCommunityNote:", error)
         communityNoteStatus = "error"
@@ -326,6 +330,8 @@ async function newTextInstanceHandler({
           : null,
       instanceCount: 0,
       adminGroupSentMessageId: adminMessageId,
+      title: title,
+      slug: slug,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -560,6 +566,8 @@ async function newImageInstanceHandler({
     let isCommunityNoteGenerated = false
     let isCommunityNoteUsable = false
     let isControversial = false
+    let title = null
+    let slug = null
     //const abTestGroup = getABTestGroup(from) ?? "A"
     let communityNoteStatus = "not-generated"
     messageRef = db.collection("messages").doc()
@@ -581,6 +589,8 @@ async function newImageInstanceHandler({
           communityNoteData.isVideo || communityNoteData.isAccessBlocked
         )
         communityNoteStatus = isCommunityNoteUsable ? "generated" : "unusable"
+        title = communityNoteData.title ?? null
+        slug = title ? getSlugFromTitle(title, messageRef.id) : null
       } catch (error) {
         functions.logger.error("Error in getCommunityNote:", error)
         communityNoteStatus = "error"
@@ -651,6 +661,8 @@ async function newImageInstanceHandler({
           : null,
       instanceCount: 0,
       adminGroupSentMessageId: adminMessageId,
+      title: title,
+      slug: slug,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {

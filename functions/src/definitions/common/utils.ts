@@ -170,6 +170,16 @@ function getABTestGroup(userWhatsappId: string) {
   return lastDigitInt % 2 === 0 ? "A" : "B"
 }
 
+function getSlugFromTitle(title: string, id: string) {
+  const slug = title
+    .toLowerCase() // convert to lowercase
+    .trim() // remove leading/trailing spaces
+    .replace(/[^a-z0-9]+/g, "-") // replace non-alphanumeric groups with single hyphen
+    .replace(/^-+|-+$/g, "") // remove leading/trailing hyphens
+  // append first 6 characters of id
+  return slug + id.slice(0, 6)
+}
+
 export {
   stripPhone,
   stripUrl,
@@ -187,4 +197,5 @@ export {
   checkPreV2User,
   getABTestGroup,
   checkWhitelistedUser,
+  getSlugFromTitle,
 }
