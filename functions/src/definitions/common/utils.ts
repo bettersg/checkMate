@@ -177,7 +177,7 @@ function getSlugFromTitle(title: string, id: string) {
     .replace(/[^a-z0-9]+/g, "-") // replace non-alphanumeric groups with single hyphen
     .replace(/^-+|-+$/g, "") // remove leading/trailing hyphens
   // append first 6 characters of id
-  return slug + id.slice(0, 6)
+  return slug + "-" + id.slice(0, 6)
 }
 
 export {
