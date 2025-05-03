@@ -756,7 +756,7 @@ async function sendSharingMessage(userSnap: DocumentSnapshot) {
   ).data()?.onboardingVideoId
   const link =
     process.env.ENVIRONMENT === "PROD"
-      ? `https://wa.me/${process.env.USERS_WHATSAPP_NUMBER}` //TODO: change to new link
+      ? `https://ref.checkmate.sg/add?utm_source=whatsapp&utm_medium=sharingmessage`
       : `https://wa.me/message/Z4VKE4XWCEVDI1`
   await sendWhatsappVideoMessage(
     "user",
@@ -769,6 +769,46 @@ async function sendSharingMessage(userSnap: DocumentSnapshot) {
   await userSnap.ref.update({
     getSharingMessageCount: FieldValue.increment(1),
   })
+}
+
+async function sendCheckSharingMessage(
+  userSnap: DocumentSnapshot,
+  instancePath: string
+) {
+  const language = userSnap.get("language") ?? "en"
+  const whatsappId = userSnap.get("whatsappId")
+  const responses = await getResponsesObj("user", language)
+  try {
+    const instanceRef = db.doc(instancePath)
+    const parentMessageRef = instanceRef.parent.parent
+    if (!parentMessageRef) {
+      throw new Error("parentMessageRef is missing")
+    }
+    const parentMessageSnap = await parentMessageRef.get()
+    const slug = parentMessageSnap.get("slug")
+    if (!slug) {
+      throw new Error("slug is missing")
+    }
+    const checkLink = `${process.env.WEBSITE_HOST}/check/${slug}`
+    const sharingMessage = responses.CHECK_SHARING_MESSAGE.replace(
+      "{{check_link}}",
+      checkLink
+    )
+    const urlEncodedCheckLink = encodeURIComponent(sharingMessage)
+    await sendWhatsappCtaUrlMessage(
+      "user",
+      whatsappId,
+      responses.BUTTON_SHARE,
+      `https://wa.me?text=${urlEncodedCheckLink}`,
+      responses.CHECK_SHARING_GUIDANCE
+    )
+    await instanceRef.update({
+      userClickedShare: true,
+    })
+  } catch (e) {
+    functions.logger.error(`Error sending check sharing message: ${e}`)
+    await sendTextMessage("user", whatsappId, responses.GENERIC_ERROR)
+  }
 }
 
 async function sendFoundersMessage(userSnap: DocumentSnapshot) {
@@ -1024,6 +1064,7 @@ async function respondToInstance(
   const hasCaption = data?.caption != null
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
+  const slug = parentMessageSnap.get("slug")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
   const replyId = data?.id
@@ -1116,6 +1157,14 @@ async function respondToInstance(
     },
   }
 
+  const shareButton = {
+    type: "reply",
+    reply: {
+      id: `shareCheck_${instanceSnap.ref.path}`,
+      title: responses.BUTTON_SHARE_CHECK,
+    },
+  }
+
   const feedbackButton = {
     type: "reply",
     reply: {
@@ -1129,8 +1178,23 @@ async function respondToInstance(
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
       category = "custom"
-      await sendTextMessage("user", from, customReply.text, replyId)
       bespokeReply = true
+      const buttons = []
+      if (slug) {
+        buttons.push(shareButton)
+      }
+      buttons.push(supportUsButton)
+      if (buttons.length > 0) {
+        await sendWhatsappButtonMessage(
+          "user",
+          from,
+          customReply.text,
+          buttons,
+          replyId
+        )
+      } else {
+        await sendTextMessage("user", from, customReply.text, replyId)
+      }
     } else if (customReply.type === "image") {
       //TODO: implement later
     }
@@ -1164,9 +1228,14 @@ async function respondToInstance(
     //if sources exists, add them in between the 2 buttons
 
     if (isOnboarded) {
-      buttons.push(feedbackButton)
       if (sources.length > 0) {
         buttons.push(viewSourcesButton)
+      }
+      if (slug) {
+        buttons.push(shareButton)
+      }
+      if (buttons.length < 2) {
+        buttons.push(feedbackButton)
       }
       buttons.push(supportUsButton)
     } else {
@@ -1492,6 +1561,9 @@ async function sendCommunityNoteFeedbackMessage(
     buttons,
     data?.id ?? null
   )
+  await instanceRef.update({
+    userClickedFeedback: true,
+  })
 }
 
 async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
@@ -1590,6 +1662,9 @@ async function sendCommunityNoteSources(
     "whatsapp",
     false
   )
+  await instanceRef.update({
+    userClickedSources: true,
+  })
 }
 
 async function sendGetMoreSubmissionsMessage(
@@ -2181,4 +2256,5 @@ export {
   sendFoundersMessage,
   sendChuffedLink,
   sendSharingMessage,
+  sendCheckSharingMessage,
 }

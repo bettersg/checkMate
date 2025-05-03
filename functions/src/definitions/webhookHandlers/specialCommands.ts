@@ -27,12 +27,12 @@ const handleSpecialCommands = async function (
   messageObj: WhatsappMessageObject
 ) {
   const command = messageObj.text.body.toLowerCase()
-  if (command.startsWith("/")) {
+  if (command.startsWith("//")) {
     switch (command) {
-      case "/mockdb":
+      case "//mockdb":
         await mockDb()
         return
-      case "/getid":
+      case "//getid":
         await sendWhatsappTextMessage(
           "user",
           messageObj.from,
@@ -40,19 +40,19 @@ const handleSpecialCommands = async function (
           messageObj.id
         )
         return
-      case "/getmessages":
+      case "//getmessages":
         await archiveMessages()
         return
-      case "/interim":
+      case "//interim":
         await utils.interimPromptHandler()
         return
-      case "/deactivate":
+      case "//deactivate":
         await utils.handleInactiveCheckers()
         return
-      case "/welcome":
+      case "//welcome":
         await utils.welcomeNewCheckers()
         return
-      case "/blast":
+      case "//blast":
         const userSnap = await getUserSnapshot(messageObj.from)
         if (userSnap !== null) {
           await sendBlast(userSnap)
