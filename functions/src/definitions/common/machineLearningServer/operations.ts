@@ -30,6 +30,7 @@ interface CommunityNoteReturn
   isControversial: boolean // Add your new field
   isVideo: boolean
   isAccessBlocked: boolean
+  title: string | null
   requestId?: string
   success?: boolean
   report?: string
@@ -154,6 +155,7 @@ async function getCommunityNote(input: {
         en: "This is a test community note.",
         cn: "这是一个测试社区笔记。",
         links: ["https://example1.com", "https://example2.com"],
+        title: "Test Title",
         isControversial:
           input.text?.toLowerCase().includes("controversial") || false,
         isVideo: input.text?.toLowerCase().includes("video") || false,
@@ -205,6 +207,7 @@ async function getCommunityNote(input: {
       return {
         en: result.communityNote.en,
         cn: result.communityNote.cn,
+        title: result.title ?? null,
         links: result.communityNote.links,
         isControversial: result.isControversial,
         isVideo: result.isVideo,
