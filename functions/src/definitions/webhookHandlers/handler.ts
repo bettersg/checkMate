@@ -14,7 +14,11 @@ import {
   createNewUser,
   getUserSnapshot,
 } from "../../services/user/userManagement"
-import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
+import {
+  checkHelp,
+  checkMenu,
+  checkShare,
+} from "../../validators/whatsapp/checkWhatsappText"
 import { Timestamp } from "firebase-admin/firestore"
 import {
   sendUnsupportedTypeMessage,
@@ -102,7 +106,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
             let type = message.type
             if (
               type == "text" &&
-              message.text.body.startsWith("/") &&
+              message.text.body.startsWith("//") &&
               runtimeEnvironment.value() !== "PROD"
             ) {
               //handle db commands
@@ -499,7 +503,7 @@ const checkNavigational = function (message: WhatsappMessageObject) {
     return true
   } else if (type == "text") {
     const text = message.text.body
-    if (checkMenu(text)) {
+    if (checkMenu(text) || checkShare(text) || checkHelp(text)) {
       return true
     }
   }

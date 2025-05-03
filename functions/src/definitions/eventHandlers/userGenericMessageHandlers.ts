@@ -396,6 +396,9 @@ async function newTextInstanceHandler({
     disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
     userClickedSupportUs: false,
+    userClickedSources: false,
+    userClickedShare: false,
+    userClickedFeedback: false,
   }
   await addInstanceToDb(
     id,
@@ -734,6 +737,9 @@ async function newImageInstanceHandler({
     disclaimerAcceptanceTimestamp: null,
     communityNoteMessageId: null,
     userClickedSupportUs: false,
+    userClickedSources: false,
+    userClickedShare: false,
+    userClickedFeedback: false,
   }
   await addInstanceToDb(
     id,

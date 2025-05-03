@@ -11,7 +11,11 @@ import {
 import { sendDisputeNotification } from "../common/sendMessage"
 import { sleep, checkMessageId } from "../common/utils"
 import { getUserSnapshot } from "../../services/user/userManagement"
-import { checkMenu } from "../../validators/whatsapp/checkWhatsappText"
+import {
+  checkMenu,
+  checkShare,
+  checkHelp,
+} from "../../validators/whatsapp/checkWhatsappText"
 import {
   sendCheckMateDemonstration,
   sendFoundersMessage,
@@ -24,7 +28,6 @@ import {
   getResponsesObj,
   sendInterimUpdate,
   sendVotingStats,
-  sendReferralMessage,
   sendRationalisation,
   respondToRationalisationFeedback,
   sendLanguageSelection,
@@ -37,6 +40,7 @@ import {
   sendCommunityNoteFeedbackMessage,
   sendCommunityNoteSources,
   handleDisclaimer,
+  sendCheckSharingMessage,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -83,6 +87,16 @@ const userWhatsappInteractionHandler = async function (
       if (checkMenu(text)) {
         step = "text_menu"
         await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
+        break
+      }
+      if (checkShare(text)) {
+        step = "text_share"
+        await sendSharingMessage(userSnap)
+        break
+      }
+      if (checkHelp(text)) {
+        step = "text_help"
+        await sendCheckMateDemonstration(userSnap)
         break
       }
     case "interactive":
@@ -253,6 +267,10 @@ async function onButtonReply(
     case "shareWithOthers":
       await sendSharingMessage(userSnap)
       break
+    case "shareCheck":
+      ;[instancePath] = rest
+      await sendCheckSharingMessage(userSnap, instancePath)
+      break
   }
   const step = type + (selection ? `_${selection}` : "")
   return Promise.resolve(step)
@@ -282,7 +300,8 @@ async function onTextListReceipt(
           response = responses.PROCEED_TO_SEND
           break
         case "help":
-          response = responses.HOW_TO
+          await sendCheckMateDemonstration(userSnap)
+          hasReplied = true
           break
 
         case "about":

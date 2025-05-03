@@ -213,6 +213,9 @@ export type InstanceData = {
   satisfactionScore: number | null //The score, from 0-10, given by the user to the satisfaction survey
   flowId: string | null //If a flow was triggered from this instance, this tracks the flowId. Otherwise null
   userClickedSupportUs: boolean | null //Whether the user clicked the support us button
+  userClickedSources: boolean | null //Whether the user clicked the sources button
+  userClickedShare: boolean | null //Whether the user clicked the share button
+  userClickedFeedback: boolean | null //Whether the user clicked the feedback button
   communityNoteMessageId: string | null // WhatsApp ID of the community note sent to the user
 }
 

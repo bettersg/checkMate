@@ -44,8 +44,18 @@ export function stripTemplate(message: string, template: string) {
 }
 
 export function checkMenu(text: string) {
-  const menuKeywords = ["menu", "菜单", "菜單"]
+  const menuKeywords = ["menu", "菜单", "菜單", "/menu"]
   return menuKeywords.includes(text.toLowerCase())
+}
+
+export function checkShare(text: string) {
+  const shareKeywords = ["/share"]
+  return shareKeywords.includes(text.toLowerCase())
+}
+
+export function checkHelp(text: string) {
+  const helpKeywords = ["/help"]
+  return helpKeywords.includes(text.toLowerCase())
 }
 
 export function checkNavigational(message: WhatsappMessageObject) {

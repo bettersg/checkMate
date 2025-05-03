@@ -228,8 +228,8 @@
     "cn": "感谢你的支持 🙏\n\n你可以通过下方链接前往我们的 Chuffed 页面支持查友。任何金额的支持，都会用于维持查证服务的运作，并扩大每月的免费使用额度，让更多人能从查友受益。"
   },
   "FORWARDING_MESSAGE": {
-    "en": "CheckMate is a WhatsApp number where you and your loved ones can send in suspicious messages, links, and screenshots for checking.\nWatch how it works ☝️\n\n🛡️ Add it to your WhatsApp for free checks: {{link}}",
-    "cn": "查友是一个 WhatsApp 号码，您和家人可以将可疑的信息、链接或截图发送过去查证。\n看看它是如何运作的 ☝️\n\n🛡️ 点击添加至 WhatsApp，免费查证信息：{{link}}"
+    "en": "Share this with others:\n\nCheckMate is a WhatsApp number where you and your loved ones can send in suspicious messages, links, and screenshots for checking.\nWatch how it works ☝️\n\n🛡️ Add it to your WhatsApp for free checks: {{link}}",
+    "cn": "分享给他人:\n\n查友是一个 WhatsApp 号码，您和家人可以将可疑的信息、链接或截图发送过去查证。\n看看它是如何运作的 ☝️\n\n🛡️ 点击添加至 WhatsApp，免费查证信息：{{link}}"
   },
   "NEW_USER_PREFIX_EN": {
     "en": "Hello and welcome to CheckMate! We're glad you've joined us to battle scams and misinformation😊.",
@@ -367,6 +367,14 @@
     "en": "Thanks for signing up for the waitlist! We will inform you when the paid subscription is available.",
     "cn": "感谢您注册候补名单！我们将在付费订阅服务上线时通知您。"
   },
+  "CHECK_SHARING_GUIDANCE": {
+    "en": "Press the button below to share this check with others",
+    "cn": "请点击下方按钮，将这条查核结果分享给他人。"
+  },
+  "CHECK_SHARING_MESSAGE": {
+    "en": "Check out this check by CheckMate: {{check_link}}",
+    "cn": "来看看查友的这条查核：{{check_link}}"
+  },
   "BLAST_FEEDBACK": {
     "en": "Did you find this content useful?\n\nIf you wish to unsubscribe, type \"menu\" and select the \"Unsubscribe\" option",
     "cn": "是否认为这份内容对您有帮助？\n\n如果您希望取消订阅，请输入“菜单”并选择“取消订阅”选项。"
@@ -384,12 +392,12 @@
     "cn": "提交文字内容、图片或截图进行评估"
   },
   "MENU_TITLE_REFERRAL": {
-    "en": "Get Referral Link",
-    "cn": "获取推荐链接"
+    "en": "Share With Others",
+    "cn": "分享给他人"
   },
   "MENU_DESCRIPTION_REFERRAL": {
-    "en": "Get referral link to forward to others",
-    "cn": "获取加入查友的推荐链接以转发给好友"
+    "en": "Get a message to forward to others",
+    "cn": "获取转发信息"
   },
   "MENU_TITLE_HELP": {
     "en": "Get Help",
@@ -562,6 +570,10 @@
   "BUTTON_THATS_HOW": {
     "en": "I see how it works!",
     "cn": "原来是这样用的"
+  },
+  "BUTTON_SHARE_CHECK": {
+    "en": "Share This Check",
+    "cn": "分享评估"
   },
   "PLACEHOLDER_SCAM": {
     "en": "a scam🚫",
