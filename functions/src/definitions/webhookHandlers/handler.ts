@@ -134,6 +134,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                 const whatsappId = message.from
                 //check if whatsapp number starts with 65, otherwise ignore
                 if (
+                  whatsappId.length > 0 || //remove to turn it SG only
                   whatsappId.startsWith("65") ||
                   (await checkWhitelistedUser(whatsappId))
                 ) {
