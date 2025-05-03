@@ -1183,6 +1183,7 @@ async function respondToInstance(
       if (slug) {
         buttons.push(shareButton)
       }
+      buttons.push(supportUsButton)
       if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
           "user",
