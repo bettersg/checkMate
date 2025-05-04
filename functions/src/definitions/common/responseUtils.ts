@@ -1749,7 +1749,8 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
 
 async function sendOnboardingFlow(
   userSnap: DocumentSnapshot,
-  firstTime: boolean
+  isResponseToSampleMessage: boolean,
+  isResponseToDemo: boolean = false
 ) {
   //get userSnap which might have refreshed
   const userRef = userSnap.ref
@@ -1764,12 +1765,16 @@ async function sendOnboardingFlow(
   const onboardingFlowId = process.env.ONBOARDING_FLOW_ID
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
-  let responseText = responses.INITIAL_ONBOARD
+  let responseText
   if (!onboardingFlowId) {
     functions.logger.error("ONBOARDING_FLOW_ID not defined")
     return
   }
-  if (!firstTime) {
+  if (isResponseToSampleMessage) {
+    responseText = responses.INITIAL_ONBOARD
+  } else if (isResponseToDemo) {
+    responseText = responses.SIGNUP_PROMPT
+  } else {
     responseText = responses.PLEASE_ONBOARD
   }
   const ctaText = responses.BUTTON_SIGN_UP_FORMAL
@@ -1894,21 +1899,7 @@ async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
   if (!isOnboardingComplete) {
     //wait 2 seconds
     await new Promise((resolve) => setTimeout(resolve, 2000))
-    await sendWhatsappButtonMessage(
-      "user",
-      whatsappId,
-      responses.SIGNUP_PROMPT,
-      [
-        {
-          type: "reply",
-          reply: {
-            id: `signup_normal`,
-            title: responses.BUTTON_SIGN_UP_FORMAL,
-          },
-        },
-      ],
-      null
-    )
+    await sendOnboardingFlow(userSnap, false, true)
   }
   await userSnap.ref.update({
     viewedDemoCount: FieldValue.increment(1),
