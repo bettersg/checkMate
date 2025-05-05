@@ -332,6 +332,8 @@ async function newTextInstanceHandler({
       adminGroupSentMessageId: adminMessageId,
       title: title,
       slug: slug,
+      approvedForPublishing: false,
+      approvedBy: null,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -666,6 +668,8 @@ async function newImageInstanceHandler({
       adminGroupSentMessageId: adminMessageId,
       title: title,
       slug: slug,
+      approvedForPublishing: false,
+      approvedBy: null,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
