@@ -35,6 +35,7 @@ const onMessageWriteV2 = onDocumentWritten(
         messageData?.customReply?.text ?? messageData.communityNote?.en ?? null
       const downvoted = messageData?.communityNote?.downvoted ?? false
       const sources = messageData?.communityNote?.links ?? null
+      const approvedForPublishing = messageData?.approvedForPublishing ?? false
       const lastMonth = firestoreTimestampToYYYYMM(lastTimestamp)
       const firstTimestamp = messageData.firstTimestamp
       const firstMonth = firestoreTimestampToYYYYMM(firstTimestamp)
@@ -58,6 +59,7 @@ const onMessageWriteV2 = onDocumentWritten(
         hasSlug: !!messageData.slug,
         isDownvoted: downvoted,
         sources: sources,
+        approvedForPublishing: approvedForPublishing,
       }
       try {
         await upsertOne(upsertDoc, CollectionTypes.Messages)

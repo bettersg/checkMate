@@ -1065,6 +1065,7 @@ async function respondToInstance(
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
   const slug = parentMessageSnap.get("slug")
+  const approvedForPublishing = parentMessageSnap.get("approvedForPublishing")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
   const replyId = data?.id
@@ -1231,7 +1232,7 @@ async function respondToInstance(
       if (sources.length > 0) {
         buttons.push(viewSourcesButton)
       }
-      if (slug) {
+      if (slug && approvedForPublishing) {
         buttons.push(shareButton)
       }
       if (buttons.length < 2) {

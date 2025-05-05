@@ -78,6 +78,10 @@ export async function sendCommunityNoteNotification(
             text: "View on LangFuse",
             url: `${langfuseBaseURL}/project/${langfuseProjectId}/traces/${messageRef.id}`,
           },
+          {
+            text: "Approve for publishing",
+            callback_data: `publish_${messageRef.id}`,
+          },
         ],
       ],
     }
