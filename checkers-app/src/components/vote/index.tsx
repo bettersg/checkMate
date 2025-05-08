@@ -67,7 +67,7 @@ export default function VotePage() {
           sender={vote.sender}
         />
 
-        {vote.communityNote && checkerDetails.isTester ? (
+        {vote.communityNote ? (
           <CommunityNoteCard
             en={vote.communityNote.en}
             cn={vote.communityNote.cn}
@@ -124,7 +124,7 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
-            {vote.communityNote && checkerDetails.isTester ? (
+            {vote.communityNote ? (
               <VotingNoteChart assessedInfo={vote.finalStats} />
             ) : null}
             <CategoryRationalisation

@@ -64,7 +64,6 @@ export default function VotingSystem(Prop: PropType) {
   const numberPointScale = Prop.numberPointScale;
   const currentCommunityNoteCategory = Prop.currentCommunityNoteCategory;
   const communityNote = Prop.communityNote;
-  const isTester = Prop.isTester;
   const currentCommentOnNote = Prop.commentOnNote;
   const [tags, setTags] = useState<string[]>(currentTags);
   const [isDropdownOpen, setDropdownOpen] = useState(false); // Track dropdown state
@@ -220,7 +219,6 @@ export default function VotingSystem(Prop: PropType) {
 
           {voteCategory &&
           communityNote &&
-          isTester &&
           voteCategory != "pass" ? (
             tags && !open.includes(3) ? (
               <Button
@@ -246,7 +244,6 @@ export default function VotingSystem(Prop: PropType) {
           )}
         </AccordionBody>
       </Accordion>
-      {isTester ? (
         <Accordion
           disabled={enabledAccordions.includes(3) ? false : true}
           open={open.includes(3)}
@@ -297,7 +294,6 @@ export default function VotingSystem(Prop: PropType) {
             ) : null}
           </AccordionBody>
         </Accordion>
-      ) : null}
     </div>
   );
 }
