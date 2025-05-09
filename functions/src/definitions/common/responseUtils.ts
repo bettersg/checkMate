@@ -844,6 +844,36 @@ async function sendCheckSharingMessage(
   }
 }
 
+async function sendCheckSharingMessagePreOnboard(
+  userSnap: DocumentSnapshot,
+  message: string,
+  response: string
+) {
+  console.log(`sending message: ${message}`)
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const responseText = responses.SHARE_TEMPLATE.replace("{{check}}", response)
+    .replace("{{share_cta}}", "")
+    .replace("{{text}}", message)
+  const signUpButton = {
+    type: "reply",
+    reply: {
+      id: `signup_new`,
+      title: responses.BUTTON_THATS_HOW,
+    },
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responseText,
+    [signUpButton],
+    null
+  )
+  await userSnap.ref.update({
+    hasExperiencedCheck: true,
+  })
+}
+
 async function sendFoundersMessage(userSnap: DocumentSnapshot) {
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
@@ -1214,8 +1244,12 @@ async function respondToInstance(
       category = "custom"
       bespokeReply = true
       const buttons = []
-      buttons.push(shareButton)
-      buttons.push(supportUsButton)
+      if (isOnboarded) {
+        buttons.push(shareButton)
+        buttons.push(supportUsButton)
+      } else {
+        buttons.push(signUpButton)
+      }
       if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
           "user",
@@ -1503,6 +1537,11 @@ async function respondToInstance(
     if (countOfInstancesFromSender == 1) {
       await incrementCheckerCounts(from, "numReported", 1)
     }
+    if (!userSnap.get("hasExperiencedCheck")) {
+      await userSnap.ref.update({
+        hasExperiencedCheck: true,
+      })
+    }
   }
   return
 }
@@ -1744,8 +1783,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
 
 async function sendOnboardingFlow(
   userSnap: DocumentSnapshot,
-  isResponseToSampleMessage: boolean,
-  isResponseToDemo: boolean = false
+  isResponseToSampleMessage: boolean
 ) {
   //get userSnap which might have refreshed
   const userRef = userSnap.ref
@@ -1767,8 +1805,6 @@ async function sendOnboardingFlow(
   }
   if (isResponseToSampleMessage) {
     responseText = responses.INITIAL_ONBOARD
-  } else if (isResponseToDemo) {
-    responseText = responses.SIGNUP_PROMPT
   } else {
     responseText = responses.PLEASE_ONBOARD
   }
@@ -1879,10 +1915,10 @@ async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
     functions.logger.error("ONBOARDING_VIDEO_ID not defined")
     return
   }
-  const noFishySuffix = responses.NO_FISHY_SUFFIX
+  const fishySuffix = responses.FISHY_SUFFIX
   const caption = responses.DEMO_CAPTION.replace(
-    "{{nofishy}}",
-    isOnboardingComplete ? noFishySuffix : ""
+    "{{fishy}}",
+    isOnboardingComplete ? fishySuffix : ""
   )
   await sendWhatsappVideoMessage(
     "user",
@@ -1894,18 +1930,47 @@ async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
   if (!isOnboardingComplete) {
     //wait 2 seconds
     await new Promise((resolve) => setTimeout(resolve, 2000))
-    await sendOnboardingFlow(userSnap, false, true)
+    await sendSampleChecksMessage(userSnap)
   }
   await userSnap.ref.update({
     viewedDemoCount: FieldValue.increment(1),
   })
 }
 
+async function sendSampleChecksMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const responseText = responses.TRY_SAMPLE_MESSAGES
+  const whatsappId = userSnap.get("whatsappId")
+  const appleScamButton = {
+    type: "reply",
+    reply: {
+      id: `appleScam`,
+      title: responses.BUTTON_APPLE_SCAM,
+    },
+  }
+  const erpFakeButton = {
+    type: "reply",
+    reply: {
+      id: `erpFake`,
+      title: responses.BUTTON_ERP_FAKE,
+    },
+  }
+  const reachRealButton = {
+    type: "reply",
+    reply: {
+      id: `reachReal`,
+      title: responses.BUTTON_REACH_REAL,
+    },
+  }
+  const buttons = [appleScamButton, erpFakeButton, reachRealButton]
+  await sendWhatsappButtonMessage("user", whatsappId, responseText, buttons)
+}
+
 async function sendCheckMateUsagePrompt(
   userSnap: DocumentSnapshot,
   includeReminder: boolean = false,
-  includeSignup: boolean = true,
-  userPressedWrong: boolean = false
+  includeSignup: boolean = true
 ) {
   //get userSnap which might have refreshed
   const userRef = userSnap.ref
@@ -1921,10 +1986,9 @@ async function sendCheckMateUsagePrompt(
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
   const reminder = responses.CANT_CHAT_PREFIX
-  const pressWrong = responses.PRESS_WRONG_PREFIX
   let response = responses.INITIAL_TRIVIAL.replace(
     "{{reminder}}",
-    includeReminder ? (userPressedWrong ? pressWrong : reminder) : ""
+    includeReminder ? reminder : ""
   )
   const buttons = [
     {
@@ -2243,4 +2307,5 @@ export {
   sendChuffedLink,
   sendSharingMessage,
   sendCheckSharingMessage,
+  sendCheckSharingMessagePreOnboard,
 }

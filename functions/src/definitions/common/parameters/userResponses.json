@@ -176,19 +176,19 @@
     "cn": "Hello and welcome to CheckMate! Press the button below and sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。"
   },
   "SHARE_TEMPLATE": {
-    "en": "*Submission:* \n{{text}}\n\n*CheckMate's Analysis:*\n{{check}}{{share_cta}}",
+    "en": "*Submission:* \n\n{{text}}\n\n---\n\n*CheckMate's Analysis:*\n\n{{check}}{{share_cta}}",
     "cn": "*提交内容：*\n{{text}}\n\n*查友的的评估：*\n{{check}}{{share_cta}}"
   },
   "SHARE_TEMPLATE_CTA": {
-    "en": "\n\nShare this with others or try CheckMate for yourself at {{link}}",
-    "cn": "\n\n转发给朋友，或点击 {{link}} 亲自试用查友！"
+    "en": "\n\n---\n\n📣 Share this with others or try CheckMate for yourself at {{link}}",
+    "cn": "\n\n---\n\n📣 转发给朋友，或点击 {{link}} 亲自试用查友！"
   },
   "SHARE_TEMPLATE_IMAGE": {
     "en": "See above image 🖼️",
     "cn": "请看上图 🖼️"
   },
   "INITIAL_ONBOARD": {
-    "en": "Yes, that's how CheckMate works. You send in a message for checking - we'll do the research and send you a response. By the way, it works for images and screenshots too.\n\nIf you like, you can try sending in a message of your own for checking. Otherwise, sign up below to receive free checks each month. 👇",
+    "en": "Yes, that's how CheckMate works. You send in a message for checking - we'll do the research and send you a response. By the way, it works for images and screenshots too.\n\nSign up below to receive free checks each month. 👇",
     "cn": "查友的服务方式如下：您发送需要查证的信息，我们会进行查找，并把结果发送给您。图片和截图也可以查证。\n\n您可以试着发送一条信息来查证，或者点击下方链接注册，每月可享有免费的查证次数。👇"
   },
   "PLEASE_ONBOARD": {
@@ -196,35 +196,31 @@
     "cn": "完成下方注册，即可每月免费使用查友查证信息，并查看日后回复所用的资料来源。👇"
   },
   "INITIAL_TRIVIAL": {
-    "en": "{{reminder}}To use CheckMate, simply send in messages, links, images, or screenshots for checking. Would you like to try sending your own message?",
+    "en": "{{reminder}}To use CheckMate, simply send in messages, links, images, or screenshots for checking. Would you like to see how it works?",
     "cn": "{{reminder}}若要使用查友，只需发送您想查证的文字、链接、图片或截图。\n\n要不要试试看，发一条信息来查证？"
   },
   "CANT_CHAT_PREFIX": {
     "en": "CheckMate can't chat with you freely. ",
     "cn": "查友无法与您自由聊天。"
   },
-  "PRESS_WRONG_PREFIX": {
-    "en": "Oops, not this one! But It's okay. ",
-    "cn": ""
-  },
   "DEMO_CAPTION": {
-    "en": "Check out the video above on how to use CheckMate. If you have fishy messages on your phone already, you can try sending one in for checking.{{nofishy}}",
-    "cn": "查看上方的视频，了解如何使用查友。如果你手机里已经有可疑的信息，可以马上发送一条来查证。{{nofishy}}"
+    "en": "Check out the video above on how to use CheckMate.{{fishy}}",
+    "cn": "查看上方的视频，了解如何使用查友。{{fishy}}"
   },
-  "NO_FISHY_SUFFIX": {
-    "en": "\n\nIf not, in future when you encounter one, send it in.",
-    "cn": "\n\n如果没有，没关系！将来如果遇到可疑的信息，随时欢迎发送给查友查证。"
+  "FISHY_SUFFIX": {
+    "en": "\n\nIf you have fishy messages on your phone already, you can try sending one in for checking. If not, in future when you encounter one, send it in.",
+    "cn": "\n\n如果你手机里已经有可疑的信息，可以马上发送一条来查证。如果没有，没关系！将来如果遇到可疑的信息，随时欢迎发送给查友查证。"
   },
-  "SIGNUP_PROMPT": {
-    "en": "If you don't have any messages on hand, you can still sign up by pressing the button below. Then next time you encounter something fishy, you can send it in.",
-    "cn": "如果您手边没有要查证的信息，也可以先点击下方按钮注册。下次遇到可疑的内容，就能马上发送给查友查证。"
+  "TRY_SAMPLE_MESSAGES": {
+    "en": "Now, try sending in a message for us to check. If you don't have any on hand, press one of the buttons below to see what a check looks like.",
+    "cn": "现在，请发送一条消息让我们来查核。如果你手上没有要查的内容，可以点击下方按钮，看看查核的示例。"
   },
   "FOUNDER_MESSAGE_HEADER": {
-    "en": "Message from the founder: Help us help others",
+    "en": "Appeal from the Founder: Help us help others",
     "cn": "创办人的一句：帮助我们，去帮助更多人。"
   },
   "FOUNDER_MESSAGE_BODY": {
-    "en": "Hello!\n\nRecently, I heard from a friend whose in-laws lost thousands to an investment scam.\n\nI'm guessing that like me, you're worried about your loved ones falling for the same fate. Stories like these motivated the team and me to start this ground-up initiative and keep it going since.\n\nYou've probably seen some of CheckMate's AI-generated responses. We've developed this capability, and it can help us reach many more people, but it isn't free and right now we're paying out of pocket to keep it going.\n\nIf you see value in what we're doing, consider making a contribution at our Chuffed page. Any funds will go towards increasing CheckMate's free tier.\n\nOtherwise, just help us spread the word - hitting \"Share with others\" sends you a message you can forward.\n\nHelp us help others - we'd appreciate it deeply 🙏.",
+    "en": "Hi there,\n\nA friend recently shared how their in-laws lost thousands to an investment scam. I'm guessing that like me, you're worried about your loved ones falling for the same fate. Stories like these motivated the team and me to start CheckMate: a volunteer-driven initiative to help people stay safe from scams and fake news.\n\nIf you've seen our AI-generated responses, you know they can help protect people before it's too late. But building and maintaining this isn't free - and for now, we’re funding it ourselves.\n\nIf you see value in what we're doing, consider making a contribution at our Chuffed page. Your contribution will help expand CheckMate’s free tier and reach more people.\n\nIf you’re not in a position to give, simply spreading the word helps a lot - just click \"Share with others\" to get a message you can forward.\n\nThanks for helping us help others. 🙏",
     "cn": "你好！\n\n不久前，我听朋友说，她的岳父母在一场投资骗局中损失了数万元。最令人痛心的不只是金额，而是受害者在整个过程中始终否认自己被骗，直到一切为时已晚。\n\n我猜，像我一样，你也会担心身边的亲人遭遇同样的命运。这些故事令人心碎，但也正是它们激励了我和团队，在两年前发起了这个由下而上的公益项目，并一路坚持至今。\n\n不过，我们研发的这项查证能力并非免费。每一次查证大约成本10 分。目前，我们一直是自掏腰包来维持服务的运行，但这不是一个可以长期、大规模推进的方式。\n\n如果你认同我们正在做的事，也希望看到查友继续运作，欢迎通过下方链接到我们的 Chuffed 页面做出支持。所有资金将用于扩大查友的每月免费查证额度，更多详情可在页面查看。\n\n如果你暂时无法资助我们，也没关系！只要愿意帮我们转发分享就已经是很大的支持。如果你觉得查友有帮助，点击下方按钮，获取一条可以转发给他人的信息。\n\n帮助我们，去帮助更多人 —— 我们将由衷感激 🙏\n\n"
   },
   "FOUNDER_MESSAGE_FOOTER": {
@@ -232,7 +228,7 @@
     "cn": "陈炳文\n查友创办人"
   },
   "ON_SIGNUP_MESSAGE": {
-    "en": "Thanks for signing up 🙏\n\nIf you need a refresher on how to use CheckMate, press \"Show me how to use\".\n\nPress \"Share with others\" to get a message you can forward to get others to join CheckMate.\n\nIf you'd like to read an appeal from our founder, press \"See founder's ask\".\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. That's all😊",
+    "en": "Thanks for signing up 🙏\n\nIf you need a refresher on how to use CheckMate, press \"Show me how it works\".\n\nPress \"Share with others\" to get a message you can forward to get others to join CheckMate.\n\nIf you'd like to read an appeal from our founder, press \"See Founder's Appeal\".\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. That's all😊",
     "cn": "感谢你的注册 🙏\n\n如果你需要回顾如何使用查友，请点击「给我演示一下」。\n\n点击「分享给他人」，即可获取一条可以转发的消息，邀请更多人加入查友。\n\n如果你想看看创办人的留言，请点击「听创办人寄语」。\n\n不然，以后遇到可疑的信息，也可以随时发送过来查证。就这样 😊"
   },
   "DONATE_MESSAGE": {
@@ -560,7 +556,7 @@
     "cn": "仍然继续"
   },
   "BUTTON_SHOW_ME": {
-    "en": "Show me how to use",
+    "en": "Show me how it works",
     "cn": "给我演示一下"
   },
   "BUTTON_SIGN_UP": {
@@ -582,6 +578,18 @@
   "BUTTON_THATS_HOW": {
     "en": "I see how it works!",
     "cn": "原来是这样用的"
+  },
+  "BUTTON_APPLE_SCAM": {
+    "en": "Apple ID Scam",
+    "cn": " Apple ID 诈骗信息"
+  },
+  "BUTTON_ERP_FAKE": {
+    "en": "ERP Misinformation",
+    "cn": "关于ERP 的假新闻"
+  },
+  "BUTTON_REACH_REAL": {
+    "en": "Real Govt Message",
+    "cn": "真实的政府信息"
   },
   "BUTTON_SHARE_CHECK": {
     "en": "Share This Check",
@@ -636,7 +644,7 @@
     "cn": "获取更多!"
   },
   "CTA_FOUNDER_MESSAGE": {
-    "en": "See founder's ask",
+    "en": "See Founder's Appeal",
     "cn": "创办人寄语"
   },
   "CTA_CHUFFED": {
