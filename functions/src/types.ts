@@ -219,6 +219,7 @@ export type InstanceData = {
   userClickedShare: boolean | null //Whether the user clicked the share button
   userClickedFeedback: boolean | null //Whether the user clicked the feedback button
   communityNoteMessageId: string | null // WhatsApp ID of the community note sent to the user
+  finalReplyText: string | null //The final reply text sent to the user
 }
 
 export type ReferralClicksData = {
@@ -275,6 +276,7 @@ export type UserData = {
   getSharingMessageCount: number // Number of times the user has clicked to get sharing message
   viewedDemoCount: number // Number of times the user has clicked to view the demo
   viewedFoundersMessageCount: number // Number of times the user has viewed the founders message
+  hasExperiencedCheck: boolean // Whether the user has experienced a check (tied to activation)
 }
 
 export type CheckerData = {

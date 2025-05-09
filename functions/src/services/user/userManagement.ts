@@ -100,6 +100,7 @@ export async function createNewUser(
     viewedDemoCount: 0,
     viewedFoundersMessageCount: 0,
     numCommunityNotesReceived: 0,
+    hasExperiencedCheck: false,
   }
   try {
     const res = await db.collection("users").add(newUserObject)
