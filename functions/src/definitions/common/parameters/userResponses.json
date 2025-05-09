@@ -216,7 +216,7 @@
     "cn": "现在，请发送一条消息让我们来查核。如果你手上没有要查的内容，可以点击下方按钮，看看查核的示例。"
   },
   "FOUNDER_MESSAGE_HEADER": {
-    "en": "Appeal from the Founder: Help us help others",
+    "en": "Appeal from the founder: Help us help others",
     "cn": "创办人的一句：帮助我们，去帮助更多人。"
   },
   "FOUNDER_MESSAGE_BODY": {
@@ -228,7 +228,7 @@
     "cn": "陈炳文\n查友创办人"
   },
   "ON_SIGNUP_MESSAGE": {
-    "en": "Thanks for signing up 🙏\n\nIf you need a refresher on how to use CheckMate, press \"Show me how it works\".\n\nPress \"Share with others\" to get a message you can forward to get others to join CheckMate.\n\nIf you'd like to read an appeal from our founder, press \"See Founder's Appeal\".\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. That's all😊",
+    "en": "Thanks for signing up 🙏\n\nIf you need a refresher on how to use CheckMate, press \"Show me how it works\".\n\nPress \"Share with others\" to get a message you can forward to get others to join CheckMate.\n\nIf you'd like to read an appeal from our founder, press \"See founder's appeal\".\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. That's all😊",
     "cn": "感谢你的注册 🙏\n\n如果你需要回顾如何使用查友，请点击「给我演示一下」。\n\n点击「分享给他人」，即可获取一条可以转发的消息，邀请更多人加入查友。\n\n如果你想看看创办人的留言，请点击「听创办人寄语」。\n\n不然，以后遇到可疑的信息，也可以随时发送过来查证。就这样 😊"
   },
   "DONATE_MESSAGE": {
@@ -536,15 +536,15 @@
     "cn": "您理解错了"
   },
   "BUTTON_GIVE_FEEDBACK": {
-    "en": "Give Feedback",
+    "en": "Give feedback",
     "cn": "发送反馈"
   },
   "BUTTON_VIEW_SOURCES": {
-    "en": "View Sources",
+    "en": "View sources",
     "cn": "审阅证据"
   },
   "BUTTON_GET_MORE_CHECKS": {
-    "en": "Get More/Support Us",
+    "en": "Get more/Support us",
     "cn": "支持我们 / 获取更多"
   },
   "BUTTON_SIGN_UP_FORMAL": {
@@ -568,7 +568,7 @@
     "cn": "分享给他人"
   },
   "BUTTON_SUPPORT_US": {
-    "en": "Support Our Work",
+    "en": "Support our work",
     "cn": "支持我们"
   },
   "BUTTON_SIGN_UP_MORE": {
@@ -592,7 +592,7 @@
     "cn": "真实的政府信息"
   },
   "BUTTON_SHARE_CHECK": {
-    "en": "Share This Check",
+    "en": "Share this check",
     "cn": "分享评估"
   },
   "PLACEHOLDER_SCAM": {
@@ -640,15 +640,15 @@
     "cn": "加入候补名单！"
   },
   "CTA_GET_MORE": {
-    "en": "Get More!",
+    "en": "Get more!",
     "cn": "获取更多!"
   },
   "CTA_FOUNDER_MESSAGE": {
-    "en": "See Founder's Appeal",
+    "en": "See founder's appeal",
     "cn": "创办人寄语"
   },
   "CTA_CHUFFED": {
-    "en": "Our Chuffed Page",
+    "en": "Our Chuffed page",
     "cn": "我们的 Chuffed 页面"
   }
 }
