@@ -175,12 +175,24 @@
     "en": "Hello and welcome to CheckMate! Press the button below to sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。",
     "cn": "Hello and welcome to CheckMate! Press the button below and sign up.\n\n你好，欢迎来到查友！点击下方按钮注册。"
   },
+  "SHARE_TEMPLATE": {
+    "en": "*Submission:* \n{{text}}\n\n*CheckMate's Analysis:*\n{{check}}{{share_cta}}",
+    "cn": "*提交内容：*\n{{text}}\n\n*查友的的评估：*\n{{check}}{{share_cta}}"
+  },
+  "SHARE_TEMPLATE_CTA": {
+    "en": "\n\nShare this with others or try CheckMate for yourself at {{link}}",
+    "cn": "\n\n转发给朋友，或点击 {{link}} 亲自试用查友！"
+  },
+  "SHARE_TEMPLATE_IMAGE": {
+    "en": "See above image 🖼️",
+    "cn": "请看上图 🖼️"
+  },
   "INITIAL_ONBOARD": {
     "en": "Yes, that's how CheckMate works. You send in a message for checking - we'll do the research and send you a response. By the way, it works for images and screenshots too.\n\nIf you like, you can try sending in a message of your own for checking. Otherwise, sign up below to receive free checks each month. 👇",
     "cn": "查友的服务方式如下：您发送需要查证的信息，我们会进行查找，并把结果发送给您。图片和截图也可以查证。\n\n您可以试着发送一条信息来查证，或者点击下方链接注册，每月可享有免费的查证次数。👇"
   },
   "PLEASE_ONBOARD": {
-    "en": "Complete your sign up below to receive free checks each month, and to view the sources used for future responses. 👇",
+    "en": "Complete your sign up below to receive free checks each month, and to view the sources used in each check. 👇",
     "cn": "完成下方注册，即可每月免费使用查友查证信息，并查看日后回复所用的资料来源。👇"
   },
   "INITIAL_TRIVIAL": {
@@ -560,8 +572,8 @@
     "cn": "分享给他人"
   },
   "BUTTON_SUPPORT_US": {
-    "en": "Support via Chuffed",
-    "cn": "在Chuffed上支持我们"
+    "en": "Support Our Work",
+    "cn": "支持我们"
   },
   "BUTTON_SIGN_UP_MORE": {
     "en": "Sign up for more",

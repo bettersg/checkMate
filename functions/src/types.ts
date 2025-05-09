@@ -219,6 +219,7 @@ export type InstanceData = {
   userClickedShare: boolean | null //Whether the user clicked the share button
   userClickedFeedback: boolean | null //Whether the user clicked the feedback button
   communityNoteMessageId: string | null // WhatsApp ID of the community note sent to the user
+  finalReplyText: string | null //The final reply text sent to the user
 }
 
 export type ReferralClicksData = {
