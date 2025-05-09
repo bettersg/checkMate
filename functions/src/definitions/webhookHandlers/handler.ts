@@ -26,6 +26,7 @@ import {
 } from "../common/responseUtils"
 import { decryptRequest, encryptResponse } from "../../utils/cyptography"
 import { flowEndpointHandler } from "./handlers/flowEndpointHandler"
+import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -184,12 +185,22 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     userSnap.get("isOnboardingComplete") === false &&
                     !isFlowSubmission
                   ) {
-                    // Publish to queue instead of direct handling
-                    await publishToTopic(
-                      "userPreOnboardingEvents",
-                      message,
-                      "whatsapp"
-                    )
+                    switch (type) {
+                      case "text":
+                      case "image":
+                      case "interactive":
+                        // Publish to queue instead of direct handling
+                        await publishToTopic(
+                          "userPreOnboardingEvents",
+                          message,
+                          "whatsapp"
+                        )
+                        break
+                      default:
+                        await sendUnsupportedTypeMessage(userSnap, message.id)
+                        break
+                    }
+
                     return res.sendStatus(200)
                   }
                   //check whether it's navigational or message
@@ -450,6 +461,7 @@ const postHandlerTelegramAdmin = async (req: Request, res: Response) => {
     process.env.TELEGRAM_WEBHOOK_TOKEN
   ) {
     functions.logger.log("Telegram admin bot received message")
+    await adminBotHandlerTelegram(req.body)
   } else {
     functions.logger.warn(
       "Telegram handler endpoint was called from unexpected source"

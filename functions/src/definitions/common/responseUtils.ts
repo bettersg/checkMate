@@ -27,6 +27,7 @@ import {
   UserBlast,
   CommunityNote,
   FlowData,
+  MessageData,
 } from "../../types"
 import { incrementCheckerCounts } from "./counters"
 import { FieldValue } from "firebase-admin/firestore"
@@ -778,30 +779,62 @@ async function sendCheckSharingMessage(
   const language = userSnap.get("language") ?? "en"
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
+  const link =
+    process.env.ENVIRONMENT === "PROD"
+      ? `https://ref.checkmate.sg/add?utm_source=whatsapp&utm_medium=sharingmessage`
+      : `https://wa.me/message/Z4VKE4XWCEVDI1`
   try {
     const instanceRef = db.doc(instancePath)
-    const parentMessageRef = instanceRef.parent.parent
-    if (!parentMessageRef) {
-      throw new Error("parentMessageRef is missing")
+    const instanceSnap = await instanceRef.get()
+    const checkText = instanceSnap.get("finalReplyText")
+    if (!checkText) {
+      throw new Error("checkText is null or undefined")
     }
-    const parentMessageSnap = await parentMessageRef.get()
-    const slug = parentMessageSnap.get("slug")
-    if (!slug) {
-      throw new Error("slug is missing")
+    const type = instanceSnap.get("type")
+    let responseText
+    if (type === "text") {
+      responseText = responses.SHARE_TEMPLATE.replace("{{check}}", checkText)
+        .replace("{{share_cta}}", responses.SHARE_TEMPLATE_CTA)
+        .replace("{{link}}", link)
+      const messageText = instanceSnap.get("text")
+      //truncate messageText to 4096 characters minus the current length of responseText
+      const maxLength = 4096 - responseText.length
+      const truncatedMessageText = messageText.slice(0, maxLength)
+      responseText = responseText.replace("{{text}}", truncatedMessageText)
+      await sendWhatsappTextMessage(
+        "user",
+        whatsappId,
+        responseText,
+        null,
+        false
+      )
+    } else if (type === "image") {
+      const temporaryUrl = await getSignedUrl(instanceSnap.get("storageUrl"))
+      const caption = instanceSnap.get("caption")
+      const res = await sendWhatsappImageMessage(
+        "user",
+        whatsappId,
+        null,
+        temporaryUrl,
+        caption,
+        null
+      )
+      responseText = responses.SHARE_TEMPLATE.replace("{{check}}", checkText)
+        .replace("{{share_cta}}", responses.SHARE_TEMPLATE_CTA)
+        .replace("{{text}}", responses.SHARE_TEMPLATE_IMAGE)
+        .replace("{{link}}", link)
+      //wait for 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await sendWhatsappTextMessage(
+        "user",
+        whatsappId,
+        responseText,
+        res.data.messages[0].id,
+        false
+      )
+    } else {
+      throw new Error("Unknown instance type")
     }
-    const checkLink = `${process.env.WEBSITE_HOST}/check/${slug}`
-    const sharingMessage = responses.CHECK_SHARING_MESSAGE.replace(
-      "{{check_link}}",
-      checkLink
-    )
-    const urlEncodedCheckLink = encodeURIComponent(sharingMessage)
-    await sendWhatsappCtaUrlMessage(
-      "user",
-      whatsappId,
-      responses.BUTTON_SHARE,
-      `https://wa.me?text=${urlEncodedCheckLink}`,
-      responses.CHECK_SHARING_GUIDANCE
-    )
     await instanceRef.update({
       userClickedShare: true,
     })
@@ -809,6 +842,35 @@ async function sendCheckSharingMessage(
     functions.logger.error(`Error sending check sharing message: ${e}`)
     await sendTextMessage("user", whatsappId, responses.GENERIC_ERROR)
   }
+}
+
+async function sendCheckSharingMessagePreOnboard(
+  userSnap: DocumentSnapshot,
+  message: string,
+  response: string
+) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const responseText = responses.SHARE_TEMPLATE.replace("{{check}}", response)
+    .replace("{{share_cta}}", "")
+    .replace("{{text}}", message)
+  const signUpButton = {
+    type: "reply",
+    reply: {
+      id: `signup_new`,
+      title: responses.BUTTON_THATS_HOW,
+    },
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responseText,
+    [signUpButton],
+    null
+  )
+  await userSnap.ref.update({
+    hasExperiencedCheck: true,
+  })
 }
 
 async function sendFoundersMessage(userSnap: DocumentSnapshot) {
@@ -1064,7 +1126,6 @@ async function respondToInstance(
   const hasCaption = data?.caption != null
   const isMatched = data?.isMatched ?? false
   const primaryCategory = parentMessageSnap.get("primaryCategory")
-  const slug = parentMessageSnap.get("slug")
   const isIncorrect = parentMessageSnap.get("tags.incorrect") ?? false
   const isGenerated = parentMessageSnap.get("tags.generated") ?? false
   const replyId = data?.id
@@ -1174,26 +1235,30 @@ async function respondToInstance(
   }
 
   let communityNoteMessageId = null
+  let responseText
 
   if (customReply) {
     if (customReply.type === "text" && customReply.text) {
+      responseText = customReply.text
       category = "custom"
       bespokeReply = true
       const buttons = []
-      if (slug) {
+      if (isOnboarded) {
         buttons.push(shareButton)
+        buttons.push(supportUsButton)
+      } else {
+        buttons.push(signUpButton)
       }
-      buttons.push(supportUsButton)
       if (buttons.length > 0) {
         await sendWhatsappButtonMessage(
           "user",
           from,
-          customReply.text,
+          responseText,
           buttons,
           replyId
         )
       } else {
-        await sendTextMessage("user", from, customReply.text, replyId)
+        await sendTextMessage("user", from, responseText, replyId)
       }
     } else if (customReply.type === "image") {
       //TODO: implement later
@@ -1211,19 +1276,24 @@ async function respondToInstance(
           year: "numeric",
         })
       : ""
-
-    const responseText = responses.COMMUNITY_NOTE.replace(
+    const noteText = responses.COMMUNITY_NOTE.replace(
       "{{community_note}}",
       note.trim()
-    )
-      .replace("{{date}}", dateStr)
-      .replace(
-        "{{submissions_remaining}}",
-        isOnboarded ? responses.REMAINING_SUBMISSIONS_SUFFIX : ""
-      )
-      .replace("{{num_submissions_used}}", numSubmissionsUsed.toString())
-      .replace("{{free_tier_limit}}", submissionLimit.toString())
-      .replace("{{get_more_cta}}", responses.GET_MORE_CTA)
+    ).replace("{{date}}", dateStr)
+
+    const checkText = noteText.replace("{{submissions_remaining}}", "")
+    if (isOnboarded) {
+      responseText = noteText
+        .replace(
+          "{{submissions_remaining}}",
+          responses.REMAINING_SUBMISSIONS_SUFFIX
+        )
+        .replace("{{num_submissions_used}}", numSubmissionsUsed.toString())
+        .replace("{{free_tier_limit}}", submissionLimit.toString())
+        .replace("{{get_more_cta}}", responses.GET_MORE_CTA)
+    } else {
+      responseText = checkText
+    }
     const buttons = []
     //if sources exists, add them in between the 2 buttons
 
@@ -1231,9 +1301,7 @@ async function respondToInstance(
       if (sources.length > 0) {
         buttons.push(viewSourcesButton)
       }
-      if (slug) {
-        buttons.push(shareButton)
-      }
+      buttons.push(shareButton)
       if (buttons.length < 2) {
         buttons.push(feedbackButton)
       }
@@ -1259,6 +1327,7 @@ async function respondToInstance(
       )
     }
     communityNoteMessageId = response?.data?.messages?.[0]?.id
+    responseText = checkText //save only the part without the submissions remaining
   }
 
   if (bespokeReply) {
@@ -1286,6 +1355,7 @@ async function respondToInstance(
     scamShieldConsent?: boolean
     isCommunityNoteSent?: boolean
     communityNoteMessageId?: string
+    finalReplyText?: string
   } = {
     isReplied: true,
     isReplyForced: forceReply,
@@ -1314,7 +1384,6 @@ async function respondToInstance(
     category = "irrelevant_auto"
   }
 
-  let responseText
   switch (category) {
     case "custom":
       break
@@ -1346,6 +1415,7 @@ async function respondToInstance(
 
       break
     case "irrelevant":
+      responseText = responses["IRRELEVANT_MENU_PREFIX"]
       await sendMenuMessage(
         userSnap,
         "IRRELEVANT_MENU_PREFIX",
@@ -1450,6 +1520,7 @@ async function respondToInstance(
   updateObj.replyCategory = category
   updateObj.isCommunityNoteSent = category === "communityNote"
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
+  updateObj.finalReplyText = responseText
   await instanceSnap.ref.update(updateObj)
 
   //check if category does not contain irrelevant, then updated reported number by 1
@@ -1464,6 +1535,11 @@ async function respondToInstance(
     ).data().count
     if (countOfInstancesFromSender == 1) {
       await incrementCheckerCounts(from, "numReported", 1)
+    }
+    if (!userSnap.get("hasExperiencedCheck")) {
+      await userSnap.ref.update({
+        hasExperiencedCheck: true,
+      })
     }
   }
   return
@@ -1564,49 +1640,6 @@ async function sendCommunityNoteFeedbackMessage(
   await instanceRef.update({
     userClickedFeedback: true,
   })
-}
-
-async function sendRemainingSubmissionQuota(userSnap: DocumentSnapshot) {
-  const language = userSnap.get("language") ?? "en"
-  const whatsappId = userSnap.get("whatsappId")
-  const responses = await getResponsesObj("user", language)
-  const numSubmissionsRemaining = userSnap.get("numSubmissionsRemaining")
-  const submissionLimit = userSnap.get("submissionLimit")
-  const numSubmissionsUsed = submissionLimit - numSubmissionsRemaining
-  const hasExpressedInterest = userSnap.get("isInterestedInSubscription")
-  const isPaidTier = userSnap.get("tier") !== "free"
-  const responseText = responses.REMAINING_SUBMISSION_QUOTA.replace(
-    "{{num_submissions_used}}",
-    numSubmissionsUsed.toString()
-  ).replace("{{free_tier_limit}}", submissionLimit.toString())
-  //TODO: change to whatsapp flow
-  if (isPaidTier || hasExpressedInterest) {
-    await sendTextMessage(
-      "user",
-      whatsappId,
-      responseText,
-      null,
-      "whatsapp",
-      true
-    )
-    return
-  } else {
-    const waitListFlowID = process.env.WAITLIST_FLOW_ID
-    const ctaText = responses.CTA_GET_MORE
-    if (!waitListFlowID) {
-      functions.logger.error("WAITLIST_FLOW_ID not defined")
-      return
-    }
-    await createAndSendFlow(
-      whatsappId,
-      language === "cn" ? "waitlist_cn" : "waitlist_en",
-      ctaText,
-      responseText,
-      null,
-      null,
-      process.env.ENVIRONMENT === "DEV" || process.env.ENVIRONMENT === "SIT"
-    )
-  }
 }
 
 async function sendCommunityNoteSources(
@@ -1749,8 +1782,7 @@ async function sendOutOfSubmissionsMessage(userSnap: DocumentSnapshot) {
 
 async function sendOnboardingFlow(
   userSnap: DocumentSnapshot,
-  isResponseToSampleMessage: boolean,
-  isResponseToDemo: boolean = false
+  isResponseToSampleMessage: boolean
 ) {
   //get userSnap which might have refreshed
   const userRef = userSnap.ref
@@ -1772,8 +1804,6 @@ async function sendOnboardingFlow(
   }
   if (isResponseToSampleMessage) {
     responseText = responses.INITIAL_ONBOARD
-  } else if (isResponseToDemo) {
-    responseText = responses.SIGNUP_PROMPT
   } else {
     responseText = responses.PLEASE_ONBOARD
   }
@@ -1884,10 +1914,10 @@ async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
     functions.logger.error("ONBOARDING_VIDEO_ID not defined")
     return
   }
-  const noFishySuffix = responses.NO_FISHY_SUFFIX
+  const fishySuffix = responses.FISHY_SUFFIX
   const caption = responses.DEMO_CAPTION.replace(
-    "{{nofishy}}",
-    isOnboardingComplete ? noFishySuffix : ""
+    "{{fishy}}",
+    isOnboardingComplete ? fishySuffix : ""
   )
   await sendWhatsappVideoMessage(
     "user",
@@ -1899,18 +1929,47 @@ async function sendCheckMateDemonstration(userSnap: DocumentSnapshot) {
   if (!isOnboardingComplete) {
     //wait 2 seconds
     await new Promise((resolve) => setTimeout(resolve, 2000))
-    await sendOnboardingFlow(userSnap, false, true)
+    await sendSampleChecksMessage(userSnap)
   }
   await userSnap.ref.update({
     viewedDemoCount: FieldValue.increment(1),
   })
 }
 
+async function sendSampleChecksMessage(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const responseText = responses.TRY_SAMPLE_MESSAGES
+  const whatsappId = userSnap.get("whatsappId")
+  const appleScamButton = {
+    type: "reply",
+    reply: {
+      id: `appleScam`,
+      title: responses.BUTTON_APPLE_SCAM,
+    },
+  }
+  const erpFakeButton = {
+    type: "reply",
+    reply: {
+      id: `erpFake`,
+      title: responses.BUTTON_ERP_FAKE,
+    },
+  }
+  const reachRealButton = {
+    type: "reply",
+    reply: {
+      id: `reachReal`,
+      title: responses.BUTTON_REACH_REAL,
+    },
+  }
+  const buttons = [appleScamButton, erpFakeButton, reachRealButton]
+  await sendWhatsappButtonMessage("user", whatsappId, responseText, buttons)
+}
+
 async function sendCheckMateUsagePrompt(
   userSnap: DocumentSnapshot,
   includeReminder: boolean = false,
-  includeSignup: boolean = true,
-  userPressedWrong: boolean = false
+  includeSignup: boolean = true
 ) {
   //get userSnap which might have refreshed
   const userRef = userSnap.ref
@@ -1926,10 +1985,9 @@ async function sendCheckMateUsagePrompt(
   const whatsappId = userSnap.get("whatsappId")
   const responses = await getResponsesObj("user", language)
   const reminder = responses.CANT_CHAT_PREFIX
-  const pressWrong = responses.PRESS_WRONG_PREFIX
   let response = responses.INITIAL_TRIVIAL.replace(
     "{{reminder}}",
-    includeReminder ? (userPressedWrong ? pressWrong : reminder) : ""
+    includeReminder ? reminder : ""
   )
   const buttons = [
     {
@@ -2248,4 +2306,5 @@ export {
   sendChuffedLink,
   sendSharingMessage,
   sendCheckSharingMessage,
+  sendCheckSharingMessagePreOnboard,
 }

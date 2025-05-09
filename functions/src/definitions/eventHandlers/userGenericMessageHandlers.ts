@@ -332,6 +332,8 @@ async function newTextInstanceHandler({
       adminGroupSentMessageId: adminMessageId,
       title: title,
       slug: slug,
+      approvedForPublishing: false,
+      approvedBy: null,
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -399,6 +401,7 @@ async function newTextInstanceHandler({
     userClickedSources: false,
     userClickedShare: false,
     userClickedFeedback: false,
+    finalReplyText: null,
   }
   await addInstanceToDb(
     id,
@@ -666,6 +669,8 @@ async function newImageInstanceHandler({
       adminGroupSentMessageId: adminMessageId,
       title: title,
       slug: slug,
+      approvedForPublishing: false,
+      approvedBy: null,
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -740,6 +745,7 @@ async function newImageInstanceHandler({
     userClickedSources: false,
     userClickedShare: false,
     userClickedFeedback: false,
+    finalReplyText: null,
   }
   await addInstanceToDb(
     id,
