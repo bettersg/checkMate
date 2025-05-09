@@ -849,7 +849,6 @@ async function sendCheckSharingMessagePreOnboard(
   message: string,
   response: string
 ) {
-  console.log(`sending message: ${message}`)
   const language = userSnap.get("language") ?? "en"
   const responses = await getResponsesObj("user", language)
   const responseText = responses.SHARE_TEMPLATE.replace("{{check}}", response)
