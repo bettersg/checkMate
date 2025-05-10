@@ -7,6 +7,7 @@ export interface VoteOptionProps {
     percentage: number;
     votes: number; 
     selected?: boolean; // Choice of the user
+    majority?: boolean; // User choice is the same as Majority Choice
 }
 
 export const VoteOption: React.FC<VoteOptionProps> = ({
@@ -14,8 +15,9 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
     percentage, 
     votes, 
     selected, 
+    majority
 }) => {
-    const color = 'orange'; // Default color for the bar
+    const color = majority ? 'green' : 'orange'; // Default color for the bar
     // local state to trigger the bar animation on mount 
     const [fill, setFill] = useState<number>(0);
 
@@ -31,8 +33,8 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
 
     return (
         <div className = {`${bgShade} flex items-start gap-4 p-4 mb-4 rounded-lg border-2 border-solid 
-            ${selected ? `border-orange-400` : `border-orange-100`}`}>
-            <CheckCircleIcon className={`size-6 ${selected ? `text-orange-600` : 'text-gray-200'}`}/>
+            ${selected ? `border-${color}-400` : `border-gray-200`}`}>
+            <CheckCircleIcon className={`size-6 ${selected ? `text-${color}-600` : 'text-gray-200'}`}/>
             <div className="flex-1">
                 <div className="flex justify-between items-center">
                     <Typography variant="paragraph" className="font-medium">

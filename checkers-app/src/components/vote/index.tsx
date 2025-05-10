@@ -28,7 +28,6 @@ export default function VotePage() {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
         setSelectedTag(vote.tags);
-        console.log(vote);
       }
       setIsLoading(false);
     };
