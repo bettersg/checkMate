@@ -3,6 +3,7 @@ import { TrophyIcon } from "@heroicons/react/20/solid";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
+import { TooltipWithHelperIcon } from "../common/ToolTip";
 
 interface PropType {
   messageId: string | null;
@@ -19,19 +20,19 @@ const CATEGORIES = [
     name: "great",
     icon: <TrophyIcon className="h-7 w-7" />,
     display: "Great",
-    description: "Good response, can't do any better",
+    description: "Helpful, informative, and concise reply. Nothing to nitpick.",
   },
   {
     name: "acceptable",
     icon: <CheckBadgeIcon className="h-7 w-7" />,
     display: "Acceptable",
-    description: "Acceptable response, but can be improved",
+    description: "Could be improved in style/susbstance, but contains no inaccuracy.",
   },
   {
     name: "unacceptable",
     icon: <XCircleIcon className="h-7 w-7" />,
     display: "Unacceptable",
-    description: "Unacceptable response",
+    description: "Contains information, or conveys a message, that is outright wrong/untrue.",
   },
 ];
 
@@ -76,6 +77,10 @@ export default function CommunityNoteCategories(Prop: PropType) {
           >
             {cat.icon}
             {cat.display}
+            <TooltipWithHelperIcon
+              header={cat.display}
+              text={cat.description}
+            />
           </Button>
         </>
       ))}

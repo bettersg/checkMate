@@ -33,6 +33,7 @@ const onVoteRequestCreate = onDocumentCreated(
       logger.error("Failed to enqueue task:", error)
     }
   }
+  
 )
 
 export { onVoteRequestCreate }
