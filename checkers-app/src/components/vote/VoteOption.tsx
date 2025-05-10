@@ -33,8 +33,8 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
 
     return (
         <div className = {`${bgShade} flex items-start gap-4 p-4 mb-4 rounded-lg border-2 border-solid 
-            ${selected ? `border-${color}-400` : `border-gray-200`}`}>
-            <CheckCircleIcon className={`size-6 ${selected ? `text-${color}-600` : 'text-gray-200'}`}/>
+            ${selected ? color === 'green' ? `border-green-400` : 'border-orange-400' : `border-gray-200`}`}>
+            <CheckCircleIcon className={`size-6 ${selected ? color === 'green' ? `text-green-600` : 'text-orange-600' : 'text-gray-200'}`}/>
             <div className="flex-1">
                 <div className="flex justify-between items-center">
                     <Typography variant="paragraph" className="font-medium">
