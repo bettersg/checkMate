@@ -125,7 +125,7 @@ export default function VotePage() {
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
             {vote.communityNote ? (
-              <VotingNoteChart assessedInfo={vote.finalStats} />
+              <VotingNoteChart assessedInfo={vote.finalStats} communityNoteCategory={vote.communityNoteCategory}/>
             ) : null}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}

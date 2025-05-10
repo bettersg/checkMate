@@ -100,7 +100,7 @@ export default function VotingSystem(Prop: PropType) {
     setOpen((prev) => [...prev, value]);
   };
 
-  const onNextStep = (value: any) => {
+  const onNextStep = (value: number) => {
     handleNextStep(value);
   };
 
