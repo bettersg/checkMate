@@ -28,24 +28,6 @@ export default function VotingNoteChart(Props: VotingNoteChartProps) {
   return (
     <div className="w-full max-w-md mx-auto p-1 bg-white rounded-lg">
       <h2 className="mb-4 text-center text-lg font-bold">Community Note Category</h2>
-      {/* <ResponsiveContainer width="100%" height={200}>
-        <PieChart>
-          <Pie
-            data={Note_Category_Data}
-            dataKey="value"
-            cx="40%"
-            cy="50%"
-            outerRadius={70}
-            innerRadius={50}
-            paddingAngle={0}
-          >
-            {Note_Category_Data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index]} />
-            ))}
-          </Pie>
-          <Legend layout="vertical" align="right" verticalAlign="middle" />
-        </PieChart>
-      </ResponsiveContainer> */}
       {Note_Category_Data.map((item) => (
         <VoteOption
           label={item.name}
