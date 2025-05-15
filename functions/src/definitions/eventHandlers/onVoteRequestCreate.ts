@@ -35,7 +35,6 @@ const onVoteRequestCreate = onDocumentCreated(
       }
     }
   }
-  
 )
 
 export { onVoteRequestCreate }
