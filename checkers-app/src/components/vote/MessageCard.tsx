@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
+import urlRegexSafe from "url-regex-safe";
+import normalizeUrl from "normalize-url";
+
 import {
   ChatBubbleLeftEllipsisIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/20/solid";
+import { LinkPreview } from "./LinkPreview";
 
 interface PropType {
   text: string | null;
@@ -50,6 +54,7 @@ export default function MessageCard(prop: PropType) {
   const [isExpanded, setIsExpanded] = useState(false);
   const lengthBeforeTruncation = 300;
   const { text, caption, imageUrl, type, sender } = prop;
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -70,6 +75,28 @@ export default function MessageCard(prop: PropType) {
 
   // Split text by URLs
   const textParts = splitTextByUrls(textToShow);
+
+  const togglePreviewExpansion = () => {
+    console.log("expanded")
+    setIsPreviewExpanded(!isPreviewExpanded);
+  }
+  // Extract ALL Urls from the text
+  const urls = useMemo(() => {
+    const extractedUrls = displayText.match(urlRegexSafe()) || [];
+    const normalisedurls = extractedUrls.map((url) =>
+      normalizeUrl(url, { defaultProtocol: "https", stripWWW: false })
+    );
+    return normalisedurls;
+  }, []);
+
+  // Is there more than 1 url in the text?
+  const hasMultipleUrls = urls.length > 1;
+  const previewLinks = 
+    isPreviewExpanded || !hasMultipleUrls ? urls : urls.slice(0, 1);
+  console.log(isPreviewExpanded)
+  console.log(previewLinks)
+
+  
 
   return (
     <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
@@ -126,6 +153,27 @@ export default function MessageCard(prop: PropType) {
           className="w-full object-contain rounded-xl"
         />
       )}
+      {previewLinks.map((url) => {
+        return (
+          <LinkPreview 
+          title={url}
+          imageUrl="https://storage.googleapis.com/checkmate-eval-images/mall%20explosion%20case.jpg"
+          />
+        )
+      })}
+      {hasMultipleUrls && (
+          <div className="flex justify-start">
+            <Button
+              onClick={togglePreviewExpansion}
+              variant = "text"
+              className="relative z-10 p-2 text-primary-color3"
+              size="sm"
+            >
+              {isPreviewExpanded ? "Show Less" : `Show ${previewLinks.length} More Links`}
+            </Button>
+          </div>
+        )}
+      
       <CardBody className="-m-3">
         <Typography className="flex items-center mt-1 mb-2">
           <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0" />
