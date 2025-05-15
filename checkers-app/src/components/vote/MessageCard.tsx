@@ -77,7 +77,6 @@ export default function MessageCard(prop: PropType) {
   const textParts = splitTextByUrls(textToShow);
 
   const togglePreviewExpansion = () => {
-    console.log("expanded")
     setIsPreviewExpanded(!isPreviewExpanded);
   }
   // Extract ALL Urls from the text
@@ -93,10 +92,6 @@ export default function MessageCard(prop: PropType) {
   const hasMultipleUrls = urls.length > 1;
   const previewLinks = 
     isPreviewExpanded || !hasMultipleUrls ? urls : urls.slice(0, 1);
-  console.log(isPreviewExpanded)
-  console.log(previewLinks)
-
-  
 
   return (
     <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
