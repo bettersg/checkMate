@@ -27,6 +27,7 @@ import {
   checkMenu,
   checkShare,
 } from "../../validators/whatsapp/checkWhatsappText"
+import { onTemplateButtonReply } from "./userNavigationHandlers"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -155,6 +156,10 @@ async function handlePreOnboardedMessage(
               step = await onPreOnboardButtonReply(userSnap, message)
               break
           }
+          break
+
+        case "button":
+          await onTemplateButtonReply(userSnap, message)
           break
         default:
           step = "preonboard_unsupported"
@@ -308,4 +313,4 @@ const onUserPreOnboardingPublish = onMessagePublished(
   }
 )
 
-export { onUserPreOnboardingPublish }
+export { onUserPreOnboardingPublish, SAMPLE_MESSAGES }
