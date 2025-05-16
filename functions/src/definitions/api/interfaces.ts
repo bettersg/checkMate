@@ -156,7 +156,6 @@ interface Vote {
   tags: string[]
   numberPointScale: 5 | 6
   commentOnNote?: string | null
-  urls: { url: string; screenshotUrl: string | null }[] | null
 }
 
 interface Last30DaysStats {
