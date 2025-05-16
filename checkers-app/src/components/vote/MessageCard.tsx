@@ -79,7 +79,6 @@ export default function MessageCard(prop: PropType) {
   const togglePreviewExpansion = () => {
     setIsPreviewExpanded(!isPreviewExpanded);
   }
-  /* Preview Link Screenshot */
   // Extract ALL Urls from the text
   const urls = useMemo(() => {
     const extractedUrls = displayText.match(urlRegexSafe()) || [];
@@ -149,7 +148,6 @@ export default function MessageCard(prop: PropType) {
           className="w-full object-contain rounded-xl"
         />
       )}
-      {/* Preview Link Screenshot */}
       {previewLinks.map((url) => {
         return (
           <LinkPreview 
