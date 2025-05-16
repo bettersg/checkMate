@@ -64,6 +64,7 @@ export default function VotePage() {
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
           sender={vote.sender}
+          urls={vote.urls}
         />
 
         {vote.communityNote ? (

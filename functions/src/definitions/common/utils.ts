@@ -129,7 +129,7 @@ function hashMessage(originalStr: string) {
 }
 
 function hashScreenshotUrl(url: string) {
-  const salt = process.env.SALT
+  const salt = process.env.SCREENSHOT_HASH_SALT
   if (!salt) {
     throw new Error(
       "The 'SCREENSHOT_HASH_SALT' environment variable is not set."

@@ -191,30 +191,37 @@ const getVoteHandler = async (req: Request, res: Response) => {
       numberPointScale: voteRequestSnap.get("numberPointScale"),
     }
     return res.status(200).send(returnData)
-  } catch {
+  } catch (e){
+    console.log(e)
     logger.error("Error retrieving vote.")
     return res.status(500).send("Error retrieving vote.")
   }
 }
 
 function extractUrls(text: string) {
-  const extractedUrls = text.match(urlRegexSafe()) || []
-  return extractedUrls.map((url) =>
-    normalizeUrl(url, { defaultProtocol: "https", stripWWW: false })
-  )
+  try {
+    const extractedUrls = text.match(urlRegexSafe()) || []
+    return extractedUrls.map((url) =>
+      normalizeUrl(url, { defaultProtocol: "https", stripWWW: false })
+    )
+  } catch (e) {
+    console.log("Error extracting urls")
+    return []
+  }
 }
 
 async function getScreenshotUrl(url: string) {
   //first hash
   const hash = hashScreenshotUrl(url)
   const blobName = `${hash}.png`
-  const bucketName = process.env.SCREENSHOT_BUCKET_NAME
+  const bucketName = process.env.SCREENSHOT_STORAGE_BUCKET
   if (!bucketName) {
     throw new Error("SCREENSHOT_BUCKET_NAME is not set")
   }
   const bucket = storage.bucket(bucketName)
   const blob = bucket.file(blobName)
   const [exists] = await blob.exists()
+
   if (exists) {
     return blob.publicUrl()
   }
