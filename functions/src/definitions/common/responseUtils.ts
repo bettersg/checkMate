@@ -870,6 +870,7 @@ async function sendCheckSharingMessagePreOnboard(
   )
   await userSnap.ref.update({
     hasExperiencedCheck: true,
+    hasExperiencedBespokeCheck: true,
   })
 }
 
@@ -1558,6 +1559,14 @@ async function respondToInstance(
     if (!userSnap.get("hasExperiencedCheck")) {
       await userSnap.ref.update({
         hasExperiencedCheck: true,
+      })
+    }
+    if (
+      (category === "communityNote" || category === "custom") &&
+      !userSnap.get("hasExperiencedBespokeCheck")
+    ) {
+      await userSnap.ref.update({
+        hasExperiencedBespokeCheck: true,
       })
     }
   }
