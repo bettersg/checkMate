@@ -18,6 +18,7 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
     majority
 }) => {
     const color = majority ? 'green' : 'orange'; // Default color for the bar
+    console.log(color);
     // local state to trigger the bar animation on mount 
     const [fill, setFill] = useState<number>(0);
 
@@ -47,7 +48,7 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
                 {/* Animated bar */}
                 <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
                     <div
-                        className={`h-full ${barColor} rounded-full transition-all duration-1000 ease-out`}
+                        className={`h-full ${selected ? barColor : 'bg-gray-500'} rounded-full transition-all duration-1000 ease-out`}
                         style={{ width: `${fill}%` }}
                     />
                 </div>

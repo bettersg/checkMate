@@ -27,7 +27,7 @@ export default function VotingNoteChart(Props: VotingNoteChartProps) {
 
 
   return (
-    <div className="w-full max-w-md mx-auto p-1 bg-white rounded-lg">
+    <div className="w-full max-w-md mx-auto p-1 rounded-lg">
       <h2 className="text-primary-color3 mb-1 text-center text-lg font-bold">Community Note Category</h2>
       <h3 className = "mb-4 text-primary-color3 text-center text-sm">{totalVotes} total votes</h3>
       {Note_Category_Data.map((item) => (

@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { Vote } from "../interfaces"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
-import normalizeUrl from "normalize-url"
+import normalizeUrl from 'normalize-url';
 import urlRegexSafe from "url-regex-safe"
 import { hashScreenshotUrl } from "../../common/utils"
 import { getVoteCounts } from "../../common/counters"
