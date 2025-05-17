@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Typography } from '@material-tailwind/react';
-import { CheckCircleIcon } from '@heroicons/react/20/solid';
 
 export interface VoteOptionProps {
     label: string;
     percentage: number;
     votes: number; 
     selected?: boolean; // Choice of the user
-    majority?: boolean; // User choice is the same as Majority Choice
 }
 
 export const VoteOption: React.FC<VoteOptionProps> = ({
@@ -15,9 +13,8 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
     percentage, 
     votes, 
     selected, 
-    majority
 }) => {
-    const color = majority ? 'green' : 'orange'; // Default color for the bar
+    const color = selected ? 'orange' : 'gray'; // Default color for the bar
     console.log(color);
     // local state to trigger the bar animation on mount 
     const [fill, setFill] = useState<number>(0);
@@ -34,8 +31,7 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
 
     return (
         <div className = {`${bgShade} flex items-start gap-4 p-4 mb-4 rounded-lg border-2 border-solid 
-            ${selected ? color === 'green' ? `border-green-400` : 'border-orange-400' : `border-gray-200`}`}>
-            <CheckCircleIcon className={`size-6 ${selected ? color === 'green' ? `text-green-600` : 'text-orange-600' : 'text-gray-200'}`}/>
+            ${selected ? 'border-orange-400' : `border-gray-200`}`}>
             <div className="flex-1">
                 <div className="flex justify-between items-center">
                     <Typography variant="paragraph" className="font-medium">

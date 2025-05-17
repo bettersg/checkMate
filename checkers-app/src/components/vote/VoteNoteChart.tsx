@@ -23,8 +23,6 @@ export default function VotingNoteChart(Props: VotingNoteChartProps) {
 
   // Calculate total vote count 
   const totalVotes = Note_Category_Data.reduce((acc, options) => acc + (options.value ?? 0), 0);
-  const maxVotesName =  Note_Category_Data.reduce((best, cur) => ((best.value ?? -Infinity) > (cur.value ?? -Infinity) ? best : cur)).name;
-
 
   return (
     <div className="w-full max-w-md mx-auto p-1 rounded-lg">
@@ -36,7 +34,6 @@ export default function VotingNoteChart(Props: VotingNoteChartProps) {
           percentage={((item.value ?? 0) / totalVotes) * 100}
           votes={item.value ?? 0}
           selected={Props.communityNoteCategory === item.name.toLowerCase()}
-          majority={Props.communityNoteCategory === maxVotesName.toLowerCase()}
         />
       ))}
     </div>
