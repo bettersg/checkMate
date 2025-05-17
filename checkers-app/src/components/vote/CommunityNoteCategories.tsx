@@ -26,13 +26,15 @@ const CATEGORIES = [
     name: "acceptable",
     icon: <CheckBadgeIcon className="h-7 w-7" />,
     display: "Acceptable",
-    description: "Could be improved in style/susbstance, but contains no inaccuracy.",
+    description:
+      "Could be improved in style/substance, but contains no inaccuracy.",
   },
   {
     name: "unacceptable",
     icon: <XCircleIcon className="h-7 w-7" />,
     display: "Unacceptable",
-    description: "Contains information, or conveys a message, that is outright wrong/untrue.",
+    description:
+      "Contains information, or conveys a message, that is outright wrong/untrue.",
   },
 ];
 
