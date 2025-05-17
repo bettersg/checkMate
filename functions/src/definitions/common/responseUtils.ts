@@ -904,6 +904,25 @@ async function sendFoundersMessage(userSnap: DocumentSnapshot) {
   })
 }
 
+async function sendShareOrTryCTA(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const shareWithOthersButton = {
+    type: "reply",
+    reply: {
+      id: `shareWithOthers`,
+      title: responses.BUTTON_SHARE,
+    },
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responses.TRY_OR_SHARE_CTA,
+    [shareWithOthersButton],
+    null
+  )
+}
+
 async function sendInterimUpdate(
   userSnap: DocumentSnapshot,
   instancePath: string
@@ -2307,4 +2326,5 @@ export {
   sendSharingMessage,
   sendCheckSharingMessage,
   sendCheckSharingMessagePreOnboard,
+  sendShareOrTryCTA,
 }
