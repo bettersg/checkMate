@@ -83,90 +83,90 @@ async function handlePreOnboardedMessage(
   let shouldProcessJourney = true
 
   try {
-    if (userSnap.get("numPreOnboardSubmissionsRemaining") <= 0) {
-      await sendOnboardingFlow(userSnap, false)
-      step = "preonboard_limit_reached"
-    } else {
-      switch (message.type) {
-        case "text":
-          step = "preonboard_open"
-          //if no text, throw error
-          const text = message.text?.body
-          if (!text) {
-            throw new Error("No text in message")
-          }
-          if (text === PREPOPULATED_MESSAGE) {
-            step = "preonboard_prepopulated"
-            //wait 5 seconds before sending onboarding flow
-            await sendCheckMateDemonstration(userSnap)
-            break
-          }
-          if (checkMenu(text)) {
-            step = "text_menu"
-            await sendMenuMessage(
-              userSnap,
-              "MENU_PREFIX",
-              "whatsapp",
-              null,
-              null
-            )
-            break
-          }
-          if (checkShare(text)) {
-            step = "text_share"
-            await sendSharingMessage(userSnap)
-            break
-          }
-          if (checkHelp(text)) {
-            step = "text_help"
-            await sendCheckMateDemonstration(userSnap)
-            break
-          }
-          const needsChecking = await determineNeedsChecking({
-            text: text,
-          })
-          if (!needsChecking) {
-            step = "preonboard_trivial"
-            if (userSnap.get("numPreOnboardMessagesSent") > 0) {
-              await sendCheckMateUsagePrompt(userSnap, true)
-            } else {
-              await sendLanguageSelection(userSnap, true)
-            }
-            break
-          }
+    switch (message.type) {
+      case "text":
+        step = "preonboard_open"
+        //if no text, throw error
+        const text = message.text?.body
+        if (!text) {
+          throw new Error("No text in message")
+        }
+        if (text === PREPOPULATED_MESSAGE) {
+          step = "preonboard_prepopulated"
+          //wait 5 seconds before sending onboarding flow
+          await sendCheckMateDemonstration(userSnap)
+          break
+        }
+        if (checkMenu(text)) {
+          step = "text_menu"
+          await sendMenuMessage(userSnap, "MENU_PREFIX", "whatsapp", null, null)
+          break
+        }
+        if (checkShare(text)) {
+          step = "text_share"
+          await sendSharingMessage(userSnap)
+          break
+        }
+        if (checkHelp(text)) {
+          step = "text_help"
+          await sendCheckMateDemonstration(userSnap)
+          break
+        }
+        if (userSnap.get("numPreOnboardSubmissionsRemaining") <= 0) {
+          await sendOnboardingFlow(userSnap, false)
+          step = "preonboard_limit_reached"
+          break
+        }
 
-          // Non-trivial message that needs checking
-          step = "preonboard_needs_checking"
-          await createAndPublishMessage(message, userSnap)
+        const needsChecking = await determineNeedsChecking({
+          text: text,
+        })
+        if (!needsChecking) {
+          step = "preonboard_trivial"
+          if (userSnap.get("numPreOnboardMessagesSent") > 0) {
+            await sendCheckMateUsagePrompt(userSnap, true)
+          } else {
+            await sendLanguageSelection(userSnap, true)
+          }
           break
+        }
 
-        case "image":
-          step = "preonboard_image"
-          await createAndPublishMessage(message, userSnap)
+        // Non-trivial message that needs checking
+        step = "preonboard_needs_checking"
+        await createAndPublishMessage(message, userSnap)
+        break
+
+      case "image":
+        if (userSnap.get("numPreOnboardSubmissionsRemaining") <= 0) {
+          await sendOnboardingFlow(userSnap, false)
+          step = "preonboard_limit_reached"
           break
+        }
+        step = "preonboard_image"
+        await createAndPublishMessage(message, userSnap)
+        break
 
-        case "interactive":
-          const interactive = message.interactive
-          if (!interactive) {
-            logger.error("Message has no interactive object")
+      case "interactive":
+        const interactive = message.interactive
+        if (!interactive) {
+          logger.error("Message has no interactive object")
+          break
+        }
+        switch (interactive.type) {
+          case "button_reply":
+            step = await onPreOnboardButtonReply(userSnap, message)
             break
-          }
-          switch (interactive.type) {
-            case "button_reply":
-              step = await onPreOnboardButtonReply(userSnap, message)
-              break
-          }
-          break
+        }
+        break
 
-        case "button":
-          await onTemplateButtonReply(userSnap, message)
-          break
-        default:
-          step = "preonboard_unsupported"
-          await sendUnsupportedTypeMessage(userSnap, message.id)
-          await sendCheckMateUsagePrompt(userSnap, false)
-          break
-      }
+      case "button":
+        await onTemplateButtonReply(userSnap, message)
+        break
+      default:
+        step = "preonboard_unsupported"
+        await sendUnsupportedTypeMessage(userSnap, message.id)
+        await sendCheckMateUsagePrompt(userSnap, false)
+        break
     }
     await userSnap.ref.update({
       numPreOnboardMessagesSent: FieldValue.increment(1),

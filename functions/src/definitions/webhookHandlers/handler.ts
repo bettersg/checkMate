@@ -185,23 +185,11 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     userSnap.get("isOnboardingComplete") === false &&
                     !isFlowSubmission
                   ) {
-                    switch (type) {
-                      case "text":
-                      case "image":
-                      case "button":
-                      case "interactive":
-                        // Publish to queue instead of direct handling
-                        await publishToTopic(
-                          "userPreOnboardingEvents",
-                          message,
-                          "whatsapp"
-                        )
-                        break
-                      default:
-                        await sendUnsupportedTypeMessage(userSnap, message.id)
-                        break
-                    }
-
+                    await publishToTopic(
+                      "userPreOnboardingEvents",
+                      message,
+                      "whatsapp"
+                    )
                     return res.sendStatus(200)
                   }
                   //check whether it's navigational or message
