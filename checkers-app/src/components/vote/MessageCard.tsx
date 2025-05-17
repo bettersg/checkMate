@@ -180,7 +180,7 @@ export default function MessageCard(prop: PropType) {
           >
             {isPreviewExpanded
               ? "Show Less"
-              : `Show ${previewLinks?.length} More Links`}
+              : `Show ${previewLinks?.length} More Link(s)`}
           </Button>
         </div>
       )}
