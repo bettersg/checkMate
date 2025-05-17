@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { LinkPreview } from "./LinkPreview";
 import { FlagIcon } from "@heroicons/react/24/solid";
-
+import { truncateText } from "../../utils/helperFunctions";
 interface PropType {
   text: string | null;
   type: "image" | "text";
@@ -143,7 +143,7 @@ export default function MessageCard(prop: PropType) {
       )}
       {/* Preview Link Screenshot */}
       {previewLinks && previewLinks.length > 0 && (
-        <CardBody className="-m-3 mb-2">
+        <CardBody className="-m-3">
           <Typography className="flex items-center mb-2">
             <PhotoIcon className="h-6 w-6 text-[#3284ff] mr-2 flex-shrink-0" />
             <p className="font-semibold leading-none">Link Screenshots:</p>
@@ -170,7 +170,8 @@ export default function MessageCard(prop: PropType) {
                         color="blue-gray"
                         className="!leading-snug"
                       >
-                        Sorry, No preview available for {url.url}
+                        Sorry, no preview available for{" "}
+                        {truncateText(url.url, 30)}
                       </Typography>
                     </CardBody>
                   </Card>
