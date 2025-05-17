@@ -10,6 +10,8 @@ import {
   sendUnsupportedTypeMessage,
   sendCheckSharingMessagePreOnboard,
   handleDisclaimer,
+  sendMenuMessage,
+  sendSharingMessage,
 } from "../../definitions/common/responseUtils"
 import { checkPreV2User } from "../../definitions/common/utils"
 import {
@@ -18,8 +20,14 @@ import {
   GeneralMessage,
 } from "../../types"
 import { determineNeedsChecking } from "../../definitions/common/machineLearningServer/operations"
+import { checkHelp } from "../../validators/whatsapp/checkWhatsappText"
 import { publishToTopic } from "../../definitions/common/pubsub"
 import { getUserSnapshot } from "../../services/user/userManagement"
+import {
+  checkMenu,
+  checkShare,
+} from "../../validators/whatsapp/checkWhatsappText"
+import { onTemplateButtonReply } from "./userNavigationHandlers"
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -93,6 +101,27 @@ async function handlePreOnboardedMessage(
             await sendCheckMateDemonstration(userSnap)
             break
           }
+          if (checkMenu(text)) {
+            step = "text_menu"
+            await sendMenuMessage(
+              userSnap,
+              "MENU_PREFIX",
+              "whatsapp",
+              null,
+              null
+            )
+            break
+          }
+          if (checkShare(text)) {
+            step = "text_share"
+            await sendSharingMessage(userSnap)
+            break
+          }
+          if (checkHelp(text)) {
+            step = "text_help"
+            await sendCheckMateDemonstration(userSnap)
+            break
+          }
           const needsChecking = await determineNeedsChecking({
             text: text,
           })
@@ -127,6 +156,10 @@ async function handlePreOnboardedMessage(
               step = await onPreOnboardButtonReply(userSnap, message)
               break
           }
+          break
+
+        case "button":
+          await onTemplateButtonReply(userSnap, message)
           break
         default:
           step = "preonboard_unsupported"
@@ -280,4 +313,4 @@ const onUserPreOnboardingPublish = onMessagePublished(
   }
 )
 
-export { onUserPreOnboardingPublish }
+export { onUserPreOnboardingPublish, SAMPLE_MESSAGES }
