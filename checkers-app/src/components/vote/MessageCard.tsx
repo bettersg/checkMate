@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
+
 import {
   ChatBubbleLeftEllipsisIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/20/solid";
+import { LinkPreview } from "./LinkPreview";
+import { FlagIcon } from "@heroicons/react/24/solid";
 
 interface PropType {
   text: string | null;
@@ -11,6 +14,7 @@ interface PropType {
   caption: string | null;
   imageUrl: string | null;
   sender: string | null;
+  urls: { url: string; screenshotUrl: string | null }[] | null;
 }
 
 // Helper function to detect URLs and split the text
@@ -49,7 +53,8 @@ const splitTextByUrls = (text: string) => {
 export default function MessageCard(prop: PropType) {
   const [isExpanded, setIsExpanded] = useState(false);
   const lengthBeforeTruncation = 300;
-  const { text, caption, imageUrl, type, sender } = prop;
+  const { text, caption, imageUrl, type, sender, urls } = prop;
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -70,6 +75,15 @@ export default function MessageCard(prop: PropType) {
 
   // Split text by URLs
   const textParts = splitTextByUrls(textToShow);
+
+  const togglePreviewExpansion = () => {
+    setIsPreviewExpanded(!isPreviewExpanded);
+  };
+
+  // // Is there more than 1 url in the text?
+  const hasMultipleUrls = urls ? urls.length > 1 : false;
+  const previewLinks =
+    isPreviewExpanded || !hasMultipleUrls ? urls : urls?.slice(0, 1);
 
   return (
     <Card className="bg-error-color overflow-y-auto overflow-x-hidden max-w-md w-full h-full max-h-full p-3">
@@ -126,6 +140,51 @@ export default function MessageCard(prop: PropType) {
           className="w-full object-contain rounded-xl"
         />
       )}
+      {/* Preview Link Screenshot */}
+      {previewLinks
+        ? previewLinks.map((url) => {
+            return (
+              // Check if the screenshot URL is valid
+              url.screenshotUrl ? (
+                <LinkPreview title={url.url} imageUrl={url.screenshotUrl} />
+              ) : (
+                <div className="grid place-items-center mt-2">
+                  <Card
+                    className="h-28 w-full max-w-sm mx-auto border border-slate-200"
+                    shadow={false}
+                    color="transparent"
+                  >
+                    <CardBody className="flex flex-col items-center justify-center text-center p-4">
+                      <FlagIcon className="w-6 h-6 mb-1 text-red-500" />
+                      <Typography
+                        variant="h6"
+                        color="blue-gray"
+                        className="!leading-snug"
+                      >
+                        Sorry, No preview available for {url.url}
+                      </Typography>
+                    </CardBody>
+                  </Card>
+                </div>
+              )
+            );
+          })
+        : null}
+      {hasMultipleUrls && (
+        <div className="flex justify-start">
+          <Button
+            onClick={togglePreviewExpansion}
+            variant="text"
+            className="relative z-10 p-2 text-primary-color3"
+            size="sm"
+          >
+            {isPreviewExpanded
+              ? "Show Less"
+              : `Show ${previewLinks?.length} More Link(s)`}
+          </Button>
+        </div>
+      )}
+
       <CardBody className="-m-3">
         <Typography className="flex items-center mt-1 mb-2">
           <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0" />

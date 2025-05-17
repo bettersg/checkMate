@@ -112,8 +112,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         totalCheckerTestersCount,
       } = await getVoteCounts(messageRef)
 
-      // Check if unacceptableCount is more than 50%
-      const isUnacceptable = unacceptableCount > 0.5 * totalCheckerTestersCount
+     
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
       const isSus =
         isBigSus || susCount > thresholds.isSus * validResponsesCount
@@ -171,6 +170,9 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVoteAbsolute //10
             ))
 
+      // Check if unacceptableCount is more than 50% 
+      // if unacceptableCount > 50% of validResponsesCount and message is considered assessed
+      const isUnacceptable = (unacceptableCount > 0.5 * validResponsesCount) && isAssessed
       const isAssessedUnacceptable = isUnacceptable
 
       let primaryCategory

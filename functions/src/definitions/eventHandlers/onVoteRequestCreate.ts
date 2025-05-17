@@ -21,16 +21,18 @@ const onVoteRequestCreate = onDocumentCreated(
       logger.log("No data associated with the event")
       return Promise.resolve()
     }
-    try {
-      await enqueueTask(
-        {
-          voteRequestPath: snap.ref.path,
-        },
-        "passVoteRequest",
-        delaySeconds
-      )
-    } catch (error) {
-      logger.error("Failed to enqueue task:", error)
+    if (env !== "DEV") {
+      try {
+        await enqueueTask(
+          {
+            voteRequestPath: snap.ref.path,
+          },
+          "passVoteRequest",
+          delaySeconds
+        )
+      } catch (error) {
+        logger.error("Failed to enqueue task:", error)
+      }
     }
   }
 )
