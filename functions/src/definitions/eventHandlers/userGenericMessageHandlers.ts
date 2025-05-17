@@ -401,6 +401,7 @@ async function newTextInstanceHandler({
     userClickedSources: false,
     userClickedShare: false,
     userClickedFeedback: false,
+    finalReplyText: null,
   }
   await addInstanceToDb(
     id,
@@ -744,6 +745,7 @@ async function newImageInstanceHandler({
     userClickedSources: false,
     userClickedShare: false,
     userClickedFeedback: false,
+    finalReplyText: null,
   }
   await addInstanceToDb(
     id,

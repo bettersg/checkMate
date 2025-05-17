@@ -23,6 +23,7 @@ import {
   sendChuffedLink,
   sendSharingMessage,
   updateLanguageAndFollowUp,
+  sendCheckSharingMessagePreOnboard,
 } from "../common/responseUtils"
 import {
   getResponsesObj,
@@ -41,10 +42,12 @@ import {
   sendCommunityNoteSources,
   handleDisclaimer,
   sendCheckSharingMessage,
+  sendShareOrTryCTA,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
 import { AppEnv } from "../../appEnv"
+import { SAMPLE_MESSAGES } from "./userPreOnboardingHandler"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -120,31 +123,7 @@ const userWhatsappInteractionHandler = async function (
       break
 
     case "button":
-      const button = message.button
-      if (!button) {
-        functions.logger.error("Message has no button object")
-        break
-      }
-      switch (button.text) {
-        case "Get Latest Update":
-          await sendBlast(userSnap)
-          break
-        case "Unsubscribe":
-          await toggleUserSubscription(userSnap, false)
-          break
-        case "Get Referral Message":
-          await sendSharingMessage(userSnap)
-          break
-        default:
-          functions.logger.error("Unsupported button type:", button.text)
-          await sendWhatsappTextMessage(
-            "user",
-            from,
-            responses.GENERIC_ERROR,
-            null,
-            true
-          )
-      }
+      await onTemplateButtonReply(userSnap, message)
       break
 
     default:
@@ -165,6 +144,52 @@ const userWhatsappInteractionHandler = async function (
   }
 
   markWhatsappMessageAsRead("user", message.id)
+}
+
+async function onTemplateButtonReply(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  messageObj: WhatsappMessageObject
+) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const from = messageObj.from
+  const button = messageObj.button
+  let reply, response
+  switch (button.text) {
+    case "Get Latest Update":
+      await sendBlast(userSnap)
+      break
+    case "Unsubscribe":
+      await toggleUserSubscription(userSnap, false)
+      break
+    case "Share with others":
+      await sendSharingMessage(userSnap)
+      break
+    case "Apple ID Scam":
+      reply = SAMPLE_MESSAGES["appleScam"].message
+      response = SAMPLE_MESSAGES["appleScam"].response
+      await sendCheckSharingMessagePreOnboard(userSnap, reply, response)
+      break
+    case "ERP Misinformation":
+      reply = SAMPLE_MESSAGES["erpFake"].message
+      response = SAMPLE_MESSAGES["erpFake"].response
+      await sendCheckSharingMessagePreOnboard(userSnap, reply, response)
+      break
+    case "Real Govt Message":
+      reply = SAMPLE_MESSAGES["reachReal"].message
+      response = SAMPLE_MESSAGES["reachReal"].response
+      await sendCheckSharingMessagePreOnboard(userSnap, reply, response)
+      break
+    default:
+      functions.logger.error("Unsupported button type:", button.text)
+      await sendWhatsappTextMessage(
+        "user",
+        from,
+        responses.GENERIC_ERROR,
+        null,
+        true
+      )
+  }
 }
 
 async function onButtonReply(
@@ -270,6 +295,9 @@ async function onButtonReply(
     case "shareCheck":
       ;[instancePath] = rest
       await sendCheckSharingMessage(userSnap, instancePath)
+      break
+    case "signup": //to respond to "I see how it works in post-onboarding"
+      await sendShareOrTryCTA(userSnap)
       break
   }
   const step = type + (selection ? `_${selection}` : "")
@@ -490,4 +518,4 @@ const onUserNavigationPublish = onMessagePublished(
     }
   }
 )
-export { onUserNavigationPublish }
+export { onUserNavigationPublish, onTemplateButtonReply }

@@ -185,7 +185,6 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     userSnap.get("isOnboardingComplete") === false &&
                     !isFlowSubmission
                   ) {
-                    // Publish to queue instead of direct handling
                     await publishToTopic(
                       "userPreOnboardingEvents",
                       message,
