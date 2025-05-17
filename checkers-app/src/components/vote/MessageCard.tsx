@@ -53,7 +53,7 @@ const splitTextByUrls = (text: string) => {
 export default function MessageCard(prop: PropType) {
   const [isExpanded, setIsExpanded] = useState(false);
   const lengthBeforeTruncation = 300;
-  const { text, caption, imageUrl, type, sender, urls} = prop;
+  const { text, caption, imageUrl, type, sender, urls } = prop;
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const toggleExpansion = () => {
@@ -78,11 +78,11 @@ export default function MessageCard(prop: PropType) {
 
   const togglePreviewExpansion = () => {
     setIsPreviewExpanded(!isPreviewExpanded);
-  }
+  };
 
   // // Is there more than 1 url in the text?
   const hasMultipleUrls = urls ? urls.length > 1 : false;
-  const previewLinks = 
+  const previewLinks =
     isPreviewExpanded || !hasMultipleUrls ? urls : urls?.slice(0, 1);
 
   return (
@@ -141,48 +141,50 @@ export default function MessageCard(prop: PropType) {
         />
       )}
       {/* Preview Link Screenshot */}
-      {previewLinks ? previewLinks.map((url) => {
-        return (
-          // Check if the screenshot URL is valid 
-          url.screenshotUrl ? (
-            <LinkPreview 
-              title={url.url}
-              imageUrl={url.screenshotUrl}
-            />
-          ) : (
-            <div className="grid place-items-center mt-2">
-              <Card className="h-28 w-full max-w-sm mx-auto border border-slate-200" shadow={false} color="transparent">
-                <CardBody className="flex flex-col items-center justify-center text-center p-4">
-                  <FlagIcon className="w-6 h-6 mb-1 text-red-500" />
-                  <Typography
-                    variant="h6"
-                    color="blue-gray"
-                    className="!leading-snug"
+      {previewLinks
+        ? previewLinks.map((url) => {
+            return (
+              // Check if the screenshot URL is valid
+              url.screenshotUrl ? (
+                <LinkPreview title={url.url} imageUrl={url.screenshotUrl} />
+              ) : (
+                <div className="grid place-items-center mt-2">
+                  <Card
+                    className="h-28 w-full max-w-sm mx-auto border border-slate-200"
+                    shadow={false}
+                    color="transparent"
                   >
-                    Sorry, No Preview Available 
-                  </Typography>
-                  <Typography className="text-xs text-gray-700 mb-2">
-                  Don&apos;t worry, our team is already on it.
-                  </Typography>
-                </CardBody>
-              </Card>
-            </div>
-          )
-        )
-      }): null}
+                    <CardBody className="flex flex-col items-center justify-center text-center p-4">
+                      <FlagIcon className="w-6 h-6 mb-1 text-red-500" />
+                      <Typography
+                        variant="h6"
+                        color="blue-gray"
+                        className="!leading-snug"
+                      >
+                        Sorry, No preview available for {url.url}
+                      </Typography>
+                    </CardBody>
+                  </Card>
+                </div>
+              )
+            );
+          })
+        : null}
       {hasMultipleUrls && (
-          <div className="flex justify-start">
-            <Button
-              onClick={togglePreviewExpansion}
-              variant = "text"
-              className="relative z-10 p-2 text-primary-color3"
-              size="sm"
-            >
-              {isPreviewExpanded ? "Show Less" : `Show ${previewLinks?.length} More Links`}
-            </Button>
-          </div>
-        )}
-      
+        <div className="flex justify-start">
+          <Button
+            onClick={togglePreviewExpansion}
+            variant="text"
+            className="relative z-10 p-2 text-primary-color3"
+            size="sm"
+          >
+            {isPreviewExpanded
+              ? "Show Less"
+              : `Show ${previewLinks?.length} More Links`}
+          </Button>
+        </div>
+      )}
+
       <CardBody className="-m-3">
         <Typography className="flex items-center mt-1 mb-2">
           <PaperAirplaneIcon className="h-6 w-6 text-[#ff8932] mr-2 flex-srhink-0" />

@@ -191,8 +191,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       numberPointScale: voteRequestSnap.get("numberPointScale"),
     }
     return res.status(200).send(returnData)
-  } catch (e){
-    console.log(e)
+  } catch (e) {
     logger.error("Error retrieving vote.")
     return res.status(500).send("Error retrieving vote.")
   }
@@ -205,7 +204,7 @@ function extractUrls(text: string) {
       normalizeUrl(url, { defaultProtocol: "https", stripWWW: false })
     )
   } catch (e) {
-    console.log("Error extracting urls")
+    logger.error("Error extracting urls")
     return []
   }
 }
@@ -221,7 +220,6 @@ async function getScreenshotUrl(url: string) {
   const bucket = storage.bucket(bucketName)
   const blob = bucket.file(blobName)
   const [exists] = await blob.exists()
-
   if (exists) {
     return blob.publicUrl()
   }
