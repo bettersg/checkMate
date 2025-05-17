@@ -101,6 +101,7 @@ export async function createNewUser(
     viewedFoundersMessageCount: 0,
     numCommunityNotesReceived: 0,
     hasExperiencedCheck: false,
+    hasExperiencedBespokeCheck: false,
   }
   try {
     const res = await db.collection("users").add(newUserObject)

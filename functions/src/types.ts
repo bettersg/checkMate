@@ -277,6 +277,7 @@ export type UserData = {
   viewedDemoCount: number // Number of times the user has clicked to view the demo
   viewedFoundersMessageCount: number // Number of times the user has viewed the founders message
   hasExperiencedCheck: boolean // Whether the user has experienced a check (tied to activation)
+  hasExperiencedBespokeCheck: boolean // Whether the user has experienced either a community note or a custom reply (tied to activation)
 }
 
 export type CheckerData = {
