@@ -1545,6 +1545,10 @@ async function respondToInstance(
 
   //check if category does not contain irrelevant, then updated reported number by 1
   if (category !== "irrelevant" && category !== "irrelevant_auto") {
+    const userUpdateObject: {
+      hasExperiencedCheck?: boolean
+      hasExperiencedBespokeCheck?: boolean
+    } = {}
     //count number of instances from this sender
     const countOfInstancesFromSender = (
       await parentMessageRef
@@ -1557,17 +1561,16 @@ async function respondToInstance(
       await incrementCheckerCounts(from, "numReported", 1)
     }
     if (!userSnap.get("hasExperiencedCheck")) {
-      await userSnap.ref.update({
-        hasExperiencedCheck: true,
-      })
+      userUpdateObject.hasExperiencedCheck = true
     }
     if (
       (category === "communityNote" || category === "custom") &&
       !userSnap.get("hasExperiencedBespokeCheck")
     ) {
-      await userSnap.ref.update({
-        hasExperiencedBespokeCheck: true,
-      })
+      userUpdateObject.hasExperiencedBespokeCheck = true
+    }
+    if (Object.keys(userUpdateObject).length > 0) {
+      await userSnap.ref.update(userUpdateObject)
     }
   }
   return
