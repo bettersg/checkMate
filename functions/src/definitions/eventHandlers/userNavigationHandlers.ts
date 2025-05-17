@@ -42,6 +42,7 @@ import {
   sendCommunityNoteSources,
   handleDisclaimer,
   sendCheckSharingMessage,
+  sendShareOrTryCTA,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
@@ -294,6 +295,9 @@ async function onButtonReply(
     case "shareCheck":
       ;[instancePath] = rest
       await sendCheckSharingMessage(userSnap, instancePath)
+      break
+    case "signup": //to respond to "I see how it works in post-onboarding"
+      await sendShareOrTryCTA(userSnap)
       break
   }
   const step = type + (selection ? `_${selection}` : "")

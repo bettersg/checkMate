@@ -231,6 +231,10 @@
     "en": "Thanks for signing up 🙏\n\nIf you need a refresher on how to use CheckMate, press \"Show me how it works\".\n\nPress \"Share with others\" to get a message you can forward to get others to join CheckMate.\n\nIf you'd like to read an appeal from our founder, press \"See founder's appeal\".\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. That's all😊",
     "cn": "感谢你的注册 🙏\n\n如果你需要回顾如何使用查友，请点击「给我演示一下」。\n\n点击「分享给他人」，即可获取一条可以转发的消息，邀请更多人加入查友。\n\n如果你想看看创办人的留言，请点击「听创办人寄语」。\n\n不然，以后遇到可疑的信息，也可以随时发送过来查证。就这样 😊"
   },
+  "TRY_OR_SHARE_CTA": {
+    "en": "Good job!🤩\n\nIf you find this useful, press \"Share with others\" to get a message you can forward to others to encourage them to join CheckMate. This helps protect more people from scams and fake news.\n\nOtherwise, when you encounter something fishy, feel free to send it in for checking. Thank you! 🙏",
+    "cn": "太棒了！🤩\n\n如果你觉得这个服务有用，点击「分享给他人」，即可获取一条可以转发的消息，邀请更多人加入查友，一起防范诈骗和假消息。\n\n不然，以后遇到可疑的信息，也可以随时发送过来查证。谢谢你 🙏"
+  },
   "DONATE_MESSAGE": {
     "en": "Thank you 🙏\n\nYou can make a contribution to CheckMate at our Chuffed Page, linked below. Any contribution will go towards keeping the service going, and increasing the monthly free tier so everyone can benefit more from CheckMate.",
     "cn": "感谢你的支持 🙏\n\n你可以通过下方链接前往我们的 Chuffed 页面支持查友。任何金额的支持，都会用于维持查证服务的运作，并扩大每月的免费使用额度，让更多人能从查友受益。"
