@@ -188,6 +188,7 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                     switch (type) {
                       case "text":
                       case "image":
+                      case "button":
                       case "interactive":
                         // Publish to queue instead of direct handling
                         await publishToTopic(
