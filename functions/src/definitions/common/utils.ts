@@ -128,6 +128,18 @@ function hashMessage(originalStr: string) {
   return createHash("md5").update(originalStr).digest("hex")
 }
 
+function hashScreenshotUrl(url: string) {
+  const salt = process.env.SCREENSHOT_HASH_SALT
+  if (!salt) {
+    throw new Error(
+      "The 'SCREENSHOT_HASH_SALT' environment variable is not set."
+    )
+  }
+  return createHash("md5")
+    .update(url + salt)
+    .digest("hex")
+}
+
 function translateFrequency(en: string) {
   switch (en) {
     case "daily":
@@ -198,4 +210,5 @@ export {
   getABTestGroup,
   checkWhitelistedUser,
   getSlugFromTitle,
+  hashScreenshotUrl,
 }

@@ -870,6 +870,7 @@ async function sendCheckSharingMessagePreOnboard(
   )
   await userSnap.ref.update({
     hasExperiencedCheck: true,
+    hasExperiencedBespokeCheck: true,
   })
 }
 
@@ -902,6 +903,25 @@ async function sendFoundersMessage(userSnap: DocumentSnapshot) {
   await userSnap.ref.update({
     viewedFoundersMessageCount: FieldValue.increment(1),
   })
+}
+
+async function sendShareOrTryCTA(userSnap: DocumentSnapshot) {
+  const language = userSnap.get("language") ?? "en"
+  const responses = await getResponsesObj("user", language)
+  const shareWithOthersButton = {
+    type: "reply",
+    reply: {
+      id: `shareWithOthers`,
+      title: responses.BUTTON_SHARE,
+    },
+  }
+  await sendWhatsappButtonMessage(
+    "user",
+    userSnap.get("whatsappId"),
+    responses.TRY_OR_SHARE_CTA,
+    [shareWithOthersButton],
+    null
+  )
 }
 
 async function sendInterimUpdate(
@@ -1525,6 +1545,10 @@ async function respondToInstance(
 
   //check if category does not contain irrelevant, then updated reported number by 1
   if (category !== "irrelevant" && category !== "irrelevant_auto") {
+    const userUpdateObject: {
+      hasExperiencedCheck?: boolean
+      hasExperiencedBespokeCheck?: boolean
+    } = {}
     //count number of instances from this sender
     const countOfInstancesFromSender = (
       await parentMessageRef
@@ -1537,9 +1561,16 @@ async function respondToInstance(
       await incrementCheckerCounts(from, "numReported", 1)
     }
     if (!userSnap.get("hasExperiencedCheck")) {
-      await userSnap.ref.update({
-        hasExperiencedCheck: true,
-      })
+      userUpdateObject.hasExperiencedCheck = true
+    }
+    if (
+      (category === "communityNote" || category === "custom") &&
+      !userSnap.get("hasExperiencedBespokeCheck")
+    ) {
+      userUpdateObject.hasExperiencedBespokeCheck = true
+    }
+    if (Object.keys(userUpdateObject).length > 0) {
+      await userSnap.ref.update(userUpdateObject)
     }
   }
   return
@@ -2307,4 +2338,5 @@ export {
   sendSharingMessage,
   sendCheckSharingMessage,
   sendCheckSharingMessagePreOnboard,
+  sendShareOrTryCTA,
 }

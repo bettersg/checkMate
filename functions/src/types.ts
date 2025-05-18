@@ -277,6 +277,7 @@ export type UserData = {
   viewedDemoCount: number // Number of times the user has clicked to view the demo
   viewedFoundersMessageCount: number // Number of times the user has viewed the founders message
   hasExperiencedCheck: boolean // Whether the user has experienced a check (tied to activation)
+  hasExperiencedBespokeCheck: boolean // Whether the user has experienced either a community note or a custom reply (tied to activation)
 }
 
 export type CheckerData = {
@@ -324,7 +325,7 @@ export type CheckerData = {
   leaderboardStats: LeaderBoardStats // The leaderboard stats of the checker
   programData: ProgramData // The Checker Program data of the checker
   dailyAssignmentCount: Number // Daily count of checker votes
-  isTester: Boolean //Whether or not the checker is whitelisted for the beta phase. Whitelisted checkers will see and vote on GenAI replies
+  isTester: Boolean //Whether or not the checker was whitelisted for the beta phase.
   hasBlockedTelegramMessages: Boolean //Whether or not the checker has blocked CheckMate from sending them messages on Telegram
 }
 

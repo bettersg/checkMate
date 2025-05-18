@@ -28,7 +28,6 @@ export default function VotePage() {
         const vote = await getVote(messageId, voteRequestId);
         setVote(vote);
         setSelectedTag(vote.tags);
-        console.log(vote);
       }
       setIsLoading(false);
     };
@@ -65,9 +64,10 @@ export default function VotePage() {
           imageUrl={vote.signedImageUrl}
           caption={vote.caption}
           sender={vote.sender}
+          urls={vote.urls}
         />
 
-        {vote.communityNote && checkerDetails.isTester ? (
+        {vote.communityNote ? (
           <CommunityNoteCard
             en={vote.communityNote.en}
             cn={vote.communityNote.cn}
@@ -124,8 +124,8 @@ export default function VotePage() {
               </div>
             </div>
             <VotingChart assessedInfo={vote.finalStats} />
-            {vote.communityNote && checkerDetails.isTester ? (
-              <VotingNoteChart assessedInfo={vote.finalStats} />
+            {vote.communityNote ? (
+              <VotingNoteChart assessedInfo={vote.finalStats} communityNoteCategory={vote.communityNoteCategory}/>
             ) : null}
             <CategoryRationalisation
               rationalisation={vote.finalStats?.rationalisation ?? null}

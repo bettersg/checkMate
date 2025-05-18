@@ -2,6 +2,9 @@ import { Request, Response } from "express"
 import { Vote } from "../interfaces"
 import * as admin from "firebase-admin"
 import { logger } from "firebase-functions/v2"
+import normalizeUrl from "normalize-url"
+import urlRegexSafe from "url-regex-safe"
+import { hashScreenshotUrl } from "../../common/utils"
 import { getVoteCounts } from "../../common/counters"
 import { getSignedUrl } from "../../common/mediaUtils"
 if (!admin.apps.length) {
@@ -9,6 +12,7 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore()
+const storage = admin.storage()
 
 const getVoteHandler = async (req: Request, res: Response) => {
   try {
@@ -57,12 +61,6 @@ const getVoteHandler = async (req: Request, res: Response) => {
     const signedUrl =
       latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
     const isAssessed = messageSnap.get("isAssessed")
-
-    // const isLegacy =
-    //   voteRequestSnap.get("truthScore") === undefined &&
-    //   voteRequestSnap.get("vote") !== undefined
-
-    const isLegacy = voteRequestSnap.get("numberPointScale") === 5
 
     const tags = voteRequestSnap.get("tags") ?? {}
     const parentTags = messageSnap.get("tags") ?? {}
@@ -126,9 +124,27 @@ const getVoteHandler = async (req: Request, res: Response) => {
       hasDiscrepancy = true
     }
 
+    //extract URLs and get screenshot hashes
+    let urls = null
+    let text = null
+    if (latestType === "text") {
+      text = messageSnap.get("text")
+      const extractedUrls = extractUrls(messageSnap.get("text"))
+      urls = await Promise.all(
+        extractedUrls.map(async (url) => {
+          const screenshotUrl = await getScreenshotUrl(url)
+          return {
+            url,
+            screenshotUrl,
+          }
+        })
+      )
+    }
+
     const returnData: Vote = {
       type: latestType,
-      text: latestType === "text" ? messageSnap.get("text") : null,
+      text: text,
+      urls: urls,
       caption:
         latestType === "image" ? latestInstanceSnap.get("caption") : null,
       signedImageUrl: signedUrl,
@@ -175,10 +191,39 @@ const getVoteHandler = async (req: Request, res: Response) => {
       numberPointScale: voteRequestSnap.get("numberPointScale"),
     }
     return res.status(200).send(returnData)
-  } catch {
+  } catch (e) {
     logger.error("Error retrieving vote.")
     return res.status(500).send("Error retrieving vote.")
   }
+}
+
+function extractUrls(text: string) {
+  try {
+    const extractedUrls = text.match(urlRegexSafe()) || []
+    return extractedUrls.map((url) =>
+      normalizeUrl(url, { defaultProtocol: "https", stripWWW: false })
+    )
+  } catch (e) {
+    logger.error("Error extracting urls")
+    return []
+  }
+}
+
+async function getScreenshotUrl(url: string) {
+  //first hash
+  const hash = hashScreenshotUrl(url)
+  const blobName = `${hash}.png`
+  const bucketName = process.env.SCREENSHOT_STORAGE_BUCKET
+  if (!bucketName) {
+    throw new Error("SCREENSHOT_BUCKET_NAME is not set")
+  }
+  const bucket = storage.bucket(bucketName)
+  const blob = bucket.file(blobName)
+  const [exists] = await blob.exists()
+  if (exists) {
+    return blob.publicUrl()
+  }
+  return null
 }
 
 export default getVoteHandler

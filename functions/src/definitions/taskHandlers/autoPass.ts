@@ -28,7 +28,7 @@ const passVoteRequest = onTaskDispatched(
       return
     }
     const category = voteRequestSnap.get("category")
-
+    
     if (category === null) {
       const updateObj = {
         category: "pass",
