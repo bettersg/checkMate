@@ -39,7 +39,7 @@ export const VoteOption: React.FC<VoteOptionProps> = ({
             {label}
           </Typography>
           <Typography variant="paragraph" className="font-medium">
-            {percentage}%
+            {percentage.toFixed(2)}%
           </Typography>
         </div>
         {/* Animated bar */}

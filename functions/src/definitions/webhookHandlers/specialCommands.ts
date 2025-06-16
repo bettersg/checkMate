@@ -83,7 +83,10 @@ const archiveMessages = async function () {
 }
 
 const mockDb = async function () {
-  if (runtimeEnvironment.value() === "PROD") {
+  if (
+    runtimeEnvironment.value() === "PROD" ||
+    runtimeEnvironment.value() === "UAT"
+  ) {
     return
   }
   functions.logger.log("mocking...")
