@@ -94,7 +94,7 @@ async function handlePreOnboardedMessage(
         if (text === PREPOPULATED_MESSAGE) {
           step = "preonboard_prepopulated"
           //wait 5 seconds before sending onboarding flow
-          await sendCheckMateDemonstration(userSnap)
+          await sendLanguageSelection(userSnap, true)
           break
         }
         if (checkMenu(text)) {
