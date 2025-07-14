@@ -253,7 +253,7 @@
   },
   "LANGUAGE_SELECTION": {
     "en": "{{new_user_en}}\n\nBefore we proceed, please select your preferred language.\n\n{{new_user_cn}}请选择语言。",
-    "cn": "{{new_user_en}}\n\n在继续之前，请选择您的语言。\n\n{{new_user_cn}}请选择语言。"
+    "cn": "{{new_user_en}}\n\nBefore we proceed, please select your preferred language.\n\n{{new_user_cn}}请选择语言。"
   },
   "IRRELEVANT_MENU_PREFIX": {
     "en": "Our volunteer checkers were unable to assess the claims in this message.😕 Sorry about that!{{generated}}",
