@@ -9,6 +9,8 @@ import {
 import { LinkPreview } from "./LinkPreview";
 import { FlagIcon } from "@heroicons/react/24/solid";
 import { truncateText } from "../../utils/helperFunctions";
+import urlRegexSafe from "url-regex-safe";
+import normalizeUrl from "normalize-url";
 interface PropType {
   text: string | null;
   type: "image" | "text";
@@ -21,7 +23,7 @@ interface PropType {
 // Helper function to detect URLs and split the text
 const splitTextByUrls = (text: string) => {
   // This regex will match URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urlRegex = urlRegexSafe();
   let match;
   let lastIndex = 0;
   const parts = [];
@@ -37,7 +39,7 @@ const splitTextByUrls = (text: string) => {
     }
 
     // Push URL
-    parts.push({ text: url, isUrl: true });
+    parts.push({ text: normalizeUrl(url, {defaultProtocol: "https", stripWWW: false}), isUrl: true });
 
     // Update lastIndex to end of current URL
     lastIndex = index + url.length;
