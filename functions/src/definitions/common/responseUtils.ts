@@ -1541,7 +1541,15 @@ async function respondToInstance(
   updateObj.isCommunityNoteSent = category === "communityNote"
   updateObj.replyTimestamp = Timestamp.fromDate(new Date())
   updateObj.finalReplyText = responseText
-  await instanceSnap.ref.update(updateObj)
+  try {
+    await instanceSnap.ref.update(updateObj)
+  } catch (error) {
+    functions.logger.warn(`updateObj: ${JSON.stringify(updateObj)}`)
+    functions.logger.error(
+      `Error updating instance ${instanceSnap.ref.path} in respondtoinstance`,
+      error
+    )
+  }
 
   //check if category does not contain irrelevant, then updated reported number by 1
   if (category !== "irrelevant" && category !== "irrelevant_auto") {
