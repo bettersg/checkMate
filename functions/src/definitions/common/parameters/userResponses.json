@@ -252,8 +252,8 @@
     "cn": "您好，欢迎来到查友！我们很高兴您加入我们，一起对抗诈骗和误导信息😊。\n\n"
   },
   "LANGUAGE_SELECTION": {
-    "en": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。",
-    "cn": "{{new_user_en}}\n\nPlease select your preferred language.\n\n{{new_user_cn}}请选择语言。"
+    "en": "{{new_user_en}}\n\nBefore we proceed, please select your preferred language.\n\n{{new_user_cn}}请选择语言。",
+    "cn": "{{new_user_en}}\n\nBefore we proceed, please select your preferred language.\n\n{{new_user_cn}}请选择语言。"
   },
   "IRRELEVANT_MENU_PREFIX": {
     "en": "Our volunteer checkers were unable to assess the claims in this message.😕 Sorry about that!{{generated}}",
