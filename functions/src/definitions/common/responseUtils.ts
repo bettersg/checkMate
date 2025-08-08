@@ -1472,7 +1472,7 @@ async function respondToInstance(
             parentMessageRef,
             language
           )
-          const responseText = getFinalResponseText({
+          responseText = getFinalResponseText({
             responseText: responses["UNSURE"],
             responses,
             submissionsUsed: numSubmissionsUsed,
