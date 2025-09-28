@@ -76,10 +76,32 @@ const getCheckerVotesHandler = async (req: Request, res: Response) => {
         }
         const latestInstanceRef = parentMessageSnap.get("latestInstance")
         if (!latestInstanceRef) {
-          logger.error(
-            `Parent message ${parentMessageSnap.id} has no latest instance`
-          )
-          return null
+          const category = doc.get("category") ?? null
+          const truthScore = doc.get("truthScore") ?? null
+          const type = parentMessageSnap.get("text") != null ? "text" : "image"
+          const createdTimestamp = doc.get("createdTimestamp")?.toDate() ?? null
+          const votedTimestamp = doc.get("votedTimestamp")?.toDate() ?? null
+          const text = parentMessageSnap.get("text") ?? null
+          const caption = parentMessageSnap.get("caption") ?? null
+          const isAssessed = parentMessageSnap.get("isAssessed") ?? false
+          const firestorePath = doc.ref.path
+          const isCorrect = checkAccuracy(parentMessageSnap, doc)
+          const needsReview = isAssessed && isCorrect === false
+          const isUnsure = isCorrect === null
+          const returnObject: VoteSummary = {
+            category,
+            truthScore,
+            type,
+            createdTimestamp,
+            votedTimestamp,
+            text,
+            caption,
+            needsReview,
+            isAssessed,
+            isUnsure,
+            firestorePath,
+          }
+          return returnObject
         }
         const latestInstanceSnap = await latestInstanceRef.get()
         if (!latestInstanceSnap.exists) {

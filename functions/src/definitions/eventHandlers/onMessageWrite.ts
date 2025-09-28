@@ -34,12 +34,12 @@ const adminMessageHandler = onDocumentWritten(
           machineCategory: machineCategory,
         })
       }
-      await sendCommunityNoteNotification(
-        communityNote,
-        communityNoteStatus,
-        adminMessageId,
-        docSnap.ref
-      )
+      // await sendCommunityNoteNotification(
+      //   communityNote,
+      //   communityNoteStatus,
+      //   adminMessageId,
+      //   docSnap.ref
+      // )
     } else {
       const before = event.data?.before
       if (!before) {
@@ -53,12 +53,12 @@ const adminMessageHandler = onDocumentWritten(
       const primaryCategoryAfter = docSnap.get("primaryCategory") ?? null
       if (communityNoteBefore === null && communityNote !== null) {
         //if community note was newly generated
-        await sendCommunityNoteNotification(
-          docSnap.get("communityNote"),
-          communityNoteStatus,
-          adminMessageId,
-          docSnap.ref
-        )
+        // await sendCommunityNoteNotification(
+        //   docSnap.get("communityNote"),
+        //   communityNoteStatus,
+        //   adminMessageId,
+        //   docSnap.ref
+        // )
       }
       if (!isAssessedBefore && isAssessedAfter) {
         //if message was newly assessed

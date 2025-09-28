@@ -135,4 +135,18 @@ function getCloudStorageUrl(storageUrl: string) {
   return `gs://${bucketName}/${storageUrl}`
 }
 
-export { downloadWhatsappMedia, downloadTelegramMedia, getHash, getSignedUrl, getCloudStorageUrl }
+async function downloadUrlMedia(url: string): Promise<Buffer> {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: url,
+      responseType: "arraybuffer",
+    })
+    return Buffer.from(response.data)
+  } catch (error) {
+    functions.logger.error("Error downloading media from URL:", error)
+    throw new Error(`Error occurred while downloading media from URL: ${url}`)
+  }
+}
+
+export { downloadWhatsappMedia, downloadTelegramMedia, downloadUrlMedia, getHash, getSignedUrl, getCloudStorageUrl }
