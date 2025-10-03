@@ -27,6 +27,7 @@ import {
 import { decryptRequest, encryptResponse } from "../../utils/cyptography"
 import { flowEndpointHandler } from "./handlers/flowEndpointHandler"
 import { adminBotHandlerTelegram } from "./handlers/adminHandlerTelegram"
+import { messageCreationHandler } from "./handlers/messageCreationHandler"
 import { sendWhatsappTextMessage } from "../common/sendWhatsappMessage"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
@@ -36,6 +37,7 @@ const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
 const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
 const webhookPathWhatsappFlow = process.env.WEBHOOK_PATH_WHATSAPP_FLOW
 const webhookPathTelegramAdmin = process.env.WEBHOOK_PATH_TELEGRAM_ADMIN
+const webhookPathMessageCreation = process.env.WEBHOOK_PATH_MESSAGE_CREATION || "message-creation"
 const typeformSecretToken = process.env.TYPEFORM_SECRET_TOKEN
 const typeformURL = process.env.TYPEFORM_URL
 const ingressSetting =
@@ -527,6 +529,7 @@ app.post(`/${webhookPathWhatsappFlow}`, postHandlerWhatsappFlow)
 app.post(`/${webhookPathTelegram}`, postHandlerTelegram)
 app.post(`/${webhookPathTelegramAdmin}`, postHandlerTelegramAdmin)
 app.post(`/${webhookPathTypeform}`, postHandlerTypeform)
+app.post(`/${webhookPathMessageCreation}`, messageCreationHandler)
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
 // info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests

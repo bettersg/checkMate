@@ -40,26 +40,31 @@ const getVoteHandler = async (req: Request, res: Response) => {
       return res.status(404).send("Vote request not found")
     }
     const latestInstanceRef = messageSnap.get("latestInstance")
-    if (!latestInstanceRef) {
-      return res.status(500).send("Message has no latest instance")
+    let latestType = "text" as "text" | "image"
+    let sender = "Unknown"
+    let signedUrl = null
+    let caption = null
+    if (latestInstanceRef == null) {
+      sender = "Unknown"
+      const storageUrl = messageSnap.get("storageUrl") ?? null
+      latestType = messageSnap.get("text") != null ? "text" : "image"
+      signedUrl = storageUrl ? await getSignedUrl(storageUrl) : null
+      caption = messageSnap.get("caption") ?? null
+    } else {
+      const latestInstanceSnap = await latestInstanceRef.get()
+      latestType =
+        latestInstanceSnap.get("type") ?? ("text" as "text" | "image")
+      sender = latestInstanceSnap.get("from") ?? "Unknown"
+      const storageBucketUrl = latestInstanceSnap.get("storageUrl") ?? ""
+      signedUrl =
+        latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
+      caption = latestInstanceSnap.get("caption") ?? null
     }
-    const latestInstanceSnap = await latestInstanceRef.get()
-    if (!latestInstanceSnap.exists) {
-      return res.status(500).send("Latest instance not found")
-    }
-
-    const latestType = latestInstanceSnap.get("type") ?? "text"
-
-    const sender = latestInstanceSnap.get("from") ?? "Unknown"
 
     //mask all but last 4 characters of sender
 
     const maskedSender =
       sender != "Unknown" ? sender.replace(/.(?=.{4})/g, "*") : sender
-
-    const storageBucketUrl = latestInstanceSnap.get("storageUrl")
-    const signedUrl =
-      latestType === "image" ? await getSignedUrl(storageBucketUrl) : null
     const isAssessed = messageSnap.get("isAssessed")
 
     const tags = voteRequestSnap.get("tags") ?? {}
@@ -145,8 +150,7 @@ const getVoteHandler = async (req: Request, res: Response) => {
       type: latestType,
       text: text,
       urls: urls,
-      caption:
-        latestType === "image" ? latestInstanceSnap.get("caption") : null,
+      caption: caption,
       signedImageUrl: signedUrl,
       communityNote: messageSnap.get("communityNote"),
       commentOnNote: voteRequestSnap.get("commentOnNote"),

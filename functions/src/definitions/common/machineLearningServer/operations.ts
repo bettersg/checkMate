@@ -59,12 +59,38 @@ interface camelCasedOCRResponse {
   prediction: string | null
 }
 
+interface PatchCheckResponse {
+  success: boolean
+  message: string
+}
+
 async function getEmbedding(text: string): Promise<number[]> {
   const data = {
     text: text,
   }
   const response = await callAPI<EmbedResponse>("embed", data)
   return response.data.embedding
+}
+
+async function patchCheck(input: {
+  checkId: string
+  isHumanAssessed: boolean
+  crowdsourcedCategory: string
+  isCommunityNoteDownvoted: boolean
+}): Promise<PatchCheckResponse> {
+  const data = {
+    isHumanAssessed: input.isHumanAssessed,
+    crowdsourcedCategory: input.crowdsourcedCategory,
+    isCommunityNoteDownvoted: input.isCommunityNoteDownvoted,
+  }
+  const response = await callCloudflareAPI<PatchCheckResponse>(
+    `checks/${input.checkId}`,
+    data,
+    undefined,
+    undefined,
+    "PATCH"
+  )
+  return response.data
 }
 
 async function determineNeedsChecking(input: {
@@ -344,13 +370,14 @@ async function callCloudflareAPI<T>(
   endpoint: string,
   data: object,
   params?: object,
-  requestId?: string | null
+  requestId?: string | null,
+  method?: string
 ) {
   try {
     const hostname = cloudfareHost.value()
     const apikey = process.env.CHECKMATE_CORE_API_KEY
     const response = await axios<T>({
-      method: "POST",
+      method: method ?? "POST",
       url: `${hostname}/${endpoint}`,
       data: data,
       params: params,
@@ -364,6 +391,7 @@ async function callCloudflareAPI<T>(
   } catch (error) {
     if (error instanceof AxiosError) {
       functions.logger.log(error.message)
+      functions.logger.log(error.response?.data)
     } else {
       functions.logger.log(error)
     }
@@ -382,4 +410,5 @@ export {
   performOCR,
   getCommunityNote,
   determineControversial,
+  patchCheck,
 }

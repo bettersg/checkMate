@@ -38,7 +38,8 @@
     "re2": "^1.20.3",
     "telegraf": "^4.16.3",
     "typesense": "^1.5.3",
-    "url-regex-safe": "^4.0.0"
+    "url-regex-safe": "^4.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",

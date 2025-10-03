@@ -11,7 +11,8 @@ import { FieldValue } from "@google-cloud/firestore"
 const checkerAppHost = process.env.CHECKER_APP_HOST
 
 export async function despatchPoll(
-  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>
+  messageRef: admin.firestore.DocumentReference<admin.firestore.DocumentData>,
+  isMessage: boolean = false
 ) {
   const db = admin.firestore()
   const messageSnap = await messageRef.get()
@@ -23,26 +24,46 @@ export async function despatchPoll(
   const factCheckersSnapshot = await query
     .orderBy("dailyAssignmentCount", "asc")
     .get()
-  const latestInstanceRef = messageSnap.get("latestInstance")
   let previewText = ""
-  if (!latestInstanceRef) {
-    logger.error(`Parent message ${messageSnap.id} has no latest instance`)
-  } else {
-    const latestInstanceSnap = await latestInstanceRef.get()
-    const type = latestInstanceSnap.get("type") ?? null
-    if (type === "text") {
-      const text = messageSnap.get("text")
-      if (text) {
-        if (text.length > 50) {
-          previewText = text.substring(0, 50) + "..."
-        } else {
-          previewText = text
-        }
-      } else {
-        logger.error(`Latest instance ${latestInstanceRef.id} has no text`)
+  if (isMessage) {
+    const type = messageSnap.get("text") != null ? "text" : "image"
+    if (type === "image") {
+      if (messageSnap.get("storageUrl") == null) {
+        logger.error(`Message ${messageSnap.id} has no image URL`)
+        return
       }
-    } else if (type === "image") {
       previewText = "<Image 🖼️>"
+    } else {
+      //text
+      const text = messageSnap.get("text")
+      if (text.length > 50) {
+        previewText = text.substring(0, 50) + "..."
+      } else {
+        previewText = text
+      }
+    }
+  } else {
+    const latestInstanceRef = messageSnap.get("latestInstance")
+
+    if (!latestInstanceRef) {
+      logger.error(`Parent message ${messageSnap.id} has no latest instance`)
+    } else {
+      const latestInstanceSnap = await latestInstanceRef.get()
+      const type = latestInstanceSnap.get("type") ?? null
+      if (type === "text") {
+        const text = messageSnap.get("text")
+        if (text) {
+          if (text.length > 50) {
+            previewText = text.substring(0, 50) + "..."
+          } else {
+            previewText = text
+          }
+        } else {
+          logger.error(`Latest instance ${latestInstanceRef.id} has no text`)
+        }
+      } else if (type === "image") {
+        previewText = "<Image 🖼️>"
+      }
     }
   }
 

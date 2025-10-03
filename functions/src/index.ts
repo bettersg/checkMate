@@ -27,3 +27,4 @@ export { onCheckerWhitelist } from "./definitions/eventHandlers/onCheckerWhiteli
 export { batchJobs }
 export { onUserPreOnboardingPublish } from "./definitions/eventHandlers/userPreOnboardingHandler"
 export { onUserUpdate } from "./definitions/eventHandlers/onUserUpdate"
+export { onMessageCreate } from "./definitions/eventHandlers/onMessageCreate"

@@ -127,6 +127,7 @@ export type MessageData = {
   isWronglyCategorisedIrrelevant: boolean //whether or not the message was categorised as irrelevant by the machine learning model but was actually not as indicated by the user
   originalText: string | null //the original, unredacted text of the message. For image messages, this is the OCR-extracted text from the image if present
   text: string | null //the text of the message, redacted for PII, to be shown on website and to checkers. For image messages, this is the redacted OCR-extracted text from the image if present
+  storageUrl?: string | null //the URL of the image, if the message is an image
   caption: string | null //for image messages, the caption of the image
   latestInstance: DocumentReference | null //reference to the most recent instance of the message that has been sent in
   firstTimestamp: Timestamp //the timestamp of the first instance of the message
@@ -161,6 +162,8 @@ export type MessageData = {
   slug: string | null // The slug of the message, derived from title
   approvedForPublishing: boolean | null // Whether the message has been approved for publishing
   approvedBy: number | null // The telegram ID of the admin who approved the message for publishing
+  source?: string | null // The source of the message, either "whatsapp" or "api"
+  checkId?: string | null // The id of the message, if it was created from the api
 }
 
 export type InstanceData = {
@@ -444,7 +447,7 @@ export type CommunityNote = {
   downvoted: boolean
   pendingCorrection: boolean
   adminGroupCommunityNoteSentMessageId: string | null
-  timestamp: Timestamp
+  timestamp: Timestamp | string
 }
 
 export type BlastData = {
