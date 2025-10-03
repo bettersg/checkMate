@@ -413,7 +413,7 @@ async function sendWhatsappFlowMessage(
         flow_token: flow_token,
         flow_id: flow_id,
         flow_cta: cta,
-        flow_action: "data_exchange",
+        flow_action: "navigate",
       },
     },
   }
