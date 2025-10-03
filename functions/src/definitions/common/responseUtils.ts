@@ -1290,11 +1290,13 @@ async function respondToInstance(
     const note = communityNote[language as keyof CommunityNote] as string
     const sources = communityNote.links as string[]
     const dateStr = communityNote.timestamp
-      ? communityNote.timestamp.toDate().toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
+      ? typeof communityNote.timestamp === "string"
+        ? communityNote.timestamp
+        : communityNote.timestamp.toDate().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
       : ""
     const noteText = responses.COMMUNITY_NOTE.replace(
       "{{community_note}}",
@@ -1435,7 +1437,7 @@ async function respondToInstance(
 
       break
     case "irrelevant":
-      responseText = responses["IRRELEVANT_MENU_PREFIX"]
+      responseText = responses["sources"]
       await sendMenuMessage(
         userSnap,
         "IRRELEVANT_MENU_PREFIX",

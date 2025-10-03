@@ -28,7 +28,7 @@ export async function despatchPoll(
   if (isMessage) {
     const type = messageSnap.get("text") != null ? "text" : "image"
     if (type === "image") {
-      if (messageSnap.get("imageUrl") == null) {
+      if (messageSnap.get("storageUrl") == null) {
         logger.error(`Message ${messageSnap.id} has no image URL`)
         return
       }

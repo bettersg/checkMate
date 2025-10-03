@@ -163,6 +163,7 @@ export type MessageData = {
   approvedForPublishing: boolean | null // Whether the message has been approved for publishing
   approvedBy: number | null // The telegram ID of the admin who approved the message for publishing
   source?: string | null // The source of the message, either "whatsapp" or "api"
+  checkId?: string | null // The id of the message, if it was created from the api
 }
 
 export type InstanceData = {
@@ -446,7 +447,7 @@ export type CommunityNote = {
   downvoted: boolean
   pendingCorrection: boolean
   adminGroupCommunityNoteSentMessageId: string | null
-  timestamp: Timestamp
+  timestamp: Timestamp | string
 }
 
 export type BlastData = {

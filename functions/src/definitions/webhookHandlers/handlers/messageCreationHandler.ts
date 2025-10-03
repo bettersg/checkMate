@@ -6,6 +6,12 @@ import { MessageData, CommunityNote } from "../../../types"
 import { Request, Response } from "express"
 import { v4 as uuidv4 } from "uuid"
 
+interface PartialCommunityNote {
+  en: string
+  cn: string
+  links: string[]
+}
+
 interface MessageCreationRequest {
   machineCategory: string
   isMachineCategorised: boolean
@@ -14,10 +20,12 @@ interface MessageCreationRequest {
   imageUrl?: string | null
   isControversial: boolean
   communityNoteStatus: string
-  communityNote: CommunityNote
+  communityNote?: PartialCommunityNote | null
+  isCommunityNoteUsable: boolean
   isIrrelevant: boolean
   title?: string | null
   slug?: string | null
+  id?: string | null
 }
 
 if (!admin.apps.length) {
@@ -28,6 +36,18 @@ const db = admin.firestore()
 
 const messageCreationHandler = async (req: Request, res: Response) => {
   try {
+    // Validate API key
+    const apiKey = req.headers["x-api-key"]
+    const expectedApiKey = process.env.INTERNAL_API_KEY
+
+    if (!apiKey || apiKey !== expectedApiKey) {
+      logger.warn("Unauthorized access attempt to messageCreationHandler", {
+        hasApiKey: !!apiKey,
+        ip: req.ip,
+      })
+      return res.status(401).json({ error: "Unauthorized" })
+    }
+
     const messageData: MessageCreationRequest = req.body
 
     if (!messageData) {
@@ -50,8 +70,21 @@ const messageCreationHandler = async (req: Request, res: Response) => {
         stream.end(buffer)
       })
     }
+    let fullCommunityNote: CommunityNote | null = null
+    if (messageData.communityNote) {
+      fullCommunityNote = {
+        en: messageData.communityNote.en,
+        cn: messageData.communityNote.cn,
+        links: messageData.communityNote.links,
+        downvoted: false,
+        pendingCorrection: false,
+        adminGroupCommunityNoteSentMessageId: null,
+        timestamp: Timestamp.now(),
+      }
+    }
+
     const messageToStore: MessageData = {
-      machineCategory: messageData.machineCategory || "error",
+      machineCategory: messageData.machineCategory || "unsure",
       isMachineCategorised: messageData.isMachineCategorised || false,
       isWronglyCategorisedIrrelevant: false,
       originalText: messageData.text ?? null,
@@ -84,7 +117,9 @@ const messageCreationHandler = async (req: Request, res: Response) => {
       primaryCategory: null,
       customReply: null,
       communityNoteStatus: messageData.communityNoteStatus ?? "not-generated",
-      communityNote: messageData.communityNote ?? null,
+      communityNote: messageData.isCommunityNoteUsable
+        ? fullCommunityNote
+        : null,
       instanceCount: 0,
       adminGroupSentMessageId: null,
       title: messageData.title ?? null,
@@ -92,6 +127,7 @@ const messageCreationHandler = async (req: Request, res: Response) => {
       approvedForPublishing: false,
       approvedBy: null,
       source: "api",
+      checkId: messageData.id ?? null,
     }
 
     await messageRef.set(messageToStore)

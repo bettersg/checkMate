@@ -8,6 +8,7 @@ import { anonymiseMessage } from "../common/genAI"
 import { onDocumentUpdated } from "firebase-functions/v2/firestore"
 import { tabulateVoteStats } from "../common/statistics"
 import { logger } from "firebase-functions"
+import { patchCheck } from "../common/machineLearningServer/operations"
 
 const onMessageUpdateV2 = onDocumentUpdated(
   {
@@ -17,6 +18,7 @@ const onMessageUpdateV2 = onDocumentUpdated(
       "WHATSAPP_TOKEN",
       "OPENAI_API_KEY",
       "TELEGRAM_ADMIN_BOT_TOKEN",
+      "CHECKMATE_CORE_API_KEY",
     ],
   },
   async (event) => {
@@ -27,68 +29,105 @@ const onMessageUpdateV2 = onDocumentUpdated(
       return Promise.resolve()
     }
     const messageData = postChangeSnap.data()
+    const preChangeData = preChangeSnap.data()
     const text = messageData.text
     const primaryCategory = messageData.primaryCategory
     let correctionSent = false
 
-    // If changes from not assessed to assessed
-    if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
-      await postChangeSnap.ref.update({
-        assessedTimestamp: Timestamp.fromDate(new Date()),
-      })
-      await replyPendingInstances(postChangeSnap)
-      if (
-        messageData?.communityNote?.downvoted &&
-        messageData?.communityNote?.pendingCorrection
-      ) {
-        correctionSent = true
-        await correctCommunityNoteInstances(postChangeSnap)
-      }
-    } // if either the text changed, or the primaryCategory changed, rerun rationalisation
+    const juryRig = messageData.source === "api"
 
-    if (
-      !preChangeSnap.data().communityNote?.downvoted &&
-      messageData?.communityNote?.downvoted
-    ) {
-      if (!correctionSent) {
-        if (messageData.isAssessed) {
-          await correctCommunityNoteInstances(postChangeSnap)
-        } else {
-          postChangeSnap.ref.update({
-            "communityNote.pendingCorrection": true,
+    if (juryRig) {
+      if (!messageData.checkId) {
+        throw new Error("Check ID is required for jury-rigged messages")
+      }
+      if (messageData.isAssessed) {
+        const changeInAssessmentStatus = !preChangeData.isAssessed
+        const changeInPrimaryCategory =
+          messageData.primaryCategory !== preChangeData.primaryCategory
+        const changeInDownvoteStatus =
+          messageData.communityNote?.downvoted !==
+          preChangeData.communityNote?.downvoted
+        if (
+          changeInAssessmentStatus ||
+          changeInPrimaryCategory ||
+          changeInDownvoteStatus
+        ) {
+          const checkId = messageData.checkId
+          const isHumanAssessed = messageData.isAssessed
+          const crowdsourcedCategory = messageData.primaryCategory
+          const isCommunityNoteDownvoted =
+            messageData.communityNote?.downvoted ?? null
+          const response = await patchCheck({
+            checkId,
+            isHumanAssessed,
+            crowdsourcedCategory,
+            isCommunityNoteDownvoted,
           })
+          if (!response.success) {
+            throw new Error("Failed to patch check")
+          }
         }
       }
-    }
-
-    if (
-      preChangeSnap.data().primaryCategory !== primaryCategory &&
-      primaryCategory === "legitimate" &&
-      text
-    ) {
-      const anonymisedText = await anonymiseMessage(text, false)
-      await postChangeSnap.ref.update({
-        text: anonymisedText,
-      })
-    }
-    if (shouldRecalculateAccuracy(preChangeSnap, postChangeSnap)) {
-      //get all voteRequests
-      const voteRequestsQuerySnap = await postChangeSnap.ref
-        .collection("voteRequests")
-        .where("category", "!=", null)
-        .get()
-      const promiseArr = voteRequestsQuerySnap.docs.map((voteRequestSnap) => {
-        const { isCorrect, score, duration } = tabulateVoteStats(
-          postChangeSnap,
-          voteRequestSnap
-        )
-        return voteRequestSnap.ref.update({
-          isCorrect: isCorrect,
-          score: score,
-          duration: duration,
+    } else {
+      // If changes from not assessed to assessed
+      if (!preChangeSnap.data().isAssessed && messageData.isAssessed) {
+        await postChangeSnap.ref.update({
+          assessedTimestamp: Timestamp.fromDate(new Date()),
         })
-      })
-      await Promise.all(promiseArr)
+        await replyPendingInstances(postChangeSnap)
+        if (
+          messageData?.communityNote?.downvoted &&
+          messageData?.communityNote?.pendingCorrection
+        ) {
+          correctionSent = true
+          await correctCommunityNoteInstances(postChangeSnap)
+        }
+      } // if either the text changed, or the primaryCategory changed, rerun rationalisation
+
+      if (
+        !preChangeSnap.data().communityNote?.downvoted &&
+        messageData?.communityNote?.downvoted
+      ) {
+        if (!correctionSent) {
+          if (messageData.isAssessed) {
+            await correctCommunityNoteInstances(postChangeSnap)
+          } else {
+            postChangeSnap.ref.update({
+              "communityNote.pendingCorrection": true,
+            })
+          }
+        }
+      }
+
+      if (
+        preChangeSnap.data().primaryCategory !== primaryCategory &&
+        primaryCategory === "legitimate" &&
+        text
+      ) {
+        const anonymisedText = await anonymiseMessage(text, false)
+        await postChangeSnap.ref.update({
+          text: anonymisedText,
+        })
+      }
+      if (shouldRecalculateAccuracy(preChangeSnap, postChangeSnap)) {
+        //get all voteRequests
+        const voteRequestsQuerySnap = await postChangeSnap.ref
+          .collection("voteRequests")
+          .where("category", "!=", null)
+          .get()
+        const promiseArr = voteRequestsQuerySnap.docs.map((voteRequestSnap) => {
+          const { isCorrect, score, duration } = tabulateVoteStats(
+            postChangeSnap,
+            voteRequestSnap
+          )
+          return voteRequestSnap.ref.update({
+            isCorrect: isCorrect,
+            score: score,
+            duration: duration,
+          })
+        })
+        await Promise.all(promiseArr)
+      }
     }
 
     return Promise.resolve()

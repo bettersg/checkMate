@@ -45,9 +45,9 @@ const getVoteHandler = async (req: Request, res: Response) => {
     let signedUrl = null
     let caption = null
     if (latestInstanceRef == null) {
-      latestType = "text"
       sender = "Unknown"
       const storageUrl = messageSnap.get("storageUrl") ?? null
+      latestType = messageSnap.get("text") != null ? "text" : "image"
       signedUrl = storageUrl ? await getSignedUrl(storageUrl) : null
       caption = messageSnap.get("caption") ?? null
     } else {

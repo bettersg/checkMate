@@ -43,7 +43,7 @@ const onMessageCreate = onDocumentCreated(
       ) {
         await parentMessageRef.update({ isPollStarted: true })
         try {
-          await despatchPoll(parentMessageRef)
+          await despatchPoll(parentMessageRef, true)
         } catch (error) {
           logger.error(
             `Error despatching poll for message ${parentMessageRef.id}: `,
