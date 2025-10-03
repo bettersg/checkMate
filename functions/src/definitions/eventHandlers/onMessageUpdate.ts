@@ -54,7 +54,17 @@ const onMessageUpdateV2 = onDocumentUpdated(
         ) {
           const checkId = messageData.checkId
           const isHumanAssessed = messageData.isAssessed
-          const crowdsourcedCategory = messageData.primaryCategory
+          let category = messageData.primaryCategory
+          if (category === "unsure") {
+            const isHarmful = messageData.isHarmful
+            const isHarmless = messageData.isHarmless
+            if (isHarmful) {
+              category = "harmful"
+            } else if (isHarmless) {
+              category = "harmless"
+            }
+          }
+          const crowdsourcedCategory = category
           const isCommunityNoteDownvoted =
             messageData.communityNote?.downvoted ?? null
           const response = await patchCheck({
