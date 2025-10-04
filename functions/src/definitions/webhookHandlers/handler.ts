@@ -37,7 +37,8 @@ const webhookPathTelegram = process.env.WEBHOOK_PATH_TELEGRAM
 const webhookPathTypeform = process.env.WEBHOOK_PATH_TYPEFORM
 const webhookPathWhatsappFlow = process.env.WEBHOOK_PATH_WHATSAPP_FLOW
 const webhookPathTelegramAdmin = process.env.WEBHOOK_PATH_TELEGRAM_ADMIN
-const webhookPathMessageCreation = process.env.WEBHOOK_PATH_MESSAGE_CREATION || "message-creation"
+const webhookPathMessageCreation =
+  process.env.WEBHOOK_PATH_MESSAGE_CREATION || "message-creation"
 const typeformSecretToken = process.env.TYPEFORM_SECRET_TOKEN
 const typeformURL = process.env.TYPEFORM_URL
 const ingressSetting =
@@ -129,13 +130,13 @@ const postHandlerWhatsapp = async (req: Request, res: Response) => {
                 res.sendStatus(200)
                 return
               }
-              if (
-                (type == "button" || type == "interactive" || type == "text") &&
-                phoneNumberId === checkerPhoneNumberId
-              ) {
-                //put into checker queue
-                await publishToTopic("checkerEvents", message, "whatsapp")
-              }
+              // if (
+              //   (type == "button" || type == "interactive" || type == "text") &&
+              //   phoneNumberId === checkerPhoneNumberId
+              // ) {
+              //   //put into checker queue
+              //   //await publishToTopic("checkerEvents", message, "whatsapp")
+              // }
               if (phoneNumberId === userPhoneNumberId) {
                 //check for new user
                 const whatsappId = message.from
