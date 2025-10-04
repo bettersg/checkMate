@@ -22,6 +22,7 @@ const adminMessageHandler = onDocumentWritten(
       logger.error("Missing after data on onMessageWrite")
       return
     }
+    const isJuryRigged = docSnap.get("source") === "api"
     const communityNote = docSnap.get("communityNote")
     const communityNoteStatus = docSnap.get("communityNoteStatus")
     const adminMessageId = docSnap.get("adminGroupSentMessageId") ?? null
@@ -34,12 +35,14 @@ const adminMessageHandler = onDocumentWritten(
           machineCategory: machineCategory,
         })
       }
-      // await sendCommunityNoteNotification(
-      //   communityNote,
-      //   communityNoteStatus,
-      //   adminMessageId,
-      //   docSnap.ref
-      // )
+      if (!isJuryRigged) {
+        await sendCommunityNoteNotification(
+          communityNote,
+          communityNoteStatus,
+          adminMessageId,
+          docSnap.ref
+        )
+      }
     } else {
       const before = event.data?.before
       if (!before) {
@@ -52,13 +55,15 @@ const adminMessageHandler = onDocumentWritten(
       const primaryCategoryBefore = before.get("primaryCategory") ?? null
       const primaryCategoryAfter = docSnap.get("primaryCategory") ?? null
       if (communityNoteBefore === null && communityNote !== null) {
-        //if community note was newly generated
-        // await sendCommunityNoteNotification(
-        //   docSnap.get("communityNote"),
-        //   communityNoteStatus,
-        //   adminMessageId,
-        //   docSnap.ref
-        // )
+        if (!isJuryRigged) {
+          //if community note was newly generated
+          await sendCommunityNoteNotification(
+            docSnap.get("communityNote"),
+            communityNoteStatus,
+            adminMessageId,
+            docSnap.ref
+          )
+        }
       }
       if (!isAssessedBefore && isAssessedAfter) {
         //if message was newly assessed
