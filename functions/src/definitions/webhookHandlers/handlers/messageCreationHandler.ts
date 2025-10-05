@@ -26,6 +26,8 @@ interface MessageCreationRequest {
   title?: string | null
   slug?: string | null
   id?: string | null
+  messageNotificationId: string | null
+  communityNoteNotificationId: string | null
 }
 
 if (!admin.apps.length) {
@@ -78,7 +80,8 @@ const messageCreationHandler = async (req: Request, res: Response) => {
         links: messageData.communityNote.links,
         downvoted: false,
         pendingCorrection: false,
-        adminGroupCommunityNoteSentMessageId: null,
+        adminGroupCommunityNoteSentMessageId:
+          messageData.communityNoteNotificationId ?? null,
         timestamp: Timestamp.now(),
       }
     }
@@ -121,7 +124,7 @@ const messageCreationHandler = async (req: Request, res: Response) => {
         ? fullCommunityNote
         : null,
       instanceCount: 0,
-      adminGroupSentMessageId: null,
+      adminGroupSentMessageId: messageData.messageNotificationId ?? null,
       title: messageData.title ?? null,
       slug: messageData.slug ?? null,
       approvedForPublishing: false,
