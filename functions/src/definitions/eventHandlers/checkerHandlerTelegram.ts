@@ -381,11 +381,12 @@ bot.on(callbackQuery("data"), async (ctx) => {
 
 ${progressBars(3)}`
           )
-          if (isUser) {
-            await sendTGGroupPrompt(chatId, checkerDocSnap, true)
-          } else {
-            await sendWABotPrompt(chatId, checkerDocSnap, true)
-          }
+          await sendWABotPrompt(chatId, checkerDocSnap, true)
+          // if (isUser) {
+          //   await sendTGGroupPrompt(chatId, checkerDocSnap, true)
+          // } else {
+
+          // }
         } else {
           await sendQuizPrompt(chatId, checkerDocSnap, false)
         }
