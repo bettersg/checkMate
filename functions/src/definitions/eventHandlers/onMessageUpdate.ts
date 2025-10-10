@@ -42,6 +42,11 @@ const onMessageUpdateV2 = onDocumentUpdated(
       }
       if (messageData.isAssessed) {
         const changeInAssessmentStatus = !preChangeData.isAssessed
+        if (changeInAssessmentStatus) {
+          await postChangeSnap.ref.update({
+            assessedTimestamp: Timestamp.fromDate(new Date()),
+          })
+        }
         const changeInPrimaryCategory =
           messageData.primaryCategory !== preChangeData.primaryCategory
         const changeInDownvoteStatus =
@@ -77,6 +82,25 @@ const onMessageUpdateV2 = onDocumentUpdated(
             throw new Error("Failed to patch check")
           }
         }
+      }
+      if (shouldRecalculateAccuracy(preChangeSnap, postChangeSnap)) {
+        //get all voteRequests
+        const voteRequestsQuerySnap = await postChangeSnap.ref
+          .collection("voteRequests")
+          .where("category", "!=", null)
+          .get()
+        const promiseArr = voteRequestsQuerySnap.docs.map((voteRequestSnap) => {
+          const { isCorrect, score, duration } = tabulateVoteStats(
+            postChangeSnap,
+            voteRequestSnap
+          )
+          return voteRequestSnap.ref.update({
+            isCorrect: isCorrect,
+            score: score,
+            duration: duration,
+          })
+        })
+        await Promise.all(promiseArr)
       }
     } else {
       // If changes from not assessed to assessed
