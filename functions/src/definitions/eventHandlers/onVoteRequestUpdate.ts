@@ -112,7 +112,6 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         totalCheckerTestersCount,
       } = await getVoteCounts(messageRef)
 
-     
       const isBigSus = susCount > thresholds.isBigSus * validResponsesCount
       const isSus =
         isBigSus || susCount > thresholds.isSus * validResponsesCount
@@ -170,9 +169,10 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
               thresholds.endVoteAbsolute //10
             ))
 
-      // Check if unacceptableCount is more than 50% 
+      // Check if unacceptableCount is more than 50%
       // if unacceptableCount > 50% of validResponsesCount and message is considered assessed
-      const isUnacceptable = (unacceptableCount > 0.5 * validResponsesCount) && isAssessed
+      const isUnacceptable =
+        unacceptableCount > 0.5 * validResponsesCount && isAssessed
       const isAssessedUnacceptable = isUnacceptable
 
       let primaryCategory
@@ -313,6 +313,11 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
     }
     //update langfuse
     try {
+      const checkId = messageSnap.get("checkId")
+      if (!checkId) {
+        functions.logger.error("Check ID not found")
+        throw new Error("Check ID not found, cannot log to langfuse")
+      }
       const communityNoteCategory = postChangeData.communityNoteCategory
 
       if (communityNoteCategory) {
@@ -326,7 +331,7 @@ const onVoteRequestUpdateV2 = onDocumentUpdated(
         const checkerId = postChangeData.factCheckerDocRef.id
         await langfuse.score({
           id: `${messageRef.id}-${checkerId}`,
-          traceId: messageRef.id,
+          traceId: checkId,
           name: "communityNoteRating",
           value: communityNoteCategory,
           dataType: "CATEGORICAL",
