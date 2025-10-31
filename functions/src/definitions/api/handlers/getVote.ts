@@ -216,18 +216,8 @@ function extractUrls(text: string) {
 async function getScreenshotUrl(url: string) {
   //first hash
   const hash = hashScreenshotUrl(url)
-  const blobName = `${hash}.png`
-  const bucketName = process.env.SCREENSHOT_STORAGE_BUCKET
-  if (!bucketName) {
-    throw new Error("SCREENSHOT_BUCKET_NAME is not set")
-  }
-  const bucket = storage.bucket(bucketName)
-  const blob = bucket.file(blobName)
-  const [exists] = await blob.exists()
-  if (exists) {
-    return blob.publicUrl()
-  }
-  return null
+  const route = process.env.SCREENSHOT_STORAGE_URL
+  return `${route}/${hash}`
 }
 
 export default getVoteHandler

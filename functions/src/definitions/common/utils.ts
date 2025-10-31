@@ -129,14 +129,8 @@ function hashMessage(originalStr: string) {
 }
 
 function hashScreenshotUrl(url: string) {
-  const salt = process.env.SCREENSHOT_HASH_SALT
-  if (!salt) {
-    throw new Error(
-      "The 'SCREENSHOT_HASH_SALT' environment variable is not set."
-    )
-  }
-  return createHash("md5")
-    .update(url + salt)
+  return createHash("sha256")
+    .update(url)
     .digest("hex")
 }
 
