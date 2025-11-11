@@ -1,3 +1,5 @@
+//IMPT: This file is deprecated now that we are on mongoDB and typesense cluster is shut down.
+
 import * as functions from "firebase-functions"
 import {
   deleteOne,
