@@ -13,7 +13,7 @@ export { webhookHandlerV2 } from "./definitions/webhookHandlers/handler"
 export { onVoteRequestCreate } from "./definitions/eventHandlers/onVoteRequestCreate"
 export { onVoteRequestUpdateV2 } from "./definitions/eventHandlers/onVoteRequestUpdate"
 export { healthcheckV2 } from "./definitions/healthcheck"
-export { onMessageWriteV2 } from "./definitions/eventHandlers/updateTypesense"
+// export { onMessageWriteV2 } from "./definitions/eventHandlers/updateTypesense" //deprecated now that we are on mongoDB and typesense cluster is shut down.
 export { onUserGenericMessagePublish } from "./definitions/eventHandlers/userGenericMessageHandlers"
 export { onCheckerPublish } from "./definitions/eventHandlers/checkerHandlerWhatsapp"
 export { onUserNavigationPublish } from "./definitions/eventHandlers/userNavigationHandlers"
