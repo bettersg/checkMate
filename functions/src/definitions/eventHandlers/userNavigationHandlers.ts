@@ -48,6 +48,10 @@ import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
 import { AppEnv } from "../../appEnv"
 import { SAMPLE_MESSAGES } from "./userPreOnboardingHandler"
+import {
+  getVirusTotalCategory,
+  scanUrlsWithVirusTotal,
+} from "../common/virusTotal"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -208,6 +212,18 @@ async function onButtonReply(
   const [type, ...rest] = buttonId.split("_")
   let instancePath, selection, instanceRef, blastPath
   switch (type) {
+    case "virusTotalAccept":
+    case "virusTotalDecline": {
+      const accepted = type === "virusTotalAccept"
+      const instancePath = rest.join("_")
+      await handleVirusTotalConsent(
+        userSnap,
+        instancePath,
+        accepted,
+        responses
+      )
+      break
+    }
     case "scamshieldDecline":
       ;[instancePath] = rest
       instanceRef = db.doc(instancePath)
@@ -302,6 +318,89 @@ async function onButtonReply(
   }
   const step = type + (selection ? `_${selection}` : "")
   return Promise.resolve(step)
+}
+
+async function handleVirusTotalConsent(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  instancePath: string,
+  accepted: boolean,
+  responses: Record<string, any>
+) {
+  let instanceRef: FirebaseFirestore.DocumentReference
+  try {
+    instanceRef = db.doc(instancePath)
+  } catch (_error) {
+    functions.logger.warn("Invalid VirusTotal consent instance path")
+    return
+  }
+
+  const instanceData = await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(instanceRef)
+    if (
+      !snapshot.exists ||
+      snapshot.get("from") !== userSnap.get("whatsappId") ||
+      snapshot.get("virusTotalConsentStatus") !== "pending"
+    ) {
+      return null
+    }
+    transaction.update(instanceRef, { virusTotalConsentStatus: "processing" })
+    return snapshot.data() ?? null
+  })
+  if (!instanceData) {
+    return
+  }
+
+  const parentMessageRef = instanceRef.parent.parent
+  if (!parentMessageRef) {
+    functions.logger.warn("VirusTotal consent instance has no parent message")
+    return
+  }
+
+  if (!accepted) {
+    await instanceRef.update({ virusTotalConsentStatus: "declined" })
+    await sendWhatsappTextMessage(
+      "user",
+      userSnap.get("whatsappId"),
+      responses.VIRUSTOTAL_URL_DECLINED
+    )
+    return
+  }
+
+  const text = [instanceData.text, instanceData.caption]
+    .filter((value): value is string => typeof value === "string")
+    .join("\n")
+  const scanResults = await scanUrlsWithVirusTotal(text, true)
+  const updates: Record<string, unknown> = {
+    virusTotalConsentStatus: "accepted",
+  }
+  if (scanResults.length > 0) {
+    await parentMessageRef.update({
+      virusTotalUrlScanResults: FieldValue.arrayUnion(...scanResults),
+    })
+  }
+  await instanceRef.update(updates)
+
+  const category = getVirusTotalCategory(scanResults)
+  if (category) {
+    const parentMessageSnap = await parentMessageRef.get()
+    if (
+      !parentMessageSnap.get("isAssessed") &&
+      !parentMessageSnap.get("isPollStarted")
+    ) {
+      await parentMessageRef.update({
+        machineCategory: category,
+        isMachineCategorised: true,
+        isIrrelevant: false,
+        primaryCategory: null,
+      })
+      await sendWhatsappTextMessage(
+        "user",
+        userSnap.get("whatsappId"),
+        responses.VIRUSTOTAL_MALICIOUS_URL_ALERT
+      )
+    }
+  }
+
 }
 
 async function onTextListReceipt(
@@ -504,6 +603,7 @@ const onUserNavigationPublish = onMessagePublished(
       "VERIFY_TOKEN",
       "TYPESENSE_TOKEN",
       "OPENAI_API_KEY",
+      "VIRUS_TOTAL_API_KEY",
     ],
     timeoutSeconds: 120,
   },

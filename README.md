@@ -527,6 +527,31 @@ Beyond the above main flow, there are many sub flows executing in the applicatio
 
 We aim to document all these flows eventually, but for now do look at the code to figure these out.
 
+### VirusTotal URL checks
+
+URL checks are disabled unless `VIRUS_TOTAL_URL_SCANNING_ENABLED=true`,
+`VIRUS_TOTAL_TERMS_APPROVED=true`, and the `VIRUS_TOTAL_API_KEY` secret are
+configured. `VIRUS_TOTAL_TERMS_APPROVED` is an owner-controlled acknowledgement:
+do not set it for a free VirusTotal Community API key. VirusTotal's public API
+terms prohibit use in commercial products or services, so the owner must first
+confirm that the selected plan and terms cover CheckMate.
+
+When enabled, a WhatsApp submission containing a URL gets a per-submission
+choice before any VirusTotal request. The notice explains that submitted URLs
+are added to VirusTotal's community dataset and may be available to other
+VirusTotal users. Declining continues the normal CheckMate flow without sending
+the URL. Accepted submissions scan at most two distinct URLs per message; the
+submission and analysis responses are stored in
+`messages/{messageId}.virusTotalUrlScanResults`. Only a completed analysis with
+at least three malicious engine results and more malicious than harmless
+results may set the existing `scam` machine category, and only before human
+assessment or polling has begun. Other results do not change the existing
+review flow.
+
+The integration follows VirusTotal's [Scan URL](https://docs.virustotal.com/reference/scan-url)
+and [Get analysis](https://docs.virustotal.com/reference/analysis) endpoints.
+VirusTotal also documents the public API's [terms and account restrictions](https://docs.virustotal.com/reference/getting-started).
+
 ## Local Development & DevOps
 
 We currently have 3 environments, prod, uat, and local. The `/integration-tests` folder contains a 4th mocked environment, SIT, which is run in the CI pipeline. Generally, you'd do most of your feature development on the local dev environment, and in a feature branch. Once the feature branch is ready, make a PR to the `develop` branch. Successful merge into the `develop` branch will trigger a UAT deployment. Successful merge from `develop` into `main` will in turn trigger a prod deployment. All these happen through Github Actions.

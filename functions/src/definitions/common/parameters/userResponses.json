@@ -23,6 +23,26 @@
     "en": "Hello! 👋 Thanks for sending this in! Give us a minute while our AI assesses this message 🤖",
     "cn": "你好！👋 感谢你的提交！请稍等片刻，我们的人工智能🤖正在评估这条消息。"
   },
+  "VIRUSTOTAL_URL_CONSENT": {
+    "en": "This submission contains one or more links. If you choose to check them, CheckMate will send up to two full URLs to VirusTotal. VirusTotal adds submitted URLs to its community dataset, where they are available to its community. Choose “Check link” to agree, or “Keep private” to continue without sending them.",
+    "cn": "这条提交包含一个或多个链接。如果您选择检测，查友会将最多两个完整网址发送给 VirusTotal。VirusTotal 会将提交的网址加入其社区数据库，供社区成员访问。选择“检测链接”即表示同意；选择“保留隐私”则继续处理，但不会发送这些网址。"
+  },
+  "BUTTON_VIRUSTOTAL_CHECK": {
+    "en": "Check link",
+    "cn": "检测链接"
+  },
+  "BUTTON_VIRUSTOTAL_PRIVATE": {
+    "en": "Keep private",
+    "cn": "保留隐私"
+  },
+  "VIRUSTOTAL_URL_DECLINED": {
+    "en": "No link was sent to VirusTotal. CheckMate will continue with its usual review.",
+    "cn": "我们不会将链接发送给 VirusTotal。查友会继续按照常规流程进行审核。"
+  },
+  "VIRUSTOTAL_MALICIOUS_URL_ALERT": {
+    "en": "VirusTotal found multiple security vendors marking this link as malicious. Treat it as a scam and do not open it.",
+    "cn": "VirusTotal 上的多个安全引擎将此链接标记为恶意链接。请将其视为诈骗链接，不要打开。"
+  },
   "WAIT_FOR_ASSESSMENT": {
     "en": "Thanks for sending this in! Our CheckMates🕵🏻 will review this and provide the results soon.",
     "cn": "感谢您使用查友！我们的查哥查妹🕵🏻会尽快评估这条短信并回复。"

@@ -40,6 +40,7 @@ import { getSignedUrl } from "../common/mediaUtils"
 import { logger } from "firebase-functions"
 import { stripTemplate } from "../../validators/whatsapp/checkWhatsappText"
 import { sendNewMessageNotification } from "../../services/admin/notificationService"
+import { shouldRequestVirusTotalConsent } from "../common/virusTotal"
 
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
@@ -191,10 +192,11 @@ async function newTextInstanceHandler({
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
-  const needsChecking = await determineNeedsChecking({
-    text: text,
-  })
-  const machineCategory = (await classifyText(text)) ?? "error"
+  const [needsChecking, predictedCategory] = await Promise.all([
+    determineNeedsChecking({ text }),
+    classifyText(text),
+  ])
+  const machineCategory = predictedCategory ?? "error"
   // if (from && isFirstTimeUser && !needsChecking) {
   //   await userSnap.ref.update({
   //     firstMessageType: "irrelevant",
@@ -402,6 +404,9 @@ async function newTextInstanceHandler({
     userClickedShare: false,
     userClickedFeedback: false,
     finalReplyText: null,
+    ...(source === "whatsapp" && shouldRequestVirusTotalConsent(text)
+      ? { virusTotalConsentStatus: "pending" }
+      : {}),
   }
   await addInstanceToDb(
     id,
@@ -566,6 +571,12 @@ async function newImageInstanceHandler({
       matchType = similarityScore == 1 ? "exact" : "similarity"
     }
   }
+
+  const hasVirusTotalUrl =
+    source === "whatsapp" &&
+    shouldRequestVirusTotalConsent(
+      [caption, extractedMessage].filter(Boolean).join("\n")
+    )
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
     let communityNoteData
@@ -746,6 +757,7 @@ async function newImageInstanceHandler({
     userClickedShare: false,
     userClickedFeedback: false,
     finalReplyText: null,
+    ...(hasVirusTotalUrl ? { virusTotalConsentStatus: "pending" } : {}),
   }
   await addInstanceToDb(
     id,
@@ -797,6 +809,7 @@ const onUserGenericMessagePublish = onMessagePublished(
       "OPENAI_API_KEY",
       "TELEGRAM_ADMIN_BOT_TOKEN",
       "CHECKMATE_CORE_API_KEY",
+      "VIRUS_TOTAL_API_KEY",
     ],
     timeoutSeconds: 120,
   },
