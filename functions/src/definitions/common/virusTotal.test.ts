@@ -3,6 +3,7 @@ import userResponses from "./parameters/userResponses.json"
 import {
   extractUrls,
   getVirusTotalCategory,
+  resumeVirusTotalUrlScans,
   scanUrlsWithVirusTotal,
   shouldRequestVirusTotalConsent,
   VirusTotalUrlScanResult,
@@ -12,6 +13,21 @@ jest.mock("axios")
 
 const mockedAxios = axios as jest.Mocked<typeof axios>
 const testUrl = "https://phishing.example.com/login?token=mock-only"
+const testUrls = [
+  testUrl,
+  "https://second.example.net/path?source=mock",
+  "http://third.example.org/a/b?query=mock",
+]
+
+function mockSubmission(id: string) {
+  return { data: { data: { id } } }
+}
+
+function rateLimitError() {
+  return {
+    response: { status: 429, headers: { "retry-after": "0.001" } },
+  }
+}
 
 describe("VirusTotal URL scanning", () => {
   const originalEnvironment = {
@@ -75,9 +91,7 @@ describe("VirusTotal URL scanning", () => {
   })
 
   it("posts only after consent and stores both API responses", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      data: { data: { id: "analysis-mock-id" } },
-    } as never)
+    mockedAxios.post.mockResolvedValueOnce(mockSubmission("analysis-mock-id") as never)
     mockedAxios.get.mockResolvedValueOnce({
       data: {
         data: {
@@ -109,12 +123,95 @@ describe("VirusTotal URL scanning", () => {
       status: "completed",
       analysisId: "analysis-mock-id",
       stats: { malicious: 4, suspicious: 1, harmless: 2, undetected: 5 },
+      retryable: false,
+      errorCode: null,
       response: {
         submission: { data: { id: "analysis-mock-id" } },
         analysis: { data: { attributes: { status: "completed" } } },
       },
     })
     expect(getVirusTotalCategory(result)).toBe("scam")
+  })
+
+  it("scans every distinct URL and preserves each complete URL", async () => {
+    testUrls.forEach((_, index) => {
+      mockedAxios.post.mockResolvedValueOnce(
+        mockSubmission(`analysis-${index}`) as never
+      )
+      mockedAxios.get.mockResolvedValueOnce({
+        data: {
+          data: {
+            attributes: {
+              status: "completed",
+              stats: { malicious: 0, harmless: 3 },
+            },
+          },
+        },
+      } as never)
+    })
+
+    const results = await scanUrlsWithVirusTotal(
+      `${testUrls.join(" ")} ${testUrls[0]}`,
+      true
+    )
+
+    expect(results.map(({ url }) => url)).toEqual(testUrls)
+    expect(mockedAxios.post).toHaveBeenCalledTimes(testUrls.length)
+    expect(
+      mockedAxios.post.mock.calls.map(([, body]) =>
+        (body as URLSearchParams).get("url")
+      )
+    ).toEqual(testUrls)
+  })
+
+  it("can resume a pending analysis without resubmitting its URL", async () => {
+    mockedAxios.post.mockResolvedValueOnce(
+      mockSubmission("analysis-pending") as never
+    )
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: { attributes: { status: "queued" } } },
+    } as never)
+
+    const firstResult = await scanUrlsWithVirusTotal(testUrl, true)
+    expect(firstResult[0]).toMatchObject({
+      status: "pending",
+      analysisId: "analysis-pending",
+      retryable: true,
+    })
+
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        data: {
+          attributes: {
+            status: "completed",
+            stats: { malicious: 4, harmless: 1 },
+          },
+        },
+      },
+    } as never)
+    const resumed = await resumeVirusTotalUrlScans(firstResult)
+
+    expect(resumed[0]).toMatchObject({ status: "completed", retryable: false })
+    expect(mockedAxios.post).toHaveBeenCalledTimes(1)
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+  })
+
+  it("retries a rate limit once and leaves every unscanned URL explicitly pending", async () => {
+    mockedAxios.post
+      .mockRejectedValueOnce(rateLimitError())
+      .mockRejectedValueOnce(rateLimitError())
+
+    const results = await scanUrlsWithVirusTotal(testUrls.join(" "), true)
+
+    expect(mockedAxios.post).toHaveBeenCalledTimes(2)
+    expect(results).toHaveLength(testUrls.length)
+    expect(results.map(({ url }) => url)).toEqual(testUrls)
+    expect(results.every((result) => result.status === "pending" && result.retryable)).toBe(true)
+    expect(results.map(({ errorCode }) => errorCode)).toEqual([
+      "rate_limited",
+      "rate_limited",
+      "rate_limited",
+    ])
   })
 
   it("uses the existing scam category only for a clear completed result", () => {
@@ -130,6 +227,8 @@ describe("VirusTotal URL scanning", () => {
         stats: { malicious, suspicious: 0, harmless, undetected: 10 },
         response: {},
         scannedAt: new Date("2026-11-03T00:00:00Z"),
+        retryable: status === "pending",
+        errorCode: null,
       },
     ]
 

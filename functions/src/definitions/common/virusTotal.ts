@@ -2,10 +2,8 @@ import axios from "axios"
 import urlRegexSafe from "url-regex-safe"
 
 const VIRUSTOTAL_BASE_URL = "https://www.virustotal.com/api/v3"
-const MAX_URLS_PER_SUBMISSION = 2
 const MALICIOUS_ENGINE_THRESHOLD = 3
-const ANALYSIS_POLL_ATTEMPTS = 3
-const ANALYSIS_POLL_DELAY_MS = 1000
+const MAX_RATE_LIMIT_RETRIES = 1
 
 export type VirusTotalStats = {
   malicious: number
@@ -19,16 +17,12 @@ export type VirusTotalUrlScanResult = {
   status: "completed" | "pending" | "failed"
   analysisId: string | null
   stats: VirusTotalStats | null
-  /** The VirusTotal analysis response, kept for checker context and auditing. */
+  /** The VirusTotal submission and analysis responses, stored for audit. */
   response: Record<string, unknown> | null
   scannedAt: Date
+  retryable: boolean
+  errorCode: "rate_limited" | "request_failed" | null
 }
-
-export type VirusTotalConsentStatus =
-  | "pending"
-  | "processing"
-  | "accepted"
-  | "declined"
 
 export function isVirusTotalScanningEnabled(): boolean {
   return (
@@ -44,7 +38,50 @@ export function shouldRequestVirusTotalConsent(
   return isVirusTotalScanningEnabled() && extractUrls(text).length > 0
 }
 
-/** Extract distinct HTTP(S) URLs without removing their paths or query strings. */
+function responseStatus(error: unknown): number | null {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return null
+  }
+  const status = (error as { response?: { status?: unknown } }).response?.status
+  return typeof status === "number" ? status : null
+}
+
+function retryAfterMilliseconds(error: unknown): number {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return 1000
+  }
+  const headers = (error as { response?: { headers?: Record<string, unknown> } })
+    .response?.headers
+  const header = headers?.["retry-after"] ?? headers?.["Retry-After"]
+  if (typeof header === "number" || typeof header === "string") {
+    const seconds = Number(header)
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.min(seconds * 1000, 60000)
+    }
+    const retryDate = new Date(header).getTime()
+    if (Number.isFinite(retryDate)) {
+      return Math.max(1000, Math.min(retryDate - Date.now(), 60000))
+    }
+  }
+  return 1000
+}
+
+async function requestWithRateLimitRetry<T>(request: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await request()
+    } catch (error) {
+      if (responseStatus(error) !== 429 || attempt >= MAX_RATE_LIMIT_RETRIES) {
+        throw error
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, retryAfterMilliseconds(error))
+      )
+    }
+  }
+}
+
+/** Extract every distinct HTTP(S) URL without dropping paths or query strings. */
 export function extractUrls(text: string | null | undefined): string[] {
   if (!text) return []
 
@@ -67,32 +104,76 @@ export function extractUrls(text: string | null | undefined): string[] {
   return Array.from(urls)
 }
 
-/**
- * Submit URLs to VirusTotal only after explicit per-submission consent and
- * owner-approved service configuration.
- * VirusTotal says both submitted and queried indicators enter its community
- * dataset, so the default remains off until the owner enables this integration.
- */
-export async function scanUrlsWithVirusTotal(
-  text: string | null | undefined,
-  consented: boolean
-): Promise<VirusTotalUrlScanResult[]> {
-  if (!consented || !isVirusTotalScanningEnabled()) return []
+function parseStats(rawStats: unknown): VirusTotalStats | null {
+  if (typeof rawStats !== "object" || rawStats === null) return null
+  const stats = rawStats as Record<string, unknown>
+  return {
+    malicious: Number(stats.malicious) || 0,
+    suspicious: Number(stats.suspicious) || 0,
+    harmless: Number(stats.harmless) || 0,
+    undetected: Number(stats.undetected) || 0,
+  }
+}
 
-  const apiKey = process.env.VIRUS_TOTAL_API_KEY
-  if (!apiKey) return []
+async function getAnalysisResult(
+  url: string,
+  analysisId: string,
+  submissionResponse: Record<string, unknown> | null,
+  apiKey: string
+): Promise<VirusTotalUrlScanResult> {
+  const scannedAt = new Date()
+  try {
+    const analysis = await requestWithRateLimitRetry(() =>
+      axios.get(
+        `${VIRUSTOTAL_BASE_URL}/analyses/${encodeURIComponent(analysisId)}`,
+        {
+          headers: {
+            accept: "application/json",
+            "x-apikey": apiKey,
+          },
+          timeout: 15000,
+        }
+      )
+    )
+    const attributes = analysis.data?.data?.attributes
+    const completed = attributes?.status === "completed"
+    return {
+      url,
+      status: completed ? "completed" : "pending",
+      analysisId,
+      stats: parseStats(attributes?.stats),
+      response: {
+        submission: submissionResponse,
+        analysis: analysis.data ?? null,
+      },
+      scannedAt,
+      retryable: !completed,
+      errorCode: null,
+    }
+  } catch (error) {
+    const rateLimited = responseStatus(error) === 429
+    return {
+      url,
+      status: rateLimited ? "pending" : "failed",
+      analysisId,
+      stats: null,
+      response: submissionResponse ? { submission: submissionResponse } : null,
+      scannedAt,
+      retryable: rateLimited,
+      errorCode: rateLimited ? "rate_limited" : "request_failed",
+    }
+  }
+}
 
-  const urls = extractUrls(text).slice(0, MAX_URLS_PER_SUBMISSION)
-  const results: VirusTotalUrlScanResult[] = []
-
-  // Keep requests sequential because VirusTotal's public API has a low default
-  // request quota. Errors are recorded per URL and do not block message review.
-  for (const url of urls) {
-    const scannedAt = new Date()
-    let analysisId: string | null = null
-    let submissionResponse: Record<string, unknown> | null = null
-    try {
-      const submission = await axios.post(
+async function scanOneUrl(
+  url: string,
+  apiKey: string
+): Promise<VirusTotalUrlScanResult> {
+  const scannedAt = new Date()
+  let submissionResponse: Record<string, unknown> | null = null
+  try {
+    const submission = await requestWithRateLimitRetry(() =>
+      axios.post(
         `${VIRUSTOTAL_BASE_URL}/urls`,
         new URLSearchParams({ url }),
         {
@@ -104,84 +185,123 @@ export async function scanUrlsWithVirusTotal(
           timeout: 15000,
         }
       )
-      submissionResponse = submission.data ?? null
-
-      const responseAnalysisId = submission.data?.data?.id
-      analysisId =
-        typeof responseAnalysisId === "string" ? responseAnalysisId : null
-      if (!analysisId) {
-        results.push({
-          url,
-          status: "failed",
-          analysisId: null,
-          stats: null,
-          response: { submission: submissionResponse },
-          scannedAt,
-        })
-        continue
-      }
-
-      let analysis
-      for (let attempt = 0; attempt < ANALYSIS_POLL_ATTEMPTS; attempt++) {
-        analysis = await axios.get(
-          `${VIRUSTOTAL_BASE_URL}/analyses/${encodeURIComponent(analysisId)}`,
-          {
-            headers: {
-              accept: "application/json",
-              "x-apikey": apiKey,
-            },
-            timeout: 15000,
-          }
-        )
-        if (
-          analysis.data?.data?.attributes?.status === "completed" ||
-          attempt === ANALYSIS_POLL_ATTEMPTS - 1
-        ) {
-          break
-        }
-        await new Promise((resolve) =>
-          setTimeout(resolve, ANALYSIS_POLL_DELAY_MS)
-        )
-      }
-      const attributes = analysis?.data?.data?.attributes
-      const rawStats = attributes?.stats
-      const stats = rawStats
-        ? {
-            malicious: Number(rawStats.malicious) || 0,
-            suspicious: Number(rawStats.suspicious) || 0,
-            harmless: Number(rawStats.harmless) || 0,
-            undetected: Number(rawStats.undetected) || 0,
-          }
-        : null
-
-      results.push({
-        url,
-        status: attributes?.status === "completed" ? "completed" : "pending",
-        analysisId,
-        stats,
-        response: {
-          submission: submissionResponse,
-          analysis: analysis?.data ?? null,
-        },
-        scannedAt,
-      })
-    } catch (_error) {
-      // Do not log the URL, API key, or request error; submissions can contain
-      // sensitive information and the original message remains available to reviewers.
-      results.push({
+    )
+    submissionResponse = submission.data ?? null
+    const responseAnalysisId = submission.data?.data?.id
+    if (typeof responseAnalysisId !== "string" || responseAnalysisId.length === 0) {
+      return {
         url,
         status: "failed",
-        analysisId,
+        analysisId: null,
         stats: null,
-        response: submissionResponse
-          ? { submission: submissionResponse }
-          : null,
+        response: { submission: submissionResponse },
         scannedAt,
-      })
+        retryable: false,
+        errorCode: "request_failed",
+      }
+    }
+
+    return await getAnalysisResult(
+      url,
+      responseAnalysisId,
+      submissionResponse,
+      apiKey
+    )
+  } catch (error) {
+    const rateLimited = responseStatus(error) === 429
+    return {
+      url,
+      status: rateLimited ? "pending" : "failed",
+      analysisId: null,
+      stats: null,
+      response: submissionResponse
+        ? { submission: submissionResponse }
+        : null,
+      scannedAt,
+      retryable: rateLimited,
+      errorCode: rateLimited ? "rate_limited" : "request_failed",
+    }
+  }
+}
+
+/**
+ * Submit URLs only after explicit per-submission consent and owner-approved
+ * service configuration. The standard API adds submitted indicators to its
+ * community dataset, so this integration is disabled unless all gates are set.
+ */
+export async function scanUrlsWithVirusTotal(
+  text: string | null | undefined,
+  consented: boolean
+): Promise<VirusTotalUrlScanResult[]> {
+  if (!consented || !isVirusTotalScanningEnabled()) return []
+
+  const apiKey = process.env.VIRUS_TOTAL_API_KEY
+  if (!apiKey) return []
+
+  const urls = extractUrls(text)
+  const results: VirusTotalUrlScanResult[] = []
+
+  // Process every distinct URL sequentially. If the provider rate-limits a
+  // request, save a retryable result for that and remaining URLs instead of
+  // hammering the API or silently dropping links.
+  for (let index = 0; index < urls.length; index++) {
+    const result = await scanOneUrl(urls[index], apiKey)
+    results.push(result)
+    if (result.errorCode === "rate_limited") {
+      for (const url of urls.slice(index + 1)) {
+        results.push({
+          url,
+          status: "pending",
+          analysisId: null,
+          stats: null,
+          response: null,
+          scannedAt: new Date(),
+          retryable: true,
+          errorCode: "rate_limited",
+        })
+      }
+      break
     }
   }
 
   return results
+}
+
+/** Recheck pending analyses without resubmitting URLs that already have IDs. */
+export async function resumeVirusTotalUrlScans(
+  results: VirusTotalUrlScanResult[]
+): Promise<VirusTotalUrlScanResult[]> {
+  if (!isVirusTotalScanningEnabled()) return results
+  const apiKey = process.env.VIRUS_TOTAL_API_KEY
+  if (!apiKey) return results
+
+  const updated: VirusTotalUrlScanResult[] = []
+  for (let index = 0; index < results.length; index++) {
+    const result = results[index]
+    if (!result.retryable || result.status !== "pending") {
+      updated.push(result)
+      continue
+    }
+
+    let resumed: VirusTotalUrlScanResult
+    if (result.analysisId) {
+      resumed = await getAnalysisResult(
+        result.url,
+        result.analysisId,
+        (result.response?.submission as Record<string, unknown>) ?? null,
+        apiKey
+      )
+    } else {
+      resumed = await scanOneUrl(result.url, apiKey)
+    }
+
+    updated.push(resumed)
+    if (resumed.errorCode === "rate_limited") {
+      updated.push(...results.slice(index + 1))
+      break
+    }
+  }
+  return updated
 }
 
 /** Map a clear VirusTotal result to CheckMate's existing scam category. */

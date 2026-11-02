@@ -119,10 +119,13 @@ export type GeneralMessage = {
   timestamp: number
   isForwarded: boolean | null
   frequently_forwarded: boolean | null
+  virusTotalConsentDecision?: boolean
 }
 
 export type MessageData = {
   virusTotalUrlScanResults?: import("./definitions/common/virusTotal").VirusTotalUrlScanResult[]
+  virusTotalAutoAssessed?: boolean
+  virusTotalScanPending?: boolean
   machineCategory: string //category assigned by the machine learning model. Can be either "scam", "illicit", "spam", "info", "irrelevant", "irrelevant_length", or "unsure"
   isMachineCategorised: boolean //whether or not the message was categorised by the machine learning model
   isWronglyCategorisedIrrelevant: boolean //whether or not the message was categorised as irrelevant by the machine learning model but was actually not as indicated by the user
@@ -168,7 +171,6 @@ export type MessageData = {
 }
 
 export type InstanceData = {
-  virusTotalConsentStatus?: import("./definitions/common/virusTotal").VirusTotalConsentStatus
   source: string //Source of the message, e.g. whatsapp, telegram, email
   id: string | null //whatsapp id for the instance
   timestamp: Timestamp //Timestamp where the instance was received by CheckMate

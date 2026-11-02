@@ -2,9 +2,11 @@ import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { Timestamp } from "firebase-admin/firestore"
+import { createHash } from "crypto"
 import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
 import {
   sendWhatsappTextMessage,
+  sendWhatsappButtonMessage,
   markWhatsappMessageAsRead,
 } from "../common/sendWhatsappMessage"
 import { hashMessage, checkMessageId, getSlugFromTitle } from "../common/utils"
@@ -40,7 +42,12 @@ import { getSignedUrl } from "../common/mediaUtils"
 import { logger } from "firebase-functions"
 import { stripTemplate } from "../../validators/whatsapp/checkWhatsappText"
 import { sendNewMessageNotification } from "../../services/admin/notificationService"
-import { shouldRequestVirusTotalConsent } from "../common/virusTotal"
+import {
+  getVirusTotalCategory,
+  isVirusTotalScanningEnabled,
+  scanUrlsWithVirusTotal,
+  shouldRequestVirusTotalConsent,
+} from "../common/virusTotal"
 
 const similarityThreshold = defineString(AppEnv.SIMILARITY_THRESHOLD)
 
@@ -53,7 +60,7 @@ const hashids = new Hashids(salt)
 const db = admin.firestore()
 
 //not whatsapp specific anymore
-const userGenericMessageHandlerWhatsapp = async function (
+export const userGenericMessageHandlerWhatsapp = async function (
   message: GeneralMessage
 ) {
   if (!message?.id) {
@@ -84,6 +91,24 @@ const userGenericMessageHandlerWhatsapp = async function (
     markWhatsappMessageAsRead("user", message.id)
     return
   }
+
+  if (
+    source === "whatsapp" &&
+    message.virusTotalConsentDecision === undefined &&
+    (type === "image"
+      ? isVirusTotalScanningEnabled()
+      : shouldRequestVirusTotalConsent(message.text))
+  ) {
+    const consentRequested = await requestVirusTotalConsent(
+      message,
+      userSnap,
+      responses
+    )
+    if (consentRequested) return
+    // If the prompt cannot be delivered, process normally without an external scan.
+    message = { ...message, virusTotalConsentDecision: false }
+  }
+
   if (isUserOnboarded) {
     await userSnap.ref.update({
       numSubmissionsRemaining: FieldValue.increment(-1),
@@ -132,6 +157,7 @@ const userGenericMessageHandlerWhatsapp = async function (
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
+        virusTotalConsentDecision: message.virusTotalConsentDecision,
       })
       break
 
@@ -147,6 +173,7 @@ const userGenericMessageHandlerWhatsapp = async function (
         from: from,
         isForwarded: message?.isForwarded || null,
         isFrequentlyForwarded: message?.frequently_forwarded || null,
+        virusTotalConsentDecision: message.virusTotalConsentDecision,
       })
       break
 
@@ -170,6 +197,63 @@ const userGenericMessageHandlerWhatsapp = async function (
   markWhatsappMessageAsRead("user", message.id)
 }
 
+async function requestVirusTotalConsent(
+  message: GeneralMessage,
+  userSnap: admin.firestore.DocumentSnapshot,
+  responses: Record<string, any>
+): Promise<boolean> {
+  const requestId = createHash("sha256")
+    .update(`${message.source}:${message.id}`)
+    .digest("hex")
+  const requestRef = db
+    .collection("virusTotalConsentRequests")
+    .doc(requestId)
+  const created = await db.runTransaction(async (transaction) => {
+    const existing = await transaction.get(requestRef)
+    if (existing.exists) return false
+    transaction.create(requestRef, {
+      status: "awaiting_consent",
+      userId: message.userId,
+      source: message.source,
+      message,
+      createdAt: Timestamp.now(),
+    })
+    return true
+  })
+
+  if (!created) return true
+
+  try {
+    await sendWhatsappButtonMessage(
+      "user",
+      userSnap.get("whatsappId"),
+      responses.VIRUSTOTAL_URL_CONSENT,
+      [
+        {
+          type: "reply",
+          reply: {
+            id: `virusTotalAcceptRequest_${requestId}`,
+            title: responses.BUTTON_VIRUSTOTAL_CHECK,
+          },
+        },
+        {
+          type: "reply",
+          reply: {
+            id: `virusTotalDeclineRequest_${requestId}`,
+            title: responses.BUTTON_VIRUSTOTAL_PRIVATE,
+          },
+        },
+      ],
+      message.id
+    )
+    markWhatsappMessageAsRead("user", message.id)
+    return true
+  } catch (_error) {
+    await requestRef.delete()
+    return false
+  }
+}
+
 async function newTextInstanceHandler({
   userSnap,
   source,
@@ -179,6 +263,7 @@ async function newTextInstanceHandler({
   from,
   isForwarded,
   isFrequentlyForwarded,
+  virusTotalConsentDecision,
 }: {
   userSnap: admin.firestore.DocumentSnapshot
   source: string
@@ -188,15 +273,21 @@ async function newTextInstanceHandler({
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
+  virusTotalConsentDecision?: boolean
 }) {
   let hasMatch = false
   let messageRef: FirebaseFirestore.DocumentReference | null = null
   let messageUpdateObj: MessageData | null = null
-  const [needsChecking, predictedCategory] = await Promise.all([
-    determineNeedsChecking({ text }),
-    classifyText(text),
-  ])
-  const machineCategory = predictedCategory ?? "error"
+  const [modelNeedsChecking, predictedCategory, virusTotalUrlScanResults] =
+    await Promise.all([
+      determineNeedsChecking({ text }),
+      classifyText(text),
+      scanUrlsWithVirusTotal(text, virusTotalConsentDecision === true),
+    ])
+  const virusTotalCategory = getVirusTotalCategory(virusTotalUrlScanResults)
+  const needsChecking = modelNeedsChecking || virusTotalCategory !== null
+  const machineCategory =
+    virusTotalCategory ?? predictedCategory ?? "error"
   // if (from && isFirstTimeUser && !needsChecking) {
   //   await userSnap.ref.update({
   //     firstMessageType: "irrelevant",
@@ -336,6 +427,15 @@ async function newTextInstanceHandler({
       slug: slug,
       approvedForPublishing: false,
       approvedBy: null,
+      ...(virusTotalUrlScanResults.length > 0
+        ? {
+            virusTotalUrlScanResults,
+            virusTotalScanPending: virusTotalUrlScanResults.some(
+              (result) => result.retryable
+            ),
+          }
+        : {}),
+      ...(virusTotalCategory ? { virusTotalAutoAssessed: true } : {}),
     }
   } else {
     messageRef = matchedParentMessageRef
@@ -404,9 +504,6 @@ async function newTextInstanceHandler({
     userClickedShare: false,
     userClickedFeedback: false,
     finalReplyText: null,
-    ...(source === "whatsapp" && shouldRequestVirusTotalConsent(text)
-      ? { virusTotalConsentStatus: "pending" }
-      : {}),
   }
   await addInstanceToDb(
     id,
@@ -414,7 +511,8 @@ async function newTextInstanceHandler({
     messageRef,
     messageUpdateObj,
     instanceRef,
-    instanceUpdateObj
+    instanceUpdateObj,
+    virusTotalUrlScanResults
   )
   return Promise.resolve(`text_normal`)
 }
@@ -430,6 +528,7 @@ async function newImageInstanceHandler({
   from,
   isForwarded,
   isFrequentlyForwarded,
+  virusTotalConsentDecision,
 }: {
   userSnap: admin.firestore.DocumentSnapshot
   source: string
@@ -441,6 +540,7 @@ async function newImageInstanceHandler({
   from: string
   isForwarded: boolean | null
   isFrequentlyForwarded: boolean | null
+  virusTotalConsentDecision?: boolean
 }) {
   let filename
   let messageRef: FirebaseFirestore.DocumentReference | null = null
@@ -572,11 +672,12 @@ async function newImageInstanceHandler({
     }
   }
 
-  const hasVirusTotalUrl =
-    source === "whatsapp" &&
-    shouldRequestVirusTotalConsent(
-      [caption, extractedMessage].filter(Boolean).join("\n")
-    )
+  const virusTotalUrlScanResults = await scanUrlsWithVirusTotal(
+    [caption, extractedMessage].filter(Boolean).join("\n"),
+    virusTotalConsentDecision === true
+  )
+  const virusTotalCategory = getVirusTotalCategory(virusTotalUrlScanResults)
+  if (virusTotalCategory) machineCategory = virusTotalCategory
 
   if (!hasMatch || (!matchedInstanceSnap && !matchedParentMessageRef)) {
     let communityNoteData
@@ -618,11 +719,12 @@ async function newImageInstanceHandler({
       strippedMessage = await anonymiseMessage(extractedMessage)
     }
     const isMachineAssessed = !!(
-      machineCategory &&
-      !caption &&
-      machineCategory !== "error" &&
-      machineCategory !== "unsure" &&
-      machineCategory !== "info"
+      virusTotalCategory === "scam" ||
+      (machineCategory &&
+        !caption &&
+        machineCategory !== "error" &&
+        machineCategory !== "unsure" &&
+        machineCategory !== "info")
     )
 
     let adminMessageId = null
@@ -682,6 +784,15 @@ async function newImageInstanceHandler({
       slug: slug,
       approvedForPublishing: false,
       approvedBy: null,
+      ...(virusTotalUrlScanResults.length > 0
+        ? {
+            virusTotalUrlScanResults,
+            virusTotalScanPending: virusTotalUrlScanResults.some(
+              (result) => result.retryable
+            ),
+          }
+        : {}),
+      ...(virusTotalCategory ? { virusTotalAutoAssessed: true } : {}),
     }
   } else {
     if (matchType === "image" && matchedInstanceSnap) {
@@ -757,7 +868,6 @@ async function newImageInstanceHandler({
     userClickedShare: false,
     userClickedFeedback: false,
     finalReplyText: null,
-    ...(hasVirusTotalUrl ? { virusTotalConsentStatus: "pending" } : {}),
   }
   await addInstanceToDb(
     id,
@@ -765,7 +875,8 @@ async function newImageInstanceHandler({
     messageRef,
     messageUpdateObj,
     instanceRef,
-    instanceUpdateObj
+    instanceUpdateObj,
+    virusTotalUrlScanResults
   )
   return Promise.resolve("image")
 }
@@ -776,7 +887,8 @@ async function addInstanceToDb(
   messageRef: FirebaseFirestore.DocumentReference | null,
   messageUpdateObj: Object | null = null,
   instanceRef: FirebaseFirestore.DocumentReference,
-  instanceUpdateObj: Object
+  instanceUpdateObj: Object,
+  virusTotalUrlScanResults: import("../common/virusTotal").VirusTotalUrlScanResult[] = []
 ) {
   const messageIdRef = db.collection("messageIds").doc(id)
   try {
@@ -787,6 +899,33 @@ async function addInstanceToDb(
       }
       if (!hasMatch && !!messageRef && !!messageUpdateObj) {
         t.set(messageRef, messageUpdateObj)
+      } else if (
+        hasMatch &&
+        messageRef &&
+        virusTotalUrlScanResults.length > 0
+      ) {
+        const parentMessageSnap = await t.get(messageRef)
+        const update: Record<string, any> = {
+          virusTotalUrlScanResults: FieldValue.arrayUnion(
+            ...virusTotalUrlScanResults
+          ),
+        }
+        const canAutoAssess =
+          !parentMessageSnap.get("isAssessed") &&
+          !parentMessageSnap.get("isPollStarted")
+        if (virusTotalUrlScanResults.some((result) => result.retryable)) {
+          update.virusTotalScanPending = true
+        }
+        if (canAutoAssess && getVirusTotalCategory(virusTotalUrlScanResults)) {
+          Object.assign(update, {
+            machineCategory: "scam",
+            isMachineCategorised: true,
+            isIrrelevant: false,
+            primaryCategory: null,
+            virusTotalAutoAssessed: true,
+          })
+        }
+        t.update(messageRef, update)
       }
       t.set(instanceRef, instanceUpdateObj)
       t.set(messageIdRef, { instanceRef: instanceRef })

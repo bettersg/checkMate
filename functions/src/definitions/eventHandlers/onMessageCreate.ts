@@ -33,6 +33,8 @@ const onMessageCreate = onDocumentCreated(
 
     if (
       !parentMessageSnap.get("isAssessed") &&
+      !parentMessageSnap.get("virusTotalAutoAssessed") &&
+      !parentMessageSnap.get("virusTotalScanPending") &&
       parentMessageSnap.get("machineCategory") !== "irrelevant"
     ) {
       const parentInstanceCount = 1

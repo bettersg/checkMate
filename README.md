@@ -536,12 +536,16 @@ do not set it for a free VirusTotal Community API key. VirusTotal's public API
 terms prohibit use in commercial products or services, so the owner must first
 confirm that the selected plan and terms cover CheckMate.
 
-When enabled, a WhatsApp submission containing a URL gets a per-submission
-choice before any VirusTotal request. The notice explains that submitted URLs
-are added to VirusTotal's community dataset and may be available to other
-VirusTotal users. Declining continues the normal CheckMate flow without sending
-the URL. Accepted submissions scan at most two distinct URLs per message; the
-submission and analysis responses are stored in
+When enabled, a WhatsApp submission gets a per-submission choice before
+assessment, polling, or any VirusTotal request. For images, the choice is shown
+before OCR so detected URLs are not processed before consent. The notice
+explains that submitted URLs are added to VirusTotal's community dataset and may
+be available to other VirusTotal users. Declining continues the normal
+CheckMate flow without sending URLs. Accepted submissions scan every distinct
+HTTP(S) URL found in text, captions, or OCR text. If VirusTotal returns a
+rate-limit response or an analysis is still running, the submission remains in
+a recoverable pending state with Retry or Continue controls. The submission and
+analysis responses are stored in
 `messages/{messageId}.virusTotalUrlScanResults`. Only a completed analysis with
 at least three malicious engine results and more malicious than harmless
 results may set the existing `scam` machine category, and only before human

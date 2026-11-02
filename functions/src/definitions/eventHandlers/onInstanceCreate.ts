@@ -1,9 +1,7 @@
 import * as admin from "firebase-admin"
 import { anonymiseMessage } from "../common/genAI"
 import { getThresholds } from "../common/utils"
-import { getResponsesObj, respondToInstance } from "../common/responseUtils"
-import { getUserSnapshot } from "../../services/user/userManagement"
-import { sendWhatsappButtonMessage } from "../common/sendWhatsappMessage"
+import { respondToInstance } from "../common/responseUtils"
 import {
   insertOne,
   CollectionTypes,
@@ -119,45 +117,13 @@ const onInstanceCreateV2 = onDocumentCreated(
       }
     }
 
-    if (data.virusTotalConsentStatus === "pending") {
-      try {
-        const userSnap = await getUserSnapshot(data.from, data.source)
-        if (userSnap) {
-          const language = userSnap.get("language") ?? "en"
-          const responses = await getResponsesObj("user", language)
-          await sendWhatsappButtonMessage(
-            "user",
-            data.from,
-            responses.VIRUSTOTAL_URL_CONSENT,
-            [
-              {
-                type: "reply",
-                reply: {
-                  id: `virusTotalAccept_${snap.ref.path}`,
-                  title: responses.BUTTON_VIRUSTOTAL_CHECK,
-                },
-              },
-              {
-                type: "reply",
-                reply: {
-                  id: `virusTotalDecline_${snap.ref.path}`,
-                  title: responses.BUTTON_VIRUSTOTAL_PRIVATE,
-                },
-              },
-            ],
-            data.id ?? null
-          )
-        }
-      } catch (_error) {
-        logger.warn("Could not send VirusTotal consent prompt")
-      }
-    }
-
-    if (!data.isReplied) {
+    if (!data.isReplied && !parentMessageSnap.get("virusTotalScanPending")) {
       await respondToInstance(snap, false, true)
     }
     if (
       !parentMessageSnap.get("isAssessed") &&
+      !parentMessageSnap.get("virusTotalAutoAssessed") &&
+      !parentMessageSnap.get("virusTotalScanPending") &&
       parentMessageSnap.get("machineCategory") !== "irrelevant"
     ) {
       const parentInstanceCount = instancesQuerySnap.size

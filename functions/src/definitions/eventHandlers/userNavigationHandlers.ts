@@ -4,12 +4,14 @@ import { onMessagePublished } from "firebase-functions/v2/pubsub"
 import { checkNewlyJoined } from "../../validators/common/checkNewlyJoined"
 import { FieldValue, Timestamp } from "firebase-admin/firestore"
 import {
+  sendWhatsappButtonMessage,
   sendWhatsappTextMessage,
   markWhatsappMessageAsRead,
   sendWhatsappContactMessage,
 } from "../common/sendWhatsappMessage"
 import { sendDisputeNotification } from "../common/sendMessage"
-import { sleep, checkMessageId } from "../common/utils"
+import { getThresholds, sleep, checkMessageId } from "../common/utils"
+import { despatchPoll } from "../../services/checker/votingService"
 import { getUserSnapshot } from "../../services/user/userManagement"
 import {
   checkMenu,
@@ -43,15 +45,19 @@ import {
   handleDisclaimer,
   sendCheckSharingMessage,
   sendShareOrTryCTA,
+  respondToInstance,
 } from "../common/responseUtils"
 import { defineString } from "firebase-functions/params"
 import { LanguageSelection, WhatsappMessageObject } from "../../types"
 import { AppEnv } from "../../appEnv"
 import { SAMPLE_MESSAGES } from "./userPreOnboardingHandler"
 import {
+  extractUrls,
   getVirusTotalCategory,
-  scanUrlsWithVirusTotal,
+  resumeVirusTotalUrlScans,
+  VirusTotalUrlScanResult,
 } from "../common/virusTotal"
+import { userGenericMessageHandlerWhatsapp } from "./userGenericMessageHandlers"
 
 const runtimeEnvironment = defineString(AppEnv.ENVIRONMENT)
 
@@ -212,14 +218,22 @@ async function onButtonReply(
   const [type, ...rest] = buttonId.split("_")
   let instancePath, selection, instanceRef, blastPath
   switch (type) {
-    case "virusTotalAccept":
-    case "virusTotalDecline": {
-      const accepted = type === "virusTotalAccept"
-      const instancePath = rest.join("_")
-      await handleVirusTotalConsent(
+    case "virusTotalAcceptRequest":
+    case "virusTotalDeclineRequest": {
+      await handleVirusTotalConsentRequest(
         userSnap,
-        instancePath,
-        accepted,
+        rest.join("_"),
+        type === "virusTotalAcceptRequest",
+        responses
+      )
+      break
+    }
+    case "virusTotalRetryRequest":
+    case "virusTotalContinueRequest": {
+      await handlePendingVirusTotalScans(
+        userSnap,
+        rest.join("_"),
+        type === "virusTotalContinueRequest",
         responses
       )
       break
@@ -320,87 +334,287 @@ async function onButtonReply(
   return Promise.resolve(step)
 }
 
-async function handleVirusTotalConsent(
+async function handleVirusTotalConsentRequest(
   userSnap: FirebaseFirestore.DocumentSnapshot,
-  instancePath: string,
+  requestId: string,
   accepted: boolean,
   responses: Record<string, any>
 ) {
-  let instanceRef: FirebaseFirestore.DocumentReference
-  try {
-    instanceRef = db.doc(instancePath)
-  } catch (_error) {
-    functions.logger.warn("Invalid VirusTotal consent instance path")
-    return
-  }
-
-  const instanceData = await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(instanceRef)
+  const requestRef = db.collection("virusTotalConsentRequests").doc(requestId)
+  const requestData = await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(requestRef)
     if (
       !snapshot.exists ||
-      snapshot.get("from") !== userSnap.get("whatsappId") ||
-      snapshot.get("virusTotalConsentStatus") !== "pending"
+      snapshot.get("status") !== "awaiting_consent" ||
+      snapshot.get("userId") !== userSnap.get("whatsappId")
     ) {
       return null
     }
-    transaction.update(instanceRef, { virusTotalConsentStatus: "processing" })
+    transaction.update(requestRef, { status: "processing" })
     return snapshot.data() ?? null
   })
-  if (!instanceData) {
-    return
-  }
+  const message = requestData?.message as
+    | import("../../types").GeneralMessage
+    | undefined
+  if (!message) return
 
-  const parentMessageRef = instanceRef.parent.parent
-  if (!parentMessageRef) {
-    functions.logger.warn("VirusTotal consent instance has no parent message")
-    return
-  }
-
-  if (!accepted) {
-    await instanceRef.update({ virusTotalConsentStatus: "declined" })
-    await sendWhatsappTextMessage(
-      "user",
-      userSnap.get("whatsappId"),
-      responses.VIRUSTOTAL_URL_DECLINED
-    )
-    return
-  }
-
-  const text = [instanceData.text, instanceData.caption]
-    .filter((value): value is string => typeof value === "string")
-    .join("\n")
-  const scanResults = await scanUrlsWithVirusTotal(text, true)
-  const updates: Record<string, unknown> = {
-    virusTotalConsentStatus: "accepted",
-  }
-  if (scanResults.length > 0) {
-    await parentMessageRef.update({
-      virusTotalUrlScanResults: FieldValue.arrayUnion(...scanResults),
+  try {
+    await userGenericMessageHandlerWhatsapp({
+      ...message,
+      virusTotalConsentDecision: accepted,
     })
-  }
-  await instanceRef.update(updates)
-
-  const category = getVirusTotalCategory(scanResults)
-  if (category) {
-    const parentMessageSnap = await parentMessageRef.get()
-    if (
-      !parentMessageSnap.get("isAssessed") &&
-      !parentMessageSnap.get("isPollStarted")
-    ) {
-      await parentMessageRef.update({
-        machineCategory: category,
-        isMachineCategorised: true,
-        isIrrelevant: false,
-        primaryCategory: null,
-      })
+    if (!accepted) {
+      await requestRef.delete()
       await sendWhatsappTextMessage(
         "user",
         userSnap.get("whatsappId"),
-        responses.VIRUSTOTAL_MALICIOUS_URL_ALERT
+        responses.VIRUSTOTAL_URL_DECLINED
+      )
+      return
+    }
+
+    const scanState = await getMessageVirusTotalScanState(message.id)
+    if (!scanState || !scanState.results.some((result) => result.retryable)) {
+      await requestRef.delete()
+      return
+    }
+
+    await requestRef.update({
+      status: "analysis_pending",
+      message: FieldValue.delete(),
+      parentMessagePath: scanState.parentMessageRef.path,
+      instancePath: scanState.instanceRef.path,
+      results: scanState.results,
+    })
+    const sent = await sendVirusTotalPendingPrompt(
+      userSnap,
+      requestId,
+      responses
+    )
+    if (!sent) {
+      await handlePendingVirusTotalScans(
+        userSnap,
+        requestId,
+        true,
+        responses
       )
     }
+  } catch (error) {
+    const latestRequest = await requestRef.get()
+    if (latestRequest.exists && latestRequest.get("status") === "processing") {
+      await requestRef.update({ status: "awaiting_consent" })
+    }
+    throw error
+  }
+}
+
+async function handlePendingVirusTotalScans(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  requestId: string,
+  continueReview: boolean,
+  responses: Record<string, any>
+) {
+  const requestRef = db.collection("virusTotalConsentRequests").doc(requestId)
+  const requestData = await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(requestRef)
+    if (
+      !snapshot.exists ||
+      snapshot.get("status") !== "analysis_pending" ||
+      snapshot.get("userId") !== userSnap.get("whatsappId")
+    ) {
+      return null
+    }
+    transaction.update(requestRef, { status: "processing" })
+    return snapshot.data() ?? null
+  })
+  if (!requestData) return
+
+  const parentMessageRef = db.doc(requestData.parentMessagePath)
+  const instanceRef = db.doc(requestData.instancePath)
+  if (continueReview) {
+    const parentMessageSnap = await parentMessageRef.get()
+    const existingResults = (parentMessageSnap.get("virusTotalUrlScanResults") ??
+      []) as VirusTotalUrlScanResult[]
+    const abandonedResults = (
+      (requestData.results ?? []) as VirusTotalUrlScanResult[]
+    ).map((result) => ({ ...result, retryable: false }))
+    const updatedResults = mergeVirusTotalResults(
+      existingResults,
+      abandonedResults
+    )
+    await parentMessageRef.update({
+      virusTotalUrlScanResults: updatedResults,
+      virusTotalScanPending: updatedResults.some((result) => result.retryable),
+    })
+    await requestRef.delete()
+    await resumeDeferredReview(parentMessageRef, instanceRef)
+    return
   }
 
+  const results = (requestData.results ?? []) as VirusTotalUrlScanResult[]
+  const resumedResults = await resumeVirusTotalUrlScans(results)
+  const stillPending = resumedResults.some((result) => result.retryable)
+  const parentMessageSnap = await parentMessageRef.get()
+  const existingResults =
+    (parentMessageSnap.get("virusTotalUrlScanResults") ??
+      []) as VirusTotalUrlScanResult[]
+  const updatedResults = mergeVirusTotalResults(existingResults, resumedResults)
+  const category = getVirusTotalCategory(resumedResults)
+  const canAutoAssess =
+    category !== null &&
+    !parentMessageSnap.get("isAssessed") &&
+    !parentMessageSnap.get("isPollStarted")
+
+  await parentMessageRef.update({
+    virusTotalUrlScanResults: updatedResults,
+    virusTotalScanPending: updatedResults.some((result) => result.retryable),
+    ...(canAutoAssess
+      ? {
+          machineCategory: "scam",
+          isMachineCategorised: true,
+          isIrrelevant: false,
+          primaryCategory: null,
+          virusTotalAutoAssessed: true,
+        }
+      : {}),
+  })
+
+  if (stillPending) {
+    await requestRef.update({
+      status: "analysis_pending",
+      results: resumedResults,
+    })
+    const sent = await sendVirusTotalPendingPrompt(
+      userSnap,
+      requestId,
+      responses
+    )
+    if (!sent) {
+      await handlePendingVirusTotalScans(
+        userSnap,
+        requestId,
+        true,
+        responses
+      )
+    }
+    return
+  }
+
+  await requestRef.delete()
+  await resumeDeferredReview(parentMessageRef, instanceRef)
+}
+
+async function getMessageVirusTotalScanState(messageId: string) {
+  const messageIdSnap = await db.collection("messageIds").doc(messageId).get()
+  const instanceRef = messageIdSnap.get("instanceRef") as
+    | FirebaseFirestore.DocumentReference
+    | undefined
+  const parentMessageRef = instanceRef?.parent.parent
+  if (!instanceRef || !parentMessageRef) return null
+
+  const [instanceSnap, parentSnap] = await Promise.all([
+    instanceRef.get(),
+    parentMessageRef.get(),
+  ])
+  const urls = new Set(
+    extractUrls(
+      [instanceSnap.get("text"), instanceSnap.get("caption")]
+        .filter((value): value is string => typeof value === "string")
+        .join("\n")
+    )
+  )
+  const latestByUrl = new Map<string, VirusTotalUrlScanResult>()
+  for (const result of (parentSnap.get("virusTotalUrlScanResults") ??
+    []) as VirusTotalUrlScanResult[]) {
+    if (urls.has(result.url)) latestByUrl.set(result.url, result)
+  }
+  return {
+    instanceRef,
+    parentMessageRef,
+    results: Array.from(latestByUrl.values()),
+  }
+}
+
+function mergeVirusTotalResults(
+  existing: VirusTotalUrlScanResult[],
+  updates: VirusTotalUrlScanResult[]
+): VirusTotalUrlScanResult[] {
+  const updatedUrls = new Set(updates.map((result) => result.url))
+  return [
+    ...existing.filter((result) => !updatedUrls.has(result.url)),
+    ...updates,
+  ]
+}
+
+async function sendVirusTotalPendingPrompt(
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+  requestId: string,
+  responses: Record<string, any>
+): Promise<boolean> {
+  try {
+    await sendWhatsappButtonMessage(
+      "user",
+      userSnap.get("whatsappId"),
+      responses.VIRUSTOTAL_SCAN_PENDING,
+      [
+        {
+          type: "reply",
+          reply: {
+            id: `virusTotalRetryRequest_${requestId}`,
+            title: responses.BUTTON_VIRUSTOTAL_RETRY,
+          },
+        },
+        {
+          type: "reply",
+          reply: {
+            id: `virusTotalContinueRequest_${requestId}`,
+            title: responses.BUTTON_VIRUSTOTAL_CONTINUE,
+          },
+        },
+      ]
+    )
+    return true
+  } catch (_error) {
+    functions.logger.warn("Could not send VirusTotal pending prompt")
+    return false
+  }
+}
+
+async function resumeDeferredReview(
+  parentMessageRef: FirebaseFirestore.DocumentReference,
+  instanceRef: FirebaseFirestore.DocumentReference
+) {
+  const instanceSnap = await instanceRef.get()
+  if (instanceSnap.exists && !instanceSnap.get("isReplied")) {
+    await respondToInstance(instanceSnap, false, true)
+  }
+
+  const parentMessageSnap = await parentMessageRef.get()
+  if (
+    parentMessageSnap.get("isAssessed") ||
+    parentMessageSnap.get("virusTotalAutoAssessed") ||
+    parentMessageSnap.get("virusTotalScanPending") ||
+    parentMessageSnap.get("isPollStarted") ||
+    parentMessageSnap.get("machineCategory") === "irrelevant"
+  ) {
+    return
+  }
+
+  const thresholds = await getThresholds()
+  if ((parentMessageSnap.get("instanceCount") ?? 1) < thresholds.startVote) {
+    return
+  }
+
+  await parentMessageRef.update({ isPollStarted: true })
+  try {
+    await despatchPoll(parentMessageRef)
+  } catch (error) {
+    functions.logger.error(
+      `Error despatching poll for message ${parentMessageRef.id}: `,
+      error
+    )
+    await parentMessageRef.update({ isPollStarted: false })
+  }
 }
 
 async function onTextListReceipt(
