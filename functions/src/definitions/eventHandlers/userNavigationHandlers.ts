@@ -54,6 +54,7 @@ import { SAMPLE_MESSAGES } from "./userPreOnboardingHandler"
 import {
   extractUrls,
   getVirusTotalCategory,
+  getVirusTotalScamAssessmentUpdate,
   resumeVirusTotalUrlScans,
   VirusTotalUrlScanResult,
 } from "../common/virusTotal"
@@ -468,15 +469,7 @@ async function handlePendingVirusTotalScans(
   await parentMessageRef.update({
     virusTotalUrlScanResults: updatedResults,
     virusTotalScanPending: updatedResults.some((result) => result.retryable),
-    ...(canAutoAssess
-      ? {
-          machineCategory: "scam",
-          isMachineCategorised: true,
-          isIrrelevant: false,
-          primaryCategory: null,
-          virusTotalAutoAssessed: true,
-        }
-      : {}),
+    ...(canAutoAssess ? getVirusTotalScamAssessmentUpdate() : {}),
   })
 
   if (stillPending) {

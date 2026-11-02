@@ -318,3 +318,14 @@ export function getVirusTotalCategory(
     ? "scam"
     : null
 }
+
+/** Fields to set when an eligible VirusTotal result auto-assesses a message. */
+export function getVirusTotalScamAssessmentUpdate() {
+  return {
+    machineCategory: "scam",
+    isMachineCategorised: true,
+    isIrrelevant: false,
+    primaryCategory: null,
+    virusTotalAutoAssessed: true,
+  }
+}

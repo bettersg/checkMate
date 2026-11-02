@@ -44,6 +44,7 @@ import { stripTemplate } from "../../validators/whatsapp/checkWhatsappText"
 import { sendNewMessageNotification } from "../../services/admin/notificationService"
 import {
   getVirusTotalCategory,
+  getVirusTotalScamAssessmentUpdate,
   isVirusTotalScanningEnabled,
   scanUrlsWithVirusTotal,
   shouldRequestVirusTotalConsent,
@@ -919,13 +920,7 @@ async function addInstanceToDb(
           update.virusTotalScanPending = true
         }
         if (canAutoAssess && getVirusTotalCategory(virusTotalUrlScanResults)) {
-          Object.assign(update, {
-            machineCategory: "scam",
-            isMachineCategorised: true,
-            isIrrelevant: false,
-            primaryCategory: null,
-            virusTotalAutoAssessed: true,
-          })
+          Object.assign(update, getVirusTotalScamAssessmentUpdate())
         }
         t.update(messageRef, update)
       }
