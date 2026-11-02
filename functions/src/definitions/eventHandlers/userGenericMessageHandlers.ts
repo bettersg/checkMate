@@ -221,6 +221,8 @@ async function requestVirusTotalConsent(
     return true
   })
 
+  // An existing request means a prompt is already outstanding or the user's
+  // choice is being processed. Never fall through into assessment on a retry.
   if (!created) return true
 
   try {
